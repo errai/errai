@@ -63,19 +63,19 @@ public class CordovaResources {
   public static interface Resources extends ClientBundle {
     public static Resources RESOURCES = GWT.create(Resources.class);
 
-    @Source("js/cordova-android-2.2.0.js")
+    @Source("js/cordova-android-2.8.1.js")
     TextResource cordovaAndroid();
 
-    @Source("js/cordova-blackberry-2.2.0.js")
+    @Source("js/cordova-blackberry-2.8.1.js")
     TextResource cordovaBlackberry();
 
-    @Source("js/cordova-ios-2.2.0.js")
+    @Source("js/cordova-ios-2.8.1.js")
     TextResource cordovaIOS();
 
-    @Source("js/cordova-windows7-2.2.0.js")
+    @Source("js/cordova-windows7-2.8.1.js")
     TextResource cordovaWindows7();
 
-    @Source("js/cordova-windows8-2.2.0.js")
+    @Source("js/cordova-windows8-2.8.1.js")
     TextResource cordovaWindows8();
   }
 }

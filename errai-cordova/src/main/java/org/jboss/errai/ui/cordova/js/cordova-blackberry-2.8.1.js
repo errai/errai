@@ -1,7 +1,5 @@
-// commit 02b91c5313ff37d74a58f71775170afd360f4a1f
-
-// File generated at :: Wed Oct 31 2012 14:46:38 GMT-0700 (PDT)
-
+// Platform: blackberry
+// 2.8.0-0-g6208c95
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -20,26 +18,36 @@
  specific language governing permissions and limitations
  under the License.
 */
-
 ;(function() {
-
+var CORDOVA_JS_BUILD_LABEL = '2.8.0-0-g6208c95';
 // file: lib/scripts/require.js
 
 var require,
     define;
 
 (function () {
-    var modules = {};
+    var modules = {},
     // Stack of moduleIds currently being built.
-    var requireStack = [];
+        requireStack = [],
     // Map of module ID -> index into requireStack of modules currently being built.
-    var inProgressModules = {};
+        inProgressModules = {},
+        SEPERATOR = ".";
+
+
 
     function build(module) {
-        var factory = module.factory;
+        var factory = module.factory,
+            localRequire = function (id) {
+                var resultantId = id;
+                //Its a relative path, so lop off the last portion and add the id (minus "./")
+                if (id.charAt(0) === ".") {
+                    resultantId = module.id.slice(0, module.id.lastIndexOf(SEPERATOR)) + SEPERATOR + id.slice(2);
+                }
+                return require(resultantId);
+            };
         module.exports = {};
         delete module.factory;
-        factory(require, module.exports, module);
+        factory(localRequire, module.exports, module);
         return module.exports;
     }
 
@@ -78,6 +86,7 @@ var require,
         delete modules[id];
     };
 
+    define.moduleMap = modules;
 })();
 
 //Export for use in node
@@ -216,6 +225,10 @@ var cordova = {
             }
             else {
               setTimeout(function() {
+                  // Fire deviceready on listeners that were registered before cordova.js was loaded.
+                  if (type == 'deviceready') {
+                      document.dispatchEvent(evt);
+                  }
                   documentEventHandlers[type].fire(evt);
               }, 0);
             }
@@ -259,7 +272,7 @@ var cordova = {
      */
     callbackSuccess: function(callbackId, args) {
         try {
-            cordova.callbackFromNative(callbackId, true, args.status, args.message, args.keepCallback);
+            cordova.callbackFromNative(callbackId, true, args.status, [args.message], args.keepCallback);
         } catch (e) {
             console.log("Error in error callback: " + callbackId + " = "+e);
         }
@@ -272,7 +285,7 @@ var cordova = {
         // TODO: Deprecate callbackSuccess and callbackError in favour of callbackFromNative.
         // Derive success from status.
         try {
-            cordova.callbackFromNative(callbackId, false, args.status, args.message, args.keepCallback);
+            cordova.callbackFromNative(callbackId, false, args.status, [args.message], args.keepCallback);
         } catch (e) {
             console.log("Error in error callback: " + callbackId + " = "+e);
         }
@@ -281,13 +294,13 @@ var cordova = {
     /**
      * Called by native code when returning the result from an action.
      */
-    callbackFromNative: function(callbackId, success, status, message, keepCallback) {
+    callbackFromNative: function(callbackId, success, status, args, keepCallback) {
         var callback = cordova.callbacks[callbackId];
         if (callback) {
             if (success && status == cordova.callbackStatus.OK) {
-                callback.success && callback.success(message);
+                callback.success && callback.success.apply(null, args);
             } else if (!success) {
-                callback.fail && callback.fail(message);
+                callback.fail && callback.fail.apply(null, args);
             }
 
             // Clear callback if not expecting any more results
@@ -316,6 +329,72 @@ module.exports = cordova;
 
 });
 
+// file: lib/common/argscheck.js
+define("cordova/argscheck", function(require, exports, module) {
+
+var exec = require('cordova/exec');
+var utils = require('cordova/utils');
+
+var moduleExports = module.exports;
+
+var typeMap = {
+    'A': 'Array',
+    'D': 'Date',
+    'N': 'Number',
+    'S': 'String',
+    'F': 'Function',
+    'O': 'Object'
+};
+
+function extractParamName(callee, argIndex) {
+  return (/.*?\((.*?)\)/).exec(callee)[1].split(', ')[argIndex];
+}
+
+function checkArgs(spec, functionName, args, opt_callee) {
+    if (!moduleExports.enableChecks) {
+        return;
+    }
+    var errMsg = null;
+    var typeName;
+    for (var i = 0; i < spec.length; ++i) {
+        var c = spec.charAt(i),
+            cUpper = c.toUpperCase(),
+            arg = args[i];
+        // Asterix means allow anything.
+        if (c == '*') {
+            continue;
+        }
+        typeName = utils.typeName(arg);
+        if ((arg === null || arg === undefined) && c == cUpper) {
+            continue;
+        }
+        if (typeName != typeMap[cUpper]) {
+            errMsg = 'Expected ' + typeMap[cUpper];
+            break;
+        }
+    }
+    if (errMsg) {
+        errMsg += ', but got ' + typeName + '.';
+        errMsg = 'Wrong type for parameter "' + extractParamName(opt_callee || args.callee, i) + '" of ' + functionName + ': ' + errMsg;
+        // Don't log when running jake test.
+        if (typeof jasmine == 'undefined') {
+            console.error(errMsg);
+        }
+        throw TypeError(errMsg);
+    }
+}
+
+function getValue(value, defaultValue) {
+    return value === undefined ? defaultValue : value;
+}
+
+moduleExports.checkArgs = checkArgs;
+moduleExports.getValue = getValue;
+moduleExports.enableChecks = true;
+
+
+});
+
 // file: lib/common/builder.js
 define("cordova/builder", function(require, exports, module) {
 
@@ -329,14 +408,27 @@ function each(objects, func, context) {
     }
 }
 
+function clobber(obj, key, value) {
+    exports.replaceHookForTesting(obj, key);
+    obj[key] = value;
+    // Getters can only be overridden by getters.
+    if (obj[key] !== value) {
+        utils.defineGetter(obj, key, function() {
+            return value;
+        });
+    }
+}
+
 function assignOrWrapInDeprecateGetter(obj, key, value, message) {
     if (message) {
         utils.defineGetter(obj, key, function() {
-            window.console && console.log(message);
+            console.log(message);
+            delete obj[key];
+            clobber(obj, key, value);
             return value;
         });
     } else {
-        obj[key] = value;
+        clobber(obj, key, value);
     }
 }
 
@@ -362,10 +454,6 @@ function include(parent, objects, clobber, merge) {
             // Overwrite if not currently defined.
             if (typeof parent[key] == 'undefined') {
               assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
-            } else if (merge && typeof obj.path !== 'undefined') {
-              // If merging, merge parent onto result
-              recursiveMerge(result, parent[key]);
-              parent[key] = result;
             } else {
               // Set result to what already exists, so we can build children into it if they exist.
               result = parent[key];
@@ -391,33 +479,32 @@ function include(parent, objects, clobber, merge) {
 function recursiveMerge(target, src) {
     for (var prop in src) {
         if (src.hasOwnProperty(prop)) {
-            if (typeof target.prototype !== 'undefined' && target.prototype.constructor === target) {
+            if (target.prototype && target.prototype.constructor === target) {
                 // If the target object is a constructor override off prototype.
-                target.prototype[prop] = src[prop];
+                clobber(target.prototype, prop, src[prop]);
             } else {
-                target[prop] = typeof src[prop] === 'object' ? recursiveMerge(
-                        target[prop], src[prop]) : src[prop];
+                if (typeof src[prop] === 'object' && typeof target[prop] === 'object') {
+                    recursiveMerge(target[prop], src[prop]);
+                } else {
+                    clobber(target, prop, src[prop]);
+                }
             }
         }
     }
-    return target;
 }
 
-module.exports = {
-    build: function (objects) {
-        return {
-            intoButDoNotClobber: function (target) {
-                include(target, objects, false, false);
-            },
-            intoAndClobber: function(target) {
-                include(target, objects, true, false);
-            },
-            intoAndMerge: function(target) {
-                include(target, objects, true, true);
-            }
-        };
-    }
+exports.buildIntoButDoNotClobber = function(objects, target) {
+    include(target, objects, false, false);
 };
+exports.buildIntoAndClobber = function(objects, target) {
+    include(target, objects, true, false);
+};
+exports.buildIntoAndMerge = function(objects, target) {
+    include(target, objects, true, true);
+};
+exports.recursiveMerge = recursiveMerge;
+exports.assignOrWrapInDeprecateGetter = assignOrWrapInDeprecateGetter;
+exports.replaceHookForTesting = function() {};
 
 });
 
@@ -647,6 +734,9 @@ channel.createSticky('onCordovaInfoReady');
 // Event to indicate that the connection property has been set.
 channel.createSticky('onCordovaConnectionReady');
 
+// Event to indicate that all automatically loaded JS plugins are loaded and ready.
+channel.createSticky('onPluginsReady');
+
 // Event to indicate that Cordova is ready
 channel.createSticky('onDeviceReady');
 
@@ -662,6 +752,7 @@ channel.createSticky('onDestroy');
 // Channels that must fire before "deviceready" is fired.
 channel.waitForInitialization('onCordovaReady');
 channel.waitForInitialization('onCordovaConnectionReady');
+channel.waitForInitialization('onDOMContentLoaded');
 
 module.exports = channel;
 
@@ -697,226 +788,11 @@ module.exports = {
 };
 });
 
-// file: lib/common/common.js
-define("cordova/common", function(require, exports, module) {
-
-module.exports = {
-    objects: {
-        cordova: {
-            path: 'cordova',
-            children: {
-                exec: {
-                    path: 'cordova/exec'
-                },
-                logger: {
-                    path: 'cordova/plugin/logger'
-                }
-            }
-        },
-        Cordova: {
-            children: {
-                exec: {
-                    path: 'cordova/exec'
-                }
-            }
-        },
-        navigator: {
-            children: {
-                notification: {
-                    path: 'cordova/plugin/notification'
-                },
-                accelerometer: {
-                    path: 'cordova/plugin/accelerometer'
-                },
-                battery: {
-                    path: 'cordova/plugin/battery'
-                },
-                camera:{
-                    path: 'cordova/plugin/Camera'
-                },
-                compass:{
-                    path: 'cordova/plugin/compass'
-                },
-                connection: {
-                    path: 'cordova/plugin/network'
-                },
-                contacts: {
-                    path: 'cordova/plugin/contacts'
-                },
-                device:{
-                    children:{
-                        capture: {
-                            path: 'cordova/plugin/capture'
-                        }
-                    }
-                },
-                geolocation: {
-                    path: 'cordova/plugin/geolocation'
-                },
-                globalization: {
-                    path: 'cordova/plugin/globalization'
-                },
-                network: {
-                    children: {
-                        connection: {
-                            path: 'cordova/plugin/network',
-                            deprecated: 'navigator.network.connection is deprecated. Use navigator.connection instead.'
-                        }
-                    }
-                },
-                splashscreen: {
-                    path: 'cordova/plugin/splashscreen'
-                }
-            }
-        },
-        Acceleration: {
-            path: 'cordova/plugin/Acceleration'
-        },
-        Camera:{
-            path: 'cordova/plugin/CameraConstants'
-        },
-        CameraPopoverOptions: {
-            path: 'cordova/plugin/CameraPopoverOptions'
-        },
-        CaptureError: {
-            path: 'cordova/plugin/CaptureError'
-        },
-        CaptureAudioOptions:{
-            path: 'cordova/plugin/CaptureAudioOptions'
-        },
-        CaptureImageOptions: {
-            path: 'cordova/plugin/CaptureImageOptions'
-        },
-        CaptureVideoOptions: {
-            path: 'cordova/plugin/CaptureVideoOptions'
-        },
-        CompassHeading:{
-            path: 'cordova/plugin/CompassHeading'
-        },
-        CompassError:{
-            path: 'cordova/plugin/CompassError'
-        },
-        ConfigurationData: {
-            path: 'cordova/plugin/ConfigurationData'
-        },
-        Connection: {
-            path: 'cordova/plugin/Connection'
-        },
-        Contact: {
-            path: 'cordova/plugin/Contact'
-        },
-        ContactAddress: {
-            path: 'cordova/plugin/ContactAddress'
-        },
-        ContactError: {
-            path: 'cordova/plugin/ContactError'
-        },
-        ContactField: {
-            path: 'cordova/plugin/ContactField'
-        },
-        ContactFindOptions: {
-            path: 'cordova/plugin/ContactFindOptions'
-        },
-        ContactName: {
-            path: 'cordova/plugin/ContactName'
-        },
-        ContactOrganization: {
-            path: 'cordova/plugin/ContactOrganization'
-        },
-        Coordinates: {
-            path: 'cordova/plugin/Coordinates'
-        },
-        device: {
-            path: 'cordova/plugin/device'
-        },
-        DirectoryEntry: {
-            path: 'cordova/plugin/DirectoryEntry'
-        },
-        DirectoryReader: {
-            path: 'cordova/plugin/DirectoryReader'
-        },
-        Entry: {
-            path: 'cordova/plugin/Entry'
-        },
-        File: {
-            path: 'cordova/plugin/File'
-        },
-        FileEntry: {
-            path: 'cordova/plugin/FileEntry'
-        },
-        FileError: {
-            path: 'cordova/plugin/FileError'
-        },
-        FileReader: {
-            path: 'cordova/plugin/FileReader'
-        },
-        FileSystem: {
-            path: 'cordova/plugin/FileSystem'
-        },
-        FileTransfer: {
-            path: 'cordova/plugin/FileTransfer'
-        },
-        FileTransferError: {
-            path: 'cordova/plugin/FileTransferError'
-        },
-        FileUploadOptions: {
-            path: 'cordova/plugin/FileUploadOptions'
-        },
-        FileUploadResult: {
-            path: 'cordova/plugin/FileUploadResult'
-        },
-        FileWriter: {
-            path: 'cordova/plugin/FileWriter'
-        },
-        Flags: {
-            path: 'cordova/plugin/Flags'
-        },
-        GlobalizationError: {
-            path: 'cordova/plugin/GlobalizationError'
-        },
-        LocalFileSystem: {
-            path: 'cordova/plugin/LocalFileSystem'
-        },
-        Media: {
-            path: 'cordova/plugin/Media'
-        },
-        MediaError: {
-            path: 'cordova/plugin/MediaError'
-        },
-        MediaFile: {
-            path: 'cordova/plugin/MediaFile'
-        },
-        MediaFileData:{
-            path: 'cordova/plugin/MediaFileData'
-        },
-        Metadata:{
-            path: 'cordova/plugin/Metadata'
-        },
-        Position: {
-            path: 'cordova/plugin/Position'
-        },
-        PositionError: {
-            path: 'cordova/plugin/PositionError'
-        },
-        ProgressEvent: {
-            path: 'cordova/plugin/ProgressEvent'
-        },
-        requestFileSystem:{
-            path: 'cordova/plugin/requestFileSystem'
-        },
-        resolveLocalFileSystemURI:{
-            path: 'cordova/plugin/resolveLocalFileSystemURI'
-        }
-    }
-};
-
-});
-
-// file: lib/webworks/exec.js
+// file: lib/blackberry/exec.js
 define("cordova/exec", function(require, exports, module) {
 
-var manager = require('cordova/plugin/manager'),
-    cordova = require('cordova'),
+var cordova = require('cordova'),
+    platform = require('cordova/platform'),
     utils = require('cordova/utils');
 
 /**
@@ -936,7 +812,8 @@ var manager = require('cordova/plugin/manager'),
 
 module.exports = function(success, fail, service, action, args) {
     try {
-        var v = manager.exec(success, fail, service, action, args);
+        var manager = require('cordova/plugin/' + platform.runtime() + '/manager'),
+            v = manager.exec(success, fail, service, action, args);
 
         // If status is OK, then return value back to caller
         if (v.status == cordova.callbackStatus.OK) {
@@ -949,7 +826,6 @@ module.exports = function(success, fail, service, action, args) {
                 catch (e) {
                     console.log("Error in success callback: "+cordova.callbackId+" = "+e);
                 }
-
             }
             return v.message;
         } else if (v.status == cordova.callbackStatus.NO_RESULT) {
@@ -976,170 +852,135 @@ module.exports = function(success, fail, service, action, args) {
 
 });
 
-// file: lib/webworks/java/platform.js
+// file: lib/common/modulemapper.js
+define("cordova/modulemapper", function(require, exports, module) {
+
+var builder = require('cordova/builder'),
+    moduleMap = define.moduleMap,
+    symbolList,
+    deprecationMap;
+
+exports.reset = function() {
+    symbolList = [];
+    deprecationMap = {};
+};
+
+function addEntry(strategy, moduleName, symbolPath, opt_deprecationMessage) {
+    if (!(moduleName in moduleMap)) {
+        throw new Error('Module ' + moduleName + ' does not exist.');
+    }
+    symbolList.push(strategy, moduleName, symbolPath);
+    if (opt_deprecationMessage) {
+        deprecationMap[symbolPath] = opt_deprecationMessage;
+    }
+}
+
+// Note: Android 2.3 does have Function.bind().
+exports.clobbers = function(moduleName, symbolPath, opt_deprecationMessage) {
+    addEntry('c', moduleName, symbolPath, opt_deprecationMessage);
+};
+
+exports.merges = function(moduleName, symbolPath, opt_deprecationMessage) {
+    addEntry('m', moduleName, symbolPath, opt_deprecationMessage);
+};
+
+exports.defaults = function(moduleName, symbolPath, opt_deprecationMessage) {
+    addEntry('d', moduleName, symbolPath, opt_deprecationMessage);
+};
+
+function prepareNamespace(symbolPath, context) {
+    if (!symbolPath) {
+        return context;
+    }
+    var parts = symbolPath.split('.');
+    var cur = context;
+    for (var i = 0, part; part = parts[i]; ++i) {
+        cur = cur[part] = cur[part] || {};
+    }
+    return cur;
+}
+
+exports.mapModules = function(context) {
+    var origSymbols = {};
+    context.CDV_origSymbols = origSymbols;
+    for (var i = 0, len = symbolList.length; i < len; i += 3) {
+        var strategy = symbolList[i];
+        var moduleName = symbolList[i + 1];
+        var symbolPath = symbolList[i + 2];
+        var lastDot = symbolPath.lastIndexOf('.');
+        var namespace = symbolPath.substr(0, lastDot);
+        var lastName = symbolPath.substr(lastDot + 1);
+
+        var module = require(moduleName);
+        var deprecationMsg = symbolPath in deprecationMap ? 'Access made to deprecated symbol: ' + symbolPath + '. ' + deprecationMsg : null;
+        var parentObj = prepareNamespace(namespace, context);
+        var target = parentObj[lastName];
+
+        if (strategy == 'm' && target) {
+            builder.recursiveMerge(target, module);
+        } else if ((strategy == 'd' && !target) || (strategy != 'd')) {
+            if (!(symbolPath in origSymbols)) {
+                origSymbols[symbolPath] = target;
+            }
+            builder.assignOrWrapInDeprecateGetter(parentObj, lastName, module, deprecationMsg);
+        }
+    }
+};
+
+exports.getOriginalSymbol = function(context, symbolPath) {
+    var origSymbols = context.CDV_origSymbols;
+    if (origSymbols && (symbolPath in origSymbols)) {
+        return origSymbols[symbolPath];
+    }
+    var parts = symbolPath.split('.');
+    var obj = context;
+    for (var i = 0; i < parts.length; ++i) {
+        obj = obj && obj[parts[i]];
+    }
+    return obj;
+};
+
+exports.loadMatchingModules = function(matchingRegExp) {
+    for (var k in moduleMap) {
+        if (matchingRegExp.exec(k)) {
+            require(k);
+        }
+    }
+};
+
+exports.reset();
+
+
+});
+
+// file: lib/blackberry/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
     id: "blackberry",
-    initialize:function() {
-        var cordova = require('cordova'),
-            exec = require('cordova/exec'),
-            channel = require('cordova/channel'),
-            manager = require('cordova/plugin/manager'),
-            app = require('cordova/plugin/java/app');
-
-        // BB OS 5 does not define window.console.
-        if (typeof window.console === 'undefined') {
-            window.console = {};
+    runtime: function () {
+        if (navigator.userAgent.indexOf("PlayBook") > -1) {
+            return 'air';
         }
-
-        // Override console.log with native logging ability.
-        // BB OS 7 devices define console.log for use with web inspector
-        // debugging. If console.log is already defined, invoke it in addition
-        // to native logging.
-        var origLog = window.console.log;
-        window.console.log = function(msg) {
-            if (typeof origLog === 'function') {
-                origLog.call(window.console, msg);
-            }
-            org.apache.cordova.Logger.log(''+msg);
-        };
-
-        // Mapping of button events to BlackBerry key identifier.
-        var buttonMapping = {
-            'backbutton'         : blackberry.system.event.KEY_BACK,
-            'conveniencebutton1' : blackberry.system.event.KEY_CONVENIENCE_1,
-            'conveniencebutton2' : blackberry.system.event.KEY_CONVENIENCE_2,
-            'endcallbutton'      : blackberry.system.event.KEY_ENDCALL,
-            'menubutton'         : blackberry.system.event.KEY_MENU,
-            'startcallbutton'    : blackberry.system.event.KEY_STARTCALL,
-            'volumedownbutton'   : blackberry.system.event.KEY_VOLUMEDOWN,
-            'volumeupbutton'     : blackberry.system.event.KEY_VOLUMEUP
-        };
-
-        // Generates a function which fires the specified event.
-        var fireEvent = function(event) {
-            return function() {
-                cordova.fireDocumentEvent(event, null);
-            };
-        };
-
-        var eventHandler = function(event) {
-            return function() {
-                // If we just attached the first handler, let native know we
-                // need to override the hardware button.
-                if (this.numHandlers) {
-                    blackberry.system.event.onHardwareKey(
-                            buttonMapping[event], fireEvent(event));
-                }
-                // If we just detached the last handler, let native know we
-                // no longer override the hardware button.
-                else {
-                    blackberry.system.event.onHardwareKey(
-                            buttonMapping[event], null);
-                }
-            };
-        };
-
-        // Inject listeners for buttons on the document.
-        for (var button in buttonMapping) {
-            if (buttonMapping.hasOwnProperty(button)) {
-                var buttonChannel = cordova.addDocumentEventHandler(button);
-                buttonChannel.onHasSubscribersChange = eventHandler(button);
-            }
+        else if (navigator.userAgent.indexOf("BlackBerry") > -1) {
+            return 'java';
         }
-
-        // Fires off necessary code to pause/resume app
-        var resume = function() {
-            cordova.fireDocumentEvent('resume');
-            manager.resume();
-        };
-        var pause = function() {
-            cordova.fireDocumentEvent('pause');
-            manager.pause();
-        };
-
-        /************************************************
-         * Patch up the generic pause/resume listeners. *
-         ************************************************/
-
-        // Unsubscribe handler - turns off native backlight change
-        // listener
-        var onHasSubscribersChange = function() {
-            // If we just attached the first handler and there are
-            // no pause handlers, start the backlight system
-            // listener on the native side.
-            if (this.numHandlers && (channel.onResume.numHandlers + channel.onPause.numHandlers === 1)) {
-                exec(backlightWin, backlightFail, "App", "detectBacklight", []);
-            } else if (channel.onResume.numHandlers === 0 && channel.onPause.numHandlers === 0) {
-                exec(null, null, 'App', 'ignoreBacklight', []);
-            }
-        };
-
-        // Native backlight detection win/fail callbacks
-        var backlightWin = function(isOn) {
-            if (isOn === true) {
-                resume();
-            } else {
-                pause();
-            }
-        };
-        var backlightFail = function(e) {
-            console.log("Error detecting backlight on/off.");
-        };
-
-        // Override stock resume and pause listeners so we can trigger
-        // some native methods during attach/remove
-        channel.onResume = cordova.addDocumentEventHandler('resume');
-        channel.onResume.onHasSubscribersChange = onHasSubscribersChange;
-        channel.onPause = cordova.addDocumentEventHandler('pause');
-        channel.onPause.onHasSubscribersChange = onHasSubscribersChange;
-
-        // Fire resume event when application brought to foreground.
-        blackberry.app.event.onForeground(resume);
-
-        // Fire pause event when application sent to background.
-        blackberry.app.event.onBackground(pause);
-
-        // Trap BlackBerry WebWorks exit. Allow plugins to clean up before exiting.
-        blackberry.app.event.onExit(app.exitApp);
-    },
-    objects: {
-        navigator: {
-            children: {
-                app: {
-                    path: "cordova/plugin/java/app"
-                }
-            }
-        },
-        File: { // exists natively on BlackBerry OS 7, override
-            path: "cordova/plugin/File"
+        else {
+            console.log("Unknown user agent?!?!? defaulting to java");
+            return 'java';
         }
     },
-    merges: {
-        navigator: {
-            children: {
-                contacts: {
-                    path: 'cordova/plugin/java/contacts'
-                },
-                notification: {
-                    path: 'cordova/plugin/java/notification'
-                }
-            }
-        },
-        Contact: {
-            path: 'cordova/plugin/java/Contact'
-        },
-        DirectoryEntry: {
-            path: 'cordova/plugin/java/DirectoryEntry'
-        },
-        Entry: {
-            path: 'cordova/plugin/java/Entry'
-        },
-        MediaError: { // Exists natively on BB OS 6+, merge in Cordova specifics
-            path: 'cordova/plugin/java/MediaError'
-        }
-    }
+    initialize: function() {
+        var modulemapper = require('cordova/modulemapper'),
+            platform = require('cordova/plugin/' + this.runtime() + '/platform');
+
+        modulemapper.loadMatchingModules(/cordova.*\/symbols$/);
+        modulemapper.loadMatchingModules(new RegExp('cordova/.*' + this.runtime() + '/.*bbsymbols$'));
+        modulemapper.mapModules(this.contextObj);
+
+        platform.initialize();
+    },
+    contextObj: this // Used for testing.
 };
 
 });
@@ -1161,8 +1002,10 @@ module.exports = Acceleration;
 // file: lib/common/plugin/Camera.js
 define("cordova/plugin/Camera", function(require, exports, module) {
 
-var exec = require('cordova/exec'),
-    Camera = require('cordova/plugin/CameraConstants');
+var argscheck = require('cordova/argscheck'),
+    exec = require('cordova/exec'),
+    Camera = require('cordova/plugin/CameraConstants'),
+    CameraPopoverHandle = require('cordova/plugin/CameraPopoverHandle');
 
 var cameraExport = {};
 
@@ -1182,95 +1025,28 @@ for (var key in Camera) {
  * @param {Object} options
  */
 cameraExport.getPicture = function(successCallback, errorCallback, options) {
+    argscheck.checkArgs('fFO', 'Camera.getPicture', arguments);
     options = options || {};
-    // successCallback required
-    if (typeof successCallback != "function") {
-        console.log("Camera Error: successCallback is not a function");
-        return;
-    }
+    var getValue = argscheck.getValue;
 
-    // errorCallback optional
-    if (errorCallback && (typeof errorCallback != "function")) {
-        console.log("Camera Error: errorCallback is not a function");
-        return;
-    }
-
-    var quality = 50;
-    if (typeof options.quality == "number") {
-        quality = options.quality;
-    } else if (typeof options.quality == "string") {
-        var qlity = parseInt(options.quality, 10);
-        if (isNaN(qlity) === false) {
-            quality = qlity.valueOf();
-        }
-    }
-
-    var destinationType = Camera.DestinationType.FILE_URI;
-    if (typeof options.destinationType == "number") {
-        destinationType = options.destinationType;
-    }
-
-    var sourceType = Camera.PictureSourceType.CAMERA;
-    if (typeof options.sourceType == "number") {
-        sourceType = options.sourceType;
-    }
-
-    var targetWidth = -1;
-    if (typeof options.targetWidth == "number") {
-        targetWidth = options.targetWidth;
-    } else if (typeof options.targetWidth == "string") {
-        var width = parseInt(options.targetWidth, 10);
-        if (isNaN(width) === false) {
-            targetWidth = width.valueOf();
-        }
-    }
-
-    var targetHeight = -1;
-    if (typeof options.targetHeight == "number") {
-        targetHeight = options.targetHeight;
-    } else if (typeof options.targetHeight == "string") {
-        var height = parseInt(options.targetHeight, 10);
-        if (isNaN(height) === false) {
-            targetHeight = height.valueOf();
-        }
-    }
-
-    var encodingType = Camera.EncodingType.JPEG;
-    if (typeof options.encodingType == "number") {
-        encodingType = options.encodingType;
-    }
-
-    var mediaType = Camera.MediaType.PICTURE;
-    if (typeof options.mediaType == "number") {
-        mediaType = options.mediaType;
-    }
-    var allowEdit = false;
-    if (typeof options.allowEdit == "boolean") {
-        allowEdit = options.allowEdit;
-    } else if (typeof options.allowEdit == "number") {
-        allowEdit = options.allowEdit <= 0 ? false : true;
-    }
-    var correctOrientation = false;
-    if (typeof options.correctOrientation == "boolean") {
-        correctOrientation = options.correctOrientation;
-    } else if (typeof options.correctOrientation == "number") {
-        correctOrientation = options.correctOrientation <=0 ? false : true;
-    }
-    var saveToPhotoAlbum = false;
-    if (typeof options.saveToPhotoAlbum == "boolean") {
-        saveToPhotoAlbum = options.saveToPhotoAlbum;
-    } else if (typeof options.saveToPhotoAlbum == "number") {
-        saveToPhotoAlbum = options.saveToPhotoAlbum <=0 ? false : true;
-    }
-    var popoverOptions = null;
-    if (typeof options.popoverOptions == "object") {
-        popoverOptions = options.popoverOptions;
-    }
+    var quality = getValue(options.quality, 50);
+    var destinationType = getValue(options.destinationType, Camera.DestinationType.FILE_URI);
+    var sourceType = getValue(options.sourceType, Camera.PictureSourceType.CAMERA);
+    var targetWidth = getValue(options.targetWidth, -1);
+    var targetHeight = getValue(options.targetHeight, -1);
+    var encodingType = getValue(options.encodingType, Camera.EncodingType.JPEG);
+    var mediaType = getValue(options.mediaType, Camera.MediaType.PICTURE);
+    var allowEdit = !!options.allowEdit;
+    var correctOrientation = !!options.correctOrientation;
+    var saveToPhotoAlbum = !!options.saveToPhotoAlbum;
+    var popoverOptions = getValue(options.popoverOptions, null);
+    var cameraDirection = getValue(options.cameraDirection, Camera.Direction.BACK);
 
     var args = [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType,
-                mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions];
+                mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions, cameraDirection];
 
     exec(successCallback, errorCallback, "Camera", "takePicture", args);
+    return new CameraPopoverHandle();
 };
 
 cameraExport.cleanup = function(successCallback, errorCallback) {
@@ -1287,7 +1063,8 @@ define("cordova/plugin/CameraConstants", function(require, exports, module) {
 module.exports = {
   DestinationType:{
     DATA_URL: 0,         // Return base64 encoded string
-    FILE_URI: 1          // Return file uri (content://media/external/images/media/2 for Android)
+    FILE_URI: 1,         // Return file uri (content://media/external/images/media/2 for Android)
+    NATIVE_URI: 2        // Return native uri (eg. asset-library://... for iOS)
   },
   EncodingType:{
     JPEG: 0,             // Return JPEG encoded image
@@ -1309,8 +1086,30 @@ module.exports = {
       ARROW_LEFT : 4,
       ARROW_RIGHT : 8,
       ARROW_ANY : 15
+  },
+  Direction:{
+      BACK: 0,
+      FRONT: 1
   }
 };
+
+});
+
+// file: lib/common/plugin/CameraPopoverHandle.js
+define("cordova/plugin/CameraPopoverHandle", function(require, exports, module) {
+
+var exec = require('cordova/exec');
+
+/**
+ * A handle to an image picker popover.
+ */
+var CameraPopoverHandle = function() {
+    this.setPosition = function(popoverOptions) {
+        console.log('CameraPopoverHandle.setPosition is only supported on iOS.');
+    };
+};
+
+module.exports = CameraPopoverHandle;
 
 });
 
@@ -1347,8 +1146,6 @@ var CaptureAudioOptions = function(){
     this.limit = 1;
     // Maximum duration of a single sound clip in seconds.
     this.duration = 0;
-    // The selected audio mode. Must match with one of the elements in supportedAudioModes array.
-    this.mode = null;
 };
 
 module.exports = CaptureAudioOptions;
@@ -1389,8 +1186,6 @@ define("cordova/plugin/CaptureImageOptions", function(require, exports, module) 
 var CaptureImageOptions = function(){
     // Upper limit of images user can take. Value must be equal or greater than 1.
     this.limit = 1;
-    // The selected image mode. Must match with one of the elements in supportedImageModes array.
-    this.mode = null;
 };
 
 module.exports = CaptureImageOptions;
@@ -1408,8 +1203,6 @@ var CaptureVideoOptions = function(){
     this.limit = 1;
     // Maximum duration of a single video clip in seconds.
     this.duration = 0;
-    // The selected video mode. Must match with one of the elements in supportedVideoModes array.
-    this.mode = null;
 };
 
 module.exports = CaptureVideoOptions;
@@ -1439,10 +1232,10 @@ module.exports = CompassError;
 define("cordova/plugin/CompassHeading", function(require, exports, module) {
 
 var CompassHeading = function(magneticHeading, trueHeading, headingAccuracy, timestamp) {
-  this.magneticHeading = (magneticHeading !== undefined ? magneticHeading : null);
-  this.trueHeading = (trueHeading !== undefined ? trueHeading : null);
-  this.headingAccuracy = (headingAccuracy !== undefined ? headingAccuracy : null);
-  this.timestamp = (timestamp !== undefined ? timestamp : new Date().getTime());
+  this.magneticHeading = magneticHeading;
+  this.trueHeading = trueHeading;
+  this.headingAccuracy = headingAccuracy;
+  this.timestamp = timestamp || new Date().getTime();
 };
 
 module.exports = CompassHeading;
@@ -1483,6 +1276,7 @@ module.exports = {
         CELL_2G: "2g",
         CELL_3G: "3g",
         CELL_4G: "4g",
+        CELL:"cellular",
         NONE: "none"
 };
 
@@ -1491,7 +1285,8 @@ module.exports = {
 // file: lib/common/plugin/Contact.js
 define("cordova/plugin/Contact", function(require, exports, module) {
 
-var exec = require('cordova/exec'),
+var argscheck = require('cordova/argscheck'),
+    exec = require('cordova/exec'),
     ContactError = require('cordova/plugin/ContactError'),
     utils = require('cordova/utils');
 
@@ -1576,7 +1371,8 @@ var Contact = function (id, displayName, name, nickname, phoneNumbers, emails, a
 * @param errorCB error callback
 */
 Contact.prototype.remove = function(successCB, errorCB) {
-    var fail = function(code) {
+    argscheck.checkArgs('FF', 'Contact.remove', arguments);
+    var fail = errorCB && function(code) {
         errorCB(new ContactError(code));
     };
     if (this.id === null) {
@@ -1594,50 +1390,26 @@ Contact.prototype.remove = function(successCB, errorCB) {
 */
 Contact.prototype.clone = function() {
     var clonedContact = utils.clone(this);
-    var i;
     clonedContact.id = null;
     clonedContact.rawId = null;
+
+    function nullIds(arr) {
+        if (arr) {
+            for (var i = 0; i < arr.length; ++i) {
+                arr[i].id = null;
+            }
+        }
+    }
+
     // Loop through and clear out any id's in phones, emails, etc.
-    if (clonedContact.phoneNumbers) {
-        for (i = 0; i < clonedContact.phoneNumbers.length; i++) {
-            clonedContact.phoneNumbers[i].id = null;
-        }
-    }
-    if (clonedContact.emails) {
-        for (i = 0; i < clonedContact.emails.length; i++) {
-            clonedContact.emails[i].id = null;
-        }
-    }
-    if (clonedContact.addresses) {
-        for (i = 0; i < clonedContact.addresses.length; i++) {
-            clonedContact.addresses[i].id = null;
-        }
-    }
-    if (clonedContact.ims) {
-        for (i = 0; i < clonedContact.ims.length; i++) {
-            clonedContact.ims[i].id = null;
-        }
-    }
-    if (clonedContact.organizations) {
-        for (i = 0; i < clonedContact.organizations.length; i++) {
-            clonedContact.organizations[i].id = null;
-        }
-    }
-    if (clonedContact.categories) {
-        for (i = 0; i < clonedContact.categories.length; i++) {
-            clonedContact.categories[i].id = null;
-        }
-    }
-    if (clonedContact.photos) {
-        for (i = 0; i < clonedContact.photos.length; i++) {
-            clonedContact.photos[i].id = null;
-        }
-    }
-    if (clonedContact.urls) {
-        for (i = 0; i < clonedContact.urls.length; i++) {
-            clonedContact.urls[i].id = null;
-        }
-    }
+    nullIds(clonedContact.phoneNumbers);
+    nullIds(clonedContact.emails);
+    nullIds(clonedContact.addresses);
+    nullIds(clonedContact.ims);
+    nullIds(clonedContact.organizations);
+    nullIds(clonedContact.categories);
+    nullIds(clonedContact.photos);
+    nullIds(clonedContact.urls);
     return clonedContact;
 };
 
@@ -1647,21 +1419,22 @@ Contact.prototype.clone = function() {
 * @param errorCB error callback
 */
 Contact.prototype.save = function(successCB, errorCB) {
-  var fail = function(code) {
-      errorCB(new ContactError(code));
-  };
+    argscheck.checkArgs('FFO', 'Contact.save', arguments);
+    var fail = errorCB && function(code) {
+        errorCB(new ContactError(code));
+    };
     var success = function(result) {
-      if (result) {
-          if (typeof successCB === 'function') {
-              var fullContact = require('cordova/plugin/contacts').create(result);
-              successCB(convertIn(fullContact));
-          }
-      }
-      else {
-          // no Entry object returned
-          fail(ContactError.UNKNOWN_ERROR);
-      }
-  };
+        if (result) {
+            if (successCB) {
+                var fullContact = require('cordova/plugin/contacts').create(result);
+                successCB(convertIn(fullContact));
+            }
+        }
+        else {
+            // no Entry object returned
+            fail(ContactError.UNKNOWN_ERROR);
+        }
+    };
     var dupContact = convertOut(utils.clone(this));
     exec(success, fail, "Contacts", "save", [dupContact]);
 };
@@ -1882,7 +1655,8 @@ module.exports = Coordinates;
 // file: lib/common/plugin/DirectoryEntry.js
 define("cordova/plugin/DirectoryEntry", function(require, exports, module) {
 
-var utils = require('cordova/utils'),
+var argscheck = require('cordova/argscheck'),
+    utils = require('cordova/utils'),
     exec = require('cordova/exec'),
     Entry = require('cordova/plugin/Entry'),
     FileError = require('cordova/plugin/FileError'),
@@ -1898,7 +1672,7 @@ var utils = require('cordova/utils'),
  * TODO: implement this!!! {FileSystem} filesystem on which the directory resides (readonly)
  */
 var DirectoryEntry = function(name, fullPath) {
-     DirectoryEntry.__super__.constructor.apply(this, [false, true, name, fullPath]);
+     DirectoryEntry.__super__.constructor.call(this, false, true, name, fullPath);
 };
 
 utils.extend(DirectoryEntry, Entry);
@@ -1919,11 +1693,12 @@ DirectoryEntry.prototype.createReader = function() {
  * @param {Function} errorCallback is called with a FileError
  */
 DirectoryEntry.prototype.getDirectory = function(path, options, successCallback, errorCallback) {
-    var win = typeof successCallback !== 'function' ? null : function(result) {
+    argscheck.checkArgs('sOFF', 'DirectoryEntry.getDirectory', arguments);
+    var win = successCallback && function(result) {
         var entry = new DirectoryEntry(result.name, result.fullPath);
         successCallback(entry);
     };
-    var fail = typeof errorCallback !== 'function' ? null : function(code) {
+    var fail = errorCallback && function(code) {
         errorCallback(new FileError(code));
     };
     exec(win, fail, "File", "getDirectory", [this.fullPath, path, options]);
@@ -1936,7 +1711,8 @@ DirectoryEntry.prototype.getDirectory = function(path, options, successCallback,
  * @param {Function} errorCallback is called with a FileError
  */
 DirectoryEntry.prototype.removeRecursively = function(successCallback, errorCallback) {
-    var fail = typeof errorCallback !== 'function' ? null : function(code) {
+    argscheck.checkArgs('FF', 'DirectoryEntry.removeRecursively', arguments);
+    var fail = errorCallback && function(code) {
         errorCallback(new FileError(code));
     };
     exec(successCallback, fail, "File", "removeRecursively", [this.fullPath]);
@@ -1951,12 +1727,13 @@ DirectoryEntry.prototype.removeRecursively = function(successCallback, errorCall
  * @param {Function} errorCallback is called with a FileError
  */
 DirectoryEntry.prototype.getFile = function(path, options, successCallback, errorCallback) {
-    var win = typeof successCallback !== 'function' ? null : function(result) {
+    argscheck.checkArgs('sOFF', 'DirectoryEntry.getFile', arguments);
+    var win = successCallback && function(result) {
         var FileEntry = require('cordova/plugin/FileEntry');
         var entry = new FileEntry(result.name, result.fullPath);
         successCallback(entry);
     };
-    var fail = typeof errorCallback !== 'function' ? null : function(code) {
+    var fail = errorCallback && function(code) {
         errorCallback(new FileError(code));
     };
     exec(win, fail, "File", "getFile", [this.fullPath, path, options]);
@@ -2017,7 +1794,8 @@ module.exports = DirectoryReader;
 // file: lib/common/plugin/Entry.js
 define("cordova/plugin/Entry", function(require, exports, module) {
 
-var exec = require('cordova/exec'),
+var argscheck = require('cordova/argscheck'),
+    exec = require('cordova/exec'),
     FileError = require('cordova/plugin/FileError'),
     Metadata = require('cordova/plugin/Metadata');
 
@@ -2036,8 +1814,8 @@ var exec = require('cordova/exec'),
  *            (readonly)
  */
 function Entry(isFile, isDirectory, name, fullPath, fileSystem) {
-    this.isFile = (typeof isFile != 'undefined'?isFile:false);
-    this.isDirectory = (typeof isDirectory != 'undefined'?isDirectory:false);
+    this.isFile = !!isFile;
+    this.isDirectory = !!isDirectory;
     this.name = name || '';
     this.fullPath = fullPath || '';
     this.filesystem = fileSystem || null;
@@ -2052,15 +1830,16 @@ function Entry(isFile, isDirectory, name, fullPath, fileSystem) {
  *            {Function} is called with a FileError
  */
 Entry.prototype.getMetadata = function(successCallback, errorCallback) {
-  var success = typeof successCallback !== 'function' ? null : function(lastModified) {
-      var metadata = new Metadata(lastModified);
-      successCallback(metadata);
-  };
-  var fail = typeof errorCallback !== 'function' ? null : function(code) {
-      errorCallback(new FileError(code));
-  };
+    argscheck.checkArgs('FF', 'Entry.getMetadata', arguments);
+    var success = successCallback && function(lastModified) {
+        var metadata = new Metadata(lastModified);
+        successCallback(metadata);
+    };
+    var fail = errorCallback && function(code) {
+        errorCallback(new FileError(code));
+    };
 
-  exec(success, fail, "File", "getMetadata", [this.fullPath]);
+    exec(success, fail, "File", "getMetadata", [this.fullPath]);
 };
 
 /**
@@ -2074,8 +1853,8 @@ Entry.prototype.getMetadata = function(successCallback, errorCallback) {
  *            {Object} keys and values to set
  */
 Entry.prototype.setMetadata = function(successCallback, errorCallback, metadataObject) {
-
-  exec(successCallback, errorCallback, "File", "setMetadata", [this.fullPath, metadataObject]);
+    argscheck.checkArgs('FFO', 'Entry.setMetadata', arguments);
+    exec(successCallback, errorCallback, "File", "setMetadata", [this.fullPath, metadataObject]);
 };
 
 /**
@@ -2091,36 +1870,25 @@ Entry.prototype.setMetadata = function(successCallback, errorCallback, metadataO
  *            {Function} called with a FileError
  */
 Entry.prototype.moveTo = function(parent, newName, successCallback, errorCallback) {
-    var fail = function(code) {
-        if (typeof errorCallback === 'function') {
-            errorCallback(new FileError(code));
-        }
+    argscheck.checkArgs('oSFF', 'Entry.moveTo', arguments);
+    var fail = errorCallback && function(code) {
+        errorCallback(new FileError(code));
     };
-    // user must specify parent Entry
-    if (!parent) {
-        fail(FileError.NOT_FOUND_ERR);
-        return;
-    }
     // source path
     var srcPath = this.fullPath,
         // entry name
         name = newName || this.name,
         success = function(entry) {
             if (entry) {
-                if (typeof successCallback === 'function') {
+                if (successCallback) {
                     // create appropriate Entry object
                     var result = (entry.isDirectory) ? new (require('cordova/plugin/DirectoryEntry'))(entry.name, entry.fullPath) : new (require('cordova/plugin/FileEntry'))(entry.name, entry.fullPath);
-                    try {
-                        successCallback(result);
-                    }
-                    catch (e) {
-                        console.log('Error invoking callback: ' + e);
-                    }
+                    successCallback(result);
                 }
             }
             else {
                 // no Entry object returned
-                fail(FileError.NOT_FOUND_ERR);
+                fail && fail(FileError.NOT_FOUND_ERR);
             }
         };
 
@@ -2141,17 +1909,10 @@ Entry.prototype.moveTo = function(parent, newName, successCallback, errorCallbac
  *            {Function} called with a FileError
  */
 Entry.prototype.copyTo = function(parent, newName, successCallback, errorCallback) {
-    var fail = function(code) {
-        if (typeof errorCallback === 'function') {
-            errorCallback(new FileError(code));
-        }
+    argscheck.checkArgs('oSFF', 'Entry.copyTo', arguments);
+    var fail = errorCallback && function(code) {
+        errorCallback(new FileError(code));
     };
-
-    // user must specify parent Entry
-    if (!parent) {
-        fail(FileError.NOT_FOUND_ERR);
-        return;
-    }
 
         // source path
     var srcPath = this.fullPath,
@@ -2160,20 +1921,15 @@ Entry.prototype.copyTo = function(parent, newName, successCallback, errorCallbac
         // success callback
         success = function(entry) {
             if (entry) {
-                if (typeof successCallback === 'function') {
+                if (successCallback) {
                     // create appropriate Entry object
                     var result = (entry.isDirectory) ? new (require('cordova/plugin/DirectoryEntry'))(entry.name, entry.fullPath) : new (require('cordova/plugin/FileEntry'))(entry.name, entry.fullPath);
-                    try {
-                        successCallback(result);
-                    }
-                    catch (e) {
-                        console.log('Error invoking callback: ' + e);
-                    }
+                    successCallback(result);
                 }
             }
             else {
                 // no Entry object returned
-                fail(FileError.NOT_FOUND_ERR);
+                fail && fail(FileError.NOT_FOUND_ERR);
             }
         };
 
@@ -2210,7 +1966,8 @@ Entry.prototype.toURI = function(mimeType) {
  * @param errorCallback {Function} called with a FileError
  */
 Entry.prototype.remove = function(successCallback, errorCallback) {
-    var fail = typeof errorCallback !== 'function' ? null : function(code) {
+    argscheck.checkArgs('FF', 'Entry.remove', arguments);
+    var fail = errorCallback && function(code) {
         errorCallback(new FileError(code));
     };
     exec(successCallback, fail, "File", "remove", [this.fullPath]);
@@ -2223,12 +1980,13 @@ Entry.prototype.remove = function(successCallback, errorCallback) {
  * @param errorCallback {Function} called with a FileError
  */
 Entry.prototype.getParent = function(successCallback, errorCallback) {
-    var win = typeof successCallback !== 'function' ? null : function(result) {
+    argscheck.checkArgs('FF', 'Entry.getParent', arguments);
+    var win = successCallback && function(result) {
         var DirectoryEntry = require('cordova/plugin/DirectoryEntry');
         var entry = new DirectoryEntry(result.name, result.fullPath);
         successCallback(entry);
     };
-    var fail = typeof errorCallback !== 'function' ? null : function(code) {
+    var fail = errorCallback && function(code) {
         errorCallback(new FileError(code));
     };
     exec(win, fail, "File", "getParent", [this.fullPath]);
@@ -2256,7 +2014,45 @@ var File = function(name, fullPath, type, lastModifiedDate, size){
     this.type = type || null;
     this.lastModifiedDate = lastModifiedDate || null;
     this.size = size || 0;
+
+    // These store the absolute start and end for slicing the file.
+    this.start = 0;
+    this.end = this.size;
 };
+
+/**
+ * Returns a "slice" of the file. Since Cordova Files don't contain the actual
+ * content, this really returns a File with adjusted start and end.
+ * Slices of slices are supported.
+ * start {Number} The index at which to start the slice (inclusive).
+ * end {Number} The index at which to end the slice (exclusive).
+ */
+File.prototype.slice = function(start, end) {
+    var size = this.end - this.start;
+    var newStart = 0;
+    var newEnd = size;
+    if (arguments.length) {
+        if (start < 0) {
+            newStart = Math.max(size + start, 0);
+        } else {
+            newStart = Math.min(size, start);
+        }
+    }
+
+    if (arguments.length >= 2) {
+        if (end < 0) {
+            newEnd = Math.max(size + end, 0);
+        } else {
+            newEnd = Math.min(end, size);
+        }
+    }
+
+    var newFile = new File(this.name, this.fullPath, this.type, this.lastModifiedData, this.size);
+    newFile.start = this.start + newStart;
+    newFile.end = this.start + newEnd;
+    return newFile;
+};
+
 
 module.exports = File;
 
@@ -2298,13 +2094,9 @@ FileEntry.prototype.createWriter = function(successCallback, errorCallback) {
         var writer = new FileWriter(filePointer);
 
         if (writer.fileName === null || writer.fileName === "") {
-            if (typeof errorCallback === "function") {
-                errorCallback(new FileError(FileError.INVALID_STATE_ERR));
-            }
+            errorCallback && errorCallback(new FileError(FileError.INVALID_STATE_ERR));
         } else {
-            if (typeof successCallback === "function") {
-                successCallback(writer);
-            }
+            successCallback && successCallback(writer);
         }
     }, errorCallback);
 };
@@ -2316,11 +2108,11 @@ FileEntry.prototype.createWriter = function(successCallback, errorCallback) {
  * @param {Function} errorCallback is called with a FileError
  */
 FileEntry.prototype.file = function(successCallback, errorCallback) {
-    var win = typeof successCallback !== 'function' ? null : function(f) {
+    var win = successCallback && function(f) {
         var file = new File(f.name, f.fullPath, f.type, f.lastModifiedDate, f.size);
         successCallback(file);
     };
-    var fail = typeof errorCallback !== 'function' ? null : function(code) {
+    var fail = errorCallback && function(code) {
         errorCallback(new FileError(code));
     };
     exec(win, fail, "File", "getFileMetadata", [this.fullPath]);
@@ -2366,8 +2158,12 @@ module.exports = FileError;
 define("cordova/plugin/FileReader", function(require, exports, module) {
 
 var exec = require('cordova/exec'),
+    modulemapper = require('cordova/modulemapper'),
+    utils = require('cordova/utils'),
+    File = require('cordova/plugin/File'),
     FileError = require('cordova/plugin/FileError'),
-    ProgressEvent = require('cordova/plugin/ProgressEvent');
+    ProgressEvent = require('cordova/plugin/ProgressEvent'),
+    origFileReader = modulemapper.getOriginalSymbol(this, 'FileReader');
 
 /**
  * This class reads the mobile device file system.
@@ -2378,23 +2174,11 @@ var exec = require('cordova/exec'),
  * @constructor
  */
 var FileReader = function() {
-    this.fileName = "";
-
-    this.readyState = 0; // FileReader.EMPTY
-
-    // File data
-    this.result = null;
-
-    // Error
-    this.error = null;
-
-    // Event handlers
-    this.onloadstart = null;    // When the read starts.
-    this.onprogress = null;     // While reading (and decoding) file or fileBlob data, and reporting partial file data (progress.loaded/progress.total)
-    this.onload = null;         // When the read has successfully completed.
-    this.onerror = null;        // When the read has failed (see errors).
-    this.onloadend = null;      // When the request has completed (either in success or failure).
-    this.onabort = null;        // When the read has been aborted. For instance, by invoking the abort() method.
+    this._readyState = 0;
+    this._error = null;
+    this._result = null;
+    this._fileName = '';
+    this._realReader = origFileReader ? new origFileReader() : {};
 };
 
 // States
@@ -2402,17 +2186,66 @@ FileReader.EMPTY = 0;
 FileReader.LOADING = 1;
 FileReader.DONE = 2;
 
+utils.defineGetter(FileReader.prototype, 'readyState', function() {
+    return this._fileName ? this._readyState : this._realReader.readyState;
+});
+
+utils.defineGetter(FileReader.prototype, 'error', function() {
+    return this._fileName ? this._error: this._realReader.error;
+});
+
+utils.defineGetter(FileReader.prototype, 'result', function() {
+    return this._fileName ? this._result: this._realReader.result;
+});
+
+function defineEvent(eventName) {
+    utils.defineGetterSetter(FileReader.prototype, eventName, function() {
+        return this._realReader[eventName] || null;
+    }, function(value) {
+        this._realReader[eventName] = value;
+    });
+}
+defineEvent('onloadstart');    // When the read starts.
+defineEvent('onprogress');     // While reading (and decoding) file or fileBlob data, and reporting partial file data (progress.loaded/progress.total)
+defineEvent('onload');         // When the read has successfully completed.
+defineEvent('onerror');        // When the read has failed (see errors).
+defineEvent('onloadend');      // When the request has completed (either in success or failure).
+defineEvent('onabort');        // When the read has been aborted. For instance, by invoking the abort() method.
+
+function initRead(reader, file) {
+    // Already loading something
+    if (reader.readyState == FileReader.LOADING) {
+      throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    reader._result = null;
+    reader._error = null;
+    reader._readyState = FileReader.LOADING;
+
+    if (typeof file.fullPath == 'string') {
+        reader._fileName = file.fullPath;
+    } else {
+        reader._fileName = '';
+        return true;
+    }
+
+    reader.onloadstart && reader.onloadstart(new ProgressEvent("loadstart", {target:reader}));
+}
+
 /**
  * Abort reading file.
  */
 FileReader.prototype.abort = function() {
-    this.result = null;
+    if (origFileReader && !this._fileName) {
+        return this._realReader.abort();
+    }
+    this._result = null;
 
-    if (this.readyState == FileReader.DONE || this.readyState == FileReader.EMPTY) {
+    if (this._readyState == FileReader.DONE || this._readyState == FileReader.EMPTY) {
       return;
     }
 
-    this.readyState = FileReader.DONE;
+    this._readyState = FileReader.DONE;
 
     // If abort callback
     if (typeof this.onabort === 'function') {
@@ -2431,43 +2264,26 @@ FileReader.prototype.abort = function() {
  * @param encoding      [Optional] (see http://www.iana.org/assignments/character-sets)
  */
 FileReader.prototype.readAsText = function(file, encoding) {
-    // Figure out pathing
-    this.fileName = '';
-    if (typeof file.fullPath === 'undefined') {
-        this.fileName = file;
-    } else {
-        this.fileName = file.fullPath;
-    }
-
-    // Already loading something
-    if (this.readyState == FileReader.LOADING) {
-        throw new FileError(FileError.INVALID_STATE_ERR);
-    }
-
-    // LOADING state
-    this.readyState = FileReader.LOADING;
-
-    // If loadstart callback
-    if (typeof this.onloadstart === "function") {
-        this.onloadstart(new ProgressEvent("loadstart", {target:this}));
+    if (initRead(this, file)) {
+        return this._realReader.readAsText(file, encoding);
     }
 
     // Default encoding is UTF-8
     var enc = encoding ? encoding : "UTF-8";
-
     var me = this;
+    var execArgs = [this._fileName, enc, file.start, file.end];
 
     // Read file
     exec(
         // Success callback
         function(r) {
             // If DONE (cancelled), then don't do anything
-            if (me.readyState === FileReader.DONE) {
+            if (me._readyState === FileReader.DONE) {
                 return;
             }
 
             // Save result
-            me.result = r;
+            me._result = r;
 
             // If onload callback
             if (typeof me.onload === "function") {
@@ -2475,7 +2291,7 @@ FileReader.prototype.readAsText = function(file, encoding) {
             }
 
             // DONE state
-            me.readyState = FileReader.DONE;
+            me._readyState = FileReader.DONE;
 
             // If onloadend callback
             if (typeof me.onloadend === "function") {
@@ -2485,18 +2301,18 @@ FileReader.prototype.readAsText = function(file, encoding) {
         // Error callback
         function(e) {
             // If DONE (cancelled), then don't do anything
-            if (me.readyState === FileReader.DONE) {
+            if (me._readyState === FileReader.DONE) {
                 return;
             }
 
             // DONE state
-            me.readyState = FileReader.DONE;
+            me._readyState = FileReader.DONE;
 
             // null result
-            me.result = null;
+            me._result = null;
 
             // Save error
-            me.error = new FileError(e);
+            me._error = new FileError(e);
 
             // If onerror callback
             if (typeof me.onerror === "function") {
@@ -2507,7 +2323,7 @@ FileReader.prototype.readAsText = function(file, encoding) {
             if (typeof me.onloadend === "function") {
                 me.onloadend(new ProgressEvent("loadend", {target:me}));
             }
-        }, "File", "readAsText", [this.fileName, enc]);
+        }, "File", "readAsText", execArgs);
 };
 
 
@@ -2519,42 +2335,27 @@ FileReader.prototype.readAsText = function(file, encoding) {
  * @param file          {File} File object containing file properties
  */
 FileReader.prototype.readAsDataURL = function(file) {
-    this.fileName = "";
-    if (typeof file.fullPath === "undefined") {
-        this.fileName = file;
-    } else {
-        this.fileName = file.fullPath;
-    }
-
-    // Already loading something
-    if (this.readyState == FileReader.LOADING) {
-        throw new FileError(FileError.INVALID_STATE_ERR);
-    }
-
-    // LOADING state
-    this.readyState = FileReader.LOADING;
-
-    // If loadstart callback
-    if (typeof this.onloadstart === "function") {
-        this.onloadstart(new ProgressEvent("loadstart", {target:this}));
+    if (initRead(this, file)) {
+        return this._realReader.readAsDataURL(file);
     }
 
     var me = this;
+    var execArgs = [this._fileName, file.start, file.end];
 
     // Read file
     exec(
         // Success callback
         function(r) {
             // If DONE (cancelled), then don't do anything
-            if (me.readyState === FileReader.DONE) {
+            if (me._readyState === FileReader.DONE) {
                 return;
             }
 
             // DONE state
-            me.readyState = FileReader.DONE;
+            me._readyState = FileReader.DONE;
 
             // Save result
-            me.result = r;
+            me._result = r;
 
             // If onload callback
             if (typeof me.onload === "function") {
@@ -2569,17 +2370,17 @@ FileReader.prototype.readAsDataURL = function(file) {
         // Error callback
         function(e) {
             // If DONE (cancelled), then don't do anything
-            if (me.readyState === FileReader.DONE) {
+            if (me._readyState === FileReader.DONE) {
                 return;
             }
 
             // DONE state
-            me.readyState = FileReader.DONE;
+            me._readyState = FileReader.DONE;
 
-            me.result = null;
+            me._result = null;
 
             // Save error
-            me.error = new FileError(e);
+            me._error = new FileError(e);
 
             // If onerror callback
             if (typeof me.onerror === "function") {
@@ -2590,7 +2391,7 @@ FileReader.prototype.readAsDataURL = function(file) {
             if (typeof me.onloadend === "function") {
                 me.onloadend(new ProgressEvent("loadend", {target:me}));
             }
-        }, "File", "readAsDataURL", [this.fileName]);
+        }, "File", "readAsDataURL", execArgs);
 };
 
 /**
@@ -2599,8 +2400,62 @@ FileReader.prototype.readAsDataURL = function(file) {
  * @param file          {File} File object containing file properties
  */
 FileReader.prototype.readAsBinaryString = function(file) {
-    // TODO - Can't return binary data to browser.
-    console.log('method "readAsBinaryString" is not supported at this time.');
+    if (initRead(this, file)) {
+        return this._realReader.readAsBinaryString(file);
+    }
+
+    var me = this;
+    var execArgs = [this._fileName, file.start, file.end];
+
+    // Read file
+    exec(
+        // Success callback
+        function(r) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = r;
+
+            // If onload callback
+            if (typeof me.onload === "function") {
+                me.onload(new ProgressEvent("load", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        },
+        // Error callback
+        function(e) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = null;
+
+            // Save error
+            me._error = new FileError(e);
+
+            // If onerror callback
+            if (typeof me.onerror === "function") {
+                me.onerror(new ProgressEvent("error", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        }, "File", "readAsBinaryString", execArgs);
 };
 
 /**
@@ -2609,8 +2464,62 @@ FileReader.prototype.readAsBinaryString = function(file) {
  * @param file          {File} File object containing file properties
  */
 FileReader.prototype.readAsArrayBuffer = function(file) {
-    // TODO - Can't return binary data to browser.
-    console.log('This method is not supported at this time.');
+    if (initRead(this, file)) {
+        return this._realReader.readAsArrayBuffer(file);
+    }
+
+    var me = this;
+    var execArgs = [this._fileName, file.start, file.end];
+
+    // Read file
+    exec(
+        // Success callback
+        function(r) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = r;
+
+            // If onload callback
+            if (typeof me.onload === "function") {
+                me.onload(new ProgressEvent("load", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        },
+        // Error callback
+        function(e) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = null;
+
+            // Save error
+            me._error = new FileError(e);
+
+            // If onerror callback
+            if (typeof me.onerror === "function") {
+                me.onerror(new ProgressEvent("error", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        }, "File", "readAsArrayBuffer", execArgs);
 };
 
 module.exports = FileReader;
@@ -2643,7 +2552,8 @@ module.exports = FileSystem;
 // file: lib/common/plugin/FileTransfer.js
 define("cordova/plugin/FileTransfer", function(require, exports, module) {
 
-var exec = require('cordova/exec'),
+var argscheck = require('cordova/argscheck'),
+    exec = require('cordova/exec'),
     FileTransferError = require('cordova/plugin/FileTransferError'),
     ProgressEvent = require('cordova/plugin/ProgressEvent');
 
@@ -2653,6 +2563,38 @@ function newProgressEvent(result) {
     pe.loaded = result.loaded;
     pe.total = result.total;
     return pe;
+}
+
+function getBasicAuthHeader(urlString) {
+    var header =  null;
+
+    if (window.btoa) {
+        // parse the url using the Location object
+        var url = document.createElement('a');
+        url.href = urlString;
+
+        var credentials = null;
+        var protocol = url.protocol + "//";
+        var origin = protocol + url.host;
+
+        // check whether there are the username:password credentials in the url
+        if (url.href.indexOf(origin) !== 0) { // credentials found
+            var atIndex = url.href.indexOf("@");
+            credentials = url.href.substring(protocol.length, atIndex);
+        }
+
+        if (credentials) {
+            var authHeader = "Authorization";
+            var authHeaderValue = "Basic " + window.btoa(credentials);
+
+            header = {
+                name : authHeader,
+                value : authHeaderValue
+            };
+        }
+    }
+
+    return header;
 }
 
 var idCounter = 0;
@@ -2677,8 +2619,7 @@ var FileTransfer = function() {
 * @param trustAllHosts {Boolean} Optional trust all hosts (e.g. for self-signed certs), defaults to false
 */
 FileTransfer.prototype.upload = function(filePath, server, successCallback, errorCallback, options, trustAllHosts) {
-    // sanity parameter checking
-    if (!filePath || !server) throw new Error("FileTransfer.upload requires filePath and server URL parameters at the minimum.");
+    argscheck.checkArgs('ssFFO*', 'FileTransfer.upload', arguments);
     // check for options
     var fileKey = null;
     var fileName = null;
@@ -2686,11 +2627,25 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
     var params = null;
     var chunkedMode = true;
     var headers = null;
+    var httpMethod = null;
+    var basicAuthHeader = getBasicAuthHeader(server);
+    if (basicAuthHeader) {
+        options = options || {};
+        options.headers = options.headers || {};
+        options.headers[basicAuthHeader.name] = basicAuthHeader.value;
+    }
+
     if (options) {
         fileKey = options.fileKey;
         fileName = options.fileName;
         mimeType = options.mimeType;
         headers = options.headers;
+        httpMethod = options.httpMethod || "POST";
+        if (httpMethod.toUpperCase() == "PUT"){
+            httpMethod = "PUT";
+        } else {
+            httpMethod = "POST";
+        }
         if (options.chunkedMode !== null || typeof options.chunkedMode != "undefined") {
             chunkedMode = options.chunkedMode;
         }
@@ -2702,8 +2657,8 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
         }
     }
 
-    var fail = function(e) {
-        var error = new FileTransferError(e.code, e.source, e.target, e.http_status);
+    var fail = errorCallback && function(e) {
+        var error = new FileTransferError(e.code, e.source, e.target, e.http_status, e.body);
         errorCallback(error);
     };
 
@@ -2711,13 +2666,13 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
     var win = function(result) {
         if (typeof result.lengthComputable != "undefined") {
             if (self.onprogress) {
-                return self.onprogress(newProgressEvent(result));
+                self.onprogress(newProgressEvent(result));
             }
         } else {
-            return successCallback(result);
+            successCallback && successCallback(result);
         }
     };
-    exec(win, fail, 'FileTransfer', 'upload', [filePath, server, fileKey, fileName, mimeType, params, trustAllHosts, chunkedMode, headers, this._id]);
+    exec(win, fail, 'FileTransfer', 'upload', [filePath, server, fileKey, fileName, mimeType, params, trustAllHosts, chunkedMode, headers, this._id, httpMethod]);
 };
 
 /**
@@ -2727,17 +2682,30 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
  * @param successCallback (Function}  Callback to be invoked when upload has completed
  * @param errorCallback {Function}    Callback to be invoked upon error
  * @param trustAllHosts {Boolean} Optional trust all hosts (e.g. for self-signed certs), defaults to false
+ * @param options {FileDownloadOptions} Optional parameters such as headers
  */
-FileTransfer.prototype.download = function(source, target, successCallback, errorCallback, trustAllHosts) {
-    // sanity parameter checking
-    if (!source || !target) throw new Error("FileTransfer.download requires source URI and target URI parameters at the minimum.");
+FileTransfer.prototype.download = function(source, target, successCallback, errorCallback, trustAllHosts, options) {
+    argscheck.checkArgs('ssFF*', 'FileTransfer.download', arguments);
     var self = this;
+
+    var basicAuthHeader = getBasicAuthHeader(source);
+    if (basicAuthHeader) {
+        options = options || {};
+        options.headers = options.headers || {};
+        options.headers[basicAuthHeader.name] = basicAuthHeader.value;
+    }
+
+    var headers = null;
+    if (options) {
+        headers = options.headers || null;
+    }
+
     var win = function(result) {
         if (typeof result.lengthComputable != "undefined") {
             if (self.onprogress) {
                 return self.onprogress(newProgressEvent(result));
             }
-        } else {
+        } else if (successCallback) {
             var entry = null;
             if (result.isDirectory) {
                 entry = new (require('cordova/plugin/DirectoryEntry'))();
@@ -2753,21 +2721,20 @@ FileTransfer.prototype.download = function(source, target, successCallback, erro
         }
     };
 
-    var fail = function(e) {
-        var error = new FileTransferError(e.code, e.source, e.target, e.http_status);
+    var fail = errorCallback && function(e) {
+        var error = new FileTransferError(e.code, e.source, e.target, e.http_status, e.body);
         errorCallback(error);
     };
 
-    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id]);
+    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id, headers]);
 };
 
 /**
- * Aborts the ongoing file transfer on this object
- * @param successCallback {Function}  Callback to be invoked upon success
- * @param errorCallback {Function}    Callback to be invoked upon error
+ * Aborts the ongoing file transfer on this object. The original error
+ * callback for the file transfer will be called if necessary.
  */
-FileTransfer.prototype.abort = function(successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'FileTransfer', 'abort', [this._id]);
+FileTransfer.prototype.abort = function() {
+    exec(null, null, 'FileTransfer', 'abort', [this._id]);
 };
 
 module.exports = FileTransfer;
@@ -2781,11 +2748,12 @@ define("cordova/plugin/FileTransferError", function(require, exports, module) {
  * FileTransferError
  * @constructor
  */
-var FileTransferError = function(code, source, target, status) {
+var FileTransferError = function(code, source, target, status, body) {
     this.code = code || null;
     this.source = source || null;
     this.target = target || null;
     this.http_status = status || null;
+    this.body = body || null;
 };
 
 FileTransferError.FILE_NOT_FOUND_ERR = 1;
@@ -2810,12 +2778,13 @@ define("cordova/plugin/FileUploadOptions", function(require, exports, module) {
  * @param headers {Object}   Keys are header names, values are header values. Multiple
  *                           headers of the same name are not supported.
  */
-var FileUploadOptions = function(fileKey, fileName, mimeType, params, headers) {
+var FileUploadOptions = function(fileKey, fileName, mimeType, params, headers, httpMethod) {
     this.fileKey = fileKey || null;
     this.fileName = fileName || null;
     this.mimeType = mimeType || null;
     this.params = params || null;
     this.headers = headers || null;
+    this.httpMethod = httpMethod || null;
 };
 
 module.exports = FileUploadOptions;
@@ -3145,6 +3114,82 @@ module.exports = GlobalizationError;
 
 });
 
+// file: lib/common/plugin/InAppBrowser.js
+define("cordova/plugin/InAppBrowser", function(require, exports, module) {
+
+var exec = require('cordova/exec');
+var channel = require('cordova/channel');
+var modulemapper = require('cordova/modulemapper');
+
+function InAppBrowser() {
+   this.channels = {
+        'loadstart': channel.create('loadstart'),
+        'loadstop' : channel.create('loadstop'),
+        'loaderror' : channel.create('loaderror'),
+        'exit' : channel.create('exit')
+   };
+}
+
+InAppBrowser.prototype = {
+    _eventHandler: function (event) {
+        if (event.type in this.channels) {
+            this.channels[event.type].fire(event);
+        }
+    },
+    close: function (eventname) {
+        exec(null, null, "InAppBrowser", "close", []);
+    },
+    addEventListener: function (eventname,f) {
+        if (eventname in this.channels) {
+            this.channels[eventname].subscribe(f);
+        }
+    },
+    removeEventListener: function(eventname, f) {
+        if (eventname in this.channels) {
+            this.channels[eventname].unsubscribe(f);
+        }
+    },
+
+    executeScript: function(injectDetails, cb) {
+        if (injectDetails.code) {
+            exec(cb, null, "InAppBrowser", "injectScriptCode", [injectDetails.code, !!cb]);
+        } else if (injectDetails.file) {
+            exec(cb, null, "InAppBrowser", "injectScriptFile", [injectDetails.file, !!cb]);
+        } else {
+            throw new Error('executeScript requires exactly one of code or file to be specified');
+        }
+    },
+
+    insertCSS: function(injectDetails, cb) {
+        if (injectDetails.code) {
+            exec(cb, null, "InAppBrowser", "injectStyleCode", [injectDetails.code, !!cb]);
+        } else if (injectDetails.file) {
+            exec(cb, null, "InAppBrowser", "injectStyleFile", [injectDetails.file, !!cb]);
+        } else {
+            throw new Error('insertCSS requires exactly one of code or file to be specified');
+        }
+    }
+};
+
+module.exports = function(strUrl, strWindowName, strWindowFeatures) {
+    var iab = new InAppBrowser();
+    var cb = function(eventname) {
+       iab._eventHandler(eventname);
+    };
+
+    // Don't catch calls that write to existing frames (e.g. named iframes).
+    if (window.frames && window.frames[strWindowName]) {
+        var origOpenFunc = modulemapper.getOriginalSymbol(window, 'open');
+        return origOpenFunc.apply(window, arguments);
+    }
+
+    exec(cb, cb, "InAppBrowser", "open", [strUrl, strWindowName, strWindowFeatures]);
+    return iab;
+};
+
+
+});
+
 // file: lib/common/plugin/LocalFileSystem.js
 define("cordova/plugin/LocalFileSystem", function(require, exports, module) {
 
@@ -3167,7 +3212,8 @@ module.exports = LocalFileSystem;
 // file: lib/common/plugin/Media.js
 define("cordova/plugin/Media", function(require, exports, module) {
 
-var utils = require('cordova/utils'),
+var argscheck = require('cordova/argscheck'),
+    utils = require('cordova/utils'),
     exec = require('cordova/exec');
 
 var mediaObjects = {};
@@ -3185,25 +3231,7 @@ var mediaObjects = {};
  *                                  statusCallback(int statusCode) - OPTIONAL
  */
 var Media = function(src, successCallback, errorCallback, statusCallback) {
-
-    // successCallback optional
-    if (successCallback && (typeof successCallback !== "function")) {
-        console.log("Media Error: successCallback is not a function");
-        return;
-    }
-
-    // errorCallback optional
-    if (errorCallback && (typeof errorCallback !== "function")) {
-        console.log("Media Error: errorCallback is not a function");
-        return;
-    }
-
-    // statusCallback optional
-    if (statusCallback && (typeof statusCallback !== "function")) {
-        console.log("Media Error: statusCallback is not a function");
-        return;
-    }
-
+    argscheck.checkArgs('SFFF', 'Media', arguments);
     this.id = utils.createUUID();
     mediaObjects[this.id] = this;
     this.src = src;
@@ -3347,12 +3375,12 @@ Media.onStatus = function(id, msgType, value) {
                 media._position = Number(value);
                 break;
             default :
-                console && console.error && console.error("Unhandled Media.onStatus :: " + msgType);
+                console.error && console.error("Unhandled Media.onStatus :: " + msgType);
                 break;
         }
     }
     else {
-         console && console.error && console.error("Received Media.onStatus callback for unknown media :: " + id);
+         console.error && console.error("Received Media.onStatus callback for unknown media :: " + id);
     }
 
 };
@@ -3581,7 +3609,8 @@ define("cordova/plugin/accelerometer", function(require, exports, module) {
  * This class provides access to device accelerometer data.
  * @constructor
  */
-var utils = require("cordova/utils"),
+var argscheck = require('cordova/argscheck'),
+    utils = require("cordova/utils"),
     exec = require("cordova/exec"),
     Acceleration = require('cordova/plugin/Acceleration');
 
@@ -3645,10 +3674,7 @@ var accelerometer = {
      * @param {AccelerationOptions} options The options for getting the accelerometer data such as timeout. (OPTIONAL)
      */
     getCurrentAcceleration: function(successCallback, errorCallback, options) {
-        // successCallback required
-        if (typeof successCallback !== "function") {
-            throw "getCurrentAcceleration must be called with at least a success callback function as first parameter.";
-        }
+        argscheck.checkArgs('fFO', 'accelerometer.getCurrentAcceleration', arguments);
 
         var p;
         var win = function(a) {
@@ -3657,7 +3683,7 @@ var accelerometer = {
         };
         var fail = function(e) {
             removeListeners(p);
-            errorCallback(e);
+            errorCallback && errorCallback(e);
         };
 
         p = createCallbackPair(win, fail);
@@ -3677,20 +3703,16 @@ var accelerometer = {
      * @return String                       The watch id that must be passed to #clearWatch to stop watching.
      */
     watchAcceleration: function(successCallback, errorCallback, options) {
+        argscheck.checkArgs('fFO', 'accelerometer.watchAcceleration', arguments);
         // Default interval (10 sec)
         var frequency = (options && options.frequency && typeof options.frequency == 'number') ? options.frequency : 10000;
-
-        // successCallback required
-        if (typeof successCallback !== "function") {
-            throw "watchAcceleration must be called with at least a success callback function as first parameter.";
-        }
 
         // Keep reference to watch id, and report accel readings as often as defined in frequency
         var id = utils.createUUID();
 
         var p = createCallbackPair(function(){}, function(e) {
             removeListeners(p);
-            errorCallback(e);
+            errorCallback && errorCallback(e);
         });
         listeners.push(p);
 
@@ -3706,7 +3728,7 @@ var accelerometer = {
         if (running) {
             // If we're already running then immediately invoke the success callback
             // but only if we have retrieved a value, sample code does not check for null ...
-            if(accel) {
+            if (accel) {
                 successCallback(accel);
             }
         } else {
@@ -3732,6 +3754,1910 @@ var accelerometer = {
 };
 
 module.exports = accelerometer;
+
+});
+
+// file: lib/common/plugin/accelerometer/symbols.js
+define("cordova/plugin/accelerometer/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.defaults('cordova/plugin/Acceleration', 'Acceleration');
+modulemapper.defaults('cordova/plugin/accelerometer', 'navigator.accelerometer');
+
+});
+
+// file: lib/blackberry/plugin/air/DirectoryEntry.js
+define("cordova/plugin/air/DirectoryEntry", function(require, exports, module) {
+
+var DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
+    DirectoryReader = require('cordova/plugin/air/DirectoryReader'),
+    FileEntry = require('cordova/plugin/FileEntry'),
+    FileError = require('cordova/plugin/FileError');
+
+var validFileRe = new RegExp('^[a-zA-Z][0-9a-zA-Z._ ]*$');
+
+module.exports = {
+    createReader : function() {
+        return new DirectoryReader(this.fullPath);
+    },
+    /**
+     * Creates or looks up a directory; override for BlackBerry.
+     *
+     * @param path
+     *            {DOMString} either a relative or absolute path from this
+     *            directory in which to look up or create a directory
+     * @param options
+     *            {Flags} options to create or exclusively create the directory
+     * @param successCallback
+     *            {Function} called with the new DirectoryEntry
+     * @param errorCallback
+     *            {Function} called with a FileError
+     */
+    getDirectory : function(path, options, successCallback, errorCallback) {
+    // create directory if it doesn't exist
+        var create = (options && options.create === true) ? true : false,
+        // if true, causes failure if create is true and path already exists
+        exclusive = (options && options.exclusive === true) ? true : false,
+        // directory exists
+        exists,
+        // create a new DirectoryEntry object and invoke success callback
+        createEntry = function() {
+            var path_parts = path.split('/'),
+                name = path_parts[path_parts.length - 1],
+                dirEntry = new DirectoryEntry(name, path);
+
+            // invoke success callback
+            if (typeof successCallback === 'function') {
+                successCallback(dirEntry);
+            }
+        };
+
+        var fail = function(error) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(new FileError(error));
+            }
+        };
+
+        // invalid path
+        if(!validFileRe.exec(path)){
+            fail(FileError.ENCODING_ERR);
+            return;
+        }
+
+        // determine if path is relative or absolute
+        if (!path) {
+            fail(FileError.ENCODING_ERR);
+            return;
+        } else if (path.indexOf(this.fullPath) !== 0) {
+            // path does not begin with the fullPath of this directory
+            // therefore, it is relative
+            path = this.fullPath + '/' + path;
+        }
+
+        // determine if directory exists
+        try {
+            // will return true if path exists AND is a directory
+            exists = blackberry.io.dir.exists(path);
+        } catch (e) {
+            // invalid path
+            // TODO this will not work on playbook - need to think how to find invalid urls
+            fail(FileError.ENCODING_ERR);
+            return;
+        }
+
+
+        // path is a directory
+        if (exists) {
+            if (create && exclusive) {
+                // can't guarantee exclusivity
+                fail(FileError.PATH_EXISTS_ERR);
+            } else {
+                // create entry for existing directory
+                createEntry();
+            }
+        }
+        // will return true if path exists AND is a file
+        else if (blackberry.io.file.exists(path)) {
+            // the path is a file
+            fail(FileError.TYPE_MISMATCH_ERR);
+        }
+        // path does not exist, create it
+        else if (create) {
+            try {
+                // directory path must have trailing slash
+                var dirPath = path;
+                if (dirPath.substr(-1) !== '/') {
+                    dirPath += '/';
+                }
+                console.log('creating dir path at: ' + dirPath);
+                blackberry.io.dir.createNewDir(dirPath);
+                createEntry();
+            } catch (eone) {
+                // unable to create directory
+                fail(FileError.NOT_FOUND_ERR);
+            }
+        }
+        // path does not exist, don't create
+        else {
+            // directory doesn't exist
+            fail(FileError.NOT_FOUND_ERR);
+        }
+    },
+
+    /**
+     * Create or look up a file.
+     *
+     * @param path {DOMString}
+     *            either a relative or absolute path from this directory in
+     *            which to look up or create a file
+     * @param options {Flags}
+     *            options to create or exclusively create the file
+     * @param successCallback {Function}
+     *            called with the new FileEntry object
+     * @param errorCallback {Function}
+     *            called with a FileError object if error occurs
+     */
+    getFile : function(path, options, successCallback, errorCallback) {
+        // create file if it doesn't exist
+        var create = (options && options.create === true) ? true : false,
+            // if true, causes failure if create is true and path already exists
+            exclusive = (options && options.exclusive === true) ? true : false,
+            // file exists
+            exists,
+            // create a new FileEntry object and invoke success callback
+            createEntry = function() {
+                var path_parts = path.split('/'),
+                    name = path_parts[path_parts.length - 1],
+                    fileEntry = new FileEntry(name, path);
+
+                // invoke success callback
+                if (typeof successCallback === 'function') {
+                    successCallback(fileEntry);
+                }
+            };
+
+        var fail = function(error) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(new FileError(error));
+            }
+        };
+
+        // invalid path
+        if(!validFileRe.exec(path)){
+            fail(FileError.ENCODING_ERR);
+            return;
+        }
+        // determine if path is relative or absolute
+        if (!path) {
+            fail(FileError.ENCODING_ERR);
+            return;
+        }
+        else if (path.indexOf(this.fullPath) !== 0) {
+            // path does not begin with the fullPath of this directory
+            // therefore, it is relative
+            path = this.fullPath + '/' + path;
+        }
+
+        // determine if file exists
+        try {
+            // will return true if path exists AND is a file
+            exists = blackberry.io.file.exists(path);
+        }
+        catch (e) {
+            // invalid path
+            fail(FileError.ENCODING_ERR);
+            return;
+        }
+
+        // path is a file
+        if (exists) {
+            if (create && exclusive) {
+                // can't guarantee exclusivity
+                fail(FileError.PATH_EXISTS_ERR);
+            }
+            else {
+                // create entry for existing file
+                createEntry();
+            }
+        }
+        // will return true if path exists AND is a directory
+        else if (blackberry.io.dir.exists(path)) {
+            // the path is a directory
+            fail(FileError.TYPE_MISMATCH_ERR);
+        }
+        // path does not exist, create it
+        else if (create) {
+            // create empty file
+            var emptyBlob = blackberry.utils.stringToBlob('');
+            blackberry.io.file.saveFile(path,emptyBlob);
+            createEntry();
+        }
+        // path does not exist, don't create
+        else {
+            // file doesn't exist
+            fail(FileError.NOT_FOUND_ERR);
+        }
+    },
+
+    /**
+     * Delete a directory and all of it's contents.
+     *
+     * @param successCallback {Function} called with no parameters
+     * @param errorCallback {Function} called with a FileError
+     */
+    removeRecursively : function(successCallback, errorCallback) {
+        // we're removing THIS directory
+        var path = this.fullPath;
+
+        var fail = function(error) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(new FileError(error));
+            }
+        };
+
+        // attempt to delete directory
+        if (blackberry.io.dir.exists(path)) {
+            // it is an error to attempt to remove the file system root
+            //exec(null, null, "File", "isFileSystemRoot", [ path ]) === true
+            if (false) {
+                fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
+            }
+            else {
+                try {
+                    // delete the directory, setting recursive flag to true
+                    blackberry.io.dir.deleteDirectory(path, true);
+                    if (typeof successCallback === "function") {
+                        successCallback();
+                    }
+                } catch (e) {
+                    // permissions don't allow deletion
+                    console.log(e);
+                    fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
+                }
+            }
+        }
+        // it's a file, not a directory
+        else if (blackberry.io.file.exists(path)) {
+            fail(FileError.TYPE_MISMATCH_ERR);
+        }
+        // not found
+        else {
+            fail(FileError.NOT_FOUND_ERR);
+        }
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/air/DirectoryReader.js
+define("cordova/plugin/air/DirectoryReader", function(require, exports, module) {
+
+var FileError = require('cordova/plugin/FileError');
+
+/**
+ * An interface that lists the files and directories in a directory.
+ */
+function DirectoryReader(path) {
+    this.path = path || null;
+}
+
+/**
+ * Returns a list of entries from a directory.
+ *
+ * @param {Function} successCallback is called with a list of entries
+ * @param {Function} errorCallback is called with a FileError
+ */
+DirectoryReader.prototype.readEntries = function(successCallback, errorCallback) {
+    var win = typeof successCallback !== 'function' ? null : function(result) {
+        var retVal = [];
+        for (var i=0; i<result.length; i++) {
+            var entry = null;
+            if (result[i].isDirectory) {
+                entry = new (require('cordova/plugin/DirectoryEntry'))();
+            }
+            else if (result[i].isFile) {
+                entry = new (require('cordova/plugin/FileEntry'))();
+            }
+            entry.isDirectory = result[i].isDirectory;
+            entry.isFile = result[i].isFile;
+            entry.name = result[i].name;
+            entry.fullPath = result[i].fullPath;
+            retVal.push(entry);
+        }
+        successCallback(retVal);
+    };
+    var fail = typeof errorCallback !== 'function' ? null : function(code) {
+        errorCallback(new FileError(code));
+    };
+
+    var theEntries = [];
+    // Entry object is borked - unable to instantiate a new Entry object so just create one
+    var anEntry = function (isDirectory, name, fullPath) {
+        this.isDirectory = (isDirectory ? true : false);
+        this.isFile = (isDirectory ? false : true);
+        this.name = name;
+        this.fullPath = fullPath;
+    };
+
+    if(blackberry.io.dir.exists(this.path)){
+        var theDirectories = blackberry.io.dir.listDirectories(this.path);
+        var theFiles = blackberry.io.dir.listFiles(this.path);
+
+        var theDirectoriesLength = theDirectories.length;
+        var theFilesLength = theFiles.length;
+        for(var i=0;i<theDirectoriesLength;i++){
+            theEntries.push(new anEntry(true, theDirectories[i], this.path+theDirectories[i]));
+        }
+
+        for(var j=0;j<theFilesLength;j++){
+            theEntries.push(new anEntry(false, theFiles[j], this.path+theFiles[j]));
+        }
+        win(theEntries);
+    }else{
+        fail(FileError.NOT_FOUND_ERR);
+    }
+
+
+};
+
+module.exports = DirectoryReader;
+
+});
+
+// file: lib/blackberry/plugin/air/Entry.js
+define("cordova/plugin/air/Entry", function(require, exports, module) {
+
+var FileError = require('cordova/plugin/FileError'),
+    LocalFileSystem = require('cordova/plugin/LocalFileSystem'),
+    Metadata = require('cordova/plugin/Metadata'),
+    resolveLocalFileSystemURI = require('cordova/plugin/air/resolveLocalFileSystemURI'),
+    DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
+    FileEntry = require('cordova/plugin/FileEntry'),
+    requestFileSystem = require('cordova/plugin/air/requestFileSystem');
+
+var recursiveCopy = function(srcDirPath, dstDirPath){
+    // get all the contents (file+dir) of the dir
+    var files = blackberry.io.dir.listFiles(srcDirPath);
+    var dirs = blackberry.io.dir.listDirectories(srcDirPath);
+
+    for(var i=0;i<files.length;i++){
+        blackberry.io.file.copy(srcDirPath + '/' + files[i], dstDirPath + '/' + files[i]);
+    }
+
+    for(var j=0;j<dirs.length;j++){
+        if(!blackberry.io.dir.exists(dstDirPath + '/' + dirs[j])){
+            blackberry.io.dir.createNewDir(dstDirPath + '/' + dirs[j]);
+        }
+        recursiveCopy(srcDirPath + '/' + dirs[j], dstDirPath + '/' + dirs[j]);
+    }
+};
+
+var validFileRe = new RegExp('^[a-zA-Z][0-9a-zA-Z._ ]*$');
+
+module.exports = {
+    getMetadata : function(successCallback, errorCallback){
+        var success = typeof successCallback !== 'function' ? null : function(lastModified) {
+          var metadata = new Metadata(lastModified);
+          successCallback(metadata);
+        };
+        var fail = typeof errorCallback !== 'function' ? null : function(code) {
+          errorCallback(new FileError(code));
+        };
+
+        if(this.isFile){
+            if(blackberry.io.file.exists(this.fullPath)){
+                var theFileProperties = blackberry.io.file.getFileProperties(this.fullPath);
+                success(theFileProperties.dateModified);
+            }
+        }else{
+            console.log('Unsupported for directories');
+            fail(FileError.INVALID_MODIFICATION_ERR);
+        }
+    },
+
+    setMetadata : function(successCallback, errorCallback , metadataObject){
+        console.log('setMetadata is unsupported for PlayBook');
+    },
+
+    moveTo : function(parent, newName, successCallback, errorCallback){
+        var fail = function(code) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(new FileError(code));
+            }
+        };
+        // user must specify parent Entry
+        if (!parent) {
+            fail(FileError.NOT_FOUND_ERR);
+            return;
+        }
+        // source path
+        var srcPath = this.fullPath,
+            // entry name
+            name = newName || this.name,
+            success = function(entry) {
+                if (entry) {
+                    if (typeof successCallback === 'function') {
+                        // create appropriate Entry object
+                        var result = (entry.isDirectory) ? new DirectoryEntry(entry.name, entry.fullPath) : new FileEntry(entry.name, entry.fullPath);
+                        try {
+                            successCallback(result);
+                        }
+                        catch (e) {
+                            console.log('Error invoking callback: ' + e);
+                        }
+                    }
+                }
+                else {
+                    // no Entry object returned
+                    fail(FileError.NOT_FOUND_ERR);
+                }
+            };
+
+
+        // Entry object is borked
+        var theEntry = {};
+        var dstPath = parent.fullPath + '/' + name;
+
+        // invalid path
+        if(!validFileRe.exec(name)){
+            fail(FileError.ENCODING_ERR);
+            return;
+        }
+
+        if(this.isFile){
+            if(srcPath != dstPath){
+                if(blackberry.io.file.exists(dstPath)){
+                    blackberry.io.file.deleteFile(dstPath);
+                    blackberry.io.file.copy(srcPath,dstPath);
+                    blackberry.io.file.deleteFile(srcPath);
+
+                    theEntry.fullPath = dstPath;
+                    theEntry.name = name;
+                    theEntry.isDirectory = false;
+                    theEntry.isFile = true;
+                    success(theEntry);
+                }else if(blackberry.io.dir.exists(dstPath)){
+                    // destination path is a directory
+                    fail(FileError.INVALID_MODIFICATION_ERR);
+                }else{
+                    // make sure the directory that we are moving to actually exists
+                    if(blackberry.io.dir.exists(parent.fullPath)){
+                        blackberry.io.file.copy(srcPath,dstPath);
+                        blackberry.io.file.deleteFile(srcPath);
+
+                        theEntry.fullPath = dstPath;
+                        theEntry.name = name;
+                        theEntry.isDirectory = false;
+                        theEntry.isFile = true;
+                        success(theEntry);
+                    }else{
+                        fail(FileError.NOT_FOUND_ERR);
+                    }
+                }
+            }else{
+                // file onto itself
+                fail(FileError.INVALID_MODIFICATION_ERR);
+            }
+        }else{
+            if(srcPath != dstPath){
+                if(blackberry.io.file.exists(dstPath) || srcPath == parent.fullPath){
+                    // destination path is either a file path or moving into parent
+                    fail(FileError.INVALID_MODIFICATION_ERR);
+                }else{
+                    if(!blackberry.io.dir.exists(dstPath)){
+                        blackberry.io.dir.createNewDir(dstPath);
+                        recursiveCopy(srcPath,dstPath);
+                        blackberry.io.dir.deleteDirectory(srcPath, true);
+                        theEntry.fullPath = dstPath;
+                        theEntry.name = name;
+                        theEntry.isDirectory = true;
+                        theEntry.isFile = false;
+                        success(theEntry);
+                    }else{
+                        var numOfEntries = 0;
+                        numOfEntries += blackberry.io.dir.listDirectories(dstPath).length;
+                        numOfEntries += blackberry.io.dir.listFiles(dstPath).length;
+                        if(numOfEntries === 0){
+                            blackberry.io.dir.createNewDir(dstPath);
+                            recursiveCopy(srcPath,dstPath);
+                            blackberry.io.dir.deleteDirectory(srcPath, true);
+                            theEntry.fullPath = dstPath;
+                            theEntry.name = name;
+                            theEntry.isDirectory = true;
+                            theEntry.isFile = false;
+                            success(theEntry);
+                        }else{
+                            // destination directory not empty
+                            fail(FileError.INVALID_MODIFICATION_ERR);
+                        }
+                    }
+                }
+            }else{
+                // directory onto itself
+                fail(FileError.INVALID_MODIFICATION_ERR);
+            }
+        }
+
+    },
+
+    copyTo : function(parent, newName, successCallback, errorCallback) {
+        var fail = function(code) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(new FileError(code));
+            }
+        };
+        // user must specify parent Entry
+        if (!parent) {
+            fail(FileError.NOT_FOUND_ERR);
+            return;
+        }
+        // source path
+        var srcPath = this.fullPath,
+            // entry name
+            name = newName || this.name,
+            success = function(entry) {
+                if (entry) {
+                    if (typeof successCallback === 'function') {
+                        // create appropriate Entry object
+                        var result = (entry.isDirectory) ? new DirectoryEntry(entry.name, entry.fullPath) : new FileEntry(entry.name, entry.fullPath);
+                        try {
+                            successCallback(result);
+                        }
+                        catch (e) {
+                            console.log('Error invoking callback: ' + e);
+                        }
+                    }
+                }
+                else {
+                    // no Entry object returned
+                    fail(FileError.NOT_FOUND_ERR);
+                }
+            };
+
+        // Entry object is borked
+        var theEntry = {};
+        var dstPath = parent.fullPath + '/' + name;
+
+        // invalid path
+        if(!validFileRe.exec(name)){
+            fail(FileError.ENCODING_ERR);
+            return;
+        }
+
+        if(this.isFile){
+            if(srcPath != dstPath){
+                if(blackberry.io.file.exists(dstPath)){
+                    if(blackberry.io.dir.exists(dstPath)){
+                        blackberry.io.file.copy(srcPath,dstPath);
+
+                        theEntry.fullPath = dstPath;
+                        theEntry.name = name;
+                        theEntry.isDirectory = false;
+                        theEntry.isFile = true;
+                        success(theEntry);
+                    }else{
+                        // destination directory doesn't exist
+                        fail(FileError.NOT_FOUND_ERR);
+                    }
+
+                }else{
+                    blackberry.io.file.copy(srcPath,dstPath);
+
+                    theEntry.fullPath = dstPath;
+                    theEntry.name = name;
+                    theEntry.isDirectory = false;
+                    theEntry.isFile = true;
+                    success(theEntry);
+                }
+            }else{
+                // file onto itself
+                fail(FileError.INVALID_MODIFICATION_ERR);
+            }
+        }else{
+            if(srcPath != dstPath){
+                // allow back up to the root but not child dirs
+                if((parent.name != "root" && dstPath.indexOf(srcPath)>=0) || blackberry.io.file.exists(dstPath)){
+                    // copying directory into child or is file path
+                    fail(FileError.INVALID_MODIFICATION_ERR);
+                }else{
+                    recursiveCopy(srcPath, dstPath);
+
+                    theEntry.fullPath = dstPath;
+                    theEntry.name = name;
+                    theEntry.isDirectory = true;
+                    theEntry.isFile = false;
+                    success(theEntry);
+                }
+            }else{
+                // directory onto itself
+                fail(FileError.INVALID_MODIFICATION_ERR);
+            }
+        }
+
+    },
+
+    remove : function(successCallback, errorCallback) {
+        var path = this.fullPath,
+            // directory contents
+            contents = [];
+
+        var fail = function(error) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(new FileError(error));
+            }
+        };
+
+        // file
+        if (blackberry.io.file.exists(path)) {
+            try {
+                blackberry.io.file.deleteFile(path);
+                if (typeof successCallback === "function") {
+                    successCallback();
+                }
+            } catch (e) {
+                // permissions don't allow
+                fail(FileError.INVALID_MODIFICATION_ERR);
+            }
+        }
+        // directory
+        else if (blackberry.io.dir.exists(path)) {
+            // it is an error to attempt to remove the file system root
+            console.log('entry directory');
+            // TODO: gotta figure out how to get root dirs on playbook -
+            // getRootDirs doesn't work
+            if (false) {
+                fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
+            } else {
+                // check to see if directory is empty
+                contents = blackberry.io.dir.listFiles(path);
+                if (contents.length !== 0) {
+                    fail(FileError.INVALID_MODIFICATION_ERR);
+                } else {
+                    try {
+                        // delete
+                        blackberry.io.dir.deleteDirectory(path, false);
+                        if (typeof successCallback === "function") {
+                            successCallback();
+                        }
+                    } catch (eone) {
+                        // permissions don't allow
+                        fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
+                    }
+                }
+            }
+        }
+        // not found
+        else {
+            fail(FileError.NOT_FOUND_ERR);
+        }
+    },
+    getParent : function(successCallback, errorCallback) {
+        var that = this;
+
+        try {
+            // On BlackBerry, the TEMPORARY file system is actually a temporary
+            // directory that is created on a per-application basis. This is
+            // to help ensure that applications do not share the same temporary
+            // space. So we check to see if this is the TEMPORARY file system
+            // (directory). If it is, we must return this Entry, rather than
+            // the Entry for its parent.
+            requestFileSystem(LocalFileSystem.TEMPORARY, 0,
+                    function(fileSystem) {
+                        if (fileSystem.root.fullPath === that.fullPath) {
+                            if (typeof successCallback === 'function') {
+                                successCallback(fileSystem.root);
+                            }
+                        } else {
+                            resolveLocalFileSystemURI(blackberry.io.dir
+                                    .getParentDirectory(that.fullPath),
+                                    successCallback, errorCallback);
+                        }
+                    }, errorCallback);
+        } catch (e) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(new FileError(FileError.NOT_FOUND_ERR));
+            }
+        }
+    }
+};
+
+
+});
+
+// file: lib/blackberry/plugin/air/File.js
+define("cordova/plugin/air/File", function(require, exports, module) {
+
+/**
+ * Constructor.
+ * name {DOMString} name of the file, without path information
+ * fullPath {DOMString} the full path of the file, including the name
+ * type {DOMString} mime type
+ * lastModifiedDate {Date} last modified date
+ * size {Number} size of the file in bytes
+ */
+
+var File = function(name, fullPath, type, lastModifiedDate, size){
+    this.name = name || '';
+    this.fullPath = fullPath || null;
+    this.type = type || null;
+    this.lastModifiedDate = lastModifiedDate || null;
+    this.size = size || 0;
+};
+
+module.exports = File;
+
+});
+
+// file: lib/blackberry/plugin/air/FileEntry.js
+define("cordova/plugin/air/FileEntry", function(require, exports, module) {
+
+var FileEntry = require('cordova/plugin/FileEntry'),
+    Entry = require('cordova/plugin/air/Entry'),
+    FileWriter = require('cordova/plugin/air/FileWriter'),
+    File = require('cordova/plugin/air/File'),
+    FileError = require('cordova/plugin/FileError');
+
+module.exports = {
+    /**
+     * Creates a new FileWriter associated with the file that this FileEntry represents.
+     *
+     * @param {Function} successCallback is called with the new FileWriter
+     * @param {Function} errorCallback is called with a FileError
+     */
+    createWriter : function(successCallback, errorCallback) {
+        this.file(function(filePointer) {
+            var writer = new FileWriter(filePointer);
+
+            if (writer.fileName === null || writer.fileName === "") {
+                if (typeof errorCallback === "function") {
+                    errorCallback(new FileError(FileError.INVALID_STATE_ERR));
+                }
+            } else {
+                if (typeof successCallback === "function") {
+                    successCallback(writer);
+                }
+            }
+        }, errorCallback);
+    },
+
+    /**
+     * Returns a File that represents the current state of the file that this FileEntry represents.
+     *
+     * @param {Function} successCallback is called with the new File object
+     * @param {Function} errorCallback is called with a FileError
+     */
+    file : function(successCallback, errorCallback) {
+        var win = typeof successCallback !== 'function' ? null : function(f) {
+            var file = new File(f.name, f.fullPath, f.type, f.lastModifiedDate, f.size);
+            successCallback(file);
+        };
+        var fail = typeof errorCallback !== 'function' ? null : function(code) {
+            errorCallback(new FileError(code));
+        };
+
+        if(blackberry.io.file.exists(this.fullPath)){
+            var theFileProperties = blackberry.io.file.getFileProperties(this.fullPath);
+            var theFile = {};
+
+            theFile.fullPath = this.fullPath;
+            theFile.type = theFileProperties.fileExtension;
+            theFile.lastModifiedDate = theFileProperties.dateModified;
+            theFile.size = theFileProperties.size;
+            win(theFile);
+        }else{
+            fail(FileError.NOT_FOUND_ERR);
+        }
+    }
+};
+
+
+});
+
+// file: lib/blackberry/plugin/air/FileReader.js
+define("cordova/plugin/air/FileReader", function(require, exports, module) {
+
+var FileError = require('cordova/plugin/FileError'),
+    ProgressEvent = require('cordova/plugin/ProgressEvent');
+
+/**
+ * This class reads the mobile device file system.
+ *
+ * For Android:
+ *      The root directory is the root of the file system.
+ *      To read from the SD card, the file name is "sdcard/my_file.txt"
+ * @constructor
+ */
+var FileReader = function() {
+    this.fileName = "";
+
+    this.readyState = 0; // FileReader.EMPTY
+
+    // File data
+    this.result = null;
+
+    // Error
+    this.error = null;
+
+    // Event handlers
+    this.onloadstart = null;    // When the read starts.
+    this.onprogress = null;     // While reading (and decoding) file or fileBlob data, and reporting partial file data (progress.loaded/progress.total)
+    this.onload = null;         // When the read has successfully completed.
+    this.onerror = null;        // When the read has failed (see errors).
+    this.onloadend = null;      // When the request has completed (either in success or failure).
+    this.onabort = null;        // When the read has been aborted. For instance, by invoking the abort() method.
+};
+
+// States
+FileReader.EMPTY = 0;
+FileReader.LOADING = 1;
+FileReader.DONE = 2;
+
+/**
+ * Abort reading file.
+ */
+FileReader.prototype.abort = function() {
+    this.result = null;
+
+    if (this.readyState == FileReader.DONE || this.readyState == FileReader.EMPTY) {
+      return;
+    }
+
+    this.readyState = FileReader.DONE;
+
+    // If abort callback
+    if (typeof this.onabort === 'function') {
+        this.onabort(new ProgressEvent('abort', {target:this}));
+    }
+    // If load end callback
+    if (typeof this.onloadend === 'function') {
+        this.onloadend(new ProgressEvent('loadend', {target:this}));
+    }
+};
+
+/**
+ * Read text file.
+ *
+ * @param file          {File} File object containing file properties
+ * @param encoding      [Optional] (see http://www.iana.org/assignments/character-sets)
+ */
+FileReader.prototype.readAsText = function(file, encoding) {
+    // Figure out pathing
+    this.fileName = '';
+    if (typeof file.fullPath === 'undefined') {
+        this.fileName = file;
+    } else {
+        this.fileName = file.fullPath;
+    }
+
+    // Already loading something
+    if (this.readyState == FileReader.LOADING) {
+        throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    // LOADING state
+    this.readyState = FileReader.LOADING;
+
+    // If loadstart callback
+    if (typeof this.onloadstart === "function") {
+        this.onloadstart(new ProgressEvent("loadstart", {target:this}));
+    }
+
+    // Default encoding is UTF-8
+    var enc = encoding ? encoding : "UTF-8";
+
+    var me = this;
+    // Read file
+    if(blackberry.io.file.exists(this.fileName)){
+        var theText = '';
+        var getFileContents = function(path,blob){
+            if(blob){
+
+                theText = blackberry.utils.blobToString(blob, enc);
+                me.result = theText;
+
+                if (typeof me.onload === "function") {
+                    me.onload(new ProgressEvent("load", {target:me}));
+                }
+
+                me.readyState = FileReader.DONE;
+
+                if (typeof me.onloadend === "function") {
+                    me.onloadend(new ProgressEvent("loadend", {target:me}));
+                }
+            }
+        };
+        // setting asynch to off
+        blackberry.io.file.readFile(this.fileName, getFileContents, false);
+
+    }else{
+        // If DONE (cancelled), then don't do anything
+        if (me.readyState === FileReader.DONE) {
+            return;
+        }
+
+        // DONE state
+        me.readyState = FileReader.DONE;
+
+        me.result = null;
+
+        // Save error
+        me.error = new FileError(FileError.NOT_FOUND_ERR);
+
+        // If onerror callback
+        if (typeof me.onerror === "function") {
+            me.onerror(new ProgressEvent("error", {target:me}));
+        }
+
+        // If onloadend callback
+        if (typeof me.onloadend === "function") {
+            me.onloadend(new ProgressEvent("loadend", {target:me}));
+        }
+    }
+};
+
+
+/**
+ * Read file and return data as a base64 encoded data url.
+ * A data url is of the form:
+ *      data:[<mediatype>][;base64],<data>
+ *
+ * @param file          {File} File object containing file properties
+ */
+FileReader.prototype.readAsDataURL = function(file) {
+    this.fileName = "";
+    if (typeof file.fullPath === "undefined") {
+        this.fileName = file;
+    } else {
+        this.fileName = file.fullPath;
+    }
+
+    // Already loading something
+    if (this.readyState == FileReader.LOADING) {
+        throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    // LOADING state
+    this.readyState = FileReader.LOADING;
+
+    // If loadstart callback
+    if (typeof this.onloadstart === "function") {
+        this.onloadstart(new ProgressEvent("loadstart", {target:this}));
+    }
+
+    var enc = "BASE64";
+
+    var me = this;
+
+    // Read file
+    if(blackberry.io.file.exists(this.fileName)){
+        var theText = '';
+        var getFileContents = function(path,blob){
+            if(blob){
+                theText = blackberry.utils.blobToString(blob, enc);
+                me.result = "data:text/plain;base64," +theText;
+
+                if (typeof me.onload === "function") {
+                    me.onload(new ProgressEvent("load", {target:me}));
+                }
+
+                me.readyState = FileReader.DONE;
+
+                if (typeof me.onloadend === "function") {
+                    me.onloadend(new ProgressEvent("loadend", {target:me}));
+                }
+            }
+        };
+        // setting asynch to off
+        blackberry.io.file.readFile(this.fileName, getFileContents, false);
+
+    }else{
+        // If DONE (cancelled), then don't do anything
+        if (me.readyState === FileReader.DONE) {
+            return;
+        }
+
+        // DONE state
+        me.readyState = FileReader.DONE;
+
+        me.result = null;
+
+        // Save error
+        me.error = new FileError(FileError.NOT_FOUND_ERR);
+
+        // If onerror callback
+        if (typeof me.onerror === "function") {
+            me.onerror(new ProgressEvent("error", {target:me}));
+        }
+
+        // If onloadend callback
+        if (typeof me.onloadend === "function") {
+            me.onloadend(new ProgressEvent("loadend", {target:me}));
+        }
+    }
+};
+
+/**
+ * Read file and return data as a binary data.
+ *
+ * @param file          {File} File object containing file properties
+ */
+FileReader.prototype.readAsBinaryString = function(file) {
+    // TODO - Can't return binary data to browser.
+    console.log('method "readAsBinaryString" is not supported at this time.');
+};
+
+/**
+ * Read file and return data as a binary data.
+ *
+ * @param file          {File} File object containing file properties
+ */
+FileReader.prototype.readAsArrayBuffer = function(file) {
+    // TODO - Can't return binary data to browser.
+    console.log('This method is not supported at this time.');
+};
+
+module.exports = FileReader;
+
+});
+
+// file: lib/blackberry/plugin/air/FileTransfer.js
+define("cordova/plugin/air/FileTransfer", function(require, exports, module) {
+
+var cordova = require('cordova'),
+FileTransferError = require('cordova/plugin/FileTransferError'),
+FileUploadResult = require('cordova/plugin/FileUploadResult');
+
+var validURLProtocol = new RegExp('^(https?|ftp):\/\/');
+
+function getParentPath(filePath) {
+    var pos = filePath.lastIndexOf('/');
+    return filePath.substring(0, pos + 1);
+}
+
+function getFileName(filePath) {
+    var pos = filePath.lastIndexOf('/');
+    return filePath.substring(pos + 1);
+}
+
+module.exports = {
+    upload: function (args, win, fail) {
+        var filePath = args[0],
+            server = args[1],
+            fileKey = args[2],
+            fileName = args[3],
+            mimeType = args[4],
+            params = args[5],
+            trustAllHosts = args[6],
+            chunkedMode = args[7],
+            headers = args[8];
+
+        if(!validURLProtocol.exec(server)){
+            return { "status" : cordova.callbackStatus.ERROR, "message" : new FileTransferError(FileTransferError.INVALID_URL_ERR) };
+        }
+
+        window.resolveLocalFileSystemURI(filePath, fileWin, fail);
+
+        function fileWin(entryObject){
+            blackberry.io.file.readFile(filePath, readWin, false);
+        }
+
+        function readWin(filePath, blobFile){
+            var fd = new FormData();
+
+            fd.append(fileKey, blobFile, fileName);
+            for (var prop in params) {
+                if(params.hasOwnProperty(prop)) {
+                    fd.append(prop, params[prop]);
+                }
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", server);
+            xhr.onload = function(evt) {
+                if (xhr.status == 200) {
+                    var result = new FileUploadResult();
+                    result.bytesSent = xhr.response.length;
+                    result.responseCode = xhr.status;
+                    result.response = xhr.response;
+                    win(result);
+                } else if (xhr.status == 404) {
+                    fail(new FileTransferError(FileTransferError.INVALID_URL_ERR, null, null, xhr.status));
+                } else if (xhr.status == 403) {
+                    fail(new FileTransferError(FileTransferError.INVALID_URL_ERR, null, null, xhr.status));
+                } else {
+                    fail(new FileTransferError(FileTransferError.CONNECTION_ERR, null, null, xhr.status));
+                }
+            };
+            xhr.ontimeout = function(evt) {
+                fail(new FileTransferError(FileTransferError.CONNECTION_ERR, null, null, xhr.status));
+            };
+
+            if(headers){
+                for(var i in headers){
+                    xhr.setRequestHeader(i, headers[i]);
+                }
+            }
+            xhr.send(fd);
+        }
+
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+    },
+
+    download: function(args, win, fail){
+        var url = args[0],
+            filePath = args[1];
+
+        if(!validURLProtocol.exec(url)){
+            return { "status" : cordova.callbackStatus.ERROR, "message" : new FileTransferError(FileTransferError.INVALID_URL_ERR) };
+        }
+
+        var xhr = new XMLHttpRequest();
+
+        function writeFile(fileEntry) {
+            fileEntry.createWriter(function(writer) {
+                writer.onwriteend = function(evt) {
+                    if (!evt.target.error) {
+                        win(new window.FileEntry(fileEntry.name, fileEntry.toURL()));
+                    } else {
+                        fail(new FileTransferError(FileTransferError.FILE_NOT_FOUND_ERR));
+                    }
+                };
+
+                writer.onerror = function(evt) {
+                    fail(new FileTransferError(FileTransferError.FILE_NOT_FOUND_ERR));
+                };
+
+                var blob = blackberry.utils.stringToBlob(xhr.response);
+                writer.write(blob);
+
+            },
+            function(error) {
+                fail(new FileTransferError(FileTransferError.FILE_NOT_FOUND_ERR));
+            });
+        }
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == xhr.DONE) {
+                if (xhr.status == 200 && xhr.response) {
+                    window.resolveLocalFileSystemURI(getParentPath(filePath), function(dir) {
+                        dir.getFile(getFileName(filePath), {create: true}, writeFile, function(error) {
+                            fail(new FileTransferError(FileTransferError.FILE_NOT_FOUND_ERR));
+                        });
+                    }, function(error) {
+                        fail(new FileTransferError(FileTransferError.FILE_NOT_FOUND_ERR));
+                    });
+                } else if (xhr.status == 404) {
+                    fail(new FileTransferError(FileTransferError.INVALID_URL_ERR, null, null, xhr.status));
+                } else {
+                    fail(new FileTransferError(FileTransferError.CONNECTION_ERR, null, null, xhr.status));
+                }
+            }
+        };
+
+        xhr.open("GET", url, true);
+        xhr.responseType = "arraybuffer";
+        xhr.send();
+
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/air/FileWriter.js
+define("cordova/plugin/air/FileWriter", function(require, exports, module) {
+
+var FileError = require('cordova/plugin/FileError'),
+    ProgressEvent = require('cordova/plugin/ProgressEvent');
+
+/**
+ * @constructor
+ * @param file {File} File object containing file properties
+ * @param append if true write to the end of the file, otherwise overwrite the file
+ */
+var FileWriter = function(file) {
+    this.fileName = "";
+    this.length = 0;
+    if (file) {
+        this.fileName = file.fullPath || file;
+        this.length = file.size || 0;
+    }
+    // default is to write at the beginning of the file
+    this.position = 0;
+
+    this.readyState = 0; // EMPTY
+
+    this.result = null;
+
+    // Error
+    this.error = null;
+
+    // Event handlers
+    this.onwritestart = null;   // When writing starts
+    this.onprogress = null;     // While writing the file, and reporting partial file data
+    this.onwrite = null;        // When the write has successfully completed.
+    this.onwriteend = null;     // When the request has completed (either in success or failure).
+    this.onabort = null;        // When the write has been aborted. For instance, by invoking the abort() method.
+    this.onerror = null;        // When the write has failed (see errors).
+};
+
+// States
+FileWriter.INIT = 0;
+FileWriter.WRITING = 1;
+FileWriter.DONE = 2;
+
+/**
+ * Abort writing file.
+ */
+FileWriter.prototype.abort = function() {
+    // check for invalid state
+    if (this.readyState === FileWriter.DONE || this.readyState === FileWriter.INIT) {
+        throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    // set error
+    this.error = new FileError(FileError.ABORT_ERR);
+
+    this.readyState = FileWriter.DONE;
+
+    // If abort callback
+    if (typeof this.onabort === "function") {
+        this.onabort(new ProgressEvent("abort", {"target":this}));
+    }
+
+    // If write end callback
+    if (typeof this.onwriteend === "function") {
+        this.onwriteend(new ProgressEvent("writeend", {"target":this}));
+    }
+};
+
+/**
+ * Writes data to the file
+ *
+ * @param text to be written
+ */
+FileWriter.prototype.write = function(text) {
+    // Throw an exception if we are already writing a file
+    if (this.readyState === FileWriter.WRITING) {
+        throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    // WRITING state
+    this.readyState = FileWriter.WRITING;
+
+    var me = this;
+
+    // If onwritestart callback
+    if (typeof me.onwritestart === "function") {
+        me.onwritestart(new ProgressEvent("writestart", {"target":me}));
+    }
+
+    var textBlob = blackberry.utils.stringToBlob(text);
+
+    if(blackberry.io.file.exists(this.fileName)){
+
+        var oldText = '';
+        var newText = text;
+
+        var getFileContents = function(path,blob){
+
+            if(blob){
+                oldText = blackberry.utils.blobToString(blob);
+                if(oldText.length>0){
+                    newText = oldText.substr(0,me.position) + text;
+                }
+            }
+
+            var tempFile = me.fileName+'temp';
+            if(blackberry.io.file.exists(tempFile)){
+                blackberry.io.file.deleteFile(tempFile);
+            }
+
+            var newTextBlob = blackberry.utils.stringToBlob(newText);
+
+            // crete a temp file, delete file we are 'overwriting', then rename temp file
+            blackberry.io.file.saveFile(tempFile, newTextBlob);
+            blackberry.io.file.deleteFile(me.fileName);
+            blackberry.io.file.rename(tempFile, me.fileName.split('/').pop());
+
+            me.position = newText.length;
+            me.length = me.position;
+
+            if (typeof me.onwrite === "function") {
+                me.onwrite(new ProgressEvent("write", {"target":me}));
+            }
+        };
+
+        // setting asynch to off
+        blackberry.io.file.readFile(this.fileName, getFileContents, false);
+
+    }else{
+
+        // file is new so just save it
+        blackberry.io.file.saveFile(this.fileName, textBlob);
+        me.position = text.length;
+        me.length = me.position;
+    }
+
+    me.readyState = FileWriter.DONE;
+
+    if (typeof me.onwriteend === "function") {
+                me.onwriteend(new ProgressEvent("writeend", {"target":me}));
+    }
+};
+
+/**
+ * Moves the file pointer to the location specified.
+ *
+ * If the offset is a negative number the position of the file
+ * pointer is rewound.  If the offset is greater than the file
+ * size the position is set to the end of the file.
+ *
+ * @param offset is the location to move the file pointer to.
+ */
+FileWriter.prototype.seek = function(offset) {
+    // Throw an exception if we are already writing a file
+    if (this.readyState === FileWriter.WRITING) {
+        throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    if (!offset && offset !== 0) {
+        return;
+    }
+
+    // See back from end of file.
+    if (offset < 0) {
+        this.position = Math.max(offset + this.length, 0);
+    }
+    // Offset is bigger than file size so set position
+    // to the end of the file.
+    else if (offset > this.length) {
+        this.position = this.length;
+    }
+    // Offset is between 0 and file size so set the position
+    // to start writing.
+    else {
+        this.position = offset;
+    }
+};
+
+/**
+ * Truncates the file to the size specified.
+ *
+ * @param size to chop the file at.
+ */
+FileWriter.prototype.truncate = function(size) {
+    // Throw an exception if we are already writing a file
+    if (this.readyState === FileWriter.WRITING) {
+        throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    // WRITING state
+    this.readyState = FileWriter.WRITING;
+
+    var me = this;
+
+    // If onwritestart callback
+    if (typeof me.onwritestart === "function") {
+        me.onwritestart(new ProgressEvent("writestart", {"target":this}));
+    }
+
+    if(blackberry.io.file.exists(this.fileName)){
+
+        var oldText = '';
+        var newText = '';
+
+        var getFileContents = function(path,blob){
+
+            if(blob){
+                oldText = blackberry.utils.blobToString(blob);
+                if(oldText.length>0){
+                    newText = oldText.slice(0,size);
+                }else{
+                    // TODO: throw error
+                }
+            }
+
+            var tempFile = me.fileName+'temp';
+            if(blackberry.io.file.exists(tempFile)){
+                blackberry.io.file.deleteFile(tempFile);
+            }
+
+            var newTextBlob = blackberry.utils.stringToBlob(newText);
+
+            // crete a temp file, delete file we are 'overwriting', then rename temp file
+            blackberry.io.file.saveFile(tempFile, newTextBlob);
+            blackberry.io.file.deleteFile(me.fileName);
+            blackberry.io.file.rename(tempFile, me.fileName.split('/').pop());
+
+            me.position = newText.length;
+            me.length = me.position;
+
+            if (typeof me.onwrite === "function") {
+                 me.onwrite(new ProgressEvent("write", {"target":me}));
+            }
+        };
+
+        // setting asynch to off - worry about making this all callbacks later
+        blackberry.io.file.readFile(this.fileName, getFileContents, false);
+
+    }else{
+
+        // TODO: file doesn't exist - throw error
+
+    }
+
+    me.readyState = FileWriter.DONE;
+
+    if (typeof me.onwriteend === "function") {
+                me.onwriteend(new ProgressEvent("writeend", {"target":me}));
+    }
+};
+
+module.exports = FileWriter;
+
+});
+
+// file: lib/blackberry/plugin/air/battery.js
+define("cordova/plugin/air/battery", function(require, exports, module) {
+
+var cordova = require('cordova');
+
+module.exports = {
+    start: function (args, win, fail) {
+        // Register one listener to each of the level and state change
+        // events using WebWorks API.
+        blackberry.system.event.deviceBatteryStateChange(function(state) {
+            var me = navigator.battery;
+            // state is either CHARGING or UNPLUGGED
+            if (state === 2 || state === 3) {
+                var info = {
+                    "level" : me._level,
+                    "isPlugged" : state === 2
+                };
+
+                if (me._isPlugged !== info.isPlugged && typeof win === 'function') {
+                    win(info);
+                }
+            }
+        });
+        blackberry.system.event.deviceBatteryLevelChange(function(level) {
+            var me = navigator.battery;
+            if (level != me._level && typeof win === 'function') {
+                win({'level' : level, 'isPlugged' : me._isPlugged});
+            }
+        });
+
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+    },
+    stop: function (args, win, fail) {
+        // Unregister battery listeners.
+        blackberry.system.event.deviceBatteryStateChange(null);
+        blackberry.system.event.deviceBatteryLevelChange(null);
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/air/camera.js
+define("cordova/plugin/air/camera", function(require, exports, module) {
+
+var cordova = require('cordova');
+
+module.exports = {
+    takePicture: function (args, win, fail) {
+        var onCaptured = blackberry.events.registerEventHandler("onCaptured", win),
+            onCameraClosed = blackberry.events.registerEventHandler("onCameraClosed", function () {}),
+            onError = blackberry.events.registerEventHandler("onError", fail),
+            request = new blackberry.transport.RemoteFunctionCall('blackberry/media/camera/takePicture');
+
+        request.addParam("onCaptured", onCaptured);
+        request.addParam("onCameraClosed", onCameraClosed);
+        request.addParam("onError", onError);
+
+        //HACK: this is a sync call due to:
+        //https://github.com/blackberry/WebWorks-TabletOS/issues/51
+        request.makeSyncCall();
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/air/capture.js
+define("cordova/plugin/air/capture", function(require, exports, module) {
+
+var cordova = require('cordova');
+
+function capture(action, win, fail) {
+    var onCaptured = blackberry.events.registerEventHandler("onCaptured", function (path) {
+            var file = blackberry.io.file.getFileProperties(path);
+            win([{
+                fullPath: path,
+                lastModifiedDate: file.dateModified,
+                name: path.replace(file.directory + "/", ""),
+                size: file.size,
+                type: file.fileExtension
+            }]);
+        }),
+        onCameraClosed = blackberry.events.registerEventHandler("onCameraClosed", function () {}),
+        onError = blackberry.events.registerEventHandler("onError", fail),
+        request = new blackberry.transport.RemoteFunctionCall('blackberry/media/camera/' + action);
+
+    request.addParam("onCaptured", onCaptured);
+    request.addParam("onCameraClosed", onCameraClosed);
+    request.addParam("onError", onError);
+
+    //HACK: this is a sync call due to:
+    //https://github.com/blackberry/WebWorks-TabletOS/issues/51
+    request.makeSyncCall();
+}
+
+module.exports = {
+    getSupportedAudioModes: function (args, win, fail) {
+        return {"status": cordova.callbackStatus.OK, "message": []};
+    },
+    getSupportedImageModes: function (args, win, fail) {
+        return {"status": cordova.callbackStatus.OK, "message": []};
+    },
+    getSupportedVideoModes: function (args, win, fail) {
+        return {"status": cordova.callbackStatus.OK, "message": []};
+    },
+    captureImage: function (args, win, fail) {
+        if (args[0].limit > 0) {
+            capture("takePicture", win, fail);
+        }
+        else {
+            win([]);
+        }
+
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+    },
+    captureVideo: function (args, win, fail) {
+        if (args[0].limit > 0) {
+            capture("takeVideo", win, fail);
+        }
+        else {
+            win([]);
+        }
+
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+    },
+    captureAudio: function (args, win, fail) {
+        var onCaptureAudioWin = function(filePath){
+        // for some reason the filePath is coming back as a string between two double quotes
+        filePath = filePath.slice(1, filePath.length-1);
+            var file = blackberry.io.file.getFileProperties(filePath);
+
+            win([{
+                fullPath: filePath,
+                lastModifiedDate: file.dateModified,
+                name: filePath.replace(file.directory + "/", ""),
+                size: file.size,
+                type: file.fileExtension
+            }]);
+        };
+
+        var onCaptureAudioFail = function(){
+            fail([]);
+        };
+
+        if (args[0].limit > 0 && args[0].duration){
+            // a sloppy way of creating a uuid since there's no built in date function to get milliseconds since epoch
+            // might be better to instead check files within directory and then figure out the next file name should be
+            // ie, img000 -> img001 though that would take awhile and would add a whole bunch of checks
+            var id = new Date();
+            id = (id.getDay()).toString() + (id.getHours()).toString() + (id.getSeconds()).toString() + (id.getMilliseconds()).toString() + (id.getYear()).toString();
+
+            var fileName = blackberry.io.dir.appDirs.shared.music.path+'/audio'+id+'.wav';
+            blackberry.media.microphone.record(fileName, onCaptureAudioWin, onCaptureAudioFail);
+            // multiple duration by a 1000 since it comes in as seconds
+            setTimeout(blackberry.media.microphone.stop,args[0].duration*1000);
+        }
+        else {
+            win([]);
+        }
+        return {"status": cordova.callbackStatus.NO_RESULT, "message": "WebWorks Is On It"};
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/air/device.js
+define("cordova/plugin/air/device", function(require, exports, module) {
+
+var channel = require('cordova/channel'),
+    cordova = require('cordova');
+
+// Tell cordova channel to wait on the CordovaInfoReady event
+channel.waitForInitialization('onCordovaInfoReady');
+
+module.exports = {
+    getDeviceInfo : function(args, win, fail){
+        //Register an event handler for the networkChange event
+        var callback = blackberry.events.registerEventHandler("deviceInfo", function (info) {
+                win({
+                    platform: "BlackBerry",
+                    version: info.version,
+                    model: "PlayBook",
+                    name: "PlayBook", // deprecated: please use device.model
+                    uuid: info.uuid,
+                    cordova: CORDOVA_JS_BUILD_LABEL
+                });
+            }),
+            request = new blackberry.transport.RemoteFunctionCall("org/apache/cordova/getDeviceInfo");
+
+        request.addParam("id", callback);
+        request.makeSyncCall();
+
+        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "" };
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/air/file/bbsymbols.js
+define("cordova/plugin/air/file/bbsymbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/air/DirectoryReader', 'DirectoryReader');
+modulemapper.clobbers('cordova/plugin/air/File', 'File');
+modulemapper.clobbers('cordova/plugin/air/FileReader', 'FileReader');
+modulemapper.clobbers('cordova/plugin/air/FileWriter', 'FileWriter');
+modulemapper.clobbers('cordova/plugin/air/requestFileSystem', 'requestFileSystem');
+modulemapper.clobbers('cordova/plugin/air/resolveLocalFileSystemURI', 'resolveLocalFileSystemURI');
+modulemapper.merges('cordova/plugin/air/DirectoryEntry', 'DirectoryEntry');
+modulemapper.merges('cordova/plugin/air/Entry', 'Entry');
+modulemapper.merges('cordova/plugin/air/FileEntry', 'FileEntry');
+
+
+});
+
+// file: lib/blackberry/plugin/air/manager.js
+define("cordova/plugin/air/manager", function(require, exports, module) {
+
+var cordova = require('cordova'),
+    plugins = {
+        'Device' : require('cordova/plugin/air/device'),
+        'Battery' : require('cordova/plugin/air/battery'),
+        'Camera' : require('cordova/plugin/air/camera'),
+        'Logger' : require('cordova/plugin/webworks/logger'),
+        'Media' : require('cordova/plugin/webworks/media'),
+        'Capture' : require('cordova/plugin/air/capture'),
+        'Accelerometer' : require('cordova/plugin/webworks/accelerometer'),
+        'NetworkStatus' : require('cordova/plugin/air/network'),
+        'Notification' : require('cordova/plugin/webworks/notification'),
+        'FileTransfer' : require('cordova/plugin/air/FileTransfer')
+    };
+
+module.exports = {
+    addPlugin: function (key, module) {
+        plugins[key] = require(module);
+    },
+    exec: function (win, fail, clazz, action, args) {
+        var result = {"status" : cordova.callbackStatus.CLASS_NOT_FOUND_EXCEPTION, "message" : "Class " + clazz + " cannot be found"};
+
+        if (plugins[clazz]) {
+            if (plugins[clazz][action]) {
+                result = plugins[clazz][action](args, win, fail);
+            }
+            else {
+                result = { "status" : cordova.callbackStatus.INVALID_ACTION, "message" : "Action not found: " + action };
+            }
+        }
+
+        return result;
+    },
+    resume: function () {},
+    pause: function () {},
+    destroy: function () {}
+};
+
+});
+
+// file: lib/blackberry/plugin/air/network.js
+define("cordova/plugin/air/network", function(require, exports, module) {
+
+var cordova = require('cordova'),
+    connection = require('cordova/plugin/Connection');
+
+module.exports = {
+    getConnectionInfo: function (args, win, fail) {
+        var connectionType = connection.NONE,
+            eventType = "offline",
+            callbackID,
+            request;
+
+        /**
+         * For PlayBooks, we currently only have WiFi connections, so
+         * return WiFi if there is any access at all.
+         * TODO: update if/when PlayBook gets other connection types...
+         */
+        if (blackberry.system.hasDataCoverage()) {
+            connectionType = connection.WIFI;
+            eventType = "online";
+        }
+
+        //Register an event handler for the networkChange event
+        callbackID = blackberry.events.registerEventHandler("networkChange", function (status) {
+            win(status.type);
+        });
+
+        //pass our callback id down to our network extension
+        request = new blackberry.transport.RemoteFunctionCall("org/apache/cordova/getConnectionInfo");
+        request.addParam("networkStatusChangedID", callbackID);
+        request.makeSyncCall();
+
+        return { "status": cordova.callbackStatus.OK, "message": connectionType};
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/air/platform.js
+define("cordova/plugin/air/platform", function(require, exports, module) {
+
+module.exports = {
+    id: "playbook",
+    initialize:function() {}
+};
+
+});
+
+// file: lib/blackberry/plugin/air/requestFileSystem.js
+define("cordova/plugin/air/requestFileSystem", function(require, exports, module) {
+
+var DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
+FileError = require('cordova/plugin/FileError'),
+FileSystem = require('cordova/plugin/FileSystem'),
+LocalFileSystem = require('cordova/plugin/LocalFileSystem');
+
+/**
+ * Request a file system in which to store application data.
+ * @param type  local file system type
+ * @param size  indicates how much storage space, in bytes, the application expects to need
+ * @param successCallback  invoked with a FileSystem object
+ * @param errorCallback  invoked if error occurs retrieving file system
+ */
+var requestFileSystem = function(type, size, successCallback, errorCallback) {
+    var fail = function(code) {
+        if (typeof errorCallback === 'function') {
+            errorCallback(new FileError(code));
+        }
+    };
+
+    if (type < 0 || type > 3) {
+        fail(FileError.SYNTAX_ERR);
+    } else {
+        // if successful, return a FileSystem object
+        var success = function(file_system) {
+            if (file_system) {
+                if (typeof successCallback === 'function') {
+                    successCallback(file_system);
+                }
+            }
+            else {
+                // no FileSystem object returned
+                fail(FileError.NOT_FOUND_ERR);
+            }
+        };
+
+        // guessing the max file size is 2GB - 1 bytes?
+        // https://bdsc.webapps.blackberry.com/native/documentation/com.qnx.doc.neutrino.user_guide/topic/limits_filesystems.html
+
+        if(size>=2147483648){
+            fail(FileError.QUOTA_EXCEEDED_ERR);
+            return;
+        }
+
+
+        var theFileSystem;
+        try{
+            // is there a way to get space for the app that doesn't point to the appDirs folder?
+            if(type==LocalFileSystem.TEMPORARY){
+                theFileSystem = new FileSystem('temporary', new DirectoryEntry('root', blackberry.io.dir.appDirs.app.storage.path));
+            }else if(type==LocalFileSystem.PERSISTENT){
+                theFileSystem = new FileSystem('persistent', new DirectoryEntry('root', blackberry.io.dir.appDirs.app.storage.path));
+            }
+            success(theFileSystem);
+        }catch(e){
+            fail(FileError.SYNTAX_ERR);
+        }
+    }
+};
+module.exports = requestFileSystem;
+
+});
+
+// file: lib/blackberry/plugin/air/resolveLocalFileSystemURI.js
+define("cordova/plugin/air/resolveLocalFileSystemURI", function(require, exports, module) {
+
+var DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
+    FileEntry = require('cordova/plugin/FileEntry'),
+    FileError = require('cordova/plugin/FileError');
+
+/**
+ * Look up file system Entry referred to by local URI.
+ * @param {DOMString} uri  URI referring to a local file or directory
+ * @param successCallback  invoked with Entry object corresponding to URI
+ * @param errorCallback    invoked if error occurs retrieving file system entry
+ */
+module.exports = function(uri, successCallback, errorCallback) {
+    // error callback
+    var fail = function(error) {
+        if (typeof errorCallback === 'function') {
+            errorCallback(new FileError(error));
+        }
+    };
+    // if successful, return either a file or directory entry
+    var success = function(entry) {
+        var result;
+
+        if (entry) {
+            if (typeof successCallback === 'function') {
+                // create appropriate Entry object
+                result = (entry.isDirectory) ? new DirectoryEntry(entry.name, entry.fullPath) : new FileEntry(entry.name, entry.fullPath);
+                try {
+                    successCallback(result);
+                }
+                catch (e) {
+                    console.log('Error invoking callback: ' + e);
+                }
+            }
+        }
+        else {
+            // no Entry object returned
+            fail(FileError.NOT_FOUND_ERR);
+            return;
+        }
+    };
+
+    if(!uri || uri === ""){
+        fail(FileError.NOT_FOUND_ERR);
+        return;
+    }
+
+    // decode uri if % char found
+    if(uri.indexOf('%')>=0){
+        uri = decodeURI(uri);
+    }
+
+    // pop the parameters if any
+    if(uri.indexOf('?')>=0){
+        uri = uri.split('?')[0];
+    }
+
+    // check for leading /
+    if(uri.indexOf('/')===0){
+        fail(FileError.ENCODING_ERR);
+        return;
+    }
+
+    // Entry object is borked - unable to instantiate a new Entry object so just create one
+    var theEntry = {};
+    if(blackberry.io.dir.exists(uri)){
+        theEntry.isDirectory = true;
+        theEntry.name = uri.split('/').pop();
+        theEntry.fullPath = uri;
+
+        success(theEntry);
+    }else if(blackberry.io.file.exists(uri)){
+        theEntry.isDirectory = false;
+        theEntry.name = uri.split('/').pop();
+        theEntry.fullPath = uri;
+        success(theEntry);
+        return;
+    }else{
+        fail(FileError.NOT_FOUND_ERR);
+        return;
+    }
+
+};
 
 });
 
@@ -3819,6 +5745,28 @@ module.exports = battery;
 
 });
 
+// file: lib/common/plugin/battery/symbols.js
+define("cordova/plugin/battery/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.defaults('cordova/plugin/battery', 'navigator.battery');
+
+});
+
+// file: lib/common/plugin/camera/symbols.js
+define("cordova/plugin/camera/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.defaults('cordova/plugin/Camera', 'navigator.camera');
+modulemapper.defaults('cordova/plugin/CameraConstants', 'Camera');
+modulemapper.defaults('cordova/plugin/CameraPopoverOptions', 'CameraPopoverOptions');
+
+});
+
 // file: lib/common/plugin/capture.js
 define("cordova/plugin/capture", function(require, exports, module) {
 
@@ -3897,10 +5845,27 @@ module.exports = new Capture();
 
 });
 
+// file: lib/common/plugin/capture/symbols.js
+define("cordova/plugin/capture/symbols", function(require, exports, module) {
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/CaptureError', 'CaptureError');
+modulemapper.clobbers('cordova/plugin/CaptureAudioOptions', 'CaptureAudioOptions');
+modulemapper.clobbers('cordova/plugin/CaptureImageOptions', 'CaptureImageOptions');
+modulemapper.clobbers('cordova/plugin/CaptureVideoOptions', 'CaptureVideoOptions');
+modulemapper.clobbers('cordova/plugin/ConfigurationData', 'ConfigurationData');
+modulemapper.clobbers('cordova/plugin/MediaFile', 'MediaFile');
+modulemapper.clobbers('cordova/plugin/MediaFileData', 'MediaFileData');
+modulemapper.clobbers('cordova/plugin/capture', 'navigator.device.capture');
+
+});
+
 // file: lib/common/plugin/compass.js
 define("cordova/plugin/compass", function(require, exports, module) {
 
-var exec = require('cordova/exec'),
+var argscheck = require('cordova/argscheck'),
+    exec = require('cordova/exec'),
     utils = require('cordova/utils'),
     CompassHeading = require('cordova/plugin/CompassHeading'),
     CompassError = require('cordova/plugin/CompassError'),
@@ -3915,23 +5880,13 @@ var exec = require('cordova/exec'),
          * @param {CompassOptions} options The options for getting the heading data (not used).
          */
         getCurrentHeading:function(successCallback, errorCallback, options) {
-            // successCallback required
-            if (typeof successCallback !== "function") {
-              console.log("Compass Error: successCallback is not a function");
-              return;
-            }
-
-            // errorCallback optional
-            if (errorCallback && (typeof errorCallback !== "function")) {
-              console.log("Compass Error: errorCallback is not a function");
-              return;
-            }
+            argscheck.checkArgs('fFO', 'compass.getCurrentHeading', arguments);
 
             var win = function(result) {
                 var ch = new CompassHeading(result.magneticHeading, result.trueHeading, result.headingAccuracy, result.timestamp);
                 successCallback(ch);
             };
-            var fail = function(code) {
+            var fail = errorCallback && function(code) {
                 var ce = new CompassError(code);
                 errorCallback(ce);
             };
@@ -3951,21 +5906,10 @@ var exec = require('cordova/exec'),
          * specifies to watch via a distance filter rather than time.
          */
         watchHeading:function(successCallback, errorCallback, options) {
+            argscheck.checkArgs('fFO', 'compass.watchHeading', arguments);
             // Default interval (100 msec)
             var frequency = (options !== undefined && options.frequency !== undefined) ? options.frequency : 100;
             var filter = (options !== undefined && options.filter !== undefined) ? options.filter : 0;
-
-            // successCallback required
-            if (typeof successCallback !== "function") {
-              console.log("Compass Error: successCallback is not a function");
-              return;
-            }
-
-            // errorCallback optional
-            if (errorCallback && (typeof errorCallback !== "function")) {
-              console.log("Compass Error: errorCallback is not a function");
-              return;
-            }
 
             var id = utils.createUUID();
             if (filter > 0) {
@@ -3990,8 +5934,8 @@ var exec = require('cordova/exec'),
             // Stop javascript timer & remove from timer list
             if (id && timers[id]) {
                 if (timers[id] != "iOS") {
-                      clearInterval(timers[id]);
-                  } else {
+                    clearInterval(timers[id]);
+                } else {
                     // is iOS watch by filter so call into device to stop
                     exec(null, null, "Compass", "stopHeading", []);
                 }
@@ -4001,6 +5945,18 @@ var exec = require('cordova/exec'),
     };
 
 module.exports = compass;
+
+});
+
+// file: lib/common/plugin/compass/symbols.js
+define("cordova/plugin/compass/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/CompassHeading', 'CompassHeading');
+modulemapper.clobbers('cordova/plugin/CompassError', 'CompassError');
+modulemapper.clobbers('cordova/plugin/compass', 'navigator.compass');
 
 });
 
@@ -4086,7 +6042,7 @@ console.debug = function() {
 console.assert = function(expression) {
     if (expression) return;
 
-    var message = utils.vformat(arguments[1], [].slice.call(arguments, 2));
+    var message = logger.format.apply(logger.format, [].slice.call(arguments, 1));
     console.log("ASSERT: " + message);
 };
 
@@ -4179,7 +6135,8 @@ for (var key in console) {
 // file: lib/common/plugin/contacts.js
 define("cordova/plugin/contacts", function(require, exports, module) {
 
-var exec = require('cordova/exec'),
+var argscheck = require('cordova/argscheck'),
+    exec = require('cordova/exec'),
     ContactError = require('cordova/plugin/ContactError'),
     utils = require('cordova/utils'),
     Contact = require('cordova/plugin/Contact');
@@ -4198,13 +6155,9 @@ var contacts = {
      * @return array of Contacts matching search criteria
      */
     find:function(fields, successCB, errorCB, options) {
-        if (!successCB) {
-            throw new TypeError("You must specify a success callback for the find command.");
-        }
-        if (!fields || (utils.isArray(fields) && fields.length === 0)) {
-            if (typeof errorCB === "function") {
-                errorCB(new ContactError(ContactError.INVALID_ARGUMENT_ERROR));
-            }
+        argscheck.checkArgs('afFO', 'contacts.find', arguments);
+        if (!fields.length) {
+            errorCB && errorCB(new ContactError(ContactError.INVALID_ARGUMENT_ERROR));
         } else {
             var win = function(result) {
                 var cs = [];
@@ -4225,9 +6178,9 @@ var contacts = {
      * @returns new Contact object
      */
     create:function(properties) {
-        var i;
+        argscheck.checkArgs('O', 'contacts.create', arguments);
         var contact = new Contact();
-        for (i in properties) {
+        for (var i in properties) {
             if (typeof contact[i] !== 'undefined' && properties.hasOwnProperty(i)) {
                 contact[i] = properties[i];
             }
@@ -4240,10 +6193,28 @@ module.exports = contacts;
 
 });
 
+// file: lib/common/plugin/contacts/symbols.js
+define("cordova/plugin/contacts/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/contacts', 'navigator.contacts');
+modulemapper.clobbers('cordova/plugin/Contact', 'Contact');
+modulemapper.clobbers('cordova/plugin/ContactAddress', 'ContactAddress');
+modulemapper.clobbers('cordova/plugin/ContactError', 'ContactError');
+modulemapper.clobbers('cordova/plugin/ContactField', 'ContactField');
+modulemapper.clobbers('cordova/plugin/ContactFindOptions', 'ContactFindOptions');
+modulemapper.clobbers('cordova/plugin/ContactName', 'ContactName');
+modulemapper.clobbers('cordova/plugin/ContactOrganization', 'ContactOrganization');
+
+});
+
 // file: lib/common/plugin/device.js
 define("cordova/plugin/device", function(require, exports, module) {
 
-var channel = require('cordova/channel'),
+var argscheck = require('cordova/argscheck'),
+    channel = require('cordova/channel'),
     utils = require('cordova/utils'),
     exec = require('cordova/exec');
 
@@ -4259,20 +6230,24 @@ function Device() {
     this.available = false;
     this.platform = null;
     this.version = null;
-    this.name = null;
     this.uuid = null;
     this.cordova = null;
+    this.model = null;
 
     var me = this;
 
     channel.onCordovaReady.subscribe(function() {
         me.getInfo(function(info) {
+            var buildLabel = info.cordova;
+            if (buildLabel != CORDOVA_JS_BUILD_LABEL) {
+                buildLabel += ' JS=' + CORDOVA_JS_BUILD_LABEL;
+            }
             me.available = true;
             me.platform = info.platform;
             me.version = info.version;
-            me.name = info.name;
             me.uuid = info.uuid;
-            me.cordova = info.cordova;
+            me.cordova = buildLabel;
+            me.model = info.model;
             channel.onCordovaInfoReady.fire();
         },function(e) {
             me.available = false;
@@ -4288,20 +6263,7 @@ function Device() {
  * @param {Function} errorCallback The function to call when there is an error getting the heading data. (OPTIONAL)
  */
 Device.prototype.getInfo = function(successCallback, errorCallback) {
-
-    // successCallback required
-    if (typeof successCallback !== "function") {
-        console.log("Device Error: successCallback is not a function");
-        return;
-    }
-
-    // errorCallback optional
-    if (errorCallback && (typeof errorCallback !== "function")) {
-        console.log("Device Error: errorCallback is not a function");
-        return;
-    }
-
-    // Get info
+    argscheck.checkArgs('fF', 'Device.getInfo', arguments);
     exec(successCallback, errorCallback, "Device", "getDeviceInfo", []);
 };
 
@@ -4309,10 +6271,21 @@ module.exports = new Device();
 
 });
 
+// file: lib/common/plugin/device/symbols.js
+define("cordova/plugin/device/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/device', 'device');
+
+});
+
 // file: lib/common/plugin/echo.js
 define("cordova/plugin/echo", function(require, exports, module) {
 
-var exec = require('cordova/exec');
+var exec = require('cordova/exec'),
+    utils = require('cordova/utils');
 
 /**
  * Sends the given message through exec() to the Echo plugin, which sends it back to the successCallback.
@@ -4322,17 +6295,82 @@ var exec = require('cordova/exec');
  * @param forceAsync  Whether to force an async return value (for testing native->js bridge).
  */
 module.exports = function(successCallback, errorCallback, message, forceAsync) {
-    var action = forceAsync ? 'echoAsync' : 'echo';
-    exec(successCallback, errorCallback, "Echo", action, [message]);
+    var action = 'echo';
+    var messageIsMultipart = (utils.typeName(message) == "Array");
+    var args = messageIsMultipart ? message : [message];
+
+    if (utils.typeName(message) == 'ArrayBuffer') {
+        if (forceAsync) {
+            console.warn('Cannot echo ArrayBuffer with forced async, falling back to sync.');
+        }
+        action += 'ArrayBuffer';
+    } else if (messageIsMultipart) {
+        if (forceAsync) {
+            console.warn('Cannot echo MultiPart Array with forced async, falling back to sync.');
+        }
+        action += 'MultiPart';
+    } else if (forceAsync) {
+        action += 'Async';
+    }
+
+    exec(successCallback, errorCallback, "Echo", action, args);
 };
 
+
+});
+
+// file: lib/common/plugin/file/symbols.js
+define("cordova/plugin/file/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper'),
+    symbolshelper = require('cordova/plugin/file/symbolshelper');
+
+symbolshelper(modulemapper.defaults);
+
+});
+
+// file: lib/common/plugin/file/symbolshelper.js
+define("cordova/plugin/file/symbolshelper", function(require, exports, module) {
+
+module.exports = function(exportFunc) {
+    exportFunc('cordova/plugin/DirectoryEntry', 'DirectoryEntry');
+    exportFunc('cordova/plugin/DirectoryReader', 'DirectoryReader');
+    exportFunc('cordova/plugin/Entry', 'Entry');
+    exportFunc('cordova/plugin/File', 'File');
+    exportFunc('cordova/plugin/FileEntry', 'FileEntry');
+    exportFunc('cordova/plugin/FileError', 'FileError');
+    exportFunc('cordova/plugin/FileReader', 'FileReader');
+    exportFunc('cordova/plugin/FileSystem', 'FileSystem');
+    exportFunc('cordova/plugin/FileUploadOptions', 'FileUploadOptions');
+    exportFunc('cordova/plugin/FileUploadResult', 'FileUploadResult');
+    exportFunc('cordova/plugin/FileWriter', 'FileWriter');
+    exportFunc('cordova/plugin/Flags', 'Flags');
+    exportFunc('cordova/plugin/LocalFileSystem', 'LocalFileSystem');
+    exportFunc('cordova/plugin/Metadata', 'Metadata');
+    exportFunc('cordova/plugin/ProgressEvent', 'ProgressEvent');
+    exportFunc('cordova/plugin/requestFileSystem', 'requestFileSystem');
+    exportFunc('cordova/plugin/resolveLocalFileSystemURI', 'resolveLocalFileSystemURI');
+};
+
+});
+
+// file: lib/common/plugin/filetransfer/symbols.js
+define("cordova/plugin/filetransfer/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/FileTransfer', 'FileTransfer');
+modulemapper.clobbers('cordova/plugin/FileTransferError', 'FileTransferError');
 
 });
 
 // file: lib/common/plugin/geolocation.js
 define("cordova/plugin/geolocation", function(require, exports, module) {
 
-var utils = require('cordova/utils'),
+var argscheck = require('cordova/argscheck'),
+    utils = require('cordova/utils'),
     exec = require('cordova/exec'),
     PositionError = require('cordova/plugin/PositionError'),
     Position = require('cordova/plugin/Position');
@@ -4389,9 +6427,7 @@ var geolocation = {
    * @param {PositionOptions} options     The options for getting the position data. (OPTIONAL)
    */
     getCurrentPosition:function(successCallback, errorCallback, options) {
-        if (arguments.length === 0) {
-            throw new Error("getCurrentPosition must be called with at least one argument.");
-        }
+        argscheck.checkArgs('fFO', 'geolocation.getCurrentPosition', arguments);
         options = parseParameters(options);
 
         // Timer var that will fire an error callback if no position is retrieved from native
@@ -4467,9 +6503,7 @@ var geolocation = {
      * @return String                       The watch id that must be passed to #clearWatch to stop watching.
      */
     watchPosition:function(successCallback, errorCallback, options) {
-        if (arguments.length === 0) {
-            throw new Error("watchPosition must be called with at least one argument.");
-        }
+        argscheck.checkArgs('fFO', 'geolocation.getCurrentPosition', arguments);
         options = parseParameters(options);
 
         var id = utils.createUUID();
@@ -4528,10 +6562,24 @@ module.exports = geolocation;
 
 });
 
+// file: lib/common/plugin/geolocation/symbols.js
+define("cordova/plugin/geolocation/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.defaults('cordova/plugin/geolocation', 'navigator.geolocation');
+modulemapper.clobbers('cordova/plugin/PositionError', 'PositionError');
+modulemapper.clobbers('cordova/plugin/Position', 'Position');
+modulemapper.clobbers('cordova/plugin/Coordinates', 'Coordinates');
+
+});
+
 // file: lib/common/plugin/globalization.js
 define("cordova/plugin/globalization", function(require, exports, module) {
 
-var exec = require('cordova/exec'),
+var argscheck = require('cordova/argscheck'),
+    exec = require('cordova/exec'),
     GlobalizationError = require('cordova/plugin/GlobalizationError');
 
 var globalization = {
@@ -4554,18 +6602,7 @@ var globalization = {
 *                                function () {});
 */
 getPreferredLanguage:function(successCB, failureCB) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.getPreferredLanguage Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.getPreferredLanguage Error: failureCB is not a function");
-        return;
-    }
-
+    argscheck.checkArgs('fF', 'Globalization.getPreferredLanguage', arguments);
     exec(successCB, failureCB, "Globalization","getPreferredLanguage", []);
 },
 
@@ -4587,17 +6624,7 @@ getPreferredLanguage:function(successCB, failureCB) {
 *                                function () {});
 */
 getLocaleName:function(successCB, failureCB) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.getLocaleName Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.getLocaleName Error: failureCB is not a function");
-        return;
-    }
+    argscheck.checkArgs('fF', 'Globalization.getLocaleName', arguments);
     exec(successCB, failureCB, "Globalization","getLocaleName", []);
 },
 
@@ -4628,27 +6655,9 @@ getLocaleName:function(successCB, failureCB) {
 *                {formatLength:'short'});
 */
 dateToString:function(date, successCB, failureCB, options) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.dateToString Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.dateToString Error: failureCB is not a function");
-        return;
-    }
-
-
-    if (date instanceof Date){
-        var dateValue;
-        dateValue = date.valueOf();
-        exec(successCB, failureCB, "Globalization", "dateToString", [{"date": dateValue, "options": options}]);
-    }
-    else {
-        console.log("Globalization.dateToString Error: date is not a Date object");
-    }
+    argscheck.checkArgs('dfFO', 'Globalization.dateToString', arguments);
+    var dateValue = date.valueOf();
+    exec(successCB, failureCB, "Globalization", "dateToString", [{"date": dateValue, "options": options}]);
 },
 
 
@@ -4688,23 +6697,8 @@ dateToString:function(date, successCB, failureCB, options) {
 *                {selector:'date'});
 */
 stringToDate:function(dateString, successCB, failureCB, options) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.stringToDate Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.stringToDate Error: failureCB is not a function");
-        return;
-    }
-    if (typeof dateString == "string"){
-        exec(successCB, failureCB, "Globalization", "stringToDate", [{"dateString": dateString, "options": options}]);
-    }
-    else {
-        console.log("Globalization.stringToDate Error: dateString is not a string");
-    }
+    argscheck.checkArgs('sfFO', 'Globalization.stringToDate', arguments);
+    exec(successCB, failureCB, "Globalization", "stringToDate", [{"dateString": dateString, "options": options}]);
 },
 
 
@@ -4741,18 +6735,7 @@ stringToDate:function(dateString, successCB, failureCB, options) {
 *                {formatLength:'short'});
 */
 getDatePattern:function(successCB, failureCB, options) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.getDatePattern Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.getDatePattern Error: failureCB is not a function");
-        return;
-    }
-
+    argscheck.checkArgs('fFO', 'Globalization.getDatePattern', arguments);
     exec(successCB, failureCB, "Globalization", "getDatePattern", [{"options": options}]);
 },
 
@@ -4783,17 +6766,7 @@ getDatePattern:function(successCB, failureCB, options) {
 *        function () {});
 */
 getDateNames:function(successCB, failureCB, options) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.getDateNames Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.getDateNames Error: failureCB is not a function");
-        return;
-    }
+    argscheck.checkArgs('fFO', 'Globalization.getDateNames', arguments);
     exec(successCB, failureCB, "Globalization", "getDateNames", [{"options": options}]);
 },
 
@@ -4818,28 +6791,9 @@ getDateNames:function(successCB, failureCB, options) {
 *                function () {});
 */
 isDayLightSavingsTime:function(date, successCB, failureCB) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.isDayLightSavingsTime Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.isDayLightSavingsTime Error: failureCB is not a function");
-        return;
-    }
-
-
-    if (date instanceof Date){
-        var dateValue;
-        dateValue = date.valueOf();
-        exec(successCB, failureCB, "Globalization", "isDayLightSavingsTime", [{"date": dateValue}]);
-    }
-    else {
-        console.log("Globalization.isDayLightSavingsTime Error: date is not a Date object");
-    }
-
+    argscheck.checkArgs('dfF', 'Globalization.isDayLightSavingsTime', arguments);
+    var dateValue = date.valueOf();
+    exec(successCB, failureCB, "Globalization", "isDayLightSavingsTime", [{"date": dateValue}]);
 },
 
 /**
@@ -4861,18 +6815,7 @@ isDayLightSavingsTime:function(date, successCB, failureCB) {
 *                function () {});
 */
 getFirstDayOfWeek:function(successCB, failureCB) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.getFirstDayOfWeek Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.getFirstDayOfWeek Error: failureCB is not a function");
-        return;
-    }
-
+    argscheck.checkArgs('fF', 'Globalization.getFirstDayOfWeek', arguments);
     exec(successCB, failureCB, "Globalization", "getFirstDayOfWeek", []);
 },
 
@@ -4901,24 +6844,8 @@ getFirstDayOfWeek:function(successCB, failureCB) {
 *                {type:'decimal'});
 */
 numberToString:function(number, successCB, failureCB, options) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.numberToString Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.numberToString Error: failureCB is not a function");
-        return;
-    }
-
-    if(typeof number == "number") {
-        exec(successCB, failureCB, "Globalization", "numberToString", [{"number": number, "options": options}]);
-    }
-    else {
-        console.log("Globalization.numberToString Error: number is not a number");
-    }
+    argscheck.checkArgs('nfFO', 'Globalization.numberToString', arguments);
+    exec(successCB, failureCB, "Globalization", "numberToString", [{"number": number, "options": options}]);
 },
 
 /**
@@ -4945,24 +6872,8 @@ numberToString:function(number, successCB, failureCB, options) {
 *                function () { alert('Error parsing number');});
 */
 stringToNumber:function(numberString, successCB, failureCB, options) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.stringToNumber Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.stringToNumber Error: failureCB is not a function");
-        return;
-    }
-
-    if(typeof numberString == "string") {
-        exec(successCB, failureCB, "Globalization", "stringToNumber", [{"numberString": numberString, "options": options}]);
-    }
-    else {
-        console.log("Globalization.stringToNumber Error: numberString is not a string");
-    }
+    argscheck.checkArgs('sfFO', 'Globalization.stringToNumber', arguments);
+    exec(successCB, failureCB, "Globalization", "stringToNumber", [{"numberString": numberString, "options": options}]);
 },
 
 /**
@@ -4998,18 +6909,7 @@ stringToNumber:function(numberString, successCB, failureCB, options) {
 *                function () {});
 */
 getNumberPattern:function(successCB, failureCB, options) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.getNumberPattern Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.getNumberPattern Error: failureCB is not a function");
-        return;
-    }
-
+    argscheck.checkArgs('fFO', 'Globalization.getNumberPattern', arguments);
     exec(successCB, failureCB, "Globalization", "getNumberPattern", [{"options": options}]);
 },
 
@@ -5041,24 +6941,8 @@ getNumberPattern:function(successCB, failureCB, options) {
 *                function () {});
 */
 getCurrencyPattern:function(currencyCode, successCB, failureCB) {
-    // successCallback required
-    if (typeof successCB != "function") {
-        console.log("Globalization.getCurrencyPattern Error: successCB is not a function");
-        return;
-    }
-
-    // errorCallback required
-    if (typeof failureCB != "function") {
-        console.log("Globalization.getCurrencyPattern Error: failureCB is not a function");
-        return;
-    }
-
-    if(typeof currencyCode == "string") {
-        exec(successCB, failureCB, "Globalization", "getCurrencyPattern", [{"currencyCode": currencyCode}]);
-    }
-    else {
-        console.log("Globalization.getCurrencyPattern Error: currencyCode is not a currency code");
-    }
+    argscheck.checkArgs('sfF', 'Globalization.getCurrencyPattern', arguments);
+    exec(successCB, failureCB, "Globalization", "getCurrencyPattern", [{"currencyCode": currencyCode}]);
 }
 
 };
@@ -5067,7 +6951,18 @@ module.exports = globalization;
 
 });
 
-// file: lib/webworks/java/plugin/java/Contact.js
+// file: lib/common/plugin/globalization/symbols.js
+define("cordova/plugin/globalization/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/globalization', 'navigator.globalization');
+modulemapper.clobbers('cordova/plugin/GlobalizationError', 'GlobalizationError');
+
+});
+
+// file: lib/blackberry/plugin/java/Contact.js
 define("cordova/plugin/java/Contact", function(require, exports, module) {
 
 var ContactError = require('cordova/plugin/ContactError'),
@@ -5458,7 +7353,7 @@ module.exports = {
 
 });
 
-// file: lib/webworks/java/plugin/java/ContactUtils.js
+// file: lib/blackberry/plugin/java/ContactUtils.js
 define("cordova/plugin/java/ContactUtils", function(require, exports, module) {
 
 var ContactAddress = require('cordova/plugin/ContactAddress'),
@@ -5825,7 +7720,7 @@ module.exports = {
 
 });
 
-// file: lib/webworks/java/plugin/java/DirectoryEntry.js
+// file: lib/blackberry/plugin/java/DirectoryEntry.js
 define("cordova/plugin/java/DirectoryEntry", function(require, exports, module) {
 
 var DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
@@ -6070,7 +7965,7 @@ module.exports = {
 
 });
 
-// file: lib/webworks/java/plugin/java/Entry.js
+// file: lib/blackberry/plugin/java/Entry.js
 define("cordova/plugin/java/Entry", function(require, exports, module) {
 
 var FileError = require('cordova/plugin/FileError'),
@@ -6164,7 +8059,7 @@ module.exports = {
 
 });
 
-// file: lib/webworks/java/plugin/java/MediaError.js
+// file: lib/blackberry/plugin/java/MediaError.js
 define("cordova/plugin/java/MediaError", function(require, exports, module) {
 
 
@@ -6178,11 +8073,12 @@ module.exports = {
 
 });
 
-// file: lib/webworks/java/plugin/java/app.js
+// file: lib/blackberry/plugin/java/app.js
 define("cordova/plugin/java/app", function(require, exports, module) {
 
-var exec = require('cordova/exec');
-var manager = require('cordova/plugin/manager');
+var exec = require('cordova/exec'),
+    platform = require('cordova/platform'),
+    manager = require('cordova/plugin/' + platform.runtime() + '/manager');
 
 module.exports = {
   /**
@@ -6234,7 +8130,17 @@ module.exports = {
 
 });
 
-// file: lib/webworks/java/plugin/java/contacts.js
+// file: lib/blackberry/plugin/java/app/bbsymbols.js
+define("cordova/plugin/java/app/bbsymbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/java/app', 'navigator.app');
+
+});
+
+// file: lib/blackberry/plugin/java/contacts.js
 define("cordova/plugin/java/contacts", function(require, exports, module) {
 
 var ContactError = require('cordova/plugin/ContactError'),
@@ -6303,295 +8209,32 @@ module.exports = {
 
 });
 
-// file: lib/webworks/java/plugin/java/notification.js
-define("cordova/plugin/java/notification", function(require, exports, module) {
+// file: lib/blackberry/plugin/java/contacts/bbsymbols.js
+define("cordova/plugin/java/contacts/bbsymbols", function(require, exports, module) {
 
-var exec = require('cordova/exec');
 
-/**
- * Provides BlackBerry enhanced notification API.
- */
-module.exports = {
-    activityStart : function(title, message) {
-        // If title and message not specified then mimic Android behavior of
-        // using default strings.
-        if (typeof title === "undefined" && typeof message == "undefined") {
-            title = "Busy";
-            message = 'Please wait...';
-        }
+var modulemapper = require('cordova/modulemapper');
 
-        exec(null, null, 'Notification', 'activityStart', [ title, message ]);
-    },
-
-    /**
-     * Close an activity dialog
-     */
-    activityStop : function() {
-        exec(null, null, 'Notification', 'activityStop', []);
-    },
-
-    /**
-     * Display a progress dialog with progress bar that goes from 0 to 100.
-     *
-     * @param {String}
-     *            title Title of the progress dialog.
-     * @param {String}
-     *            message Message to display in the dialog.
-     */
-    progressStart : function(title, message) {
-        exec(null, null, 'Notification', 'progressStart', [ title, message ]);
-    },
-
-    /**
-     * Close the progress dialog.
-     */
-    progressStop : function() {
-        exec(null, null, 'Notification', 'progressStop', []);
-    },
-
-    /**
-     * Set the progress dialog value.
-     *
-     * @param {Number}
-     *            value 0-100
-     */
-    progressValue : function(value) {
-        exec(null, null, 'Notification', 'progressValue', [ value ]);
-    }
-};
+modulemapper.merges('cordova/plugin/java/contacts', 'navigator.contacts');
+modulemapper.merges('cordova/plugin/java/Contact', 'Contact');
 
 });
 
-// file: lib/common/plugin/logger.js
-define("cordova/plugin/logger", function(require, exports, module) {
+// file: lib/blackberry/plugin/java/file/bbsymbols.js
+define("cordova/plugin/java/file/bbsymbols", function(require, exports, module) {
 
-//------------------------------------------------------------------------------
-// The logger module exports the following properties/functions:
-//
-// LOG                          - constant for the level LOG
-// ERROR                        - constant for the level ERROR
-// WARN                         - constant for the level WARN
-// INFO                         - constant for the level INFO
-// DEBUG                        - constant for the level DEBUG
-// logLevel()                   - returns current log level
-// logLevel(value)              - sets and returns a new log level
-// useConsole()                 - returns whether logger is using console
-// useConsole(value)            - sets and returns whether logger is using console
-// log(message,...)             - logs a message at level LOG
-// error(message,...)           - logs a message at level ERROR
-// warn(message,...)            - logs a message at level WARN
-// info(message,...)            - logs a message at level INFO
-// debug(message,...)           - logs a message at level DEBUG
-// logLevel(level,message,...)  - logs a message specified level
-//
-//------------------------------------------------------------------------------
 
-var logger = exports;
+var modulemapper = require('cordova/modulemapper');
 
-var exec    = require('cordova/exec');
-var utils   = require('cordova/utils');
+modulemapper.clobbers('cordova/plugin/File', 'File');
+modulemapper.merges('cordova/plugin/java/DirectoryEntry', 'DirectoryEntry');
+modulemapper.merges('cordova/plugin/java/Entry', 'Entry');
 
-var UseConsole   = true;
-var Queued       = [];
-var DeviceReady  = false;
-var CurrentLevel;
-
-/**
- * Logging levels
- */
-
-var Levels = [
-    "LOG",
-    "ERROR",
-    "WARN",
-    "INFO",
-    "DEBUG"
-];
-
-/*
- * add the logging levels to the logger object and
- * to a separate levelsMap object for testing
- */
-
-var LevelsMap = {};
-for (var i=0; i<Levels.length; i++) {
-    var level = Levels[i];
-    LevelsMap[level] = i;
-    logger[level]    = level;
-}
-
-CurrentLevel = LevelsMap.WARN;
-
-/**
- * Getter/Setter for the logging level
- *
- * Returns the current logging level.
- *
- * When a value is passed, sets the logging level to that value.
- * The values should be one of the following constants:
- *    logger.LOG
- *    logger.ERROR
- *    logger.WARN
- *    logger.INFO
- *    logger.DEBUG
- *
- * The value used determines which messages get printed.  The logging
- * values above are in order, and only messages logged at the logging
- * level or above will actually be displayed to the user.  E.g., the
- * default level is WARN, so only messages logged with LOG, ERROR, or
- * WARN will be displayed; INFO and DEBUG messages will be ignored.
- */
-logger.level = function (value) {
-    if (arguments.length) {
-        if (LevelsMap[value] === null) {
-            throw new Error("invalid logging level: " + value);
-        }
-        CurrentLevel = LevelsMap[value];
-    }
-
-    return Levels[CurrentLevel];
-};
-
-/**
- * Getter/Setter for the useConsole functionality
- *
- * When useConsole is true, the logger will log via the
- * browser 'console' object.  Otherwise, it will use the
- * native Logger plugin.
- */
-logger.useConsole = function (value) {
-    if (arguments.length) UseConsole = !!value;
-
-    if (UseConsole) {
-        if (typeof console == "undefined") {
-            throw new Error("global console object is not defined");
-        }
-
-        if (typeof console.log != "function") {
-            throw new Error("global console object does not have a log function");
-        }
-
-        if (typeof console.useLogger == "function") {
-            if (console.useLogger()) {
-                throw new Error("console and logger are too intertwingly");
-            }
-        }
-    }
-
-    return UseConsole;
-};
-
-/**
- * Logs a message at the LOG level.
- *
- * Parameters passed after message are used applied to
- * the message with utils.format()
- */
-logger.log   = function(message) { logWithArgs("LOG",   arguments); };
-
-/**
- * Logs a message at the ERROR level.
- *
- * Parameters passed after message are used applied to
- * the message with utils.format()
- */
-logger.error = function(message) { logWithArgs("ERROR", arguments); };
-
-/**
- * Logs a message at the WARN level.
- *
- * Parameters passed after message are used applied to
- * the message with utils.format()
- */
-logger.warn  = function(message) { logWithArgs("WARN",  arguments); };
-
-/**
- * Logs a message at the INFO level.
- *
- * Parameters passed after message are used applied to
- * the message with utils.format()
- */
-logger.info  = function(message) { logWithArgs("INFO",  arguments); };
-
-/**
- * Logs a message at the DEBUG level.
- *
- * Parameters passed after message are used applied to
- * the message with utils.format()
- */
-logger.debug = function(message) { logWithArgs("DEBUG", arguments); };
-
-// log at the specified level with args
-function logWithArgs(level, args) {
-    args = [level].concat([].slice.call(args));
-    logger.logLevel.apply(logger, args);
-}
-
-/**
- * Logs a message at the specified level.
- *
- * Parameters passed after message are used applied to
- * the message with utils.format()
- */
-logger.logLevel = function(level, message /* , ... */) {
-    // format the message with the parameters
-    var formatArgs = [].slice.call(arguments, 2);
-    message    = utils.vformat(message, formatArgs);
-
-    if (LevelsMap[level] === null) {
-        throw new Error("invalid logging level: " + level);
-    }
-
-    if (LevelsMap[level] > CurrentLevel) return;
-
-    // queue the message if not yet at deviceready
-    if (!DeviceReady && !UseConsole) {
-        Queued.push([level, message]);
-        return;
-    }
-
-    // if not using the console, use the native logger
-    if (!UseConsole) {
-        exec(null, null, "Logger", "logLevel", [level, message]);
-        return;
-    }
-
-    // make sure console is not using logger
-    if (console.__usingCordovaLogger) {
-        throw new Error("console and logger are too intertwingly");
-    }
-
-    // log to the console
-    switch (level) {
-        case logger.LOG:   console.log(message); break;
-        case logger.ERROR: console.log("ERROR: " + message); break;
-        case logger.WARN:  console.log("WARN: "  + message); break;
-        case logger.INFO:  console.log("INFO: "  + message); break;
-        case logger.DEBUG: console.log("DEBUG: " + message); break;
-    }
-};
-
-// when deviceready fires, log queued messages
-logger.__onDeviceReady = function() {
-    if (DeviceReady) return;
-
-    DeviceReady = true;
-
-    for (var i=0; i<Queued.length; i++) {
-        var messageArgs = Queued[i];
-        logger.logLevel(messageArgs[0], messageArgs[1]);
-    }
-
-    Queued = null;
-};
-
-// add a deviceready event to log queued messages
-document.addEventListener("deviceready", logger.__onDeviceReady, false);
 
 });
 
-// file: lib/webworks/java/plugin/manager.js
-define("cordova/plugin/manager", function(require, exports, module) {
+// file: lib/blackberry/plugin/java/manager.js
+define("cordova/plugin/java/manager", function(require, exports, module) {
 
 var cordova = require('cordova');
 
@@ -6666,6 +8309,572 @@ module.exports = {
 
 });
 
+// file: lib/blackberry/plugin/java/media/bbsymbols.js
+define("cordova/plugin/java/media/bbsymbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.defaults('cordova/plugin/Media', 'Media');
+modulemapper.defaults('cordova/plugin/MediaError', 'MediaError');
+// Exists natively on BB OS 6+, merge in Cordova specifics
+modulemapper.merges('cordova/plugin/java/MediaError', 'MediaError');
+
+});
+
+// file: lib/blackberry/plugin/java/notification.js
+define("cordova/plugin/java/notification", function(require, exports, module) {
+
+var exec = require('cordova/exec');
+
+/**
+ * Provides BlackBerry enhanced notification API.
+ */
+module.exports = {
+    activityStart : function(title, message) {
+        // If title and message not specified then mimic Android behavior of
+        // using default strings.
+        if (typeof title === "undefined" && typeof message == "undefined") {
+            title = "Busy";
+            message = 'Please wait...';
+        }
+
+        exec(null, null, 'Notification', 'activityStart', [ title, message ]);
+    },
+
+    /**
+     * Close an activity dialog
+     */
+    activityStop : function() {
+        exec(null, null, 'Notification', 'activityStop', []);
+    },
+
+    /**
+     * Display a progress dialog with progress bar that goes from 0 to 100.
+     *
+     * @param {String}
+     *            title Title of the progress dialog.
+     * @param {String}
+     *            message Message to display in the dialog.
+     */
+    progressStart : function(title, message) {
+        exec(null, null, 'Notification', 'progressStart', [ title, message ]);
+    },
+
+    /**
+     * Close the progress dialog.
+     */
+    progressStop : function() {
+        exec(null, null, 'Notification', 'progressStop', []);
+    },
+
+    /**
+     * Set the progress dialog value.
+     *
+     * @param {Number}
+     *            value 0-100
+     */
+    progressValue : function(value) {
+        exec(null, null, 'Notification', 'progressValue', [ value ]);
+    }
+};
+
+});
+
+// file: lib/blackberry/plugin/java/notification/bbsymbols.js
+define("cordova/plugin/java/notification/bbsymbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.merges('cordova/plugin/java/notification', 'navigator.notification');
+
+});
+
+// file: lib/blackberry/plugin/java/platform.js
+define("cordova/plugin/java/platform", function(require, exports, module) {
+
+module.exports = {
+    id: "blackberry",
+    initialize:function() {
+        var cordova = require('cordova'),
+            exec = require('cordova/exec'),
+            channel = require('cordova/channel'),
+            platform = require('cordova/platform'),
+            manager = require('cordova/plugin/' + platform.runtime() + '/manager'),
+            app = require('cordova/plugin/java/app');
+
+        // BB OS 5 does not define window.console.
+        if (typeof window.console === 'undefined') {
+            window.console = {};
+        }
+
+        // Override console.log with native logging ability.
+        // BB OS 7 devices define console.log for use with web inspector
+        // debugging. If console.log is already defined, invoke it in addition
+        // to native logging.
+        var origLog = window.console.log;
+        window.console.log = function(msg) {
+            if (typeof origLog === 'function') {
+                origLog.call(window.console, msg);
+            }
+            org.apache.cordova.Logger.log(''+msg);
+        };
+
+        // Mapping of button events to BlackBerry key identifier.
+        var buttonMapping = {
+            'backbutton'         : blackberry.system.event.KEY_BACK,
+            'conveniencebutton1' : blackberry.system.event.KEY_CONVENIENCE_1,
+            'conveniencebutton2' : blackberry.system.event.KEY_CONVENIENCE_2,
+            'endcallbutton'      : blackberry.system.event.KEY_ENDCALL,
+            'menubutton'         : blackberry.system.event.KEY_MENU,
+            'startcallbutton'    : blackberry.system.event.KEY_STARTCALL,
+            'volumedownbutton'   : blackberry.system.event.KEY_VOLUMEDOWN,
+            'volumeupbutton'     : blackberry.system.event.KEY_VOLUMEUP
+        };
+
+        // Generates a function which fires the specified event.
+        var fireEvent = function(event) {
+            return function() {
+                cordova.fireDocumentEvent(event, null);
+            };
+        };
+
+        var eventHandler = function(event) {
+            return function() {
+                // If we just attached the first handler, let native know we
+                // need to override the hardware button.
+                if (this.numHandlers) {
+                    blackberry.system.event.onHardwareKey(
+                            buttonMapping[event], fireEvent(event));
+                }
+                // If we just detached the last handler, let native know we
+                // no longer override the hardware button.
+                else {
+                    blackberry.system.event.onHardwareKey(
+                            buttonMapping[event], null);
+                }
+            };
+        };
+
+        // Inject listeners for buttons on the document.
+        for (var button in buttonMapping) {
+            if (buttonMapping.hasOwnProperty(button)) {
+                var buttonChannel = cordova.addDocumentEventHandler(button);
+                buttonChannel.onHasSubscribersChange = eventHandler(button);
+            }
+        }
+
+        // Fires off necessary code to pause/resume app
+        var resume = function() {
+            cordova.fireDocumentEvent('resume');
+            manager.resume();
+        };
+        var pause = function() {
+            cordova.fireDocumentEvent('pause');
+            manager.pause();
+        };
+
+        /************************************************
+         * Patch up the generic pause/resume listeners. *
+         ************************************************/
+
+        // Unsubscribe handler - turns off native backlight change
+        // listener
+        var onHasSubscribersChange = function() {
+            // If we just attached the first handler and there are
+            // no pause handlers, start the backlight system
+            // listener on the native side.
+            if (this.numHandlers && (channel.onResume.numHandlers + channel.onPause.numHandlers === 1)) {
+                exec(backlightWin, backlightFail, "App", "detectBacklight", []);
+            } else if (channel.onResume.numHandlers === 0 && channel.onPause.numHandlers === 0) {
+                exec(null, null, 'App', 'ignoreBacklight', []);
+            }
+        };
+
+        // Native backlight detection win/fail callbacks
+        var backlightWin = function(isOn) {
+            if (isOn === true) {
+                resume();
+            } else {
+                pause();
+            }
+        };
+        var backlightFail = function(e) {
+            console.log("Error detecting backlight on/off.");
+        };
+
+        // Override stock resume and pause listeners so we can trigger
+        // some native methods during attach/remove
+        channel.onResume = cordova.addDocumentEventHandler('resume');
+        channel.onResume.onHasSubscribersChange = onHasSubscribersChange;
+        channel.onPause = cordova.addDocumentEventHandler('pause');
+        channel.onPause.onHasSubscribersChange = onHasSubscribersChange;
+
+        // Fire resume event when application brought to foreground.
+        blackberry.app.event.onForeground(resume);
+
+        // Fire pause event when application sent to background.
+        blackberry.app.event.onBackground(pause);
+
+        // Trap BlackBerry WebWorks exit. Allow plugins to clean up before exiting.
+        blackberry.app.event.onExit(app.exitApp);
+    }
+};
+
+});
+
+// file: lib/common/plugin/logger.js
+define("cordova/plugin/logger", function(require, exports, module) {
+
+//------------------------------------------------------------------------------
+// The logger module exports the following properties/functions:
+//
+// LOG                          - constant for the level LOG
+// ERROR                        - constant for the level ERROR
+// WARN                         - constant for the level WARN
+// INFO                         - constant for the level INFO
+// DEBUG                        - constant for the level DEBUG
+// logLevel()                   - returns current log level
+// logLevel(value)              - sets and returns a new log level
+// useConsole()                 - returns whether logger is using console
+// useConsole(value)            - sets and returns whether logger is using console
+// log(message,...)             - logs a message at level LOG
+// error(message,...)           - logs a message at level ERROR
+// warn(message,...)            - logs a message at level WARN
+// info(message,...)            - logs a message at level INFO
+// debug(message,...)           - logs a message at level DEBUG
+// logLevel(level,message,...)  - logs a message specified level
+//
+//------------------------------------------------------------------------------
+
+var logger = exports;
+
+var exec    = require('cordova/exec');
+var utils   = require('cordova/utils');
+
+var UseConsole   = true;
+var UseLogger    = true;
+var Queued       = [];
+var DeviceReady  = false;
+var CurrentLevel;
+
+var originalConsole = console;
+
+/**
+ * Logging levels
+ */
+
+var Levels = [
+    "LOG",
+    "ERROR",
+    "WARN",
+    "INFO",
+    "DEBUG"
+];
+
+/*
+ * add the logging levels to the logger object and
+ * to a separate levelsMap object for testing
+ */
+
+var LevelsMap = {};
+for (var i=0; i<Levels.length; i++) {
+    var level = Levels[i];
+    LevelsMap[level] = i;
+    logger[level]    = level;
+}
+
+CurrentLevel = LevelsMap.WARN;
+
+/**
+ * Getter/Setter for the logging level
+ *
+ * Returns the current logging level.
+ *
+ * When a value is passed, sets the logging level to that value.
+ * The values should be one of the following constants:
+ *    logger.LOG
+ *    logger.ERROR
+ *    logger.WARN
+ *    logger.INFO
+ *    logger.DEBUG
+ *
+ * The value used determines which messages get printed.  The logging
+ * values above are in order, and only messages logged at the logging
+ * level or above will actually be displayed to the user.  E.g., the
+ * default level is WARN, so only messages logged with LOG, ERROR, or
+ * WARN will be displayed; INFO and DEBUG messages will be ignored.
+ */
+logger.level = function (value) {
+    if (arguments.length) {
+        if (LevelsMap[value] === null) {
+            throw new Error("invalid logging level: " + value);
+        }
+        CurrentLevel = LevelsMap[value];
+    }
+
+    return Levels[CurrentLevel];
+};
+
+/**
+ * Getter/Setter for the useConsole functionality
+ *
+ * When useConsole is true, the logger will log via the
+ * browser 'console' object.
+ */
+logger.useConsole = function (value) {
+    if (arguments.length) UseConsole = !!value;
+
+    if (UseConsole) {
+        if (typeof console == "undefined") {
+            throw new Error("global console object is not defined");
+        }
+
+        if (typeof console.log != "function") {
+            throw new Error("global console object does not have a log function");
+        }
+
+        if (typeof console.useLogger == "function") {
+            if (console.useLogger()) {
+                throw new Error("console and logger are too intertwingly");
+            }
+        }
+    }
+
+    return UseConsole;
+};
+
+/**
+ * Getter/Setter for the useLogger functionality
+ *
+ * When useLogger is true, the logger will log via the
+ * native Logger plugin.
+ */
+logger.useLogger = function (value) {
+    // Enforce boolean
+    if (arguments.length) UseLogger = !!value;
+    return UseLogger;
+};
+
+/**
+ * Logs a message at the LOG level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.log   = function(message) { logWithArgs("LOG",   arguments); };
+
+/**
+ * Logs a message at the ERROR level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.error = function(message) { logWithArgs("ERROR", arguments); };
+
+/**
+ * Logs a message at the WARN level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.warn  = function(message) { logWithArgs("WARN",  arguments); };
+
+/**
+ * Logs a message at the INFO level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.info  = function(message) { logWithArgs("INFO",  arguments); };
+
+/**
+ * Logs a message at the DEBUG level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.debug = function(message) { logWithArgs("DEBUG", arguments); };
+
+// log at the specified level with args
+function logWithArgs(level, args) {
+    args = [level].concat([].slice.call(args));
+    logger.logLevel.apply(logger, args);
+}
+
+/**
+ * Logs a message at the specified level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.logLevel = function(level /* , ... */) {
+    // format the message with the parameters
+    var formatArgs = [].slice.call(arguments, 1);
+    var message    = logger.format.apply(logger.format, formatArgs);
+
+    if (LevelsMap[level] === null) {
+        throw new Error("invalid logging level: " + level);
+    }
+
+    if (LevelsMap[level] > CurrentLevel) return;
+
+    // queue the message if not yet at deviceready
+    if (!DeviceReady && !UseConsole) {
+        Queued.push([level, message]);
+        return;
+    }
+
+    // Log using the native logger if that is enabled
+    if (UseLogger) {
+        exec(null, null, "Logger", "logLevel", [level, message]);
+    }
+
+    // Log using the console if that is enabled
+    if (UseConsole) {
+        // make sure console is not using logger
+        if (console.__usingCordovaLogger) {
+            throw new Error("console and logger are too intertwingly");
+        }
+
+        // log to the console
+        switch (level) {
+            case logger.LOG:   originalConsole.log(message); break;
+            case logger.ERROR: originalConsole.log("ERROR: " + message); break;
+            case logger.WARN:  originalConsole.log("WARN: "  + message); break;
+            case logger.INFO:  originalConsole.log("INFO: "  + message); break;
+            case logger.DEBUG: originalConsole.log("DEBUG: " + message); break;
+        }
+    }
+};
+
+
+/**
+ * Formats a string and arguments following it ala console.log()
+ *
+ * Any remaining arguments will be appended to the formatted string.
+ *
+ * for rationale, see FireBug's Console API:
+ *    http://getfirebug.com/wiki/index.php/Console_API
+ */
+logger.format = function(formatString, args) {
+    return __format(arguments[0], [].slice.call(arguments,1)).join(' ');
+};
+
+
+//------------------------------------------------------------------------------
+/**
+ * Formats a string and arguments following it ala vsprintf()
+ *
+ * format chars:
+ *   %j - format arg as JSON
+ *   %o - format arg as JSON
+ *   %c - format arg as ''
+ *   %% - replace with '%'
+ * any other char following % will format it's
+ * arg via toString().
+ *
+ * Returns an array containing the formatted string and any remaining
+ * arguments.
+ */
+function __format(formatString, args) {
+    if (formatString === null || formatString === undefined) return [""];
+    if (arguments.length == 1) return [formatString.toString()];
+
+    if (typeof formatString != "string")
+        formatString = formatString.toString();
+
+    var pattern = /(.*?)%(.)(.*)/;
+    var rest    = formatString;
+    var result  = [];
+
+    while (args.length) {
+        var match = pattern.exec(rest);
+        if (!match) break;
+
+        var arg   = args.shift();
+        rest = match[3];
+        result.push(match[1]);
+
+        if (match[2] == '%') {
+            result.push('%');
+            args.unshift(arg);
+            continue;
+        }
+
+        result.push(__formatted(arg, match[2]));
+    }
+
+    result.push(rest);
+
+    var remainingArgs = [].slice.call(args);
+    remainingArgs.unshift(result.join(''));
+    return remainingArgs;
+}
+
+function __formatted(object, formatChar) {
+
+    try {
+        switch(formatChar) {
+            case 'j':
+            case 'o': return JSON.stringify(object);
+            case 'c': return '';
+        }
+    }
+    catch (e) {
+        return "error JSON.stringify()ing argument: " + e;
+    }
+
+    if ((object === null) || (object === undefined)) {
+        return Object.prototype.toString.call(object);
+    }
+
+    return object.toString();
+}
+
+
+//------------------------------------------------------------------------------
+// when deviceready fires, log queued messages
+logger.__onDeviceReady = function() {
+    if (DeviceReady) return;
+
+    DeviceReady = true;
+
+    for (var i=0; i<Queued.length; i++) {
+        var messageArgs = Queued[i];
+        logger.logLevel(messageArgs[0], messageArgs[1]);
+    }
+
+    Queued = null;
+};
+
+// add a deviceready event to log queued messages
+document.addEventListener("deviceready", logger.__onDeviceReady, false);
+
+});
+
+// file: lib/common/plugin/logger/symbols.js
+define("cordova/plugin/logger/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/logger', 'cordova.logger');
+
+});
+
+// file: lib/common/plugin/media/symbols.js
+define("cordova/plugin/media/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.defaults('cordova/plugin/Media', 'Media');
+modulemapper.defaults('cordova/plugin/MediaError', 'MediaError');
+
+});
+
 // file: lib/common/plugin/network.js
 define("cordova/plugin/network", function(require, exports, module) {
 
@@ -6683,49 +8892,9 @@ if (typeof navigator != 'undefined') {
     });
 }
 
-var NetworkConnection = function () {
-    this.type = null;
-    this._firstRun = true;
-    this._timer = null;
-    this.timeout = 500;
-
-    var me = this;
-
-    channel.onCordovaReady.subscribe(function() {
-        me.getInfo(function (info) {
-            me.type = info;
-            if (info === "none") {
-                // set a timer if still offline at the end of timer send the offline event
-                me._timer = setTimeout(function(){
-                    cordova.fireDocumentEvent("offline");
-                    me._timer = null;
-                    }, me.timeout);
-            } else {
-                // If there is a current offline event pending clear it
-                if (me._timer !== null) {
-                    clearTimeout(me._timer);
-                    me._timer = null;
-                }
-                cordova.fireDocumentEvent("online");
-            }
-
-            // should only fire this once
-            if (me._firstRun) {
-                me._firstRun = false;
-                channel.onCordovaConnectionReady.fire();
-            }
-        },
-        function (e) {
-            // If we can't get the network info we should still tell Cordova
-            // to fire the deviceready event.
-            if (me._firstRun) {
-                me._firstRun = false;
-                channel.onCordovaConnectionReady.fire();
-            }
-            console.log("Error initializing Network Connection: " + e);
-        });
-    });
-};
+function NetworkConnection() {
+    this.type = 'unknown';
+}
 
 /**
  * Get connection info
@@ -6733,12 +8902,60 @@ var NetworkConnection = function () {
  * @param {Function} successCallback The function to call when the Connection data is available
  * @param {Function} errorCallback The function to call when there is an error getting the Connection data. (OPTIONAL)
  */
-NetworkConnection.prototype.getInfo = function (successCallback, errorCallback) {
-    // Get info
+NetworkConnection.prototype.getInfo = function(successCallback, errorCallback) {
     exec(successCallback, errorCallback, "NetworkStatus", "getConnectionInfo", []);
 };
 
-module.exports = new NetworkConnection();
+var me = new NetworkConnection();
+var timerId = null;
+var timeout = 500;
+
+channel.onCordovaReady.subscribe(function() {
+    me.getInfo(function(info) {
+        me.type = info;
+        if (info === "none") {
+            // set a timer if still offline at the end of timer send the offline event
+            timerId = setTimeout(function(){
+                cordova.fireDocumentEvent("offline");
+                timerId = null;
+            }, timeout);
+        } else {
+            // If there is a current offline event pending clear it
+            if (timerId !== null) {
+                clearTimeout(timerId);
+                timerId = null;
+            }
+            cordova.fireDocumentEvent("online");
+        }
+
+        // should only fire this once
+        if (channel.onCordovaConnectionReady.state !== 2) {
+            channel.onCordovaConnectionReady.fire();
+        }
+    },
+    function (e) {
+        // If we can't get the network info we should still tell Cordova
+        // to fire the deviceready event.
+        if (channel.onCordovaConnectionReady.state !== 2) {
+            channel.onCordovaConnectionReady.fire();
+        }
+        console.log("Error initializing Network Connection: " + e);
+    });
+});
+
+module.exports = me;
+
+});
+
+// file: lib/common/plugin/networkstatus/symbols.js
+define("cordova/plugin/networkstatus/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/network', 'navigator.network.connection', 'navigator.network.connection is deprecated. Use navigator.connection instead.');
+modulemapper.clobbers('cordova/plugin/network', 'navigator.connection');
+modulemapper.defaults('cordova/plugin/Connection', 'Connection');
 
 });
 
@@ -6746,6 +8963,7 @@ module.exports = new NetworkConnection();
 define("cordova/plugin/notification", function(require, exports, module) {
 
 var exec = require('cordova/exec');
+var platform = require('cordova/platform');
 
 /**
  * Provides access to notifications on the device.
@@ -6774,12 +8992,52 @@ module.exports = {
      * @param {String} message              Message to print in the body of the alert
      * @param {Function} resultCallback     The callback that is called when user clicks on a button.
      * @param {String} title                Title of the alert dialog (default: Confirm)
-     * @param {String} buttonLabels         Comma separated list of the labels of the buttons (default: 'OK,Cancel')
+     * @param {Array} buttonLabels          Array of the labels of the buttons (default: ['OK', 'Cancel'])
      */
     confirm: function(message, resultCallback, title, buttonLabels) {
         var _title = (title || "Confirm");
-        var _buttonLabels = (buttonLabels || "OK,Cancel");
+        var _buttonLabels = (buttonLabels || ["OK", "Cancel"]);
+
+        // Strings are deprecated!
+        if (typeof _buttonLabels === 'string') {
+            console.log("Notification.confirm(string, function, string, string) is deprecated.  Use Notification.confirm(string, function, string, array).");
+        }
+
+        // Some platforms take an array of button label names.
+        // Other platforms take a comma separated list.
+        // For compatibility, we convert to the desired type based on the platform.
+        if (platform.id == "android" || platform.id == "ios" || platform.id == "windowsphone" || platform.id == "blackberry10") {
+            if (typeof _buttonLabels === 'string') {
+                var buttonLabelString = _buttonLabels;
+                _buttonLabels = _buttonLabels.split(","); // not crazy about changing the var type here
+            }
+        } else {
+            if (Array.isArray(_buttonLabels)) {
+                var buttonLabelArray = _buttonLabels;
+                _buttonLabels = buttonLabelArray.toString();
+            }
+        }
         exec(resultCallback, null, "Notification", "confirm", [message, _title, _buttonLabels]);
+    },
+
+    /**
+     * Open a native prompt dialog, with a customizable title and button text.
+     * The following results are returned to the result callback:
+     *  buttonIndex     Index number of the button selected.
+     *  input1          The text entered in the prompt dialog box.
+     *
+     * @param {String} message              Dialog message to display (default: "Prompt message")
+     * @param {Function} resultCallback     The callback that is called when user clicks on a button.
+     * @param {String} title                Title of the dialog (default: "Prompt")
+     * @param {Array} buttonLabels          Array of strings for the button labels (default: ["OK","Cancel"])
+     * @param {String} defaultText          Textbox input value (default: "Default text")
+     */
+    prompt: function(message, resultCallback, title, buttonLabels, defaultText) {
+        var _message = (message || "Prompt message");
+        var _title = (title || "Prompt");
+        var _buttonLabels = (buttonLabels || ["OK","Cancel"]);
+        var _defaultText = (defaultText || "Default text");
+        exec(resultCallback, null, "Notification", "prompt", [_message, _title, _buttonLabels, _defaultText]);
     },
 
     /**
@@ -6804,10 +9062,41 @@ module.exports = {
 
 });
 
+// file: lib/common/plugin/notification/symbols.js
+define("cordova/plugin/notification/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.defaults('cordova/plugin/notification', 'navigator.notification');
+
+});
+
+// file: lib/blackberry/plugin/qnx/compass/bbsymbols.js
+define("cordova/plugin/qnx/compass/bbsymbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.merges('cordova/plugin/qnx/compass', 'navigator.compass');
+
+});
+
+// file: lib/blackberry/plugin/qnx/inappbrowser/bbsymbols.js
+define("cordova/plugin/qnx/inappbrowser/bbsymbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/InAppBrowser', 'open');
+
+});
+
 // file: lib/common/plugin/requestFileSystem.js
 define("cordova/plugin/requestFileSystem", function(require, exports, module) {
 
-var FileError = require('cordova/plugin/FileError'),
+var argscheck = require('cordova/argscheck'),
+    FileError = require('cordova/plugin/FileError'),
     FileSystem = require('cordova/plugin/FileSystem'),
     exec = require('cordova/exec');
 
@@ -6819,10 +9108,9 @@ var FileError = require('cordova/plugin/FileError'),
  * @param errorCallback  invoked if error occurs retrieving file system
  */
 var requestFileSystem = function(type, size, successCallback, errorCallback) {
+    argscheck.checkArgs('nnFF', 'requestFileSystem', arguments);
     var fail = function(code) {
-        if (typeof errorCallback === 'function') {
-            errorCallback(new FileError(code));
-        }
+        errorCallback && errorCallback(new FileError(code));
     };
 
     if (type < 0 || type > 3) {
@@ -6831,7 +9119,7 @@ var requestFileSystem = function(type, size, successCallback, errorCallback) {
         // if successful, return a FileSystem object
         var success = function(file_system) {
             if (file_system) {
-                if (typeof successCallback === 'function') {
+                if (successCallback) {
                     // grab the name and root from the file system object
                     var result = new FileSystem(file_system.name, file_system.root);
                     successCallback(result);
@@ -6853,7 +9141,8 @@ module.exports = requestFileSystem;
 // file: lib/common/plugin/resolveLocalFileSystemURI.js
 define("cordova/plugin/resolveLocalFileSystemURI", function(require, exports, module) {
 
-var DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
+var argscheck = require('cordova/argscheck'),
+    DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
     FileEntry = require('cordova/plugin/FileEntry'),
     FileError = require('cordova/plugin/FileError'),
     exec = require('cordova/exec');
@@ -6865,11 +9154,10 @@ var DirectoryEntry = require('cordova/plugin/DirectoryEntry'),
  * @param errorCallback    invoked if error occurs retrieving file system entry
  */
 module.exports = function(uri, successCallback, errorCallback) {
+    argscheck.checkArgs('sFF', 'resolveLocalFileSystemURI', arguments);
     // error callback
     var fail = function(error) {
-        if (typeof errorCallback === 'function') {
-            errorCallback(new FileError(error));
-        }
+        errorCallback && errorCallback(new FileError(error));
     };
     // sanity check for 'not:valid:filename'
     if(!uri || uri.split(":").length > 2) {
@@ -6882,15 +9170,10 @@ module.exports = function(uri, successCallback, errorCallback) {
     var success = function(entry) {
         var result;
         if (entry) {
-            if (typeof successCallback === 'function') {
+            if (successCallback) {
                 // create appropriate Entry object
                 result = (entry.isDirectory) ? new DirectoryEntry(entry.name, entry.fullPath) : new FileEntry(entry.name, entry.fullPath);
-                try {
-                    successCallback(result);
-                }
-                catch (e) {
-                    console.log('Error invoking callback: ' + e);
-                }
+                successCallback(result);
             }
         }
         else {
@@ -6922,7 +9205,17 @@ module.exports = splashscreen;
 
 });
 
-// file: lib/webworks/common/plugin/webworks/accelerometer.js
+// file: lib/common/plugin/splashscreen/symbols.js
+define("cordova/plugin/splashscreen/symbols", function(require, exports, module) {
+
+
+var modulemapper = require('cordova/modulemapper');
+
+modulemapper.clobbers('cordova/plugin/splashscreen', 'navigator.splashscreen');
+
+});
+
+// file: lib/blackberry/plugin/webworks/accelerometer.js
 define("cordova/plugin/webworks/accelerometer", function(require, exports, module) {
 
 var cordova = require('cordova'),
@@ -6944,13 +9237,13 @@ module.exports = {
     },
     stop: function (args, win, fail) {
         window.removeEventListener("devicemotion", callback);
-        return { "status" : cordova.callbackStatus.NO_RESULT, "message" : "WebWorks Is On It" };
+        return { "status" : cordova.callbackStatus.OK, "message" : "removed" };
     }
 };
 
 });
 
-// file: lib/webworks/common/plugin/webworks/logger.js
+// file: lib/blackberry/plugin/webworks/logger.js
 define("cordova/plugin/webworks/logger", function(require, exports, module) {
 
 var cordova = require('cordova');
@@ -6965,7 +9258,7 @@ module.exports = {
 
 });
 
-// file: lib/webworks/common/plugin/webworks/media.js
+// file: lib/blackberry/plugin/webworks/media.js
 define("cordova/plugin/webworks/media", function(require, exports, module) {
 
 var cordova = require('cordova'),
@@ -6980,7 +9273,12 @@ module.exports = {
         var id = args[0],
             src = args[1];
 
-        audioObjects[id] = new Audio(src);
+        if (typeof src == "undefined"){
+            audioObjects[id] = new Audio();
+        } else {
+            audioObjects[id] = new Audio(src);
+        }
+
         return {"status" : 1, "message" : "Audio object created" };
     },
     startPlayingAudio: function (args, win, fail) {
@@ -6992,7 +9290,7 @@ module.exports = {
             audio = audioObjects[id],
             result;
 
-        if (args.length === 1) {
+        if (args.length === 1 || typeof args[1] == "undefined" ) {
             return {"status" : 9, "message" : "Media source argument not found"};
         }
 
@@ -7003,7 +9301,6 @@ module.exports = {
 
         audio = audioObjects[id] = new Audio(args[1]);
         audio.play();
-
         return {"status" : 1, "message" : "Audio play started" };
     },
     stopPlayingAudio: function (args, win, fail) {
@@ -7047,7 +9344,6 @@ module.exports = {
 
             result = {"status" : 1, "message" : "Seek to audio succeeded" };
         }
-
         return result;
     },
     pausePlayingAudio: function (args, win, fail) {
@@ -7102,12 +9398,8 @@ module.exports = {
             return {"status" : 9, "message" : "Media Object id was not sent in arguments"};
         }
 
-        var id = args[0],
-            audio = audioObjects[id],
-            result;
-
         if (args.length <= 1) {
-            result = {"status" : 9, "message" : "Media start recording, insufficient arguments"};
+            return {"status" : 9, "message" : "Media start recording, insufficient arguments"};
         }
 
         blackberry.media.microphone.record(args[1], win, fail);
@@ -7125,8 +9417,10 @@ module.exports = {
             result;
 
         if (audio) {
+            if(audio.src !== ""){
+                audio.src = undefined;
+            }
             audioObjects[id] = undefined;
-            audio.src = undefined;
             //delete audio;
         }
 
@@ -7138,7 +9432,7 @@ module.exports = {
 
 });
 
-// file: lib/webworks/common/plugin/webworks/notification.js
+// file: lib/blackberry/plugin/webworks/notification.js
 define("cordova/plugin/webworks/notification", function(require, exports, module) {
 
 var cordova = require('cordova');
@@ -7175,34 +9469,90 @@ module.exports = {
 
 });
 
+// file: lib/common/symbols.js
+define("cordova/symbols", function(require, exports, module) {
+
+var modulemapper = require('cordova/modulemapper');
+
+// Use merges here in case others symbols files depend on this running first,
+// but fail to declare the dependency with a require().
+modulemapper.merges('cordova', 'cordova');
+modulemapper.clobbers('cordova/exec', 'cordova.exec');
+modulemapper.clobbers('cordova/exec', 'Cordova.exec');
+
+});
+
 // file: lib/common/utils.js
 define("cordova/utils", function(require, exports, module) {
 
 var utils = exports;
 
 /**
+ * Defines a property getter / setter for obj[key].
+ */
+utils.defineGetterSetter = function(obj, key, getFunc, opt_setFunc) {
+    if (Object.defineProperty) {
+        var desc = {
+            get: getFunc,
+            configurable: true
+        };
+        if (opt_setFunc) {
+            desc.set = opt_setFunc;
+        }
+        Object.defineProperty(obj, key, desc);
+    } else {
+        obj.__defineGetter__(key, getFunc);
+        if (opt_setFunc) {
+            obj.__defineSetter__(key, opt_setFunc);
+        }
+    }
+};
+
+/**
  * Defines a property getter for obj[key].
  */
-utils.defineGetter = function(obj, key, func) {
-    if (Object.defineProperty) {
-        Object.defineProperty(obj, key, { get: func });
-    } else {
-        obj.__defineGetter__(key, func);
+utils.defineGetter = utils.defineGetterSetter;
+
+utils.arrayIndexOf = function(a, item) {
+    if (a.indexOf) {
+        return a.indexOf(item);
     }
+    var len = a.length;
+    for (var i = 0; i < len; ++i) {
+        if (a[i] == item) {
+            return i;
+        }
+    }
+    return -1;
+};
+
+/**
+ * Returns whether the item was found in the array.
+ */
+utils.arrayRemove = function(a, item) {
+    var index = utils.arrayIndexOf(a, item);
+    if (index != -1) {
+        a.splice(index, 1);
+    }
+    return index != -1;
+};
+
+utils.typeName = function(val) {
+    return Object.prototype.toString.call(val).slice(8, -1);
 };
 
 /**
  * Returns an indication of whether the argument is an array or not
  */
 utils.isArray = function(a) {
-    return Object.prototype.toString.call(a) == '[object Array]';
+    return utils.typeName(a) == 'Array';
 };
 
 /**
  * Returns an indication of whether the argument is a Date or not
  */
 utils.isDate = function(d) {
-    return Object.prototype.toString.call(d) == '[object Date]';
+    return utils.typeName(d) == 'Date';
 };
 
 /**
@@ -7285,62 +9635,6 @@ utils.alert = function(msg) {
     }
 };
 
-/**
- * Formats a string and arguments following it ala sprintf()
- *
- * see utils.vformat() for more information
- */
-utils.format = function(formatString /* ,... */) {
-    var args = [].slice.call(arguments, 1);
-    return utils.vformat(formatString, args);
-};
-
-/**
- * Formats a string and arguments following it ala vsprintf()
- *
- * format chars:
- *   %j - format arg as JSON
- *   %o - format arg as JSON
- *   %c - format arg as ''
- *   %% - replace with '%'
- * any other char following % will format it's
- * arg via toString().
- *
- * for rationale, see FireBug's Console API:
- *    http://getfirebug.com/wiki/index.php/Console_API
- */
-utils.vformat = function(formatString, args) {
-    if (formatString === null || formatString === undefined) return "";
-    if (arguments.length == 1) return formatString.toString();
-    if (typeof formatString != "string") return formatString.toString();
-
-    var pattern = /(.*?)%(.)(.*)/;
-    var rest    = formatString;
-    var result  = [];
-
-    while (args.length) {
-        var arg   = args.shift();
-        var match = pattern.exec(rest);
-
-        if (!match) break;
-
-        rest = match[3];
-
-        result.push(match[1]);
-
-        if (match[2] == '%') {
-            result.push('%');
-            args.unshift(arg);
-            continue;
-        }
-
-        result.push(formatted(arg, match[2]));
-    }
-
-    result.push(rest);
-
-    return result.join('');
-};
 
 //------------------------------------------------------------------------------
 function UUIDcreatePart(length) {
@@ -7355,85 +9649,57 @@ function UUIDcreatePart(length) {
     return uuidpart;
 }
 
-//------------------------------------------------------------------------------
-function formatted(object, formatChar) {
-
-    try {
-        switch(formatChar) {
-            case 'j':
-            case 'o': return JSON.stringify(object);
-            case 'c': return '';
-        }
-    }
-    catch (e) {
-        return "error JSON.stringify()ing argument: " + e;
-    }
-
-    if ((object === null) || (object === undefined)) {
-        return Object.prototype.toString.call(object);
-    }
-
-    return object.toString();
-}
 
 });
 
-
 window.cordova = require('cordova');
-
 // file: lib/scripts/bootstrap.js
 
 (function (context) {
-    // Replace navigator before any modules are required(), to ensure it happens as soon as possible.
-    // We replace it so that properties that can't be clobbered can instead be overridden.
-    if (typeof navigator != 'undefined') {
-        var CordovaNavigator = function () {};
-        CordovaNavigator.prototype = navigator;
-        navigator = new CordovaNavigator();
+    if (context._cordovaJsLoaded) {
+        throw new Error('cordova.js included multiple times.');
+    }
+    context._cordovaJsLoaded = true;
+
+    var channel = require('cordova/channel');
+    var platformInitChannelsArray = [channel.onNativeReady, channel.onPluginsReady];
+
+    function logUnfiredChannels(arr) {
+        for (var i = 0; i < arr.length; ++i) {
+            if (arr[i].state != 2) {
+                console.log('Channel not fired: ' + arr[i].type);
+            }
+        }
     }
 
-    var channel = require("cordova/channel"),
-        _self = {
-            boot: function () {
-                /**
-                 * Create all cordova objects once page has fully loaded and native side is ready.
-                 */
-                channel.join(function() {
-                    var builder = require('cordova/builder'),
-                        base = require('cordova/common'),
-                        platform = require('cordova/platform');
+    window.setTimeout(function() {
+        if (channel.onDeviceReady.state != 2) {
+            console.log('deviceready has not fired after 5 seconds.');
+            logUnfiredChannels(platformInitChannelsArray);
+            logUnfiredChannels(channel.deviceReadyChannelsArray);
+        }
+    }, 5000);
 
-                    // Drop the common globals into the window object, but be nice and don't overwrite anything.
-                    builder.build(base.objects).intoButDoNotClobber(window);
-
-                    // Drop the platform-specific globals into the window object
-                    // and clobber any existing object.
-                    builder.build(platform.objects).intoAndClobber(window);
-
-                    // Merge the platform-specific overrides/enhancements into
-                    // the window object.
-                    if (typeof platform.merges !== 'undefined') {
-                        builder.build(platform.merges).intoAndMerge(window);
-                    }
-
-                    // Call the platform-specific initialization
-                    platform.initialize();
-
-                    // Fire event to notify that all objects are created
-                    channel.onCordovaReady.fire();
-
-                    // Fire onDeviceReady event once all constructors have run and
-                    // cordova info has been received from native side.
-                    channel.join(function() {
-                        require('cordova').fireDocumentEvent('deviceready');
-                    }, channel.deviceReadyChannelsArray);
-
-                }, [ channel.onDOMContentLoaded, channel.onNativeReady ]);
+    // Replace navigator before any modules are required(), to ensure it happens as soon as possible.
+    // We replace it so that properties that can't be clobbered can instead be overridden.
+    function replaceNavigator(origNavigator) {
+        var CordovaNavigator = function() {};
+        CordovaNavigator.prototype = origNavigator;
+        var newNavigator = new CordovaNavigator();
+        // This work-around really only applies to new APIs that are newer than Function.bind.
+        // Without it, APIs such as getGamepads() break.
+        if (CordovaNavigator.bind) {
+            for (var key in origNavigator) {
+                if (typeof origNavigator[key] == 'function') {
+                    newNavigator[key] = origNavigator[key].bind(origNavigator);
+                }
             }
-        };
-
-    // boot up once native side is ready
-    channel.onNativeReady.subscribe(_self.boot);
+        }
+        return newNavigator;
+    }
+    if (context.navigator) {
+        context.navigator = replaceNavigator(context.navigator);
+    }
 
     // _nativeReady is global variable that the native side can set
     // to signify that the native code is ready. It is a global since
@@ -7442,7 +9708,152 @@ window.cordova = require('cordova');
         channel.onNativeReady.fire();
     }
 
+    /**
+     * Create all cordova objects once native side is ready.
+     */
+    channel.join(function() {
+        // Call the platform-specific initialization
+        require('cordova/platform').initialize();
+
+        // Fire event to notify that all objects are created
+        channel.onCordovaReady.fire();
+
+        // Fire onDeviceReady event once page has fully loaded, all
+        // constructors have run and cordova info has been received from native
+        // side.
+        // This join call is deliberately made after platform.initialize() in
+        // order that plugins may manipulate channel.deviceReadyChannelsArray
+        // if necessary.
+        channel.join(function() {
+            require('cordova').fireDocumentEvent('deviceready');
+        }, channel.deviceReadyChannelsArray);
+
+    }, platformInitChannelsArray);
+
+}(window));
+
+// file: lib/scripts/bootstrap-blackberry.js
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (require('cordova/platform').runtime() === 'air') {
+        require('cordova/channel').onNativeReady.fire();
+    }
+});
+
+// file: lib/scripts/plugin_loader.js
+
+// Tries to load all plugins' js-modules.
+// This is an async process, but onDeviceReady is blocked on onPluginsReady.
+// onPluginsReady is fired when there are no plugins to load, or they are all done.
+(function (context) {
+    // To be populated with the handler by handlePluginsObject.
+    var onScriptLoadingComplete;
+
+    var scriptCounter = 0;
+    function scriptLoadedCallback() {
+        scriptCounter--;
+        if (scriptCounter === 0) {
+            onScriptLoadingComplete && onScriptLoadingComplete();
+        }
+    }
+
+    // Helper function to inject a <script> tag.
+    function injectScript(path) {
+        scriptCounter++;
+        var script = document.createElement("script");
+        script.onload = scriptLoadedCallback;
+        script.src = path;
+        document.head.appendChild(script);
+    }
+
+    // Called when:
+    // * There are plugins defined and all plugins are finished loading.
+    // * There are no plugins to load.
+    function finishPluginLoading() {
+        context.cordova.require('cordova/channel').onPluginsReady.fire();
+    }
+
+    // Handler for the cordova_plugins.json content.
+    // See plugman's plugin_loader.js for the details of this object.
+    // This function is only called if the really is a plugins array that isn't empty.
+    // Otherwise the XHR response handler will just call finishPluginLoading().
+    function handlePluginsObject(modules, path) {
+        // First create the callback for when all plugins are loaded.
+        var mapper = context.cordova.require('cordova/modulemapper');
+        onScriptLoadingComplete = function() {
+            // Loop through all the plugins and then through their clobbers and merges.
+            for (var i = 0; i < modules.length; i++) {
+                var module = modules[i];
+                if (!module) continue;
+
+                if (module.clobbers && module.clobbers.length) {
+                    for (var j = 0; j < module.clobbers.length; j++) {
+                        mapper.clobbers(module.id, module.clobbers[j]);
+                    }
+                }
+
+                if (module.merges && module.merges.length) {
+                    for (var k = 0; k < module.merges.length; k++) {
+                        mapper.merges(module.id, module.merges[k]);
+                    }
+                }
+
+                // Finally, if runs is truthy we want to simply require() the module.
+                // This can be skipped if it had any merges or clobbers, though,
+                // since the mapper will already have required the module.
+                if (module.runs && !(module.clobbers && module.clobbers.length) && !(module.merges && module.merges.length)) {
+                    context.cordova.require(module.id);
+                }
+            }
+
+            finishPluginLoading();
+        };
+
+        // Now inject the scripts.
+        for (var i = 0; i < modules.length; i++) {
+            injectScript(path + modules[i].file);
+        }
+    }
+
+    // Find the root of the app
+    var path = '';
+    var scripts = document.getElementsByTagName('script');
+    var term = 'cordova.js';
+    for (var n = scripts.length-1; n>-1; n--) {
+        var src = scripts[n].src;
+        if (src.indexOf(term) == (src.length - term.length)) {
+            path = src.substring(0, src.length - term.length);
+            break;
+        }
+    }
+    // Try to XHR the cordova_plugins.json file asynchronously.
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        // If the response is a JSON string which composes an array, call handlePluginsObject.
+        // If the request fails, or the response is not a JSON array, just call finishPluginLoading.
+        var obj;
+        try {
+            obj = (this.status == 0 || this.status == 200) && this.responseText && JSON.parse(this.responseText);
+        } catch (err) {
+            // obj will be undefined.
+        }
+        if (Array.isArray(obj) && obj.length > 0) {
+            handlePluginsObject(obj, path);
+        } else {
+            finishPluginLoading();
+        }
+    };
+    xhr.onerror = function() {
+        finishPluginLoading();
+    };
+    var plugins_json = path + 'cordova_plugins.json';
+    try { // we commented we were going to try, so let us actually try and catch
+        xhr.open('GET', plugins_json, true); // Async
+        xhr.send();
+    } catch(err){
+        finishPluginLoading();
+    }
 }(window));
 
 
-})();var PhoneGap = cordova;
+})();
