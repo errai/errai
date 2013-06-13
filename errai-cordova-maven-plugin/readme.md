@@ -24,9 +24,9 @@ of your `pom.xml`
       </plugin>
 
 ```
-The configuration above will excute one of the plugin goals `build-project` at the `package` build phase you can also
-omit this to speedup building and then later execute `mvn build-project` to build the native parts. Right now _only_
-android and ios are supported.
+The configuration above will execute one of the plugin goals `build-project` at the `package` build phase you can also
+omit this to speedup building and then later execute `mvn cordova:build-project` to build the native parts.
+Right now _only_ android and ios are supported.
 
 Add the following to for maven to be able to find the plugin:
 
