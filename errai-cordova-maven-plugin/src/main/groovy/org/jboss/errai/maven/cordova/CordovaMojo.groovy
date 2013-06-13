@@ -83,9 +83,11 @@ class CordovaMojo extends GroovyMojo {
         def www = "${project.build.directory}/${project.build.finalName}"
 
         [androidDir, iosDir].each { dir ->
-            cleanCopy(dir, www)
+            clean(dir)
+            copy(dir, www)
         }
 
+        copy("${template}/www/", www)
         ant.copy(file: "${template}/www/config.xml", todir: warSourceDir)
     }
 
@@ -124,13 +126,15 @@ class CordovaMojo extends GroovyMojo {
         return 'src/main/webapp'
     }
 
-    void cleanCopy(dir, www) {
-        ant.delete(includeemptydirs: 'true', {
-            fileset(dir: dir, includes: '**/*')
-        })
-
+    def void copy(dir, www) {
         ant.copy(todir: dir) {
             fileset(dir: www, includes: '**/*.htm, **/*.html, **/*.gif, **/*.jpg, **/*.jpeg, **/*.png, **/*.js, **/*.css')
         }
+    }
+
+    def void clean(dir) {
+        ant.delete(includeemptydirs: 'true', {
+            fileset(dir: dir, includes: '**/*')
+        })
     }
 }
