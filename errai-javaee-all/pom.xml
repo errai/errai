@@ -12,16 +12,15 @@
    <name>Errai::Java EE::All</name>
    <packaging>jar</packaging>
 
-   <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-   </properties>
-
    <dependencies>
+
+      <!-- GWT Dependencies -->
       <dependency>
          <groupId>com.google.gwt</groupId>
          <artifactId>gwt-user</artifactId>
-         <scope>provided</scope>
       </dependency>
+
+      <!-- Errai Dependencies -->
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-bus</artifactId>
@@ -37,12 +36,10 @@
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-cdi-client</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-jpa-client</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
@@ -52,47 +49,63 @@
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-jaxrs-client</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-jaxrs-provider</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-javax-enterprise</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-weld-integration</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-ui</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-navigation</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-data-binding</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-marshalling</artifactId>
       </dependency>
       <dependency>
+         <groupId>org.jboss.errai</groupId>
+         <artifactId>errai-validation</artifactId>
+      </dependency>
+
+      <!-- XXX the following is required at compile time but must not be deployed to the app server -->
+      <!-- we need to find a better way! -->
+            <dependency>
+        <groupId>javax.enterprise</groupId>
+        <artifactId>cdi-api</artifactId>
+      </dependency>
+
+      <!-- Required for Errai Validation -->
+      <dependency>
          <groupId>javax.validation</groupId>
          <artifactId>validation-api</artifactId>
          <classifier>sources</classifier>
-         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-validator</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <classifier>sources</classifier>
       </dependency>
    </dependencies>
 

@@ -139,34 +139,146 @@
   <dependencyManagement>
     <dependencies>
       <!-- Errai Dependencies -->
-      <!-- Project Dependencies -->
+      <!-- Project Dependencies provided by Errai -->
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-bus</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-cdi-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-cdi-jetty</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-codegen</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-codegen-gwt</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-common</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-config</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-cordova</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-data-binding</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-html5</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-ioc</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-ioc-bus-support</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-javaee-all</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-javaee-provided</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-javax-enterprise</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jaxrs-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jaxrs-provider</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jboss-as-support</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jpa-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-js</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-marshalling</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-navigation</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-otec</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-tools</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-ui</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-uibinder</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-validation</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-weld-integration</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -524,6 +636,7 @@
         <version>3.15.0-GA</version>
       </dependency>
 
+      <!-- FIXME this apparently does not exist, and even if it did, it looks redundant with the one that follows. -->
       <dependency>
           <groupId>org.jboss.ejb3</groupId>
           <artifactId>jboss-ejb3-api</artifactId>
@@ -628,6 +741,17 @@
       </dependency>
 
       <dependency>
+          <groupId>org.jboss.weld</groupId>
+          <artifactId>weld-api</artifactId>
+          <version>1.1.Final</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jboss.weld</groupId>
+          <artifactId>weld-spi</artifactId>
+          <version>1.1.Final</version>
+      </dependency>
+
+      <dependency>
           <groupId>org.jboss</groupId>
           <artifactId>jboss-vfs</artifactId>
           <version>3.0.1.GA</version>
@@ -704,6 +828,17 @@
       <dependency>
           <groupId>org.hibernate</groupId>
           <artifactId>hibernate-entitymanager</artifactId>
+          <version>4.2.0.Final</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.hibernate.common</groupId>
+          <artifactId>hibernate-commons-annotations</artifactId>
+          <version>4.0.1.Final</version>
+      </dependency>
+      <dependency>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-core</artifactId>
           <version>4.2.0.Final</version>
       </dependency>
 
