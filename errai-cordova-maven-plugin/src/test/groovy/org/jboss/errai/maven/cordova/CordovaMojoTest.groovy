@@ -15,7 +15,9 @@ class CordovaMojoTest extends GroovyTestCase {
         def fileToBeCopied = new File(source, "copied.html")
         fileToBeCopied << "I'm copied"
 
-        new CordovaMojo().cleanCopy(dir, source)
+        def mojo = new CordovaMojo()
+        mojo.clean(dir)
+        mojo.copy(dir, source)
 
         assert fileToBeCopied.isFile()
         assert dir.listFiles().length != 0
