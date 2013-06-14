@@ -319,9 +319,14 @@ public class JettyLauncher extends ServletContainerLauncher {
     private class WebAppClassLoaderExtension extends WebAppClassLoader {
 
       private static final String META_INF_SERVICES = "META-INF/services/";
+      private String[] systemClasses = null;
 
       public WebAppClassLoaderExtension() throws IOException {
         super(bootStrapOnlyClassLoader, WebAppContextWithReload.this);
+        String customSystemClasses = System.getProperty("jetty.custom.sys.classes");
+        if (customSystemClasses != null) {
+            systemClasses = customSystemClasses.split(";");
+        }
       }
 
       @Override
@@ -371,9 +376,21 @@ public class JettyLauncher extends ServletContainerLauncher {
       @Override
       public boolean isSystemPath(String name) {
         name = name.replace('/', '.');
-        return super.isSystemPath(name)
+        return super.isSystemPath(name) || inSystemClasses(name)
             || name.startsWith("org.apache.jasper.")
             || name.startsWith("org.apache.xerces.");
+      }
+
+      protected boolean inSystemClasses(String name) {
+          if (systemClasses == null) {
+              return false;
+          }
+          for (String systemClassPrefix : systemClasses) {
+              if (name.startsWith(systemClassPrefix)) {
+                  return true;
+              }
+          }
+          return false;
       }
 
       @Override
