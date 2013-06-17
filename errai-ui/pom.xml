@@ -152,6 +152,7 @@
         <version>2.7</version>
         <configuration>
           <includes>org/w3c/dom/**</includes>
+          <excludes>**/bootstrap/**,**/ls/**</excludes>
         </configuration>
         <executions>
           <execution>

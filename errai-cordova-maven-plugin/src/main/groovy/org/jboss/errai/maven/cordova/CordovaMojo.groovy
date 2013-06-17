@@ -104,14 +104,29 @@ class CordovaMojo extends GroovyMojo {
     }
 
     void compile() {
-        supportedPlatforms.each {
-            ant.exec(failonerror: "true",
-                    dir: "${project.build.directory}/template/platforms/${it.toLowerCase()}/cordova",
-                    executable: './build')
+        if (session.userProperties.containsKey('platform')) {
+            execute(session.userProperties.platform.toLowerCase())
+        } else {
+            supportedPlatforms.each { execute(it) }
+        }
+    }
 
-            if (ant.project.properties.cmdExit) {
-                throw new Error("An error occurred while building the $it project. ${ant.project.properties.cmdExit}");
+    def execute = { platform ->
+        def os = System.getProperty("os.name")
+        if (os.startsWith("Windows")) {
+            ant.exec(failonerror: "true",
+                    executable: 'cmd') {
+                arg(line: '/c')
+                arg(line: "${project.build.directory}/template/platforms/${platform.toLowerCase()}/cordova/build.bat")
             }
+        } else {
+            ant.exec(failonerror: "true",
+                    dir: "${project.build.directory}/template/platforms/${platform.toLowerCase()}/cordova",
+                    executable: './build')
+        }
+
+        if (ant.project.properties.cmdExit) {
+            throw new Error("An error occurred while building the $platform project. ${ant.project.properties.cmdExit}");
         }
     }
 
