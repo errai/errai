@@ -16,7 +16,9 @@
 
 package org.jboss.errai.bus.server;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 
@@ -26,6 +28,7 @@ import javax.servlet.http.HttpSession;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.server.HttpSessionProvider.SessionsContainer;
 import org.jboss.errai.bus.server.annotations.Service;
 
 /**
@@ -40,9 +43,12 @@ public class SessionPassivationService implements MessageCallback {
     for (Enumeration<String> names = session.getAttributeNames(); names.hasMoreElements(); ) {
       String name = names.nextElement();
       Object attribute = session.getAttribute(name);
+      Object deserializedAttribute = null;
       System.out.println("Session attribute: " + name);
       try {
-        new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(attribute);
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        new ObjectOutputStream(bytes).writeObject(attribute);
+        deserializedAttribute = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray())).readObject();
       }
       catch (Exception ex) {
         ex.printStackTrace();
@@ -50,6 +56,10 @@ public class SessionPassivationService implements MessageCallback {
       }
       if (attribute instanceof HttpSession) {
         throw new RuntimeException("The session contains an HttpSession! This is not allowed!");
+      }
+      if (attribute instanceof SessionsContainer) {
+        // this could cause a NPE if session doesn't deserialize properly
+        ((SessionsContainer) deserializedAttribute).getSession("doesn't matter");
       }
     }
     MessageBuilder.createConversation(message)

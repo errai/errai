@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -86,6 +87,14 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
     public void removeSession(final String remoteQueueId) {
       queueSessions.remove(remoteQueueId);
+    }
+
+    /**
+     * Just returns a fresh new SessionsContainer.
+     */
+    private Object readResolve() throws ObjectStreamException {
+      // this is necessary because deserializing the private final fields gets us a couple of big fat nulls.
+      return new SessionsContainer();
     }
   }
 
