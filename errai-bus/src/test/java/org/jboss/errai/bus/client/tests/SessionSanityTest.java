@@ -21,8 +21,9 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 /**
- * Tests that HttpSessions involved with ErraiBus communication are still well-behaved.
- * 
+ * Tests that HttpSessions involved with ErraiBus communication are
+ * well-behaved. For example, they must be serializable.
+ *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
