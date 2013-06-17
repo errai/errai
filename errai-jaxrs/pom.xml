@@ -42,8 +42,7 @@
 
   <modules>
     <module>errai-jaxrs-client</module>
-    <module>errai-jaxrs-provider</module>
-    <!-- module>demos/jaxrs-demo</module-->
+    <module>errai-jaxrs-provider</module>    
   </modules>
 
   <build>
@@ -99,7 +98,7 @@
       <id>distro</id>
       <modules>
         <module>errai-jaxrs-client</module>
-        <module>demos/jaxrs-demo</module>
+        <module>errai-jaxrs-provider</module>        
       </modules>
     </profile>
   </profiles>
