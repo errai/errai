@@ -29,13 +29,13 @@ import org.jboss.errai.databinding.client.api.InitialState;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyFactory {
-  private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders =
-      new HashMap<Class<?>, BindableProxyProvider>();
+  private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders = new HashMap<Class<?>, BindableProxyProvider>();
 
   /**
-   * Returns a proxy for the provided model instance. Changes to the proxy's state will result in updates on the widget
-   * given the corresponding property was bound (see
-   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
+   * Returns a proxy for the provided model instance. Changes to the proxy's state will result in
+   * updates on the widget given the corresponding property was bound (see
+   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}). If the model is
+   * already proxied, return that proxy.
    * 
    * @param <T>
    *          the bindable type
@@ -43,13 +43,16 @@ public class BindableProxyFactory {
    *          The model instance to proxy.
    * @param state
    *          Specifies the origin of the initial state of both model and UI widget.
-   *                   
+   * 
    * @return proxy that can be used in place of the model instance.
    */
   @SuppressWarnings("unchecked")
   public static <T> T getBindableProxy(T model, InitialState state) {
-    BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
+    if (model instanceof BindableProxy) {
+      return model;
+    }
 
+    BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
     BindableProxy<?> proxy = proxyProvider.getBindableProxy(model, state);
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
@@ -59,8 +62,8 @@ public class BindableProxyFactory {
   }
 
   /**
-   * Returns a proxy for a newly created model instance of the provided type. Changes to the proxy's state will result
-   * in updates on the widget given the corresponding property was bound (see
+   * Returns a proxy for a newly created model instance of the provided type. Changes to the proxy's
+   * state will result in updates on the widget given the corresponding property was bound (see
    * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
    * 
    * @param bindableType
@@ -95,7 +98,8 @@ public class BindableProxyFactory {
   }
 
   /**
-   * Registers a generated bindable proxy. This method is called by the generated BindableProxyLoader.
+   * Registers a generated bindable proxy. This method is called by the generated
+   * BindableProxyLoader.
    * 
    * @param proxyType
    *          The bindable type, must not be null.
@@ -108,4 +112,18 @@ public class BindableProxyFactory {
 
     bindableProxyProviders.put(proxyType, proxyProvider);
   }
+
+  /**
+   * Checks if the type of the provided model is bindable. That's the case when a proxy provider has
+   * been generated for that type.
+   * 
+   * @param model
+   *          the object to be checked.
+   * @return true if the object is bindable, otherwise false.
+   */
+  public static boolean isBindableType(Object model) {
+    BindableProxyProvider proxyProvider = bindableProxyProviders.get(model.getClass());
+    return (proxyProvider != null);
+  }
+
 }
