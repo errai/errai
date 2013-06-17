@@ -569,15 +569,13 @@ public class QuickHandlerComponent extends Composite {
         <code>@Bound</code>
         have their contents bound to properties of the data model (a
         <code>User</code>
-        object). The model object is injected and annotated with
-        <code>@Model</code>
-        , which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected
+        object). The model object is provided by an injected
         <code>DataBinder</code>
         instance annotated with
         <code>@AutoBound</code>
-        , see
-        <link linkend="sid-51282340_DataBinding-DeclarativeBinding">Declarative Binding</link>
-        for details.
+        , which indicates automatic binding should be carried out. This works whether the
+        <code>DataBinder</code>
+        is injected into a field or a constructor.
       </para>
       <informalexample>
          <programlisting language="java">
@@ -585,13 +583,9 @@ public class QuickHandlerComponent extends Composite {
 public class LoginForm extends Composite {
 
    @Inject
-   @Model   
-   private User user;
-
-   @Inject
    @Bound
    @DataField
-   private TextBox name;
+   private TextBox username;
 
    @Inject
    @Bound
@@ -600,6 +594,13 @@ public class LoginForm extends Composite {
 
    @DataField
    private Button submit = new Button();
+
+   private User user;
+
+   @Inject
+   public LoginForm(@AutoBound DataBinder&lt;User&gt; userBinder) {
+     this.user = userBinder.getModel();
+   }
 }
 </programlisting>
       </informalexample>
@@ -618,12 +619,10 @@ public class LoginForm extends Composite {
          <title>Default, Simple, and Chained Property Bindings</title>
          <para>
           By default, bindings are determined by matching field names to property names on the model object. In the example above, the field
-          <code>name</code>
+          <code>username</code>
           was automatically bound to the JavaBeans property
-          <code>name</code>
-          of the model (
-          <code>user</code>
-          object). If the field name does not match the model property name, you can use the
+          <code>username</code>
+          of the model object. If the field name does not match the model property name, you can use the
           <code>property</code>
           attribute of the
           <code>@Bound</code>
@@ -648,10 +647,8 @@ public class Address {
 @Bindable
 public class User {
   private String name;
-  private String password;
   private Date dob;
   private Address address;
-  private List&lt;Role&gt; roles;
 
   // getters and setters
 }
@@ -715,7 +712,7 @@ public class MyComposite extends Composite {
           Calling
           <code>setItems</code>
           on the
-          <code>userListWidget</code>
+          <code>userList</code>
           causes an instance of
           <code>UserWidget</code>
           to be displayed for each user in the list. The
@@ -742,53 +739,6 @@ public class UserListWidget extends ListWidget&lt;User, UserWidget&gt; {
   public Class&lt;UserWidget&gt; getItemWidgetType() {
     return UserWidget.class;
   }
-}
-</programlisting>
-         </informalexample>
-         <para>
-          An instance of
-          <code>ListWidget</code>
-          can also participate in automatic bindings using
-          <code>@Bound</code>
-          . In this case,
-          <code>setItems</code>
-          never needs to be called manually. The bound list property and displayed items will automatically be kept in sync. In the example below a list of user roles is bound to a
-          <code>ListWidget</code>
-          that displays and manages a
-          <code>RoleWidget</code>
-          for each role in the list. Every change to the list returned by
-          <code>user.getRoles()</code>
-          will now trigger a corresponding update in the UI.
-        </para>
-         <informalexample>
-            <programlisting language="java">
-@Templated
-public class UserDetailView extends Composite {
-
-   @Inject
-   @Bound
-   @DataField
-   private TextBox name;
-
-   @Inject
-   @Bound
-   @DataField
-   private PasswordTextBox password;
-
-   @Inject
-   @Bound
-   @DataField
-   private ListWidget&lt;Role, RoleWidget&gt; roles;
-
-   @DataField
-   private Button submit = new Button();
-
-   private User user;
-
-   @Inject
-   public LoginForm(@AutoBound DataBinder&lt;User&gt; userBinder) {
-     this.user = userBinder.getModel();
-   }
 }
 </programlisting>
          </informalexample>

@@ -248,40 +248,4 @@ public class MyRemoteServiceImpl implements MyRemoteService {
 </programlisting>
       </informalexample>
    </section>
-   <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Batchingremotecalls">
-      <title>Batching remote calls</title>
-      <para>Some use cases require multiple interactions with the server to complete. Errai's RPC mechanism allows for batched invocations of remote methods that will be executed using a single server round-trip. This is useful for reducing the number of simultaneous HTTP connections and at the same time allows for reusing and combining fine-grained remote services.</para>
-      <para>Injecting a BatchCaller instead of a Caller&lt;T&gt; is all it takes to make use of batched remote procedure calls.</para>
-      <informalexample>
-         <programlisting language="java">
-@EntryPoint
-public class MyBean {
- 
- @Inject
- private BatchCaller batchCaller;
- 
- private void someMethod() {
-    // ...
-    batchCaller.call(remoteCallback1, RemoteService1.class).method1();
-    batchCaller.call(remoteCallback2, RemoteService2.class).method2();
-    
-    // Invokes the accumulated remote requests using a single server round-trip.
-    batchCaller.sendBatch();
- }
- 
-}
-</programlisting>
-      </informalexample>
-      <para>
-        The remote methods will get executed only after
-        <code>sendBatch()</code>
-        was called. The method
-        <code>sendBatch</code>
-        accepts an additional
-        <code>RemoteCallback</code>
-        instance as a parameter which will we invoked when all remote calls have completed in success. Consequently, an
-        <code>ErrorCallback</code>
-        can also be provided which will get executed for all remote calls that have completed in failure.
-      </para>
-   </section>
 </chapter>

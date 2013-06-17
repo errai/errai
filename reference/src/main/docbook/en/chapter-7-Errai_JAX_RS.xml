@@ -335,8 +335,8 @@ ResponseCallback callback = new ResponseCallback() {
       </para>
       <informalexample>
          <programlisting language="java">
-ErrorCallback errorCallback = new RestErrorCallback() {
-  public boolean error(Request request, Throwable throwable) {
+ErrorCallback errorCallback = new ErrorCallback() {
+  public boolean error(Message message, Throwable throwable) {
     try {
       throw throwable;
     }
