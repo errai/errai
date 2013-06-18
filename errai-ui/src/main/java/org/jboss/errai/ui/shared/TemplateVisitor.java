@@ -94,7 +94,7 @@ public class TemplateVisitor implements DomVisitor {
     if (hasAttribute(element, "data-i18n-key")) {
       translationKey = element.getAttribute("data-i18n-key");
     } else {
-      translationKey = currentText.replaceAll("[:\\s'\"]", "_");
+      translationKey = currentText.replaceAll("[:\\s'\"]+", "_");
       if (translationKey.length() > 128) {
         translationKey = translationKey.substring(0, 128) + translationKey.hashCode();
       }
