@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="sid-65274252">
    <title>Errai Cordova</title>
-   <para>As part of the 3.0 release Errai now supports mobile development. One of the modules that makes this feasible is the Cordova module. It offers a way to integrate with native hardware in a Errai way.</para>
+   <para>Starting with version 2.4.0, Errai now supports mobile development. One of the modules that makes this feasible is the Cordova module. It offers a way to integrate with native hardware in a Errai way.</para>
    <section id="sid-65274252_ErraiCordova-Getstarted">
       <title>Get started</title>
       <para>The Errai Cordova module is directly integrated with ERRAI:Container and you can use it by adding the following in your App.gwt.xml:</para>
@@ -137,11 +137,75 @@ public class KitchenSinkClient extends Composite {
       <para>Example of how to use these events:</para>
       <informalexample>
          <programlisting language="java">
-private void updatedProjectList(@Observes ) {
-  projects.add(0, null);
-  projectListBox.setAcceptableValues(projects);
-}
+  private void batteryIsLow(@Observes BatteryLowEvent event) {
+  	//todo add some logic....
+  }
 </programlisting>
       </informalexample>
+   </section>
+   <section id="sid-65274252_ErraiCordova-AeroGear">
+      <title>AeroGear</title>
+      <para>
+        AeroGear is a very new and hot new project with jboss these wrappers give you the posibilty to create your server with AeroGear and your client with Errai. Also have a look at the
+        <ulink url="http://aerogear.org/docs">documentation</ulink>
+        of the AeroGear project. There is some vocabulary to learn.
+      </para>
+      <section id="sid-65274252_ErraiCordova-Pipes">
+         <title>Pipes</title>
+         <para>Pipes are for getting data from the server. Right now the only implementation is REST it will use Id to construct urls.</para>
+         <informalexample>
+            <programlisting language="java">
+  Pipe&lt;Task&gt; pipe = new PipeFactory().createPipe(Task.class, "tasks");
+
+  pipe.save(new Task(123, "new", "2012-01-01"), new AsyncCallback&lt;Task&gt;() {
+    @Override
+    public void onSuccess(Task result) {
+      Window.alert("jipee saved a taks");
+    }
+    @Override
+    public void onFailure(Throwable caught) {
+    }
+  });
+</programlisting>
+         </informalexample>
+         <para>This will preform a PUT /tasks URL</para>
+      </section>
+      <section id="sid-65274252_ErraiCordova-Stores">
+         <title>Stores</title>
+         <para>Another concept that comes with AeroGear is Stores. Currently there are 2 Store types supported: Memory and SessionLocal. Memory is just a big javascript array to hold your data. Here is how you create and configure a Store:</para>
+         <informalexample>
+            <programlisting language="java">
+    Store&lt;User&gt; store = new DataManager().store(User.class);
+
+    store.save(new User(2, "test2"));
+    Collection&lt;User&gt; collection = store.readAll();
+
+    User user = store.read(2);
+</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-65274252_ErraiCordova-Authentication">
+         <title>Authentication</title>
+         <para>Pipes can be authenticated with just add the authenticator into the Pipe and you are good to go.</para>
+         <informalexample>
+            <programlisting language="java">
+    Authenticator authenticator = new AuthenticationFactory().createAuthenticator("name");
+    Pipe&lt;Task&gt; pipe = new PipeFactory().createPipe(Task.class, "tasks", authenticator);
+
+    authenticator.login(username.getText(), password.getText(), new AsyncCallback&lt;String&gt;() {
+      @Override
+      public void onSuccess(String result) {
+        Window.alert("successful login");
+      }
+
+      @Override
+      public void onFailure(Throwable caught) {
+        message.setText("Login failed, please try again");
+      }
+    });
+</programlisting>
+         </informalexample>
+         <para>There is also a method enroll to add new users.</para>
+      </section>
    </section>
 </chapter>

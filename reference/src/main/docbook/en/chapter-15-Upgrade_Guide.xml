@@ -142,9 +142,9 @@
       </itemizedlist>
    </section>
    <section id="sid-59146804">
-      <title>Upgrading from Errai 2.2.x to 3.0</title>
-      <para>There are some breaking API changes in the update from Errai 2.2.x to Errai 3.0.x.</para>
-      <para>Here are the steps you'll need to take to get your project compiling after you update to Errai 3:</para>
+      <title>Upgrading from Errai 2.2.x to 2.4 or 3.0</title>
+      <para>There are some breaking API changes in the update from Errai 2.3.x to Errai 2.4.x and 3.0.x.</para>
+      <para>Here are the steps you'll need to take to get your project compiling after you update:</para>
       <itemizedlist>
          <listitem>
             <para>Use your IDE to organize imports at the top level. In eclipse, you'd click in the Project Explorer, press Ctrl-A (select all) and then Ctrl-O (Organize Imports). Other IDEs have similar features.</para>
@@ -165,6 +165,6 @@
           </para>
          </listitem>
       </itemizedlist>
-      <para>Note: Errai 3 is still changing rapidly, so this section is a work in progress. Please add any additional steps you had to take in upgrading your own codebase from Errai 2.2.</para>
+      <para>Note: Errai 3 is still changing rapidly, so this section is a work in progress. Please add any additional steps you had to take in upgrading your own codebase from Errai 2.3.</para>
    </section>
 </chapter>

@@ -45,6 +45,40 @@
 &lt;inherits name="org.jboss.errai.ui.UI" /&gt;
 </programlisting>
          </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-pom.xml">
+         <title>pom.xml</title>
+         <para>
+          The easiest way to get Errai UI on your classpath is to depend on the special
+          <code>errai-javaee-all</code>
+          artifact, which brings in most Errai modules:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-javaee-all&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          Or if you prefer to manage your project's dependency in a finer-grained way, you can depend on
+          <code>errai-ui</code>
+          directly:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-ui&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-WorkingDemo">
+         <title>Working Demo</title>
          <para>
           If you work better by playing with a finished product, you can see a simple client-server project
           <ulink url="https://github.com/lincolnthree/errai-ui-demo">implemented using Errai UI here</ulink>
@@ -585,7 +619,7 @@ public class QuickHandlerComponent extends Composite {
 public class LoginForm extends Composite {
 
    @Inject
-   @Model   
+   @Model
    private User user;
 
    @Inject
@@ -657,7 +691,7 @@ public class User {
 }
 
 @Templated
-public class UserWidget {
+public class UserWidget extends Composite {
   @Inject @AutoBound DataBinder&lt;User&gt; user;
   @Inject @Bound TextBox name;
   @Inject @Bound("dob") DatePicker dateOfBirth;
@@ -690,11 +724,39 @@ public class UserWidget {
       <section id="sid-51806600_ErraiUI-BindingofLists">
          <title>Binding of Lists</title>
          <para>
-          More often than not you will need to bind a list of model objects so that every object in the list is bound to a corresponding widget. This task can be simplified using Errai UI's
+          Often you will need to bind a list of model objects so that every object in the list is bound to a corresponding widget. This task can be accomplished using Errai UI's
           <code>ListWidget</code>
           class. Here's an example of binding a list of users using the
           <code>UserWidget</code>
-          class from the previous example.
+          class from the previous example. First, we need to enhance
+          <code>UserWidget</code>
+          to implement
+          <code>HasModel</code>
+          .
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Templated
+public class UserWidget extends Composite implements HasModel&lt;User&gt; {
+  @Inject @AutoBound DataBinder&lt;User&gt; userBinder;
+  @Inject @Bound TextBox name;
+  @Inject @Bound("dob") DatePicker dateOfBirth;
+  @Inject @Bound("address.city") TextBox city;
+
+  public User getModel() {
+    userBinder.getModel();
+  }
+
+  public void setModel(User user) {
+    userBinder.setModel(user);
+  }
+}
+</programlisting>
+         </informalexample>
+         <para>
+          Now we can use
+          <code>UserWidget</code>
+          to display items in a list.
         </para>
          <informalexample>
             <programlisting language="java">
@@ -745,23 +807,25 @@ public class UserListWidget extends ListWidget&lt;User, UserWidget&gt; {
 }
 </programlisting>
          </informalexample>
-         <para>
-          An instance of
-          <code>ListWidget</code>
-          can also participate in automatic bindings using
-          <code>@Bound</code>
-          . In this case,
-          <code>setItems</code>
-          never needs to be called manually. The bound list property and displayed items will automatically be kept in sync. In the example below a list of user roles is bound to a
-          <code>ListWidget</code>
-          that displays and manages a
-          <code>RoleWidget</code>
-          for each role in the list. Every change to the list returned by
-          <code>user.getRoles()</code>
-          will now trigger a corresponding update in the UI.
-        </para>
-         <informalexample>
-            <programlisting language="java">
+         <section id="sid-51806600_ErraiUI-Bindinglistswith@Bound">
+            <title>Binding lists with @Bound</title>
+            <para>
+            An instance of
+            <code>ListWidget</code>
+            can also participate in automatic bindings using
+            <code>@Bound</code>
+            . In this case,
+            <code>setItems</code>
+            never needs to be called manually. The bound list property and displayed items will automatically be kept in sync. In the example below a list of user roles is bound to a
+            <code>ListWidget</code>
+            that displays and manages a
+            <code>RoleWidget</code>
+            for each role in the list. Every change to the list returned by
+            <code>user.getRoles()</code>
+            will now trigger a corresponding update in the UI.
+          </para>
+            <informalexample>
+               <programlisting language="java">
 @Templated
 public class UserDetailView extends Composite {
 
@@ -783,15 +847,12 @@ public class UserDetailView extends Composite {
    @DataField
    private Button submit = new Button();
 
+   @Inject @Model
    private User user;
-
-   @Inject
-   public LoginForm(@AutoBound DataBinder&lt;User&gt; userBinder) {
-     this.user = userBinder.getModel();
-   }
 }
 </programlisting>
-         </informalexample>
+            </informalexample>
+         </section>
       </section>
       <section id="sid-51806600_ErraiUI-DataConverters">
          <title>Data Converters</title>

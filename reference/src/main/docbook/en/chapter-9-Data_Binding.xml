@@ -483,30 +483,46 @@ public class CustomerView {
 &lt;inherits name="org.jboss.errai.validation.Validation" /&gt;
 </programlisting>
       </example>
-      <para>
-        Before a validator instance be used, we need to provide a
-        <code>ValidatorFactory</code>
-        implementation.
-      </para>
-      <note>
-         <para>In a future version of Errai we will aim to remove this step.</para>
-      </note>
+      <para>To use Errai's bean validation module, you must add the module, the javax.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:</para>
       <informalexample>
-         <programlisting language="java">
-public final class MyModelValidatorFactory extends AbstractGwtValidatorFactory {
+         <programlisting language="xml">
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-validation&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+    &lt;/dependency&gt;
 
-  @GwtValidation({Customer.class, User.class, Address.class})
-  public interface GwtValidator extends Validator {}
+    &lt;dependency&gt;
+      &lt;groupId&gt;javax.validation&lt;/groupId&gt;
+      &lt;artifactId&gt;validation-api&lt;/artifactId&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
 
-  @Override
-  public AbstractGwtValidator createValidator() {
-    return GWT.create(GwtValidator.class);
-  }
-}
+    &lt;dependency&gt;
+      &lt;groupId&gt;javax.validation&lt;/groupId&gt;
+      &lt;artifactId&gt;validation-api&lt;/artifactId&gt;
+      &lt;classifier&gt;sources&lt;/classifier&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.hibernate&lt;/groupId&gt;
+      &lt;artifactId&gt;hibernate-validator&lt;/artifactId&gt;
+      &lt;version&gt;4.2.0.Final&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.hibernate&lt;/groupId&gt;
+      &lt;artifactId&gt;hibernate-validator&lt;/artifactId&gt;
+      &lt;version&gt;4.2.0.Final&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+      &lt;classifier&gt;sources&lt;/classifier&gt;
+    &lt;/dependency&gt;
 </programlisting>
       </informalexample>
       <para>
-        Once this unfortunate step is out of the way, it is as simple as injecting a
+        Now it is as simple as injecting a
         <code>Validator</code>
         instance into an
         <link linkend="sid-5931402">Errai IOC</link>

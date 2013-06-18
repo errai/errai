@@ -438,9 +438,28 @@ public class Foo {
             <title>Starting Development Mode from within your IDE</title>
             <para>Consequently, when starting Development Mode from within your IDE the following program argument has to be provided: -server org.jboss.errai.cdi.server.gwt.JettyLauncher</para>
          </note>
-         <para>Once this is set up correctly, we can bootstrap the CDI container through a servlet listener:</para>
-         <informalexample>
-            <programlisting language="xml">
+         <section id="sid-5931501_DeployingErraiCDI-SpecialcaseClassloading">
+            <title>Special-case Classloading</title>
+            <para>
+            JettyLauncher uses different class loaders to load classes that belongs to the web application, the Jetty server, and the Java standard library itself. In the majority of cases, you can simply put all dependencies into your web application's
+            <code>WEB-INF/lib</code>
+            folder. However, there are cases where putting a dependency in
+            <code>WEB-INF/lib</code>
+            will cause troubles such as
+            <code>ClassCastException</code>
+            when same class is also loaded by a different classloader. To mitigate this problem, JettyLauncher can be instructed that certain classes (or packages) shall be loaded only by the system class loader. To do so, set the Java system property
+            <code>jetty.custom.sys.classes</code>
+            when launching Dev Mode.
+          </para>
+            <para>For example, when using gwt-maven-plugin:</para>
+            <informalexample>
+               <programlisting language="xml">
+&lt;extraJvmArgs&gt;-Djetty.custom.sys.classes=bitronix;javax.transaction&lt;/extraJvmArgs&gt;
+</programlisting>
+            </informalexample>
+            <para>Once this is set up correctly, we can bootstrap the CDI container through a servlet listener:</para>
+            <informalexample>
+               <programlisting language="xml">
 &lt;web-app&gt;
   ...
   &lt;listener&gt;
@@ -455,11 +474,12 @@ public class Foo {
   ...
 &lt;/web-app&gt;
 </programlisting>
-         </informalexample>
-         <note>
-            <title>Errai-CDI maven archetype</title>
-            <para>Sounds terribly complicated, no? Don't worry we provide a maven archetype that takes care of all these setup steps and configuration details.</para>
-         </note>
+            </informalexample>
+            <note>
+               <title>Errai-CDI maven archetype</title>
+               <para>Sounds terribly complicated, no? Don't worry we provide a maven archetype that takes care of all these setup steps and configuration details.</para>
+            </note>
+         </section>
       </section>
       <section id="sid-5931501_DeployingErraiCDI-DeploymenttoaServletEngine">
          <title>Deployment to a Servlet Engine</title>

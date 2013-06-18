@@ -36,20 +36,27 @@
       <title>Getting Started</title>
       <section id="sid-54493676_ErraiUINavigation-Compiletimedependency">
          <title>Compile-time dependency</title>
-         <para>To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</para>
+         <para>To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add these dependencies:</para>
          <informalexample>
             <programlisting language="xml">
     &lt;dependency&gt;
       &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
       &lt;artifactId&gt;errai-navigation&lt;/artifactId&gt;
       &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-cdi-client&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
     &lt;/dependency&gt;
 </programlisting>
          </informalexample>
          <para>
           If you are not using Maven for dependency management, add
           <code>errai-navigation-version.jar</code>
-          to your classpath.
+          to the compile-time classpath of a project that's already set up for Errai UI templating.
         </para>
       </section>
       <section id="sid-54493676_ErraiUINavigation-GWTModuleDescriptor">
