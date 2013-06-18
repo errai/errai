@@ -1,6 +1,5 @@
 <module>
     <inherits name='com.google.gwt.user.User'/>
-    <inherits name="javax.validation.Validation" />
     <inherits name="com.google.gwt.junit.JUnit"/>
     <inherits name="org.jboss.errai.ioc.Container"/>
     <inherits name="javax.enterprise.Support" />
