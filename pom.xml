@@ -125,6 +125,7 @@
     <module>errai-security</module>
     <module>errai-cdi-async-databinding-tests</module>
     <module>errai-bom</module>
+    <module>errai-demos</module>
   </modules>
 
   <dependencies>
