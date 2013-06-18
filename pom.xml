@@ -123,6 +123,7 @@
     <module>errai-jboss-as-support</module>  
     <module>errai-cdi-async-databinding-tests</module>
     <module>errai-bom</module>
+    <module>errai-demos</module>
   </modules>
 
   <dependencies>
