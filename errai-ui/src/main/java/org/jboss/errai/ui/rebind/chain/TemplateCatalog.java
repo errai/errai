@@ -39,10 +39,12 @@ public class TemplateCatalog {
   public void visitTemplate(URL template) {
     if (!contextMap.containsKey(template)) {
       final Document document = parseTemplate(template);
-      for (int i = 0; i < document.getChildNodes().getLength(); i++) {
-        final Node node = document.getChildNodes().item(i);
-        if (node instanceof Element) {
-          visitTemplate((Element) node, template);
+      synchronized (this) {
+        for (int i = 0; i < document.getChildNodes().getLength(); i++) {
+          final Node node = document.getChildNodes().item(i);
+          if (node instanceof Element) {
+            visitTemplate((Element) node, template);
+          }
         }
       }
     }

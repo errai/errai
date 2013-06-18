@@ -29,16 +29,14 @@ public class TemplateChain {
   private static final TemplateCatalog catalog = createTemplateCatalog(
           new TranslateCommand(), new SelectorReplacer(), new DummyRemover());
 
-  private URL template;
-
   public static TemplateChain getInstance() {
     return INSTANCE;
   }
 
   public void visitTemplate(String templateFileName) {
-    this.template = getClass().getClassLoader().getResource(templateFileName);
+    URL template = getClass().getClassLoader().getResource(templateFileName);
     catalog.visitTemplate(template);
-    final Document result = getLastResult(RESULT);
+    final Document result = (Document) catalog.getResult(template, RESULT);
     if (result != null) {
       writeDocumentToFile(result, templateFileName);
     }
@@ -83,8 +81,8 @@ public class TemplateChain {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T getLastResult(String key) {
-    final Object result = catalog.getResult(template, key);
+  public <T> T getResult(String templateFileName, String key) {
+    final Object result = catalog.getResult(getClass().getClassLoader().getResource(templateFileName), key);
     return (T) result;
   }
 }

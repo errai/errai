@@ -291,7 +291,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       final TemplateChain chain = TemplateChain.getInstance();
       chain.visitTemplate(templateFileName);
 
-      Map<String, String> i18nValues = chain.getLastResult(VALUES);
+      Map<String, String> i18nValues = chain.getResult(templateFileName, VALUES);
 
       allI18nValues.putAll(i18nValues);
       Map<String, String> templateI18nValues = indexedI18nValues.get(templateBundleName);
