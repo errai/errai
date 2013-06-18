@@ -4,11 +4,23 @@ body {
 	text-align: center;
 }
 
+.footer {
+	color: #eee;
+	margin-top: 40px;
+}
+
+.footer a {
+	color: #f60;
+	text-decoration: none;
+	font-weight: bold;
+}
+
 h1 {
 	color: #f60;
 	font-size: 60px;
 	margin-top: 50px;
 	margin-bottom: 50px;
+	text-align: center;
 }
 
 div.mainContentArea {
