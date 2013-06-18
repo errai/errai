@@ -34,7 +34,7 @@ import javax.inject.Inject;
  * @author edewit@redhat.com
  */
 @Dependent
-@Templated
+@Templated("ListItem.html")
 public class StoreListItem extends Composite implements HasModel<Store> {
 
     @AutoBound
