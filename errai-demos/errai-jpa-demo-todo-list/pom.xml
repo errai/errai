@@ -36,8 +36,7 @@
 
   <dependencyManagement>
     <dependencies>
-    
-      <!-- Question: does this do anything? It appears properties can't be imported this way. -->
+
       <dependency>
         <groupId>org.jboss.errai.bom</groupId>
         <artifactId>errai-version-master</artifactId>
