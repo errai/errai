@@ -96,7 +96,6 @@
     <module>errai-javax-enterprise</module>
     <module>errai-ioc</module>
     <module>errai-bus</module>
-    <!-- module>errai-bus/demos</module-->
     <module>errai-tools</module>
     <module>errai-codegen</module>
     <module>errai-marshalling</module>
@@ -1390,7 +1389,7 @@
           <name>!wfk</name>
         </property>
       </activation>
-      <!-- distributionManagement>
+      <distributionManagement>
         <repository>
           <id>jboss-releases-repository</id>
           <name>JBoss Releases Repository</name>
@@ -1402,7 +1401,7 @@
           <name>JBoss Snapshots Repository</name>
           <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
-      </distributionManagement-->
+      </distributionManagement>
     </profile>
 
     <profile>
