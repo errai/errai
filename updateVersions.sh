@@ -13,7 +13,7 @@ if ! grep "$1" quickstart/src/main/docbook/en/*.xml; then
 fi
 
 mvn versions:set -DnewVersion=$newversion
-mvn clean install -Dgwt.compiler.skip=true
+mvn clean install -Dgwt.compiler.skip=true -Dmaven.test.skip=true
 for proj in errai-demos errai-demos/errai-* errai-bom errai-version-master; do (cd $proj; mvn versions:set -DnewVersion=$newversion); done
 
 for file in quickstart/src/main/docbook/en/*.xml; do

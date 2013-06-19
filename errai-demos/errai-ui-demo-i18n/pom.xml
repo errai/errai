@@ -7,6 +7,49 @@
   <version>2.4.0.Beta1</version>
   <packaging>war</packaging>
 
+  <url>http://jboss.org/errai/errai</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <description>
+    A GWT framework.
+  </description>
+
+  <developers>
+    <developer>
+      <name>Mike Brock</name>
+    </developer>
+    <developer>
+      <name>Christian Sadilek</name>
+    </developer>
+    <developer>
+      <name>Jonathan Fuerth</name>
+    </developer>
+    <developer>
+      <name>Lincoln Baxter, III</name>
+    </developer>
+    <developer>
+      <name>Erik Jan de Wit</name>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:errai/errai.git</connection>
+    <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
+    <url>scm:git:git@github.com:errai/errai.git</url>
+  </scm>
+
+  <organization>
+    <name>JBoss, a division of Red Hat</name>
+    <url>http://www.jboss.org</url>
+  </organization>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.6</maven.compiler.source>
