@@ -1403,15 +1403,7 @@
           <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
       </distributionManagement>
-    </profile>
-
-    <profile>
-      <id>withDemos</id>
-      <modules>
-        <module>errai-demos</module>
-      </modules>
-    </profile>
-    
+    </profile>    
     
     <profile>
       <id>distro</id>

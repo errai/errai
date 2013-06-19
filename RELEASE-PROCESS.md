@@ -57,7 +57,7 @@ Release Steps
 1. Ask Maven to update the version number in all the pom.xml files:
    
         % cd $errai_root_dir
-        % mvn versions:set -DnewVersion=x.y.z.Final
+        % ./updateVersions.sh x.y.z.Final
    
    Afterward, verify that all subprojects reference the new parent pom's version:
    
