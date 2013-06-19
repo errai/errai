@@ -112,4 +112,23 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     HistoryToken expectedToken = HistoryToken.of("PageWithPageShowingHistoryTokenMethod", ImmutableMultimap.of("state", "footastic"));
     assertEquals(expectedToken, page.mostRecentStateToken);
   }
+
+  public void testEventRaisedOnPageShown() {
+    // given
+    PageWithExtraState pageWithExtraState = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+
+    // when
+    navigation.goTo(PageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
+
+    // then
+    final NavigationEvent event = pageWithExtraState.getEvent();
+    assertNotNull(event);
+
+    final PageRequest pageRequest = event.getPageRequest();
+    assertNotNull(pageRequest);
+    assertEquals("PageWithLifecycleMethods", pageRequest.getPageName());
+    assertNotNull(pageRequest.getState());
+    assertEquals(1, pageRequest.getState().size());
+    assertEquals("foo", pageRequest.getState().get("state"));
+  }
 }

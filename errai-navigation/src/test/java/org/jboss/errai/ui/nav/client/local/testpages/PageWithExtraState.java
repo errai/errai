@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 
+import org.jboss.errai.ui.nav.client.local.NavigationEvent;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageState;
 
@@ -44,6 +46,12 @@ public class PageWithExtraState extends SimplePanel {
 
   // random spot check to ensure collections of a numeric type work
   @PageState private List<Integer> intList = new ArrayList<Integer>();
+
+  private NavigationEvent event;
+
+  public void observe(@Observes NavigationEvent event) {
+    this.event = event;
+  }
 
   public String getStringThing() {
     return stringThing;
@@ -121,4 +129,7 @@ public class PageWithExtraState extends SimplePanel {
     return intList;
   }
 
+  public NavigationEvent getEvent() {
+    return event;
+  }
 }
