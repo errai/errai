@@ -39,7 +39,7 @@ public class SecurityRoleInterceptorTest {
     InvocationContext context = mock(InvocationContext.class);
 
     // when
-    when(context.getTarget()).thenReturn(this);
+    when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
     when(authenticationService.getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
     interceptor.aroundInvoke(context);
@@ -54,13 +54,29 @@ public class SecurityRoleInterceptorTest {
     InvocationContext context = mock(InvocationContext.class);
 
     // when
-    when(context.getTarget()).thenReturn(this);
-    when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
-    when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
-    interceptor.aroundInvoke(context);
+    invokeTest(context, new Service());
 
     // then
     fail("security exception should have been thrown");
+  }
+
+  @Test(expected = SecurityException.class)
+  public void shouldFindMethodWhenNoInterface() throws Exception {
+    // given
+    InvocationContext context = mock(InvocationContext.class);
+
+    // when
+    invokeTest(context, this);
+
+    // then
+    fail("security exception should have been thrown");
+  }
+
+  private void invokeTest(InvocationContext context, Object service) throws Exception {
+    when(context.getTarget()).thenReturn(service);
+    when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
+    when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
+    interceptor.aroundInvoke(context);
   }
 
   @Test
@@ -94,6 +110,9 @@ public class SecurityRoleInterceptorTest {
   @RequireRoles("admin")
   @SuppressWarnings("UnusedDeclaration")
   public void annotatedServiceMethod() {}
+
+  public static interface  ServiceInterface {}
+  public static class Service implements ServiceInterface {}
 
   @SuppressWarnings("unchecked")
   public static class MockAuthenticationService extends AbstractRpcProxy implements AuthenticationService {
