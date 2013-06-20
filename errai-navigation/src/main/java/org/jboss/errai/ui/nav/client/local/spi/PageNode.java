@@ -4,8 +4,7 @@ import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
-import com.google.common.collect.Multimap;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Represents a page (a distinct place that can be navigated to and bookmarked
@@ -16,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public interface PageNode<W extends Widget> {
+public interface PageNode<W extends IsWidget> {
 
   /**
    * Returns the name of this page.
@@ -37,7 +36,8 @@ public interface PageNode<W extends Widget> {
   public void produceContent(CreationalCallback<W> callback);
 
   /**
-   * Returns the type of widget that this page node's {@link #content()} method will produce.
+   * Returns the type of widget that this page node's
+   * {@link #produceContent(CreationalCallback)} method will produce.
    *
    * @return The type of widget that supplies this page's content. Never null.
    */
@@ -52,7 +52,7 @@ public interface PageNode<W extends Widget> {
    *
    * @param widget
    *          the widget instance that was just returned from a call to
-   *          {@link #content()}. Never null.
+   *          {@link #produceContent(CreationalCallback)}. Never null.
    * @param state
    *          the state of the page, parsed from the history token on the URL.
    *          Never null.
@@ -68,7 +68,7 @@ public interface PageNode<W extends Widget> {
    *
    * @param widget
    *          the widget instance that was just returned from a call to
-   *          {@link #content()}. Never null.
+   *          {@link #produceContent(CreationalCallback)}. Never null.
    * @param state
    *          the state of the page, parsed from the history token on the URL.
    *          Never null.
@@ -85,7 +85,7 @@ public interface PageNode<W extends Widget> {
    * @param widget
    *          the widget instance (which is currently in the navigation content
    *          panel) that was previously used in the call to
-   *          {@link #pageShowing(Widget, Multimap)}. Never null.
+   *          {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
    */
   public void pageHiding(W widget);
 
@@ -99,7 +99,7 @@ public interface PageNode<W extends Widget> {
    * @param widget
    *          the widget instance (which was in the navigation content
    *          panel) that was previously used in the call to
-   *          {@link #pageShowing(Widget, Multimap)}. Never null.
+   *          {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
    */
   public void pageHidden(W widget);
 

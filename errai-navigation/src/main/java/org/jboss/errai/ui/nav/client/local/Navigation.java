@@ -6,8 +6,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
@@ -39,7 +39,7 @@ public class Navigation {
   /**
    * Encapsulates a navigation request to another page.
    */
-  private static class Request<W extends Widget> {
+  private static class Request<W extends IsWidget> {
 
     PageNode<W> pageNode;
 
@@ -69,7 +69,7 @@ public class Navigation {
 
   private final NavigationGraph navGraph = GWT.create(NavigationGraph.class);
 
-  protected PageNode<Widget> currentPage;
+  protected PageNode<IsWidget> currentPage;
 
   private HandlerRegistration historyHandlerRegistration;
 
@@ -94,12 +94,12 @@ public class Navigation {
       public void onValueChange(ValueChangeEvent<String> event) {
 
         HistoryToken token = HistoryToken.parse(event.getValue());
-        PageNode<Widget> toPage = navGraph.getPage(token.getPageName());
+        PageNode<IsWidget> toPage = navGraph.getPage(token.getPageName());
         if (toPage == null) {
           GWT.log("Got invalid page name \"" + token.getPageName() + "\" in URL history token. Falling back to default page.");
           toPage = navGraph.getPage(""); // guaranteed at compile time to exist
         }
-        navigate(new Request<Widget>(toPage, token));
+        navigate(new Request<IsWidget>(toPage, token));
 
       }
     });
@@ -131,7 +131,7 @@ public class Navigation {
    *          annotated with {@code @PageState} in the widget class, but this is
    *          not required.
    */
-  public <W extends Widget> void goTo(Class<W> toPage, Multimap<String,String> state) {
+  public <W extends IsWidget> void goTo(Class<W> toPage, Multimap<String,String> state) {
     PageNode<W> toPageInstance = navGraph.getPage(toPage);
     navigate(toPageInstance, state);
   }
@@ -142,7 +142,7 @@ public class Navigation {
    * @param toPage the name of the page node to lookup and display.
    */
   public void goTo(String toPage) {
-    PageNode<? extends Widget> toPageInstance = navGraph.getPage(toPage);
+    PageNode<? extends IsWidget> toPageInstance = navGraph.getPage(toPage);
     navigate(toPageInstance);
   }
 
@@ -163,15 +163,15 @@ public class Navigation {
    * @param pageRole the role to find PageNodes by
    * @return All the pageNodes of the pages that have the specific pageRole.
    */
-  public Collection<PageNode<? extends Widget>> getPagesByRole(Class<? extends PageRole> pageRole) {
+  public Collection<PageNode<? extends IsWidget>> getPagesByRole(Class<? extends PageRole> pageRole) {
     return navGraph.getPagesByRole(pageRole);
   }
 
-  private <W extends Widget> void navigate(PageNode<W> toPageInstance) {
+  private <W extends IsWidget> void navigate(PageNode<W> toPageInstance) {
     navigate(toPageInstance, ImmutableListMultimap.<String, String>of());
   }
 
-  private <W extends Widget> void navigate(PageNode<W> toPageInstance, Multimap<String, String> state) {
+  private <W extends IsWidget> void navigate(PageNode<W> toPageInstance, Multimap<String, String> state) {
     HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
     navigate(new Request<W>(toPageInstance, token));
   }
@@ -181,7 +181,7 @@ public class Navigation {
    * the given PageNode from the given state token, then makes its widget
    * visible in the content area.
    */
-  private <W extends Widget> void navigate(Request<W> request) {
+  private <W extends IsWidget> void navigate(Request<W> request) {
     if (locked) {
       queuedRequests.add(request);
       return;
@@ -220,7 +220,7 @@ public class Navigation {
    * Hide the page currently displayed and call the associated lifecycle methods.
    */
   private void hideCurrentPage() {
-    Widget currentWidget = contentPanel.getWidget();
+    IsWidget currentWidget = contentPanel.getWidget();
 
     // Note: Optimized out in production mode
     if (currentPage != null && currentWidget == null) {
@@ -244,7 +244,7 @@ public class Navigation {
   /**
    * Show the given page and call the associated lifecycle methods.
    */
-  private <W extends Widget> void showPage(final PageNode<W> toPage, final HistoryToken state) {
+  private <W extends IsWidget> void showPage(final PageNode<W> toPage, final HistoryToken state) {
     toPage.produceContent(new CreationalCallback<W>() {
       @Override
       public void callback(W widget) {
@@ -264,7 +264,7 @@ public class Navigation {
    * Return the current page that is being displayed.
    * @return the current page
    */
-  public PageNode<Widget> getCurrentPage() {
+  public PageNode<IsWidget> getCurrentPage() {
     return currentPage;
   }
 
@@ -278,7 +278,7 @@ public class Navigation {
    *         because this Navigation instance may replace its contents at any
    *         time.
    */
-  public Widget getContentPanel() {
+  public IsWidget getContentPanel() {
     return contentPanel;
   }
 

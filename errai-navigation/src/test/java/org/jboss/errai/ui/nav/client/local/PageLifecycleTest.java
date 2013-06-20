@@ -11,6 +11,7 @@ import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageA;
 import org.jboss.errai.ui.nav.client.local.testpages.PageAWithRedirect;
 import org.jboss.errai.ui.nav.client.local.testpages.PageBWithRedirect;
+import org.jboss.errai.ui.nav.client.local.testpages.PageC;
 import org.jboss.errai.ui.nav.client.local.testpages.PageCWithRedirect;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithDoubleRedirect;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithException;
@@ -294,6 +295,10 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     navigation.goTo(PageA.class, ImmutableMultimap.<String, String>of());
 
     assertEquals("PageA", History.getToken());
+  }
+
+  public void testIt() {
+    navigation.goTo(PageC.class, ImmutableMultimap.<String, String>of());
   }
 
 }
