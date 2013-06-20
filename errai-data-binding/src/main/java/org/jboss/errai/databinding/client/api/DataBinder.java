@@ -112,7 +112,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          Specifies the origin of the initial state of both model and UI widget. Null if no
    *          initial state synchronization should be carried out.
    */
-  public static <T> DataBinder<T> forType(Class<T> modelType, InitialState initialState) {
+  public static <T> DataBinder<T> forType(Class<T> modelType,
+          InitialState initialState) {
     return new DataBinder<T>(modelType, initialState);
   }
 
@@ -137,7 +138,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          initial state synchronization should be carried out.
    */
   public static <T> DataBinder<T> forModel(T model, InitialState initialState) {
-    return new DataBinder<T>(maybeUnwrapModel(model), initialState);
+    return new DataBinder<T>(model, initialState);
   }
 
   /**
@@ -183,7 +184,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *           If the provided {@code widget} is already bound to a property of the model.
    */
   public DataBinder<T> bind(final Widget widget, final String property,
-      @SuppressWarnings("rawtypes") final Converter converter) {
+          @SuppressWarnings("rawtypes") final Converter converter) {
 
     Assert.notNull(widget);
     Assert.notNull(property);
@@ -260,19 +261,20 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   public T setModel(T model, InitialState initialState) {
     Assert.notNull(model);
 
-    // ensure that we do not proxy the model twice
-    model = maybeUnwrapModel(model);
+    // create or reuse existing proxy
+    BindableProxy<T> newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model,
+            (initialState != null) ? initialState : getAgent().getInitialState());
 
-    // create a new proxy and copy the bindings
-    BindableProxy<T> newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(
-        model, (initialState != null) ? initialState : getAgent().getInitialState());
+    // if we got a new proxy copy the existing state and bindings
+    if (newProxy != this.model) {
+      newProxy.getProxyAgent().copyStateFrom(getAgent());
 
-    newProxy.getProxyAgent().copyStateFrom(getAgent());
+      // unbind the old proxied model
+      unbind();
 
-    // unbind the old proxied model
-    unbind();
-
-    this.model = (T) newProxy;
+      this.model = (T) newProxy;
+    }
+    
     return this.model;
   }
 
@@ -309,21 +311,15 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+  public <P> void addPropertyChangeHandler(String property,
+          PropertyChangeHandler<P> handler) {
     getAgent().addPropertyChangeHandler(property, handler);
   }
 
   @Override
-  public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
+  public void removePropertyChangeHandler(String property,
+          PropertyChangeHandler<?> handler) {
     getAgent().removePropertyChangeHandler(property, handler);
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <M> M maybeUnwrapModel(M model) {
-    if (model instanceof BindableProxy) {
-      model = (M) ((BindableProxy<M>) model).unwrap();
-    }
-    return model;
   }
 
   @SuppressWarnings("unchecked")
