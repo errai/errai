@@ -40,37 +40,42 @@ public class SecurityRoleInterceptor extends org.jboss.errai.security.client.loc
     }
   }
 
-  private RequireRoles getRequiredRoleAnnotation(Class<?> service, Method method) {
-    final Class<?>[] interfaces = service.getInterfaces();
-
-    RequireRoles requiredRoles = null;
-    if (interfaces.length > 0) {
-      for (Class<?> anInterface : interfaces) {
-        requiredRoles = getRequireRoles(method, anInterface);
-      }
-    } else {
-      requiredRoles = getRequireRoles(method, service);
+  private RequireRoles getRequiredRoleAnnotation(Class<?> aClass, Method method) {
+    RequireRoles requireRoles = getRequiredRoleAnnotation(method.getAnnotations());
+    if (requireRoles != null) {
+      return requireRoles;
     }
 
-    if (requiredRoles == null) {
+    for (Class<?> aInterface : aClass.getInterfaces()) {
+      requireRoles = getRequireRoles(aInterface, method);
+    }
+
+    if (requireRoles == null) {
       throw new IllegalArgumentException("could not find method that was intercepted!");
     }
 
-    return requiredRoles;
+    return requireRoles;
   }
 
-  private RequireRoles getRequireRoles(Method method, Class<?> aClass) {
-    RequireRoles requiredRoles = getRequiredRoleAnnotation(method.getAnnotations());
-    if (requiredRoles == null) {
-      for (Method m : aClass.getMethods()) {
-        if (m.getName().equals(method.getName())
-                && Arrays.equals(m.getParameterTypes(), method.getParameterTypes())) {
-          requiredRoles = getRequiredRoleAnnotation(m.getAnnotations());
-          if (requiredRoles != null)
-            break;
-        }
+  private RequireRoles getRequireRoles(Class<?> aClass, Method searchMethod) {
+    for (Method method : aClass.getMethods()) {
+      final RequireRoles requireRoles = getRequireRoles(searchMethod, method);
+      if (requireRoles != null) {
+        return requireRoles;
       }
     }
+
+    return null;
+  }
+
+  private RequireRoles getRequireRoles(Method searchMethod, Method method) {
+    RequireRoles requiredRoles = null;
+
+    if (searchMethod.getName().equals(method.getName())
+            && Arrays.equals(searchMethod.getParameterTypes(), method.getParameterTypes())) {
+      requiredRoles = getRequiredRoleAnnotation(method.getAnnotations());
+    }
+
     return requiredRoles;
   }
 }
