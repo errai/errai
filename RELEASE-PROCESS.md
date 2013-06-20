@@ -57,7 +57,7 @@ Release Steps
 1. Ask Maven to update the version number in all the pom.xml files:
    
         % cd $errai_root_dir
-        % ./updateVersions.sh x.y.z.Final
+        % ./updateVersions.sh a.b.c.Final x.y.z.Final
    
    Afterward, verify that all subprojects reference the new parent pom's version:
    
@@ -68,7 +68,7 @@ Release Steps
 1. Build and package the release. These are the bits that will be uploaded to nexus.
    Expect this to take about 4 minutes, depending on network speed.
 
-        % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true
+        % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
 
 1. Publish new quickstart archetypes to Nexus repo (both snapshots and released version)
 
@@ -82,8 +82,6 @@ Release Steps
    Then publish the archetypes to the repository:
    
         % mvn clean deploy    
-  * Note that the kitschensink archetype is tested automatically. For the test to work,
-     AS7 has to be running.
   * Now test the archetypes you just installed (use instructions from quickstart guides)
   * Check generated app's pom.xml for correct version
  
