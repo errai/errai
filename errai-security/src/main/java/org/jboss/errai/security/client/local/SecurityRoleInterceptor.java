@@ -6,14 +6,15 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.Role;
+import org.jboss.errai.security.shared.SecurityError;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
  * Will 'redirect' users that try to make use of services annotated with {@link RequireRoles} that are not logged in
- * or do not have specified role go to the {@link org.jboss.errai.security.shared.LoginPage}. In other cases the
- * service call will proceed
+ * to the {@link org.jboss.errai.security.shared.LoginPage} or do not have specified role
+ * go to the {@link org.jboss.errai.security.shared.SecurityError}. In other cases the service call will proceed
  *
  * @see org.jboss.errai.security.shared.LoginPage
  * @author edewit@redhat.com
@@ -25,10 +26,12 @@ public class SecurityRoleInterceptor extends SecurityInterceptor{
       @Override
       public void callback(final List<Role> roles) {
         final RequireRoles annotation = getRequiredRoleAnnotation(context.getAnnotations());
-        if (hasAllRoles(roles, annotation.value())) {
+        if (roles == null) {
+          navigateToLoginPage();
+        } else if (hasAllRoles(roles, annotation.value())) {
           proceed(context);
         } else {
-          navigateToLoginPage();
+          navigateToPage(SecurityError.class);
         }
       }
     }, AuthenticationService.class);

@@ -4,6 +4,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
+import org.jboss.errai.ui.nav.client.local.PageRequest;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -38,5 +39,10 @@ public class JaasAuthenticationService implements AuthenticationService {
   @Override
   public List<Role> getRoles() {
     return null;
+  }
+
+  @Override
+  public boolean hasPermission(PageRequest pageRequest) {
+    return false;
   }
 }

@@ -1,9 +1,8 @@
 package org.jboss.errai.security.server;
 
+import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
 import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.RequireRoles;
-import org.picketlink.deltaspike.core.util.metadata.AnnotationInstanceProvider;
-import org.picketlink.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AnnotatedMethod;

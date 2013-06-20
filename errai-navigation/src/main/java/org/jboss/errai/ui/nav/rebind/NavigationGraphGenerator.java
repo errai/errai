@@ -4,13 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -19,11 +13,9 @@ import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
+import org.jboss.errai.codegen.builder.*;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -43,6 +35,7 @@ import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.ui.nav.client.local.*;
@@ -95,7 +88,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                 "of Widget.");
       }
       Page annotation = pageClass.getAnnotation(Page.class);
-      String pageName = annotation.path().equals("") ? pageClass.getName() : annotation.path();
+      String pageName = getPageName(pageClass);
       List<Class<? extends PageRole>> annotatedPageRoles = Arrays.asList(annotation.role());
 
       MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
@@ -156,6 +149,11 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     }
 
     return out;
+  }
+
+  private String getPageName(MetaClass pageClass) {
+    final Page annotation = pageClass.getAnnotation(Page.class);
+    return annotation.path().equals("") ? pageClass.getName() : annotation.path();
   }
 
   private void validateDefaultPagePresent(Collection<MetaClass> pages, Multimap<Class<?>, MetaClass> pageRoles) {
@@ -330,6 +328,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
               .body();
 
     int idx = 0;
+
+    method.append(Stmt.declareFinalVariable("pageState", Map.class, new HashMap<String, Object>()));
     for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
       PageState psAnno = field.getAnnotation(PageState.class);
       String fieldName = field.getName();
@@ -372,36 +372,50 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
         // for (String fv{idx} : state.get({fieldName}))
         method.append(
-            Stmt.loadVariable("state").invoke("getState").invoke("get", queryParamName).foreach("elem", Object.class)
-                .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
+                Stmt.loadVariable("state").invoke("getState").invoke("get", queryParamName).foreach("elem", Object.class)
+                        .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
+                        .append(
+                                Stmt.loadVariable(fieldName).invoke("add",
+                                        paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
                 .append(
-                    Stmt.loadVariable(fieldName).invoke("add",
-                        paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
-                .finish()
-            );
+                        Stmt.loadVariable("pageState").invoke(
+                                "put", fieldName, Stmt.loadVariable(fieldName)))
+                        .finish()
+        );
         method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"),
-            Stmt.loadVariable(fieldName)));
+                Stmt.loadVariable(fieldName)));
       }
       else {
         method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke(
-            "getState").invoke("get", queryParamName)));
+                "getState").invoke("get", queryParamName)));
         method.append(
-            If.cond(
-                Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
-                .append(
-                    Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"),
-                        defaultValueStatement(erasedFieldType))).finish()
-                .else_()
-                .append(
-                    Stmt.loadVariable("this").invoke(
-                        injectorName,
-                        Stmt.loadVariable("widget"),
-                        paramFromStringStatement(erasedFieldType, Stmt.loadVariable("fv" + idx).invoke("iterator")
-                            .invoke("next"))))
-                .finish()
-            );
+                If.cond(
+                        Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
+                        .append(
+                                Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"),
+                                        defaultValueStatement(erasedFieldType))).finish()
+                        .else_()
+                        .append(
+                                Stmt.loadVariable("this").invoke(
+                                        injectorName,
+                                        Stmt.loadVariable("widget"),
+                                        paramFromStringStatement(erasedFieldType, Stmt.loadVariable("fv" + idx).invoke("iterator")
+                                                .invoke("next"))))
+                        .append(
+                                Stmt.loadVariable("pageState").invoke(
+                                        "put", fieldName, Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next")))
+                        .finish()
+        );
       }
       idx++;
+    }
+
+    if (addPrivateAccessors) {
+      method.append(Stmt.invokeStatic(CDI.class, "fireEvent",
+              Stmt.newObject(NavigationEvent.class).withParameters(
+                      Stmt.newObject(PageRequest.class).withParameters(getPageName(pageClass), Stmt.loadVariable("pageState"))
+              )
+      ));
     }
 
     checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, true);

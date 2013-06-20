@@ -14,7 +14,8 @@
 
   <properties>
     <weld.version>1.1.6.Final</weld.version>
-    <picketlink.version>3.0.0.Beta1</picketlink.version>
+    <picketlink.version>2.5.0.Beta4</picketlink.version>
+    <deltaspike.version>0.4</deltaspike.version>
   </properties>
 
   <dependencyManagement>
@@ -81,28 +82,28 @@
 
     <dependency>
       <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-core-api</artifactId>
+      <artifactId>picketlink-api</artifactId>
       <version>${picketlink.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-core-impl</artifactId>
+      <artifactId>picketlink-impl</artifactId>
       <version>${picketlink.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-idm-api</artifactId>
-      <version>${picketlink.version}</version>
+      <groupId>org.apache.deltaspike.core</groupId>
+      <artifactId>deltaspike-core-api</artifactId>
+      <version>${deltaspike.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-idm-impl</artifactId>
-      <version>${picketlink.version}</version>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.1.26</version>
     </dependency>
 
     <dependency>

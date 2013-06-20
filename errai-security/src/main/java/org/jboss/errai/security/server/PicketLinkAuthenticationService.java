@@ -3,10 +3,14 @@ package org.jboss.errai.security.server;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.*;
 import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.Role;
+import org.jboss.errai.security.shared.User;
+import org.jboss.errai.ui.nav.client.local.PageRequest;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.credential.Password;
+import org.picketlink.idm.model.*;
 import org.picketlink.idm.query.IdentityQuery;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -49,7 +53,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
       throw new SecurityException();
     }
 
-    loggedInEventSource.fire(new LoggedInEvent(createUser(identity.getUser())));
+    loggedInEventSource.fire(new LoggedInEvent(createUser((org.picketlink.idm.model.User) identity.getAgent())));
   }
 
 
@@ -79,24 +83,30 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   @Override
   public User getUser() {
     if (identity.isLoggedIn()) {
-      return createUser(identity.getUser());
+      return createUser((org.picketlink.idm.model.User) identity.getAgent());
     }
     return null;
   }
 
   @Override
   public List<Role> getRoles() {
-    List<Role> roles = new ArrayList<Role>();
+    List<Role> roles = null;
 
     if (identity.isLoggedIn()) {
       IdentityQuery<org.picketlink.idm.model.Role> query =
               identityManager.createIdentityQuery(org.picketlink.idm.model.Role.class);
-      query.setParameter(org.picketlink.idm.model.Role.ROLE_OF, identity.getUser());
+      query.setParameter(org.picketlink.idm.model.Role.ROLE_OF, identity.getAgent());
+      roles = new ArrayList<Role>();
       for (org.picketlink.idm.model.Role role : query.getResultList()) {
         roles.add(new Role(role.getName()));
       }
     }
 
     return roles;
+  }
+
+  @Override
+  public boolean hasPermission(PageRequest pageRequest) {
+    return identity.hasPermission(pageRequest, "show");
   }
 }
