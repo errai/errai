@@ -12,7 +12,6 @@ import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageShown;
 import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.util.state.State;
 
 import javax.enterprise.context.ApplicationScoped;
 
