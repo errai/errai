@@ -127,7 +127,7 @@ public class ItemForm extends Composite {
         item.setAddedOn(new Date());
 
         groceryList.getItems().add(item);
-        em.persist(groceryList);
+        em.merge(groceryList);
         em.flush();
 
         if (afterSaveAction != null) {

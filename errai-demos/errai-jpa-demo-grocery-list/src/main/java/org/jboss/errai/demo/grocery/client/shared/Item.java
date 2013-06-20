@@ -16,10 +16,17 @@
  */
 package org.jboss.errai.demo.grocery.client.shared;
 
-import org.jboss.errai.databinding.client.api.Bindable;
-
-import javax.persistence.*;
 import java.util.Date;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+
+import org.jboss.errai.databinding.client.api.Bindable;
 
 @Bindable
 @Entity
@@ -33,12 +40,12 @@ public class Item {
 
     private String name;
 
-    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
+    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
     private Department department;
 
     private String comment;
 
-    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
+    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
     private User addedBy;
 
     public User getAddedBy() {
