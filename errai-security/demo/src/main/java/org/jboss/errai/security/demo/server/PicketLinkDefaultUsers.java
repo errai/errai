@@ -23,31 +23,35 @@ public class PicketLinkDefaultUsers {
   /**
    * <p>Loads some users during the first construction.</p>
    */
-  //TODO this entire initialization code will be removed
   @PostConstruct
   public void create() {
 
-    User user = new SimpleUser("john");
+    User john = new SimpleUser("john");
 
-    user.setEmail("john@doe.com");
-    user.setFirstName("John");
-    user.setLastName("Doe");
+    john.setEmail("john@doe.com");
+    john.setFirstName("John");
+    john.setLastName("Doe");
 
-        /*
-         * Note: Password will be encoded in SHA-512 with SecureRandom-1024 salt
-         * See http://lists.jboss.org/pipermail/security-dev/2013-January/000650.html for more information
-         */
-    this.identityManager.add(user);
-    this.identityManager.updateCredential(user, new Password("123"));
+    User hacker = new SimpleUser("hacker");
+
+    hacker.setEmail("hacker@illegal.ru");
+    hacker.setFirstName("Hacker");
+    hacker.setLastName("anonymous");
+    
+    identityManager.add(john);
+    identityManager.add(hacker);
+    final Password defaultPassword = new Password("123");
+    identityManager.updateCredential(john, defaultPassword);
+    identityManager.updateCredential(hacker, defaultPassword);
 
     Role roleDeveloper = new SimpleRole("simple");
     Role roleAdmin = new SimpleRole("admin");
 
-    this.identityManager.add(roleDeveloper);
-    this.identityManager.add(roleAdmin);
+    identityManager.add(roleDeveloper);
+    identityManager.add(roleAdmin);
 
-    identityManager.grantRole(user, roleDeveloper);
-    identityManager.grantRole(user, roleAdmin);
+    identityManager.grantRole(john, roleDeveloper);
+    identityManager.grantRole(john, roleAdmin);
 
   }
 

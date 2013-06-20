@@ -5,6 +5,7 @@ import org.jboss.errai.security.shared.*;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.User;
+import org.jboss.errai.ui.nav.client.local.PageRequest;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.IdentityManager;
@@ -101,5 +102,10 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     }
 
     return roles;
+  }
+
+  @Override
+  public boolean hasPermission(PageRequest pageRequest) {
+    return identity.hasPermission(pageRequest, "show");
   }
 }

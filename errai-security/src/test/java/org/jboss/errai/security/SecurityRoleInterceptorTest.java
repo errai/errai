@@ -172,5 +172,10 @@ public class SecurityRoleInterceptorTest {
       remoteCallback.callback(roleList);
       return roleList;
     }
+
+    @Override
+    public boolean hasPermission(PageRequest pageRequest) {
+      return false;
+    }
   }
 }

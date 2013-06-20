@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
 import org.jboss.errai.security.shared.*;
+import org.jboss.errai.ui.nav.client.local.PageRequest;
 
 import java.util.List;
 
@@ -43,5 +44,11 @@ class SpyAbstractRpcProxy extends AbstractRpcProxy implements AuthenticationServ
 
   public Integer getCallCount(String method) {
     return calls.count(method);
+  }
+
+  @Override
+  public boolean hasPermission(PageRequest pageRequest) {
+    calls.add("hasPermission");
+    return false;
   }
 }

@@ -1,6 +1,7 @@
 package org.jboss.errai.security.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.ui.nav.client.local.PageRequest;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface AuthenticationService {
   User getUser();
 
   List<Role> getRoles();
+
+  boolean hasPermission(PageRequest pageRequest);
 }
