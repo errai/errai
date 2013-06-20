@@ -7,6 +7,7 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.shared.LoginPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 
 import static org.jboss.errai.security.shared.LoginPage.CURRENT_PAGE_COOKIE;
 
@@ -26,8 +27,13 @@ public abstract class SecurityInterceptor implements RemoteCallInterceptor<Remot
   }
 
   protected void navigateToLoginPage() {
+    navigateToPage(LoginPage.class);
+  }
+
+  protected void navigateToPage(Class<? extends UniquePageRole> roleClass) {
     Navigation navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
     Cookies.setCookie(CURRENT_PAGE_COOKIE, navigation.getCurrentPage().name());
-    navigation.goToWithRole(LoginPage.class);
+    navigation.goToWithRole(roleClass);
   }
+
 }

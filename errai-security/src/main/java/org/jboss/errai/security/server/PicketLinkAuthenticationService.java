@@ -90,12 +90,13 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
 
   @Override
   public List<Role> getRoles() {
-    List<Role> roles = new ArrayList<Role>();
+    List<Role> roles = null;
 
     if (identity.isLoggedIn()) {
       IdentityQuery<org.picketlink.idm.model.Role> query =
               identityManager.createIdentityQuery(org.picketlink.idm.model.Role.class);
       query.setParameter(org.picketlink.idm.model.Role.ROLE_OF, identity.getAgent());
+      roles = new ArrayList<Role>();
       for (org.picketlink.idm.model.Role role : query.getResultList()) {
         roles.add(new Role(role.getName()));
       }
