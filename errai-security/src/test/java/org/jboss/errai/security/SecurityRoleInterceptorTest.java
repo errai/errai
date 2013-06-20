@@ -8,6 +8,7 @@ import org.jboss.errai.security.server.SecurityRoleInterceptor;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.*;
 import org.jboss.errai.ui.nav.client.local.PageRequest;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -110,7 +111,7 @@ public class SecurityRoleInterceptorTest {
     final Boolean[] redirectToLoginPage = {Boolean.FALSE};
     interceptor = new SecurityRoleInterceptor(authenticationService) {
       @Override
-      protected void navigateToLoginPage() {
+      protected void navigateToPage(Class<? extends UniquePageRole> roleClass) {
         redirectToLoginPage[0] = Boolean.TRUE;
       }
     };
