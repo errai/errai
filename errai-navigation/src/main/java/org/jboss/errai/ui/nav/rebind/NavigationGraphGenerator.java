@@ -47,7 +47,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Generates the GeneratedNavigationGraph class based on {@code @Page} and {@code @DefaultPage}
@@ -82,10 +82,9 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
     for (MetaClass pageClass : pages) {
-      if (!pageClass.isAssignableTo(Widget.class)) {
+      if (!pageClass.isAssignableTo(IsWidget.class)) {
         throw new GenerationException(
-            "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must be a subtype " +
-                "of Widget.");
+            "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must implement IsWidget");
       }
       Page annotation = pageClass.getAnnotation(Page.class);
       String pageName = getPageName(pageClass);

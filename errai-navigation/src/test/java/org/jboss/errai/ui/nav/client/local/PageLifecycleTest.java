@@ -1,16 +1,14 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.History;
-import com.google.web.bindery.event.shared.HandlerRegistration;
+import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.lifecycleTracer;
+
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageA;
 import org.jboss.errai.ui.nav.client.local.testpages.PageAWithRedirect;
 import org.jboss.errai.ui.nav.client.local.testpages.PageBWithRedirect;
+import org.jboss.errai.ui.nav.client.local.testpages.PageC;
 import org.jboss.errai.ui.nav.client.local.testpages.PageCWithRedirect;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithDoubleRedirect;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithException;
@@ -19,7 +17,11 @@ import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedLifecycleM
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLifecycleMethods;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithPageShowingHistoryTokenMethod;
 
-import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.lifecycleTracer;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class PageLifecycleTest extends AbstractErraiCDITest {
 
@@ -303,7 +305,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
   }
 
   public void testPageWithException() {
-    PageWithException page = beanManager.lookupBean(PageWithException.class).getInstance();
+    beanManager.lookupBean(PageWithException.class).getInstance();
 
     try {
       navigation.goTo(PageWithException.class, ImmutableMultimap.<String, String>of());
@@ -315,4 +317,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals("PageA", History.getToken());
   }
 
+  public void testIt() {
+    navigation.goTo(PageC.class, ImmutableMultimap.<String, String>of());
+  }
 }

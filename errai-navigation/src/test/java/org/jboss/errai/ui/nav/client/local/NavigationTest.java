@@ -9,6 +9,7 @@ import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
+import org.jboss.errai.ui.nav.client.local.testpages.PageIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
 
@@ -99,4 +100,9 @@ public class NavigationTest extends AbstractErraiCDITest {
     assertNotNull(pageByRole);
     assertEquals("PageA", pageByRole.name());
   }
+
+  public void testIsWidgetPage() {
+    navigation.goTo(PageIsWidget.class, ImmutableMultimap.<String, String>of());
+  }
+
 }
