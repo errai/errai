@@ -19,6 +19,6 @@ public class AdminPagePermissionResolver implements RequestPermissionResolver {
         return PermissionStatus.DENY;
       }
     }
-    return PermissionStatus.NOT_APPLICABLE;
+    return PermissionStatus.ALLOW;
   }
 }

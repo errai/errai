@@ -46,8 +46,9 @@ public class SecurityRoleInterceptor extends org.jboss.errai.security.client.loc
       return requireRoles;
     }
 
-    for (Class<?> aInterface : aClass.getInterfaces()) {
-      requireRoles = getRequireRoles(aInterface, method);
+    Class<?>[] interfaces = aClass.getInterfaces();
+    for (int i = 0, interfacesLength = interfaces.length; i < interfacesLength && requireRoles == null; i++) {
+      requireRoles = getRequireRoles(interfaces[i], method);
     }
 
     if (requireRoles == null) {
