@@ -2,7 +2,7 @@ package org.jboss.errai.ui.nav.client.local.spi;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -36,8 +36,8 @@ public abstract class NavigationGraph {
    * Maps page names to the classes that implement them. The subclass's
    * constructor is responsible for populating this map.
    */
-  protected final Map<String, PageNode<? extends Widget>> pagesByName = new HashMap<String, PageNode<? extends Widget>>();
-  protected final Multimap<Class<? extends PageRole>, PageNode<? extends Widget>> pagesByRole = ArrayListMultimap.create();
+  protected final Map<String, PageNode<? extends IsWidget>> pagesByName = new HashMap<String, PageNode<? extends IsWidget>>();
+  protected final Multimap<Class<? extends PageRole>, PageNode<? extends IsWidget>> pagesByRole = ArrayListMultimap.create();
 
 
   /**
@@ -49,7 +49,7 @@ public abstract class NavigationGraph {
    * @param name The page name, as defined by the implementation of page.
    * @return The appropriate instance of the page.
    */
-  public <W extends Widget> PageNode<W> getPage(String name) {
+  public <W extends IsWidget> PageNode<W> getPage(String name) {
     @SuppressWarnings("unchecked")
     PageNode<W> page = (PageNode<W>) pagesByName.get(name);
     if (page == null) {
@@ -67,9 +67,9 @@ public abstract class NavigationGraph {
    * @param type The Class object for the bean that implements the page.
    * @return The appropriate instance of the page.
    */
-  public <W extends Widget> PageNode<W> getPage(Class<W> type) {
+  public <W extends IsWidget> PageNode<W> getPage(Class<W> type) {
     // TODO this could be made more efficient if we had a pagesByWidgetType map
-    for (Entry<String, PageNode<? extends Widget>> e : pagesByName.entrySet()) {
+    for (Entry<String, PageNode<? extends IsWidget>> e : pagesByName.entrySet()) {
       if (e.getValue().contentType().equals(type)) {
         @SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
         PageNode<W> page = (PageNode<W>) e.getValue();
@@ -86,12 +86,12 @@ public abstract class NavigationGraph {
    * @param role the role used to lookup the pages
    * @return all pages that have the role set.
    */
-  public Collection<PageNode<? extends Widget>> getPagesByRole(Class<? extends PageRole> role) {
+  public Collection<PageNode<? extends IsWidget>> getPagesByRole(Class<? extends PageRole> role) {
     return pagesByRole.get(role);
   }
 
   public PageNode getPageByRole(Class<? extends UniquePageRole> role) {
-    final Collection<PageNode<? extends Widget>> pageNodes = pagesByRole.get(role);
+    final Collection<PageNode<? extends IsWidget>> pageNodes = pagesByRole.get(role);
     if (pageNodes.size() > 1) {
       throw new IllegalArgumentException("Role '" + role + "' is not unique multiple pages: " + pageNodes + " found");
     }
@@ -106,7 +106,7 @@ public abstract class NavigationGraph {
   }
 
   @SuppressWarnings("UnusedDeclaration")
-  protected static final class PageNodeCreationalCallback<W extends Widget> implements CreationalCallback<PageNode<W>> {
+  protected static final class PageNodeCreationalCallback<W extends IsWidget> implements CreationalCallback<PageNode<W>> {
 
     @Override
     public void callback(PageNode<W> beanInstance) {
