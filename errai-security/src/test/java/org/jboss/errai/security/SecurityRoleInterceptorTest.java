@@ -7,11 +7,13 @@ import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.security.server.SecurityRoleInterceptor;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.*;
+import org.jboss.errai.ui.nav.client.local.PageRequest;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.interceptor.InvocationContext;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +42,7 @@ public class SecurityRoleInterceptorTest {
 
     // when
     when(context.getTarget()).thenReturn(new Service());
-    when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
+    when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
     when(authenticationService.getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
     interceptor.aroundInvoke(context);
 
@@ -74,9 +76,24 @@ public class SecurityRoleInterceptorTest {
 
   private void invokeTest(InvocationContext context, Object service) throws Exception {
     when(context.getTarget()).thenReturn(service);
-    when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
+    when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
     when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
     interceptor.aroundInvoke(context);
+  }
+
+  @Test(expected = SecurityException.class)
+  public void shouldFindMethodWhenOnInterface() throws Exception {
+    // given
+    InvocationContext context = mock(InvocationContext.class);
+
+    // when
+    when(context.getTarget()).thenReturn(new Service());
+    when(context.getMethod()).thenReturn(Service.class.getMethod("annotatedServiceMethod"));
+    when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
+    interceptor.aroundInvoke(context);
+
+    // then
+    fail("security exception should have been thrown");
   }
 
   @Test
@@ -99,20 +116,26 @@ public class SecurityRoleInterceptorTest {
     };
 
     //when
-    when(context.getAnnotations()).thenReturn(getClass().getMethod("annotatedServiceMethod").getAnnotations());
+    when(context.getAnnotations()).thenReturn(getAnnotatedServiceMethod().getAnnotations());
     interceptor.aroundInvoke(context);
 
     //then
     assertTrue(redirectToLoginPage[0]);
   }
 
+  private Method getAnnotatedServiceMethod() throws NoSuchMethodException {
+    return ServiceInterface.class.getMethod("annotatedServiceMethod");
+  }
 
-  @RequireRoles("admin")
-  @SuppressWarnings("UnusedDeclaration")
-  public void annotatedServiceMethod() {}
-
-  public static interface  ServiceInterface {}
-  public static class Service implements ServiceInterface {}
+  public static interface  ServiceInterface {
+    @RequireRoles("admin")
+    void annotatedServiceMethod();
+  }
+  public static class Service implements ServiceInterface {
+    @Override
+    public void annotatedServiceMethod() {
+    }
+  }
 
   @SuppressWarnings("unchecked")
   public static class MockAuthenticationService extends AbstractRpcProxy implements AuthenticationService {

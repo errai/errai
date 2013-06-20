@@ -59,14 +59,13 @@ public class SecurityRoleInterceptor extends org.jboss.errai.security.client.loc
     return requiredRoles;
   }
 
-  private RequireRoles getRequireRoles(Method method, Class<?> anInterface) {
-    RequireRoles requiredRoles;
-    requiredRoles = getRequiredRoleAnnotation(method.getAnnotations());
+  private RequireRoles getRequireRoles(Method method, Class<?> aClass) {
+    RequireRoles requiredRoles = getRequiredRoleAnnotation(method.getAnnotations());
     if (requiredRoles == null) {
-      for (Method m : anInterface.getMethods()) {
+      for (Method m : aClass.getMethods()) {
         if (m.getName().equals(method.getName())
                 && Arrays.equals(m.getParameterTypes(), method.getParameterTypes())) {
-          requiredRoles = getRequiredRoleAnnotation(method.getAnnotations());
+          requiredRoles = getRequiredRoleAnnotation(m.getAnnotations());
           if (requiredRoles != null)
             break;
         }
