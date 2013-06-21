@@ -39,14 +39,13 @@ public class BindableListWrapper<M> implements List<M> {
 
   private final List<M> list;
   private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
-
   
   public BindableListWrapper(List<M> list) {
     Assert.notNull(list);
     this.list = list;
 
     for (int i = 0; i < this.list.size(); i++) {
-      this.list.set(i, (M) maybeConvertToProxy(this.list.get(i)));
+      this.list.set(i, (M) convertToProxy(this.list.get(i)));
     }
   }
 
@@ -54,7 +53,7 @@ public class BindableListWrapper<M> implements List<M> {
   public boolean add(M element) {
     final List<M> oldValue = new ArrayList<M>(list);
 
-    element = (M) maybeConvertToProxy(element);
+    element = (M) convertToProxy(element);
     boolean b = list.add(element);
     for (BindableListChangeHandler<M> handler : handlers) {
       handler.onItemAdded(oldValue, element);
@@ -66,7 +65,7 @@ public class BindableListWrapper<M> implements List<M> {
   public void add(int index, M element) {
     final List<M> oldValue = new ArrayList<M>(list);
 
-    element = (M) maybeConvertToProxy(element);
+    element = (M) convertToProxy(element);
     list.add(index, element);
     for (BindableListChangeHandler<M> handler : handlers) {
       handler.onItemAddedAt(oldValue, index, element);
@@ -79,7 +78,7 @@ public class BindableListWrapper<M> implements List<M> {
 
     List<M> addedModels = new ArrayList<M>();
     for (M model : c) {
-      addedModels.add((M) maybeConvertToProxy(model));
+      addedModels.add((M) convertToProxy(model));
     }
 
     boolean b = list.addAll(addedModels);
@@ -99,7 +98,7 @@ public class BindableListWrapper<M> implements List<M> {
     int numAdded = list.size() - originalSize;
 
     for (int i = index; i < index + numAdded; i++) {
-      list.set(i, (M) maybeConvertToProxy(list.get(i)));
+      list.set(i, (M) convertToProxy(list.get(i)));
     }
 
     for (BindableListChangeHandler<M> handler : handlers) {
@@ -119,7 +118,7 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public boolean contains(Object o) {
-    return list.contains(maybeConvertToProxy(o));
+    return list.contains(convertToProxy(o));
   }
 
   @Override
@@ -142,7 +141,7 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public int indexOf(Object o) {
-    return list.indexOf(maybeConvertToProxy(o));
+    return list.indexOf(convertToProxy(o));
   }
 
   @Override
@@ -157,7 +156,7 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public int lastIndexOf(Object o) {
-    return list.lastIndexOf(maybeConvertToProxy(o));
+    return list.lastIndexOf(convertToProxy(o));
   }
 
   @Override
@@ -173,7 +172,7 @@ public class BindableListWrapper<M> implements List<M> {
   @Override
   public boolean remove(Object o) {
     final List<M> oldValue = new ArrayList<M>(list);
-    o = maybeConvertToProxy(o);
+    o = convertToProxy(o);
 
     int index = list.indexOf(o);
     boolean b = list.remove(o);
@@ -202,7 +201,7 @@ public class BindableListWrapper<M> implements List<M> {
 
     List<Integer> indexes = new ArrayList<Integer>();
     for (Object m : c) {
-      m = maybeConvertToProxy(m);
+      m = convertToProxy(m);
       Integer index = list.indexOf(m);
       if (!indexes.contains(index)) {
         indexes.add(index);
@@ -223,7 +222,7 @@ public class BindableListWrapper<M> implements List<M> {
   public boolean retainAll(Collection<?> c) {
     List<Object> proxies = new ArrayList<Object>();
     for (Object item : c) {
-      proxies.add(maybeConvertToProxy(item));
+      proxies.add(convertToProxy(item));
     }
     return list.retainAll(c);
   }
@@ -232,7 +231,7 @@ public class BindableListWrapper<M> implements List<M> {
   public M set(int index, M element) {
     final List<M> oldValue = new ArrayList<M>(list);
 
-    element = (M) maybeConvertToProxy(element);
+    element = (M) convertToProxy(element);
     M m = list.set(index, element);
     for (BindableListChangeHandler<M> handler : handlers) {
       handler.onItemChanged(oldValue, index, element);
@@ -269,7 +268,7 @@ public class BindableListWrapper<M> implements List<M> {
     handlers.remove(handler);
   }
   
-  private Object maybeConvertToProxy(Object element) {
+  private Object convertToProxy(Object element) {
     if (BindableProxyFactory.isBindableType(element)) {
       element = BindableProxyFactory.getBindableProxy(element, InitialState.FROM_MODEL);
     }

@@ -32,10 +32,9 @@ public class BindableProxyFactory {
   private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders = new HashMap<Class<?>, BindableProxyProvider>();
 
   /**
-   * Returns a proxy for the provided model instance. Changes to the proxy's state will result in
+   * Returns a new proxy for the provided model instance. Changes to the proxy's state will result in
    * updates on the widget given the corresponding property was bound (see
-   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}). If the model is
-   * already proxied, return that proxy.
+   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}). 
    * 
    * @param <T>
    *          the bindable type
@@ -49,7 +48,7 @@ public class BindableProxyFactory {
   @SuppressWarnings("unchecked")
   public static <T> T getBindableProxy(T model, InitialState state) {
     if (model instanceof BindableProxy) {
-      return model;
+      model = (T) ((BindableProxy<T>) model).unwrap();
     }
 
     BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
@@ -115,13 +114,18 @@ public class BindableProxyFactory {
 
   /**
    * Checks if the type of the provided model is bindable. That's the case when a proxy provider has
-   * been generated for that type.
+   * been generated for that type (the type has been annotated or configured to be bindable).
    * 
    * @param model
    *          the object to be checked.
    * @return true if the object is bindable, otherwise false.
    */
-  public static boolean isBindableType(Object model) {
+  @SuppressWarnings("unchecked")
+  public static <T> boolean isBindableType(T model) {
+    if (model instanceof BindableProxy) {
+      model = (T) ((BindableProxy<T>) model).unwrap();
+    }
+    
     BindableProxyProvider proxyProvider = bindableProxyProviders.get(model.getClass());
     return (proxyProvider != null);
   }

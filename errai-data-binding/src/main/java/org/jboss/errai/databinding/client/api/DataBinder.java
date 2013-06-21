@@ -39,7 +39,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class DataBinder<T> implements HasPropertyChangeHandlers {
 
-  private T model;
+  private T proxy;
 
   /**
    * Creates a {@link DataBinder} for a new model instance of the provided type (see
@@ -49,7 +49,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The bindable type, must not be null.
    */
   private DataBinder(Class<T> modelType) {
-    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
+    this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
   }
 
   /**
@@ -64,7 +64,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          initial state synchronization should be carried out.
    */
   private DataBinder(Class<T> modelType, InitialState initialState) {
-    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), initialState);
+    this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), initialState);
   }
 
   /**
@@ -89,7 +89,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          initial state synchronization should be carried out.
    */
   private DataBinder(T model, InitialState initialState) {
-    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), initialState);
+    this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(model), initialState);
   }
 
   /**
@@ -112,8 +112,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          Specifies the origin of the initial state of both model and UI widget. Null if no
    *          initial state synchronization should be carried out.
    */
-  public static <T> DataBinder<T> forType(Class<T> modelType,
-          InitialState initialState) {
+  public static <T> DataBinder<T> forType(Class<T> modelType, InitialState initialState) {
     return new DataBinder<T>(modelType, initialState);
   }
 
@@ -225,7 +224,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         automatically synchronized with the UI.
    */
   public T getModel() {
-    return this.model;
+    return this.proxy;
   }
 
   /**
@@ -261,21 +260,26 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   public T setModel(T model, InitialState initialState) {
     Assert.notNull(model);
 
-    // create or reuse existing proxy
-    BindableProxy<T> newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model,
-            (initialState != null) ? initialState : getAgent().getInitialState());
+    BindableProxy<T> newProxy;
+    if (model instanceof BindableProxy) {
+      newProxy = (BindableProxy<T>) model;
+    }
+    else {
+      newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model, 
+          (initialState != null) ? initialState : getAgent().getInitialState());
+    }
 
     // if we got a new proxy copy the existing state and bindings
-    if (newProxy != this.model) {
+    if (newProxy != this.proxy) {
       newProxy.getProxyAgent().copyStateFrom(getAgent());
 
       // unbind the old proxied model
       unbind();
 
-      this.model = (T) newProxy;
+      this.proxy = (T) newProxy;
     }
-    
-    return this.model;
+
+    return this.proxy;
   }
 
   /**
@@ -324,7 +328,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   @SuppressWarnings("unchecked")
   private BindableProxyAgent<T> getAgent() {
-    return ((BindableProxy<T>) this.model).getProxyAgent();
+    return ((BindableProxy<T>) this.proxy).getProxyAgent();
   }
 
 }
