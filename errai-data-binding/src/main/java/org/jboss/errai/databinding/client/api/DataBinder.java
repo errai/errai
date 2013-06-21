@@ -265,12 +265,13 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       newProxy = (BindableProxy<T>) model;
     }
     else {
-      newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model, 
+      newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model,
           (initialState != null) ? initialState : getAgent().getInitialState());
     }
 
     // if we got a new proxy copy the existing state and bindings
     if (newProxy != this.proxy) {
+      newProxy.getProxyAgent().unbind();
       newProxy.getProxyAgent().copyStateFrom(getAgent());
 
       // unbind the old proxied model
@@ -315,14 +316,12 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public <P> void addPropertyChangeHandler(String property,
-          PropertyChangeHandler<P> handler) {
+  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
     getAgent().addPropertyChangeHandler(property, handler);
   }
 
   @Override
-  public void removePropertyChangeHandler(String property,
-          PropertyChangeHandler<?> handler) {
+  public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
     getAgent().removePropertyChangeHandler(property, handler);
   }
 
