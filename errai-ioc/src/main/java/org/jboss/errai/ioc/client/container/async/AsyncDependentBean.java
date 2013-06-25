@@ -1,9 +1,10 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
+
+import javax.enterprise.context.Dependent;
 
 /**
  * @author Mike Brock
@@ -86,4 +87,12 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
   public Class<? extends Annotation> getScope() {
     return Dependent.class;
   }
+
+  @Override
+  public String toString() {
+    return "AsyncDependentBean [name=" + name + ", type=" + type + ", beanType=" + beanType + ", qualifiers="
+            + qualifiers + ", concrete=" + concrete + "]";
+  }
+
+
 }

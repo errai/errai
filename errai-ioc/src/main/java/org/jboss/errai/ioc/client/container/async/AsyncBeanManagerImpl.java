@@ -1,12 +1,5 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import com.google.gwt.user.client.Timer;
-import org.jboss.errai.ioc.client.QualifierUtil;
-import org.jboss.errai.ioc.client.api.EnabledByProperty;
-import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.client.container.DestructionCallback;
-import org.jboss.errai.ioc.client.container.IOCResolutionException;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +11,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.errai.ioc.client.QualifierUtil;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
+import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
+
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock
@@ -134,7 +135,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                       final Annotation[] qualifiers,
                       final String name) {
 
-    addBean(type, beanType, callback, instance, qualifiers, name, true);
+    addBean(type, beanType, callback, instance, qualifiers, name, beanType.equals(type));
   }
 
 
@@ -160,6 +161,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
   }
 
 
+  @Override
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
     final AsyncCreationalContext creationalContext =
@@ -178,6 +180,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     }
   }
 
+  @Override
   public void destroyBean(final Object ref, final Runnable runnable) {
     destroyBean(ref);
 
@@ -193,10 +196,12 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     }.schedule(1);
   }
 
+  @Override
   public boolean isManaged(final Object ref) {
     return creationalContextMap.containsKey(getActualBeanReference(ref));
   }
 
+  @Override
   public Object getActualBeanReference(final Object ref) {
     if (isProxyReference(ref)) {
       return proxyLookupForManagedBeans.get(ref);
@@ -206,11 +211,13 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     }
   }
 
+  @Override
   public boolean isProxyReference(final Object ref) {
     return proxyLookupForManagedBeans.containsKey(ref);
   }
 
 
+  @Override
   public void addProxyReference(final Object proxyRef, final Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
@@ -223,6 +230,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
    * @param creationalContext
    *     the {@link CreationalContext} instance to associate the bean instance with.
    */
+  @Override
   public void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
     creationalContextMap.put(ref, creationalContext);
   }
@@ -351,6 +359,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     }
   }
 
+  @Override
   public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
     final CreationalContext creationalContext = creationalContextMap.get(beanInstance);
     if (creationalContext == null) {
@@ -361,6 +370,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     return true;
   }
 
+  @Override
   public void destroyAllBeans() {
     namedBeans.clear();
     beanMap.clear();

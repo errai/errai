@@ -18,6 +18,18 @@ package org.jboss.errai.ioc.rebind.ioc.injector;
 
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.inject.New;
+
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
@@ -36,17 +48,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
-import javax.enterprise.inject.New;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class AbstractInjector implements Injector {
   protected QualifyingMetadata qualifyingMetadata;
@@ -251,17 +252,10 @@ public abstract class AbstractInjector implements Injector {
         valueRef = Stmt.loadStatic(SimpleInjectionContext.class, "LAZY_INIT_REF");
       }
 
-      final ContextualStatementBuilder statement;
-      if (beanName == null) {
-        statement = loadVariable(context.getProcessingContext().getContextVariableReference())
-            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                valueRef, qualifyingMetadata.render(), null, true);
-      }
-      else {
-        statement = loadVariable(context.getProcessingContext().getContextVariableReference())
-            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                valueRef, qualifyingMetadata.render(), beanName, true);
-      }
+      final ContextualStatementBuilder statement =
+              loadVariable(context.getProcessingContext().getContextVariableReference())
+              .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                      valueRef, qualifyingMetadata.render(), beanName, true);
 
       context.getProcessingContext().appendToEnd(statement);
 
@@ -303,6 +297,7 @@ public abstract class AbstractInjector implements Injector {
     return beanName;
   }
 
+  @Override
   public boolean isEnabled() {
     return enabled;
   }
@@ -452,6 +447,7 @@ public abstract class AbstractInjector implements Injector {
    *
    * @param statement
    */
+  @Override
   public void addStatementToEndOfInjector(Statement statement) {
     if (addToEndStatements == null) {
       addToEndStatements = new ArrayList<Statement>();

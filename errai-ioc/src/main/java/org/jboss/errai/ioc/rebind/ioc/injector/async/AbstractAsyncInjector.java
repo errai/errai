@@ -23,17 +23,9 @@ public abstract class AbstractAsyncInjector extends AbstractInjector {
 
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       _registerCache = new RegisterCache(context, valueRef);
-      final ContextualStatementBuilder statement;
-      if (beanName == null) {
-        statement = loadVariable(context.getProcessingContext().getContextVariableReference())
-            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                isSingleton(), qualifyingMetadata.render(), null, true);
-      }
-      else {
-        statement = loadVariable(context.getProcessingContext().getContextVariableReference())
-            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                isSingleton(), qualifyingMetadata.render(), beanName, true);
-      }
+      final ContextualStatementBuilder statement = loadVariable(context.getProcessingContext().getContextVariableReference())
+              .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                      isSingleton(), qualifyingMetadata.render(), beanName, true);
 
       context.getProcessingContext().appendToEnd(statement);
 

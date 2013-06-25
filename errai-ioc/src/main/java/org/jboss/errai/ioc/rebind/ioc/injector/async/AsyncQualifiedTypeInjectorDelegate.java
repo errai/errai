@@ -28,7 +28,7 @@ public class AsyncQualifiedTypeInjectorDelegate extends QualifiedTypeInjectorDel
       context.getProcessingContext().appendToEnd(
           Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
               .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                  isSingleton(), md.render(), null, false));
+                  isSingleton(), md.render(), delegate.getBeanName(), false));
 
       for (final RegistrationHook hook : getRegistrationHooks()) {
         hook.onRegister(context, valueRef);

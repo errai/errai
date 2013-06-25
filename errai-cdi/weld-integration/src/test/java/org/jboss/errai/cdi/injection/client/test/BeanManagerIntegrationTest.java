@@ -8,7 +8,27 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 
-import org.jboss.errai.cdi.injection.client.*;
+import org.jboss.errai.cdi.injection.client.AbstractBean;
+import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
+import org.jboss.errai.cdi.injection.client.CommonInterface;
+import org.jboss.errai.cdi.injection.client.CommonInterfaceB;
+import org.jboss.errai.cdi.injection.client.Cow;
+import org.jboss.errai.cdi.injection.client.CreditCard;
+import org.jboss.errai.cdi.injection.client.DependentScopedBean;
+import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.injection.client.FoobieScopedBean;
+import org.jboss.errai.cdi.injection.client.FoobieScopedOverriddenBean;
+import org.jboss.errai.cdi.injection.client.HistoryStack;
+import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
+import org.jboss.errai.cdi.injection.client.InheritedFromAbstractBean;
+import org.jboss.errai.cdi.injection.client.InterfaceA;
+import org.jboss.errai.cdi.injection.client.InterfaceB;
+import org.jboss.errai.cdi.injection.client.InterfaceC;
+import org.jboss.errai.cdi.injection.client.InterfaceD;
+import org.jboss.errai.cdi.injection.client.InterfaceRoot;
+import org.jboss.errai.cdi.injection.client.OuterBeanInterface;
+import org.jboss.errai.cdi.injection.client.Pig;
+import org.jboss.errai.cdi.injection.client.Visa;
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 import org.jboss.errai.cdi.injection.client.qualifier.QualA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanA;
@@ -22,8 +42,8 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 /**
  * @author Mike Brock
@@ -122,7 +142,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   public void testBeanManagerLookupForGenericType() {
     final IOCBeanDef<HistoryStack> bean = IOC.getBeanManager().lookupBean(HistoryStack.class);
     assertNotNull("did not find managed bean of generic type " + HistoryStack.class.getName(), bean.getInstance());
-    
+
     HistoryStack beanInst = bean.getInstance();
     assertNotNull("did not find injected generic bean", beanInst.getHistoryList());
   }
@@ -288,6 +308,32 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertEquals("wrong number of beans", 2, beans.size());
     assertTrue("should contain a pig", containsInstanceOf(beans, Pig.class));
     assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
+
+    for (IOCBeanDef<?> bean : beans) {
+      assertEquals("animal", bean.getName());
+    }
+  }
+
+  public void testNameAvailableThroughInterfaceLookup() {
+    Collection<IOCBeanDef<CreditCard>> beans = IOC.getBeanManager().lookupBeans(CreditCard.class);
+    for (IOCBeanDef<CreditCard> bean : beans) {
+      if (bean.getBeanClass().getName().endsWith("Visa")) {
+        assertEquals("visa", bean.getName());
+      }
+      else if (bean.getBeanClass().getName().endsWith("Amex")) {
+        assertEquals("amex", bean.getName());
+      }
+      else {
+        fail("Unexpected bean was returned from lookup: " + bean);
+      }
+    }
+  }
+
+  public void testNameAvailableThroughConcreteTypeLookup() {
+    Collection<IOCBeanDef<Visa>> beans = IOC.getBeanManager().lookupBeans(Visa.class);
+    for (IOCBeanDef<Visa> bean : beans) {
+      assertNotNull("Missing name on " + bean, bean.getName());
+    }
   }
 
   public void testLookupAllBeans() {

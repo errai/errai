@@ -1,12 +1,13 @@
 package org.jboss.errai.ioc.client;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
 
 /**
  * A utility class for testing the equality of qualifiers at runtime.
@@ -19,6 +20,10 @@ public class QualifierUtil {
     public Class<? extends Annotation> annotationType() {
       return Default.class;
     }
+    @Override
+    public String toString() {
+      return "@Default";
+    };
   };
 
   public static final Annotation ANY_ANNOTATION = new Any() {
@@ -26,6 +31,10 @@ public class QualifierUtil {
     public Class<? extends Annotation> annotationType() {
       return Any.class;
     }
+    @Override
+    public String toString() {
+      return "@Any";
+    };
   };
 
   public static final Annotation[] DEFAULT_QUALIFIERS = new Annotation[]{
@@ -126,15 +135,15 @@ public class QualifierUtil {
   }
 
   public static int hashValueFor(final char c) {
-    return (int) c;
+    return c;
   }
 
   public static int hashValueFor(final byte b) {
-    return (int) b;
+    return b;
   }
 
   public static int hashValueFor(final short s) {
-    return (int) s;
+    return s;
   }
 
   public static int hashValueFor(final Object o) {
