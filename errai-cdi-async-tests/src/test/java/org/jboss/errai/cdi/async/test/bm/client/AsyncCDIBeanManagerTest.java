@@ -16,11 +16,20 @@
 
 package org.jboss.errai.cdi.async.test.bm.client;
 
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+
 import org.jboss.errai.cdi.async.test.bm.client.res.AbstractBean;
 import org.jboss.errai.cdi.async.test.bm.client.res.ApplicationScopedBean;
 import org.jboss.errai.cdi.async.test.bm.client.res.CommonInterface;
 import org.jboss.errai.cdi.async.test.bm.client.res.CommonInterfaceB;
 import org.jboss.errai.cdi.async.test.bm.client.res.Cow;
+import org.jboss.errai.cdi.async.test.bm.client.res.CreditCard;
 import org.jboss.errai.cdi.async.test.bm.client.res.DependentScopedBean;
 import org.jboss.errai.cdi.async.test.bm.client.res.DependentScopedBeanWithDependencies;
 import org.jboss.errai.cdi.async.test.bm.client.res.FoobieScopedBean;
@@ -43,8 +52,8 @@ import org.jboss.errai.cdi.async.test.bm.client.res.QualEnum;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanOranges;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualV;
+import org.jboss.errai.cdi.async.test.bm.client.res.Visa;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
@@ -53,13 +62,6 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanQuery;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -373,6 +375,42 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
 
   }
 
+  public void testNameAvailableThroughInterfaceLookup() {
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        Collection<AsyncBeanDef<CreditCard>> beans = IOC.getAsyncBeanManager().lookupBeans(CreditCard.class);
+        for (AsyncBeanDef<CreditCard> bean : beans) {
+          if (bean.getBeanClass().getName().endsWith("Visa")) {
+            assertEquals("visa", bean.getName());
+          }
+          else if (bean.getBeanClass().getName().endsWith("Amex")) {
+            assertEquals("amex", bean.getName());
+          }
+          else {
+            fail("Unexpected bean was returned from lookup: " + bean);
+          }
+        }
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testNameAvailableThroughConcreteTypeLookup() {
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        Collection<AsyncBeanDef<Visa>> beans = IOC.getAsyncBeanManager().lookupBeans(Visa.class);
+        for (AsyncBeanDef<Visa> bean : beans) {
+          assertNotNull("Missing name on " + bean, bean.getName());
+        }
+
+        finishTest();
+      }
+    });
+  }
+
   public void testLookupAllBeans() {
     asyncTest(new Runnable() {
       @Override
@@ -400,7 +438,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
         final Collection<AsyncBeanDef<Object>> beans
             = IOC.getAsyncBeanManager().lookupBeans(Object.class, QUAL_A);
 
-        assertEquals(1, beans.size());
+        assertEquals("Unexpected number of beans matched. Actual results: " + beans, 1, beans.size());
         assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
         finishTest();
       }

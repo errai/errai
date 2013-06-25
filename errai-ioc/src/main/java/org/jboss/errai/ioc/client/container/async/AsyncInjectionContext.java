@@ -1,10 +1,11 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.ioc.client.BootstrapInjectionContext;
-import org.jboss.errai.ioc.client.container.IOC;
+import java.lang.annotation.Annotation;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.lang.annotation.Annotation;
+
+import org.jboss.errai.ioc.client.BootstrapInjectionContext;
+import org.jboss.errai.ioc.client.container.IOC;
 
 /**
  * @author Mike Brock
@@ -23,7 +24,8 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
                       final Class beanType,
                       final AsyncBeanProvider provider,
                       final Object instance,
-                      final Annotation[] qualifiers) {
+                      final Annotation[] qualifiers,
+                      final String name) {
 
 //    final Collection<AsyncBeanDef> collection = manager.lookupBeans(type, qualifiers);
 //    for (AsyncBeanDef asyncBeanDef : collection) {
@@ -32,7 +34,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
 //      }
 //    }
 
-    ((AsyncBeanManagerSetup)manager).addBean(type, beanType, provider, instance, qualifiers);
+    ((AsyncBeanManagerSetup)manager).addBean(type, beanType, provider, instance, qualifiers, name);
   }
 
   public void addBean(final Class type,
@@ -75,7 +77,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
           return type.getName();
         }
       };
-      context.getSingletonInstanceOrNew(this, provider, creationalCallback, type, beanType, qualifiers);
+      context.getSingletonInstanceOrNew(this, provider, creationalCallback, type, beanType, qualifiers, name);
     }
     else {
       ((AsyncBeanManagerSetup)manager).addBean(type, beanType, provider, null, qualifiers, name, concrete);

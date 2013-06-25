@@ -1,12 +1,5 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
-import org.jboss.errai.ioc.client.container.BeanRef;
-import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.InitializationCallback;
-import org.jboss.errai.ioc.client.container.ProxyResolver;
-import org.jboss.errai.ioc.client.container.Tuple;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +8,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
+import org.jboss.errai.ioc.client.container.BeanRef;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.InitializationCallback;
+import org.jboss.errai.ioc.client.container.ProxyResolver;
+import org.jboss.errai.ioc.client.container.Tuple;
 
 /**
  * @author Mike Brock
@@ -117,12 +117,15 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     }
   }
 
+  /**
+   * This method is invoked by generated code (in BootstrapperImpl).
+   */
   public <T> void getSingletonInstanceOrNew(final AsyncInjectionContext injectionContext,
                                             final AsyncBeanProvider<T> beanProvider,
                                             final CreationalCallback<T> creationalCallback,
                                             final Class<T> beanType,
                                             final Annotation[] qualifiers) {
-    getSingletonInstanceOrNew(injectionContext, beanProvider, creationalCallback, beanType, beanType, qualifiers);
+    getSingletonInstanceOrNew(injectionContext, beanProvider, creationalCallback, beanType, beanType, qualifiers, null);
   }
 
   /**
@@ -150,7 +153,8 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
                                             final CreationalCallback<T> creationalCallback,
                                             final Class type,
                                             final Class<T> beanType,
-                                            final Annotation[] qualifiers) {
+                                            final Annotation[] qualifiers,
+                                            final String name) {
 
     getBeanInstance(new CreationalCallback<T>() {
       @Override
@@ -161,7 +165,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
          * it must be a lazily initialized singleton reference, and therefore shouldn't be recorded.
          */
         if (!type.equals(beanType)) {
-          injectionContext.addBean(type, beanType, beanProvider, inst, qualifiers);
+          injectionContext.addBean(type, beanType, beanProvider, inst, qualifiers, name);
         }
 
 
@@ -186,7 +190,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           final CreationalCallback<T> callback = new CreationalCallback<T>() {
             @Override
             public void callback(final T beanInstance) {
-              injectionContext.addBean(type, beanType, beanProvider, beanInstance, qualifiers);
+              injectionContext.addBean(type, beanType, beanProvider, beanInstance, qualifiers, name);
               creationalCallback.callback(beanInstance);
               notifyAllWaiting(beanRef, beanInstance);
 

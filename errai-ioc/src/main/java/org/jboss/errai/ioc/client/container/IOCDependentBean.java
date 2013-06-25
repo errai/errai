@@ -16,10 +16,11 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
+
+import javax.enterprise.context.Dependent;
 
 /**
  * Represents a default dependent scoped bean.

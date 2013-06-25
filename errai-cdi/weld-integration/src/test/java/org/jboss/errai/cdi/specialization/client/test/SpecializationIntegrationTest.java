@@ -1,5 +1,13 @@
 package org.jboss.errai.cdi.specialization.client.test;
 
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Set;
+
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
+import javax.inject.Named;
+
 import org.jboss.errai.cdi.specialization.client.Expensive;
 import org.jboss.errai.cdi.specialization.client.Farmer;
 import org.jboss.errai.cdi.specialization.client.Human;
@@ -14,13 +22,6 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
-
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.inject.Named;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * Tests for {@link javax.enterprise.inject.Specializes}
@@ -87,7 +88,7 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     final String expectedName = "farmer";
     final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(expectedName);
 
-    assertEquals("should have one matching bean", 1, beans.size());
+    assertEquals("should have one matching bean, but got: " + beans, 1, beans.size());
 
     final IOCBeanDef farmerBean = beans.iterator().next();
     assertEquals(expectedName, farmerBean.getName());

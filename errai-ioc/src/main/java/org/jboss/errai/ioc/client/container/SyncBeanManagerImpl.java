@@ -16,10 +16,6 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import org.jboss.errai.ioc.client.QualifierUtil;
-import org.jboss.errai.ioc.client.SimpleInjectionContext;
-import org.jboss.errai.ioc.client.api.EnabledByProperty;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +27,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.errai.ioc.client.QualifierUtil;
+import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 
 /**
  * A simple bean manager provided by the Errai IOC framework. The manager provides access to all of the wired beans
@@ -123,10 +123,12 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
 
   private void _registerNamedBean(final String name,
                                   final IOCBeanDef beanDef) {
-    if (!namedBeans.containsKey(name)) {
-      namedBeans.put(name, new ArrayList<IOCBeanDef>());
+    if (beanDef.isConcrete()) {
+      if (!namedBeans.containsKey(name)) {
+        namedBeans.put(name, new ArrayList<IOCBeanDef>());
+      }
+      namedBeans.get(name).add(beanDef);
     }
-    namedBeans.get(name).add(beanDef);
   }
 
 
@@ -215,10 +217,12 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
     return proxyLookupForManagedBeans.containsKey(ref);
   }
 
+  @Override
   public void addProxyReference(final Object proxyRef, final Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
+  @Override
   public void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
     creationalContextMap.put(ref, creationalContext);
   }
