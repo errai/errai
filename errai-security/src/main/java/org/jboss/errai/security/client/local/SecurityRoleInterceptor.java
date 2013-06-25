@@ -19,9 +19,18 @@ import java.util.List;
  * @see org.jboss.errai.security.shared.LoginPage
  * @author edewit@redhat.com
  */
-public class SecurityRoleInterceptor extends SecurityInterceptor{
+public class SecurityRoleInterceptor extends SecurityInterceptor {
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
+    securityCheck(getRequiredRoleAnnotation(context.getAnnotations()).value(), new Command() {
+      @Override
+      public void action() {
+        proceed(context);
+      }
+    });
+  }
+
+  public void securityCheck(final String[] values, final Command command) {
     MessageBuilder.createCall(new RemoteCallback<Boolean>() {
       @Override
       public void callback(final Boolean loggedIn) {
@@ -29,9 +38,8 @@ public class SecurityRoleInterceptor extends SecurityInterceptor{
           MessageBuilder.createCall(new RemoteCallback<List<Role>>() {
             @Override
             public void callback(final List<Role> roles) {
-              final RequireRoles annotation = getRequiredRoleAnnotation(context.getAnnotations());
-              if (hasAllRoles(roles, annotation.value())) {
-                proceed(context);
+              if (hasAllRoles(roles, values)) {
+                if (command != null) command.action();
               } else {
                 navigateToPage(SecurityError.class);
               }
