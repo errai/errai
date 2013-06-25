@@ -36,4 +36,8 @@ public abstract class SecurityInterceptor implements RemoteCallInterceptor<Remot
     navigation.goToWithRole(roleClass);
   }
 
+  /* Poor mans closures */
+  public static interface Command {
+    void action();
+  }
 }

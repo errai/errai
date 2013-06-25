@@ -11,7 +11,7 @@ import java.util.List;
 /**
 * @author edewit@redhat.com
 */
-class SpyAbstractRpcProxy extends AbstractRpcProxy implements AuthenticationService {
+public class SpyAbstractRpcProxy extends AbstractRpcProxy implements AuthenticationService {
   private Multiset<String> calls = HashMultiset.create();
 
   @Override
@@ -42,13 +42,13 @@ class SpyAbstractRpcProxy extends AbstractRpcProxy implements AuthenticationServ
     return null;
   }
 
-  public Integer getCallCount(String method) {
-    return calls.count(method);
-  }
-
   @Override
   public boolean hasPermission(PageRequest pageRequest) {
     calls.add("hasPermission");
     return false;
+  }
+
+  public Integer getCallCount(String method) {
+    return calls.count(method);
   }
 }

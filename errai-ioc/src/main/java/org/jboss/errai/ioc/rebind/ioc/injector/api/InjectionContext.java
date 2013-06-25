@@ -506,11 +506,13 @@ public class InjectionContext {
           // meta-annotation to the decorator extension.
 
           for (final MetaClass annotationClazz : ClassScanner.getTypesAnnotatedWith(annotation)) {
-            final Class<? extends Annotation> javaAnnoCls = annotationClazz.asClass().asSubclass(Annotation.class);
-            decorators.get(javaAnnoCls).add(iocExtension);
+            if (Annotation.class.isAssignableFrom(annotationClazz.asClass())) {
+              final Class<? extends Annotation> javaAnnoCls = annotationClazz.asClass().asSubclass(Annotation.class);
+              decorators.get(javaAnnoCls).add(iocExtension);
 
-            if (oneTarget) {
-              metaAnnotationAliases.put(javaAnnoCls, annotation);
+              if (oneTarget) {
+                metaAnnotationAliases.put(javaAnnoCls, annotation);
+              }
             }
           }
           if (oneTarget) {

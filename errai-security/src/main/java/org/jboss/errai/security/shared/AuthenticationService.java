@@ -21,10 +21,6 @@ public interface AuthenticationService {
 
   User getUser();
 
-  /**
-   * Get the roles of the user, null if there is no user logged in
-   * @return the roles of the user and null if there is currently no user logged in.
-   */
   List<Role> getRoles();
 
   boolean hasPermission(PageRequest pageRequest);

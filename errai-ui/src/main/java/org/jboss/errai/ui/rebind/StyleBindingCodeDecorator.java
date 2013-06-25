@@ -30,6 +30,7 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 import org.jboss.errai.ui.shared.api.style.StyleBindingChangeHandler;
 import org.jboss.errai.ui.shared.api.style.StyleBindingExecutor;
@@ -81,6 +82,11 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
             Refs.get(ctx.getInjector().getInstanceVarName()), ctx.getField());
         break;
 
+      case Type:
+        // for api annotations being on a type is allowed.
+        if (ctx.getRawAnnotation().annotationType().getPackage().getName().startsWith("org.jboss.errai")) {
+          return new ArrayList<Statement>();
+        }
       default:
         throw new RuntimeException("problem with style binding. element target type is invalid: " + ctx.getTaskType());
     }

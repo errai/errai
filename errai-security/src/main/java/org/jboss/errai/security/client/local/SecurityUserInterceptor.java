@@ -14,17 +14,29 @@ public class SecurityUserInterceptor extends SecurityInterceptor {
 
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
-    final AuthenticationService authenticationService = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
+    securityCheck(new Command() {
+
+      @Override
+      public void action() {
+        proceed(context);
+      }
+    });
+  }
+
+  private void securityCheck(final Command command) {
+    MessageBuilder.createCall(new RemoteCallback<Boolean>() {
       @Override
       public void callback(final Boolean loggedIn) {
         if (loggedIn) {
-          proceed(context);
+          if (command != null) command.action();
         } else {
           navigateToLoginPage();
         }
       }
-    }, AuthenticationService.class);
+    }, AuthenticationService.class).isLoggedIn();
+  }
 
-    authenticationService.isLoggedIn();
+  public void securityCheck() {
+    securityCheck(null);
   }
 }
