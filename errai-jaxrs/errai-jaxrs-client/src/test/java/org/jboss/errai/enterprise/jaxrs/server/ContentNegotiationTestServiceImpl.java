@@ -84,4 +84,9 @@ public class ContentNegotiationTestServiceImpl implements ContentNegotiationTest
   public String deleteXml(String xml) {
     return "delete:xml";
   }
+
+  @Override
+  public String postAnyXml(String xml) {
+    return "post:"+xml;
+  }
 }
