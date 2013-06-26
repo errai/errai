@@ -103,8 +103,8 @@ public class JaxrsHeaders {
     if (headers == null) 
       headers = new HashMap<String, String>();
     
-    String val = (value.length == 1) ? value[0] : "*/*";
-    headers.put("Content-Type", val);
+    if (value.length == 1)
+      headers.put("Content-Type", value[0]);
   }
   
   public Map<String, String> get() {
