@@ -87,6 +87,9 @@ public class JaxrsHeaders {
   }
 
   private void setAcceptHeader(String[] value) {
+    if (value == null)
+      return;
+    
     if (headers == null) 
       headers = new HashMap<String, String>();
     
@@ -94,10 +97,14 @@ public class JaxrsHeaders {
   }
 
   private void setContentTypeHeader(String[] value) {
+    if (value == null)
+      return;
+        
     if (headers == null) 
       headers = new HashMap<String, String>();
-
-    headers.put("Content-Type", StringUtils.join(value, ","));
+    
+    String val = (value.length == 1) ? value[0] : "*/*";
+    headers.put("Content-Type", val);
   }
   
   public Map<String, String> get() {

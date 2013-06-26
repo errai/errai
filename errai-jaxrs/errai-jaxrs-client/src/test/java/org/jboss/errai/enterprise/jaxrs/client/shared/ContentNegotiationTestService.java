@@ -67,6 +67,10 @@ public interface ContentNegotiationTestService {
   @POST
   @Consumes("application/xml")
   public String postXml(String xml);
+  
+  @POST
+  @Consumes({"application/xml", "text/xml"})
+  public String postAnyXml(String xml);
 
   @PUT
   @Consumes("text/plain")

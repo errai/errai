@@ -80,6 +80,13 @@ public class ContentNegotiationIntegrationTest extends AbstractErraiJaxrsTest {
   }
   
   @Test
+  public void testPostAsAnyXml() {
+    call(ContentNegotiationTestService.class,
+        new AssertionCallback<String>("@POST consuming application/xml or text/xml failed", "post:anyxml"))
+        .postAnyXml("anyxml");
+  }
+  
+  @Test
   public void testPutAsText() {
     call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@PUT consuming text/plain failed", "put:text")).putText("text");
