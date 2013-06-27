@@ -17,13 +17,18 @@
 package org.jboss.errai.demo.busstress.client.local;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.demo.busstress.client.shared.RecursiveObject;
+import org.jboss.errai.demo.busstress.client.shared.RpcService;
 import org.jboss.errai.demo.busstress.client.shared.Stats;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
@@ -75,6 +80,36 @@ public class StressTestClient extends Composite {
 
     @UiField
     VerticalPanel resultsPanel;
+
+    @UiField
+    Label rpcResultLabel;
+
+    @Inject Caller<RpcService> rpcService;
+
+    @UiHandler("rpcButton")
+    void onRpcButtonClick(ClickEvent event) {
+      final RecursiveObject firstO = new RecursiveObject();
+      RecursiveObject prevO = firstO;
+      for (int i = 0; i < 100; i++) {
+        RecursiveObject o = new RecursiveObject();
+        o.setaDouble(123.0);
+        o.setString("strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr strrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr ");
+        o.setString1("str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 str1111111111111111111111111111111111111111111111111111111111111111111111111 ");
+        o.setTime(4321L);
+        prevO.setNextInChain(o);
+        prevO = o;
+      }
+
+      final long startTime = System.currentTimeMillis();
+      rpcService.call(new RemoteCallback<RecursiveObject>() {
+        @Override
+        public void callback(RecursiveObject response) {
+          long elapsed = System.currentTimeMillis() - startTime;
+          rpcResultLabel.setText("RPC Took " + elapsed + "ms");
+        }
+      }).echo(firstO);
+    }
+
 
     private ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 

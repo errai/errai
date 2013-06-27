@@ -77,6 +77,8 @@
 
         <g:SimplePanel ui:field="statusPanel" />
 
+        <p><g:Button ui:field="rpcButton">Send an RPC</g:Button><g:Label ui:field="rpcResultLabel"/></p>
+        
         <h1>Results</h1>
         <g:VerticalPanel width="100%" ui:field="resultsPanel" />
 
