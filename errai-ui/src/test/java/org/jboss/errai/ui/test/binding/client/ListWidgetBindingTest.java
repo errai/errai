@@ -17,7 +17,10 @@
 package org.jboss.errai.ui.test.binding.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -360,6 +363,72 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertEquals("Expected five widgets", 5, listWidget.getWidgetCount());
 
     listWidget.getItems().remove(2);
+    assertItemsRendered(listWidget);
+  }
+  
+  @Test
+  public void testListBindingAndCollectionsSort() {
+    List<TestModel> modelList = new ArrayList<TestModel>();
+    modelList.add(new TestModel(3, "3"));
+    modelList.add(new TestModel(2, "2"));
+    modelList.add(new TestModel(1, "1"));
+    modelList.add(new TestModel(0, "0"));
+    
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    BindingListWidget listWidget = app.getListWidget();
+    listWidget.setItems(modelList);
+    assertEquals("Expected four widgets", 4, listWidget.getWidgetCount());
+    
+    Collections.sort(listWidget.getItems(), new Comparator<TestModel>() {
+      @Override
+      public int compare(TestModel o1, TestModel o2) {
+        return o1.getId() - o2.getId();
+      }
+    });
+    
+    assertItemsRendered(listWidget);
+  }
+  
+  @Test
+  public void testBindableListIteratorAdd() {
+    List<TestModel> modelList = new ArrayList<TestModel>();
+    modelList.add(new TestModel(0, "0"));
+    modelList.add(new TestModel(1, "1"));
+    modelList.add(new TestModel(3, "3"));
+    
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    BindingListWidget listWidget = app.getListWidget();
+    listWidget.setItems(modelList);
+    assertEquals("Expected three widgets", 3, listWidget.getWidgetCount());
+    
+    ListIterator<TestModel> iter = listWidget.getValue().listIterator();
+    iter.next();
+    iter.next();
+    iter.add(new TestModel(2, "2"));
+    
+    assertItemsRendered(listWidget);
+  }
+  
+  @Test
+  public void testBindableListIteratorRemove() {
+    List<TestModel> modelList = new ArrayList<TestModel>();
+    modelList.add(new TestModel(0, "0"));
+    modelList.add(new TestModel(1, "1"));
+    modelList.add(new TestModel(5, "5"));
+    modelList.add(new TestModel(2, "2"));
+    modelList.add(new TestModel(3, "3"));
+    
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    BindingListWidget listWidget = app.getListWidget();
+    listWidget.setItems(modelList);
+    assertEquals("Expected three widgets", 5, listWidget.getWidgetCount());
+    
+    ListIterator<TestModel> iter = listWidget.getValue().listIterator();
+    for (int i = 0; i < 3; i++) {
+      iter.next();
+    }
+    iter.remove();
+    
     assertItemsRendered(listWidget);
   }
 
