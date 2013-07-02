@@ -39,7 +39,7 @@ public class BindableListWrapper<M> implements List<M> {
 
   private final List<M> list;
   private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
-  
+
   public BindableListWrapper(List<M> list) {
     Assert.notNull(list);
     this.list = list;
@@ -151,7 +151,7 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public Iterator<M> iterator() {
-    return list.iterator();
+    return new BindableListIterator();
   }
 
   @Override
@@ -161,12 +161,12 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public ListIterator<M> listIterator() {
-    return list.listIterator();
+    return new BindableListIterator();
   }
 
   @Override
   public ListIterator<M> listIterator(int index) {
-    return list.listIterator(index);
+    return new BindableListIterator(index);
   }
 
   @Override
@@ -267,7 +267,7 @@ public class BindableListWrapper<M> implements List<M> {
   public void removeChangeHandler(BindableListChangeHandler<M> handler) {
     handlers.remove(handler);
   }
-  
+
   private Object convertToProxy(Object element) {
     if (BindableProxyFactory.isBindableType(element)) {
       element = BindableProxyFactory.getBindableProxy(element, InitialState.FROM_MODEL);
@@ -275,4 +275,80 @@ public class BindableListWrapper<M> implements List<M> {
     return element;
   }
 
+  /**
+   * Wraps an Iterator or ListIterator to notify change handlers of all operations that mutate the
+   * underlying list.
+   */
+  public class BindableListIterator implements ListIterator<M>, Iterator<M> {
+
+    private ListIterator<M> iterator;
+
+    public BindableListIterator() {
+      iterator = list.listIterator();
+    }
+
+    public BindableListIterator(int index) {
+      iterator = list.listIterator(index);
+    }
+
+    @Override
+    public boolean hasNext() {
+      return iterator.hasNext();
+    }
+
+    @Override
+    public M next() {
+      return iterator.next();
+    }
+
+    @Override
+    public boolean hasPrevious() {
+      return iterator.hasPrevious();
+    }
+
+    @Override
+    public M previous() {
+      return iterator.previous();
+    }
+
+    @Override
+    public int nextIndex() {
+      return iterator.nextIndex();
+    }
+
+    @Override
+    public int previousIndex() {
+      return iterator.previousIndex();
+    }
+
+    @Override
+    public void remove() {
+      List<M> oldValue = new ArrayList<M>(list);
+      iterator.remove();
+      for (BindableListChangeHandler<M> handler : handlers) {
+        handler.onItemRemovedAt(oldValue, iterator.previousIndex() + 1);
+      }
+    }
+
+    @Override
+    public void set(M e) {
+      List<M> oldValue = new ArrayList<M>(list);
+      e = (M) convertToProxy(e);
+      iterator.set(e);
+      for (BindableListChangeHandler<M> handler : handlers) {
+        handler.onItemChanged(oldValue, iterator.nextIndex() - 1, e);
+      }
+    }
+
+    @Override
+    public void add(M e) {
+      List<M> oldValue = new ArrayList<M>(list);
+      e = (M) convertToProxy(e);
+      int index = iterator.nextIndex();
+      iterator.add(e);
+      for (BindableListChangeHandler<M> handler : handlers) {
+        handler.onItemAddedAt(oldValue, index, e);
+      }
+    }
+  }
 }
