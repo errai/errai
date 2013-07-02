@@ -76,7 +76,7 @@
         </plugins>
       </build>
       <properties>
-        <argLine>-Xmx1024m</argLine>
+        <argLine>-Xmx1024m -XX:MaxPermSize=300m</argLine>
       </properties>
     </profile>
   </profiles>

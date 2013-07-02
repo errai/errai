@@ -79,6 +79,7 @@ public class OTServerEngine extends AbstractOTEngine {
       setMode(OTEngineMode.Offline);
     }
     incomingQueue.offer(new OTQueuedOperation(-1, null, null, -1));
+    housekeeperThread.interrupt();
 
     try {
       pollingThread.join();
@@ -87,7 +88,7 @@ public class OTServerEngine extends AbstractOTEngine {
       }
     }
     catch (InterruptedException e) {
-      // ignore
+      Thread.currentThread().interrupt();
     }
   }
 
@@ -126,7 +127,7 @@ public class OTServerEngine extends AbstractOTEngine {
           }
         }
         catch (InterruptedException e) {
-          // fall though.
+          Thread.currentThread().interrupt();
         }
       }
     }
@@ -150,7 +151,7 @@ public class OTServerEngine extends AbstractOTEngine {
           }
         }
         catch (InterruptedException e) {
-          // probably
+          Thread.currentThread().interrupt();
         }
       }
     }

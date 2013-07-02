@@ -19,6 +19,10 @@ package org.jboss.errai.otec;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Map.Entry;
+
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.OTPeer;
@@ -172,7 +176,6 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
 
     assertAllLogsConsistent(expectedState, initialState);
   }
-
 
   @Test
   public void testConflictingDeleteAndInsert() {

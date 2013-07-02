@@ -47,8 +47,9 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
 
   @Override
   protected void startEnginesAndWait() {
-    for (AsynchronousMockPeerlImpl peer : peersStarted)
+    for (AsynchronousMockPeerlImpl peer : peersStarted) {
       peer.start();
+    }
 
     try {
       for (AsynchronousMockPeerlImpl peer : peersStarted)
