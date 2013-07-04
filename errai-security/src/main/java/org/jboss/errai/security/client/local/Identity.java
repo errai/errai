@@ -2,12 +2,13 @@ package org.jboss.errai.security.client.local;
 
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
@@ -29,14 +30,21 @@ public class Identity implements Serializable {
   private String username;
   private String password;
 
-  public void login() {
-    MessageBuilder.createCall(new VoidRemoteCallback(), AuthenticationService.class).login(username, password);
-    StyleBindingsRegistry.get().updateStyles();
-    final String page = Cookies.getCookie(CURRENT_PAGE_COOKIE);
-    if (page != null) {
-      Cookies.removeCookie(CURRENT_PAGE_COOKIE);
-      IOC.getBeanManager().lookupBean(Navigation.class).getInstance().goTo(page);
-    }
+  public void login(final RemoteCallback<User> callback, BusErrorCallback errorCallback) {
+    MessageBuilder.createCall(new RemoteCallback<User>() {
+      @Override
+      public void callback(User user) {
+        StyleBindingsRegistry.get().updateStyles();
+        final String page = Cookies.getCookie(CURRENT_PAGE_COOKIE);
+        if (page != null) {
+          Cookies.removeCookie(CURRENT_PAGE_COOKIE);
+          IOC.getBeanManager().lookupBean(Navigation.class).getInstance().goTo(page);
+        }
+        if (callback != null) {
+          callback.callback(user);
+        }
+      }
+    }, errorCallback, AuthenticationService.class).login(username, password);
   }
 
   public void logout() {

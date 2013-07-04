@@ -19,7 +19,8 @@ import java.util.List;
 public class JaasAuthenticationService implements AuthenticationService {
 
   @Override
-  public void login(String username, String password) {
+  public User login(String username, String password) {
+    return null;
   }
 
   @Override
