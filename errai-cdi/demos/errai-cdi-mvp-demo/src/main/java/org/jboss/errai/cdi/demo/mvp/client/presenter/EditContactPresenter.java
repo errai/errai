@@ -19,14 +19,18 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 @Dependent
-public class
-        EditContactPresenter implements Presenter {
+public class EditContactPresenter implements Presenter {
   public interface Display {
     HasClickHandlers getSaveButton();
+
     HasClickHandlers getCancelButton();
+
     HasValue<String> getFirstName();
+
     HasValue<String> getLastName();
+
     HasValue<String> getEmailAddress();
+
     Widget asWidget();
   }
 
@@ -47,6 +51,7 @@ public class
 
   private void setContact(String id) {
     contactsService.call(new RemoteCallback<Contact>() {
+      @Override
       public void callback(Contact result) {
         contact = result;
         EditContactPresenter.this.display.getFirstName().setValue(
@@ -61,18 +66,21 @@ public class
 
   public void bind() {
     this.display.getSaveButton().addClickHandler(new ClickHandler() {
+      @Override
       public void onClick(ClickEvent event) {
         doSave();
       }
     });
 
     this.display.getCancelButton().addClickHandler(new ClickHandler() {
+      @Override
       public void onClick(ClickEvent event) {
         eventBus.fireEvent(new EditContactCancelledEvent());
       }
     });
   }
 
+  @Override
   public void go(final HasWidgets container) {
     bind();
     container.clear();
@@ -83,16 +91,26 @@ public class
     setContact(id);
     go(container);
   }
-  
+
   private void doSave() {
     contact.setFirstName(display.getFirstName().getValue());
     contact.setLastName(display.getLastName().getValue());
     contact.setEmailAddress(display.getEmailAddress().getValue());
 
-    contactsService.call(new RemoteCallback<Contact>() {
-      public void callback(Contact result) {
-        eventBus.fireEvent(new ContactUpdatedEvent(result));
-      }
-    }).updateContact(contact);
+    if (contact.getId() != null) {
+      contactsService.call(new RemoteCallback<Contact>() {
+        @Override
+        public void callback(Contact result) {
+          eventBus.fireEvent(new ContactUpdatedEvent(result));
+        }
+      }).updateContact(contact);
+    } else {
+      contactsService.call(new RemoteCallback<Contact>() {
+        @Override
+        public void callback(Contact result) {
+          eventBus.fireEvent(new ContactUpdatedEvent(result));
+        }
+      }).addContact(contact);
+    }
   }
 }

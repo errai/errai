@@ -200,7 +200,7 @@
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-naming</artifactId>
-          <scope>provided</scope>
+          <scope>compile</scope>
         </dependency>
 
         <dependency>
