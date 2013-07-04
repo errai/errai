@@ -31,18 +31,18 @@ import com.google.gwt.user.client.ui.RootPanel;
 @EntryPoint
 public class Contacts {
 
-    private HandlerManager eventBus = new HandlerManager(null);
+  private HandlerManager eventBus = new HandlerManager(null);
 
-    @Inject
-    private AppController appController;
+  @Inject
+  private AppController appController;
 
-    @AfterInitialization
-    public void startApp() {
-        appController.go(RootPanel.get());
-    }
+  @AfterInitialization
+  public void startApp() {
+    appController.go(RootPanel.get());
+  }
 
-    @Produces
-    private HandlerManager produceEventBus() {
-        return eventBus;
-    }
+  @Produces
+  private HandlerManager produceEventBus() {
+    return eventBus;
+  }
 }

@@ -26,31 +26,31 @@ import org.jboss.errai.orientation.client.shared.OrientationEvent;
 @Portable
 public class ClientOrientationEvent extends OrientationEvent {
 
-    private String clientId;
-    private long timestamp;
+  private String clientId;
+  private long timestamp;
 
-    public ClientOrientationEvent(String clientId, OrientationEvent event) {
-        this(clientId, System.currentTimeMillis(), event.getX(), event.getY(), event.getZ());
-    }
+  public ClientOrientationEvent(String clientId, OrientationEvent event) {
+    this(clientId, System.currentTimeMillis(), event.getX(), event.getY(), event.getZ());
+  }
 
-    public ClientOrientationEvent(@MapsTo("clientId") String clientId, @MapsTo("timestamp") long timestamp,
+  public ClientOrientationEvent(@MapsTo("clientId") String clientId, @MapsTo("timestamp") long timestamp,
         @MapsTo("x") double x,
         @MapsTo("y") double y, @MapsTo("z") double z) {
-        super(x, y, z);
-        this.clientId = clientId;
-        this.timestamp = timestamp;
-    }
+    super(x, y, z);
+    this.clientId = clientId;
+    this.timestamp = timestamp;
+  }
 
-    public String getClientId() {
-        return clientId;
-    }
+  public String getClientId() {
+    return clientId;
+  }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
+  public long getTimestamp() {
+    return timestamp;
+  }
 
-    @Override
-    public String toString() {
-        return "ClientOrientationEvent{" + "clientId='" + clientId + '\'' + '}';
-    }
+  @Override
+  public String toString() {
+    return "ClientOrientationEvent{" + "clientId='" + clientId + '\'' + '}';
+  }
 }

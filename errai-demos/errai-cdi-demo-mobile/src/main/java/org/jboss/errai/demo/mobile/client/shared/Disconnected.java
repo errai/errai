@@ -24,9 +24,9 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 /**
- * CDI event qualifier indicating that the OrientationEvent received is the last one for the client it describes. Clients will
- * find this useful for cleaning up the DOM.
- *
+ * CDI event qualifier indicating that the OrientationEvent received is the last one for the client
+ * it describes. Clients will find this useful for cleaning up the DOM.
+ * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Qualifier
