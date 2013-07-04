@@ -693,13 +693,13 @@
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>jaxrs-api</artifactId>
-        <version>2.3.5.Final</version>
+        <version>2.3.6.Final</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jaxrs</artifactId>
-        <version>2.3.5.Final</version>
+        <version>2.3.6.Final</version>
       </dependency>
 
       <dependency>
@@ -1350,7 +1350,7 @@
         </os>
       </activation>
       <properties>
-        <argLine>-d32 -XX:CompileThreshold=1000</argLine>
+        <argLine>-d32 -XX:CompileThreshold=1000 -Djava.awt.headless=true</argLine>
       </properties>
     </profile>
     
