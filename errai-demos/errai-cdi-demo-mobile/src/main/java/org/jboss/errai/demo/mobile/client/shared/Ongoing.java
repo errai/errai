@@ -24,10 +24,10 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 /**
- * CDI event qualifier indicating that the OrientationEvent received is part of an ongoing series of events for the client it
- * describes. When and if the client in question goes away, a final event for that client for that client qualified by
- * {@link Disconnected} for that client.
- *
+ * CDI event qualifier indicating that the OrientationEvent received is part of an ongoing series of
+ * events for the client it describes. When and if the client in question goes away, a final event
+ * for that client for that client qualified by {@link Disconnected} for that client.
+ * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Qualifier

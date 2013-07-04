@@ -42,101 +42,103 @@ import com.google.gwt.user.client.ui.HasWidgets;
 @ApplicationScoped
 public class AppController implements Presenter, ValueChangeHandler<String> {
 
-    @Inject
-    private SyncBeanManager manager;
+  @Inject
+  private SyncBeanManager manager;
 
-    @Inject
-    private HandlerManager eventBus;
+  @Inject
+  private HandlerManager eventBus;
 
-    private HasWidgets container;
+  private HasWidgets container;
 
-    public void bind() {
-        History.addValueChangeHandler(this);
+  public void bind() {
+    History.addValueChangeHandler(this);
 
-        eventBus.addHandler(AddContactEvent.TYPE, new AddContactEventHandler() {
-            public void onAddContact(AddContactEvent event) {
-                doAddNewContact();
-            }
-        });
+    eventBus.addHandler(AddContactEvent.TYPE, new AddContactEventHandler() {
+      public void onAddContact(AddContactEvent event) {
+        doAddNewContact();
+      }
+    });
 
-        eventBus.addHandler(EditContactEvent.TYPE, new EditContactEventHandler() {
-            public void onEditContact(EditContactEvent event) {
-                doEditContact(event.getId());
-            }
-        });
+    eventBus.addHandler(EditContactEvent.TYPE, new EditContactEventHandler() {
+      public void onEditContact(EditContactEvent event) {
+        doEditContact(event.getId());
+      }
+    });
 
-        eventBus.addHandler(EditContactCancelledEvent.TYPE,
+    eventBus.addHandler(EditContactCancelledEvent.TYPE,
             new EditContactCancelledEventHandler() {
-                public void onEditContactCancelled(EditContactCancelledEvent event) {
-                    doEditContactCancelled();
-                }
+              public void onEditContactCancelled(EditContactCancelledEvent event) {
+                doEditContactCancelled();
+              }
             });
 
-        eventBus.addHandler(ContactUpdatedEvent.TYPE,
+    eventBus.addHandler(ContactUpdatedEvent.TYPE,
             new ContactUpdatedEventHandler() {
-                public void onContactUpdated(ContactUpdatedEvent event) {
-                    doContactUpdated();
-                }
+              public void onContactUpdated(ContactUpdatedEvent event) {
+                doContactUpdated();
+              }
             });
+  }
+
+  private void doAddNewContact() {
+    History.newItem("add");
+  }
+
+  private void doEditContact(String id) {
+    History.newItem("edit", false);
+    IOCBeanDef<EditContactPresenter> bean = manager.lookupBean(EditContactPresenter.class);
+
+    EditContactPresenter presenter = null;
+    if (bean != null) {
+      presenter = bean.getInstance();
     }
 
-    private void doAddNewContact() {
-        History.newItem("add");
+    if (presenter != null) {
+      presenter.go(container, id);
     }
+  }
 
-    private void doEditContact(String id) {
-        History.newItem("edit", false);
-        IOCBeanDef<EditContactPresenter> bean = manager.lookupBean(EditContactPresenter.class);
+  private void doEditContactCancelled() {
+    History.newItem("list");
+  }
 
-        EditContactPresenter presenter = null;
+  private void doContactUpdated() {
+    History.newItem("list");
+  }
+
+  public void go(final HasWidgets container) {
+    this.container = container;
+    bind();
+
+    if ("".equals(History.getToken())) {
+      History.newItem("list");
+    }
+    else {
+      History.fireCurrentHistoryState();
+    }
+  }
+
+  public void onValueChange(ValueChangeEvent<String> event) {
+    String token = event.getValue();
+    if (token != null) {
+      Presenter presenter = null;
+
+      if (token.equals("list")) {
+        IOCBeanDef<ContactsPresenter> bean = manager.lookupBean(ContactsPresenter.class);
         if (bean != null) {
-            presenter = bean.getInstance();
+          presenter = bean.getInstance();
         }
-
-        if (presenter != null) {
-            presenter.go(container, id);
+      }
+      else if (token.equals("add") || token.equals("edit")) {
+        IOCBeanDef<EditContactPresenter> bean = manager.lookupBean(EditContactPresenter.class);
+        if (bean != null) {
+          presenter = bean.getInstance();
         }
+      }
+
+      if (presenter != null) {
+        presenter.go(container);
+      }
     }
-
-    private void doEditContactCancelled() {
-        History.newItem("list");
-    }
-
-    private void doContactUpdated() {
-        History.newItem("list");
-    }
-
-    public void go(final HasWidgets container) {
-        this.container = container;
-        bind();
-
-        if ("".equals(History.getToken())) {
-            History.newItem("list");
-        } else {
-            History.fireCurrentHistoryState();
-        }
-    }
-
-    public void onValueChange(ValueChangeEvent<String> event) {
-        String token = event.getValue();
-        if (token != null) {
-            Presenter presenter = null;
-
-            if (token.equals("list")) {
-                IOCBeanDef<ContactsPresenter> bean = manager.lookupBean(ContactsPresenter.class);
-                if (bean != null) {
-                    presenter = bean.getInstance();
-                }
-            } else if (token.equals("add") || token.equals("edit")) {
-                IOCBeanDef<EditContactPresenter> bean = manager.lookupBean(EditContactPresenter.class);
-                if (bean != null) {
-                    presenter = bean.getInstance();
-                }
-            }
-
-            if (presenter != null) {
-                presenter.go(container);
-            }
-        }
-    }
+  }
 }

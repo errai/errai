@@ -37,53 +37,59 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class EditContactView extends Composite implements EditContactPresenter.Display {
 
-    private TextBox firstName = new TextBox();
-    private TextBox lastName = new TextBox();
-    private TextBox emailAddress = new TextBox();
+  private TextBox firstName = new TextBox();
+  private TextBox lastName = new TextBox();
+  private TextBox emailAddress = new TextBox();
 
-    @Inject UiBinder<Panel, EditContactView> uiBinder;
+  @Inject
+  UiBinder<Panel, EditContactView> uiBinder;
 
-    @UiField DecoratorPanel contentDetailsDecorator;
-    @UiField VerticalPanel contentDetailsPanel;
-    @UiField FlexTable detailsTable;
-    @UiField Button saveButton;
-    @UiField Button cancelButton;
+  @UiField
+  DecoratorPanel contentDetailsDecorator;
+  @UiField
+  VerticalPanel contentDetailsPanel;
+  @UiField
+  FlexTable detailsTable;
+  @UiField
+  Button saveButton;
+  @UiField
+  Button cancelButton;
 
-    @PostConstruct
-    public void init() {
-        initWidget(uiBinder.createAndBindUi(this));
+  @PostConstruct
+  public void init() {
+    initWidget(uiBinder.createAndBindUi(this));
 
-        detailsTable.getColumnFormatter().addStyleName(1, "add-contact-input");
-        detailsTable.setWidget(0, 0, new Label("Firstname"));
-        detailsTable.setWidget(0, 1, firstName);
-        detailsTable.setWidget(1, 0, new Label("Lastname"));
-        detailsTable.setWidget(1, 1, lastName);
-        detailsTable.setWidget(2, 0, new Label("Email Address"));
-        detailsTable.setWidget(2, 1, emailAddress);
-        firstName.setFocus(true);
-    }
+    detailsTable.getColumnFormatter().addStyleName(1, "add-contact-input");
+    detailsTable.setWidget(0, 0, new Label("Firstname"));
+    detailsTable.setWidget(0, 1, firstName);
+    detailsTable.setWidget(1, 0, new Label("Lastname"));
+    detailsTable.setWidget(1, 1, lastName);
+    detailsTable.setWidget(2, 0, new Label("Email Address"));
+    detailsTable.setWidget(2, 1, emailAddress);
+    firstName.setFocus(true);
+  }
 
-    public HasValue<String> getFirstName() {
-        return firstName;
-    }
+  public HasValue<String> getFirstName() {
+    return firstName;
+  }
 
-    public HasValue<String> getLastName() {
-        return lastName;
-    }
+  public HasValue<String> getLastName() {
+    return lastName;
+  }
 
-    public HasValue<String> getEmailAddress() {
-        return emailAddress;
-    }
+  public HasValue<String> getEmailAddress() {
+    return emailAddress;
+  }
 
-    public HasClickHandlers getSaveButton() {
-        return saveButton;
-    }
+  public HasClickHandlers getSaveButton() {
+    return saveButton;
+  }
 
-    public HasClickHandlers getCancelButton() {
-        return cancelButton;
-    }
+  public HasClickHandlers getCancelButton() {
+    return cancelButton;
+  }
 
-    public Widget asWidget() {
-        return this;
-    }
+  public Widget asWidget() {
+    return this;
+  }
 }

@@ -32,54 +32,56 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class WelcomeDialog extends Composite {
 
-    private static WelcomeDialogUiBinder uiBinder = GWT
+  private static WelcomeDialogUiBinder uiBinder = GWT
         .create(WelcomeDialogUiBinder.class);
 
-    interface WelcomeDialogUiBinder extends UiBinder<Widget, WelcomeDialog> {
+  interface WelcomeDialogUiBinder extends UiBinder<Widget, WelcomeDialog> {}
+
+  @UiField
+  TextBox nameBox;
+
+  @UiField
+  Button goButton;
+
+  private final Runnable afterNameGivenAction;
+
+  private String name = "Anonymous";
+
+  public WelcomeDialog(Runnable afterNameGivenAction) {
+    this.afterNameGivenAction = Assert.notNull(afterNameGivenAction);
+    initWidget(uiBinder.createAndBindUi(this));
+  }
+
+  /**
+   * Aliases typing Enter in the name box to the same as pressing the "Go" button.
+   * 
+   * @param event
+   *          The key event. The value {@code event.getNativeKeyCode()} is compared against
+   *          {@code KeyCodes.KEY_ENTER}.
+   */
+  @UiHandler("nameBox")
+  void onNameBoxKeypress(KeyUpEvent event) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      onGoButtonClick(null);
     }
+  }
 
-    @UiField
-    TextBox nameBox;
+  /**
+   * Runs the {@code afterNameGivenAction}.
+   * 
+   * @param event
+   *          Ignored. Can be null.
+   */
+  @UiHandler("goButton")
+  void onGoButtonClick(ClickEvent event) {
+    afterNameGivenAction.run();
+    name = nameBox.getText();
+  }
 
-    @UiField
-    Button goButton;
-
-    private final Runnable afterNameGivenAction;
-
-    private String name = "Anonymous";
-
-    public WelcomeDialog(Runnable afterNameGivenAction) {
-        this.afterNameGivenAction = Assert.notNull(afterNameGivenAction);
-        initWidget(uiBinder.createAndBindUi(this));
-    }
-
-    /**
-     * Aliases typing Enter in the name box to the same as pressing the "Go" button.
-     *
-     * @param event The key event. The value {@code event.getNativeKeyCode()} is compared against {@code KeyCodes.KEY_ENTER}.
-     */
-    @UiHandler("nameBox")
-    void onNameBoxKeypress(KeyUpEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            onGoButtonClick(null);
-        }
-    }
-
-    /**
-     * Runs the {@code afterNameGivenAction}.
-     *
-     * @param event Ignored. Can be null.
-     */
-    @UiHandler("goButton")
-    void onGoButtonClick(ClickEvent event) {
-        afterNameGivenAction.run();
-        name = nameBox.getText();
-    }
-
-    /**
-     * Returns the text that is currently entered in the name textbox.
-     */
-    public String getName() {
-        return name;
-    }
+  /**
+   * Returns the text that is currently entered in the name textbox.
+   */
+  public String getName() {
+    return name;
+  }
 }
