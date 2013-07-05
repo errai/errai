@@ -65,7 +65,8 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
    * @return our user
    */
   private User createUser(org.picketlink.idm.model.User picketLinkUser) {
-    User user = new User(picketLinkUser.getLoginName());
+    User user = new User();
+    user.setLoginName(picketLinkUser.getLoginName());
     user.setFullName(picketLinkUser.getFirstName() + " " + picketLinkUser.getLastName());
     user.setShortName(picketLinkUser.getLastName());
     return user;
