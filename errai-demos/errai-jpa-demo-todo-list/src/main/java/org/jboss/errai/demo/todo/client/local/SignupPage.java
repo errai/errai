@@ -91,23 +91,7 @@ public class SignupPage extends Composite {
       signupService.call(new RemoteCallback<User>() {
         @Override
         public void callback(final User response) {
-          Map<String, Object> params = new HashMap<String, Object>();
-          params.put("userId", response.getId());
-          syncManager.coldSync("userById", User.class, params,
-                  new RemoteCallback<List<SyncResponse<User>>>() {
-                    @Override
-                    public void callback(List<SyncResponse<User>> syncOps) {
-                      todoListPageLink.go(ImmutableMultimap.<String, String>of("userId", response.getId().toString()));
-                    }
-                  },
-                  new BusErrorCallback() {
-                    @Override
-                    public boolean error(Message message, Throwable throwable) {
-                      overallErrorMessage.setText(throwable.getMessage());
-                      overallErrorMessage.setVisible(true);
-                      return false;
-                    }
-                  });
+          todoListPageLink.go();
         }
       },
       new BusErrorCallback() {
