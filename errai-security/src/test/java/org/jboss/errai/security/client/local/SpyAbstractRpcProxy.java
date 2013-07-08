@@ -25,7 +25,6 @@ public class SpyAbstractRpcProxy extends AbstractRpcProxy implements Authenticat
 
   @Override
   public boolean isLoggedIn() {
-    this.remoteCallback.callback(null);
     calls.add("isLoggedIn");
     return false;
   }
@@ -45,7 +44,6 @@ public class SpyAbstractRpcProxy extends AbstractRpcProxy implements Authenticat
 
   @Override
   public List<Role> getRoles() {
-    this.remoteCallback.callback(new ArrayList<Role>());
     calls.add("getRoles");
     return null;
   }
