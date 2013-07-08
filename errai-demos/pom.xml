@@ -79,6 +79,7 @@
   	<module>errai-jpa-demo-todo-list</module>
     <module>errai-jaxrs-demo-crud</module>
     <module>errai-ui-demo-i18n</module>
+    <module>errai-aerogear-demo</module>
   </modules>
 
 </project>
