@@ -80,6 +80,7 @@
     <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+    <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
   </properties>
@@ -195,6 +196,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven.resources.plugin.version}</version>
         <executions>
           <execution>
             <id>css-resources</id>
@@ -238,21 +240,8 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>${maven.clean.plugin.version}</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>src/main/webapp</directory>
-              <includes>
-                <include>app/**</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
