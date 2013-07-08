@@ -13,7 +13,7 @@ import java.util.List;
 @Remote
 public interface AuthenticationService {
 
-  void login(String username, String password);
+  User login(String username, String password);
 
   boolean isLoggedIn();
 

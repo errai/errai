@@ -4,12 +4,16 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.shared.api.style.StyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
@@ -45,7 +49,14 @@ public class SecurityTest extends AbstractErraiCDITest {
     Cookies.setCookie(CURRENT_PAGE_COOKIE, "TestPage");
 
     // when
-    module.login();
+    module.login(
+            null, new BusErrorCallback() {
+      @Override
+      public boolean error(Message message, Throwable throwable) {
+        fail("no error should have occurred as the the SpyAbstractRpcProxy got the call");
+        return false;
+      }
+    });
 
     // then
     assertEquals(new Integer(1), spy.getCallCount("login"));

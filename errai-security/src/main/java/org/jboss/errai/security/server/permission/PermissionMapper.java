@@ -22,18 +22,15 @@ public class PermissionMapper {
   AuthenticationService service;
 
   public boolean resolvePermission(PageRequest pageRequest) {
-    boolean permit = false;
     User user = service.getUser();
 
     for (RequestPermissionResolver resolver : resolvers) {
       PermissionStatus status = resolver.hasPermission(user, pageRequest);
-      if (PermissionStatus.ALLOW.equals(status)) {
-        permit = true;
-      } else if (PermissionStatus.DENY.equals(status)) {
+    if (PermissionStatus.DENY.equals(status)) {
         return false;
       }
     }
 
-    return permit;
+    return true;
   }
 }

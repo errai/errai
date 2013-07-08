@@ -45,7 +45,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   private DefaultLoginCredentials credentials;
 
   @Override
-  public void login(String username, String password) {
+  public User login(String username, String password) {
     credentials.setUserId(username);
     credentials.setCredential(new Password(password));
 
@@ -53,7 +53,9 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
       throw new SecurityException();
     }
 
-    loggedInEventSource.fire(new LoggedInEvent(createUser((org.picketlink.idm.model.User) identity.getAgent())));
+    final User user = createUser((org.picketlink.idm.model.User) identity.getAgent());
+    loggedInEventSource.fire(new LoggedInEvent(user));
+    return user;
   }
 
 
@@ -63,7 +65,8 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
    * @return our user
    */
   private User createUser(org.picketlink.idm.model.User picketLinkUser) {
-    User user = new User(picketLinkUser.getLoginName());
+    User user = new User();
+    user.setLoginName(picketLinkUser.getLoginName());
     user.setFullName(picketLinkUser.getFirstName() + " " + picketLinkUser.getLastName());
     user.setShortName(picketLinkUser.getLastName());
     return user;

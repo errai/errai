@@ -8,7 +8,8 @@
     <inherits name="org.jboss.errai.jpa.sync.DataSync"/>
     <inherits name="org.jboss.errai.validation.Validation" />
     <inherits name="org.hibernate.validator.HibernateValidator" />
+  <inherits name="org.jboss.errai.security.Security"/>
 
-    <source path="client"/>
+  <source path="client"/>
     <source path="shared"/>    
 </module>

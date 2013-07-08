@@ -1,44 +1,37 @@
 package org.jboss.errai.demo.todo.client.local;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.demo.todo.shared.LoginService;
 import org.jboss.errai.demo.todo.shared.TodoItem;
-import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
+import org.jboss.errai.security.client.local.Identity;
+import org.jboss.errai.security.shared.RequireAuthentication;
+import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
-import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+@RequireAuthentication
 @Templated("#main")
 @Page(path="list")
 public class TodoListPage extends Composite {
@@ -47,8 +40,7 @@ public class TodoListPage extends Composite {
   @Inject private ClientBeanManager bm;
   @Inject private ClientSyncManager syncManager;
 
-  private @PageState Long userId;
-  private User user; // filled in by @PageShowing method by lookup on userId
+  private User user; // filled in by @PageShowing method
 
   @Inject private @DataField TextBox newItemBox;
   @Inject private @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
@@ -62,30 +54,31 @@ public class TodoListPage extends Composite {
 
   @Inject private TransitionTo<LoginPage> logoutTransition;
   @Inject private @DataField Anchor logoutLink;
-  @Inject private Caller<LoginService> loginService;
+
+  @Inject private Identity identity;
 
   @PageShowing
   private void onPageShowing() {
-    if (userId == null) {
-      Window.alert("No user id specified. Please sign in again.");
-      logout(null);
-    }
+    identity.getUser(new AsyncCallback<User>() {
+      @Override
+      public void onSuccess(User result) {
+        user = result;
+        username.setText(user.getFullName());
+        errorLabel.setVisible(false);
+        refreshItems();
+      }
 
-    user = em.find(User.class, userId);
-    if (user == null) {
-      Window.alert("Please sign in again.");
-      logout(null);
-    }
-
-    username.setText(user.getFullName());
-    errorLabel.setVisible(false);
-    refreshItems();
+      @Override
+      public void onFailure(Throwable caught) {
+        logoutTransition.go();
+      }
+    });
   }
 
   private void refreshItems() {
     System.out.println("Todo List Demo: refreshItems()");
     TypedQuery<TodoItem> query = em.createNamedQuery("currentItemsForUser", TodoItem.class);
-    query.setParameter("user", user);
+    query.setParameter("userId", user.getLoginName());
     itemContainer.setItems(query.getResultList());
   }
 
@@ -98,7 +91,7 @@ public class TodoListPage extends Composite {
   void onNewItem(KeyDownEvent event) {
     if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER && !newItemBox.getText().trim().equals("")) {
       TodoItem item = new TodoItem();
-      item.setUser(user);
+      item.setLoginName(user.getLoginName());
       item.setText(newItemBox.getText());
       em.persist(item);
       em.flush();
@@ -110,7 +103,7 @@ public class TodoListPage extends Composite {
   @EventHandler("archiveButton")
   void archive(ClickEvent event) {
     TypedQuery<TodoItem> query = em.createNamedQuery("currentItemsForUser", TodoItem.class);
-    query.setParameter("user", user);
+    query.setParameter("userId", user.getLoginName());
     for (TodoItem item : query.getResultList()) {
       if (item.isDone()) {
         item.setArchived(true);
@@ -123,7 +116,7 @@ public class TodoListPage extends Composite {
   @EventHandler("syncButton")
   void sync(ClickEvent event) {
     Map<String,Object> params = new HashMap<String, Object>();
-    params.put("user", user);
+    params.put("userId", user.getLoginName());
     syncManager.coldSync("allItemsForUser", TodoItem.class, params,
             new RemoteCallback<List<SyncResponse<TodoItem>>>() {
               @Override
@@ -149,7 +142,7 @@ public class TodoListPage extends Composite {
   @EventHandler("logoutLink")
   void logout(ClickEvent event) {
     syncManager.clear();
-    loginService.call().logOut();
+    identity.logout();
     logoutTransition.go();
   }
 }

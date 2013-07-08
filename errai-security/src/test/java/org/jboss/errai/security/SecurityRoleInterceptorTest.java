@@ -150,7 +150,8 @@ public class SecurityRoleInterceptorTest {
     }
 
     @Override
-    public void login(String username, String password) {
+    public User login(String username, String password) {
+      return null;
     }
 
     @Override

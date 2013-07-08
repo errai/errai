@@ -9,6 +9,8 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.security.client.local.Identity;
 import org.jboss.errai.security.shared.LoginPage;
 import org.jboss.errai.security.shared.User;
@@ -53,9 +55,18 @@ public class LoginForm extends Composite {
   @DataField
   private Anchor logout;
 
+  @DataField
+  Element alert = DOM.createDiv();
+
   @EventHandler("login")
   private void loginClicked(ClickEvent event) {
-    identity.login();
+    identity.login(null, new BusErrorCallback() {
+      @Override
+      public boolean error(Message message, Throwable throwable) {
+        alert.getStyle().setDisplay(Style.Display.BLOCK);
+        return false;
+      }
+    });
   }
 
   @EventHandler("logout")

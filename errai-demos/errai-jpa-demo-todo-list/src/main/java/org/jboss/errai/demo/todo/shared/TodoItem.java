@@ -13,19 +13,15 @@ import org.jboss.errai.databinding.client.api.Bindable;
 
 @Portable @Bindable @Entity
 @NamedQueries({
-  @NamedQuery(name="currentItemsForUser", query="SELECT i FROM TodoItem i WHERE i.user = :user AND i.archived=false ORDER BY i.text"),
-  @NamedQuery(name="allItemsForUser", query="SELECT i FROM TodoItem i WHERE i.user = :user ORDER BY i.text")
+  @NamedQuery(name="currentItemsForUser", query="SELECT i FROM TodoItem i WHERE i.loginName = :userId AND i.archived=false ORDER BY i.text"),
+  @NamedQuery(name="allItemsForUser", query="SELECT i FROM TodoItem i WHERE i.loginName = :userId ORDER BY i.text")
 })
 public class TodoItem {
 
   @Id @GeneratedValue
   private Long id;
 
-  /**
-   * The user who owns this To-do item.
-   */
-  @ManyToOne(cascade=CascadeType.MERGE)
-  private User user;
+  private String loginName;
 
   private String text;
 
@@ -38,11 +34,11 @@ public class TodoItem {
   public void setId(Long id) {
     this.id = id;
   }
-  public User getUser() {
-    return user;
+  public String getLoginName() {
+    return loginName;
   }
-  public void setUser(User user) {
-    this.user = user;
+  public void setLoginName(String loginName) {
+    this.loginName = loginName;
   }
   public String getText() {
     return text;
@@ -64,7 +60,7 @@ public class TodoItem {
   }
   @Override
   public String toString() {
-    return "TodoItem [id=" + id + ", user=" + (user == null ? "null" : user.getId()) + ", done=" + done +
+    return "TodoItem [id=" + id + ", user=" + loginName + ", done=" + done +
             ", archived=" + archived + ", text=" + text + "]";
   }
 }
