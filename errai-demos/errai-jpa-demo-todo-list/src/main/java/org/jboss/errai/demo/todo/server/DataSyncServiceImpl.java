@@ -28,9 +28,9 @@ public class DataSyncServiceImpl implements DataSyncService {
       throw new IllegalStateException("Nobody is logged in!");
     }
     if (dataSet.getQueryName().equals("allItemsForUser")) {
-      User requestedUser = (User) dataSet.getParameters().get("user");
-      if (!currentUser.getLoginName().equals(requestedUser.getLoginName())) {
-        throw new AccessDeniedException("You don't have permission to sync user " + requestedUser.getLoginName());
+      String requestedUserId = (String) dataSet.getParameters().get("userId");
+      if (!currentUser.getLoginName().equals(requestedUserId)) {
+        throw new AccessDeniedException("You don't have permission to sync user " + requestedUserId);
       }
     }
     else {
