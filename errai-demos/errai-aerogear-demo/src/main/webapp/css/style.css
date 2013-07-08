@@ -1,0 +1,609 @@
+body {
+    padding-top: 120px;
+}
+
+.navbar-inner {
+    min-height: 110px;
+    background-color: #dde7ec;
+    background-image: url("http://todo-aerogear.rhcloud.com/img/banner.png");
+    background-repeat: no-repeat;
+}
+
+.navbar .container {
+    width: auto;
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    height: 30px;
+}
+
+.navbar .nav > li > a {
+    color: #e25027;
+    font-weight: bold;
+    text-shadow: none;
+    margin: 2px;
+}
+
+.navbar .nav > li > a:hover {
+    background-color: #669eb2;
+    text-shadow: none;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.navbar .btn-navbar, .navbar .btn-navbar:hover {
+    background-color: #e25027;
+    background-image: none;
+}
+
+.container {
+    margin-bottom: 100px;
+}
+
+.todo-app {
+    margin-top: 15px;
+}
+
+.todo-app .span2.navbar {
+    color: #000;
+}
+
+.todo-app .span2 > div {
+    background: transparent;
+}
+
+.todo-app .span2 > div > div > div,
+.todo-app .span2 > div .add-project,
+.todo-app .span2 > div .add-project-form,
+.todo-app .span2 > div .add-tag,
+.todo-app .span2 > div .add-tag-form,
+.todo-app .span9 > div.task,
+.todo-app .span9 > div > div.task {
+    padding: 12px 10px;
+    margin-top: 5px;
+    background-color: #fff;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    display: block;
+}
+
+.todo-app .span9 > div > div.task {
+    min-height: 60px;
+}
+
+.todo-app .span2, .todo-app .span9 {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.todo-app .span9 {
+    margin-bottom: 100px;
+}
+
+.btn-primary {
+    background-color: #e25027;
+    background-image: -ms-linear-gradient(top, #f27552, #d63a0e);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f27552), to(#d63a0e));
+    background-image: -webkit-linear-gradient(top, #f27552, #d63a0e);
+    background-image: -o-linear-gradient(top, #f27552, #d63a0e);
+    background-image: -moz-linear-gradient(top, #f27552, #d63a0e);
+    background-image: linear-gradient(top, #f27552, #d63a0e);
+    background-repeat: repeat-x;
+    border-color: #05C #05C #003580;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr='#f27552', endColorstr='#d63a0e', GradientType=0);
+    filter: progid:dximagetransform.microsoft.gradient(enabled=false)
+}
+
+.swatch {
+    float: left;
+    margin: 3px 5px 0 0;
+    height: 10px;
+    width: 10px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.btn .icon-plus-sign, .btn .icon-remove {
+    float: left;
+}
+
+.todo-app .span2 div.add-project-form, .todo-app .span2 div.add-tag-form, .todo-app .span9 div.add-task-form {
+    background: rgba(255,255,255,1);
+    display: none;
+    position: relative;
+}
+
+#add-project .btn, #add-tag .btn, #add-task .btn {
+    display: block;
+}
+
+#add-project input, #add-tag input {
+    width: 98%;
+    margin-left: -4px;
+}
+#add-task input[type="text"] {
+    width: 270px;
+}
+#add-task textarea {
+    width: 100%;
+}
+#add-task .form-column {
+    float: left;
+    margin-right: 10px;
+    width: 45%;
+    padding: 5px 10px;
+}
+#add-task .form-column.full {
+    float: none;
+    clear: both;
+    width: 90%;
+}
+#add-task .btn {
+    clear: both;
+    margin: 10px;
+}
+
+.project, .tag, .task {
+    position: relative;
+}
+
+.option-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: #fff;
+    width: 100%;
+    height: 100%;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    display: none;
+}
+
+.task .option-overlay {
+    width: 55px;
+    left: auto;
+    right: 0px;
+}
+
+.option-overlay .col {
+    width: 33%;
+    float: left;
+}
+
+.task .option-overlay .col {
+    width: 100%;
+}
+
+.option-overlay .col .btn {
+    margin: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 14px;
+}
+
+.task .option-overlay .col .btn {
+    margin: 1px 10px 2px 10px;
+}
+
+.option-overlay .col .btn.delete {
+    padding: 5px 10px;
+}
+
+
+.option-overlay .col .btn .btn-txt {
+    display: none;
+}
+
+.tag-select-column {
+    width: 25%;
+    float: left;
+    margin: 0 10px 10px 0;
+}
+
+.tag-select-box {
+    float: left;
+    margin-right: 10px;
+    padding: 0 4px;
+}
+
+.span12 h1 {
+    font-family: 'Aldrich', sans-serif;
+    margin: 10px auto;
+    width: 275px;
+}
+
+.add-tag, .add-project, .add-task {
+    color: #999;
+}
+
+#task-container, #project-list, #tag-list {
+    position: relative;
+}
+
+#project-list, #tag-list {
+    max-height: 200px;
+    overflow: hidden;
+    padding-bottom: 5px;
+}
+#project-list:hover, #tag-list:hover {
+    max-height: none;
+}
+
+.task {
+    display: table;
+}
+
+.task > hr {
+    margin: 2px;
+    border-color: #000;
+    opacity: 0.15;
+    filter:alpha(opacity=15);
+}
+
+.task-upper {
+    display: table-row;
+}
+
+.task-upper > div {
+    display: table-cell;
+    padding: 5px 10px;
+    vertical-align: middle;
+}
+
+.task-date {
+    font-weight: bold;
+    width: 75px;
+}
+
+.task-tags {
+    width: 35px;
+}
+
+.task-title {
+    display: table-cell;
+}
+
+.task-desc {
+    display: block;
+    margin-top: 10px;
+}
+
+label {
+    font-weight: bold;
+}
+
+.todo-app .form-error {
+    border-color: #ff0000;
+    background: rgb(255, 0, 0);
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+}
+
+#userinfo-msg, #login-btn {
+    display: none;
+}
+
+#login-msg, #register-msg {
+    color: #F00;
+}
+
+/* Footer styles */
+footer {
+    width: 100%;
+    background-image: url("../img/bg.png");
+    background-position: bottom;
+    background-repeat: repeat-x;
+    min-height: 100px;
+}
+
+.navbar-fixed-bottom {
+    z-index: -1;
+}
+
+/* Bootstrap Overrides */
+.progress {
+    margin: 10px auto;
+    z-index: 999;
+    background-color: transparent;
+}
+
+.modal {
+    position: inherit;
+    width: 250px;
+    padding: 20px;
+}
+
+.color-picker {
+    clear: both;
+}
+.color-picker-label {
+    float: left;
+    margin-right: 10px;
+}
+
+/* jQuery miniColors color-picker plugin styles */
+.miniColors-trigger {
+    height: 22px;
+    width: 22px;
+    vertical-align: middle;
+    margin: 0 .25em;
+    display: inline-block;
+    outline: none;
+    border: 1px solid #555;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.miniColors-selector {
+    position: absolute;
+    width: 175px;
+    height: 150px;
+    background: #FFF;
+    border: solid 1px #BBB;
+    -moz-box-shadow: 0 0 6px rgba(0, 0, 0, .25);
+    -webkit-box-shadow: 0 0 6px rgba(0, 0, 0, .25);
+    box-shadow: 0 0 6px rgba(0, 0, 0, .25);
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 999999;
+}
+.miniColors-selector.black {
+    background: #000;
+    border-color: #000;
+}
+.miniColors-colors {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 150px;
+    height: 150px;
+    background: url(../img/colors.png) right no-repeat;
+    cursor: crosshair;
+}
+.miniColors-hues {
+    position: absolute;
+    top: 5px;
+    left: 160px;
+    width: 20px;
+    height: 150px;
+    background: url(../img/colors.png) left no-repeat;
+    cursor: crosshair;
+}
+.miniColors-colorPicker {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border: 1px solid #fff;
+    -moz-border-radius: 11px;
+    -webkit-border-radius: 11px;
+    border-radius: 11px;
+}
+.miniColors-colorPicker-inner {
+    position: absolute;
+    top: 0;
+    left: 0; 
+    width: 7px;
+    height: 7px;
+    border: 1px solid #000;
+    -moz-border-radius: 9px;
+    -webkit-border-radius: 9px;
+    border-radius: 9px;
+}
+.miniColors-huePicker {
+    position: absolute;
+    left: -3px;
+    width: 24px;
+    height: 1px;
+    border: 1px solid #fff;
+    border-radius: 2px;
+    background: #000;
+}
+
+/* Media Queries */
+@media (max-width: 1200px) {
+
+}
+
+@media (max-width: 979px) {
+    body {
+        padding-top: 0px;
+    }
+
+    .navbar-fixed-top {
+        position: relative;
+    }
+
+    .nav-collapse {
+        height: auto;
+        overflow: auto;
+    }
+
+    .todo-app .span2.navbar .btn-navbar {
+        display: none;
+    }
+
+    .todo-app .span2.navbar h3 {
+        font-size: 16px;
+    }
+
+    .todo-app .span2.navbar .btn {
+        padding: 8px 10px;
+    }
+
+    .navbar-fixed-bottom {
+        position: fixed;
+    }
+}
+
+@media (max-width: 768px) {
+    .todo-app .span2.navbar .btn-navbar {
+        display: inline;
+    }
+
+    .nav-collapse {
+        height: 0;
+        overflow: hidden;
+    }
+
+    .navbar-fixed-bottom {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    #add-project input, #add-tag input {
+        width: 95%;
+        margin-left: -4px;
+    }
+    #add-task input[type="text"] {
+        width: 250px;
+    }
+}
+
+@media (max-width: 640px) {
+
+}
+
+@media (max-width: 500px) {
+
+}
+
+@media (max-width: 480px) {
+    .modal {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        padding: 20px;
+        margin: 0;
+    }
+}
+
+* {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);  
+}
+
+.dateBoxFormatError {
+    background: #ffcccc;
+}
+.dateBoxPopup {
+}
+
+.gwt-DatePicker {
+    border: 1px solid #ccc;
+    border-top:1px solid #999;
+    cursor: default;
+}
+.gwt-DatePicker td,
+.datePickerMonthSelector td:focus {
+    outline: none;
+}
+.datePickerDays {
+    width: 100%;
+    background: white;
+}
+.datePickerDay,
+.datePickerWeekdayLabel,
+.datePickerWeekendLabel {
+    font-size: 85%;
+    text-align: center;
+    padding: 4px;
+    outline: none;
+    color:#333;
+    border-right: 1px solid #EDEDED;
+    border-bottom: 1px solid #EDEDED;
+}
+.datePickerWeekdayLabel,
+.datePickerWeekendLabel {
+    background: #fff;
+    padding: 0px 4px 2px;
+    cursor: default;
+    color:#666;
+    font-size:70%;
+    font-weight:normal;
+}
+.datePickerDay {
+    padding: 3px 5px;
+    cursor: hand;
+    cursor: pointer;
+}
+.datePickerDayIsWeekend {
+    background: #f7f7f7;
+}
+.datePickerDayIsFiller {
+    color: #999;
+    font-weight:normal;
+}
+.datePickerDayIsValue {
+    background: #d7dfe8;
+}
+.datePickerDayIsDisabled {
+    color: #AAAAAA;
+    font-style: italic;
+}
+.datePickerDayIsHighlighted {
+    background: #d33917;
+}
+.datePickerDayIsValueAndHighlighted {
+    background: #d7dfe8;
+}
+.datePickerDayIsToday {
+    padding: 3px;
+    color: #fff;
+    background-color: #999;
+}
+
+.datePickerMonthSelector {
+    width: 100%;
+    padding: 1px 0 5px 0;
+    background: #fff;
+}
+td.datePickerMonth {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    font-size: 100%;
+    font-weight: bold;
+    color: #333;
+}
+.datePickerPreviousButton,
+.datePickerNextButton {
+    font-size: 120%;
+    line-height: 1em;
+    color: #3a6aad;
+    cursor: hand;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0px 4px;
+    outline: none;
+}
+
+.dialogMiddleCenter td:nth-child(3) {
+    display:none;
+}
+
+#task-tag-column .gwt-CheckBox {
+    float: left;
+    margin-right: 10px;
+}
+
+#task-tag-column .gwt-CheckBox input {
+    float: left;
+    margin: 2px 5px 2px 5px;
+}
+
+#task-tag-column .gwt-CheckBox label {
+    display: inline;
+    margin-right: 10px;
+}
