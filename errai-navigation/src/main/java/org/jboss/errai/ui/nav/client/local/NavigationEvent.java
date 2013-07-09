@@ -1,20 +1,19 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
+ * A CDI event that is fired when the user navigates to a different page within the app.
+ *
  * @author edewit@redhat.com
  */
-@Portable
 public class NavigationEvent {
-  private final PageRequest pageRequest;
+  private final HistoryToken pageRequest;
 
-  public NavigationEvent(@MapsTo("pageRequest") PageRequest pageRequest) {
+  public NavigationEvent(HistoryToken pageRequest) {
     this.pageRequest = pageRequest;
   }
 
-  public PageRequest getPageRequest() {
+  public HistoryToken getHistoryToken() {
     return pageRequest;
   }
 }

@@ -148,12 +148,12 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     final NavigationEvent event = pageWithExtraState.getEvent();
     assertNotNull(event);
 
-    final PageRequest pageRequest = event.getPageRequest();
+    final HistoryToken pageRequest = event.getHistoryToken();
     assertNotNull(pageRequest);
     assertEquals("PageWithLifecycleMethods", pageRequest.getPageName());
     assertNotNull(pageRequest.getState());
     assertEquals(1, pageRequest.getState().size());
-    assertEquals("foo", pageRequest.getState().get("state"));
+    assertEquals("foo", pageRequest.getState().get("state").toArray()[0]);
   }
 
   public void testRedirect() {

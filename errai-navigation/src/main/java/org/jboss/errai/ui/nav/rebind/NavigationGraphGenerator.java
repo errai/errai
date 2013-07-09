@@ -4,18 +4,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
-import org.jboss.errai.codegen.builder.*;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -33,17 +40,31 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
-
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.ui.nav.client.local.*;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
+import org.jboss.errai.ui.nav.client.local.HistoryToken;
+import org.jboss.errai.ui.nav.client.local.NavigationEvent;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageHidden;
+import org.jboss.errai.ui.nav.client.local.PageHiding;
+import org.jboss.errai.ui.nav.client.local.PageRole;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
+import org.jboss.errai.ui.nav.client.local.PageShown;
+import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
+import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
@@ -52,19 +73,19 @@ import com.google.gwt.user.client.ui.IsWidget;
 /**
  * Generates the GeneratedNavigationGraph class based on {@code @Page} and {@code @DefaultPage}
  * annotations.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @GenerateAsync(NavigationGraph.class)
 public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
-  private static final String GENERATED_CLASS_NAME = "GeneratedNavigationGraph"; 
-  
+  private static final String GENERATED_CLASS_NAME = "GeneratedNavigationGraph";
+
   @Override
   public String generate(TreeLogger logger, GeneratorContext context,
           String typeName) throws UnableToCompleteException {
 
-    return startAsyncGeneratorsAndWaitFor(NavigationGraph.class, 
+    return startAsyncGeneratorsAndWaitFor(NavigationGraph.class,
         context, logger, NavigationGraph.class.getPackage().getName(), GENERATED_CLASS_NAME);
   }
 
@@ -185,7 +206,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   /**
    * Generates a new instance of an anonymous inner class that implements the PageNode interface.
-   * 
+   *
    * @param pageClass
    *          The class providing the widget content for the page.
    * @param pageName
@@ -217,7 +238,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   /**
    * Appends the method that calls the {@code @PageHiding} method of the widget.
-   * 
+   *
    * @param pageImplBuilder
    *          The class builder for the implementation of PageNode we are adding the method to.
    * @param pageClass
@@ -230,7 +251,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   /**
    * Appends the method that calls the {@code @PageHidden} method of the widget.
-   * 
+   *
    * @param pageImplBuilder
    *          The class builder for the implementation of PageNode we are adding the method to.
    * @param pageClass
@@ -411,10 +432,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     if (addPrivateAccessors) {
       method.append(Stmt.invokeStatic(CDI.class, "fireEvent",
-              Stmt.newObject(NavigationEvent.class).withParameters(
-                      Stmt.newObject(PageRequest.class).withParameters(getPageName(pageClass), Stmt.loadVariable("pageState"))
-              )
-      ));
+              Stmt.newObject(NavigationEvent.class).withParameters(Stmt.loadVariable("state"))));
     }
 
     checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, true);
@@ -423,7 +441,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   /**
    * Renders the page-to-page navigation graph into the file {@code navgraph.gv} in the
    * {@code .errai} cache directory.
-   * 
+   *
    */
   private void renderNavigationToDotFile(BiMap<String, MetaClass> pages) {
     final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath(), "navgraph.gv");
