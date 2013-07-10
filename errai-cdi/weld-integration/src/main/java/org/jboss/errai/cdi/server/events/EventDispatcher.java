@@ -15,26 +15,6 @@
  */
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.client.api.RoutingFlag;
-import org.jboss.errai.bus.server.util.LocalContext;
-import org.jboss.errai.cdi.server.CDIServerUtil;
-import org.jboss.errai.cdi.server.ScopeUtil;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.enterprise.client.cdi.CDICommands;
-import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.ObserverMethod;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +24,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.ObserverMethod;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.util.LocalContext;
+import org.jboss.errai.cdi.server.CDIServerUtil;
+import org.jboss.errai.cdi.server.ScopeUtil;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.enterprise.client.cdi.CDICommands;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.weld.manager.BeanManagerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
@@ -82,6 +84,7 @@ public class EventDispatcher implements MessageCallback {
     this.afterBeanDiscovery = afterBeanDiscovery;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public void callback(final Message message) {
     /**
@@ -115,6 +118,8 @@ public class EventDispatcher implements MessageCallback {
 
               if (!activeObserverMethods.contains(observerMethod)) {
                 afterBeanDiscovery.addObserverMethod(observerMethod);
+                int clearCount = clearBeanManagerObserverCaches(((BeanManagerImpl) beanManager));
+                log.debug("Cleared observer resolution caches of " + clearCount + " bean managers");
                 activeObserverMethods.add(observerMethod);
               }
 
@@ -216,5 +221,13 @@ public class EventDispatcher implements MessageCallback {
     final Set<String> annotationTypes = new TreeSet<String>(message.get(Set.class, CDIProtocol.Qualifiers));
 
     return typeName + annotationTypes;
+  }
+
+  private static int clearBeanManagerObserverCaches(BeanManagerImpl bm) {
+    bm.getObserverResolver().clear();
+    for (BeanManagerImpl otherBeanManager : bm.getAccessibleManagers()) {
+      otherBeanManager.getObserverResolver().clear();
+    }
+    return bm.getAccessibleManagers().size() + 1;
   }
 }

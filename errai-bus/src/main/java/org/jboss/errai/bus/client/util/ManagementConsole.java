@@ -20,13 +20,13 @@ import static org.jboss.errai.common.client.util.LogUtil.displayDebuggerUtilityT
 import static org.jboss.errai.common.client.util.LogUtil.displaySeparator;
 import static org.jboss.errai.common.client.util.LogUtil.nativeLog;
 
+import java.util.Collection;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.bus.client.framework.transports.TransportStatistics;
 import org.jboss.errai.common.client.util.LogUtil;
-
-import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -67,6 +67,14 @@ public class ManagementConsole {
 
       $wnd.errai_show_error_console = function () {
           thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::showErrorConsole()();
+      }
+
+      $wnd.errai_bus_stop = function () {
+          thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::stopBus()();
+      }
+
+      $wnd.errai_bus_start = function () {
+          thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::startBus()();
       }
   }-*/;
 
@@ -165,5 +173,12 @@ public class ManagementConsole {
     displaySeparator();
   }
 
+  private void stopBus() {
+    clientMessageBus.stop(false);
+  }
+
+  private void startBus() {
+    clientMessageBus.init();
+  }
 
 }

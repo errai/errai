@@ -21,25 +21,25 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * Test module used by {@see EventObserverIntegrationTest}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
 public class EventObserverTestModule extends EventTestObserverSuperClass {
   private final Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
-  
+
   private int busReadyEventsReceived = 0;
   private Runnable verifier;
   private boolean destroyed;
-  
+
   @Inject
   private Event<StartEvent> startEvent;
-  
+
   @PreDestroy
   private void destroy() {
     destroyed = true;
   }
-  
+
   public int getBusReadyEventsReceived() {
     return busReadyEventsReceived;
   }
@@ -51,7 +51,7 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
   public Event<StartEvent> getStartEvent() {
     return startEvent;
   }
-  
+
   public boolean isDestroyed() {
     return destroyed;
   }
@@ -133,15 +133,11 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
   public void setResultVerifier(Runnable verifier) {
     this.verifier = verifier;
   }
-  
+
   private void addQualifiedReceivedEvent(String receiver, String event) {
     List<String> events = receivedQualifiedEvents.get(receiver);
     if (events == null)
       events = new ArrayList<String>();
-
-    if (events.contains(event))
-      throw new RuntimeException(receiver + " received " + event + " twice!");
-
     events.add(event);
     receivedQualifiedEvents.put(receiver, events);
   }

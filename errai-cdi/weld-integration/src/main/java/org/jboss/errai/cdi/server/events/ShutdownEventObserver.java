@@ -78,6 +78,8 @@ public class ShutdownEventObserver implements ObserverMethod {
   @Override
   public void notify(Object o) {
 
+    log.info("Shutting down CDI-to-ErraiBus event bridge");
+
     // unsubscribe bean endpoints
     for (AnnotatedType<?> svc : managedTypes.getServiceEndpoints()) {
       final String subject = CDIServerUtil.resolveServiceName(svc.getJavaClass());
