@@ -9,6 +9,7 @@ import org.jboss.errai.cdi.client.event.FinishEvent;
 import org.jboss.errai.cdi.client.event.MyEventImpl;
 import org.jboss.errai.cdi.client.event.MyEventInterface;
 import org.jboss.errai.cdi.client.event.StartEvent;
+import org.jboss.errai.cdi.client.event.UnobservedEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
@@ -39,10 +40,13 @@ public class CdiTestEventProducerService {
 
   @Inject @A @B @C
   private Event<String> eventABC;
-  
+
   @Inject
   private Event<MyEventInterface> myEvent;
-  
+
+  @Inject
+  private Event<UnobservedEvent> unobservedEvent;
+
   @Inject
   private Event<FinishEvent> finishEvent;
 
@@ -61,6 +65,7 @@ public class CdiTestEventProducerService {
     eventBC.fire("BC");
     eventABC.fire("ABC");
     myEvent.fire(new MyEventImpl());
+    unobservedEvent.fire(new UnobservedEvent(String.valueOf(System.currentTimeMillis())));
     finishEvent.fire(new FinishEvent());
   }
 }

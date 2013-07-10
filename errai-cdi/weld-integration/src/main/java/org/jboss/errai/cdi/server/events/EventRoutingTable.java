@@ -1,10 +1,5 @@
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.laundry.Laundry;
-import org.jboss.errai.bus.client.api.laundry.LaundryList;
-import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,10 +7,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.laundry.Laundry;
+import org.jboss.errai.bus.client.api.laundry.LaundryList;
+import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
+ * <a href="http://www.youtube.com/watch?v=qBXn9PptgN8">Architectural Overview</a>
+ *
  * @author Mike Brock
  */
 public class EventRoutingTable {
+  private static final Logger log = LoggerFactory.getLogger(EventRoutingTable.class);
+
   private static final String CDI_EVENT_ROUTES_ACTIVE = "cdi.event.routesActive";
 
   // type to (set<annotations> to set<session ids>)
@@ -87,7 +93,8 @@ public class EventRoutingTable {
       return false;
     }
     final Set<String> sessions = route.get(annotations);
-    return sessions != null && sessions.contains(queueSession.getSessionId());
+    boolean active = sessions != null && sessions.contains(queueSession.getSessionId());
+    return active;
   }
 
   public Collection<String> getQueueIdsForRoute(final String eventType,

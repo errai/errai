@@ -34,17 +34,19 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the
  * CDI container. The purpose of this implementation is to observe an event which is exposed to the bus and
  * transmit the event to all clients listening to this event.</p>
- * <p/>
- * For the "conversational" version of this, see {@link org.jboss.errai.cdi.server.events.ConversationalEventObserverMethod}.
  *
  * @author Mike Brock
  */
 public class DynamicEventObserverMethod implements ObserverMethod {
+
+  private static final Logger log = LoggerFactory.getLogger(DynamicEventObserverMethod.class);
 
   /**
    * An instance of the MessageBus.
@@ -101,13 +103,19 @@ public class DynamicEventObserverMethod implements ObserverMethod {
 
   @Override
   public void notify(final Object event) {
-    if (EventConversationContext.isEventObjectInContext(event)) return;
+    if (EventConversationContext.isEventObjectInContext(event)) {
+      log.debug("Not sending event to clients; it is not in context");
+      return;
+    }
 
     final Class<? extends Object> aClass = event.getClass();
     final String sessionId;
     final EventConversationContext.Context ctx = EventConversationContext.get();
     if (aClass.isAnnotationPresent(Conversational.class) && ctx != null && ctx.getSessionId() != null) {
-      if (ctx.getEventObject() == event) return;
+      if (ctx.getEventObject() == event) {
+        log.debug("Not sending event; it is conversational and we are in its own conversation context");
+        return;
+      }
       sessionId = ctx.getSessionId();
     }
     else {
@@ -119,7 +127,6 @@ public class DynamicEventObserverMethod implements ObserverMethod {
     messageParts.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
     messageParts.put(CDIProtocol.BeanType.name(), aClass.getName());
     messageParts.put(CDIProtocol.BeanReference.name(), event);
-
 
     if (!annotationTypes.isEmpty()) {
       messageParts.put(CDIProtocol.Qualifiers.name(), annotationTypes);
@@ -151,6 +158,7 @@ public class DynamicEventObserverMethod implements ObserverMethod {
 
   @Override
   public boolean equals(final Object o) {
+    log.info("Checking for equality with " + o);
     if (this == o) return true;
     if (!(o instanceof DynamicEventObserverMethod)) return false;
 

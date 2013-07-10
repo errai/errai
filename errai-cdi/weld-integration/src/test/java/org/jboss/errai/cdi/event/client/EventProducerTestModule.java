@@ -26,7 +26,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 public class EventProducerTestModule {
   private boolean busReadyEventReceived = false;
   private Runnable verifier;
-  
+
   private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
 
   @Inject
