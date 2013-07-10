@@ -6,8 +6,9 @@ import java.util.Queue;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -30,7 +31,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@ApplicationScoped
+@EntryPoint
 public class Navigation {
 
   /**
@@ -93,8 +94,7 @@ public class Navigation {
 
     historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-
+      public void onValueChange(final ValueChangeEvent<String> event) {
         HistoryToken token = HistoryToken.parse(event.getValue());
         PageNode<IsWidget> toPage = navGraph.getPage(token.getPageName());
         if (toPage == null) {
@@ -106,7 +106,13 @@ public class Navigation {
     });
 
     // finally, we bootstrap the navigation system (this invokes the callback above)
-    History.fireCurrentHistoryState();
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        History.fireCurrentHistoryState();
+      }
+    });
+
   }
 
   /**

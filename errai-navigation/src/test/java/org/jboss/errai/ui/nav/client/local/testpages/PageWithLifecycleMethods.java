@@ -33,7 +33,7 @@ public class PageWithLifecycleMethods extends VerticalPanel {
   private void afterShown() {
 	afterShowCallCount++;
   }
-  
+
   @PageHiding
   private void beforeHide() {
     beforeHideCallCount++;

@@ -13,6 +13,12 @@ import java.lang.annotation.Target;
  * panel: after the widget's {@code @PageState} fields have been updated and
  * before it is displayed in the navigation content panel.
  * <p>
+ * When the client-side application is bootstrapping (the page is loading in the
+ * browser), the Navigation system waits until all Errai modules are fully
+ * initialized before displaying the initial page. Hence, it is safe to make RPC
+ * requests and to fire portable CDI events from within a {@code @PageShowing}
+ * method.
+ * <p>
  * The target method is permitted an optional parameter of type
  * {@link HistoryToken}. If the parameter is present, the framework will pass in
  * the history token that caused the page to show. This is useful in cases where

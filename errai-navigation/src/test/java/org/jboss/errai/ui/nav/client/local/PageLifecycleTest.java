@@ -2,6 +2,7 @@ package org.jboss.errai.ui.nav.client.local;
 
 import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.lifecycleTracer;
 
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
@@ -21,6 +22,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class PageLifecycleTest extends AbstractErraiCDITest {
@@ -50,6 +52,51 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     // Clean the handler manually because multiple HistoryHandlers interfere with tests
     navigation.cleanUp();
     super.gwtTearDown();
+  }
+
+  /**
+   * Unlike the rest of the tests in this class, this one test sits around and
+   * waits for the default page to show up on its own. This is to check that the
+   * default page will not show up until all the init votes are in.
+   * <p>
+   * (All the other tests just force an immediate page transition, so they
+   * bootstrap the navigation system earlier than it would otherwise have done
+   * on its own)
+   */
+  public void testPageNotShownUntilFrameworkInitialized() throws Exception {
+
+    // this thing holds a boolean which will become true as soon as the init votes are all in
+    final boolean[] isInitialized = new boolean[1];
+    InitVotes.registerOneTimePreInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        isInitialized[0] = true;
+      }
+    });
+
+    final PageA page = beanManager.lookupBean(PageA.class).getInstance();
+    assertEquals("Page was already shown before the test even started!",
+            0, page.beforeShowCallCount);
+
+    // we give the init state holder to the page so it can capture the init state when it gets its @PageShowing callback
+    page.setInitStateHolder(isInitialized);
+
+    // now we poll until the starting page has been shown
+    final Timer timer = new Timer() {
+      @Override
+      public void run() {
+        if (page.beforeShowCallCount == 0) {
+          // wait longer; the page hasn't been shown yet!
+          schedule(500);
+          return;
+        }
+
+        assertTrue("Starting Page was shown before client bootstrap completed!", page.initStateWhenBeforeShowWasCalled);
+        finishTest();
+      }
+    };
+    timer.schedule(500);
+    delayTestFinish(5000);
   }
 
   public void testPageShowingMethodCalled() throws Exception {
