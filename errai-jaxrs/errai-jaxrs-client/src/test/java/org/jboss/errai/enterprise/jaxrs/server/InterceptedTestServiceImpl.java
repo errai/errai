@@ -45,4 +45,9 @@ public class InterceptedTestServiceImpl implements InterceptedTestService {
   public String interceptedGetWithChainedInterceptors(String result) {
     return result;
   }
+
+  @Override
+  public String interceptedGetWithPrimitiveAndBoxedParameters(Long p1, long p2) {
+    return "";
+  }
 }

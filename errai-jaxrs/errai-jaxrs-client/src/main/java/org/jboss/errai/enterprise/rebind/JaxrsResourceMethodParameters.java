@@ -70,7 +70,7 @@ public class JaxrsResourceMethodParameters {
     List<Statement> params = new ArrayList<Statement>();
     Parameter[] defParms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
     for (int i = 0; i < defParms.length; i++) {
-      final MetaClass type = defParms[i].getType();
+      final MetaClass type = defParms[i].getType().asBoxed();
       final Statement s = Cast.to(type, Stmt.loadVariable(parameterArrayVarName, i));
       params.add(new Statement() {
         @Override

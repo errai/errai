@@ -55,4 +55,9 @@ public interface InterceptedTestService {
   @Path("/3/{result}")
   @InterceptedCall(RestCallParameterManipulatingInterceptor.class)
   public String interceptedGetWithParameterManipulation(@PathParam("result") String result);
+  
+  @GET
+  @Path("/4/{p1}/{p2}")
+  @InterceptedCall(RestCallBypassingInterceptor.class)
+  public String interceptedGetWithPrimitiveAndBoxedParameters(@PathParam("p1") Long p1, @PathParam("p2") long p2);
 }

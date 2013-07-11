@@ -59,4 +59,11 @@ public class InterceptorIntegrationTest extends AbstractErraiJaxrsTest {
         new AssertionCallback<String>("Request was not intercepted", "ABCD"))
         .interceptedGetWithChainedInterceptors("");
   }
+  
+  @Test
+  public void testInterceptedRestCallWithPrimitiveAndBoxedParameters() {
+    call(InterceptedTestService.class,
+        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        .interceptedGetWithPrimitiveAndBoxedParameters(1l, 2l);
+  }
 }

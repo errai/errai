@@ -101,9 +101,6 @@ public class TypeMarshaller {
     }
 
     private static Statement marshal(MetaClass type, Statement statement) {
-      if (type.equals(statement.getType())) {
-        return statement;
-      }
       ContextualStatementBuilder s = null;
       if (type.isPrimitive()) {
         s = Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement)).invoke("toString");
