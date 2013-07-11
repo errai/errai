@@ -1,7 +1,7 @@
 package org.jboss.errai.security.server.permission;
 
 import org.jboss.errai.security.shared.User;
-import org.jboss.errai.ui.nav.client.local.PageRequest;
+import org.jboss.errai.ui.nav.client.shared.PageRequest;
 
 /**
  * @author edewit@redhat.com

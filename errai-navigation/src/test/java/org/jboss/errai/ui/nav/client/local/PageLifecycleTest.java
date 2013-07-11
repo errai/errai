@@ -5,17 +5,9 @@ import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycle
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.jboss.errai.ui.nav.client.local.testpages.PageA;
-import org.jboss.errai.ui.nav.client.local.testpages.PageAWithRedirect;
-import org.jboss.errai.ui.nav.client.local.testpages.PageBWithRedirect;
-import org.jboss.errai.ui.nav.client.local.testpages.PageC;
-import org.jboss.errai.ui.nav.client.local.testpages.PageCWithRedirect;
-import org.jboss.errai.ui.nav.client.local.testpages.PageWithDoubleRedirect;
-import org.jboss.errai.ui.nav.client.local.testpages.PageWithException;
-import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
-import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedLifecycleMethods;
-import org.jboss.errai.ui.nav.client.local.testpages.PageWithLifecycleMethods;
-import org.jboss.errai.ui.nav.client.local.testpages.PageWithPageShowingHistoryTokenMethod;
+import org.jboss.errai.ui.nav.client.local.testpages.*;
+import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
+import org.jboss.errai.ui.nav.client.shared.PageRequest;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -25,7 +17,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class PageLifecycleTest extends AbstractErraiCDITest {
 
-  private SyncBeanManager beanManager = IOC.getBeanManager();
+  private final SyncBeanManager beanManager = IOC.getBeanManager();
   private Navigation navigation;
   private HandlerRegistration historyHandlerRegistration;
 
@@ -148,12 +140,12 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     final NavigationEvent event = pageWithExtraState.getEvent();
     assertNotNull(event);
 
-    final HistoryToken pageRequest = event.getHistoryToken();
+    final PageRequest pageRequest = event.getPageRequest();
     assertNotNull(pageRequest);
     assertEquals("PageWithLifecycleMethods", pageRequest.getPageName());
     assertNotNull(pageRequest.getState());
     assertEquals(1, pageRequest.getState().size());
-    assertEquals("foo", pageRequest.getState().get("state").toArray()[0]);
+    assertEquals("foo", pageRequest.getState().get("state"));
   }
 
   public void testRedirect() {

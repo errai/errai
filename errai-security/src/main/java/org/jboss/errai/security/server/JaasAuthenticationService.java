@@ -4,7 +4,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
-import org.jboss.errai.ui.nav.client.local.PageRequest;
+import org.jboss.errai.ui.nav.client.shared.PageRequest;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;

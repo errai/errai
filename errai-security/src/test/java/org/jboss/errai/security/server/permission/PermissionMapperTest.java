@@ -2,7 +2,7 @@ package org.jboss.errai.security.server.permission;
 
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
-import org.jboss.errai.ui.nav.client.local.PageRequest;
+import org.jboss.errai.ui.nav.client.shared.PageRequest;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -9,9 +9,9 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 
-import org.jboss.errai.ui.nav.client.local.NavigationEvent;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 

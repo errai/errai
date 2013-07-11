@@ -44,22 +44,11 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.ui.nav.client.local.DefaultPage;
-import org.jboss.errai.ui.nav.client.local.HistoryToken;
-import org.jboss.errai.ui.nav.client.local.NavigationEvent;
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageHidden;
-import org.jboss.errai.ui.nav.client.local.PageHiding;
-import org.jboss.errai.ui.nav.client.local.PageRole;
-import org.jboss.errai.ui.nav.client.local.PageShowing;
-import org.jboss.errai.ui.nav.client.local.PageShown;
-import org.jboss.errai.ui.nav.client.local.PageState;
-import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
-import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.jboss.errai.ui.nav.client.local.*;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
+import org.jboss.errai.ui.nav.client.shared.PageRequest;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
@@ -431,8 +420,10 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     }
 
     if (addPrivateAccessors) {
-      method.append(Stmt.invokeStatic(CDI.class, "fireEvent",
-              Stmt.newObject(NavigationEvent.class).withParameters(Stmt.loadVariable("state"))));
+      method.append(Stmt.invokeStatic(CDI.class, "fireEvent", 
+          Stmt.newObject(NavigationEvent.class).withParameters(
+              Stmt.newObject(PageRequest.class).withParameters(getPageName(pageClass), Stmt.loadVariable("pageState")))
+      ));
     }
 
     checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, true);
