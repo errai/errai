@@ -55,6 +55,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>jboss7</webDescriptor>
     <skipTests>true</skipTests>
+    <weld.version>1.1.6.Final</weld.version>
     <argLine></argLine>
     <!-- maven plugins versions -->
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
@@ -67,6 +68,7 @@
 
   <dependencyManagement>
     <dependencies>
+
       <dependency>
         <groupId>org.jboss.errai.bom</groupId>
         <artifactId>errai-version-master</artifactId>
@@ -76,9 +78,18 @@
       </dependency>
 
       <dependency>
-        <groupId>org.jboss.errai.bom</groupId>
-        <artifactId>errai-bom</artifactId>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-parent</artifactId>
         <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Question: should a project have to import this too? Could errai-bom should import it recursively? -->
+      <dependency>
+        <groupId>org.jboss.spec</groupId>
+        <artifactId>jboss-javaee-6.0</artifactId>
+        <version>3.0.2.Final</version> <!-- FIXME should use a property here I think -->
         <type>pom</type>
         <scope>import</scope>
       </dependency>
