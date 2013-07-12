@@ -16,6 +16,7 @@
 package org.jboss.errai.cdi.server.events;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -223,11 +224,52 @@ public class EventDispatcher implements MessageCallback {
     return typeName + annotationTypes;
   }
 
+  /**
+   * Clears the caches of all BeanManagers reachable from the given one.
+   * <p>
+   * Explanation: Weld doesn't expect ObserverMethods to be added after it has
+   * finished initializing; if a particular CDI event is first fired when there
+   * are no ObserverMethods interested in it, Weld remembers this fact in its
+   * cache, and even if an interested ObserverMethod is registered later on,
+   * that ObserverMethod will never receive events.
+   *
+   * @param bm
+   *          The bean manager to clear the cache on, and to search for other
+   *          bean managers from.
+   * @return The number of bean managers whose caches were cleared.
+   */
   private static int clearBeanManagerObserverCaches(BeanManagerImpl bm) {
-    bm.getObserverResolver().clear();
-    for (BeanManagerImpl otherBeanManager : bm.getAccessibleManagers()) {
-      otherBeanManager.getObserverResolver().clear();
+    int clearCount = 1;
+    clearObserverCache(bm);
+    for (BeanManagerImpl accessibleBm : bm.getAccessibleManagers()) {
+      clearObserverCache(accessibleBm);
+      clearCount++;
     }
-    return bm.getAccessibleManagers().size() + 1;
+    return clearCount;
+  }
+
+  /**
+   * Clears the observer cache on a Weld BeanManagerImpl. Tested on Weld 1.1.5, 1.1.8, and 1.1.13.
+   */
+  private static void clearObserverCache(BeanManagerImpl bm) {
+    // Weld renamed this public method from getObserverResolver() to getAccessibleObserverNotifier() in the 1.1.9 release
+    // The return type was also renamed, but in both cases the returned object has a clear() method we need to call.
+    // AS 7.1.1 uses Weld 1.1.5; EAP and Wildfly use Weld >= 1.1.9. We need to try both getter methods.
+    try {
+      Method getterMethod;
+      try {
+        getterMethod = bm.getClass().getMethod("getObserverResolver");
+      }
+      catch (NoSuchMethodException e) {
+        // Weld >= 1.1.9
+        getterMethod = bm.getClass().getMethod("getAccessibleObserverNotifier");
+      }
+      Object thingToCallClearOn = getterMethod.invoke(bm);
+      Method clearMethod = thingToCallClearOn.getClass().getMethod("clear");
+      clearMethod.invoke(thingToCallClearOn);
+    }
+    catch (Exception e) {
+      log.warn("Did not find a way to clear the CDI observer cache. Some CDI events may be undeliverable to clients. Problematic BeanManagerImpl is " + bm.getClass(), e);
+    }
   }
 }
