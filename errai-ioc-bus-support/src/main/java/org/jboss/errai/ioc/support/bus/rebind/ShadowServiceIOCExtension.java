@@ -18,14 +18,28 @@ package org.jboss.errai.ioc.support.bus.rebind;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.ShadowService;
+import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.VariableReference;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,22 +53,90 @@ public class ShadowServiceIOCExtension extends IOCDecoratorExtension<ShadowServi
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(InjectableInstance<ShadowService> ctx) {
+  public List<? extends Statement> generateDecorator(final InjectableInstance<ShadowService> ctx) {
     ctx.ensureMemberExposed(PrivateAccessType.Read);
 
     final ShadowService shadowService = ctx.getAnnotation();
-    final String serviceName;
+    String serviceName = null;
 
-    if (shadowService.value().equals("")) {
-      serviceName = ctx.getMemberName();
-    }
-    else {
-      serviceName = shadowService.value();
-    }
+    Statement subscribeShadowStatement = null;
+    final Class<?> javaClass = ctx.getElementType().asClass();
+    for (final Class<?> intf : javaClass.getInterfaces()) {
+      if (intf.isAnnotationPresent(Remote.class)) {
+        serviceName = intf.getName() + ":RPC";
 
-    final Statement subscribeShadowStatement = Stmt.castTo(ClientMessageBus.class,
-        Stmt.invokeStatic(ErraiBus.class, "get")).invoke("subscribeShadow", serviceName, ctx.getValueStatement());
+        final AnonymousClassStructureBuilder builder = generateMethodDelegates(ctx, intf);
+
+        subscribeShadowStatement = Stmt.castTo(ClientMessageBus.class,
+                Stmt.invokeStatic(ErraiBus.class, "get")).invoke("subscribeShadow", serviceName, builder.finish());
+      }
+    }
+    if (serviceName == null) {
+      if (shadowService.value().equals("")) {
+        serviceName = ctx.getMemberName();
+      } else {
+        serviceName = shadowService.value();
+      }
+
+      subscribeShadowStatement = Stmt.castTo(ClientMessageBus.class,
+              Stmt.invokeStatic(ErraiBus.class, "get")).invoke("subscribeShadow", serviceName, ctx.getValueStatement());
+    }
 
     return Collections.singletonList(subscribeShadowStatement);
+  }
+
+
+  /* generates something like this:
+
+    new MessageCallback() {
+        public void callback(Message message) {
+          String commandType = message.getCommandType();
+          List methodParms = message.get(List.class, "MethodParms");
+          if ("register:org.jboss.errai.demo.todo.shared.User:java.lang.String:".equals(commandType)) {
+            User var0 = (User) methodParms.get(0);
+            String var1 = (String) methodParms.get(1);
+            try {
+              inj488_SignupServiceShadow.register(var0, var1);
+            } catch (Throwable throwable) {
+
+            }
+          }
+        }
+  */
+  private AnonymousClassStructureBuilder generateMethodDelegates(InjectableInstance<ShadowService> ctx, Class<?> intf) {
+    final BlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(MessageCallback.class).extend()
+            .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
+            .append(
+                    Stmt.declareVariable("commandType", String.class,
+                            Stmt.loadVariable("message").invoke("getCommandType"))
+            ).append(
+                    Stmt.declareVariable("methodParms", List.class, Stmt.loadVariable("message").invoke(
+                            "get", List.class, Variable.get("\"MethodParms\"")))
+            );
+
+    for (final Method method : intf.getMethods()) {
+      if (ProxyUtil.isMethodInInterface(intf, method)) {
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        VariableReference[] objects = new VariableReference[parameterTypes.length];
+        final BlockBuilder<ElseBlockBuilder> blockBuilder = If.cond(Stmt.loadVariable("\"" + ProxyUtil.createCallSignature(intf, method) + "\"").invoke("equals",
+                Stmt.loadVariable("commandType")));
+        for (int i = 0; i < parameterTypes.length; i++) {
+          Class<?> parameterType = parameterTypes[i];
+          blockBuilder.append(Stmt.declareVariable("var" + i, parameterType, Stmt.castTo(parameterType,
+                  Stmt.loadVariable("methodParms").invoke("get", i))));
+          objects[i] = Refs.get("var" + i);
+        }
+
+        blockBuilder.append(
+                Stmt.try_()
+                        .append(
+                                Stmt.nestedCall(ctx.getValueStatement()).invoke(method.getName(), objects)
+                        ).finish()
+                        .catch_(Throwable.class, "throwable")
+                        .finish());
+        builder.append(blockBuilder.finish());
+      }
+    }
+    return builder.finish();
   }
 }
