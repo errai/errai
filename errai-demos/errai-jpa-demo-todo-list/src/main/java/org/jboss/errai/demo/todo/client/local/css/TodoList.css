@@ -42,6 +42,20 @@ div.mainContentArea>input {
 	width: 100%;
 }
 
+div.shared {
+    border: 1px solid #a3a3a3;
+    margin-top: 20px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    padding-bottom: 20px;
+}
+legend {
+    margin: -18px auto auto;
+    background-color: white;
+    padding: 10px;
+}
+
 div.item {
 	width: 100%;
 	font-size: 35px;
