@@ -1,7 +1,6 @@
 body {
 	background-color: #777;
 	font-family: helvetica, sans-serif;
-	text-align: center;
 }
 
 .footer {
@@ -30,6 +29,7 @@ div.mainContentArea {
 	border-radius: 15px;
 	background-color: #fff;
 	width: 600px;
+    text-align: center;
 }
 
 div.mainContentArea>input {
