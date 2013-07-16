@@ -145,8 +145,14 @@ div.loginForm p {
 }
 
 a {
-	color: #00f;
-	text-decoration: underline;
+    color: #0088cc;
+    text-decoration: none;
+}
+
+a:hover,
+a:focus {
+    color: #005580;
+    text-decoration: underline;
 }
 
 /* Don't forget the phones! */
