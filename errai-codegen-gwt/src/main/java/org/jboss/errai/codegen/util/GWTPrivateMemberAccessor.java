@@ -1,6 +1,9 @@
 package org.jboss.errai.codegen.util;
 
-import com.google.gwt.core.client.UnsafeNativeLong;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -12,10 +15,9 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gwt.core.client.UnsafeNativeLong;
 
 /**
  * @author Mike Brock
@@ -31,6 +33,11 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
       return UnsafeNativeLong.class;
     }
   };
+
+  /**
+   * A reusable empty annotation array.
+   */
+  private static final Annotation[] NO_ANNOTATIONS = new Annotation[0];
 
   @Override
   public void createWritableField(final MetaClass type,
@@ -94,7 +101,18 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
     final List<Parameter> methodDefParms = DefParameters.from(method).getParameters();
     wrapperDefParms.addAll(methodDefParms);
 
+    Annotation[] annotations = NO_ANNOTATIONS;
+    for (MetaParameter p : method.getParameters()) {
+      if (p.getType().getCanonicalName().equals("long")) {
+        annotations = new Annotation[] { UNSAFE_NATIVE_LONG_ANNOTATION };
+      }
+    }
+    if (method.getReturnType().getCanonicalName().equals("long")) {
+      annotations = new Annotation[] { UNSAFE_NATIVE_LONG_ANNOTATION };
+    }
+
     classBuilder.publicMethod(method.getReturnType(), PrivateAccessUtil.getPrivateMethodName(method))
+            .annotatedWith(annotations)
             .parameters(DefParameters.fromParameters(wrapperDefParms))
             .modifiers(appendJsni(modifiers))
             .body()
@@ -108,12 +126,20 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
 
     final DefParameters methodDefParms = DefParameters.from(constructor);
 
+    Annotation[] annotations = NO_ANNOTATIONS;
+    for (MetaParameter p : constructor.getParameters()) {
+      if (p.getType().getCanonicalName().equals("long")) {
+        annotations = new Annotation[] { UNSAFE_NATIVE_LONG_ANNOTATION };
+      }
+    }
+
     classBuilder.publicMethod(constructor.getReturnType(), PrivateAccessUtil.getPrivateMethodName(constructor))
+            .annotatedWith(annotations)
             .parameters(methodDefParms)
-                    .modifiers(Modifier.Static, Modifier.JSNI)
-                    .body()
-                    ._(StringStatement.of(JSNIUtil.methodAccess(constructor)))
-                    .finish();
+            .modifiers(Modifier.Static, Modifier.JSNI)
+            .body()
+            ._(StringStatement.of(JSNIUtil.methodAccess(constructor)))
+            .finish();
   }
 
   /**

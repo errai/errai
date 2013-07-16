@@ -130,7 +130,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
         else {
           builder.append(If.cond(Bool.isNull(Refs.get("obj"))).append(Stmt.load(null).returnValue()).finish());
-          
+
           builder.append(Stmt.declareVariable(String.class).named("objId")
               .initializeWith(loadVariable("obj")
                   .invoke("get", SerializationParts.OBJECT_ID)
@@ -545,7 +545,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
     else {
       final MetaMethod method = (MetaMethod) member;
-      return loadVariable("a0").invoke(method);
+      if (!method.isPublic()) {
+        if (!context.isExposed(method)) {
+          PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), method);
+          context.markExposed(method);
+        }
+
+        return Stmt.invokeStatic(context.getGeneratedBootstrapClass(),
+                PrivateAccessUtil.getPrivateMethodName(method), loadVariable("a0"));
+      }
+      else {
+        return loadVariable("a0").invoke(method);
+      }
     }
   }
 
