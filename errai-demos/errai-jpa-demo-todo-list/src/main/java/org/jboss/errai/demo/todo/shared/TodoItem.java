@@ -14,7 +14,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 @Portable @Bindable @Entity
 @NamedQueries({
   @NamedQuery(name="currentItemsForUser", query="SELECT i FROM TodoItem i WHERE i.loginName = :userId AND i.archived=false ORDER BY i.text"),
-  @NamedQuery(name="allItemsForUser", query="SELECT i FROM TodoItem i WHERE i.loginName = :userId ORDER BY i.text")
+  @NamedQuery(name="allItemsForUser", query="SELECT i FROM TodoItem i WHERE i.loginName in :userIds ORDER BY i.text")
 })
 public class TodoItem {
 
