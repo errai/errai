@@ -1,20 +1,15 @@
 package org.jboss.errai.demo.todo.shared;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
+
+import javax.persistence.*;
 
 @Portable @Bindable @Entity
 @NamedQueries({
   @NamedQuery(name="currentItemsForUser", query="SELECT i FROM TodoItem i WHERE i.loginName = :userId AND i.archived=false ORDER BY i.text"),
-  @NamedQuery(name="allItemsForUser", query="SELECT i FROM TodoItem i WHERE i.loginName in :userIds ORDER BY i.text")
+  @NamedQuery(name = "allItemsForUser", query = "SELECT i FROM TodoItem i WHERE i.loginName = :userId ORDER BY i.text"),
+  @NamedQuery(name = "allSharedItems", query = "SELECT i FROM TodoItem i WHERE i.loginName in :userIds ORDER BY i.loginName")
 })
 public class TodoItem {
 

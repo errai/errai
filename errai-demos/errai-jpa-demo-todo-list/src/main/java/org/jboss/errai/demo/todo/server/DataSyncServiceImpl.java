@@ -20,7 +20,6 @@ public class DataSyncServiceImpl implements DataSyncService {
 
   @Inject private DataSyncEjb dataSyncEjb;
   @Inject private AuthenticationService service;
-  @Inject EntityManager entityManager;
 
   @Override
   public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> remoteResults) {
@@ -31,14 +30,9 @@ public class DataSyncServiceImpl implements DataSyncService {
     }
 
     if (dataSet.getQueryName().equals("allItemsForUser")) {
-      final TypedQuery<String> query = entityManager.createNamedQuery("sharedWithMe", String.class);
-      query.setParameter("loginName", currentUser.getLoginName());
-      List<String> userIds = new ArrayList<String>(query.getResultList());
-
       // the userId that comes from the client can be tampered with and that is why we override it here
-      userIds.add(currentUser.getLoginName());
-
-      dataSet.getParameters().put("userIds", userIds);
+      // the server state is more secure.
+      dataSet.getParameters().put("userId", currentUser.getLoginName());
     }
     else {
       throw new IllegalArgumentException("You don't have permission to sync dataset");
