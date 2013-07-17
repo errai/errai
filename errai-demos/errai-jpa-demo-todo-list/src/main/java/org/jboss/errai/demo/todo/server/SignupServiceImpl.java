@@ -23,17 +23,25 @@ public class SignupServiceImpl implements SignupService {
 
   @Inject AuthenticationService service;
   @Inject IdentityManager identityManager;
+  @Inject EntityManager entityManager;
 
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
   public User register(User newUserObject, String password) throws RegistrationException {
-    SimpleUser user = new SimpleUser(newUserObject.getEmail());
-    user.setEmail(newUserObject.getEmail());
+    final String email = newUserObject.getEmail().toLowerCase();
+    SimpleUser user = new SimpleUser(email);
+    user.setEmail(email);
     user.setFirstName("");
     user.setLastName(newUserObject.getFullName());
-    user.setAttribute(new Attribute<String>("shortName", newUserObject.getShortName()));
     identityManager.add(user);
     identityManager.updateCredential(user, new Password(password));
+
+    //users login with their email address
+    newUserObject.setLoginName(email);
+    newUserObject.setEmail(email);
+    entityManager.persist(newUserObject);
+    entityManager.flush();
+    entityManager.detach(newUserObject);
 
     System.out.println("Saved new user " + newUserObject + " (id=" + newUserObject.getEmail() + ")");
     service.login(newUserObject.getEmail(), password);

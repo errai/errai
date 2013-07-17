@@ -47,12 +47,14 @@ public class TodoListPage extends Composite {
 
   @Inject private @DataField Button archiveButton;
   @Inject private @DataField Button syncButton;
+  @Inject private @DataField Button shareButton;
 
   @Inject private @DataField Label errorLabel;
 
   @Inject private @DataField InlineLabel username;
 
   @Inject private TransitionTo<LoginPage> logoutTransition;
+  @Inject private TransitionTo<SharePage> sharePageTransition;
   @Inject private @DataField Anchor logoutLink;
 
   @Inject private Identity identity;
@@ -116,7 +118,7 @@ public class TodoListPage extends Composite {
   @EventHandler("syncButton")
   void sync(ClickEvent event) {
     Map<String,Object> params = new HashMap<String, Object>();
-    params.put("userId", user.getLoginName());
+    params.put("userIds", user.getLoginName());
     syncManager.coldSync("allItemsForUser", TodoItem.class, params,
             new RemoteCallback<List<SyncResponse<TodoItem>>>() {
               @Override
@@ -144,5 +146,10 @@ public class TodoListPage extends Composite {
     syncManager.clear();
     identity.logout();
     logoutTransition.go();
+  }
+
+  @EventHandler("shareButton")
+  void share(ClickEvent event) {
+    sharePageTransition.go();
   }
 }
