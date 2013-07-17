@@ -55,11 +55,15 @@
         </div>
 
       </div>
-      <div class="itemsContainer shared">
-        <legend>Pete's items</legend>
-        <div class=item>
-          <input data-field=checkbox type=checkbox checked disabled>
-          <span data-field=itemName class=done>Get the Yak</span>
+      <div data-field="sharedContainer" class="itemsContainer shared">
+        <div data-field="sharedList">
+          <legend data-field="userName">Pete's items</legend>
+          <div data-field="items" style="width: 100%">
+            <div class=item>
+              <input data-field=checkbox type=checkbox checked disabled>
+              <span data-field=itemName class=done>Get the Yak</span>
+            </div>
+          </div>
         </div>
       </div>
       

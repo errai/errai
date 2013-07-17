@@ -7,8 +7,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
+import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
@@ -39,11 +42,14 @@ public class TodoListPage extends Composite {
   @Inject private EntityManager em;
   @Inject private ClientBeanManager bm;
   @Inject private ClientSyncManager syncManager;
+  @Inject private Caller<TodoListService> todoListService;
 
   private User user; // filled in by @PageShowing method
 
   @Inject private @DataField TextBox newItemBox;
   @Inject private @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
+
+  @Inject private @DataField ListWidget<SharedList, SharedListWidget> sharedContainer;
 
   @Inject private @DataField Button archiveButton;
   @Inject private @DataField Button syncButton;
@@ -68,6 +74,13 @@ public class TodoListPage extends Composite {
         username.setText(user.getFullName());
         errorLabel.setVisible(false);
         refreshItems();
+
+        todoListService.call(new RemoteCallback<List<SharedList>>() {
+          @Override
+          public void callback(List<SharedList> response) {
+            sharedContainer.setItems(response);
+          }
+        }).getSharedTodoLists();
       }
 
       @Override

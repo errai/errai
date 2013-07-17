@@ -42,7 +42,7 @@ div.mainContentArea>input {
 	width: 100%;
 }
 
-div.shared {
+.shared {
     border: 1px solid #a3a3a3;
     margin-top: 20px;
     -webkit-border-radius: 6px;
