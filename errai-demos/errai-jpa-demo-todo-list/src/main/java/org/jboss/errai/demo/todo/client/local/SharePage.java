@@ -11,6 +11,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.todo.shared.ShareService;
 import org.jboss.errai.demo.todo.shared.UnknownUserException;
+import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -23,6 +24,7 @@ import javax.inject.Inject;
 /**
  * @author edewit@redhat.com
  */
+@RequireAuthentication
 @Templated("#main")
 @Page(path="share")
 public class SharePage extends Composite {

@@ -19,6 +19,7 @@ import org.jboss.errai.security.client.local.Identity;
 import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
@@ -36,7 +37,7 @@ import java.util.Map;
 
 @RequireAuthentication
 @Templated("#main")
-@Page(path="list")
+@Page(path="list", role = DefaultPage.class)
 public class TodoListPage extends Composite {
 
   @Inject private EntityManager em;

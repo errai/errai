@@ -11,13 +11,16 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.client.local.Identity;
 import org.jboss.errai.security.shared.SecurityError;
 import org.jboss.errai.security.shared.User;
-import org.jboss.errai.ui.nav.client.local.*;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
+import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
 import javax.inject.Inject;
 
 @Templated("#main")
-@Page(path="login", role = {org.jboss.errai.security.shared.LoginPage.class, DefaultPage.class, SecurityError.class})
+@Page(path="login", role = {org.jboss.errai.security.shared.LoginPage.class, SecurityError.class})
 public class LoginPage extends Composite {
 
   @Inject private @Model Identity identity;
