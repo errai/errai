@@ -14,8 +14,11 @@ import java.io.Serializable;
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-@Portable @Bindable
+@Portable @Bindable @Entity
+@NamedQuery(name="userByEmail", query="SELECT u FROM User u WHERE u.email = :email")
 public class User implements Serializable {
+
+  @Id
   private String loginName;
 
   /**
@@ -35,6 +38,7 @@ public class User implements Serializable {
   /**
    * The user's email address.
    */
+  @Column(nullable=false, unique=true)
   @NotNull
   @GwtCompatibleEmail
   private String email;

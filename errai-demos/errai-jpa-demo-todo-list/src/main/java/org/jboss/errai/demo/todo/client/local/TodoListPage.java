@@ -7,8 +7,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
+import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
@@ -16,6 +19,7 @@ import org.jboss.errai.security.client.local.Identity;
 import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
@@ -33,26 +37,31 @@ import java.util.Map;
 
 @RequireAuthentication
 @Templated("#main")
-@Page(path="list")
+@Page(path="list", role = DefaultPage.class)
 public class TodoListPage extends Composite {
 
   @Inject private EntityManager em;
   @Inject private ClientBeanManager bm;
   @Inject private ClientSyncManager syncManager;
+  @Inject private Caller<TodoListService> todoListService;
 
   private User user; // filled in by @PageShowing method
 
   @Inject private @DataField TextBox newItemBox;
   @Inject private @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
 
+  @Inject private @DataField ListWidget<SharedList, SharedListWidget> sharedContainer;
+
   @Inject private @DataField Button archiveButton;
   @Inject private @DataField Button syncButton;
+  @Inject private @DataField Button shareButton;
 
   @Inject private @DataField Label errorLabel;
 
   @Inject private @DataField InlineLabel username;
 
   @Inject private TransitionTo<LoginPage> logoutTransition;
+  @Inject private TransitionTo<SharePage> sharePageTransition;
   @Inject private @DataField Anchor logoutLink;
 
   @Inject private Identity identity;
@@ -66,6 +75,13 @@ public class TodoListPage extends Composite {
         username.setText(user.getFullName());
         errorLabel.setVisible(false);
         refreshItems();
+
+        todoListService.call(new RemoteCallback<List<SharedList>>() {
+          @Override
+          public void callback(List<SharedList> response) {
+            sharedContainer.setItems(response);
+          }
+        }).getSharedTodoLists();
       }
 
       @Override
@@ -144,5 +160,10 @@ public class TodoListPage extends Composite {
     syncManager.clear();
     identity.logout();
     logoutTransition.go();
+  }
+
+  @EventHandler("shareButton")
+  void share(ClickEvent event) {
+    sharePageTransition.go();
   }
 }

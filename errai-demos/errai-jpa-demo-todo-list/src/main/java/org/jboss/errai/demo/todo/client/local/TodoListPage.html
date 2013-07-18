@@ -45,7 +45,7 @@
         <!-- This item is just for design reference. It's not used in the template. -->
         <div class=item>
           <input data-field=checkbox type=checkbox checked>
-          <span data-field=itemName class=done>Perm the Llama</span>
+          <span data-field=itemName class=done>Perm the Lama</span>
         </div>
 
         <!-- This item is just for design reference. It's not used in the template. -->
@@ -55,9 +55,33 @@
         </div>
 
       </div>
+      <div data-field="sharedContainer" class="itemsContainer">
+        <div data-field="sharedList" class="shared">
+          <legend data-field="userName">Pete's items</legend>
+          <div data-field="items" style="width: 100%">
+            <div class=item>
+              <input data-field=checkbox type=checkbox checked disabled>
+              <span data-field=itemName class=done>Get the Yak</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- This item is just for design reference. It's not used in the template. -->
+        <div data-field="sharedList" class="shared">
+          <legend data-field="userName">Rob's items</legend>
+          <div data-field="items" style="width: 100%">
+            <div class=item>
+              <input data-field=checkbox type=checkbox checked disabled>
+              <span data-field=itemName>Get the Yak</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
       
       <button data-field=archiveButton>Archive Finished Items</button>
       <button data-field=syncButton>Sync!</button>
+      <button data-field="shareButton">Share</button>
 
       <div class=error data-field=errorLabel>Example error message</div>
 
