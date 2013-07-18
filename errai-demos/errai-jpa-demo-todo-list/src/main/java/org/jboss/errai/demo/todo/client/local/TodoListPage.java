@@ -131,7 +131,7 @@ public class TodoListPage extends Composite {
   @EventHandler("syncButton")
   void sync(ClickEvent event) {
     Map<String,Object> params = new HashMap<String, Object>();
-    params.put("userIds", user.getLoginName());
+    params.put("userId", user.getLoginName());
     syncManager.coldSync("allItemsForUser", TodoItem.class, params,
             new RemoteCallback<List<SyncResponse<TodoItem>>>() {
               @Override
