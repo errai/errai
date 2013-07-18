@@ -17,33 +17,39 @@ import java.util.List;
 /**
  * @author edewit@redhat.com
  */
-@Stateless @Service
+@Stateless
+@Service
 public class TodoListServiceImpl implements TodoListService {
-  @Inject private EntityManager entityManager;
-  @Inject private AuthenticationService service;
+  @Inject
+  private EntityManager entityManager;
+  @Inject
+  private AuthenticationService service;
 
   @Override
   public List<SharedList> getSharedTodoLists() {
+    final ArrayList<SharedList> sharedLists = new ArrayList<SharedList>();
     User currentUser = service.getUser();
     final TypedQuery<String> query = entityManager.createNamedQuery("sharedWithMe", String.class);
     query.setParameter("loginName", currentUser.getLoginName());
 
-    final List<TodoItem> list = entityManager.createNamedQuery("allSharedItems", TodoItem.class)
-            .setParameter("userIds", query.getResultList()).getResultList();
+    final List<String> sharedWithMe = query.getResultList();
 
-    final ArrayList<SharedList> sharedLists = new ArrayList<SharedList>();
-    String userName = null;
-    SharedList currentList = null;
-    for (TodoItem todoItem : list) {
-      if (!todoItem.getLoginName().equals(userName)) {
-        currentList = new SharedList(todoItem.getLoginName());
-        sharedLists.add(currentList);
-        userName = todoItem.getLoginName();
+    if (!sharedWithMe.isEmpty()) {
+      final List<TodoItem> list = entityManager.createNamedQuery("allSharedItems", TodoItem.class)
+              .setParameter("userIds", sharedWithMe).getResultList();
+
+      String userName = null;
+      SharedList currentList = null;
+      for (TodoItem todoItem : list) {
+        if (!todoItem.getLoginName().equals(userName)) {
+          currentList = new SharedList(todoItem.getLoginName());
+          sharedLists.add(currentList);
+          userName = todoItem.getLoginName();
+        }
+
+        currentList.getItems().add(todoItem);
       }
-
-      currentList.getItems().add(todoItem);
     }
-
     return sharedLists;
   }
 }
