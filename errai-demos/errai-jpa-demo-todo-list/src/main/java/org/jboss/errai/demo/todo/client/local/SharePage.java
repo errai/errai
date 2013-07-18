@@ -51,6 +51,7 @@ public class SharePage extends Composite {
                 @Override
                 public boolean error(Message message, Throwable throwable) {
                   overallErrorMessage.setText(throwable.getMessage());
+                  overallErrorMessage.setVisible(true);
                   return false;
                 }
               }
