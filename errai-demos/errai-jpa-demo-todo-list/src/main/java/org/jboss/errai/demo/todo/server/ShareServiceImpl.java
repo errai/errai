@@ -38,10 +38,13 @@ public class ShareServiceImpl implements ShareService {
       throw new UnknownUserException("user with email '" + email + "' is not a registered user");
     }
 
-    ShareList shareList = entityManager.find(ShareList.class, currentUser.getLoginName());
-    if (shareList == null) {
+    ShareList shareList;
+    try {
+      shareList = entityManager.createNamedQuery("mySharedLists", ShareList.class)
+            .setParameter("loginName", currentUser.getLoginName()).getSingleResult();
+    } catch (NoResultException e) {
       shareList = new ShareList();
-      shareList.setLoginName(currentUser.getLoginName());
+      shareList.setUser(entityManager.find(User.class, currentUser.getLoginName()));
     }
 
     shareList.getSharedWith().add(user);

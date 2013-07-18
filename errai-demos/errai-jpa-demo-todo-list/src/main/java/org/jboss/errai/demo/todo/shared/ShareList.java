@@ -8,20 +8,31 @@ import java.util.List;
  * @author edewit@redhat.com
  */
 @Entity
-@NamedQuery(name = "sharedWithMe", query = "SELECT s.loginName FROM ShareList s, in (s.sharedWith) w WHERE w.loginName = :loginName")
+@NamedQueries({
+  @NamedQuery(name = "sharedWithMe", query = "SELECT s.user FROM ShareList s, in (s.sharedWith) w WHERE w.loginName = :loginName"),
+  @NamedQuery(name = "mySharedLists", query = "SELECT s FROM ShareList s WHERE s.user.loginName = :loginName")
+})
 public class ShareList {
   @Id
-  private String loginName;
+  @GeneratedValue
+  private Long id;
+
+  @OneToOne
+  private User user;
 
   @ManyToMany
   private List<User> sharedWith;
 
-  public String getLoginName() {
-    return loginName;
+  public Long getId() {
+    return id;
   }
 
-  public void setLoginName(String loginName) {
-    this.loginName = loginName;
+  public User getUser() {
+    return user;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
   }
 
   public List<User> getSharedWith() {
@@ -38,7 +49,8 @@ public class ShareList {
   @Override
   public String toString() {
     return "ShareList[" +
-            "loginName='" + loginName + '\'' +
+            "id=" + id +
+            ", user=" + user +
             ", sharedWith=" + sharedWith +
             ']';
   }
