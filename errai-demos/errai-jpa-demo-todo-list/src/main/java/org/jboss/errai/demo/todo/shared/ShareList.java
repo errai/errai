@@ -8,12 +8,12 @@ import java.util.List;
  * @author edewit@redhat.com
  */
 @Entity
-@NamedQuery(name="sharedWithMe", query="SELECT s.loginName FROM ShareList s, in (s.sharedWith) w WHERE w.loginName = :loginName")
+@NamedQuery(name = "sharedWithMe", query = "SELECT s.loginName FROM ShareList s, in (s.sharedWith) w WHERE w.loginName = :loginName")
 public class ShareList {
   @Id
   private String loginName;
 
-  @OneToMany
+  @ManyToMany
   private List<User> sharedWith;
 
   public String getLoginName() {
