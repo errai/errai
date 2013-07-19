@@ -1,9 +1,7 @@
 package org.jboss.errai.demo.todo.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
@@ -65,6 +63,9 @@ public class LoginPage extends Composite {
 
   @EventHandler({"username", "password"})
   private void onKeyDown(KeyDownEvent event) {
+    //fire change events to update the binder properties
+    DomEvent.fireNativeEvent(Document.get().createChangeEvent(), password);
+    DomEvent.fireNativeEvent(Document.get().createChangeEvent(), username);
     // auto-submit login form when user presses enter
     if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER &&
             !username.getText().trim().equals("") &&
