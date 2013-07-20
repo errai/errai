@@ -1,6 +1,5 @@
 package org.jboss.errai.ui.rebind.res;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -12,12 +11,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
 
-@Dependent
 @Templated
 public class TranslatableComponent1 extends Composite {
 
   @DataField("welcome-p")
-  private ParagraphElement welcome_p = Document.get().createPElement();
+  private final ParagraphElement welcome_p = Document.get().createPElement();
   @Inject @DataField
   private InlineLabel label1;
   @Inject @DataField

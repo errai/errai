@@ -1,7 +1,6 @@
 package org.jboss.errai.ui.test.path.client.res;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -14,7 +13,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
-@Dependent
 @Templated("/org/jboss/errai/ui/test/path/client/res/site/PathComponent.html")
 public class PathAbsoluteComponent extends Composite {
 

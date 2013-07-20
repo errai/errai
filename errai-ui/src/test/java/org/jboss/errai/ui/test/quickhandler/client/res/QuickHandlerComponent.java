@@ -1,6 +1,5 @@
 package org.jboss.errai.ui.test.quickhandler.client.res;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -15,7 +14,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 
-@Dependent
 @Templated
 public class QuickHandlerComponent extends Composite {
 

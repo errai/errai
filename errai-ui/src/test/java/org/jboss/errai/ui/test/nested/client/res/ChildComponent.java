@@ -1,7 +1,6 @@
 package org.jboss.errai.ui.test.nested.client.res;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -11,7 +10,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 
-@Dependent
 @Templated
 public class ChildComponent extends Composite {
 
