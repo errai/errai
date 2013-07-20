@@ -120,7 +120,6 @@
     <module>errai-ioc-bus-support</module>
     <module>errai-bus-jboss7-websocket</module>
     <module>errai-jboss-as-support</module>
-    <module>errai-otec</module>    
     <module>errai-cdi-async-databinding-tests</module>
     <module>errai-bom</module>
     <module>errai-demos</module>
@@ -247,11 +246,6 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-navigation</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-otec</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
