@@ -1,6 +1,5 @@
 package org.jboss.errai.ui.test.binding.client.res;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -16,7 +15,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
-@Dependent
 @Templated
 public class BindingTemplate extends Composite {
 

@@ -46,6 +46,7 @@ import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithConstructorAndMethodMappedLong;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
 import org.jboss.errai.bus.client.tests.support.EntityWithGoodParts;
 import org.jboss.errai.bus.client.tests.support.EntityWithInheritedTypeVariable;
@@ -195,6 +196,24 @@ public class SerializationTests extends AbstractErraiTest {
             finishTest();
           }
         }, TestSerializationRPCService.class).testLong(expected);
+      }
+    });
+  }
+
+  public void testConstructorAndMethodMappedLong() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final EntityWithConstructorAndMethodMappedLong expected =
+                EntityWithConstructorAndMethodMappedLong.instanceFor(Long.MAX_VALUE - 1);
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithConstructorAndMethodMappedLong>() {
+          @Override
+          public void callback(EntityWithConstructorAndMethodMappedLong response) {
+            assertEquals(expected.toString(), response.toString());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testConstructorAndMethodMappedLong(expected);
       }
     });
   }

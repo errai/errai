@@ -1,6 +1,5 @@
 package org.jboss.errai.ui.test.i18n.client.res;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.ui.client.widget.LocaleListBox;
@@ -9,17 +8,15 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ParagraphElement;
-import com.google.gwt.dom.client.UListElement;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
 
-@Dependent
 @Templated
 public class I18nComponent extends Composite {
 
   @DataField("welcome-p")
-  private ParagraphElement welcome_p = Document.get().createPElement();
+  private final ParagraphElement welcome_p = Document.get().createPElement();
   @Inject @DataField
   private InlineLabel label1;
   @Inject @DataField

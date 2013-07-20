@@ -19,9 +19,25 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import com.google.common.collect.Multimap;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Inject;
+import javax.inject.Scope;
+import javax.inject.Singleton;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Statement;
@@ -67,23 +83,9 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Inject;
-import javax.inject.Scope;
-import javax.inject.Singleton;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
 
 /**
  * Generator for the Bootstrapper class generated to wire an application at runtime.
@@ -484,7 +486,10 @@ public class IOCBootstrapGenerator {
 
     final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class));
     knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class));
-
+    
+    final Collection<Class<? extends Annotation>> dependentAnnotations = 
+      injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean);
+    
     if (context != null) {
       TypeScan:
       for (final MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
@@ -492,7 +497,10 @@ public class IOCBootstrapGenerator {
 
           for (final Annotation a : clazz.getAnnotations()) {
             final Class<? extends Annotation> clazz1 = a.annotationType();
-            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)) {
+            
+            final boolean implicitlyDependent = dependentAnnotations != null && dependentAnnotations.contains(clazz1);
+            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class) 
+                || implicitlyDependent) {
               continue TypeScan;
             }
           }

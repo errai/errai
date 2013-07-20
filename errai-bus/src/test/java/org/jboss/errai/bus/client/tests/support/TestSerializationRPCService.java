@@ -38,16 +38,22 @@ import org.jboss.errai.bus.server.annotations.Remote;
  */
 @Remote
 public interface TestSerializationRPCService {
-  
+
   // This guard against regressions of https://issues.jboss.org/browse/ERRAI-476
   @Remote
   public interface DuplicateRemoteInterface {};
-  
+
   public String testString(String str);
 
   public int testInteger(int i);
 
   public long testLong(long l);
+
+  /**
+   * @param ewcamml Pronounced "eww! camel!"
+   */
+  public EntityWithConstructorAndMethodMappedLong testConstructorAndMethodMappedLong(
+          EntityWithConstructorAndMethodMappedLong ewcamml);
 
   public double testDouble(double d);
 
@@ -160,13 +166,13 @@ public interface TestSerializationRPCService {
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);
-  
+
   public EntityWithGoodParts testEntityWithGoodParts(EntityWithGoodParts e);
 
   public GenericEntity testGenericEntity(GenericEntity e);
-  
+
   public GenericEntitySubtypeInteger testGenericEntitySubtypeInteger(GenericEntitySubtypeInteger e);
-  
+
   public GenericEntitySubtypeString testGenericEntitySubtypeString(GenericEntitySubtypeString e);
 
   public EntityWithSuperClassField testEntityWithSuperClassField(EntityWithSuperClassField e);
@@ -182,7 +188,7 @@ public interface TestSerializationRPCService {
   public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(EntityWithMapUsingAbstractKeyType e);
 
   public EntityWithMapUsingSubtypeValues testEntityWithMapUsingSubtypeValues(EntityWithMapUsingSubtypeValues e);
-  
+
   public EntityWithTypesUsingNestedParameterizedTypes testEntityWithTypesUsingNestedParamTypes(EntityWithTypesUsingNestedParameterizedTypes e);
 
   public LinkedHashMap<String,Integer> testLinkedHashMap(LinkedHashMap<String,Integer> map);

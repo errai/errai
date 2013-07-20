@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 
-@Dependent
 @Templated
+@Dependent
 public class ChildComponent extends Composite {
 
   // this component introduces a cycle between parent and child, to ensure Errai UI works with cyclical/proxied beans

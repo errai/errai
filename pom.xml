@@ -1337,14 +1337,17 @@
   <!-- Profiles -->
   <profiles>
     <profile>
-      <id>macJvmSettings</id>
+      <id>macJvm6Settings</id>
       <activation>
         <os>
           <family>mac</family>
         </os>
       </activation>
+      <!-- If we could limit this profile to JDK <=6 on Mac, we'd include -d32 in argLine.
+           But we can't, because profile activation settings are ORed rather than ANDed together.
+           See http://jira.codehaus.org/browse/MNG-4565 -->
       <properties>
-        <argLine>-d32 -XX:CompileThreshold=1000 -Djava.awt.headless=true</argLine>
+        <argLine>-XX:CompileThreshold=1000 -Djava.awt.headless=true</argLine>
       </properties>
     </profile>
     
