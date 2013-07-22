@@ -16,19 +16,12 @@
 
 package org.jboss.errai.ui.nav.rebind;
 
-import java.util.Collection;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.Page;
 
 /**
@@ -39,12 +32,6 @@ public class PageNavIOCExtension implements IOCExtensionConfigurator {
   @Override
   public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
     injectionContext.mapElementType(WiringElementType.DependentBean, Page.class);
-    
-    final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
-    MetaClass navigationClass = MetaClassFactory.get(Navigation.class);
-    for (MetaClass pageClass : pages) {
-      injectionContext.getGraphBuilder().addDependency(navigationClass, Dependency.on(pageClass));
-    }
   }
 
   @Override
