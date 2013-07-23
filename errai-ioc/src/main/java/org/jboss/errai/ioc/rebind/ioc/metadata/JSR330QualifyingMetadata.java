@@ -16,15 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.metadata;
 
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.literal.LiteralFactory;
-import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
-
-import javax.enterprise.inject.Default;
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Named;
-import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,6 +27,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import javax.enterprise.inject.Default;
+import javax.enterprise.util.Nonbinding;
+import javax.inject.Named;
+import javax.inject.Qualifier;
+
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.literal.LiteralFactory;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 
 /**
  * @author Mike Brock .
@@ -175,4 +176,31 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
 
     return buf.toString();
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((qualifiers == null) ? 0 : qualifiers.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    JSR330QualifyingMetadata other = (JSR330QualifyingMetadata) obj;
+    if (qualifiers == null) {
+      if (other.qualifiers != null)
+        return false;
+    }
+    else if (!qualifiers.equals(other.qualifiers))
+      return false;
+    return true;
+  }
+  
 }
