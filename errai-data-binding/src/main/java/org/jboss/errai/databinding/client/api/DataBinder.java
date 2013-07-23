@@ -271,7 +271,6 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
     // if we got a new proxy copy the existing state and bindings
     if (newProxy != this.proxy) {
-      newProxy.getProxyAgent().unbind();
       newProxy.getProxyAgent().copyStateFrom(getAgent());
 
       // unbind the old proxied model

@@ -1,5 +1,15 @@
 package org.jboss.errai.ui.rebind.chain;
 
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.DONE;
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.FRAGMENT;
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.PREFIX;
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.VALUES;
+
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
@@ -10,13 +20,6 @@ import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.*;
 
 /**
  * Command version of the TemplateVisitor this command executes in a chain of commands for each element in the DOM tree.
@@ -74,7 +77,6 @@ public class TranslateCommand extends TemplateVisitor implements Command {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void execute(Context context) {
     Node parent = (Node) context.get(DONE);
     Element element = (Element) context.get(TemplateCatalog.ELEMENT);

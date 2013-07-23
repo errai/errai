@@ -17,6 +17,11 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -32,11 +37,6 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
   private static final String TRANSIENT_DATA_KEY = "InjectableInstance::TransientData";
@@ -291,7 +291,8 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     final Statement val;
 
     if (getTargetInjector().getInjectedType().equals(getEnclosingType()) &&
-        getTargetInjector().getQualifyingMetadata().equals(getQualifyingMetadata())) {
+        getTargetInjector().getQualifyingMetadata().equals(getQualifyingMetadata()) &&
+        getInjector() != null) {
 
       val = Refs.get(getInjector().getInstanceVarName());
     }

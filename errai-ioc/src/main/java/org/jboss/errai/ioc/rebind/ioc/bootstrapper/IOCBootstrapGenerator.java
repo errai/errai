@@ -487,9 +487,6 @@ public class IOCBootstrapGenerator {
     final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class));
     knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class));
     
-    final Collection<Class<? extends Annotation>> dependentAnnotations = 
-      injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean);
-    
     if (context != null) {
       TypeScan:
       for (final MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
@@ -498,9 +495,7 @@ public class IOCBootstrapGenerator {
           for (final Annotation a : clazz.getAnnotations()) {
             final Class<? extends Annotation> clazz1 = a.annotationType();
             
-            final boolean implicitlyDependent = dependentAnnotations != null && dependentAnnotations.contains(clazz1);
-            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class) 
-                || implicitlyDependent) {
+            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)) {
               continue TypeScan;
             }
           }

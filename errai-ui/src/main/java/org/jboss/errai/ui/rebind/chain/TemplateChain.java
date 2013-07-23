@@ -1,6 +1,18 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import com.google.gwt.resources.ext.ResourceGeneratorUtil;
+import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.RESULT;
+import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.createTemplateCatalog;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -8,17 +20,7 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
-import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.RESULT;
-import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.createTemplateCatalog;
+import com.google.gwt.resources.ext.ResourceGeneratorUtil;
 
 /**
  * @author edewit@redhat.com
@@ -35,6 +37,10 @@ public class TemplateChain {
 
   public void visitTemplate(String templateFileName) {
     URL template = getClass().getClassLoader().getResource(templateFileName);
+    if (template == null) {
+      throw new IllegalArgumentException("Could not find HTML template file: " + templateFileName);
+    }
+    
     catalog.visitTemplate(template);
     final Document result = (Document) catalog.getResult(template, RESULT);
     if (result != null) {
