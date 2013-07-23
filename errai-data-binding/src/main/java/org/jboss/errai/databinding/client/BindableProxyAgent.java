@@ -98,6 +98,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          method.
    */
   public void copyStateFrom(BindableProxyAgent<T> other) {
+    unbind();
+    
     for (Binding binding : other.bindings.values()) {
       bind(binding.getWidget(), binding.getProperty(), binding.getConverter());
     }
