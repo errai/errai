@@ -454,7 +454,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testBindableProxyMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
     model.setName("test");
-    
+
     String marshalledModel = Marshalling.toJSON(model);
     assertEquals(model, Marshalling.fromJSON(marshalledModel, TestModel.class));
   }
@@ -463,7 +463,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testBindableProxyListMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
     model.setName("test");
-    
+
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(model);
     String marshalledModelList = Marshalling.toJSON(modelList);
@@ -474,7 +474,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testBindableProxyMapMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
     model.setName("test");
-    
+
     Map<TestModel, TestModel> modelMap = new HashMap<TestModel, TestModel>();
     modelMap.put(model, model);
     String marshalledModelMap = Marshalling.toJSON(modelMap);
@@ -541,7 +541,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong previous value in event", null, handler.getEvents().get(1).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
   }
-  
+
   @Test
   public void testPropertyChangeHandlingOfBoundList() {
     MockHandler handler = new MockHandler();
@@ -566,7 +566,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong property name in event", "list", handler.getEvents().get(1).getPropertyName());
     assertEquals("Wrong property value in event", Arrays.asList("1"), handler.getEvents().get(1).getNewValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
-    
+
     list = binder.getModel().getList();
     list.add("2");
     assertEquals("Should have received exactly three property change event", 3, handler.getEvents().size());
@@ -574,7 +574,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong old property value in event", Arrays.asList("1"), handler.getEvents().get(2).getOldValue());
     assertEquals("Wrong property value in event", Arrays.asList("1", "2"), handler.getEvents().get(2).getNewValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(2).getSource());
-    
+
     list.remove(1);
     assertEquals("Should have received exactly four property change event", 4, handler.getEvents().size());
     assertEquals("Wrong property name in event", "list", handler.getEvents().get(3).getPropertyName());
@@ -709,7 +709,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
         IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
     testDeclarativeBinding(module);
   }
-  
+
   @Test
   public void testInjectedBindableTypeIsNotBound() {
     ModuleWithInjectedBindable module =
@@ -734,7 +734,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertTrue(module.getModel() instanceof BindableProxy);
     assertTrue(module.getModel().getName().equals(model.getName()));
     assertEquals("123", module.getLabel().getText());
-    
+
     module.getLabel().setText("");
     module.getDateTextBox().setText("");
     testDeclarativeBinding(module);
@@ -785,4 +785,114 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Model (phoneNumber) was not updated!", age.getValue(), model.getAge().toString());
   }
 
+  @Test
+  public void testBindingWithSharedModel() {
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    TestModel model = new TestModel();
+
+    TestModel modelProxy1 = DataBinder.forModel(model).bind(textBox1, "value").getModel();
+    TestModel modelProxy2 = DataBinder.forModel(model).bind(textBox2, "value").getModel();
+    assertSame(modelProxy1, modelProxy2);
+
+    textBox1.setValue("UI change 1", true);
+    assertEquals("Model not properly updated", "UI change 1", model.getValue());
+
+    textBox2.setValue("UI change 2", true);
+    assertEquals("Model not properly updated", "UI change 2", model.getValue());
+
+    model.setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox1.getText());
+    assertEquals("Widget not properly updated", "model change", textBox2.getText());
+  }
+
+  @Test
+  public void testBindingWithSharedModelProxy() {
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    TestModel model = new TestModel();
+
+    TestModel modelProxy1 = DataBinder.forModel(model).bind(textBox1, "value").getModel();
+    TestModel modelProxy2 = DataBinder.forModel(modelProxy1).bind(textBox2, "value").getModel();
+    assertSame(modelProxy1, modelProxy2);
+
+    textBox1.setValue("UI change 1", true);
+    assertEquals("Model not properly updated", "UI change 1", model.getValue());
+
+    textBox2.setValue("UI change 2", true);
+    assertEquals("Model not properly updated", "UI change 2", model.getValue());
+
+    model.setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox1.getText());
+    assertEquals("Widget not properly updated", "model change", textBox2.getText());
+  }
+
+  @Test
+  public void testUnbindingWithSharedModel() {
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    TestModel model = new TestModel();
+
+    DataBinder<TestModel> binder1 = DataBinder.forModel(model).bind(textBox1, "value");
+    DataBinder<TestModel> binder2 = DataBinder.forModel(model).bind(textBox2, "value");
+    assertSame(binder1.getModel(), binder2.getModel());
+    binder1.unbind();
+
+    textBox2.setValue("UI change 2", true);
+    assertEquals("Model not properly updated", "UI change 2", model.getValue());
+
+    model.setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox2.getText());
+  }
+
+  @Test
+  public void testSetModelWithSharedProxies() {
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    TestModel model = new TestModel();
+
+    DataBinder<TestModel> binder1 = DataBinder.forModel(model).bind(textBox1, "value");
+    DataBinder<TestModel> binder2 = DataBinder.forModel(model).bind(textBox2, "name");
+    TestModel modelProxy1 = binder1.getModel();
+    TestModel modelProxy2 = binder2.getModel();
+    assertSame(modelProxy1, modelProxy2);
+    
+    assertEquals("", textBox1.getText());
+    assertEquals("", textBox2.getText());
+    
+    TestModel model2 = new TestModel();
+    model2.setValue("value");
+    model2.setName("name");
+    
+    binder1.setModel(model2);
+    assertEquals("value", textBox1.getText());
+    assertEquals("", textBox2.getText());
+    
+    model2.setValue("newValue");
+    binder2.setModel(model2);
+    assertEquals("value", textBox1.getText());
+    assertEquals("name", textBox2.getText());
+  }
+  
+  @Test
+  public void testSharedProxyCleanup() {
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    TestModel model = new TestModel();
+
+    DataBinder<TestModel> binder1 = DataBinder.forModel(model).bind(textBox1, "value");
+    DataBinder<TestModel> binder2 = DataBinder.forModel(model).bind(textBox2, "value");
+    TestModel modelProxy1 = binder1.getModel();
+    TestModel modelProxy2 = binder2.getModel();
+    assertSame(modelProxy1, modelProxy2);
+
+    // Unbinding all binders for a given proxy should clear it from the cache we keep to ensure that
+    // we always use the same proxy for the same model instance
+    binder1.unbind();
+    binder2.unbind();
+
+    TestModel modelProxy3 = DataBinder.forModel(model).bind(textBox2, "value").getModel();
+    assertNotSame(modelProxy1, modelProxy3);
+    assertNotSame(modelProxy2, modelProxy3);
+  }
 }
