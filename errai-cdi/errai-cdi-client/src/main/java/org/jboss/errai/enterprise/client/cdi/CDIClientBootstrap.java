@@ -16,10 +16,12 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -32,7 +34,7 @@ import com.google.gwt.core.client.EntryPoint;
 
 /**
  * The GWT entry point for the Errai CDI module.
- *
+ * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -41,16 +43,37 @@ public class CDIClientBootstrap implements EntryPoint {
 
   final static Runnable initRemoteCdiSubsystem = new Runnable() {
 
+    @Override
     public void run() {
       LogUtil.log("CDI subsystem syncing with server ...");
+
+      BusErrorCallback serverDispatchErrorCallback = new BusErrorCallback() {
+        @Override
+        public boolean error(Message message, Throwable throwable) {
+          try {
+            throw throwable;
+          }
+          catch (NoSubscribersToDeliverTo e) {
+            LogUtil.log("Server did not subscribe to " + CDI.SERVER_DISPATCHER_SUBJECT +
+                ". To activate the full Errai CDI functionality, make sure that Errai's Weld " +
+                "integration module has been deployed.");
+            return false;
+          }
+          catch (Throwable t) {
+            return true;
+          }
+        }
+      };
+
       MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
           .command(CDICommands.AttachRemote)
-          .done()
+          .errorsHandledBy(serverDispatchErrorCallback)
           .sendNowWith(bus);
 
       CDI.fireEvent(new BusReadyEvent());
     }
 
+    @Override
     public String toString() {
       return "BusReadyEvent";
     }
@@ -64,26 +87,28 @@ public class CDIClientBootstrap implements EntryPoint {
       if (!bus.isSubscribed(CDI.CLIENT_DISPATCHER_SUBJECT)) {
         LogUtil.log("declare CDI dispatch service");
         bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
+          @Override
           public void callback(final Message message) {
             switch (CDICommands.valueOf(message.getCommandType())) {
-              case AttachRemote:
+            case AttachRemote:
                 CDI.activate(message.get(String.class, MessageParts.RemoteServices).split(","));
                 break;
 
               case RemoteSubscribe:
                 CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
-
                 break;
+                
               case CDIEvent:
                 CDI.consumeEventFromMessage(message);
                 break;
+              }
             }
-          }
         });
       }
     }
   };
 
+  @Override
   public void onModuleLoad() {
     InitVotes.registerPersistentPreInitCallback(declareServices);
     InitVotes.waitFor(CDI.class);
