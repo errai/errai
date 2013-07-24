@@ -23,28 +23,16 @@ import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProce
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import org.jboss.errai.bus.client.api.BusLifecycleEvent;
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.BusMonitor;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.bus.client.api.RoutingFlag;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.Subscription;
-import org.jboss.errai.bus.client.api.TransportError;
-import org.jboss.errai.bus.client.api.TransportErrorHandler;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import java.util.*;
+
+import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.transports.BusTransportError;
 import org.jboss.errai.bus.client.framework.transports.HttpPollingHandler;
 import org.jboss.errai.bus.client.framework.transports.SSEHandler;
@@ -59,16 +47,11 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -770,8 +753,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
     catch (RuntimeException e) {
-      callErrorHandler(message, e);
-      throw e;
+      boolean defaultErrorHandling = callErrorHandler(message, e);
+      
+      if (defaultErrorHandling)
+        throw e;
     }
   }
 
@@ -784,11 +769,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  public void callErrorHandler(final Message message, final Throwable t) {
+  public boolean callErrorHandler(final Message message, final Throwable t) {
+    boolean defaultErrorHandling = true;
+    
     if (message.getErrorCallback() != null) {
-      message.getErrorCallback().error(message, t);
+      defaultErrorHandling = message.getErrorCallback().error(message, t);
     }
-    managementConsole.displayError(t.getMessage(), "none", t);
+    
+    if (defaultErrorHandling) {
+      managementConsole.displayError(t.getMessage(), "none", t);
+    }
+    
+    return defaultErrorHandling;
   }
 
   public void encodeAndTransmit(final Message message) {
