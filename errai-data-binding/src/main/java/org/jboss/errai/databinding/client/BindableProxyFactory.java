@@ -17,11 +17,13 @@
 package org.jboss.errai.databinding.client;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
+
 
 /**
  * Provides access to the generated proxies for {@link Bindable} types.
@@ -30,6 +32,7 @@ import org.jboss.errai.databinding.client.api.InitialState;
  */
 public class BindableProxyFactory {
   private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders = new HashMap<Class<?>, BindableProxyProvider>();
+  private static Map<Object, BindableProxy<?>> proxies = new IdentityHashMap<Object, BindableProxy<?>>();
 
   /**
    * Returns a new proxy for the provided model instance. Changes to the proxy's state will result in
@@ -47,16 +50,18 @@ public class BindableProxyFactory {
    */
   @SuppressWarnings("unchecked")
   public static <T> T getBindableProxy(T model, InitialState state) {
-    if (model instanceof BindableProxy) {
-      model = (T) ((BindableProxy<T>) model).unwrap();
-    }
-
-    BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
-    BindableProxy<?> proxy = proxyProvider.getBindableProxy(model, state);
+    if (model instanceof BindableProxy)
+      return model;
+   
+    BindableProxy<?> proxy = proxies.get(model);
     if (proxy == null) {
-      throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
+      BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
+      proxy = proxyProvider.getBindableProxy(model, state);
+      if (proxy == null) {
+        throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
+      }
+      proxies.put(model, proxy);
     }
-
     return (T) proxy;
   }
 
