@@ -56,7 +56,8 @@ public class CDIClientBootstrap implements EntryPoint {
           catch (NoSubscribersToDeliverTo e) {
             LogUtil.log("Server did not subscribe to " + CDI.SERVER_DISPATCHER_SUBJECT +
                 ". To activate the full Errai CDI functionality, make sure that Errai's Weld " +
-                "integration module has been deployed.");
+                "integration module has been deployed on the server.");
+            CDI.activate();
             return false;
           }
           catch (Throwable t) {
