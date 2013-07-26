@@ -192,11 +192,11 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
     Assert.notNull(widget);
     Assert.notNull(property);
-    
+
     if (!(proxy instanceof BindableProxy<?>)) {
       proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(proxy), null);
     }
-    
+
     Binding binding = getAgent().bind(widget, property, converter);
     bindings.put(property, binding);
     return this;
@@ -217,7 +217,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       getAgent().unbind(binding);
     }
     bindings.removeAll(property);
-    
+
     if (bindings.isEmpty()) {
       unwrapProxy();
     }
@@ -230,11 +230,17 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   public DataBinder<T> unbind() {
+    return unbind(true);
+  }
+
+  private DataBinder<T> unbind(boolean clearBindings) {
     for (Binding binding : bindings.values()) {
       getAgent().unbind(binding);
     }
-    bindings.clear();
-    
+    if (clearBindings) {
+      bindings.clear();
+    }
+
     unwrapProxy();
     return this;
   }
@@ -298,7 +304,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       newProxy.getAgent().copyStateFrom(getAgent());
 
       // unbind the old proxied model
-      unbind();
+      unbind(false);
 
       this.proxy = (T) newProxy;
     }
@@ -357,13 +363,13 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   private BindableProxyAgent<T> getAgent() {
     return ((BindableProxy<T>) this.proxy).getAgent();
   }
-  
+
   private void unwrapProxy() {
     if (proxy instanceof BindableProxy<?>) {
       proxy = (T) ((BindableProxy<T>) proxy).unwrap();
     }
   }
-  
+
   private void ensureProxied() {
     if (!(proxy instanceof BindableProxy<?>)) {
       proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(proxy), null);

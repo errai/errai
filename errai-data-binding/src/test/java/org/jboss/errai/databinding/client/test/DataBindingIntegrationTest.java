@@ -882,20 +882,16 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     
     TestModel model2 = new TestModel();
     model2.setValue("value");
-    model2.setName("name");
     
     binder1.setModel(model2);
     assertEquals("value", textBox1.getText());
-    assertEquals("name", textBox2.getText());
     assertTrue(binder1.getBoundProperties().contains("value"));
     
     model2 = new TestModel();
-    model2.setValue("newValue");
-    model2.setName("newName");
+    model2.setName("name");
     
     binder2.setModel(model2);
-    assertEquals("newValue", textBox1.getText());
-    assertEquals("newName", textBox2.getText());
+    assertEquals("name", textBox2.getText());
     assertTrue(binder2.getBoundProperties().contains("name"));
   }
   
