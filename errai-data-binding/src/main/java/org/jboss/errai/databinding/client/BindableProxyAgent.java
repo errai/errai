@@ -16,11 +16,9 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Convert;
@@ -69,7 +67,6 @@ import com.google.gwt.user.client.ui.Widget;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
-
   final Map<String, PropertyType> propertyTypes = new HashMap<String, PropertyType>();
   final Map<String, DataBinder> binders = new HashMap<String, DataBinder>();
   final Map<String, Object> knownValues = new HashMap<String, Object>();
@@ -98,8 +95,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          method.
    */
   public void copyStateFrom(BindableProxyAgent<T> other) {
-    unbind();
-    
     for (Binding binding : other.bindings.values()) {
       bind(binding.getWidget(), binding.getProperty(), binding.getConverter());
     }
@@ -115,32 +110,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     for (String property : propertyTypes.keySet()) {
       knownValues.put(property, proxy.get(property));
     }
-  }
-
-  /**
-   * Returns a set of the currently bound property names.
-   * 
-   * @return bound properties, an empty set if no properties have been bound.
-   */
-  public Set<String> getBoundProperties() {
-    return bindings.keySet();
-  }
-
-  /**
-   * Returns the widgets currently bound to the provided property (see
-   * {@link #bind(Widget, String, Converter)}).
-   * 
-   * @param property
-   *          the name of the model property
-   * @return the list of widgets currently bound to the provided property or an empty list if no
-   *         widget was bound to the property.
-   */
-  public List<Widget> getWidgets(final String property) {
-    List<Widget> widgets = new ArrayList<Widget>();
-    for (Binding binding : bindings.get(property)) {
-      widgets.add(binding.getWidget());
-    }
-    return widgets;
   }
 
   /**
@@ -162,14 +131,17 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          the property of the model to bind the widget to, must not be null.
    * @param converter
    *          the converter to use for this binding, null if default conversion should be used.
+   * @return binding
+   *          the created binding.
    */
-  public void bind(final Widget widget, final String property, final Converter converter) {
+  public Binding bind(final Widget widget, final String property, final Converter converter) {
     validatePropertyExpr(property);
 
     if (property.indexOf(".") > 0) {
       createNestedBinders(widget, property, converter);
-      bindings.put(property, new Binding(property, widget, converter, null));
-      return;
+      Binding binding = new Binding(property, widget, converter, null);
+      bindings.put(property, binding);
+      return binding;
     }
 
     if (!propertyTypes.containsKey(property)) {
@@ -177,7 +149,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     }
 
     for (Binding binding : bindings.values()) {
-      if (binding.getWidget().equals(widget)) {
+      if (binding.getWidget().equals(widget) && !property.equals(binding.getProperty())) {
         throw new WidgetAlreadyBoundException("Widget already bound to property: " + binding.getProperty());
       }
     }
@@ -202,12 +174,15 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           " or " + HasText.class.getName() + "!");
     }
 
-    bindings.put(property, new Binding(property, widget, converter, handlerRegistration));
+    Binding binding = new Binding(property, widget, converter, handlerRegistration);
+    bindings.put(property, binding);
 
     if (propertyTypes.get(property).isList()) {
       proxy.set(property, ensureBoundListIsProxied(property));
     }
     syncState(widget, property, initialState);
+    
+    return binding;
   }
 
   /**
@@ -272,6 +247,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       binding.removeHandler();
     }
     bindings.clear();
+    
+    BindableProxyFactory.removeCachedProxyForModel(target);
   }
 
   /**
@@ -280,7 +257,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param property
    *          the name of the model property to unbind, must not be null.
    */
-  public void unbind(final String property) {
+  public void unbind(final Binding binding) {
+    String property = binding.getProperty();
     validatePropertyExpr(property);
 
     int dotPos = property.indexOf(".");
@@ -291,11 +269,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         binder.unbind(property.substring(dotPos + 1));
       }
     }
-
-    for (Binding binding : bindings.get(property)) {
-      binding.removeHandler();
+    binding.removeHandler();
+    bindings.remove(property, binding);
+    
+    if (bindings.isEmpty()) {
+      BindableProxyFactory.removeCachedProxyForModel(target);
     }
-    bindings.removeAll(property);
   }
 
   /**

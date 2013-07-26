@@ -109,4 +109,9 @@ public final class Binding {
     return true;
   }
 
+  @Override
+  public String toString() {
+    return "Binding [property=" + property + ", widget=" + widget + "]";
+  }
+  
 }

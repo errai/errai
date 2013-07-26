@@ -117,6 +117,10 @@ public class BindableProxyFactory {
     bindableProxyProviders.put(proxyType, proxyProvider);
   }
 
+  public static <T> void removeCachedProxyForModel(T model) {
+    proxies.remove(model);
+  }
+  
   /**
    * Checks if the type of the provided model is bindable. That's the case when a proxy provider has
    * been generated for that type (the type has been annotated or configured to be bindable).
