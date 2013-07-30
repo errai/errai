@@ -93,7 +93,7 @@ public class BindableProxyGenerator {
         .append(generatePropertiesMap())
         .append(agent().invoke("copyValues"))
         .finish()
-        .publicMethod(BindableProxyAgent.class, "getProxyAgent")
+        .publicMethod(BindableProxyAgent.class, "getAgent")
         .append(agent().returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")

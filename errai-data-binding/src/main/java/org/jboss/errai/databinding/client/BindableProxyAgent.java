@@ -16,11 +16,11 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.util.ArrayList;
+import static org.jboss.errai.databinding.client.api.Convert.toModelValue;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Convert;
@@ -69,7 +69,6 @@ import com.google.gwt.user.client.ui.Widget;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
-
   final Map<String, PropertyType> propertyTypes = new HashMap<String, PropertyType>();
   final Map<String, DataBinder> binders = new HashMap<String, DataBinder>();
   final Map<String, Object> knownValues = new HashMap<String, Object>();
@@ -87,27 +86,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Makes the settings of this BindableProxyAgent match those of the given agent.
-   * <p>
-   * IMPORTANT NOTE: this is currently implemented by sharing the PropertyChangeHandler
-   * registrations with the given agent. You should discard all references to the "other" agent
-   * after calling this method.
-   * 
-   * @param other
-   *          the agent to copy/share settings from. Should not be used after you pass it to this
-   *          method.
-   */
-  public void copyStateFrom(BindableProxyAgent<T> other) {
-    unbind();
-    
-    for (Binding binding : other.bindings.values()) {
-      bind(binding.getWidget(), binding.getProperty(), binding.getConverter());
-    }
-
-    propertyChangeHandlerSupport = other.propertyChangeHandlerSupport;
-  }
-
-  /**
    * Copies the values of all properties to be able to compare them in case they change outside a
    * setter method.
    */
@@ -115,41 +93,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     for (String property : propertyTypes.keySet()) {
       knownValues.put(property, proxy.get(property));
     }
-  }
-
-  /**
-   * Returns a set of the currently bound property names.
-   * 
-   * @return bound properties, an empty set if no properties have been bound.
-   */
-  public Set<String> getBoundProperties() {
-    return bindings.keySet();
-  }
-
-  /**
-   * Returns the widgets currently bound to the provided property (see
-   * {@link #bind(Widget, String, Converter)}).
-   * 
-   * @param property
-   *          the name of the model property
-   * @return the list of widgets currently bound to the provided property or an empty list if no
-   *         widget was bound to the property.
-   */
-  public List<Widget> getWidgets(final String property) {
-    List<Widget> widgets = new ArrayList<Widget>();
-    for (Binding binding : bindings.get(property)) {
-      widgets.add(binding.getWidget());
-    }
-    return widgets;
-  }
-
-  /**
-   * Returns the {@link InitialState} configured when the proxy was created.
-   * 
-   * @return initial state, can be null.
-   */
-  public InitialState getInitialState() {
-    return initialState;
   }
 
   /**
@@ -162,14 +105,16 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          the property of the model to bind the widget to, must not be null.
    * @param converter
    *          the converter to use for this binding, null if default conversion should be used.
+   * @return binding the created binding.
    */
-  public void bind(final Widget widget, final String property, final Converter converter) {
+  public Binding bind(final Widget widget, final String property, final Converter converter) {
     validatePropertyExpr(property);
 
     if (property.indexOf(".") > 0) {
       createNestedBinders(widget, property, converter);
-      bindings.put(property, new Binding(property, widget, converter, null));
-      return;
+      Binding binding = new Binding(property, widget, converter, null);
+      bindings.put(property, binding);
+      return binding;
     }
 
     if (!propertyTypes.containsKey(property)) {
@@ -177,7 +122,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     }
 
     for (Binding binding : bindings.values()) {
-      if (binding.getWidget().equals(widget)) {
+      if (binding.getWidget().equals(widget) && !property.equals(binding.getProperty())) {
         throw new WidgetAlreadyBoundException("Widget already bound to property: " + binding.getProperty());
       }
     }
@@ -188,11 +133,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         @Override
         public void onValueChange(ValueChangeEvent event) {
           Object oldValue = proxy.get(property);
-
-          Object newValue =
-                Convert.toModelValue(propertyTypes.get(property).getType(), widget, event.getValue(), converter);
+          Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, event.getValue(), converter);
           proxy.set(property, newValue);
-
           updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
         }
       });
@@ -202,12 +144,15 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           " or " + HasText.class.getName() + "!");
     }
 
-    bindings.put(property, new Binding(property, widget, converter, handlerRegistration));
+    Binding binding = new Binding(property, widget, converter, handlerRegistration);
+    bindings.put(property, binding);
 
     if (propertyTypes.get(property).isList()) {
       proxy.set(property, ensureBoundListIsProxied(property));
     }
     syncState(widget, property, initialState);
+
+    return binding;
   }
 
   /**
@@ -247,6 +192,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           binder = DataBinder.forModel(proxy.get(bindableProperty), initialState);
         }
         binders.put(bindableProperty, binder);
+      } 
+      else {
+        binder.setModel(proxy.get(bindableProperty), initialState);
       }
       binder.bind(widget, property.substring(dotPos + 1), converter);
       proxy.set(bindableProperty, binder.getModel());
@@ -260,27 +208,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Unbinds all properties.
-   */
-  public void unbind() {
-    for (DataBinder binder : binders.values()) {
-      binder.unbind();
-    }
-    binders.clear();
-
-    for (Binding binding : bindings.values()) {
-      binding.removeHandler();
-    }
-    bindings.clear();
-  }
-
-  /**
    * Unbinds the property with the given name.
    * 
    * @param property
    *          the name of the model property to unbind, must not be null.
    */
-  public void unbind(final String property) {
+  public void unbind(final Binding binding) {
+    String property = binding.getProperty();
     validatePropertyExpr(property);
 
     int dotPos = property.indexOf(".");
@@ -291,11 +225,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         binder.unbind(property.substring(dotPos + 1));
       }
     }
+    binding.removeHandler();
+    bindings.remove(property, binding);
 
-    for (Binding binding : bindings.get(property)) {
-      binding.removeHandler();
+    if (bindings.isEmpty()) {
+      BindableProxyFactory.removeCachedProxyForModel(target);
     }
-    bindings.removeAll(property);
   }
 
   /**
@@ -371,8 +306,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       else if (widget instanceof HasText) {
         HasText ht = (HasText) widget;
         Object widgetValue =
-            Convert
-                .toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converter);
+            Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converter);
         ht.setText((String) widgetValue);
       }
     }
@@ -469,11 +403,30 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           firePropertyChangeEvent(property, oldList, newList);
         }
       });
-   
+
       return newList;
     }
-    
+
     return list;
+  }
+
+  /**
+   * Returns the {@link InitialState} configured when the proxy was created.
+   * 
+   * @return initial state, can be null.
+   */
+  public InitialState getInitialState() {
+    return initialState;
+  }
+
+  /**
+   * Returns the {@link PropertyChangeHandlerSupport} object of this agent containing all change
+   * handlers that have been registered for the corresponding model proxy.
+   * 
+   * @return propertyChangeHandlerSupport object, never null.
+   */
+  public PropertyChangeHandlerSupport getPropertyChangeHandlers() {
+    return propertyChangeHandlerSupport;
   }
 
   @Override
@@ -482,8 +435,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public <P> void addPropertyChangeHandler(String name, PropertyChangeHandler<P> handler) {
-    propertyChangeHandlerSupport.addPropertyChangeHandler(name, handler);
+  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+    propertyChangeHandlerSupport.addPropertyChangeHandler(property, handler);
   }
 
   @Override
@@ -492,7 +445,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public void removePropertyChangeHandler(String name, PropertyChangeHandler handler) {
-    propertyChangeHandlerSupport.removePropertyChangeHandler(name, handler);
+  public void removePropertyChangeHandler(String property, PropertyChangeHandler handler) {
+    propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
   }
 }

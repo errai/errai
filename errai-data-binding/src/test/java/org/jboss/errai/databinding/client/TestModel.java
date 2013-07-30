@@ -53,6 +53,12 @@ public class TestModel {
   @SuppressWarnings("unused")
   private String agent;
   
+  public TestModel() {}
+  
+  public TestModel(String value) {
+    this.value = value;
+  }
+  
   public int getId() {
     return id;
   }
