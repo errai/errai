@@ -17,6 +17,7 @@
 package org.jboss.errai.databinding.client;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
@@ -30,11 +31,12 @@ import org.jboss.errai.databinding.client.api.InitialState;
  */
 public class BindableProxyFactory {
   private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders = new HashMap<Class<?>, BindableProxyProvider>();
+  private static Map<Object, BindableProxy<?>> proxies = new IdentityHashMap<Object, BindableProxy<?>>();
 
   /**
-   * Returns a new proxy for the provided model instance. Changes to the proxy's state will result in
-   * updates on the widget given the corresponding property was bound (see
-   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}). 
+   * Returns a new proxy for the provided model instance. Changes to the proxy's state will result
+   * in updates on the widget given the corresponding property was bound (see
+   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
    * 
    * @param <T>
    *          the bindable type
@@ -47,16 +49,18 @@ public class BindableProxyFactory {
    */
   @SuppressWarnings("unchecked")
   public static <T> T getBindableProxy(T model, InitialState state) {
-    if (model instanceof BindableProxy) {
-      model = (T) ((BindableProxy<T>) model).unwrap();
-    }
+    if (model instanceof BindableProxy)
+      return model;
 
-    BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
-    BindableProxy<?> proxy = proxyProvider.getBindableProxy(model, state);
+    BindableProxy<?> proxy = proxies.get(model);
     if (proxy == null) {
-      throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
+      BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
+      proxy = proxyProvider.getBindableProxy(model, state);
+      if (proxy == null) {
+        throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
+      }
+      proxies.put(model, proxy);
     }
-
     return (T) proxy;
   }
 
@@ -113,6 +117,19 @@ public class BindableProxyFactory {
   }
 
   /**
+   * Remove the cached proxy for the provided model instance. A future lookup will cause the
+   * creation of a new proxy instance.
+   * 
+   * @param <T>
+   *          the bindable type
+   * @param model
+   *          the model instance
+   */
+  public static <T> void removeCachedProxyForModel(T model) {
+    proxies.remove(model);
+  }
+
+  /**
    * Checks if the type of the provided model is bindable. That's the case when a proxy provider has
    * been generated for that type (the type has been annotated or configured to be bindable).
    * 
@@ -125,7 +142,7 @@ public class BindableProxyFactory {
     if (model instanceof BindableProxy) {
       model = (T) ((BindableProxy<T>) model).unwrap();
     }
-    
+
     BindableProxyProvider proxyProvider = bindableProxyProviders.get(model.getClass());
     return (proxyProvider != null);
   }

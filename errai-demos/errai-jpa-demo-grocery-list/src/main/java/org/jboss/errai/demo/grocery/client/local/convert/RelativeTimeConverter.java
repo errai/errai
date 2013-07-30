@@ -29,6 +29,9 @@ public class RelativeTimeConverter implements Converter<Date, String> {
 
     @Override
     public String toWidgetValue(Date modelValue) {
+        if (modelValue == null) {
+          return "";
+        }
         return toRelativeTime(modelValue.getTime());
     }
 

@@ -22,7 +22,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Represents the binding of a bean property to a widget and holds all relevant binding-specific metadata.
+ * Represents the binding of a bean property to a widget and holds all relevant binding-specific
+ * metadata.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -61,52 +62,10 @@ public final class Binding {
       handlerRegistration.removeHandler();
     }
   }
-  
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((converter == null) ? 0 : converter.hashCode());
-    result = prime * result + ((handlerRegistration == null) ? 0 : handlerRegistration.hashCode());
-    result = prime * result + ((property == null) ? 0 : property.hashCode());
-    result = prime * result + ((widget == null) ? 0 : widget.hashCode());
-    return result;
-  }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    Binding other = (Binding) obj;
-    if (converter == null) {
-      if (other.converter != null)
-        return false;
-    }
-    else if (!converter.equals(other.converter))
-      return false;
-    if (handlerRegistration == null) {
-      if (other.handlerRegistration != null)
-        return false;
-    }
-    else if (!handlerRegistration.equals(other.handlerRegistration))
-      return false;
-    if (property == null) {
-      if (other.property != null)
-        return false;
-    }
-    else if (!property.equals(other.property))
-      return false;
-    if (widget == null) {
-      if (other.widget != null)
-        return false;
-    }
-    else if (!widget.equals(other.widget))
-      return false;
-    return true;
+  public String toString() {
+    return "Binding [property=" + property + ", widget=" + widget + "]";
   }
 
 }

@@ -26,23 +26,21 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 /**
- * This is a utility class that can be used by implementations of {@link HasPropertyChangeHandlers}. It manages a list
- * of handlers and dispatches {@link PropertyChangeEvent}s.
- *
+ * This is a utility class that can be used by implementations of {@link HasPropertyChangeHandlers}.
+ * It manages a list of handlers and dispatches {@link PropertyChangeEvent}s.
+ * 
  * @author David Cracauer <dcracauer@gmail.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PropertyChangeHandlerSupport {
-
   private final List<PropertyChangeHandler<?>> handlers = new ArrayList<PropertyChangeHandler<?>>();
   private final Multimap<String, PropertyChangeHandler<?>> specificPropertyHandlers = ArrayListMultimap.create();
 
   /**
-   * Adds a {@link PropertyChangeHandler} that will be notified when any
-   * property of the bound object changes. Multiple handlers can be registered.
-   * If the same handler instance is passed multiple times, it will be notified
-   * multiple times.
-   *
+   * Adds a {@link PropertyChangeHandler} that will be notified when any property of the bound
+   * object changes. Multiple handlers can be registered. If the same handler instance is passed
+   * multiple times, it will be notified multiple times.
+   * 
    * @param handler
    *          The {@link PropertyChangeHandler} to add, must not be null.
    */
@@ -51,13 +49,12 @@ public class PropertyChangeHandlerSupport {
   }
 
   /**
-   * Adds a {@link PropertyChangeHandler} that will be notified only when the
-   * given property of the bound object changes. Multiple handlers can be
-   * registered for each property. If the same handler instance is passed for
-   * the same property multiple times, it will be notified multiple times. If
-   * the property name does not correspond to a property of the bound object, no
-   * exception is thrown, but no events will ever be delivered to the handler.
-   *
+   * Adds a {@link PropertyChangeHandler} that will be notified only when the given property of the
+   * bound object changes. Multiple handlers can be registered for each property. If the same
+   * handler instance is passed for the same property multiple times, it will be notified multiple
+   * times. If the property name does not correspond to a property of the bound object, no exception
+   * is thrown, but no events will ever be delivered to the handler.
+   * 
    * @param name
    *          The property name for which notifications should be sent.
    * @param handler
@@ -68,10 +65,10 @@ public class PropertyChangeHandlerSupport {
   }
 
   /**
-   * Removes a {@link PropertyChangeHandler} from the list of handlers. If the handler was added more than once to the
-   * same event source, it will be notified one less time after being removed. If listener is null, or was never added,
-   * no exception is thrown and no action is taken.
-   *
+   * Removes a {@link PropertyChangeHandler} from the list of handlers. If the handler was added
+   * more than once to the same event source, it will be notified one less time after being removed.
+   * If listener is null, or was never added, no exception is thrown and no action is taken.
+   * 
    * @param handler
    *          The {@link PropertyChangeHandler} to remove.
    */
@@ -80,13 +77,12 @@ public class PropertyChangeHandlerSupport {
   }
 
   /**
-   * Removes a {@link PropertyChangeHandler}, causing it no longer to be
-   * notified only when the given property of the bound object changes. If the
-   * same handler instance was added for the same property multiple times, it
-   * will be notified one less time per change than before. If listener is null,
-   * was never added, or the property name does not correspond to a property of
-   * the bound object, no exception is thrown and no action is taken.
-   *
+   * Removes a {@link PropertyChangeHandler}, causing it no longer to be notified only when the
+   * given property of the bound object changes. If the same handler instance was added for the same
+   * property multiple times, it will be notified one less time per change than before. If listener
+   * is null, was never added, or the property name does not correspond to a property of the bound
+   * object, no exception is thrown and no action is taken.
+   * 
    * @param name
    *          The property name for which notifications should be sent.
    * @param handler
@@ -97,9 +93,10 @@ public class PropertyChangeHandlerSupport {
   }
 
   /**
-   * Notify registered {@link PropertyChangeHandlers} of a {@link PropertyChangeEvent}. Will only dispatch events that
-   * represent a change. If oldValue and newValue are equal, the event will be ignored.
-   *
+   * Notify registered {@link PropertyChangeHandlers} of a {@link PropertyChangeEvent}. Will only
+   * dispatch events that represent a change. If oldValue and newValue are equal, the event will be
+   * ignored.
+   * 
    * @param event
    *          {@link the PropertyChangeEvent} to provide to handlers.
    */
@@ -132,5 +129,24 @@ public class PropertyChangeHandlerSupport {
     }
 
     return !event.getOldValue().equals(event.getNewValue());
+  }
+
+  /**
+   * Merges the {@link PropertyChangeHandler}s of the provided {@link PropertyChangeHandlerSupport}
+   * instance. If a handler instance is already registered it will NOT be added again.
+   * 
+   * @param propertyChangeHandlerSupport
+   *          the instance who's change handlers will be merged, must not be null.
+   */
+  @SuppressWarnings({ "rawtypes" })
+  public void merge(PropertyChangeHandlerSupport pchs) {
+    Assert.notNull(pchs);
+
+    for (PropertyChangeHandler pch : pchs.handlers) {
+      if (!handlers.contains(pch)) {
+        handlers.add(pch);
+      }
+    }
+
   }
 }

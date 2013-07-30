@@ -38,7 +38,7 @@ public interface Converter<M, W> {
    * Converts the provided widget value to a model value of type &lt;M&gt;.
    *
    * @param widgetValue
-   *          the widget value to convert
+   *          the widget value to convert, may be null.
    * @return converted value for the model.
    */
   public M toModelValue(W widgetValue);
@@ -47,7 +47,7 @@ public interface Converter<M, W> {
    * Converts the provided model value to a value usable by widgets of type {@link HasValue HasValue&lt;W&gt;}.
    *
    * @param modelValue
-   *          the model value to convert
+   *          the model value to convert, may be null.
    * @return converted value for the widget.
    */
   public W toWidgetValue(M modelValue);
