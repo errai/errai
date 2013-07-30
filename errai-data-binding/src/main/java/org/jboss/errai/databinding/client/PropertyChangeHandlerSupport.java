@@ -130,4 +130,23 @@ public class PropertyChangeHandlerSupport {
 
     return !event.getOldValue().equals(event.getNewValue());
   }
+
+  /**
+   * Merges the {@link PropertyChangeHandler}s of the provided {@link PropertyChangeHandlerSupport}
+   * instance. If a handler instance is already registered it will NOT be added again.
+   * 
+   * @param propertyChangeHandlerSupport
+   *          the instance who's change handlers will be merged, must not be null.
+   */
+  @SuppressWarnings({ "rawtypes" })
+  public void merge(PropertyChangeHandlerSupport pchs) {
+    Assert.notNull(pchs);
+
+    for (PropertyChangeHandler pch : pchs.handlers) {
+      if (!handlers.contains(pch)) {
+        handlers.add(pch);
+      }
+    }
+
+  }
 }

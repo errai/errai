@@ -27,6 +27,7 @@ import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.Binding;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.PropertyChangeHandlerSupport;
 import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -42,8 +43,9 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DataBinder<T> implements HasPropertyChangeHandlers {
-  final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
-
+  private final PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
+  private final InitialState initialState;
+  private Multimap<String, Binding> bindings = LinkedHashMultimap.create();
   private T proxy;
 
   /**
@@ -54,7 +56,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The bindable type, must not be null.
    */
   private DataBinder(Class<T> modelType) {
-    this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
+    this(modelType, null);
   }
 
   /**
@@ -69,6 +71,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          initial state synchronization should be carried out.
    */
   private DataBinder(Class<T> modelType, InitialState initialState) {
+    this.initialState = initialState;
     this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), initialState);
   }
 
@@ -94,6 +97,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          initial state synchronization should be carried out.
    */
   private DataBinder(T model, InitialState initialState) {
+    this.initialState = initialState;
     this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(model), initialState);
   }
 
@@ -194,7 +198,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     Assert.notNull(property);
 
     if (!(proxy instanceof BindableProxy<?>)) {
-      proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(proxy), null);
+      proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(proxy), initialState);
     }
 
     Binding binding = getAgent().bind(widget, property, converter);
@@ -219,6 +223,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     bindings.removeAll(property);
 
     if (bindings.isEmpty()) {
+      // Proxies without bindings will be removed from the cache to make sure the garbage collector
+      // can do its job (see BindableProxyFactory#removeCachedProxyForModel). We throw away the
+      // reference to the proxy to force a new lookup in case this data binder will be reused.
       unwrapProxy();
     }
     return this;
@@ -241,6 +248,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       bindings.clear();
     }
 
+    // Proxies without bindings will be removed from the cache to make sure the garbage collector
+    // can do its job (see BindableProxyFactory#removeCachedProxyForModel). We throw away the
+    // reference to the proxy to force a new lookup in case this data binder will be reused.
     unwrapProxy();
     return this;
   }
@@ -299,16 +309,21 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
           (initialState != null) ? initialState : getAgent().getInitialState());
     }
 
-    // if we got a new proxy copy the existing state and bindings
     if (newProxy != this.proxy) {
-      newProxy.getAgent().copyStateFrom(getAgent());
-
-      // unbind the old proxied model
+      // unbind the old proxy
       unbind(false);
-
-      this.proxy = (T) newProxy;
     }
+    
+    // replay all bindings
+    final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
+    for (Binding b : this.bindings.values()) {
+      newProxy.getAgent().unbind(b);
+      bindings.put(b.getProperty(), newProxy.getAgent().bind(b.getWidget(), b.getProperty(), b.getConverter()));
+    }
+    newProxy.getAgent().getPropertyChangeHandlers().merge(propertyChangeHandlerSupport);
 
+    this.bindings = bindings;
+    this.proxy = (T) newProxy;
     return this.proxy;
   }
 
@@ -341,21 +356,25 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   @Override
   public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
+    propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
     getAgent().addPropertyChangeHandler(handler);
   }
 
   @Override
   public void removePropertyChangeHandler(PropertyChangeHandler<?> handler) {
+    propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
     getAgent().removePropertyChangeHandler(handler);
   }
 
   @Override
   public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+    propertyChangeHandlerSupport.addPropertyChangeHandler(property, handler);
     getAgent().addPropertyChangeHandler(property, handler);
   }
 
   @Override
   public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
+    propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
     getAgent().removePropertyChangeHandler(property, handler);
   }
 
@@ -364,6 +383,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     return ((BindableProxy<T>) this.proxy).getAgent();
   }
 
+  @SuppressWarnings("unchecked")
   private void unwrapProxy() {
     if (proxy instanceof BindableProxy<?>) {
       proxy = (T) ((BindableProxy<T>) proxy).unwrap();

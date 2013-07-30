@@ -310,8 +310,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
 
-    TestModel model = binder.setModel(new TestModel());
-
+    TestModel model = new TestModel();
+    TestModel childModel = new TestModel();
+    TestModel grandChildModel = new TestModel("value1");
+    childModel.setChild(grandChildModel);
+    model.setChild(childModel);
+    binder.setModel(model);
+    assertEquals("Widget not properly updated", "value1", textBox.getText());
+    
+    TestModel newGrandChildModel = new TestModel("value2");
+    childModel.setChild(newGrandChildModel);
+    model = binder.setModel(model);
+    assertEquals("Widget not properly updated", "value2", textBox.getText());
+    
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getValue());
 
@@ -324,11 +335,15 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.value").getModel();
 
-    model.setChild(new TestModel());
+    model.setChild(new TestModel("value"));
+    assertEquals("Widget not properly updated", "value", textBox.getText());
+    
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
 
-    model.setChild(new TestModel());
+    model.setChild(new TestModel("newValue"));
+    assertEquals("Widget not properly updated", "newValue", textBox.getText());
+    
     model.getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
   }
@@ -893,6 +908,33 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     binder2.setModel(model2);
     assertEquals("name", textBox2.getText());
     assertTrue(binder2.getBoundProperties().contains("name"));
+  }
+  
+  @Test
+  public void testSetModelWithSharedProxiesAndPropertyChain() {
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    TestModel model = new TestModel();
+
+    DataBinder<TestModel> binder1 = DataBinder.forModel(model).bind(textBox1, "child.value");
+    DataBinder<TestModel> binder2 = DataBinder.forModel(model).bind(textBox2, "child.value");
+    TestModel modelProxy1 = binder1.getModel();
+    TestModel modelProxy2 = binder2.getModel();
+    assertSame(modelProxy1, modelProxy2);
+    
+    assertEquals("", textBox1.getText());
+    assertEquals("", textBox2.getText());
+    
+    TestModel model2 = new TestModel();
+    model2.setChild(new TestModel("value1"));
+    binder1.setModel(model2);
+    assertEquals("value1", textBox1.getText());
+    assertTrue(binder1.getBoundProperties().contains("child.value"));
+    
+    model2.setChild(new TestModel("value2"));
+    binder2.setModel(model2);
+    assertEquals("value2", textBox2.getText());
+    assertTrue(binder2.getBoundProperties().contains("child.value"));
   }
   
   @Test
