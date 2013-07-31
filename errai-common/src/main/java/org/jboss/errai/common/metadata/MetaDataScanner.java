@@ -27,17 +27,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -238,6 +228,8 @@ public class MetaDataScanner extends Reflections {
     final List<Vfs.UrlType> urlTypes = Vfs.getDefaultUrlTypes();
     urlTypes.add(new WarUrlType());
     urlTypes.add(new LeafUrlType(".jnilib"));
+    urlTypes.add(new LeafUrlType(".zip"));
+    urlTypes.add(new LeafUrlType(".pom"));
     // thread safe?
     Vfs.setDefaultURLTypes(urlTypes);
   }
@@ -286,7 +278,7 @@ public class MetaDataScanner extends Reflections {
     return results;
   }
 
-  private Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache =
+  private final Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache =
       new HashMap<Class<? extends Annotation>, Set<Class<?>>>();
 
   @Override
