@@ -2,8 +2,6 @@ package org.jboss.errai.bus.client.framework;
 
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 
-import java.util.Set;
-
 /**
  * Allows tests in the proper package to access private bus features.
  *
@@ -38,9 +36,5 @@ public class Wormhole {
       ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT = oldInEntryPoint;
       ((ClientMessageBusImpl) bus).OUT_SERVICE_ENTRY_POINT = oldOutEntryPoint;
     }
-  }
-
-  public static Set<String> getRemoteSubscriptions(ClientMessageBus bus) {
-    return ((ClientMessageBusImpl) bus).getRemoteSubscriptions();
   }
 }
