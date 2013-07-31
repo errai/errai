@@ -23,9 +23,27 @@ import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProce
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.BusLifecycleEvent;
+import org.jboss.errai.bus.client.api.BusLifecycleListener;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.TransportError;
+import org.jboss.errai.bus.client.api.TransportErrorHandler;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -73,13 +91,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
   private final List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
 
-  public final MessageCallback remoteCallback = new MessageCallback() {
+  /**
+   * Forwards every message received across the communication link to the remote
+   * server bus. This is the mechanism by which local messages are routed to the
+   * server bus.
+   * <p>
+   * One instance of this callback can be subscribed to any number of subjects
+   * simultaneously.
+   */
+  public final MessageCallback serverForwarder = new MessageCallback() {
     @Override
     public void callback(final Message message) {
       encodeAndTransmit(message);
     }
   };
 
+  /**
+   * Puts every message received onto this message bus. This is the mechanism by
+   * which messages received from the remote server bus are delivered to local
+   * message subscribers.
+   */
   private final MessageCallback transportToBusCallback = new MessageCallback() {
     @Override
     public void callback(final Message message) {
@@ -189,7 +220,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     LogUtil.log("bus initialization started ...");
     setBusToInitializableState();
 
-    registerInitVoteCallbacks();
+    InitVotes.waitFor(ClientMessageBus.class);
 
     if (isRemoteCommunicationEnabled()) {
       remoteSubscribe(BuiltInServices.ServerEchoService.name());
@@ -754,7 +785,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     catch (RuntimeException e) {
       boolean defaultErrorHandling = callErrorHandler(message, e);
-      
+
       if (defaultErrorHandling)
         throw e;
     }
@@ -771,15 +802,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public boolean callErrorHandler(final Message message, final Throwable t) {
     boolean defaultErrorHandling = true;
-    
+
     if (message.getErrorCallback() != null) {
       defaultErrorHandling = message.getErrorCallback().error(message, t);
     }
-    
+
     if (defaultErrorHandling) {
       managementConsole.displayError(t.getMessage(), "none", t);
     }
-    
+
     return defaultErrorHandling;
   }
 
@@ -838,12 +869,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return subscriptions.containsKey(subject);
   }
 
-  private void registerInitVoteCallbacks() {
-    InitVotes.waitFor(ClientMessageBus.class);
-  }
-
   private void remoteSubscribe(final String subject) {
-    remotes.put(subject, remoteCallback);
+    remotes.put(subject, serverForwarder);
   }
 
   Set<String> getRemoteSubscriptions() {
