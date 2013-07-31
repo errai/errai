@@ -18,7 +18,7 @@ package org.jboss.errai.bus.client.tests;
 
 import java.util.Set;
 
-import org.jboss.errai.bus.client.framework.Wormhole;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 
 /**
  * Tests for the correct behaviour in case remote communication was disabled in the client bus.
@@ -50,7 +50,7 @@ public class DisabledRemoteCommunicationTest extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        Set<String> remoteSubscriptions = Wormhole.getRemoteSubscriptions(bus);
+        Set<String> remoteSubscriptions = ((ClientMessageBusImpl) bus).getRemoteServices();
 
         assertNotNull(remoteSubscriptions);
         assertTrue("Expected to find no remote subscriptions", remoteSubscriptions.isEmpty());
