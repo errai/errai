@@ -1,10 +1,17 @@
 package org.jboss.errai.cdi.event.client.test;
 
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.BusLifecycleAdapter;
+import org.jboss.errai.bus.client.api.BusLifecycleEvent;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.cdi.event.client.DependentEventObserverTestModule;
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 import org.jboss.errai.cdi.event.client.OnDemandEventObserver;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
+
+import com.google.gwt.user.client.Timer;
 
 /**
  * Tests CDI event observers.
@@ -103,6 +110,71 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
 
     // only used for the case the {@see FinishEvent} was not received
     verifyInBackupTimer(firstVerifier, 120000);
+    delayTestFinish(240000);
+  }
+
+  // regression test for ERRAI-592
+  public void testObserversStillWorkAfterSessionRenegotiation() {
+    /* Unfortunately, this test is quite intricate. Here's the outline:
+     *  - set up event observers (the server will associate our QueueSession with those observers)
+     *  - kill the QueueSession
+     *  - ask the bus to reconnect (gives us a new QueueSession with a different ID)
+     *  - test that the pre-existing CDI observers still receive events from the server
+     */
+
+    final Runnable verifier = new Runnable() {
+      @Override
+      public void run() {
+        System.out.println("Verifier starting");
+        EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+
+        // assert that client received all events
+        EventObserverIntegrationTest.this.verifyQualifiedEvents(module.getReceivedQualifiedEvents(), true);
+        EventObserverIntegrationTest.this.verifySuperTypeEvents(module.getReceivedSuperTypeEvents());
+
+        finishTest();
+      }
+    };
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        final EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+
+        assertNotNull(module.getStartEvent());
+        module.setResultVerifier(verifier);
+        // unlike the other test cases, not starting the test yet!
+
+        final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
+        MessageBuilder.createMessage("queueSessionInvalidationService").done().sendNowWith(bus);
+
+        new Timer() {
+          @Override
+          public void run() {
+            System.out.println("Stopping bus...");
+            bus.stop(false);
+            bus.addLifecycleListener(new BusLifecycleAdapter() {
+              @Override
+              public void busOnline(BusLifecycleEvent e) {
+                System.out.println("Bus is back online. Starting event test module.");
+                module.start();
+              }
+            });
+          }
+        }.schedule(1000);
+
+        new Timer() {
+          @Override
+          public void run() {
+            System.out.println("Restarting bus...");
+            bus.init();
+          }
+        }.schedule(2000);
+      }
+    });
+
+    // only used for the case the {@see FinishEvent} was not received
+    verifyInBackupTimer(verifier, 120000);
     delayTestFinish(240000);
   }
 

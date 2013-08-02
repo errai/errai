@@ -147,7 +147,7 @@
                    prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
 
-              <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+              <argLine>-Xmx1500m -XX:MaxPermSize=500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 
               <systemProperties>
                 <property>

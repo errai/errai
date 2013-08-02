@@ -28,12 +28,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -63,7 +63,7 @@ public class CDI {
   private static final Set<String> remoteEvents = new HashSet<String>();
   private static boolean active = false;
 
-  private static Map<String, List<MessageCallback>> eventObservers = new HashMap<String, List<MessageCallback>>();
+  private static Map<String, List<AbstractCDIEventCallback<?>>> eventObservers = new HashMap<String, List<AbstractCDIEventCallback<?>>>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
   private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<String, List<MessageFireDeferral>>();
 
@@ -160,9 +160,9 @@ public class CDI {
     }
   }
 
-  public static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback callback) {
+  public static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback) {
     if (!eventObservers.containsKey(eventType)) {
-      eventObservers.put(eventType, new ArrayList<MessageCallback>());
+      eventObservers.put(eventType, new ArrayList<AbstractCDIEventCallback<?>>());
     }
     eventObservers.get(eventType).add(callback);
 
@@ -175,7 +175,7 @@ public class CDI {
   }
 
 
-  public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback callback) {
+  public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
 
     if (isRemoteCommunicationEnabled()) {
       MessageBuilder.createMessage()
@@ -189,7 +189,7 @@ public class CDI {
     return subscribeLocal(eventType, callback);
   }
 
-  private static void unsubscribe(final String eventType, final AbstractCDIEventCallback callback) {
+  private static void unsubscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
     if (eventObservers.containsKey(eventType)) {
       eventObservers.get(eventType).remove(callback);
       if (eventObservers.get(eventType).isEmpty()) {
@@ -203,6 +203,34 @@ public class CDI {
             .with(CDIProtocol.BeanType, eventType)
             .with(CDIProtocol.Qualifiers, callback.getQualifiers())
             .noErrorHandling().sendNowWith(ErraiBus.get());
+      }
+    }
+  }
+
+  /**
+   * Informs the server of all active CDI observers currently registered on the
+   * client. This is not strictly necessary when the client bus first connects,
+   * because observers register themselves with the server as they are created.
+   * However, if the QueueSession expires and the bus reconnects, it is
+   * essential to inform the server of all existing CDI observers so the
+   * server-side event routing can be established for the new session.
+   * <p>
+   * Application code should never have to call this method directly. The Errai
+   * framework calls this method when required.
+   */
+  public static void resendSubscriptionRequestForAllEventTypes() {
+    if (isRemoteCommunicationEnabled()) {
+      LogUtil.log("requesting server to forward CDI events for " + eventObservers.size() + " existing observers");
+      for (Map.Entry<String, List<AbstractCDIEventCallback<?>>> mapEntry : eventObservers.entrySet()) {
+        String eventType = mapEntry.getKey();
+        for (AbstractCDIEventCallback<?> callback : mapEntry.getValue()) {
+          MessageBuilder.createMessage()
+              .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+              .command(CDICommands.RemoteSubscribe)
+              .with(CDIProtocol.BeanType, eventType)
+              .with(CDIProtocol.Qualifiers, callback.getQualifiers())
+              .noErrorHandling().sendNowWith(ErraiBus.get());
+        }
       }
     }
   }
