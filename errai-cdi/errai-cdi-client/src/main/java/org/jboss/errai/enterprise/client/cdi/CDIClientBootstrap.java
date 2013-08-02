@@ -34,7 +34,7 @@ import com.google.gwt.core.client.EntryPoint;
 
 /**
  * The GWT entry point for the Errai CDI module.
- * 
+ *
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -71,6 +71,8 @@ public class CDIClientBootstrap implements EntryPoint {
           .errorsHandledBy(serverDispatchErrorCallback)
           .sendNowWith(bus);
 
+      CDI.resendSubscriptionRequestForAllEventTypes();
+
       CDI.fireEvent(new BusReadyEvent());
     }
 
@@ -98,7 +100,7 @@ public class CDIClientBootstrap implements EntryPoint {
               case RemoteSubscribe:
                 CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
                 break;
-                
+
               case CDIEvent:
                 CDI.consumeEventFromMessage(message);
                 break;

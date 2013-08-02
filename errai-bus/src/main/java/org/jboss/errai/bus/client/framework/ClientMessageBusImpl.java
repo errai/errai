@@ -278,7 +278,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               break;
 
             case FinishAssociation:
-              LogUtil.log("received handshake response from server. preparing to bring up the federation");
+              sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
+              LogUtil.log("my queue session id: " + sessionId);
 
               loadRpcProxies();
               processCapabilities(message);
@@ -287,7 +288,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 remoteSubscribe(svc);
               }
 
-              sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
               remoteSubscribe(BuiltInServices.ServerBus.name());
 
               if (!deferredSubscriptions.isEmpty()) {
@@ -869,6 +869,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return subscriptions.containsKey(subject);
   }
 
+  /**
+   * Arranges for messages to the given subject to be forwarded to the server.
+   *
+   * @param subject the bus subject for messages that should be forwarded to the server.
+   */
   private void remoteSubscribe(final String subject) {
     remotes.put(subject, serverForwarder);
   }
