@@ -301,29 +301,32 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     Assert.notNull(model);
 
     BindableProxy<T> newProxy;
+    // The whole initial state concept serves no real purpose and should be removed in Errai 3. We
+    // only keep it for API compatibility reasons in 2.x. In the future, we should just
+    // always sync the initial state from the model object.
+    InitialState newInitState = (initialState != null) ? initialState : getAgent().getInitialState();
     if (model instanceof BindableProxy) {
       newProxy = (BindableProxy<T>) model;
-      newProxy.getAgent().setInitialState(initialState);
+      newProxy.getAgent().setInitialState(newInitState);
     }
     else {
-      newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model,
-          (initialState != null) ? initialState : getAgent().getInitialState());
+      newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model, newInitState);
     }
 
     if (newProxy != this.proxy) {
       // unbind the old proxy
       unbind(false);
     }
-    
+
     // replay all bindings
     final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
     for (Binding b : this.bindings.values()) {
       newProxy.getAgent().unbind(b);
       bindings.put(b.getProperty(), newProxy.getAgent().bind(b.getWidget(), b.getProperty(), b.getConverter()));
     }
-    newProxy.getAgent().getPropertyChangeHandlers().merge(propertyChangeHandlerSupport);
-
     this.bindings = bindings;
+    newProxy.getAgent().getPropertyChangeHandlers().merge(propertyChangeHandlerSupport);
+    
     this.proxy = (T) newProxy;
     return this.proxy;
   }
