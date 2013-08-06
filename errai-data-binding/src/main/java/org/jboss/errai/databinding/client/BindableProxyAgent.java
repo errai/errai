@@ -77,7 +77,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   final BindableProxy<T> proxy;
   final T target;
-  final InitialState initialState;
+  InitialState initialState;
 
   BindableProxyAgent(BindableProxy<T> proxy, T target, InitialState initialState) {
     this.proxy = proxy;
@@ -417,6 +417,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   public InitialState getInitialState() {
     return initialState;
+  }
+  
+  /**
+   * Configures the {@link InitialState}.
+   */
+  public void setInitialState(InitialState initialState) {
+    this.initialState = initialState;
   }
 
   /**

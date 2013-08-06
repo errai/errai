@@ -303,6 +303,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     BindableProxy<T> newProxy;
     if (model instanceof BindableProxy) {
       newProxy = (BindableProxy<T>) model;
+      newProxy.getAgent().setInitialState(initialState);
     }
     else {
       newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model,
