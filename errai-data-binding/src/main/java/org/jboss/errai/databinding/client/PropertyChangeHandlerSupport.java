@@ -148,5 +148,12 @@ public class PropertyChangeHandlerSupport {
       }
     }
 
+    for (String pchKey : pchs.specificPropertyHandlers.keys()) {
+      for (PropertyChangeHandler pch : pchs.specificPropertyHandlers.get(pchKey)) {
+        if (!specificPropertyHandlers.containsEntry(pchKey, pch)) {
+          specificPropertyHandlers.put(pchKey, pch);
+        }
+      }
+    }
   }
 }
