@@ -598,22 +598,25 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(3).getSource());
   }
 
+  
   @Test
+  @SuppressWarnings("unchecked")
   public void testBinderRetainsPropertyChangeHandlersAfterModelChange() {
     MockHandler handler = new MockHandler();
 
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     binder.addPropertyChangeHandler(handler);
+    binder.addPropertyChangeHandler("value", handler);
     binder.setModel(new TestModel());
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
-    assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
+    assertEquals("Should have received exactly one property change event", 2, handler.getEvents().size());
 
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
-    assertEquals("Should have received exactly two property change event", 2, handler.getEvents().size());
+    assertEquals("Should have received exactly two property change event", 4, handler.getEvents().size());
   }
 
   @Test
