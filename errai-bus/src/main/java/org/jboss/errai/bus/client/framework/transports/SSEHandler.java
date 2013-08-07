@@ -49,6 +49,11 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   private boolean stopped;
   private boolean connected;
+
+  /**
+   * The number of reconnect attempts that have been made since a message was
+   * received over the SSE channel.
+   */
   private int retries;
 
   private boolean configured;
@@ -56,7 +61,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   private String unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
 
-  private final Timer initialTimeoutTimer = new Timer() {
+  private final Timer pingTimeout = new Timer() {
     @Override
     public void run() {
       if (!connected) {
@@ -111,10 +116,6 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       return;
     }
     sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint);
-
-    // time out after 2 seconds and attempt reconnect. (note: this is really to deal with a bug a firefox).
-    initialTimeoutTimer.cancel();
-    initialTimeoutTimer.schedule(2500);
   }
 
   @Override
@@ -158,13 +159,12 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       var thisRef = this;
 
       var errorHandler = function (e) {
-          $wnd.console.log("SSE transport error: ", e);
-          if (e.srcElement.readyState === EventSource.CLOSED) {
-              thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
-          }
+          $wnd.console.log("SSE channel error (according to the browser)");
+          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::verifyConnected()();
       };
 
       var openHandler = function () {
+          $wnd.console.log("SSE channel opened (according to the browser)");
           thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::verifyConnected()();
       };
 
@@ -179,34 +179,42 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       return sseSource;
   }-*/;
 
-
+  /**
+   * Sends a ping request to the server. If the ping response is not received
+   * within a reasonable time limit, notifyDisconnected() will be called.
+   */
   private void verifyConnected() {
+
+    // in case we were in the middle of something already
+    pingTimeout.cancel();
+
     transmit(Collections.singletonList(MessageBuilder.createMessage()
         .toSubject("ServerEchoService")
         .signalling().done().repliesToSubject(SSE_AGENT_SERVICE).getMessage()));
+
+    pingTimeout.schedule(2500);
   }
 
   private void notifyConnected() {
-    initialTimeoutTimer.cancel();
-
-    if (connected) {
-      return;
-    }
-    connected = true;
-
-    connectedTime = System.currentTimeMillis();
-    LogUtil.log(this + ": SSE channel opened.");
+    pingTimeout.cancel();
     retries = 0;
 
-    if (clientMessageBus.getState() == BusState.CONNECTION_INTERRUPTED)
+    if (!connected) {
+      connected = true;
+      connectedTime = System.currentTimeMillis();
+      LogUtil.log(this + ": SSE channel is active.");
+    }
+
+    if (clientMessageBus.getState() == BusState.CONNECTION_INTERRUPTED) {
       clientMessageBus.setState(BusState.CONNECTED);
+    }
   }
 
   private void notifyDisconnected() {
     connected = false;
 
-    initialTimeoutTimer.cancel();
-    LogUtil.log("SSE channel disconnected.");
+    pingTimeout.cancel();
+    LogUtil.log(this + " channel disconnected.");
     connectedTime = -1;
     clientMessageBus.setState(BusState.CONNECTION_INTERRUPTED);
 
@@ -214,18 +222,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
     if (!stopped) {
       retries++;
-      new Timer() {
-        @Override
-        public void run() {
-          transmit(Collections.singletonList(MessageBuilder.createMessage()
-              .toSubject("SSEAgent")
-              .signalling().done().repliesToSubject("ClientBus").getMessage()));
-
-          pollingHandler.performPoll();
-          start();
-        }
-
-      }.schedule(retries * 1000);
+      start();
     }
   }
 
