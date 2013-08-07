@@ -16,14 +16,16 @@
 
 package org.jboss.errai.bus.client.framework.transports;
 
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.RequestTimeoutException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Timer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
@@ -36,15 +38,14 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.RequestTimeoutException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock
@@ -190,7 +191,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     final Map<String, String> specialParms;
     if (txMessages.size() == 1 && txMessages.get(0).hasResource(EXTRA_URI_PARMS_RESOURCE)) {
       toSend.add(txMessages.get(0));
-      specialParms = (Map<String, String>) txMessages.get(0).getResource(Map.class, EXTRA_URI_PARMS_RESOURCE);
+      specialParms = txMessages.get(0).getResource(Map.class, EXTRA_URI_PARMS_RESOURCE);
     }
     else {
       for (final Message message : txMessages) {
@@ -596,6 +597,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     }
   }
 
+  @Override
   public String toString() {
     if (receiveCommCallback instanceof NoPollRequestCallback) {
       return "No Polling";
@@ -767,5 +769,11 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         }
       }
     }
+  }
+
+  @Override
+  public void close() {
+    stop(true);
+    configured = false;
   }
 }

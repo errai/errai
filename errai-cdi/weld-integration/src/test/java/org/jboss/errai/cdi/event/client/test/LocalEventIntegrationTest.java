@@ -82,10 +82,13 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
             = IOC.getBeanManager().lookupBean(LocalEventTestModule.class).getInstance();
 
         DataBoundEvent dbe = DataBinder.forModel(new DataBoundEvent()).getModel();
+        dbe.setValue("testValue");
         module.fireDataBoundEvent(dbe);
 
-        assertNotNull("databound event was not observed", module.getCapturedDataBoundEvent());
-        assertFalse("event was not unwrapped", module.getCapturedDataBoundEvent() instanceof BindableProxy);
+        DataBoundEvent capturedEvent = module.getCapturedDataBoundEvent();
+        assertNotNull("databound event was not observed", capturedEvent);
+        assertFalse("databound event was not unwrapped", capturedEvent instanceof BindableProxy);
+        assertEquals("databound event was not marshalled correctly", "testValue", capturedEvent.getValue());
         finishTest();
       }
     });

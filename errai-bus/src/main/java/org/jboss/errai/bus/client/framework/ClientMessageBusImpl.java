@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -183,16 +182,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void setupDefaultHandlers() {
-    availableHandlers = Collections.unmodifiableMap(new LinkedHashMap<String, TransportHandler>() {
-      {
-        put(Capabilities.WebSockets.name(), new WebsocketHandler(transportToBusCallback, ClientMessageBusImpl.this));
-        put(Capabilities.SSE.name(), new SSEHandler(transportToBusCallback, ClientMessageBusImpl.this));
-        put(Capabilities.LongPolling.name(),
-            HttpPollingHandler.newLongPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
-        put(Capabilities.ShortPolling.name(),
-            HttpPollingHandler.newShortPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
+    if (availableHandlers != null) {
+      for (TransportHandler handler : availableHandlers.values()) {
+        handler.close();
       }
-    });
+    }
+
+    Map<String, TransportHandler> m = new HashMap<String, TransportHandler>();
+    m.put(Capabilities.WebSockets.name(), new WebsocketHandler(transportToBusCallback, ClientMessageBusImpl.this));
+    m.put(Capabilities.SSE.name(), new SSEHandler(transportToBusCallback, ClientMessageBusImpl.this));
+    m.put(Capabilities.LongPolling.name(),
+            HttpPollingHandler.newLongPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
+    m.put(Capabilities.ShortPolling.name(),
+            HttpPollingHandler.newShortPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
+    availableHandlers = Collections.unmodifiableMap(m);
   }
 
   /**

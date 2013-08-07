@@ -16,8 +16,11 @@
 
 package org.jboss.errai.bus.client.framework.transports;
 
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Timer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
@@ -26,9 +29,8 @@ import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.util.LogUtil;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock
@@ -47,6 +49,11 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   private boolean stopped;
   private boolean connected;
+
+  /**
+   * The number of reconnect attempts that have been made since a message was
+   * received over the SSE channel.
+   */
   private int retries;
 
   private boolean configured;
@@ -54,10 +61,11 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   private String unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
 
-  private final Timer initialTimeoutTimer = new Timer() {
+  private final Timer pingTimeout = new Timer() {
     @Override
     public void run() {
       if (!connected) {
+        LogUtil.log(this + ": initial timeout expired");
         notifyDisconnected();
       }
     }
@@ -65,12 +73,18 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   private Object sseChannel;
 
+  /**
+   * Bus subscription that receives ping responses from the server bus. This is
+   * used for verifying that the SSE channel is actually working.
+   */
+  private Subscription sseAgentSubscription;
+
   public SSEHandler(final MessageCallback messageCallback, final ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
     this.messageCallback = messageCallback;
     this.pollingHandler = HttpPollingHandler.newNoPollingInstance(messageCallback, clientMessageBus);
 
-    clientMessageBus.subscribe(SSE_AGENT_SERVICE, new MessageCallback() {
+    sseAgentSubscription = clientMessageBus.subscribe(SSE_AGENT_SERVICE, new MessageCallback() {
       @Override
       public void callback(final Message message) {
         notifyConnected();
@@ -102,17 +116,15 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       return;
     }
     sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint);
-
-    // time out after 2 seconds and attempt reconnect. (note: this is really to deal with a bug a firefox).
-    initialTimeoutTimer.cancel();
-    initialTimeoutTimer.schedule(2500);
   }
 
   @Override
   public Collection<Message> stop(final boolean stopAllCurrentRequests) {
     stopped = true;
-    disconnect(sseChannel);
-    sseChannel = null;
+    if (sseChannel != null) {
+      disconnect(sseChannel);
+      sseChannel = null;
+    }
     return pollingHandler.stop(stopAllCurrentRequests);
   }
 
@@ -147,12 +159,12 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       var thisRef = this;
 
       var errorHandler = function (e) {
-          if (e.srcElement.readyState === EventSource.CLOSED) {
-              thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
-          }
+          $wnd.console.log("SSE channel error (according to the browser)");
+          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::verifyConnected()();
       };
 
       var openHandler = function () {
+          $wnd.console.log("SSE channel opened (according to the browser)");
           thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::verifyConnected()();
       };
 
@@ -167,34 +179,42 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       return sseSource;
   }-*/;
 
-
+  /**
+   * Sends a ping request to the server. If the ping response is not received
+   * within a reasonable time limit, notifyDisconnected() will be called.
+   */
   private void verifyConnected() {
+
+    // in case we were in the middle of something already
+    pingTimeout.cancel();
+
     transmit(Collections.singletonList(MessageBuilder.createMessage()
         .toSubject("ServerEchoService")
         .signalling().done().repliesToSubject(SSE_AGENT_SERVICE).getMessage()));
+
+    pingTimeout.schedule(2500);
   }
 
   private void notifyConnected() {
-    initialTimeoutTimer.cancel();
-
-    if (connected) {
-      return;
-    }
-    connected = true;
-
-    connectedTime = System.currentTimeMillis();
-    LogUtil.log("SSE channel opened.");
+    pingTimeout.cancel();
     retries = 0;
 
-    if (clientMessageBus.getState() == BusState.CONNECTION_INTERRUPTED)
+    if (!connected) {
+      connected = true;
+      connectedTime = System.currentTimeMillis();
+      LogUtil.log(this + ": SSE channel is active.");
+    }
+
+    if (clientMessageBus.getState() == BusState.CONNECTION_INTERRUPTED) {
       clientMessageBus.setState(BusState.CONNECTED);
+    }
   }
 
   private void notifyDisconnected() {
     connected = false;
 
-    initialTimeoutTimer.cancel();
-    LogUtil.log("SSE channel disconnected.");
+    pingTimeout.cancel();
+    LogUtil.log(this + " channel disconnected.");
     connectedTime = -1;
     clientMessageBus.setState(BusState.CONNECTION_INTERRUPTED);
 
@@ -202,26 +222,13 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
     if (!stopped) {
       retries++;
-      new Timer() {
-        @Override
-        public void run() {
-          LogUtil.log("attempting reconnection ... ");
-
-          transmit(Collections.singletonList(MessageBuilder.createMessage()
-              .toSubject("SSEAgent")
-              .signalling().done().repliesToSubject("ClientBus").getMessage()));
-
-          pollingHandler.performPoll();
-          start();
-        }
-
-      }.schedule(retries * 1000);
+      start();
     }
   }
 
   @Override
   public String toString() {
-    return "SSE";
+    return "SSE[" + System.identityHashCode(this) + "]";
   }
 
   @Override
@@ -282,5 +289,14 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   @Override
   public int getPendingMessages() {
     return pollingHandler.getStatistics().getPendingMessages();
+  }
+
+  @Override
+  public void close() {
+    if (!stopped) {
+      stop(true);
+    }
+    sseAgentSubscription.remove();
+    configured = false;
   }
 }
