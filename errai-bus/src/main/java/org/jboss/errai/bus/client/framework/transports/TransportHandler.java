@@ -16,10 +16,10 @@
 
 package org.jboss.errai.bus.client.framework.transports;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-
 import java.util.Collection;
 import java.util.List;
+
+import org.jboss.errai.bus.client.api.messaging.Message;
 
 /**
 * @author Mike Brock
@@ -88,4 +88,12 @@ public interface TransportHandler {
    * @return
    */
   public TransportStatistics getStatistics();
+
+  /**
+   * Permanently closes this transport handler. Once closed, a TransportHandler
+   * cannot be used again. It is imperative that a TransportHandler is closed
+   * when it is no longer needed; failing to do so may leak resources and lead
+   * to client bus malfunctions.
+   */
+  public void close();
 }

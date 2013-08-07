@@ -16,7 +16,10 @@
 
 package org.jboss.errai.bus.client.framework.transports;
 
-import com.google.gwt.user.client.Timer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
@@ -29,9 +32,7 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock
@@ -186,6 +187,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
     lastTransmission = System.currentTimeMillis();
   }
 
+  @Override
   public String toString() {
     return "WebSockets";
   }
@@ -321,5 +323,13 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   @Override
   public int getPendingMessages() {
     return 0;
+  }
+
+  @Override
+  public void close() {
+    if (!stopped) {
+      stop(true);
+    }
+    configured = false;
   }
 }
