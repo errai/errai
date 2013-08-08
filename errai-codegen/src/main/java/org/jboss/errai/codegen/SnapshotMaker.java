@@ -296,7 +296,8 @@ public final class SnapshotMaker {
             }
           }
 
-          if (method.getName().equals("equals") || method.getName().equals("hashCode")) {
+          if (method.getName().equals("equals") || method.getName().equals("hashCode")
+              || method.getName().equals("clone") || method.getName().equals("finalize")) {
             // we skip these if not provided by the callback
             if (logger.isDebugEnabled()) {
               logger.debug("    skipping special-case method " + method.getName());
