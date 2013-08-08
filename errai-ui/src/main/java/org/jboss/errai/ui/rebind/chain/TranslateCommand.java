@@ -5,7 +5,6 @@ import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.FRAGMEN
 import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.PREFIX;
 import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.VALUES;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +25,7 @@ import org.w3c.dom.Node;
  * @author edewit@redhat.com
  */
 public class TranslateCommand extends TemplateVisitor implements Command {
-  protected Map<URL, Context> contexts = new HashMap<URL, Context>();
+  protected Map<MetaClass, Context> contexts = new HashMap<MetaClass, Context>();
 
   public class Constants {
     public static final String PREFIX ="i18nPrefix";
@@ -35,8 +34,9 @@ public class TranslateCommand extends TemplateVisitor implements Command {
     public static final String DONE = "done";
   }
 
+  private Element fragmentRoot;
+  
   private String templateFragment;
-  private boolean foundTemplateFragment;
 
   public TranslateCommand() {
     super("");
@@ -44,15 +44,30 @@ public class TranslateCommand extends TemplateVisitor implements Command {
 
   @Override
   public boolean visit(Element element) {
-    if (templateFragment != null && !foundTemplateFragment) {
-      foundTemplateFragment = templateFragment.equals(element.getAttribute("data-field"));
-      return true;
-    }
-    if (foundTemplateFragment) {
-      return super.visit(element);
-    } else {
+    if (templateFragment == null) {
       return super.visit(element);
     }
+    
+    // if we've found the fragment root already, check if we're still under it 
+    if (fragmentRoot != null) {
+      if ( (fragmentRoot.compareDocumentPosition(element) & Element.DOCUMENT_POSITION_CONTAINED_BY) != 0) {
+        // still under it
+        return super.visit(element);
+      }
+      else {
+        // went past it
+        return true;
+      }
+    }
+
+    // check if this is the fragment root
+    if (templateFragment.equals(element.getAttribute("data-field"))) {
+      fragmentRoot = element;
+      return super.visit(element);
+    }
+    
+    // haven't reached fragment root yet
+    return true;
   }
 
   @Override
@@ -69,8 +84,7 @@ public class TranslateCommand extends TemplateVisitor implements Command {
         subContext.put(FRAGMENT, templateFragment);
       }
 
-      final URL resource = getClass().getClassLoader().getResource(templateFileName);
-      contexts.put(resource, subContext);
+      contexts.put(templatedAnnotatedClass, subContext);
     }
 
     return new Context();
@@ -88,13 +102,17 @@ public class TranslateCommand extends TemplateVisitor implements Command {
       }
     }
 
-    final URL fileName = (URL) context.get(TemplateCatalog.FILENAME);
-    Context subContext = contexts.get(fileName);
+    final MetaClass template = (MetaClass) context.get(TemplateCatalog.FILENAME);
+    Context subContext = contexts.get(template);
     context.putAll(subContext);
 
     setI18nPrefix((String) context.get(PREFIX));
     context.put(VALUES, getI18nValues());
-    templateFragment = (String) context.get(FRAGMENT);
+    String newTemplateFragment = (String) context.get(FRAGMENT);
+    if (areDifferent(templateFragment, newTemplateFragment)) {
+      fragmentRoot = null;
+    }
+    templateFragment = newTemplateFragment;
     if (!visit(element)) {
       context.put(DONE, element);
     }
@@ -110,5 +128,11 @@ public class TranslateCommand extends TemplateVisitor implements Command {
     }
 
     return false;
+  }
+  
+  private static boolean areDifferent(String s1, String s2) {
+    if (s1 == s2) return false;
+    if (s1 != null && s1.equals(s2)) return false;
+    return true;
   }
 }
