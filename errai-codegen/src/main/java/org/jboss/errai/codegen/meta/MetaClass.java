@@ -36,6 +36,10 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract String getPackageName();
 
+  /**
+   * Returns all declared and inherited public, protected, and package-private methods
+   * available on this class.
+   */
   public abstract MetaMethod[] getMethods();
 
   /**

@@ -4,5 +4,9 @@ public class Parent extends Grandparent implements ParentInterface {
 
   @Override
   public void interfaceMethodOverriddenMultipleTimes() {}
+  
+  private void privateMethod() {};
+  
+  protected void protectedMethod() {};
 
 }
