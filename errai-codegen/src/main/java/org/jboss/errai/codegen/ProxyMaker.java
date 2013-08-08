@@ -19,6 +19,16 @@ package org.jboss.errai.codegen;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.throw_;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -36,16 +46,6 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -172,8 +172,10 @@ public class ProxyMaker {
     for (final MetaMethod method : toProxy.getMethods()) {
       final String methodString = GenUtil.getMethodString(method);
       if (renderedMethods.contains(methodString) || method.getName().equals("hashCode")
+          || method.getName().equals("clone") || method.getName().equals("finalize")
           || (method.getName().equals("equals") && method.getParameters().length == 1
-          && method.getParameters()[0].getType().getFullyQualifiedName().equals(Object.class.getName()))) continue;
+          && method.getParameters()[0].getType().getFullyQualifiedName().equals(Object.class.getName())))
+        continue;
 
       renderedMethods.add(methodString);
 
@@ -324,6 +326,7 @@ public class ProxyMaker {
       this.valueReference = valueReference;
     }
 
+    @Override
     public MetaClass getType() {
       return type;
     }
