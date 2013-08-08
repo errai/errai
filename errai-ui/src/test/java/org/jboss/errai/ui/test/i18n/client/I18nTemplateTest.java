@@ -8,8 +8,6 @@ import org.jboss.errai.ui.client.widget.LocaleSelector;
 import org.jboss.errai.ui.shared.api.Locale;
 import org.junit.Test;
 
-import com.google.gwt.dom.client.UListElement;
-
 public class I18nTemplateTest extends AbstractErraiCDITest {
 
   private I18nTemplateTestApp app;
@@ -38,6 +36,8 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
     assertEquals("Welcome to the errai-ui i18n demo.", app.getComponent().getWelcome_p().getInnerText());
     assertEquals("Label 1:", app.getComponent().getLabel1().getText());
     assertEquals("value one", app.getComponent().getVal1().getText());
+    assertEquals("Label 1.1:", app.getComponent().getNestedLabel().getText());
+    assertEquals("value one.one", app.getComponent().getVal1_1().getText());
     assertEquals("Label 2:", app.getComponent().getLabel2().getText());
     assertEquals("value two", app.getComponent().getVal2().getText());
 

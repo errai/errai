@@ -15,15 +15,27 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
-import com.google.gwt.resources.client.TextResource;
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.VALUES;
+
+import java.io.File;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.*;
+import org.codehaus.jackson.JsonEncoding;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
@@ -50,14 +62,13 @@ import org.jboss.errai.ui.shared.MessageBundle;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import java.io.File;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.VALUES;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
 
 /**
  * Generates a concrete subclass of {@link TranslationService}. This class is
@@ -72,15 +83,6 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   private static final String GENERATED_CLASS_NAME = "TranslationServiceImpl";
   private static Pattern LOCALE_IN_FILENAME_PATTERN = Pattern.compile("([^_]*)_(\\w\\w)?(_\\w\\w)?\\.json");
 
-  /**
-   * Constructor.
-   */
-  public TranslationServiceGenerator() {
-  }
-
-  /**
-   * @see com.google.gwt.core.ext.Generator#generate(com.google.gwt.core.ext.TreeLogger, com.google.gwt.core.ext.GeneratorContext, java.lang.String)
-   */
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
           throws UnableToCompleteException {
@@ -88,11 +90,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
             TranslationService.class.getPackage().getName(), GENERATED_CLASS_NAME);
   }
 
-  /**
-   * @see org.jboss.errai.config.rebind.AbstractAsyncGenerator#generate(com.google.gwt.core.ext.TreeLogger, com.google.gwt.core.ext.GeneratorContext)
-   */
   @Override
-  protected String generate(TreeLogger logger, GeneratorContext context) {
+  public String generate(TreeLogger logger, GeneratorContext context) {
     // The class we will be building is GeneratedTranslationService
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(
             TranslationService.class, GENERATED_CLASS_NAME);
@@ -289,7 +288,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
 
       final TemplateChain chain = TemplateChain.getInstance();
-      chain.visitTemplate(templateFileName);
+      chain.visitTemplate(templateFileName, templatedAnnotatedClass);
 
       Map<String, String> i18nValues = chain.getResult(templateFileName, VALUES);
 
@@ -373,8 +372,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @author eric.wittmann@redhat.com
    */
   private static class MessageBundleResourceScanner extends ResourcesScanner {
-    private String bundlePrefix;
-    private String bundleSuffix = ".json";
+    private final String bundlePrefix;
+    private final String bundleSuffix = ".json";
     /**
      * Constructor.
      * @param bundlePath

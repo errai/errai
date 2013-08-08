@@ -1,13 +1,15 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import org.jboss.errai.ui.shared.chain.Context;
-import org.junit.Test;
-import org.w3c.dom.Document;
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.DONE;
+import static org.jgroups.util.Util.assertTrue;
 
 import java.net.URL;
 
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.DONE;
-import static org.jgroups.util.Util.assertTrue;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ui.shared.chain.Context;
+import org.jboss.errai.ui.test.i18n.client.res.I18nComponent;
+import org.junit.Test;
+import org.w3c.dom.Document;
 
 /**
  * @author edewit@redhat.com
@@ -19,7 +21,7 @@ public class TranslateCommandTest {
     // given
     TranslateCommand command = new TranslateCommand();
     final URL resource = getClass().getResource("/dummy.html");
-    command.contexts.put(resource, new Context());
+    command.contexts.put(MetaClassFactory.get(I18nComponent.class), new Context());
     final Document document = new TemplateCatalog().parseTemplate(resource);
     Context context = new Context();
     context.put(DONE, document.getFirstChild());

@@ -16,10 +16,11 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassCache;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -29,10 +30,10 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock
@@ -57,7 +58,6 @@ public abstract class MetaClassBridgeUtil {
   public synchronized static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
                                                                          final TreeLogger logger) {
 
-
     final GWTTypeOracleCacheStore tOCache = CacheUtil.getCache(GWTTypeOracleCacheStore.class);
 
     // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
@@ -69,7 +69,6 @@ public abstract class MetaClassBridgeUtil {
     final TypeOracle typeOracle = context.getTypeOracle();
     final MetaClassCache cache = MetaClassFactory.getMetaClassCache();
 
-    // Clearing the LiteralFactory cache resolved https://issues.jboss.org/browse/ERRAI-456
     if (typeOracle != null) {
       final Map<String, MetaClass> classesToPush = new HashMap<String, MetaClass>(typeOracle.getTypes().length);
       final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));

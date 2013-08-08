@@ -22,6 +22,10 @@ public class I18nComponent extends Composite {
   @Inject @DataField
   private InlineLabel val1;
   @Inject @DataField
+  private InlineLabel nestedLabel;
+  @Inject @DataField
+  private InlineLabel val1_1;
+  @Inject @DataField
   private InlineLabel label2;
   @Inject @DataField
   private InlineLabel val2;
@@ -37,12 +41,6 @@ public class I18nComponent extends Composite {
 
   @Inject
   private LocaleListBox listBox;
-
-  /**
-   * Constructor.
-   */
-  public I18nComponent() {
-  }
 
   /**
    * @return the welcome_p
@@ -110,4 +108,14 @@ public class I18nComponent extends Composite {
   public LocaleListBox getListBox() {
     return listBox;
   }
+
+  public InlineLabel getNestedLabel() {
+    return nestedLabel;
+  }
+
+  public InlineLabel getVal1_1() {
+    return val1_1;
+  }
+  
+  
 }
