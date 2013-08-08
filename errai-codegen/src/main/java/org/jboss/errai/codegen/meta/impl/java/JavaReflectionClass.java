@@ -27,12 +27,17 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 
+import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -40,7 +45,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
-import org.jboss.errai.codegen.meta.AnnotationParser;
+import org.jboss.errai.codegen.util.GenUtil;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private volatile Annotation[] _annotationsCache;
@@ -148,11 +153,41 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
-  private transient volatile MetaMethod[] _methodsCache;
-
   @Override
   public MetaMethod[] getMethods() {
-    return _methodsCache != null ? _methodsCache : (_methodsCache = fromMethodArray(getEnclosedMetaObject().getMethods()));
+    final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
+
+    Class<?> type = getEnclosedMetaObject();
+    if (type == null) {
+      return null;
+    }
+
+    final Set<String> processedMethods = new HashSet<String>();
+    do {
+      for (final Method method : type.getDeclaredMethods()) {
+        JavaReflectionMethod metaMethod = new JavaReflectionMethod(this, method);
+        String readableMethodDecl = GenUtil.getMethodString(metaMethod);
+        if (!metaMethod.isPrivate() && !processedMethods.contains(readableMethodDecl)) {
+            meths.add(metaMethod);
+            processedMethods.add(readableMethodDecl);
+        }
+      }
+
+      // we don't need to recurse on interfaces in this case because we already get the list of
+      // all inherited methods from Class.getMethods() -- interface methods are public
+      for (final Class<?> interfaceType : type.getInterfaces()) {
+        for (MetaMethod ifaceMethod : Arrays.asList(JavaReflectionClass.newInstance(interfaceType).getMethods())) {
+          String readableMethodDecl = GenUtil.getMethodString(ifaceMethod);
+          if (!processedMethods.contains(readableMethodDecl)) {
+            meths.add(ifaceMethod);
+            processedMethods.add(readableMethodDecl);
+          }
+        }
+      }
+    }
+    while ((type = type.getSuperclass()) != null);
+
+    return meths.toArray(new MetaMethod[meths.size()]);
   }
 
   private transient volatile MetaMethod[] _declaredMethodCache;

@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -51,6 +52,7 @@ import org.jboss.errai.codegen.test.model.tree.Parent;
 import org.jboss.errai.codegen.test.model.tree.ParentInterface;
 import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface1;
 import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface2;
+import org.jboss.errai.codegen.util.GenUtil;
 import org.junit.Test;
 import org.mvel2.util.NullType;
 
@@ -659,6 +661,41 @@ public abstract class AbstractMetaClassTest {
     MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
     assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getLowerBounds());
     assertArrayEquals(new MetaType[] { getMetaClass(Object.class)}, typeParam.getUpperBounds());
+  }
+  
+  @Test
+  public void testGetMethods() {
+    final MetaClass c = getMetaClass(Child.class);
+    MetaMethod[] methods = c.getMethods();
+    
+    assertNotNull(methods);
+    
+    List<String> methodSignatures = new ArrayList<String>();
+    for(MetaMethod m : methods) {
+      methodSignatures.add(GenUtil.getMethodString(m));
+    }
+
+    List<String> expectedMethods = new ArrayList<String>();
+    expectedMethods.add("protectedMethod([])");
+    expectedMethods.add("interfaceMethodOverriddenMultipleTimes([])");
+    expectedMethods.add("packagePrivateMethod([])");
+    expectedMethods.add("finalize([])");
+    expectedMethods.add("equals([java.lang.Object])");
+    expectedMethods.add("toString([])");
+    expectedMethods.add("notify([])");
+    expectedMethods.add("wait([])");
+    expectedMethods.add("clone([])");
+    expectedMethods.add("notifyAll([])");
+    expectedMethods.add("getClass([])");
+    expectedMethods.add("wait([long])");
+    expectedMethods.add("hashCode([])");
+    expectedMethods.add("wait([long, int])");
+    
+    Collections.sort(expectedMethods);
+    Collections.sort(methodSignatures);
+    
+
+    assertEquals(expectedMethods.toString(), methodSignatures.toString());
   }
 
 }
