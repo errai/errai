@@ -31,7 +31,7 @@ Release Steps
    password under the keys `jboss.username` and `jboss.password` respectively.)
       ```
          % cd reference
-         % mvn generate-resources
+         % mvn package   # this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
          % git add src
       ```
   * Edit the version numbers in Book_Info.xml to reflect release version
