@@ -37,23 +37,6 @@ Release Steps
   * Edit the version numbers in Book_Info.xml to reflect release version
   * Don't upload to JBoss FTP server! The release upload script will do this later.
 
-1. Export docbook from confluence for /quickstart
-  * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833096
-     (Single book output, no static files)
-  * Copy and commit the docbook files (only chapter*) in /quickstart. Verify there is only one chapter of
-     each name and one of each number (there will be old cruft left over if any chapters
-     were renamed or renumbered)
-
-     ```
-        % cd quickstart
-        % rm src/main/docbook/en/chapter-*
-        % cp $newdocs/chapter-* src/main/docbook/en/
-        % git add src
-     ``` 
-  * Don't upload to JBoss FTP server! The release upload script will do this later.
-
-1. Update quickstart docs to reflect the new version number
-
 1. Ask Maven to update the version number in all the pom.xml files:
    
         % cd $errai_root_dir
