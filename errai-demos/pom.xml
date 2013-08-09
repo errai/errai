@@ -20,63 +20,30 @@
 
   <modelVersion>4.0.0</modelVersion>
   <name>Errai::Demos::Aggregator</name>
-  <groupId>org.jboss.errai</groupId>
+  <parent>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-parent</artifactId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
+
   <artifactId>errai-demos</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <description>
+    A grouping of all the demos included with the Errai framework.
+    This aggregator helps Maven find the demos during recursive builds.
+    It is NOT for use as a parent pom for the demos: for the convenience
+    of end users, the demo poms are all parentless.
+  </description>
   <packaging>pom</packaging>
 
-  <url>http://jboss.org/errai/errai</url>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
-  <description>
-    A GWT framework.
-  </description>
-
-  <developers>
-    <developer>
-      <name>Mike Brock</name>
-    </developer>
-    <developer>
-      <name>Christian Sadilek</name>
-    </developer>
-    <developer>
-      <name>Jonathan Fuerth</name>
-    </developer>
-    <developer>
-      <name>Lincoln Baxter, III</name>
-    </developer>
-    <developer>
-      <name>Erik Jan de Wit</name>
-    </developer>
-  </developers>
-
-  <scm>
-    <connection>scm:git:git@github.com:errai/errai.git</connection>
-    <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
-    <url>scm:git:git@github.com:errai/errai.git</url>
-  </scm>
-
-  <organization>
-    <name>JBoss, a division of Red Hat</name>
-    <url>http://www.jboss.org</url>
-  </organization>
-
   <modules>
-  	<module>errai-bus-demo-stress-test</module>
-  	<module>errai-bus-demo-stock</module>
-  	<module>errai-cdi-demo-mobile</module>
-  	<module>errai-cdi-demo-mvp</module>
-  	<module>errai-cdi-demo-tagcloud</module>
-  	<module>errai-jpa-demo-basic</module>  	
-  	<module>errai-jpa-demo-grocery-list</module>
-  	<module>errai-jpa-demo-todo-list</module>
+    <module>errai-bus-demo-stress-test</module>
+    <module>errai-bus-demo-stock</module>
+    <module>errai-cdi-demo-mobile</module>
+    <module>errai-cdi-demo-mvp</module>
+    <module>errai-cdi-demo-tagcloud</module>
+    <module>errai-jpa-demo-basic</module>  	
+    <module>errai-jpa-demo-grocery-list</module>
+    <module>errai-jpa-demo-todo-list</module>
     <module>errai-jaxrs-demo-crud</module>
     <module>errai-ui-demo-i18n</module>
     <module>errai-aerogear-demo</module>

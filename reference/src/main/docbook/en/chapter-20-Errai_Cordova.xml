@@ -143,10 +143,68 @@ public class KitchenSinkClient extends Composite {
 </programlisting>
       </informalexample>
    </section>
+   <section id="sid-65274252_ErraiCordova-Mavenbuild">
+      <title>Maven build</title>
+      <para>
+        All that is left to do is build this and put it on a actual device. In order to make this as easy as possible we have a maven plugin that will create a native binary that you can install on a device. It will put the html and javascript of you application in a
+        <ulink url="http://cordova.apache.org/">cordova</ulink>
+        application, because by doing so the client is no longer servered by the server the client will need to know how it can reach the server to do that place the following in your gwt.xml:
+      </para>
+      <informalexample>
+         <programlisting language="xml">
+&lt;replace-with class="com.company.application.Config"&gt;
+   &lt;when-type-is class="org.jboss.errai.bus.client.framework.Configuration" /&gt;
+&lt;/replace-with&gt;
+</programlisting>
+      </informalexample>
+      <para>This class must implement org.jboss.errai.bus.client.framework.Configuration and return the url where the server is configured.</para>
+      <informalexample>
+         <programlisting language="java">
+import org.jboss.errai.bus.client.framework.Configuration;
+
+public class Config implements Configuration {
+    @Override
+    public String getRemoteLocation() {
+        // you probably want to do something environment specify here instead of something like this:
+        return "https://grocery-edewit.rhcloud.com/errai-jpa-demo-grocery-list";
+    }
+}
+</programlisting>
+      </informalexample>
+      <para>Now all that is left is to add the plugin to the pom.xml like so:</para>
+      <informalexample>
+         <programlisting language="xml">
+&lt;build&gt;
+ ...
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+        &lt;artifactId&gt;cordova-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;/plugin&gt;
+</programlisting>
+      </informalexample>
+      <para>Now you can execute a native build with the following maven command:</para>
+      <informalexample>
+         <programlisting language="ini">
+#will build all supported platforms for now only ios and android
+mvn cordova:build-project
+
+#only build android
+mvn cordova:build-project -Dplatform=android
+
+#start the ios emulator with the deployed application
+mvn cordova:emulator -Dplatform=ios
+</programlisting>
+      </informalexample>
+      <important>
+         <para>For these to work you'll need to have the SDK's installed and on your path! In case of android you will additionally have to have ANDROID_HOME environment variable set.</para>
+      </important>
+   </section>
    <section id="sid-65274252_ErraiCordova-AeroGear">
       <title>AeroGear</title>
       <para>
-        AeroGear is a very new and hot new project with jboss these wrappers give you the posibilty to create your server with AeroGear and your client with Errai. Also have a look at the
+        AeroGear is a very new and hot new project with jboss these wrappers give you the possibility to create your server with AeroGear and your client with Errai. Also have a look at the
         <ulink url="http://aerogear.org/docs">documentation</ulink>
         of the AeroGear project. There is some vocabulary to learn.
       </para>

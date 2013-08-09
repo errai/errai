@@ -31,28 +31,11 @@ Release Steps
    password under the keys `jboss.username` and `jboss.password` respectively.)
       ```
          % cd reference
-         % mvn generate-resources
+         % mvn package   # this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
          % git add src
       ```
   * Edit the version numbers in Book_Info.xml to reflect release version
   * Don't upload to JBoss FTP server! The release upload script will do this later.
-
-1. Export docbook from confluence for /quickstart
-  * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833096
-     (Single book output, no static files)
-  * Copy and commit the docbook files (only chapter*) in /quickstart. Verify there is only one chapter of
-     each name and one of each number (there will be old cruft left over if any chapters
-     were renamed or renumbered)
-
-     ```
-        % cd quickstart
-        % rm src/main/docbook/en/chapter-*
-        % cp $newdocs/chapter-* src/main/docbook/en/
-        % git add src
-     ``` 
-  * Don't upload to JBoss FTP server! The release upload script will do this later.
-
-1. Update quickstart docs to reflect the new version number
 
 1. Ask Maven to update the version number in all the pom.xml files:
    
@@ -68,26 +51,7 @@ Release Steps
 1. Build and package the release. These are the bits that will be uploaded to nexus.
    Expect this to take about 4 minutes, depending on network speed.
 
-        % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
-
-1. Publish new quickstart archetypes to Nexus repo (both snapshots and released version)
-
-        % cd $somewhere/archetypes
-        % mvn versions:set -DnewVersion=x.y.z.Final
-    
-   Afterward, verify that all subprojects reference the new parent pom's version:
-
-        % find . -name pom.xml | xargs grep x.y.z | grep SNAP
-
-   Then publish the archetypes to the repository:
-   
-        % mvn clean deploy    
-  * Now test the archetypes you just installed (use instructions from quickstart guides)
-  * Check generated app's pom.xml for correct version
- 
-    ```
-    % mvn gwt:run
-    ```
+        % mvn clean deploy -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
 
 1. Create the a-la-carte binary Errai distribution and docs
 
@@ -98,7 +62,7 @@ Release Steps
         % cd dist
         % scripts/upload_binaries.sh ${version}
 
-1. Tag and push the release to github (DO THIS FOR BOTH ERRAI AND ITS ARCHETYPES):
+1. Tag and push the release to github
 
         % git commit a -m "Updated to new version x.y.z"
         % git tag x.y.z.Final
@@ -116,6 +80,9 @@ Release Steps
   * Select it again and click Release
   * Browse to https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/ and verify that 
      the artifacts are present
+
+1. Update the version number of errai in the getting started demo's pom.xml:
+  https://github.com/errai/summit-demo-2013/blob/master/pom.xml
 
 1. Update http://www.jboss.org/errai/Documentation to provide the download links for
    the generated/released docs and distribution.

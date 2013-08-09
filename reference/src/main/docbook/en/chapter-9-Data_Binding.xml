@@ -425,6 +425,24 @@ public class UserWidget {
           in this case.
         </para>
       </section>
+      <section id="sid-51282340_DataBinding-DataConverters">
+         <title>Data Converters</title>
+         <para>
+          The
+          <code>@Bound</code>
+          annotation further allows to specify a converter to use for the binding (see
+          <link linkend="sid-51282340_DataBinding-SpecifyingConverters">Specifying Converters</link>
+          for details). This is how a binding specific converter can be specified on a data field:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Inject
+@Bound(converter=MyDateConverter.class)
+@DataField
+private TextBox date;
+</programlisting>
+         </informalexample>
+      </section>
       <section id="sid-51282340_DataBinding-Replacingamodelobject">
          <title>Replacing a model object</title>
          <para>The injected model objects in the examples above are always proxies to the actual model since method invocations on these objects need to trigger additional logic for updating the UI. Special care needs to be taken in case a model object should be replaced.</para>
