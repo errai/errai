@@ -5,7 +5,7 @@
   <name>Errai::JPA::Demos::GroceryList</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jpa-demo-grocery-list</artifactId>
-  <version>2.4.0.CR1</version>
+  <version>2.4.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
