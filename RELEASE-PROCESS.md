@@ -51,7 +51,7 @@ Release Steps
 1. Build and package the release. These are the bits that will be uploaded to nexus.
    Expect this to take about 4 minutes, depending on network speed.
 
-        % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
+        % mvn clean deploy -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
 
 1. Create the a-la-carte binary Errai distribution and docs
 
@@ -80,6 +80,9 @@ Release Steps
   * Select it again and click Release
   * Browse to https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/ and verify that 
      the artifacts are present
+
+1. Update the version number of errai in the getting started demo's pom.xml:
+  https://github.com/errai/summit-demo-2013/blob/master/pom.xml
 
 1. Update http://www.jboss.org/errai/Documentation to provide the download links for
    the generated/released docs and distribution.
