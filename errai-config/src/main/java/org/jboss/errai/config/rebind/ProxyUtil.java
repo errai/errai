@@ -16,7 +16,9 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -37,8 +39,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import com.google.common.reflect.TypeToken;
 
 /**
  * Utilities to avoid redundant code for proxy generation.
@@ -154,8 +155,9 @@ public abstract class ProxyUtil {
   public static boolean shouldProxyMethod(final MetaMethod method) {
     final String methodName = method.getName();
     
-    return !method.isFinal() && !method.isStatic() && !method.isPrivate() && 
-      !methodName.equals("hashCode") && !methodName.equals("equals")  && !methodName.equals("toString");
+    return !method.isFinal() && !method.isStatic() && !method.isPrivate() && !methodName.equals("hashCode")
+        && !methodName.equals("equals") && !methodName.equals("toString") && !methodName.equals("clone")
+        && !methodName.equals("finalize");
   }
   
   public static String createCallSignature(final MetaMethod m) {
