@@ -70,25 +70,6 @@ Release Steps
 
         % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
 
-1. Publish new quickstart archetypes to Nexus repo (both snapshots and released version)
-
-        % cd $somewhere/archetypes
-        % mvn versions:set -DnewVersion=x.y.z.Final
-    
-   Afterward, verify that all subprojects reference the new parent pom's version:
-
-        % find . -name pom.xml | xargs grep x.y.z | grep SNAP
-
-   Then publish the archetypes to the repository:
-   
-        % mvn clean deploy    
-  * Now test the archetypes you just installed (use instructions from quickstart guides)
-  * Check generated app's pom.xml for correct version
- 
-    ```
-    % mvn gwt:run
-    ```
-
 1. Create the a-la-carte binary Errai distribution and docs
 
         % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
@@ -98,7 +79,7 @@ Release Steps
         % cd dist
         % scripts/upload_binaries.sh ${version}
 
-1. Tag and push the release to github (DO THIS FOR BOTH ERRAI AND ITS ARCHETYPES):
+1. Tag and push the release to github
 
         % git commit a -m "Updated to new version x.y.z"
         % git tag x.y.z.Final
