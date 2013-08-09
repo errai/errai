@@ -1359,4 +1359,30 @@ errai.bus.enable_web_socket_server=true
          </note>
       </section>
    </section>
+   <section id="sid-68355291">
+      <title>Shadow Services</title>
+      <para>Shadow Services is a Service that will get invoked when there is no longer a connection with the server. This is particular helpful when developing an application for mobile. To create a Shadow Service for a specific Services all you have to do is annotate a new client side implementation with the @ShadowService:</para>
+      <informalexample>
+         <programlisting language="java">
+@ShadowService
+public class SignupShadowService implements MessageCallback {
+   @Override
+   public void callback(Message message) {
+   }
+}
+</programlisting>
+      </informalexample>
+      <para>Also when you have a RPC based Service you can just add @ShadowService on a client side implementation to configure it to be the service to get called when there is no network:</para>
+      <informalexample>
+         <programlisting language="java">
+@ShadowService
+public class SignupServiceShadow implements SignupService {
+   @Override
+   public User register(User newUserObject, String password) throws RegistrationException {
+   }
+}
+</programlisting>
+      </informalexample>
+      <para>In this shadow service we can create logic that will deal with the temporary connection loss. For instance you could save the data that needs to get send to the server with JPA on the client and then when the bus get online again sent the data to the server.</para>
+   </section>
 </chapter>
