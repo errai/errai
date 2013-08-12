@@ -28,8 +28,7 @@ import com.google.gwt.resources.ext.ResourceGeneratorUtil;
 public class TemplateChain {
 
   private static final TemplateChain INSTANCE = new TemplateChain();
-  private static final TemplateCatalog catalog = createTemplateCatalog(
-          new TranslateCommand(), new SelectorReplacer(), new DummyRemover());
+  private static final TemplateCatalog catalog = createTemplateCatalog(new SelectorReplacer(), new DummyRemover());
 
   public static TemplateChain getInstance() {
     return INSTANCE;

@@ -15,27 +15,16 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.VALUES;
-
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.net.URL;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
+import org.codehaus.jackson.*;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
@@ -57,8 +46,11 @@ import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
-import org.jboss.errai.ui.rebind.chain.TemplateChain;
+import org.jboss.errai.ui.rebind.chain.TemplateCatalog;
+import org.jboss.errai.ui.shared.DomVisit;
 import org.jboss.errai.ui.shared.MessageBundle;
+import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
@@ -69,6 +61,13 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * Generates a concrete subclass of {@link TranslationService}. This class is
@@ -286,12 +285,16 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
       String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
-
-      final TemplateChain chain = TemplateChain.getInstance();
-      chain.visitTemplate(templateFileName);
-
-      Map<String, String> i18nValues = chain.getResult(templateFileName, VALUES);
-
+      String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
+      String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
+      final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
+      Document templateNode = new TemplateCatalog().parseTemplate(resource);
+      if (templateNode == null) // TODO log that the template failed to parse
+        continue;
+      Element templateRoot = getTemplateRootNode(templateNode, templateFragment);
+      if (templateRoot == null) // TODO log that the template root couldn't be found
+        continue;
+      Map<String, String> i18nValues = getTemplateI18nValues(templateRoot, i18nPrefix);
       allI18nValues.putAll(i18nValues);
       Map<String, String> templateI18nValues = indexedI18nValues.get(templateBundleName);
       if (templateI18nValues == null) {
@@ -337,6 +340,37 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
       // TODO output -missing bundle files for each locale
     }
+  }
+
+  /**
+   * Gets the root node of the template (within a potentially larger template HTML file).
+   * @param templateNode
+   * @param templateFragment
+   */
+  private static Element getTemplateRootNode(Document templateNode, String templateFragment) {
+    try {
+      XPath xpath = XPathFactory.newInstance().newXPath();
+      Element documentElement = templateNode.getDocumentElement();
+      if (templateFragment == null || templateFragment.trim().length() == 0) {
+        return (Element) xpath.evaluate("//body", documentElement, XPathConstants.NODE);
+      } else {
+        return (Element) xpath.evaluate("//*[@data-field='"+templateFragment+"']", documentElement, XPathConstants.NODE);
+      }
+    } catch (XPathExpressionException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Gets all of the i18n key/value pairs from the given template root.  In
+   * other words, returns everything that needs to be translated.
+   * @param templateRoot
+   * @param i18nPrefix
+   */
+  private static Map<String, String> getTemplateI18nValues(Element templateRoot, final String i18nPrefix) {
+    final TemplateVisitor visitor = new TemplateVisitor(i18nPrefix);
+    DomVisit.visit(templateRoot, visitor);
+    return visitor.getI18nValues();
   }
 
   /**

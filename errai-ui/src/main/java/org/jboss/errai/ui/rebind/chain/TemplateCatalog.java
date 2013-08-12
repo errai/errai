@@ -54,7 +54,7 @@ public class TemplateCatalog {
    * Parses the template into a document.
    * @param template the location of the template to parse
    */
-  protected Document parseTemplate(URL template) {
+  public Document parseTemplate(URL template) {
     InputStream inputStream = null;
     try {
       inputStream = template.openStream();
