@@ -1,11 +1,12 @@
 package org.jboss.errai.ui.rebind.less;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dom.client.StyleInjector;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Refs;
@@ -18,10 +19,10 @@ import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
 import org.jboss.errai.ui.rebind.chain.TemplateChain;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.dom.client.StyleInjector;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 /**
  * This generator will create the LessStyleMapping that contains the mapping between the original selector name and
@@ -56,7 +57,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
         String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
 
         final TemplateChain chain = TemplateChain.getInstance();
-        chain.visitTemplate(templateFileName, metaClass);
+        chain.visitTemplate(templateFileName);
       }
     }
 

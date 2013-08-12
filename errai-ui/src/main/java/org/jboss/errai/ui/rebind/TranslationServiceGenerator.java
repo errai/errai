@@ -288,7 +288,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
 
       final TemplateChain chain = TemplateChain.getInstance();
-      chain.visitTemplate(templateFileName, templatedAnnotatedClass);
+      chain.visitTemplate(templateFileName);
 
       Map<String, String> i18nValues = chain.getResult(templateFileName, VALUES);
 

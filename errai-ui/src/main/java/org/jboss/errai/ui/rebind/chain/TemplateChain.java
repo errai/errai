@@ -17,7 +17,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.exception.GenerationException;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -29,19 +28,20 @@ import com.google.gwt.resources.ext.ResourceGeneratorUtil;
 public class TemplateChain {
 
   private static final TemplateChain INSTANCE = new TemplateChain();
-  private static final TemplateCatalog catalog = createTemplateCatalog(new TranslateCommand(), new SelectorReplacer(), new DummyRemover());; 
+  private static final TemplateCatalog catalog = createTemplateCatalog(
+          new TranslateCommand(), new SelectorReplacer(), new DummyRemover());
 
   public static TemplateChain getInstance() {
     return INSTANCE;
   }
-  
-  public void visitTemplate(String templateFileName, MetaClass widget) {
+
+  public void visitTemplate(String templateFileName) {
     URL template = getClass().getClassLoader().getResource(templateFileName);
     if (template == null) {
       throw new IllegalArgumentException("Could not find HTML template file: " + templateFileName);
     }
     
-    catalog.visitTemplate(template, widget);
+    catalog.visitTemplate(template);
     final Document result = (Document) catalog.getResult(template, RESULT);
     if (result != null) {
       writeDocumentToFile(result, templateFileName);

@@ -1,14 +1,8 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.DONE;
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.FRAGMENT;
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.PREFIX;
-import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.VALUES;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
@@ -20,54 +14,23 @@ import org.jboss.errai.ui.shared.chain.Context;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.*;
+
 /**
  * Command version of the TemplateVisitor this command executes in a chain of commands for each element in the DOM tree.
  * @author edewit@redhat.com
  */
-public class TranslateCommand extends TemplateVisitor implements Command {
-  protected Map<MetaClass, Context> contexts = new HashMap<MetaClass, Context>();
+public class TranslateCommand implements Command {
+  protected Multimap<URL, TemplateVisitor> contexts = ArrayListMultimap.create();
 
   public class Constants {
-    public static final String PREFIX ="i18nPrefix";
     public static final String VALUES = "i18nValues";
-    public static final String FRAGMENT = "templateFragment";
-    public static final String DONE = "done";
-  }
-
-  private Element fragmentRoot;
-  
-  private String templateFragment;
-
-  public TranslateCommand() {
-    super("");
-  }
-
-  @Override
-  public boolean visit(Element element) {
-    if (templateFragment == null) {
-      return super.visit(element);
-    }
-    
-    // if we've found the fragment root already, check if we're still under it 
-    if (fragmentRoot != null) {
-      if ( (fragmentRoot.compareDocumentPosition(element) & Element.DOCUMENT_POSITION_CONTAINED_BY) != 0) {
-        // still under it
-        return super.visit(element);
-      }
-      else {
-        // went past it
-        return true;
-      }
-    }
-
-    // check if this is the fragment root
-    if (templateFragment.equals(element.getAttribute("data-field"))) {
-      fragmentRoot = element;
-      return super.visit(element);
-    }
-    
-    // haven't reached fragment root yet
-    return true;
   }
 
   @Override
@@ -75,16 +38,10 @@ public class TranslateCommand extends TemplateVisitor implements Command {
     final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
-      String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
 
-      Context subContext = new Context();
-      subContext.put(PREFIX, i18nPrefix);
-      if (templateFragment != null && templateFragment.trim().length() > 0) {
-        subContext.put(FRAGMENT, templateFragment);
-      }
-
-      contexts.put(templatedAnnotatedClass, subContext);
+      final URL resource = getClass().getClassLoader().getResource(templateFileName);
+      contexts.put(resource, new TemplateVisitor(i18nPrefix));
     }
 
     return new Context();
@@ -92,47 +49,12 @@ public class TranslateCommand extends TemplateVisitor implements Command {
 
   @Override
   public void execute(Context context) {
-    Node parent = (Node) context.get(DONE);
-    Element element = (Element) context.get(TemplateCatalog.ELEMENT);
-    if (parent != null) {
-      if (isElementParentOf(parent, element)) {
-        return;
-      } else {
-        context.remove(DONE);
-      }
-    }
+    final URL fileName = (URL) context.get(TemplateCatalog.FILENAME);
+    Collection<TemplateVisitor> visitors = contexts.get(fileName);
 
-    final MetaClass template = (MetaClass) context.get(TemplateCatalog.FILENAME);
-    Context subContext = contexts.get(template);
-    context.putAll(subContext);
-
-    setI18nPrefix((String) context.get(PREFIX));
-    context.put(VALUES, getI18nValues());
-    String newTemplateFragment = (String) context.get(FRAGMENT);
-    if (areDifferent(templateFragment, newTemplateFragment)) {
-      fragmentRoot = null;
+    for (TemplateVisitor templateVisitor : visitors) {
+      templateVisitor.visit((Element) context.get(TemplateCatalog.ELEMENT));
+      context.put(VALUES, templateVisitor.getI18nValues());
     }
-    templateFragment = newTemplateFragment;
-    if (!visit(element)) {
-      context.put(DONE, element);
-    }
-  }
-
-  private boolean isElementParentOf(Node parent, Element element) {
-    Node elementParent = element.getParentNode();
-    while (elementParent != null) {
-      if (elementParent.isEqualNode(parent)) {
-        return true;
-      }
-      elementParent = elementParent.getParentNode();
-    }
-
-    return false;
-  }
-  
-  private static boolean areDifferent(String s1, String s2) {
-    if (s1 == s2) return false;
-    if (s1 != null && s1.equals(s2)) return false;
-    return true;
   }
 }

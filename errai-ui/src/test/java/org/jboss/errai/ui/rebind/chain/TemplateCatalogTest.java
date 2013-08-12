@@ -1,16 +1,14 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.net.URL;
-
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ui.shared.chain.Chain;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
-import org.jboss.errai.ui.test.i18n.client.res.I18nComponent;
 import org.junit.Test;
+
+import java.net.URL;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author edewit@redhat.com
@@ -25,7 +23,7 @@ public class TemplateCatalogTest {
 
     // when
     final URL template = getClass().getResource("/simple.html");
-    catalog.visitTemplate(template, MetaClassFactory.get(I18nComponent.class));
+    catalog.visitTemplate(template);
 
     // then
     final Chain chain = catalog.getChain();

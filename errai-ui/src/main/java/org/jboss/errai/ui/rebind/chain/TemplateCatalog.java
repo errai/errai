@@ -1,13 +1,7 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.engines.htmlextractor.impl.DOMBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ui.shared.DomVisit;
 import org.jboss.errai.ui.shared.DomVisitor;
 import org.jboss.errai.ui.shared.chain.Chain;
@@ -18,6 +12,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author edewit@redhat.com
  */
@@ -26,8 +25,8 @@ public class TemplateCatalog {
   public static final String FILENAME = "CURRENT_FILE";
   public static final String RESULT = "result";
 
-  private final Map<URL, Context> contextMap = new HashMap<URL, Context>();
-  private final Chain chain = new Chain();
+  private Map<URL, Context> contextMap = new HashMap<URL, Context>();
+  private Chain chain = new Chain();
 
   public static TemplateCatalog createTemplateCatalog(Command... commands) {
     TemplateCatalog catalog = new TemplateCatalog();
@@ -37,13 +36,15 @@ public class TemplateCatalog {
     return catalog;
   }
 
-  public void visitTemplate(URL template, MetaClass widget) {
-    final Document document = parseTemplate(template);
-    synchronized (this) {
-      for (int i = 0; i < document.getChildNodes().getLength(); i++) {
-        final Node node = document.getChildNodes().item(i);
-        if (node instanceof Element) {
-          visitTemplate((Element) node, template, widget);
+  public void visitTemplate(URL template) {
+    if (!contextMap.containsKey(template)) {
+      final Document document = parseTemplate(template);
+      synchronized (this) {
+        for (int i = 0; i < document.getChildNodes().getLength(); i++) {
+          final Node node = document.getChildNodes().item(i);
+          if (node instanceof Element) {
+            visitTemplate((Element) node, template);
+          }
         }
       }
     }
@@ -51,36 +52,25 @@ public class TemplateCatalog {
 
   /**
    * Parses the template into a document.
-   * 
-   * @param template
-   *          the location of the template to parse
+   * @param template the location of the template to parse
    */
   protected Document parseTemplate(URL template) {
     InputStream inputStream = null;
     try {
       inputStream = template.openStream();
       return DOMBuilder.jsoup2DOM(Jsoup.parse(inputStream, "UTF-8", ""));
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw new IllegalArgumentException("could not read template " + template, e);
-    }
-    finally {
+    } finally {
       IOUtils.closeQuietly(inputStream);
     }
   }
 
-  private void visitTemplate(Element element, URL templateFileName, MetaClass widget) {
+  private void visitTemplate(Element element, URL templateFileName) {
     Context context = chain.createInitialContext();
-    Context existing = contextMap.get(templateFileName);
-
     contextMap.put(templateFileName, context);
-    context.put(FILENAME, widget);
+    context.put(FILENAME, templateFileName);
     DomVisit.visit(element, new TemplateDomVisitor(templateFileName));
-
-    if (existing != null) {
-      // temporary fix for ERRAI-604
-      context.putAll(existing);
-    }
   }
 
   public Object getResult(URL template, String key) {
@@ -93,7 +83,6 @@ public class TemplateCatalog {
 
   /**
    * for testing purposes.
-   * 
    * @return the initialized chain
    */
   Chain getChain() {
