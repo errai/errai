@@ -1,7 +1,7 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.user.client.Window;
+import java.util.Collection;
+
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -11,9 +11,11 @@ import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 import org.jboss.errai.ui.nav.client.local.testpages.PageIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
 
-import java.util.Collection;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.user.client.Window;
 
 public class NavigationTest extends AbstractErraiCDITest {
 
@@ -103,6 +105,23 @@ public class NavigationTest extends AbstractErraiCDITest {
 
   public void testIsWidgetPage() {
     navigation.goTo(PageIsWidget.class, ImmutableMultimap.<String, String>of());
+  }
+
+  public void testTransitionToIsWidgetPage() {
+    PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
+    TransitionTo<PageIsWidget> transitionToIsWidget = page.getTransitionToIsWidget();
+    assertNotNull(transitionToIsWidget);
+    transitionToIsWidget.go();
+    assertEquals(PageIsWidget.class, navigation.currentPage.contentType());
+    assertNotNull(page.getLinkToIsWidget());
+  }
+
+  public void testLinkToIsWidgetPage() {
+    PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
+    TransitionAnchor<PageIsWidget> anchorToIsWidget = page.getLinkToIsWidget();
+    assertNotNull(anchorToIsWidget);
+    anchorToIsWidget.click();
+    assertEquals(PageIsWidget.class, navigation.currentPage.contentType());
   }
 
 }

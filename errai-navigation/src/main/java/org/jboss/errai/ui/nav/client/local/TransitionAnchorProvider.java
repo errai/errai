@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Provides new instances of the {@link TransitionAnchor} widget class, which
@@ -23,8 +23,8 @@ public class TransitionAnchorProvider implements ContextualTypeProvider<Transiti
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public TransitionAnchor provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    Class<Widget> toPageType = (Class<Widget>) typeargs[0];
-    return new TransitionAnchor<Widget>(navigation, toPageType);
+    Class<IsWidget> toPageType = (Class<IsWidget>) typeargs[0];
+    return new TransitionAnchor<IsWidget>(navigation, toPageType);
   }
 
 }

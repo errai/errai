@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
 @IOCProvider @Singleton
 public class PageTransitionProvider implements ContextualTypeProvider<TransitionTo<?>> {
@@ -15,8 +15,8 @@ public class PageTransitionProvider implements ContextualTypeProvider<Transition
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public TransitionTo provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    Class<Widget> toPageType = (Class<Widget>) typeargs[0];
-    return new TransitionTo<Widget>(toPageType);
+    Class<IsWidget> toPageType = (Class<IsWidget>) typeargs[0];
+    return new TransitionTo<IsWidget>(toPageType);
   }
 
 }
