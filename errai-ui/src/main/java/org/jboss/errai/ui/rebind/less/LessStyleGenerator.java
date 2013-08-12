@@ -56,7 +56,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
       for (MetaClass metaClass : templated) {
         String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
 
-        final TemplateChain chain = TemplateChain.getInstance();
+        final TemplateChain chain = new TemplateChain();
         chain.visitTemplate(templateFileName);
       }
     }

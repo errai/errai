@@ -2,8 +2,9 @@ package org.jboss.errai.ui.rebind.chain;
 
 import org.jboss.errai.ui.shared.chain.Chain;
 import org.jboss.errai.ui.shared.chain.Command;
-import org.jboss.errai.ui.shared.chain.Context;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.net.URL;
 
@@ -23,28 +24,21 @@ public class TemplateCatalogTest {
 
     // when
     final URL template = getClass().getResource("/simple.html");
-    catalog.visitTemplate(template);
+    final Document document = catalog.visitTemplate(template);
 
     // then
     final Chain chain = catalog.getChain();
     assertEquals(1, chain.getCommands().size());
     assertEquals(5, command.getCounter());
-    assertNotNull(catalog.getResult(template, "dummy"));
+    assertNotNull(document);
   }
 
   public static class DummyCommand implements Command {
     private int counter;
 
     @Override
-    public void execute(Context context) {
-      assertNotNull(context.get(TemplateCatalog.ELEMENT));
-      context.put("dummy", new Object());
+    public void execute(Element element) {
       counter++;
-    }
-
-    @Override
-    public Context createInitialContext() {
-      return new Context();
     }
 
     public int getCounter() {
