@@ -1,6 +1,5 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import org.jboss.errai.ui.rebind.less.LessStyleGenerator;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.w3c.dom.Element;
 
@@ -13,23 +12,24 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class SelectorReplacer implements Command {
 
+  private final Map<String, String> styleSheetMapping;
+
+  public SelectorReplacer(Map<String, String> styleSheetMapping) {
+    this.styleSheetMapping = styleSheetMapping;
+  }
+
   @Override
   @SuppressWarnings("unchecked")
   public void execute(Element element) {
-    Map<String, String> selectorMap = getStyleMapping();
     String selector = element.getAttribute("class");
     if (isNotEmpty(selector)) {
       final String[] classSelectors = selector.split(" ");
       for (String classSelector : classSelectors) {
-        final String obfuscatedSelector = selectorMap.get(classSelector);
+        final String obfuscatedSelector = styleSheetMapping.get(classSelector);
         if (obfuscatedSelector != null) {
           element.setAttribute("class", selector.replaceAll(classSelector, obfuscatedSelector));
         }
       }
     }
-  }
-
-  protected Map<String, String> getStyleMapping() {
-    return LessStyleGenerator.getStyleMapping();
   }
 }

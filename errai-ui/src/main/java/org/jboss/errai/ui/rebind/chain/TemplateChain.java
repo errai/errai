@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.ui.rebind.less.LessStylesheetContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -30,7 +31,8 @@ public class TemplateChain {
       throw new IllegalArgumentException("Could not find HTML template file: " + templateFileName);
     }
 
-    final TemplateCatalog catalog = createTemplateCatalog(new SelectorReplacer(), new DummyRemover());
+    final TemplateCatalog catalog = createTemplateCatalog(
+            new SelectorReplacer(LessStylesheetContext.getInstance().getStyleMapping()), new DummyRemover());
     final Document result = catalog.visitTemplate(template);
     writeDocumentToFile(result, templateFileName);
   }

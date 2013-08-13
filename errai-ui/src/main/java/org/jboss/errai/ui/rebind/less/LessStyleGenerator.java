@@ -6,7 +6,6 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dom.client.StyleInjector;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
-import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Refs;
@@ -19,10 +18,8 @@ import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
 import org.jboss.errai.ui.rebind.chain.TemplateChain;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * This generator will create the LessStyleMapping that contains the mapping between the original selector name and
@@ -45,7 +42,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
   protected String generate(TreeLogger logger, GeneratorContext context) {
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(LessStyleMapping.class, GENERATED_CLASS_NAME);
     ConstructorBlockBuilder<?> constructor = classBuilder.publicConstructor();
-    final Map<String, String> styleMapping = getStyleMapping();
+    final Map<String, String> styleMapping = LessStylesheetContext.getInstance().getStyleMapping();
     for (Map.Entry<String, String> entry : styleMapping.entrySet()) {
       constructor.append(Stmt.nestedCall(Refs.get("styleNameMapping")).invoke("put", entry.getKey(), entry.getValue()));
     }
@@ -65,14 +62,6 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     constructor.finish();
 
     return classBuilder.toJavaString();
-  }
-
-  public static Map<String, String> getStyleMapping() {
-    Map<String, String> styleMapping = new HashMap<String, String>();
-    for (StylesheetOptimizer stylesheet : LessStylesheetContext.getInstance().getOptimizedStylesheets()) {
-      styleMapping.putAll(stylesheet.getConvertedSelectors());
-    }
-    return styleMapping;
   }
 
   private static String createStyleSheet() {

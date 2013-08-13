@@ -21,14 +21,10 @@ public class SelectorReplacerTest {
   @Test
   public void shouldReplaceClassSelectors() throws TransformerException {
     //given
-    SelectorReplacer minifier = new SelectorReplacer() {
-      @Override
-      protected Map<String, String> getStyleMapping() {
-        final HashMap<String, String> mapping = new HashMap<String, String>();
-        mapping.put("dropdown", OBFUSCATED_NAME);
-        return mapping;
-      }
-    };
+    final HashMap<String, String> mapping = new HashMap<String, String>();
+    mapping.put("dropdown", OBFUSCATED_NAME);
+
+    SelectorReplacer minifier = new SelectorReplacer(mapping);
     final Element element = getElement();
 
     //when
