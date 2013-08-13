@@ -20,6 +20,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
@@ -203,6 +204,7 @@ public class Navigation {
 
     locked = true;
     try {
+      maybeAttachContentPanel();
       hideCurrentPage();
       showPage(request.pageNode, request.state);
     } finally {
@@ -221,6 +223,15 @@ public class Navigation {
       }
     }
 
+  }
+
+  /**
+   * Attach the content panel to the RootPanel if does not already have a parent.
+   */
+  private void maybeAttachContentPanel() {
+    if (getContentPanel().asWidget().getParent() == null) {
+      RootPanel.get().add(getContentPanel());
+    }
   }
 
   /**

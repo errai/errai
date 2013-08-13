@@ -2,6 +2,8 @@ package org.jboss.errai.ui.nav.client.local;
 
 import java.util.Collection;
 
+import junit.framework.AssertionFailedError;
+
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -15,7 +17,10 @@ import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 public class NavigationTest extends AbstractErraiCDITest {
 
@@ -122,6 +127,113 @@ public class NavigationTest extends AbstractErraiCDITest {
     assertNotNull(anchorToIsWidget);
     anchorToIsWidget.click();
     assertEquals(PageIsWidget.class, navigation.currentPage.contentType());
+  }
+
+  public void testNotAttachedToRootPanel() {
+    assertNull("Navigation Content Panel should not yet have a parent", navigation.getContentPanel().asWidget()
+            .getParent());
+  }
+
+  public void testAutomaticRootPanelAttachment() {
+    runPostAttachTests(new Runnable() {
+      @Override
+      public void run() {
+        assertEquals("Navigation Panel was not automatically attached", RootPanel.get(), navigation.getContentPanel()
+                .asWidget().getParent());
+      }
+    }, 30000, 500);
+  }
+  
+  public void testAddNavToRootPanel() {
+    runPostAttachTests(new Runnable() {
+
+      @Override
+      public void run() {
+        RootPanel.get().add(navigation.getContentPanel());
+        assertEquals("Navigation Panel should still be attached to the RootPanel", RootPanel.get(), navigation
+                .getContentPanel().asWidget().getParent());
+      }
+    }, 30000, 500);
+  }
+
+  public void testAddNavPanelToOtherPanel() {
+    runPostAttachTests(new Runnable() {
+
+      @Override
+      public void run() {
+        SimplePanel newParent = new SimplePanel();
+        newParent.add(navigation.getContentPanel());
+
+        assertEquals("Navigation panel should be child of newParent", newParent, navigation.getContentPanel()
+                .asWidget().getParent());
+        assertEquals("Navigation panel shoudl not be attached to the RootPanel", -1,
+                RootPanel.get().getWidgetIndex(navigation.getContentPanel()));
+      }
+    }, 30000, 500);
+  }
+
+  public void testManuallyAttachToRootPanelBefore() {
+    assertNull("Navigation content panel should not yet be attached", navigation.getContentPanel().asWidget()
+            .getParent());
+    RootPanel.get().add(navigation.getContentPanel());
+
+    // Force navigation to run Navigation#maybeAttachContentPanel()
+    navigation.goToWithRole(DefaultPage.class);
+
+    assertEquals("RootPanel should still be parent", RootPanel.get(), navigation.getContentPanel().asWidget()
+            .getParent());
+
+  }
+
+  public void testManuallyAttachToOtherPanelBefore() {
+    assertNull("Navigation content panel should not yet be attached", navigation.getContentPanel().asWidget()
+            .getParent());
+    SimplePanel panel = new SimplePanel();
+    panel.add(navigation.getContentPanel());
+
+    // Force navigation to run Navigation#maybeAttachContentPanel()
+    navigation.goToWithRole(DefaultPage.class);
+
+    assertEquals(panel, navigation.getContentPanel().asWidget().getParent());
+  }
+
+  /**
+   * Give the bootstrapper time to attach the Navigation content panel to the RootPanel and then run
+   * a test.
+   * 
+   * @param test
+   *          The test code to be executed after the content panel is attached
+   * @param timeout
+   *          The time in milliseconds to wait for the bootstrapper before giving up
+   * @param interval
+   *          The interval in milliseconds at which to poll the content panel while waiting for
+   *          bootstrapping
+   */
+  private void runPostAttachTests(final Runnable test, final int timeout, final int interval) {
+    delayTestFinish(timeout + 2 * interval);
+    final long startTime = System.currentTimeMillis();
+
+    new Timer() {
+
+      @Override
+      public void run() {
+        if (System.currentTimeMillis() - startTime >= timeout) {
+          this.cancel();
+        }
+        else {
+          try {
+            assertEquals(RootPanel.get(), navigation.getContentPanel().asWidget().getParent());
+
+          } catch (AssertionFailedError e) {
+            return;
+          }
+          test.run();
+          this.cancel();
+          finishTest();
+        }
+
+      }
+    }.scheduleRepeating(interval);
   }
 
 }
