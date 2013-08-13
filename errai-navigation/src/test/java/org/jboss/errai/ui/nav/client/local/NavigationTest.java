@@ -2,6 +2,11 @@ package org.jboss.errai.ui.nav.client.local;
 
 import java.util.Collection;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -21,6 +26,7 @@ public class NavigationTest extends AbstractErraiCDITest {
 
   private Navigation navigation;
   private NavigationGraph navGraph;
+  private HandlerRegistration historyHandlerRegistration;
 
   @Override
   public String getModuleName() {
@@ -104,24 +110,56 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testIsWidgetPage() {
+    final PageIsWidget page = IOC.getBeanManager().lookupBean(PageIsWidget.class).getInstance();
+
+    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<String> event) {
+        historyHandlerRegistration.removeHandler();
+        assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
+        assertEquals(page.asWidget(), ((SimplePanel)navigation.getContentPanel().asWidget()).getWidget());
+        finishTest();
+      }
+    });
+
+    delayTestFinish(5000);
     navigation.goTo(PageIsWidget.class, ImmutableMultimap.<String, String>of());
   }
 
-  public void testTransitionToIsWidgetPage() {
-    PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
-    TransitionTo<PageIsWidget> transitionToIsWidget = page.getTransitionToIsWidget();
-    assertNotNull(transitionToIsWidget);
-    transitionToIsWidget.go();
-    assertEquals(PageIsWidget.class, navigation.currentPage.contentType());
-    assertNotNull(page.getLinkToIsWidget());
+  public void testIsWidgetPageTransition() {
+    final PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
+    final PageIsWidget targetPage = IOC.getBeanManager().lookupBean(PageIsWidget.class).getInstance();
+
+    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<String> event) {
+        historyHandlerRegistration.removeHandler();
+        assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
+        assertEquals(targetPage.asWidget(), ((SimplePanel)navigation.getContentPanel().asWidget()).getWidget());
+        finishTest();
+      }
+    });
+
+    delayTestFinish(5000);
+    page.getTransitionToIsWidget().go();
   }
 
-  public void testLinkToIsWidgetPage() {
-    PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
-    TransitionAnchor<PageIsWidget> anchorToIsWidget = page.getLinkToIsWidget();
-    assertNotNull(anchorToIsWidget);
-    anchorToIsWidget.click();
-    assertEquals(PageIsWidget.class, navigation.currentPage.contentType());
+  public void testIsWidgetAnchorTransition() {
+    final PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
+    final PageIsWidget targetPage = IOC.getBeanManager().lookupBean(PageIsWidget.class).getInstance();
+
+    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<String> event) {
+        historyHandlerRegistration.removeHandler();
+        assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
+        assertEquals(targetPage.asWidget(), ((SimplePanel)navigation.getContentPanel().asWidget()).getWidget());
+        finishTest();
+      }
+    });
+
+    delayTestFinish(5000);
+    page.getLinkToIsWidget().click();
   }
 
 }
