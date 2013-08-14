@@ -16,6 +16,7 @@ import javax.persistence.PreUpdate;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
@@ -40,6 +41,7 @@ public class GlobalEntityListenerTest extends GWTTestCase {
     JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
     assertNotNull(testClient.entityManager);
+    ((ErraiEntityManager) JpaTestClient.INSTANCE.entityManager).removeAll();
     return JpaTestClient.INSTANCE.entityManager;
   }
 
@@ -58,6 +60,8 @@ public class GlobalEntityListenerTest extends GWTTestCase {
 
   public void testStoreAndFetchAlbumLifecycle() throws Exception {
 
+    assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
+    
     // make it
     Album album = new Album();
     album.setArtist(null);
@@ -89,6 +93,8 @@ public class GlobalEntityListenerTest extends GWTTestCase {
 
   public void testMultipleEntityTypesLifecycle() throws Exception {
 
+    assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
+    
     // make them
     Zentity zentity = new Zentity();
 
@@ -125,6 +131,8 @@ public class GlobalEntityListenerTest extends GWTTestCase {
 
   public void testRemoveEntityLifecycle() throws Exception {
 
+    assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
+    
     // make it
     Album album = new Album();
     album.setArtist(null);
@@ -157,6 +165,8 @@ public class GlobalEntityListenerTest extends GWTTestCase {
 
   public void testUpdateEntityLifecycle() throws Exception {
 
+    assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
+    
     // make it
     Album album = new Album();
     album.setArtist(null);
