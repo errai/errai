@@ -4,7 +4,7 @@ import org.jboss.errai.common.client.api.Assert;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * A factory for creating {@link TransitionAnchor} instances.  This is
@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @param <P> The type of the target page ("to page")
  * @author eric.wittmann@redhat.com
  */
-public final class TransitionAnchorFactory<P extends Widget> {
+public final class TransitionAnchorFactory<P extends IsWidget> {
 
   private final Navigation navigation;
   private final Class<P> toPageWidgetType;

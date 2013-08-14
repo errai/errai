@@ -7,7 +7,7 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Represents navigability from one page to another in the application's flow.
@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @param <P> The type of the target page ("to page")
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public final class TransitionTo<P extends Widget> {
+public final class TransitionTo<P extends IsWidget> {
 
   private final Class<P> toPageWidgetType;
 
