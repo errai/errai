@@ -15,12 +15,37 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  -->
-<div>
-  <label for=itemName>Name:</label> <input id=itemName class=span5 type=text data-field=name>
-  <br>
-  <label for=itemDept>Department:</label> <input id=itemDept class=span5 type=text data-field=department>
-  <br>
-  <label for=itemComments>Notes:</label> <input id=itemComments class=span5 type=text data-field=comment>
-  <br>
-  <button class=btn data-field=saveButton>Save</button>
-</div>
+<!--<link href="css/bootstrap/css/bootstrap.min.css" rel="stylesheet">-->
+<form class="form-horizontal">
+  <div class="form-group">
+    <div class="hidden-sm">
+      <label for="itemName" class="col-lg-2 control-label">Name:</label>
+    </div>
+    <div class="col-lg-10">
+      <input type="text" class="form-control" id="itemName" placeholder="Name" data-field=name>
+    </div>
+  </div>
+  <div data-field="otherFields" style="overflow: hidden">
+    <div class="form-group">
+      <div class="hidden-sm">
+        <label for="itemDept" class="col-lg-2 control-label">Department:</label>
+      </div>
+      <div class="col-lg-10">
+        <input type="text" class="form-control" id="itemDept" placeholder="Department" data-field=department>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="hidden-sm">
+        <label for="itemComments" class="col-lg-2 control-label">Notes:</label>
+      </div>
+      <div class="col-lg-10">
+        <input type="text" class="form-control" id="itemComments" placeholder="Note" data-field=comment>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-offset-2 col-lg-10">
+        <button type=submit data-field=saveButton class="btn btn-default">Save</button>
+      </div>
+    </div>
+  </div>
+</form>

@@ -1,23 +1,14 @@
-<div class="navbar navbar-fixed-top">
-  <div class=navbar-inner>
-    <div class=container>
-      <a class=brand href="#">Errai</a>
-      <ul class=nav>
-        <li><a data-field=home>Home</a>
-        <li><a data-field=items>Items</a>
-        <li><a data-field=stores>Stores</a>
-      </ul>
-      <div class="btn-group pull-right">
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span class="icon-globe"></span>
-          Language
-          <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu" data-field="language" data-role="dummy">
-          <li><a>English</a></li>
-          <li><a>Uppercase</a></li>
-        </ul>
-      </div>
-    </div>
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <button data-field="info" type="button" class="glyphicon glyphicon-info-sign btn btn-default navbar-btn"></button>
+  <a class="navbar-brand">Grocery List</a>
+  <button type="button" class="glyphicon glyphicon-edit btn btn-default navbar-btn pull-right"></button>
+  <div class="btn-group pull-right">
+    <button type="button" class="btn btn-default dropdown-toggle navbar-btn pull-right" data-toggle="dropdown">
+      <span class="glyphicon glyphicon-globe"></span>
+    </button>
+    <ul class="dropdown-menu" data-field="language" data-role="dummy">
+      <li><a>English</a></li>
+      <li><a>Uppercase</a></li>
+    </ul>
   </div>
 </div>

@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.Composite;
  */
 @Dependent
 @Templated("#root")
-@Page(startingPage = true)
+@Page
 public class WelcomePage extends Composite {
 
     @Inject

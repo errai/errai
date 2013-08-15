@@ -74,7 +74,7 @@ public class StoreWidget extends Composite implements HasModel<Store> {
             store.setName("Unnamed Store"); // XXX this side effect is not in a great place
         }
         storeBinder.setModel(store, InitialState.FROM_MODEL);
-        departments.setText(store.getDepartments().size() + " Departments");
+        departments.setText(String.valueOf(store.getDepartments().size()));
     }
 
     @EventHandler

@@ -16,11 +16,36 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.Anchor;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Composite;
 
+import javax.inject.Inject;
+
 @Templated("GroceryListClient.html#footer")
 public class Footer extends Composite {
+
+  @Inject private @DataField SortWidget sortWidget;
+
+
+  @Inject @DataField Anchor items;
+  @Inject @DataField Anchor stores;
+  @Inject TransitionTo<StoresPage> storesTab;
+  @Inject TransitionTo<ItemListPage> itemsTab;
+
+  @EventHandler("items")
+  public void onItemsButtonClick(ClickEvent e) {
+    itemsTab.go();
+  }
+
+  @EventHandler("stores")
+  public void onStoresButtonClick(ClickEvent e) {
+    storesTab.go();
+  }
 
 }

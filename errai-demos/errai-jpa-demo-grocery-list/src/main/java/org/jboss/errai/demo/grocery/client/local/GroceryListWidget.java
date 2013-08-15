@@ -16,6 +16,7 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
+import com.google.gwt.user.client.ui.FlowPanel;
 import org.jboss.errai.demo.grocery.client.local.producer.StoreListProducer;
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Item;
@@ -77,6 +78,10 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
         SortBy(Comparator<Item> itemComparator) {
             this.itemComparator = itemComparator;
         }
+    }
+
+    public GroceryListWidget() {
+      super(new FlowPanel());
     }
 
     @SuppressWarnings("unused")
