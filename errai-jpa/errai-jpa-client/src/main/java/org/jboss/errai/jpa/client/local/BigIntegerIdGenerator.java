@@ -2,9 +2,9 @@ package org.jboss.errai.jpa.client.local;
 
 import java.math.BigInteger;
 
-public class BigIntegerIdGenerator implements ErraiIdGenerator<BigInteger> {
+public class BigIntegerIdGenerator<X> implements ErraiIdGenerator<BigInteger> {
 
-  private final ErraiSingularAttribute<?, BigInteger> attr;
+  private final ErraiSingularAttribute<X, BigInteger> attr;
 
   /**
    * The next ID we will attempt to return (after checking for collisions in the datastore).
@@ -19,7 +19,7 @@ public class BigIntegerIdGenerator implements ErraiIdGenerator<BigInteger> {
    */
   private final double probeJumpSize = 1000;
 
-  public BigIntegerIdGenerator(ErraiSingularAttribute<?, BigInteger> attr) {
+  public BigIntegerIdGenerator(ErraiSingularAttribute<X, BigInteger> attr) {
     this.attr = attr;
   }
 
@@ -37,8 +37,7 @@ public class BigIntegerIdGenerator implements ErraiIdGenerator<BigInteger> {
   @Override
   public BigInteger next(ErraiEntityManager entityManager) {
     BigInteger nextAvailableId = nextCandidateId;
-    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextAvailableId,
-            LongIdGenerator.NO_SIDE_EFFECTS_OPTION) != null) {
+    while (entityManager.backendContains(new Key<X, BigInteger>((ErraiEntityType<X>) attr.getDeclaringType(), nextAvailableId))) {
       nextAvailableId = nextAvailableId.add(new BigInteger(String.valueOf(Math.random() * probeJumpSize)));
     }
     nextCandidateId = nextAvailableId.add(BigInteger.ONE);

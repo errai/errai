@@ -1,9 +1,10 @@
 package org.jboss.errai.jpa.client.local;
 
 
-public class IntIdGenerator implements ErraiIdGenerator<Integer> {
 
-  private final ErraiSingularAttribute<?, Integer> attr;
+public class IntIdGenerator<X> implements ErraiIdGenerator<Integer> {
+
+  private final ErraiSingularAttribute<X, Integer> attr;
 
   /**
    * The next ID we will attempt to return (after checking for collisions in the datastore).
@@ -18,7 +19,7 @@ public class IntIdGenerator implements ErraiIdGenerator<Integer> {
    */
   private final double probeJumpSize = 1000;
 
-  public IntIdGenerator(ErraiSingularAttribute<?, Integer> attr) {
+  public IntIdGenerator(ErraiSingularAttribute<X, Integer> attr) {
     this.attr = attr;
   }
 
@@ -35,8 +36,7 @@ public class IntIdGenerator implements ErraiIdGenerator<Integer> {
 
   @Override
   public Integer next(ErraiEntityManager entityManager) {
-    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId,
-            LongIdGenerator.NO_SIDE_EFFECTS_OPTION) != null) {
+    while (entityManager.backendContains(new Key<X, Integer>((ErraiEntityType<X>) attr.getDeclaringType(), nextCandidateId))) {
       nextCandidateId += (int) (Math.random() * probeJumpSize);
 
       // control rollover in case we run out of values
