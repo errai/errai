@@ -5,8 +5,9 @@ import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
-* @author edewit@redhat.com
-*/
+ * HtmlList panel creates an ordered (ol) or unordered (ul) element for lists
+ * @author edewit@redhat.com
+ */
 public class HtmlListPanel extends ComplexPanel {
   public HtmlListPanel(boolean ordered) {
     if (ordered) {

@@ -15,6 +15,18 @@ import java.io.IOException;
 import java.util.Collection;
 
 /**
+ * ListBox that contains the available language options. A user of your application can select one of these options by
+ * hand. You can add a key in your bundle that is equal to the locale key (default for the one without locale key) to
+ * add translation of the label.
+ *
+ * <pre>
+ *   {
+ *      "default": "English",
+ *      "nl": "Nederlands"
+ *
+ *   }
+ * </pre>
+ *
  * @author edewit@redhat.com
  */
 @Dependent

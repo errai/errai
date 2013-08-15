@@ -9,6 +9,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
+ * Qualifies a {@link ListWidget} to be OrderedList created by the {@link ListWidgetProvider}
  * @author edewit@redhat.com
  */
 @Target( { TYPE, METHOD, PARAMETER, FIELD })

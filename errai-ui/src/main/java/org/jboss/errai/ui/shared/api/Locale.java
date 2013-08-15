@@ -5,6 +5,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
+ * Simple data object representing a Locale for i18n
  * @author edewit@redhat.com
  */
 @Bindable
