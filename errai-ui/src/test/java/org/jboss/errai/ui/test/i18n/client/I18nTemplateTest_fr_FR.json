@@ -7,5 +7,6 @@
     "I18nComponent.Email_": "email:",
     "I18nComponent.email-placeholder": "Entrez votre adresse e-mail...",
     "I18nComponent.Password_": "mot de passe:",
-    "I18nComponent.password-title": "Votre mot de passe va ici."
+    "I18nComponent.password-title": "Votre mot de passe va ici.",
+    "I18nComponent.This_is_a_really_really_really_really_really_really_really_really_really_really_really_really_really_really_really_really_really-942055656" : "String trop grand"
 }

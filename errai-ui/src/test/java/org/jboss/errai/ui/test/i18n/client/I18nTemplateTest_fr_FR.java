@@ -36,6 +36,8 @@ public class I18nTemplateTest_fr_FR extends AbstractErraiCDITest {
     assertEquals("une valeur", app.getComponent().getVal1().getText());
     assertEquals("Etiquette 2:", app.getComponent().getLabel2().getText());
     assertEquals("valeur de deux", app.getComponent().getVal2().getText());
+    assertEquals("String trop grand", app.getComponent().getLongTextLabel().getText());
+
     assertEquals("email:", app.getComponent().getEmailLabel().getText());
     assertEquals("Entrez votre adresse e-mail...", app.getComponent().getEmail().getElement().getAttribute("placeholder"));
     assertEquals("mot de passe:", app.getComponent().getPasswordLabel().getText());

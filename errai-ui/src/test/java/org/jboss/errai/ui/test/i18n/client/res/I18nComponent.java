@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Templated
@@ -29,6 +30,9 @@ public class I18nComponent extends Composite {
   private InlineLabel label2;
   @Inject @DataField
   private InlineLabel val2;
+
+  @Inject @DataField
+  private Label longTextLabel;
 
   @Inject @DataField
   private InlineLabel emailLabel;
@@ -77,6 +81,10 @@ public class I18nComponent extends Composite {
     return val2;
   }
 
+  public Label getLongTextLabel() {
+    return longTextLabel;
+  }
+
   /**
    * @return the emailLabel
    */
@@ -116,6 +124,6 @@ public class I18nComponent extends Composite {
   public InlineLabel getVal1_1() {
     return val1_1;
   }
-  
-  
+
+
 }

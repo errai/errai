@@ -73,7 +73,7 @@ public class I18nBundleTest {
         i18nComponentStringCount++;
       }
     }
-    assertEquals("Too many translation keys for I18nComponent: " + translations, 12, i18nComponentStringCount);
+    assertEquals("Too many translation keys for I18nComponent: " + translations, 13, i18nComponentStringCount);
   }
 
   @Test
