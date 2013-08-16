@@ -786,6 +786,12 @@
       </plugin>
 
       <plugin>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>cordova-maven-plugin</artifactId>
+        <version>${project.version}</version>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.4.1</version>
         <configuration>
