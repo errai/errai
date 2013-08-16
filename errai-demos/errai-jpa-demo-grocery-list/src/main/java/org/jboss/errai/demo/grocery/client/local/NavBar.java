@@ -35,6 +35,7 @@ import java.util.ArrayList;
 public class NavBar extends Composite {
 
   @Inject @DataField Button info;
+  @Inject @DataField Button edit;
 
   /**
    * Could have used the {@link org.jboss.errai.ui.client.widget.LocaleListBox} here instead, but
@@ -55,5 +56,10 @@ public class NavBar extends Composite {
   @EventHandler("info")
   public void onHomeButtonClick(ClickEvent e) {
     homeTab.go();
+  }
+
+  @EventHandler("edit")
+  public void onEditButtonClick(ClickEvent e) {
+
   }
 }

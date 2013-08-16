@@ -15,8 +15,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  -->
-<!--<link href="css/bootstrap/css/bootstrap.min.css" rel="stylesheet">-->
-<form class="form-horizontal">
+<link href="css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/GroceryList.css" rel="stylesheet">
+<form class="form-horizontal" data-field=form>
   <div class="form-group">
     <div class="hidden-sm">
       <label for="itemName" class="col-lg-2 control-label">Name:</label>
@@ -25,7 +26,7 @@
       <input type="text" class="form-control" id="itemName" placeholder="Name" data-field=name>
     </div>
   </div>
-  <div data-field="otherFields" style="overflow: hidden">
+  <div data-field="otherFields" style="overflow: hidden" class="otherFields">
     <div class="form-group">
       <div class="hidden-sm">
         <label for="itemDept" class="col-lg-2 control-label">Department:</label>

@@ -19,52 +19,24 @@
 <link href="css/bootstrap/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link href="css/GroceryList.css" rel="stylesheet">
 
-<div class="list-group" data-field="main">
-  <style>
-    .edit .col-2 {
-      display: none;
-    }
-    .edit .col-10 {
-      padding-left: 0;
-      padding-right: 0;
-      width: 100%;
-    }
-    .edit .badge {
-      margin-right: -15px;
-    }
+<div class="list-group">
+  <div class="list-group-item" data-field="main">
+      <div class="row edit">
+        <div class="col-2">
+          <button type="button" data-field=deleteButton
+                  class="glyphicon glyphicon-remove btn btn-danger btn-small"></button>
+        </div>
+        <div class="col-10">
+          <h4 class="list-group-item-heading"><span data-field="name">Store name</span></h4>
+          <span class="badge pull-right" data-field="departments">14</span>
 
-    .badge {
-      margin-right: -30px;
-    }
-
-    @media (min-width: 768px){
-      .badge {
-        margin-right: -15px;
-      }
-      .edit .badge {
-        margin-right: 0;
-      }
-      .edit .col-10 {
-        padding-left: 15px;
-      }
-    }
-  </style>
-  <a href="#" class="list-group-item">
-    <div class="row edit">
-      <div class="col-2">
-        <button type="button" data-field=deleteButton class="glyphicon glyphicon-remove btn btn-danger btn-small"></button>
+          <p class="list-group-item-text">
+            <small>
+              <i class="glyphicon glyphicon-map-marker"></i><span
+                    data-field="address">123 Main Street, City, Region</span>
+            </small>
+          </p>
+        </div>
       </div>
-      <div class="col-10">
-        <h4 class="list-group-item-heading"><span data-field="name">Store name</span></h4>
-        <span class="badge pull-right" data-field="departments">14</span>
-
-        <p class="list-group-item-text">
-          <small>
-            <i class="glyphicon glyphicon-map-marker"></i><span
-                  data-field="address">123 Main Street, City, Region</span>
-          </small>
-        </p>
-      </div>
-    </div>
-  </a>
+  </div>
 </div>

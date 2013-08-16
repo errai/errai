@@ -23,15 +23,20 @@
 <body>
 <div data-field=root>
   <h1 class="hidden-sm">Stores!</h1>
-  <div data-field=storeList style="width: 100%">
-    <div data-field=store class=store>
-      <span data-field=name class=name>Example Store 1</span>
-    </div>
-    <div class=store data-role=dummy>
-      <span class=name>Example Store 2</span>
+
+  <div class=row>
+    <div class=col-12>
+      <div class="list-group" data-field=storeList style="width: 100%">
+        <div data-field=store class=store>
+          <span data-field=name class=name>Example Store 1</span>
+        </div>
+        <div class=store data-role=dummy>
+          <span class=name>Example Store 2</span>
+        </div>
+      </div>
+      <button class=btn data-field=addStoreButton style="margin-top: 10px">New Store</button>
     </div>
   </div>
-  <button class=btn data-field=addStoreButton style="margin-top: 10px">New Store</button>
 </div>
 </body>
 </html>

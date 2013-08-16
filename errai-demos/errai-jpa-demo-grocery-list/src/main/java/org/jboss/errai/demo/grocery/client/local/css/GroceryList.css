@@ -204,3 +204,26 @@ form {
 .list-group-item-text .gwt-Label {
     display: inline;
 }
+
+.edit .col-2 {
+    display: none;
+}
+.edit .col-10 {
+    width: 100%;
+}
+.badge {
+    margin-right: -15px;
+}
+
+@media (min-width: 768px){
+    .badge {
+        margin-right: -15px;
+    }
+}
+
+@media (min-width: 992px) {
+    div[style].otherFields {
+        height: 100% !important;
+    }
+}
+

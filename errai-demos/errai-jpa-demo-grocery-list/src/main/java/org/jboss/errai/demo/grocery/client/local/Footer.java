@@ -18,6 +18,8 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -32,20 +34,21 @@ public class Footer extends Composite {
 
   @Inject private @DataField SortWidget sortWidget;
 
+  @Inject
+  private Navigation navigation;
 
-  @Inject @DataField Anchor items;
-  @Inject @DataField Anchor stores;
+  @Inject @DataField
+  private Button list;
+
   @Inject TransitionTo<StoresPage> storesTab;
   @Inject TransitionTo<ItemListPage> itemsTab;
 
-  @EventHandler("items")
+  @EventHandler("list")
   public void onItemsButtonClick(ClickEvent e) {
-    itemsTab.go();
+    if (navigation.getCurrentPage().name().equals("StoresPage")) {
+      itemsTab.go();
+    } else {
+      storesTab.go();
+    }
   }
-
-  @EventHandler("stores")
-  public void onStoresButtonClick(ClickEvent e) {
-    storesTab.go();
-  }
-
 }

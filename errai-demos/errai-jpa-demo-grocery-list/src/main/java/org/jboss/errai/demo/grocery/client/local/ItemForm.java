@@ -55,7 +55,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Dependent
-@Templated
+@Templated("#form")
 public class ItemForm extends Composite {
 
     @Inject private EntityManager em;
@@ -97,7 +97,7 @@ public class ItemForm extends Composite {
                 protected void onUpdate(double progress) {
                   otherFields.getStyle().setHeight(Window.getClientWidth() > 768 ? 215 : 145 * progress, PX);
                 }
-              }.run(1500);
+              }.run(1000);
             }
           }
         });
