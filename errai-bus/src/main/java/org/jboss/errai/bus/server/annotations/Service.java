@@ -105,11 +105,6 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
  *     }
  * </pre>
  *
- * <p>
- * Note that a field can be annotated with {@code @Service} if its type is
- * {@link MessageCallback}, but such usage is deprecated and will be removed in
- * a future release.
- *
  * @see Remote
  * @see MessageCallback
  * @see Command
