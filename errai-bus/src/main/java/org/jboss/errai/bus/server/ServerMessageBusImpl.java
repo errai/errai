@@ -266,7 +266,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     message.commit();
     final String subject = message.getSubject();
 
-    if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
+    if (!subscriptions.containsKey(subject) && !subscriptions.containsKey("local:".concat(subject))
+            && !remoteSubscriptions.containsKey(subject)) {
 
       delayOrFail(message, new Runnable() {
         @Override
