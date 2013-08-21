@@ -16,10 +16,16 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Store;
@@ -32,11 +38,6 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.Label;
 
 @Dependent
 @Templated("#main")
@@ -60,12 +61,44 @@ public class StoreWidget extends Composite implements HasModel<Store> {
     @Inject
     private TransitionTo<StorePage> toStorePage;
 
+    private @DataField Element panel = DOM.createDiv();
+
+    private boolean editMode;
+
     @Inject
     EntityManager em;
 
     @Override
     public Store getModel() {
         return storeBinder.getModel();
+    }
+
+    @PostConstruct
+    public void init() {
+      final Timer longPress = new Timer() {
+
+        @Override
+        public void run() {
+          switchMode();
+        }
+      };
+      addDomHandler(new MouseDownHandler() {
+        @Override
+        public void onMouseDown(MouseDownEvent event) {
+          longPress.schedule(1500);
+        }
+      }, MouseDownEvent.getType());
+
+      addDomHandler(new MouseUpHandler() {
+        @Override
+        public void onMouseUp(MouseUpEvent event) {
+          if (!editMode) {
+            toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
+          }
+          longPress.cancel();
+        }
+      }, MouseUpEvent.getType());
+
     }
 
     @Override
@@ -77,14 +110,19 @@ public class StoreWidget extends Composite implements HasModel<Store> {
         departments.setText(String.valueOf(store.getDepartments().size()));
     }
 
-    @EventHandler
-    private void onClick(ClickEvent e) {
-        toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
-    }
-
     @EventHandler("deleteButton")
     private void deleteThisStore(ClickEvent e) {
         em.remove(getModel());
         em.flush();
+    }
+
+    public void switchMode() {
+      if (editMode) {
+        panel.addClassName("edit");
+      } else {
+        panel.removeClassName("edit");
+      }
+
+      editMode = !editMode;
     }
 }
