@@ -19,6 +19,7 @@ import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 import org.jboss.errai.jpa.test.entity.Album;
+import org.jboss.errai.jpa.test.entity.Artist;
 import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
 import org.jboss.errai.jpa.test.entity.TestingGlobalEntityListener;
 import org.jboss.errai.jpa.test.entity.Zentity;
@@ -61,7 +62,7 @@ public class GlobalEntityListenerTest extends GWTTestCase {
   public void testStoreAndFetchAlbumLifecycle() throws Exception {
 
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
-    
+
     // make it
     Album album = new Album();
     album.setArtist(null);
@@ -94,7 +95,7 @@ public class GlobalEntityListenerTest extends GWTTestCase {
   public void testMultipleEntityTypesLifecycle() throws Exception {
 
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
-    
+
     // make them
     Zentity zentity = new Zentity();
 
@@ -132,7 +133,7 @@ public class GlobalEntityListenerTest extends GWTTestCase {
   public void testRemoveEntityLifecycle() throws Exception {
 
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
-    
+
     // make it
     Album album = new Album();
     album.setArtist(null);
@@ -166,7 +167,7 @@ public class GlobalEntityListenerTest extends GWTTestCase {
   public void testUpdateEntityLifecycle() throws Exception {
 
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
-    
+
     // make it
     Album album = new Album();
     album.setArtist(null);
@@ -193,4 +194,36 @@ public class GlobalEntityListenerTest extends GWTTestCase {
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
   }
 
+  /**
+   * Regression test for ERRAI-611.
+   */
+  public void testNoEventFromIdGeneratorProbe() throws Exception {
+
+    // create an album with an artist, which we will probe for with the NO_SIDE_EFFECTS option
+
+    Artist artist = new Artist();
+    artist.setId(123L);
+    artist.setName("The Beatles");
+
+    Album album = new Album();
+    album.setArtist(artist);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store them
+    EntityManager em = getEntityManager();
+    em.persist(artist);
+    em.persist(album);
+    em.flush();
+    em.clear();
+
+    TestingGlobalEntityListener.CALLBACK_LOG.clear();
+
+    ErraiEntityManager eem = (ErraiEntityManager) em;
+    assertTrue(eem.backendContains(eem.keyFor(album)));
+
+    // Finally, ensure there were no events fired as a result of the probe
+    // (originally, we were getting a PostLoad for artist, because it was being cascade-fetched from album)
+    assertEquals("[]", TestingGlobalEntityListener.CALLBACK_LOG.toString());
+  }
 }

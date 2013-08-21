@@ -1,14 +1,10 @@
 package org.jboss.errai.jpa.client.local;
 
-import java.util.Collections;
-import java.util.Map;
 
-public class LongIdGenerator implements ErraiIdGenerator<Long> {
 
-  static final Map<String, Object> NO_SIDE_EFFECTS_OPTION =
-           Collections.singletonMap(ErraiEntityManager.NO_SIDE_EFFECTS, (Object) Boolean.TRUE);
+public class LongIdGenerator<X> implements ErraiIdGenerator<Long> {
 
-  private final ErraiSingularAttribute<?, Long> attr;
+  private final ErraiSingularAttribute<X, Long> attr;
 
   /**
    * The next ID we will attempt to return (after checking for collisions in the datastore).
@@ -23,7 +19,7 @@ public class LongIdGenerator implements ErraiIdGenerator<Long> {
    */
   private final double probeJumpSize = 1000;
 
-  public LongIdGenerator(ErraiSingularAttribute<?, Long> attr) {
+  public LongIdGenerator(ErraiSingularAttribute<X, Long> attr) {
     this.attr = attr;
   }
 
@@ -40,7 +36,7 @@ public class LongIdGenerator implements ErraiIdGenerator<Long> {
 
   @Override
   public Long next(ErraiEntityManager entityManager) {
-    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId, NO_SIDE_EFFECTS_OPTION) != null) {
+    while (entityManager.backendContains(new Key<X, Long>((ErraiEntityType<X>) attr.getDeclaringType(), nextCandidateId))) {
       nextCandidateId += (long) (Math.random() * probeJumpSize);
 
       // control rollover in case we run out of values

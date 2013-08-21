@@ -40,6 +40,10 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
     assertEquals("value one.one", app.getComponent().getVal1_1().getText());
     assertEquals("Label 2:", app.getComponent().getLabel2().getText());
     assertEquals("value two", app.getComponent().getVal2().getText());
+    assertEquals("This is a really really really really really really really really really" +
+    		" really really really really really really really really really really really" +
+    		" long string that exceeds the cutoff length for adding a hash to its internationalization key.",
+    		app.getComponent().getLongTextLabel().getText());
 
     assertEquals("Email:", app.getComponent().getEmailLabel().getText());
     assertEquals("Enter your email address...", app.getComponent().getEmail().getElement().getAttribute("placeholder"));

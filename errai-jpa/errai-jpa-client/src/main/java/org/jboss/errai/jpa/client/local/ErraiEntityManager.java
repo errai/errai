@@ -36,13 +36,6 @@ import org.jboss.errai.marshalling.client.api.MarshallerFramework;
  */
 public class ErraiEntityManager implements EntityManager {
 
-  /**
-   * Hint that can be used with {@link #find(Class, Object, Map)} to specify
-   * that the find operation should not have any side effects, such as adding
-   * the entity to the persistence context and delivering PostLoad event.
-   */
-  static final String NO_SIDE_EFFECTS = "errai.jpa.NO_SIDE_EFFECTS";
-
   // magic incantation. ooga booga!
   static {
     // ensure that the marshalling framework has been initialized
@@ -524,6 +517,22 @@ public class ErraiEntityManager implements EntityManager {
     return backend.getAll(type, matcher);
   }
 
+  /**
+   * Tests if this entity manager's storage backend contains an entity with the
+   * given key. This method is free of side effects: it will not affect the
+   * contents of the persistence context, and it will not affect the persistence
+   * state of any entity (hence it will not deliver any events to JPA lifecycle
+   * listeners).
+   *
+   * @param key
+   *          The key to test for in backend storage. Not null.
+   * @return true if and only if this entity manager's storage backend contains
+   *         an entity with the given key.
+   */
+  public boolean backendContains(Key<?, ?> key) {
+    return backend.contains(key);
+  }
+
   // -------------- Actual JPA API below this line -------------------
 
   @Override
@@ -586,7 +595,7 @@ public class ErraiEntityManager implements EntityManager {
     X entity = cast(key.getEntityType().getJavaType(), persistenceContext.get(key));
     if (entity == null) {
       entity = backend.get(key);
-      if (entity != null && !properties.containsKey(NO_SIDE_EFFECTS)) {
+      if (entity != null) {
         persistenceContext.put(key, entity);
 
         // XXX when persistenceContext gets its own class, this should go on the ultimate ingress point

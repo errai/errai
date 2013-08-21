@@ -607,7 +607,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       if (isGeneratedValue(getJavaMember(attr))) {
 
         MetaClass generatorDeclaredType;
-        Class<? extends ErraiIdGenerator<?>> generatorType;
+        Class<?> generatorType;
 
         if (attr.getJavaType() == Long.class || attr.getJavaType() == long.class) {
           generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<ErraiIdGenerator<Long>>() {

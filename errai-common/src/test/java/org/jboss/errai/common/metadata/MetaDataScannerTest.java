@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.vfs.Vfs;
 import org.jboss.errai.reflections.vfs.ZipDir;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -92,5 +93,50 @@ public class MetaDataScannerTest {
 
     // delete if test passes (otherwise, we may want to inspect its contents)
     jarFile.delete();
+  }
+  
+  @Test
+  public void testClasspathUrlDecoding() throws Exception {
+    
+    File erraiAppPropertiesFile = new File(System.getProperty("java.io.tmpdir"), "ErraiApp.properties");
+    erraiAppPropertiesFile.createNewFile();
+
+    File jarFile = File.createTempFile("testjar-\u00e4\u00f6\u00e9\u00f8 +abc!@$%^&()_+}{", ".jar");
+    JavaArchive jarArchive = ShrinkWrap.create(JavaArchive.class)
+        .addClass(getClass())
+        .addAsResource(erraiAppPropertiesFile);
+    jarArchive.as(ZipExporter.class).exportTo(jarFile, true);
+
+    erraiAppPropertiesFile.delete();
+
+    URL testJarURL = jarFile.toURI().toURL();
+    assertNotNull("Jar file not found: " + jarFile, testJarURL);
+
+    ClassLoader loader = URLClassLoader.newInstance(new URL[] { testJarURL }, null);
+    Set<URL> urls = ClasspathHelper.forClassLoader(loader);
+    assertFalse("No URLs returned", urls.isEmpty());
+    URL url = urls.iterator().next();
+    String[] segments = url.getPath().split("/");
+
+    assertTrue("No path segments found in URL", segments.length > 0);
+    assertEquals("URL not properly decoded", jarFile.getName(), segments[segments.length - 1]);
+    assertNotNull("Could not open jar", new ZipDir(url).getFiles());
+
+    Set<String> zipContents = new TreeSet<String>();
+    for (Vfs.File path : new ZipDir(url).getFiles()) {
+      if (!path.getRelativePath().endsWith("/")) {
+        zipContents.add(path.getRelativePath());
+      }
+    }
+
+    Set<String> expectedContents = new TreeSet<String>();
+    expectedContents.add("ErraiApp.properties");
+    expectedContents.add("org/jboss/errai/common/metadata/MetaDataScannerTest.class");
+
+    assertEquals("Wrong file contents", expectedContents, zipContents);
+
+    // delete if test passes (otherwise, we may want to inspect its contents)
+    jarFile.delete();
+   
   }
 }

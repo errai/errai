@@ -55,7 +55,6 @@ import org.jboss.errai.jpa.client.local.ErraiParameter;
 import org.jboss.errai.jpa.client.local.ErraiTypedQuery;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.Key;
-import org.jboss.errai.jpa.client.local.LongIdGenerator;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 import org.jboss.errai.jpa.client.local.backend.Comparisons;
 import org.mvel2.MVEL;
@@ -628,7 +627,7 @@ public class TypedQueryFactoryGenerator {
                     Stmt.loadVariable("entityManager"),
                     Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()).invoke("isObject"),
                     false),
-                Stmt.loadStatic(LongIdGenerator.class, "NO_SIDE_EFFECTS_OPTION")));
+                Stmt.loadStatic(Collections.class, "EMPTY_MAP")));
       }
       else if (dataType.isCollectionType()) {
         throw new UnsupportedOperationException("Can't resolve " + dotNode.getText() + ": Collections are not implemented yet in JPQL expressions");

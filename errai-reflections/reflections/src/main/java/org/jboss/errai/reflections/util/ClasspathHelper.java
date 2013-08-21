@@ -1,20 +1,23 @@
 package org.jboss.errai.reflections.util;
 
-import com.google.common.collect.Sets;
-import org.jboss.errai.reflections.Reflections;
-import org.jboss.errai.reflections.vfs.Vfs;
-
-import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import javax.servlet.ServletContext;
+
+import org.jboss.errai.reflections.Reflections;
+import org.jboss.errai.reflections.vfs.Vfs;
+
+import com.google.common.collect.Sets;
 
 /**
  * Some classpath convenient methods
@@ -100,13 +103,22 @@ public abstract class ClasspathHelper {
                 if (classLoader instanceof URLClassLoader) {
                     URL[] urls = ((URLClassLoader) classLoader).getURLs();
                     if (urls != null) {
-                        result.addAll(Sets.<URL>newHashSet(urls));
+                        for (URL url : urls) {
+                            try {
+                              String urlString = url.toExternalForm();
+                              String decodedUrlString = 
+                                URLDecoder.decode(urlString.replaceAll("\\+", "%2b"), "UTF-8");
+                              result.add(new URL(decodedUrlString));
+                            }
+                            catch (IOException ioe) {
+                              throw new RuntimeException("Failed to scan configuration Url's", ioe);
+                            }
+                        }
                     }
                 }
                 classLoader = classLoader.getParent();
             }
         }
-
         return result;
     }
 

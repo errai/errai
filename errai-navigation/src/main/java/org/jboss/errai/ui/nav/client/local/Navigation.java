@@ -75,6 +75,8 @@ public class Navigation {
 
   protected PageNode<IsWidget> currentPage;
 
+  protected IsWidget currentWidget;
+
   private HandlerRegistration historyHandlerRegistration;
 
   /**
@@ -238,16 +240,17 @@ public class Navigation {
    * Hide the page currently displayed and call the associated lifecycle methods.
    */
   private void hideCurrentPage() {
-    IsWidget currentWidget = contentPanel.getWidget();
+    IsWidget currentContent = contentPanel.getWidget();
 
     // Note: Optimized out in production mode
-    if (currentPage != null && currentWidget == null) {
+    if (currentPage != null &&
+            (currentContent == null || currentWidget.asWidget() != currentContent)) {
       // This could happen if someone was manipulating the DOM behind our backs
-      GWT.log("Current widget vanished from navigation content panel. " +
+      GWT.log("Current content widget vanished or changed. " +
               "Not delivering pageHiding event to " + currentPage + ".");
     }
 
-    if (currentPage != null && currentWidget != null) {
+    if (currentPage != null && currentWidget != null && currentWidget.asWidget() == currentContent) {
       currentPage.pageHiding(currentWidget);
     }
 
@@ -272,6 +275,7 @@ public class Navigation {
 
         toPage.pageShowing(widget, state);
         setCurrentPage(toPage);
+        currentWidget = widget;
         contentPanel.add(widget);
         toPage.pageShown(widget, state);
       }
