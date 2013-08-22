@@ -51,7 +51,7 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
     runServiceTest("ClassWithService", null);
   }
   
-  public void testname() throws Exception {
+  public void testClassWithMultipleServices() throws Exception {
     runServiceTestAndThen("service1", null, new Runnable() {
       @Override
       public void run() {
