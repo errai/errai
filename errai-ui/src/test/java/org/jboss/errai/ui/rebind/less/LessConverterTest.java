@@ -53,6 +53,19 @@ public class LessConverterTest {
       // then
       assertTrue(e.getMessage().contains("compile"));
     }
+  }
 
+  @Test
+  public void shouldConvertLessFilesWithinJars() throws IOException {
+    // given
+    final URL resource = getClass().getResource("/less.jar");
+    final URL less = new URL("jar:" + resource + "!/org/jboss/errai/package.less");
+
+    // when
+    final File css = new LessConverter().convert(less);
+
+    // then
+    final Scanner scanner = new Scanner(css);
+    assertEquals("#header", scanner.next());
   }
 }
