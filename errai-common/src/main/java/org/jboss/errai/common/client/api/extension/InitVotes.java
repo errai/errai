@@ -18,12 +18,6 @@ package org.jboss.errai.common.client.api.extension;
 
 import static org.jboss.errai.common.client.util.LogUtil.log;
 
-import com.google.gwt.core.client.GWT;
-import org.jboss.errai.common.client.api.tasks.AsyncTask;
-import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.common.client.util.TimeUnit;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,18 +27,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.common.client.util.TimeUnit;
+
+import com.google.gwt.core.client.GWT;
+
 /**
- * The <tt>InitVotes</tt> class provides the central algorithm around which disparate services within the Errai
- * Framework can elect to prevent initialization and be notified when initialization occurs. This is required
- * internally to ensure that services such as RPC proxies have been properly bound prior to any remote calls being
- * made. This API also makes it possible for user-defined services and extensions to Errai to participate in the
- * startup contract.
- *
+ * The <tt>InitVotes</tt> class provides the central algorithm around which disparate services
+ * within the Errai Framework can elect to prevent initialization and be notified when
+ * initialization occurs. This is required internally to ensure that services such as RPC proxies
+ * have been properly bound prior to any remote calls being made. This API also makes it possible
+ * for user-defined services and extensions to Errai to participate in the startup contract.
+ * 
  * @author Mike Brock
  */
 public final class InitVotes {
-  private InitVotes() {
-  }
+  private InitVotes() {}
 
   private static final List<Runnable> preInitCallbacks = new ArrayList<Runnable>();
   private static final Map<String, List<Runnable>> dependencyCallbacks = new HashMap<String, List<Runnable>>();
@@ -67,8 +67,9 @@ public final class InitVotes {
   private static final Object lock = new Object();
 
   /**
-   * Resets the state, clearing all current waiting votes and disarming the startup process. Calling <tt>reset()</tt>
-   * does not however clear out any initialization callbacks registered with {@link #registerPersistentInitCallback(Runnable)}.
+   * Resets the state, clearing all current waiting votes and disarming the startup process. Calling
+   * <tt>reset()</tt> does not however clear out any initialization callbacks registered with
+   * {@link #registerPersistentInitCallback(Runnable)}.
    */
   public static void reset() {
     synchronized (lock) {
@@ -87,29 +88,30 @@ public final class InitVotes {
   }
 
   /**
-   * Specifies the number of milliseconds that will be permitted to transpire until dependencies are assumed
-   * to have failed to satisfy, and thus an error is rendered to the browser console. The default value is
-   * 5000 milliseconds.
-   *
+   * Specifies the number of milliseconds that will be permitted to transpire until dependencies are
+   * assumed to have failed to satisfy, and thus an error is rendered to the browser console. The
+   * default value is 5000 milliseconds.
+   * 
    * @param millis
-   *     milliseconds.
+   *          milliseconds.
    */
   public static void setTimeoutMillis(final int millis) {
     timeoutMillis = millis;
   }
 
   /**
-   * Declares a startup dependency on the specified class. By doing so, initialization of the framework services
-   * will be blocked until a {@link #voteFor(Class)} is called with the same <tt>Class</tt> reference passed
-   * to this method.
+   * Declares a startup dependency on the specified class. By doing so, initialization of the
+   * framework services will be blocked until a {@link #voteFor(Class)} is called with the same
+   * <tt>Class</tt> reference passed to this method.
    * <p/>
-   * If no dependencies have previously been declared, then the first caller to invoke this method arms and
-   * begins the startup process. This starts the timer window (see {@link #setTimeoutMillis(int)}) for which
-   * all components being waited on are expected to report back that they're ready.
-   *
+   * If no dependencies have previously been declared, then the first caller to invoke this method
+   * arms and begins the startup process. This starts the timer window (see
+   * {@link #setTimeoutMillis(int)}) for which all components being waited on are expected to report
+   * back that they're ready.
+   * 
    * @param clazz
-   *     a class reference.
-   *
+   *          a class reference.
+   * 
    * @see #voteFor(Class)
    */
   public static void waitFor(final Class<?> clazz) {
@@ -119,11 +121,13 @@ public final class InitVotes {
   private static void waitFor(final String topic) {
     synchronized (lock) {
       if (completedSet.contains(topic)) {
-//        throw new RuntimeException("cannot declare a wait on '" + topic + "' as it is already marked completed!");
+        // throw new RuntimeException("cannot declare a wait on '" + topic +
+        // "' as it is already marked completed!");
         return;
       }
 
-      if (waitForSet.contains(topic)) return;
+      if (waitForSet.contains(topic))
+        return;
 
       log("wait for: " + topic);
 
@@ -136,12 +140,13 @@ public final class InitVotes {
   }
 
   /**
-   * Votes for initialization and removes a lock on the initialization of framework services. If the initialization
-   * process has been armed and this vote releases the final dependency, the initialization process will be triggered,
-   * calling all the registered initialization callbacks. See: {@link #registerPersistentInitCallback(Runnable)}
-   *
+   * Votes for initialization and removes a lock on the initialization of framework services. If the
+   * initialization process has been armed and this vote releases the final dependency, the
+   * initialization process will be triggered, calling all the registered initialization callbacks.
+   * See: {@link #registerPersistentInitCallback(Runnable)}
+   * 
    * @param clazz
-   *     a class reference
+   *          a class reference
    */
   public static void voteFor(final Class<?> clazz) {
     voteFor(clazz.getName());
@@ -167,7 +172,8 @@ public final class InitVotes {
   }
 
   private static void scheduleFinish() {
-    if (_initWait) return;
+    if (_initWait)
+      return;
     _initWait = true;
 
     _scheduleFinish(new Runnable() {
@@ -219,27 +225,28 @@ public final class InitVotes {
         preInitCallbacks.add(runnable);
 
         if (armed) {
-         runnable.run();
+          runnable.run();
         }
       }
     }
   }
-
 
   public static void registerOneTimePreInitCallback(final Runnable runnable) {
     registerPersistentPreInitCallback(new OneTimeRunnable(runnable));
   }
 
   /**
-   * Registers a callback task to be executed once initialization occurs. Callbacks registered with this method
-   * will be persistent <em>across</em> multiple initializations, and will not be cleared out even if {@link #reset()}
-   * is called. If this is not desirable, see: {@link #registerOneTimeInitCallback};
+   * Registers a callback task to be executed once initialization occurs. Callbacks registered with
+   * this method will be persistent <em>across</em> multiple initializations, and will not be
+   * cleared out even if {@link #reset()} is called. If this is not desirable, see:
+   * {@link #registerOneTimeInitCallback};
    * <p>
-   * As of Errai 3.0, the callback list is de-duped based on instance to simplify initialization code in modules. You
-   * can now safely re-add a Runnable in initialization code as long as it is always guaranteed to be the same instance.*
-   *
+   * As of Errai 3.0, the callback list is de-duped based on instance to simplify initialization
+   * code in modules. You can now safely re-add a Runnable in initialization code as long as it is
+   * always guaranteed to be the same instance.*
+   * 
    * @param runnable
-   *     a callback to execute
+   *          a callback to execute
    */
   public static void registerPersistentInitCallback(final Runnable runnable) {
     synchronized (lock) {
@@ -250,23 +257,24 @@ public final class InitVotes {
   }
 
   /**
-   * Registers a one-time callback task to be executed once initialization occurs. Unlike callbacks registered with
-   * {@link #registerPersistentInitCallback(Runnable)} Callback(Runnable)}, callbacks registered with this method will only
-   * be executed once and will never be used again if framework services are re-initialized.
-   *
+   * Registers a one-time callback task to be executed once initialization occurs. Unlike callbacks
+   * registered with {@link #registerPersistentInitCallback(Runnable)} Callback(Runnable)},
+   * callbacks registered with this method will only be executed once and will never be used again
+   * if framework services are re-initialized.
+   * 
    * @param runnable
-   *     a callback to execute
+   *          a callback to execute
    */
   public static void registerOneTimeInitCallback(final Runnable runnable) {
     registerPersistentInitCallback(new OneTimeRunnable(runnable));
   }
 
   /**
-   * Registers an {@link InitFailureListener} to monitor for initialization failures of the framework or its
-   * components.
-   *
+   * Registers an {@link InitFailureListener} to monitor for initialization failures of the
+   * framework or its components.
+   * 
    * @param failureListener
-   *     the instance of the {@link InitFailureListener} to be registered.
+   *          the instance of the {@link InitFailureListener} to be registered.
    */
   public static void registerInitFailureListener(final InitFailureListener failureListener) {
     initFailureListeners.add(failureListener);
@@ -279,7 +287,6 @@ public final class InitVotes {
     }
     beginInit();
   }
-
 
   private static void beginInit() {
     synchronized (lock) {
@@ -297,7 +304,8 @@ public final class InitVotes {
         @Override
         public void run() {
           synchronized (lock) {
-            if (waitForSet.isEmpty() || !armed) return;
+            if (waitForSet.isEmpty() || !armed)
+              return;
 
             if (initDelay != null) {
               initDelay.cancel(true);
@@ -342,21 +350,29 @@ public final class InitVotes {
   }
 
   private static void _runAllRunnables(final List<Runnable> runnables) {
-    if (runnables == null) return;
+    if (runnables == null || runnables.isEmpty())
+      return;
+    _runAllRunnables(new ArrayList<Runnable>(runnables), runnables);
 
-    final Iterator<Runnable> runnableIterable = runnables.iterator();
-    while (runnableIterable.hasNext()) {
-      final Runnable runnable = runnableIterable.next();
+  }
+
+  private static void _runAllRunnables(final List<Runnable> curRunnables, final List<Runnable> allRunnables) {
+    for (Runnable runnable : curRunnables) {
       if (completedSet.contains(runnable)) {
         continue;
       }
-
       completedSet.add(runnable);
 
       if (runnable instanceof OneTimeRunnable) {
-        runnableIterable.remove();
+        allRunnables.remove(runnable);
       }
+      int expectedSize = allRunnables.size();
       runnable.run();
+      if (expectedSize < allRunnables.size()) {
+        // this runnable added more runnables that need to be executed
+        List<Runnable> moreRunnables = new ArrayList<Runnable>(allRunnables).subList(expectedSize, allRunnables.size());
+        _runAllRunnables(moreRunnables, allRunnables);
+      }
     }
   }
 
