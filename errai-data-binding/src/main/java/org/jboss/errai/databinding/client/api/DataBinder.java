@@ -384,6 +384,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   @SuppressWarnings("unchecked")
   private BindableProxyAgent<T> getAgent() {
+    ensureProxied();
     return ((BindableProxy<T>) this.proxy).getAgent();
   }
 

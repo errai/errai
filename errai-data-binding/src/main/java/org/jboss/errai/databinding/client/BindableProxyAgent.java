@@ -110,8 +110,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   public Binding bind(final Widget widget, final String property, final Converter converter) {
     validatePropertyExpr(property);
 
-    if (property.indexOf(".") > 0) {
-      createNestedBinders(widget, property, converter);
+    int dotPos = property.indexOf(".");
+    if (dotPos > 0) {
+      DataBinder nested = createNestedBinder(property);
+      nested.bind(widget, property.substring(dotPos + 1), converter);
       Binding binding = new Binding(property, widget, converter, null);
       bindings.put(property, binding);
       return binding;
@@ -161,44 +163,38 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * property type if the value is null. The proxy's value for this property is then replaced with
    * the proxy managed by the nested data binder.
    * 
-   * @param widget
-   *          the widget to bind to, must not be null.
    * @param property
    *          the property of the model to bind the widget to, must not be null. The property must
    *          be of a @Bindable type.
-   * @param converter
-   *          the converter to use for this binding, null if default conversion should be used.
    */
-  private void createNestedBinders(final Widget widget, final String property, final Converter converter) {
-    int dotPos = property.indexOf(".");
-    if (dotPos > 0) {
-      String bindableProperty = property.substring(0, dotPos);
+  private DataBinder createNestedBinder(final String property) {
+    String bindableProperty = property.substring(0, property.indexOf("."));
+    DataBinder<Object> binder = binders.get(bindableProperty);
 
-      if (!propertyTypes.containsKey(bindableProperty)) {
-        throw new NonExistingPropertyException(bindableProperty);
-      }
-
-      if (!propertyTypes.get(bindableProperty).isBindable()) {
-        throw new RuntimeException("The type of property " + bindableProperty + " ("
-            + propertyTypes.get(bindableProperty).getType().getName() + ") is not a @Bindable type!");
-      }
-
-      DataBinder<Object> binder = binders.get(bindableProperty);
-      if (binder == null) {
-        if (proxy.get(bindableProperty) == null) {
-          binder = DataBinder.forType(propertyTypes.get(bindableProperty).getType(), initialState);
-        }
-        else {
-          binder = DataBinder.forModel(proxy.get(bindableProperty), initialState);
-        }
-        binders.put(bindableProperty, binder);
-      } 
-      else {
-        binder.setModel(proxy.get(bindableProperty), initialState);
-      }
-      binder.bind(widget, property.substring(dotPos + 1), converter);
-      proxy.set(bindableProperty, binder.getModel());
+    if (!propertyTypes.containsKey(bindableProperty)) {
+      throw new NonExistingPropertyException(bindableProperty);
     }
+
+    if (!propertyTypes.get(bindableProperty).isBindable()) {
+      throw new RuntimeException("The type of property " + bindableProperty + " ("
+            + propertyTypes.get(bindableProperty).getType().getName() + ") is not a @Bindable type!");
+    }
+
+    if (binder == null) {
+      if (proxy.get(bindableProperty) == null) {
+        binder = DataBinder.forType(propertyTypes.get(bindableProperty).getType(), initialState);
+      }
+      else {
+        binder = DataBinder.forModel(proxy.get(bindableProperty), initialState);
+      }
+      binders.put(bindableProperty, binder);
+    }
+    else {
+      binder.setModel(proxy.get(bindableProperty), initialState);
+    }
+    proxy.set(bindableProperty, binder.getModel());
+
+    return binder;
   }
 
   private void validatePropertyExpr(String property) {
@@ -418,7 +414,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   public InitialState getInitialState() {
     return initialState;
   }
-  
+
   /**
    * Configures the {@link InitialState}.
    */
@@ -443,6 +439,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   @Override
   public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+    int dotPos = property.indexOf(".");
+    if (dotPos > 0) {
+      DataBinder nested = createNestedBinder(property);      
+      nested.addPropertyChangeHandler(property.substring(dotPos + 1), handler);
+    }
+
     propertyChangeHandlerSupport.addPropertyChangeHandler(property, handler);
   }
 
