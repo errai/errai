@@ -15,22 +15,25 @@ import static org.junit.Assert.*;
 @RunWith(GwtMockitoTestRunner.class)
 public class LongTapRecogniserTest {
 
+  private final MockHasHandlers handlers;
+  private final LongTapRecognizer longTapRecognizer;
   private CodeToRun codeToRun;
 
-  @Test
-  public void shouldDetectLongTap() throws InterruptedException {
-    // given
-    MockHasHandlers handlers = new MockHasHandlers();
-    LongTapRecognizer longTapRecognizer = new LongTapRecognizer(handlers, new TimerExecutor() {
+  public LongTapRecogniserTest() {
+    handlers = new MockHasHandlers();
+    longTapRecognizer = new LongTapRecognizer(handlers, new TimerExecutor() {
       @Override
       public void execute(CodeToRun codeToRun, int time) {
         LongTapRecogniserTest.this.codeToRun = codeToRun;
       }
     });
+  }
+
+  @Test
+  public void shouldDetectLongTap() throws InterruptedException {
 
     // when
     longTapRecognizer.onTouchStart(new MockTouchStartEvent(1, 2, 3));
-    longTapRecognizer.onTouchEnd(new MockTouchEndEvent());
     codeToRun.onExecution();
 
     // then
@@ -45,5 +48,20 @@ public class LongTapRecogniserTest {
     assertEquals(3, tapEvent.getStartPositions().get(0).getPageY());
 
     assertSame(handlers, tapEvent.getSource());
+  }
+
+  @Test
+  public void shouldSimpleLongTouchWithBigMoveNotFiring() {
+
+    // when
+    longTapRecognizer.onTouchStart(new MockTouchStartEvent(1, 2, 3));
+    longTapRecognizer.onTouchMove(new MockTouchMoveEvent(1, 20, 50));
+
+    //simulate wait...
+    codeToRun.onExecution();
+
+    GwtEvent<?> event = handlers.getEvent();
+
+    assertNull(event);
   }
 }
