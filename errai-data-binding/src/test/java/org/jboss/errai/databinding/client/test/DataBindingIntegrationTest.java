@@ -556,6 +556,25 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong previous value in event", null, handler.getEvents().get(1).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
   }
+  
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testPropertyChangeHandlingWithPropertyChain() {
+    MockHandler handler = new MockHandler();
+
+    TextBox textBox = new TextBox();
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    binder.addPropertyChangeHandler("child.child.value", handler);
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", binder.getModel().getChild().getChild().getValue());
+    assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
+    assertEquals("Wrong property name in event", "value", handler.getEvents().get(0).getPropertyName());
+    assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
+    assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
+    assertEquals("Wrong event source", binder.getModel().getChild().getChild(), 
+        handler.getEvents().get(0).getSource());
+  }
 
   @Test
   public void testPropertyChangeHandlingOfBoundList() {
@@ -733,7 +752,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     ModuleWithInjectedBindable module =
         IOC.getBeanManager().lookupBean(ModuleWithInjectedBindable.class).getInstance();
 
-    // injecting a bindable type with @Model qualification shouldn't result in a bindable proxy
+    // injecting a bindable type without @Model qualification shouldn't result in a bindable proxy
     assertEquals(SingletonBindable.class, module.getUnboundModel().getClass());
     // verify that the injection scope is correct
     assertSame(module.getUnboundModel2(), module.getUnboundModel());
