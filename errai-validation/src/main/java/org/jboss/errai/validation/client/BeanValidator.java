@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.errai.validation.client.api;
+package org.jboss.errai.validation.client;
 
 import java.util.Set;
 
