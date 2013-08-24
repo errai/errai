@@ -19,6 +19,7 @@ package org.jboss.errai.validation.client.test;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
@@ -29,6 +30,8 @@ import org.jboss.errai.validation.client.ModuleWithInjectedValidator;
 import org.jboss.errai.validation.client.TestGroup;
 import org.jboss.errai.validation.client.TestModel;
 import org.jboss.errai.validation.client.api.BeanValidator;
+
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Integration test for injected {@link BeanValidator}s.
@@ -51,7 +54,6 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
   public void testValidatorInjection() {
     ModuleWithInjectedValidator module =
       IOC.getBeanManager().lookupBean(ModuleWithInjectedValidator.class).getInstance();
-    
     Validator validator = module.getValidator();
     assertNotNull("Validator was not injected", validator);
     
@@ -60,15 +62,58 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
   }
   
   public void testValidationOfBindableType() {
-    Validator validator = new BeanValidator();
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     
     TestModel model = DataBinder.forModel(new TestModel()).getModel();
     Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
     assertEquals("Expected two constraint violations", 2, violations.size());
+    
+    model.setStringVal("valid");
+    violations = validator.validate(model);
+    assertEquals("Expected one constraint violations", 1, violations.size());
+    
+    model.setNumVal(101);
+    violations = validator.validate(model);
+    assertEquals("Expected no constraint violations", 0, violations.size());
+  }
+  
+  public void testValidationOfNestedBindableType() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    TestModel model = DataBinder.forModel(new TestModel()).bind(new TextBox(), "child.stringVal").getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
+    // model and child model should get validated (see @Valid on child field which caused validation when not null)
+    assertEquals("Expected four constraint violations", 4, violations.size());
+    
+    model.setNumVal(101);
+    violations = validator.validate(model);
+    assertEquals("Expected three constraint violations", 3, violations.size());
+    
+    model.getChild().setStringVal("valid");
+    violations = validator.validate(model);
+    assertEquals("Expected two constraint violations", 2, violations.size());
   }
 
+  public void testValidationOfBindableTypeWithInjectedValidator() {
+    ModuleWithInjectedValidator module =
+      IOC.getBeanManager().lookupBean(ModuleWithInjectedValidator.class).getInstance();
+    Validator validator = module.getValidator();
+    
+    TestModel model = DataBinder.forModel(new TestModel()).getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
+    assertEquals("Expected two constraint violations", 2, violations.size());
+    
+    model.setStringVal("valid");
+    violations = validator.validate(model);
+    assertEquals("Expected one constraint violations", 1, violations.size());
+    
+    model.setNumVal(101);
+    violations = validator.validate(model);
+    assertEquals("Expected no constraint violations", 0, violations.size());
+  }
+  
   public void testValidationWithGroup() {
-    Validator validator =  new BeanValidator();
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     TestModel model = DataBinder.forModel(new TestModel()).getModel();
     Set<ConstraintViolation<TestModel>> violations = validator.validate(model, TestGroup.class);

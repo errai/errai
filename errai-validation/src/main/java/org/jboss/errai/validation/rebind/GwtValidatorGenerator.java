@@ -16,20 +16,6 @@
 
 package org.jboss.errai.validation.rebind;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
-import com.google.gwt.validation.client.GwtValidation;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.reflections.Reflections;
-import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
-import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
-import org.jboss.errai.reflections.util.ClasspathHelper;
-import org.jboss.errai.reflections.util.ConfigurationBuilder;
-
-import javax.validation.Constraint;
-import javax.validation.Validator;
-import javax.validation.groups.Default;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -38,9 +24,25 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.Constraint;
+import javax.validation.Validator;
+import javax.validation.groups.Default;
+
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.reflections.Reflections;
+import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
+import org.jboss.errai.reflections.util.ClasspathHelper;
+import org.jboss.errai.reflections.util.ConfigurationBuilder;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
+import com.google.gwt.validation.client.GwtValidation;
+
 /**
  * Generates the GWT {@link Validator} interface based on validation annotations.
- *
+ * 
  * @author Johannes Barop <jb@barop.de>
  */
 class GwtValidatorGenerator {
@@ -50,8 +52,7 @@ class GwtValidatorGenerator {
     ValidationScanner() {
       super(new ConfigurationBuilder()
               .setUrls(ClasspathHelper.forClassLoader())
-              .setScanners(new TypeAnnotationsScanner(), new FieldAnnotationsScanner())
-      );
+              .setScanners(new TypeAnnotationsScanner(), new FieldAnnotationsScanner()));
       scan();
     }
 
@@ -96,6 +97,7 @@ class GwtValidatorGenerator {
     return builder;
   }
 
+  @SuppressWarnings("unchecked")
   private SetMultimap<Class<?>, Annotation> getValidationConfig(Set<Class<?>> validationAnnotations) {
     SetMultimap<Class<?>, Annotation> beans = HashMultimap.create();
     for (Class<?> annotation : validationAnnotations) {
@@ -116,14 +118,18 @@ class GwtValidatorGenerator {
         Class<?>[] ret = (Class<?>[]) method.invoke(annotation, null);
         if (ret.length != 0) {
           groups.addAll(Arrays.asList(ret));
-        } else {
+        }
+        else {
           groups.add(Default.class);
         }
-      } catch (NoSuchMethodException e) {
+      }
+      catch (NoSuchMethodException e) {
         throw new RuntimeException("Error finding groups() parameter in " + annotation.getClass().getName(), e);
-      } catch (InvocationTargetException e) {
+      }
+      catch (InvocationTargetException e) {
         throw new RuntimeException("Error invoking groups() parameter in " + annotation.getClass().getName(), e);
-      } catch (IllegalAccessException e) {
+      }
+      catch (IllegalAccessException e) {
         throw new RuntimeException("Error invoking groups() parameter in " + annotation.getClass().getName(), e);
       }
     }
