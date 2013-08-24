@@ -16,26 +16,30 @@
 
 package org.jboss.errai.validation.rebind;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.validation.client.AbstractGwtValidatorFactory;
-import com.google.gwt.validation.client.impl.AbstractGwtValidator;
+import javax.validation.ValidatorFactory;
+
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.validation.client.api.BeanValidator;
 
-import javax.validation.ValidatorFactory;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.validation.client.AbstractGwtValidatorFactory;
+import com.google.gwt.validation.client.impl.AbstractGwtValidator;
 
 /**
  * Generates an implementation of {@link ValidatorFactory} which provides a generated implementation
  * of a GWT {@link javax.validation.Validator}.
- *
+ * 
  * @author Johannes Barop <jb@barop.de>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @GenerateAsync(ValidatorFactory.class)
 public class ValidatorFactoryGenerator extends AbstractAsyncGenerator {
@@ -57,7 +61,12 @@ public class ValidatorFactoryGenerator extends AbstractAsyncGenerator {
             .body()
             .publicMethod(AbstractGwtValidator.class, "createValidator")
             .append(
-                    Stmt.invokeStatic(GWT.class, "create", validatorInterface.getClassDefinition()).returnValue()
+                Stmt.nestedCall(
+                    Stmt.newObject(BeanValidator.class, Cast.to(AbstractGwtValidator.class,
+                        Stmt.invokeStatic(GWT.class, "create", validatorInterface.getClassDefinition()))
+                    )
+                )
+                .returnValue()
             )
             .finish();
     builder.getClassDefinition().addInnerClass(new InnerClass(validatorInterface.getClassDefinition()));
