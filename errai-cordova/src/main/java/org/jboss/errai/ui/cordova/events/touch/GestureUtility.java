@@ -5,7 +5,7 @@ import com.google.gwt.event.dom.client.TouchEndEvent;
 import com.google.gwt.event.dom.client.TouchMoveEvent;
 import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.ui.cordova.events.swipe.*;
+import org.jboss.errai.ui.cordova.events.touch.swipe.*;
 import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapEvent;
 import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapHandler;
 import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapRecognizer;

@@ -13,40 +13,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.jboss.errai.ui.cordova.events.swipe;
+package org.jboss.errai.ui.cordova.events.touch.swipe;
 
-import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
- * A {@link SwipeMoveEvent} occurs when the user moves his finger over the
- * display
+ * A {@link SwipeEndEvent} occurs when the user lifts his finger of the display
  *
  * @author Daniel Kurka
  *
  */
-public class SwipeMoveEvent extends SwipeEvent<SwipeMoveHandler> {
+public class SwipeEndEvent extends SwipeEvent<SwipeEndHandler> {
 
-	private final static GwtEvent.Type<SwipeMoveHandler> TYPE = new Type<SwipeMoveHandler>();
+	private final static GwtEvent.Type<SwipeEndHandler> TYPE = new Type<SwipeEndHandler>();
 	private final boolean distanceReached;
 	private final int distance;
-	private final Touch touch;
 
-	public static GwtEvent.Type<SwipeMoveHandler> getType() {
+	public static GwtEvent.Type<SwipeEndHandler> getType() {
 		return TYPE;
 	}
 
 	/**
-	 * Construct a {@link SwipeMoveEvent}
+	 * Construct a swipe end event
 	 *
-     * @param touch the touch of the finger
-     * @param distanceReached is the minimum distance reached for this swipe
-	 * @param distance the distance in px
+	 * @param distanceReached was the minumum distance reached
+	 * @param distance the distance that was covered by the finger
 	 * @param direction the direction of the swipe
 	 */
-	public SwipeMoveEvent(Touch touch, boolean distanceReached, int distance, Direction direction) {
+	public SwipeEndEvent(boolean distanceReached, int distance, Direction direction) {
 		super(direction);
-		this.touch = touch;
 		this.distanceReached = distanceReached;
 		this.distance = distance;
 	}
@@ -56,7 +51,7 @@ public class SwipeMoveEvent extends SwipeEvent<SwipeMoveHandler> {
 	 * @see com.google.gwt.event.shared.GwtEvent#getAssociatedType()
 	 */
 	@Override
-	public com.google.gwt.event.shared.GwtEvent.Type<SwipeMoveHandler> getAssociatedType() {
+	public com.google.gwt.event.shared.GwtEvent.Type<SwipeEndHandler> getAssociatedType() {
 		return TYPE;
 	}
 
@@ -65,31 +60,27 @@ public class SwipeMoveEvent extends SwipeEvent<SwipeMoveHandler> {
 	 * @see com.google.gwt.event.shared.GwtEvent#dispatch(com.google.gwt.event.shared.EventHandler)
 	 */
 	@Override
-	protected void dispatch(SwipeMoveHandler handler) {
-		handler.onSwipeMove(this);
+	protected void dispatch(SwipeEndHandler handler) {
+		handler.onSwipeEnd(this);
 
 	}
 
 	/**
-	 * the distance of this swipe
+	 * the distance the finger has covered in px
 	 * 
-	 * @return the distance of this swipe in px
+	 * @return the distance in px
 	 */
 	public int getDistance() {
 		return distance;
 	}
 
 	/**
-	 * is the minimum distance reached
+	 * is the minimum distance reached by this swipe
 	 * 
-	 * @return true if the minimum distance reached
+	 * @return true if minimum distance was reached
 	 */
 	public boolean isDistanceReached() {
 		return distanceReached;
-	}
-
-	public Touch getTouch() {
-		return touch;
 	}
 
 }

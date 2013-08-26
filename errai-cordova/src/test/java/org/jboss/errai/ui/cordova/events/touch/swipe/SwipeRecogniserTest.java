@@ -2,10 +2,6 @@ package org.jboss.errai.ui.cordova.events.touch.swipe;
 
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import org.jboss.errai.ui.cordova.events.swipe.SwipeEndEvent;
-import org.jboss.errai.ui.cordova.events.swipe.SwipeMoveEvent;
-import org.jboss.errai.ui.cordova.events.swipe.SwipeRecognizer;
-import org.jboss.errai.ui.cordova.events.swipe.SwipeStartEvent;
 import org.jboss.errai.ui.cordova.events.touch.mock.MockHasHandlers;
 import org.jboss.errai.ui.cordova.events.touch.mock.MockTouchEndEvent;
 import org.jboss.errai.ui.cordova.events.touch.mock.MockTouchMoveEvent;
@@ -14,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.jboss.errai.ui.cordova.events.swipe.SwipeEvent.Direction;
+import static org.jboss.errai.ui.cordova.events.touch.swipe.SwipeEvent.Direction;
 
 /**
  * @author edewit@redhat.com

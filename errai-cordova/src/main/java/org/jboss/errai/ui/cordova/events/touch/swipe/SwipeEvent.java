@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.cordova.events.swipe;
+package org.jboss.errai.ui.cordova.events.touch.swipe;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;

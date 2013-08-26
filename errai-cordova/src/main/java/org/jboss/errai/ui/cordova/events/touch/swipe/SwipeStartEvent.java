@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.jboss.errai.ui.cordova.events.swipe;
+package org.jboss.errai.ui.cordova.events.touch.swipe;
 
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.shared.GwtEvent;

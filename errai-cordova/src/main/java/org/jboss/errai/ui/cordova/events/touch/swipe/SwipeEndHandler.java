@@ -13,23 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.jboss.errai.ui.cordova.events.swipe;
+package org.jboss.errai.ui.cordova.events.touch.swipe;
 
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * A {@link SwipeStartHandler} receives {@link SwipeStartEvent}s
+ * A {@link SwipeEndHandler} receives {@link SwipeEndEvent}s
  * 
  * @author Daniel Kurka
  * 
  */
-public interface SwipeStartHandler extends EventHandler {
-
+public interface SwipeEndHandler extends EventHandler {
 	/**
-	 * called when a {@link SwipeStartEvent} occurs
+	 * Called when a {@link SwipeEndEvent} occurs
 	 * 
 	 * @param event the event
 	 */
-	void onSwipeStart(SwipeStartEvent event);
-
+	public void onSwipeEnd(SwipeEndEvent event);
 }

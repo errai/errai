@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.cordova.events.swipe;
+package org.jboss.errai.ui.cordova.events.touch.swipe;
 
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.*;
@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.HasHandlers;
 import org.jboss.errai.ui.cordova.events.touch.AbstractRecognizer;
 import org.jboss.errai.ui.cordova.events.touch.TouchUtil;
 
-import static org.jboss.errai.ui.cordova.events.swipe.SwipeEvent.Direction;
+import static org.jboss.errai.ui.cordova.events.touch.swipe.SwipeEvent.Direction;
 
 public class SwipeRecognizer extends AbstractRecognizer {
 
