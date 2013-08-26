@@ -71,7 +71,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBasicBindingWithInjectedDataBinder() {
+  public void testBasicBindingWithInjection() {
     ModuleWithInjectedDataBinder module =
         IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
 
@@ -574,6 +574,10 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel().getChild().getChild(), 
         handler.getEvents().get(0).getSource());
+    
+    binder.removePropertyChangeHandler("child.child.value", handler);
+    textBox.setValue("UI change 2", true);
+    assertEquals("Should have received no additional event", 1, handler.getEvents().size());
   }
 
   @Test

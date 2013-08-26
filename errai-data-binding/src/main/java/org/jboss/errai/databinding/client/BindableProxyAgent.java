@@ -455,6 +455,15 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   @Override
   public void removePropertyChangeHandler(String property, PropertyChangeHandler handler) {
+    int dotPos = property.indexOf(".");
+    if (dotPos > 0) {
+      String bindableProperty = property.substring(0, dotPos);
+      DataBinder nested = binders.get(bindableProperty);
+      if (nested != null) {
+        nested.removePropertyChangeHandler(property.substring(dotPos + 1), handler);
+      }
+      
+    }
     propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
   }
 }
