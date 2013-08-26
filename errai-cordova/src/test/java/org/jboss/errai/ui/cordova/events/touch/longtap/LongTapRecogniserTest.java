@@ -3,6 +3,9 @@ package org.jboss.errai.ui.cordova.events.touch.longtap;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.jboss.errai.ui.cordova.events.touch.TimerExecutor;
+import org.jboss.errai.ui.cordova.events.touch.mock.MockHasHandlers;
+import org.jboss.errai.ui.cordova.events.touch.mock.MockTouchMoveEvent;
+import org.jboss.errai.ui.cordova.events.touch.mock.MockTouchStartEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

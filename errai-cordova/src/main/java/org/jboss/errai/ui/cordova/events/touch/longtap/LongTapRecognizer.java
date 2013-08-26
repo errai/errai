@@ -4,6 +4,7 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HasHandlers;
+import org.jboss.errai.ui.cordova.events.touch.AbstractRecognizer;
 import org.jboss.errai.ui.cordova.events.touch.GwtTimerExecutor;
 import org.jboss.errai.ui.cordova.events.touch.TimerExecutor;
 
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * @author edewit@redhat.com
  */
-public class LongTapRecognizer implements TouchStartHandler, TouchMoveHandler, TouchEndHandler, TouchCancelHandler {
+public class LongTapRecognizer extends AbstractRecognizer {
 
   public static final int DEFAULT_WAIT_TIME_IN_MS = 1500;
   public static final int DEFAULT_MAX_DISTANCE = 15;
@@ -24,10 +25,6 @@ public class LongTapRecognizer implements TouchStartHandler, TouchMoveHandler, T
   private final int numberOfFingers;
   private List<Touch> startPositions;
   private int touchCount;
-
-  protected enum State {
-    INVALID, READY, FINGERS_DOWN, FINGERS_UP, WAITING
-  }
 
   public LongTapRecognizer(HasHandlers source) {
     this(source, new GwtTimerExecutor(), 1);

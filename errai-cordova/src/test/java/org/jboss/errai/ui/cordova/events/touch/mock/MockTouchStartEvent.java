@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.cordova.events.touch.longtap;
+package org.jboss.errai.ui.cordova.events.touch.mock;
 
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Touch;
