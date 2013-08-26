@@ -18,7 +18,6 @@ package org.jboss.errai.bus.server;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
-import static org.jboss.errai.bus.client.util.ErrorHelper.sendClientError;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.getNewOneTimeToken;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
 import static org.jboss.errai.common.client.protocols.MessageParts.ConnectionSessionKey;
@@ -26,17 +25,7 @@ import static org.jboss.errai.common.client.protocols.MessageParts.RemoteService
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -344,7 +333,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         forwardToCluster(message, new Runnable() {
           @Override
           public void run() {
-            sendClientError(ServerMessageBusImpl.this, message, "failed to deliver message", e);
+            log.debug("Failed to deliver message to queue with id:" + message.get(String.class, MessageParts.SessionID), e);
           }
         });
       }
