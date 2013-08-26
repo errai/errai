@@ -16,16 +16,16 @@
 
 package org.jboss.errai.bus.client.api.base;
 
+import java.util.Map;
+
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
-
-import java.util.Map;
 
 /**
  * Internal wrapper class that makes any type of given message (the <i>wrapped
@@ -288,7 +288,7 @@ class ConversationMessageWrapper implements Message {
       newMessage.copyResource("Session", message);
     }
     else {
-      throw new RuntimeException("cannot have a conversation.  the incoming message has not session data associated with it.");
+      throw new RuntimeException("cannot have a conversation.  the incoming message has no session data associated with it.");
     }
 
     committed = true;

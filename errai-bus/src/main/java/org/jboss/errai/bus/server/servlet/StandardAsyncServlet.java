@@ -17,12 +17,9 @@
 package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
+import static org.slf4j.LoggerFactory.getLogger;
 
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.server.QueueUnavailableException;
-import org.jboss.errai.bus.server.api.MessageQueue;
-import org.jboss.errai.bus.server.api.QueueActivationCallback;
-import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
+import java.io.IOException;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -30,7 +27,13 @@ import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.QueueUnavailableException;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.api.QueueActivationCallback;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
+import org.slf4j.Logger;
 
 /**
  * An implementation of {@link AbstractErraiServlet} leveraging asynchronous support of Servlet 3.0.
@@ -39,6 +42,7 @@ import java.io.IOException;
  * @author Mike Brock
  */
 public class StandardAsyncServlet extends AbstractErraiServlet {
+  private static final Logger log = getLogger(StandardAsyncServlet.class);
   private static final long serialVersionUID = 1L;
 
   @Override
@@ -60,17 +64,18 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
     queue.heartBeat();
 
-    final OutputStreamWriteAdapter writer = new OutputStreamWriteAdapter(response.getOutputStream());
+    final OutputStreamWriteAdapter writer;
 
     if (isSSERequest(request)) {
-      prepareSSE(response);
-      prepareSSEContinue(response);
-
-      response.getOutputStream().flush();
-
       final AsyncContext asyncContext = request.startAsync();
       asyncContext.setTimeout(getSSETimeout());
       queue.setTimeout(getSSETimeout() + 5000);
+      
+      final HttpServletResponse asynResponse = (HttpServletResponse) asyncContext.getResponse();
+      prepareSSE(asynResponse);
+      prepareSSEContinue(asynResponse);
+      asynResponse.getOutputStream().flush();
+      writer = new OutputStreamWriteAdapter(asynResponse.getOutputStream());
 
       asyncContext.addListener(new AsyncListener() {
         @Override
@@ -100,13 +105,14 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         if (queue.messagesWaiting()) {
           queue.poll(writer);
           writer.write(SSE_TERMINATION_BYTES);
+          writer.flush();
+          return;
         }
 
         queue.setActivationCallback(new QueueActivationCallback() {
           @Override
           public void activate(final MessageQueue queue) {
             try {
-              queue.setActivationCallback(null);
               queue.poll(writer);
 
               writer.write(SSE_TERMINATION_BYTES);
@@ -114,20 +120,22 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
               queue.heartBeat();
               writer.flush();
 
-              prepareSSEContinue(response);
+              prepareSSEContinue(asynResponse);
+            }
+            catch (IOException e) {
+              log.debug("Closing queue with id: " + queue.getSession().getSessionId() + " due to IOException", e);
+              queue.stopQueue();
             }
             catch (final Throwable t) {
               try {
                 writeExceptionToOutputStream((HttpServletResponse) asyncContext.getResponse(), t);
               }
-              catch (IOException e) {
-                throw new RuntimeException("Failed to write exception to output stream", e);
+              catch (Throwable t2) {
+                log.debug("Failed to write exception to dead client", t2);
               }
             }
           }
         });
-
-        writer.flush();
       }
     }
 
@@ -135,6 +143,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       final AsyncContext asyncContext = request.startAsync();
       asyncContext.setTimeout(60000);
       queue.setTimeout(65000);
+      writer = new OutputStreamWriteAdapter(asyncContext.getResponse().getOutputStream());
 
       asyncContext.addListener(new AsyncListener() {
           @Override
@@ -177,12 +186,16 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
               queue.heartBeat();
               writer.flush();
             }
+            catch (IOException e) {
+              log.debug("Closing queue with id: " + queue.getSession().getSessionId() + " due to IOException", e);
+              
+            }
             catch (final Throwable t) {
               try {
                 writeExceptionToOutputStream((HttpServletResponse) asyncContext.getResponse(), t);
               }
-              catch (IOException e) {
-                throw new RuntimeException("Failed to write exception to output stream", e);
+              catch (Throwable t2) {
+                log.debug("Failed to write exception to dead client", t2);
               }
             }
             finally {
