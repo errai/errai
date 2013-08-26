@@ -4,6 +4,8 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.shared.GwtEvent;
 
+import java.util.List;
+
 /**
  * A long tap event is produced if the user touches an area of the display for a
  * given time without moving his finger(s)
@@ -22,7 +24,7 @@ public class LongTapEvent extends GwtEvent<LongTapHandler> {
 		return TYPE;
 	}
 
-	private final JsArray<Touch> startPositions;
+	private final List<Touch> startPositions;
 	private final int numberOfFingers;
 	private final int time;
 
@@ -34,7 +36,7 @@ public class LongTapEvent extends GwtEvent<LongTapHandler> {
 	 * @param time the time the fingers where touching
 	 * @param startPositions the start position of each finger
 	 */
-	public LongTapEvent(Object source, int numberOfFingers, int time, JsArray<Touch> startPositions) {
+	public LongTapEvent(Object source, int numberOfFingers, int time, List<Touch> startPositions) {
 		this.numberOfFingers = numberOfFingers;
 		this.time = time;
 		this.startPositions = startPositions;
@@ -75,7 +77,7 @@ public class LongTapEvent extends GwtEvent<LongTapHandler> {
 	 * 
 	 * @return the array of start positions
 	 */
-	public JsArray<Touch> getStartPositions() {
+	public List<Touch> getStartPositions() {
 		return startPositions;
 	}
 

@@ -26,7 +26,7 @@ public class LongTapRecogniserTest {
       public void execute(CodeToRun codeToRun, int time) {
         LongTapRecogniserTest.this.codeToRun = codeToRun;
       }
-    });
+    }, 1);
   }
 
   @Test

@@ -21,6 +21,7 @@ public class LongTapRecognizer implements TouchStartHandler, TouchMoveHandler, T
   private final HasHandlers source;
   private State state = State.READY;
   private TimerExecutor timerExecutor;
+  private final int numberOfFingers;
   private List<Touch> startPositions;
   private int touchCount;
 
@@ -29,12 +30,17 @@ public class LongTapRecognizer implements TouchStartHandler, TouchMoveHandler, T
   }
 
   public LongTapRecognizer(HasHandlers source) {
-    this(source, new GwtTimerExecutor());
+    this(source, new GwtTimerExecutor(), 1);
   }
 
-  protected LongTapRecognizer(HasHandlers source, TimerExecutor timerExecutor) {
+  public LongTapRecognizer(HasHandlers source, int numberOfFingers) {
+    this(source, new GwtTimerExecutor(), numberOfFingers);
+  }
+
+  protected LongTapRecognizer(HasHandlers source, TimerExecutor timerExecutor, int numberOfFingers) {
     this.source = source;
     this.timerExecutor = timerExecutor;
+    this.numberOfFingers = numberOfFingers;
     this.startPositions = new ArrayList<Touch>();
   }
 
@@ -59,7 +65,7 @@ public class LongTapRecognizer implements TouchStartHandler, TouchMoveHandler, T
         break;
     }
 
-    if (touchCount == 1) {
+    if (touchCount == numberOfFingers) {
       state = State.WAITING;
       timerExecutor.execute(new TimerExecutor.CodeToRun() {
 
@@ -70,14 +76,14 @@ public class LongTapRecognizer implements TouchStartHandler, TouchMoveHandler, T
             return;
           }
 
-          source.fireEvent(new LongTapEvent(source, 1, DEFAULT_WAIT_TIME_IN_MS, event.getTouches()));
+          source.fireEvent(new LongTapEvent(source, numberOfFingers, DEFAULT_WAIT_TIME_IN_MS, startPositions));
           reset();
 
         }
       }, DEFAULT_WAIT_TIME_IN_MS);
     }
 
-    if (touchCount > 1) {
+    if (touchCount > numberOfFingers) {
       state = State.INVALID;
     }
   }
@@ -127,7 +133,7 @@ public class LongTapRecognizer implements TouchStartHandler, TouchMoveHandler, T
         break;
       case FINGERS_UP:
         // are we ready?
-        if (currentTouches == 0 && touchCount == 1) {
+        if (currentTouches == 0 && touchCount == numberOfFingers) {
           // fire and reset
 
           reset();
