@@ -46,9 +46,14 @@ public interface CustomTypeTestService {
   };
   
   @GET
-  @Path("/1")
+  @Path("/entity")
   @Produces("application/json")
   public Entity getEntity();
+  
+  @GET
+  @Path("/sub")
+  @Produces("application/json")
+  public Entity getSubEntity();
   
   @GET
   @Produces("application/json")

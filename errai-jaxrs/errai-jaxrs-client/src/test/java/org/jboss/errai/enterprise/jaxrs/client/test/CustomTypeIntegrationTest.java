@@ -21,6 +21,7 @@ import java.util.List;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.SubEntity;
 import org.junit.Test;
 
 /**
@@ -39,6 +40,12 @@ public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {
   public void testGetWithCustomType() {
     call(CustomTypeTestService.class,
         new AssertionCallback<Entity>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
+  }
+  
+  @Test
+  public void testGetWithCustomSubType() {
+    call(CustomTypeTestService.class,
+        new AssertionCallback<Entity>("@GET using custom type failed", new SubEntity("val"))).getSubEntity();
   }
 
   @Test

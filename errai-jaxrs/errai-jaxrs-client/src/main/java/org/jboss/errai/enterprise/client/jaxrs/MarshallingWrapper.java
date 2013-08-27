@@ -19,6 +19,7 @@ package org.jboss.errai.enterprise.client.jaxrs;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.marshalling.client.Marshalling;
 
@@ -28,7 +29,7 @@ import org.jboss.errai.marshalling.client.Marshalling;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingWrapper {
-  
+
   public static String toJSON(final Object obj) {
     return _toJSON(Marshalling.toJSON(obj));
   }
@@ -49,11 +50,20 @@ public class MarshallingWrapper {
     return json;
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> T fromJSON(final String json, final Class<T> type) {
+    if (json.contains(SerializationParts.ENCODED_TYPE)) {
+      // This is Errai's native JSON format (we don't need to transform and don't need to rely on
+      // the provided type since it's part of the payload)
+      return (T) Marshalling.fromJSON(json);
+    }
     return Marshalling.fromJSON(_fromJSON(json), type);
   }
-  
+
   public static <T> T fromJSON(final String json, final Class<T> type, final Class<?> elementType) {
+    if (elementType == null) {
+      return fromJSON(json, type);
+    }
     return Marshalling.fromJSON(_fromJSON(json), type, elementType);
   }
 
@@ -61,7 +71,7 @@ public class MarshallingWrapper {
   public static <K, V> Map<K, V> fromJSON(final String json, final Class<?> type, final Class<K> mapKeyType, final Class<V> mapValueType) {
     return (Map<K, V>) Marshalling.fromJSON(_fromJSON(json), type, mapKeyType, mapValueType);
   }
-  
+
   public static Object fromJSON(final String json) {
     return Marshalling.fromJSON(_fromJSON(json), Object.class);
   }

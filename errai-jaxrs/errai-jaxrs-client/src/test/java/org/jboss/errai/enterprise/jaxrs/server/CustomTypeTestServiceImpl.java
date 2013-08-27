@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.SubEntity;
 
 /**
  * Implementation of {@link CustomTypeTestService} returning test data.
@@ -32,6 +33,11 @@ public class CustomTypeTestServiceImpl implements CustomTypeTestService {
   @Override
   public Entity getEntity() {
     return new Entity(1, "entity1");
+  }
+  
+  @Override
+  public Entity getSubEntity() {
+    return new SubEntity("val");
   }
 
   @Override
