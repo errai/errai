@@ -145,7 +145,27 @@
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>
+              <excludes>
+                <exclude>**/events/**</exclude>
+              </excludes>
             </configuration>
+            <executions>
+              <execution>
+                <phase>test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <useSystemClassLoader>true</useSystemClassLoader>
+                  <includes>
+                    <include>**/events/**/*Test.java</include>
+                  </includes>
+                  <excludes>
+                    <exclude>none</exclude>
+                  </excludes>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
