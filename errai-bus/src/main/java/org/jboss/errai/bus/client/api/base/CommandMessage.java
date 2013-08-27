@@ -36,6 +36,7 @@ import java.util.Map;
  * @see ConversationMessage
  * @see MessageBuilder
  * @author Mike Brock
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @SuppressWarnings({"UnusedDeclarations"})
 public class CommandMessage implements Message {
@@ -336,6 +337,9 @@ public class CommandMessage implements Message {
 
   @Override
   public void sendNowWith(final MessageBus viaThis) {
+    if (ConversationHelper.hasConversationCallback(this)) {
+      ConversationHelper.createConversationService(viaThis, this);
+    }
     viaThis.send(this);
   }
 
