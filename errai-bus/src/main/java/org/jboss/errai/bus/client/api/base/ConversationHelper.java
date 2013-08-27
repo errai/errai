@@ -28,6 +28,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 class ConversationHelper {
   private static final String RES_NAME = "MessageReplyCallback";
@@ -47,6 +48,10 @@ class ConversationHelper {
 
       m.set(MessageParts.ReplyTo, replyService);
     }
+  }
+  
+  static boolean hasConversationCallback(Message message) {
+    return message.hasResource(RES_NAME);
   }
 
   static int count() {
