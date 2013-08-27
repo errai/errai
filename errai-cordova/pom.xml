@@ -73,6 +73,19 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gwt.gwtmockito</groupId>
+      <artifactId>gwtmockito</artifactId>
+      <version>1.1.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -132,7 +145,27 @@
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>
+              <excludes>
+                <exclude>**/events/**</exclude>
+              </excludes>
             </configuration>
+            <executions>
+              <execution>
+                <phase>test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <useSystemClassLoader>true</useSystemClassLoader>
+                  <includes>
+                    <include>**/events/**/*Test.java</include>
+                  </includes>
+                  <excludes>
+                    <exclude>none</exclude>
+                  </excludes>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
