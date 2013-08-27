@@ -21,48 +21,24 @@ public class SwipeRecogniserTest {
   private MockHasHandlers hasHandlers = new MockHasHandlers();
   private SwipeRecognizer swipeRecognizer = new SwipeRecognizer(hasHandlers);
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testSwipeRecognizerHasHandlers() {
-    try {
-      new SwipeRecognizer(null);
-      Assert.fail("expected exception did not occur");
-
-    } catch (IllegalArgumentException e) {
-
-    }
+    new SwipeRecognizer(null);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testSwipeRecognizerHasHandlersInt() {
-    try {
-      new SwipeRecognizer(hasHandlers, -1);
-      Assert.fail("expected exception did not occur");
-
-    } catch (IllegalArgumentException e) {
-
-    }
+    new SwipeRecognizer(hasHandlers, -1);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testSwipeRecognizerHasHandlersInt1() {
-    try {
-      new SwipeRecognizer(hasHandlers, 2);
-      Assert.fail("expected exception did not occur");
-
-    } catch (IllegalArgumentException e) {
-
-    }
+    new SwipeRecognizer(hasHandlers, 2);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testSwipeRecognizerHasHandlersIntInt() {
-    try {
-      new SwipeRecognizer(hasHandlers, 20, -1);
-      Assert.fail("expected exception did not occur");
-
-    } catch (IllegalArgumentException e) {
-
-    }
+    new SwipeRecognizer(hasHandlers, 20, -1);
   }
 
   @Test

@@ -5,6 +5,10 @@ import com.google.gwt.event.dom.client.TouchEndEvent;
 import com.google.gwt.event.dom.client.TouchMoveEvent;
 import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ui.cordova.events.touch.pinch.OffsetProvider;
+import org.jboss.errai.ui.cordova.events.touch.pinch.PinchEvent;
+import org.jboss.errai.ui.cordova.events.touch.pinch.PinchHandler;
+import org.jboss.errai.ui.cordova.events.touch.pinch.PinchRecognizer;
 import org.jboss.errai.ui.cordova.events.touch.swipe.*;
 import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapEvent;
 import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapHandler;
@@ -40,6 +44,23 @@ public class GestureUtility {
   public void addSwipeEndHandler(SwipeEndHandler handler) {
     initialiseSwipeRecognizer();
     source.addHandler(handler, SwipeEndEvent.getType());
+  }
+
+  public void addPinchHandler(PinchHandler handler) {
+    PinchRecognizer recognizer = new PinchRecognizer(source, new OffsetProvider() {
+      @Override
+      public int getLeft() {
+        return source.getAbsoluteLeft();
+      }
+
+      @Override
+      public int getTop() {
+        return source.getAbsoluteTop();
+      }
+    });
+
+    registerRecognizer(recognizer);
+    source.addHandler(handler, PinchEvent.getType());
   }
 
   private void initialiseSwipeRecognizer() {
