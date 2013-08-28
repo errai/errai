@@ -63,6 +63,7 @@
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
     <jetty.version>6.1.25</jetty.version>
+    <weld.version>1.1.6.Final</weld.version>
   </properties>
 
   <dependencyManagement>
@@ -233,6 +234,7 @@
         <dependency>
           <groupId>xml-apis</groupId>
           <artifactId>xml-apis</artifactId>
+          <version>2.0.2</version>
           <scope>provided</scope>
         </dependency>
 
@@ -258,12 +260,14 @@
         <dependency>
           <groupId>org.jboss.weld</groupId>
           <artifactId>weld-api</artifactId>
+          <version>1.1.Final</version>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.weld</groupId>
           <artifactId>weld-spi</artifactId>
+          <version>1.1.Final</version>
           <scope>provided</scope>
         </dependency>
 
