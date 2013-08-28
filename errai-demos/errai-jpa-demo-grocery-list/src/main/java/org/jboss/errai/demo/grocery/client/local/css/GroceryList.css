@@ -183,6 +183,11 @@ html,body {
 
 .list-group {
     margin-bottom: 0;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    width: 100%;
+    overflow: hidden;
 }
 
 .glyphicon-edit {

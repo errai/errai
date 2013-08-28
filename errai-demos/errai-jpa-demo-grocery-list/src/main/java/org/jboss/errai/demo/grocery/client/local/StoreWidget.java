@@ -16,28 +16,30 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import com.google.gwt.event.dom.client.*;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.client.widget.HasModel;
+import org.jboss.errai.ui.cordova.events.touch.GestureUtility;
+import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapEvent;
+import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapHandler;
+import org.jboss.errai.ui.cordova.events.touch.swipe.*;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.errai.ui.shared.api.annotations.AutoBound;
-import org.jboss.errai.ui.shared.api.annotations.Bound;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.shared.api.annotations.*;
 
-import com.google.common.collect.ImmutableMultimap;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 @Dependent
 @Templated("#main")
@@ -75,30 +77,40 @@ public class StoreWidget extends Composite implements HasModel<Store> {
 
     @PostConstruct
     public void init() {
-      final Timer longPress = new Timer() {
-
+      final GestureUtility gestureUtility = new GestureUtility(this);
+      gestureUtility.addLongTapHandler(new LongTapHandler() {
         @Override
-        public void run() {
+        public void onLongTap(LongTapEvent event) {
           switchMode();
         }
-      };
-      addDomHandler(new MouseDownHandler() {
+      });
+      gestureUtility.addSwipeMoveHandler(new SwipeMoveHandler() {
         @Override
-        public void onMouseDown(MouseDownEvent event) {
-          longPress.schedule(1500);
-        }
-      }, MouseDownEvent.getType());
-
-      addDomHandler(new MouseUpHandler() {
-        @Override
-        public void onMouseUp(MouseUpEvent event) {
-          if (!editMode) {
-            toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
+        public void onSwipeMove(SwipeMoveEvent event) {
+          int distance;
+          switch (event.getDirection()) {
+            case LEFT_TO_RIGHT:
+              distance = event.getDistance();
+              break;
+            case RIGHT_TO_LEFT:
+              distance = -event.getDistance();
+              break;
+            case TOP_TO_BOTTOM:
+            case BOTTOM_TO_TOP:
+            default:
+              distance = 0;
           }
-          longPress.cancel();
+          StoreWidget.this.getElement().getStyle().setLeft(distance, Style.Unit.PX);
         }
-      }, MouseUpEvent.getType());
-
+      });
+      gestureUtility.addSwipeEndHandler(new SwipeEndHandler() {
+        @Override
+        public void onSwipeEnd(SwipeEndEvent event) {
+          if (event.isDistanceReached()) {
+            deleteThisStore();
+          }
+        }
+      });
     }
 
     @Override
@@ -112,8 +124,18 @@ public class StoreWidget extends Composite implements HasModel<Store> {
 
     @EventHandler("deleteButton")
     private void deleteThisStore(ClickEvent e) {
-        em.remove(getModel());
+      deleteThisStore();
+    }
+
+    private void deleteThisStore() {
+        //remove detached entity
+        em.remove(em.find(Store.class, getModel().getId()));
         em.flush();
+    }
+
+  @EventHandler
+    private void onClick(ClickEvent e) {
+        toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
     }
 
     public void switchMode() {
