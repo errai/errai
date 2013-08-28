@@ -25,6 +25,14 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import com.google.gwt.animation.client.Animation;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Department;
@@ -38,11 +46,8 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
+
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * A form for editing the properties of a new or existing Item object.
@@ -50,7 +55,7 @@ import com.google.gwt.user.client.ui.TextBox;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Dependent
-@Templated
+@Templated("#form")
 public class ItemForm extends Composite {
 
     @Inject private EntityManager em;
@@ -67,6 +72,8 @@ public class ItemForm extends Composite {
     @Inject @Bound(property="department.name") @DataField private SuggestBox department;
     @Inject @DataField private Button saveButton;
 
+    @DataField Element otherFields = DOM.createDiv();
+
     private Runnable afterSaveAction;
 
     @PostConstruct
@@ -80,9 +87,28 @@ public class ItemForm extends Composite {
         for (Department d : em.createNamedQuery("allDepartments", Department.class).getResultList()) {
             dso.add(d.getName());
         }
+
+        name.getValueBox().addFocusHandler(new FocusHandler() {
+          @Override
+          public void onFocus(FocusEvent event) {
+            if ("0px".equals(otherFields.getStyle().getHeight())) {
+              new Animation() {
+                @Override
+                protected void onUpdate(double progress) {
+                  otherFields.getStyle().setHeight(Window.getClientWidth() > 768 ? 215 : 145 * progress, PX);
+                }
+              }.run(1000);
+            }
+          }
+        });
+      hideOtherFields();
     }
 
-    @PreDestroy
+  private void hideOtherFields() {
+    otherFields.getStyle().setHeight(0, PX);
+  }
+
+  @PreDestroy
     void cleanup() {
         itemBinder.unbind();
     }
@@ -129,6 +155,8 @@ public class ItemForm extends Composite {
         groceryList.getItems().add(item);
         em.merge(groceryList);
         em.flush();
+
+        hideOtherFields();
 
         if (afterSaveAction != null) {
             afterSaveAction.run();

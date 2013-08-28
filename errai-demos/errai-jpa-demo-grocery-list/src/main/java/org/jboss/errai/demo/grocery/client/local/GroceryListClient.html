@@ -17,24 +17,18 @@
  -->
 <html>
 <head>
-<link href="css/bootstrap/css/bootstrap.css" rel="stylesheet">
-<link href="../../../../../../../../webapp/GroceryList.css" rel="stylesheet">
-<link href="css/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+  <link href="css/bootstrap/css/bootstrap.css" rel="stylesheet">
+  <link href="css/bootstrap/css/bootstrap-glyphicons.css" rel="stylesheet">
+  <link href="../../../../../../../../webapp/GroceryList.css" rel="stylesheet">
 </head>
 <body>
     <div id=wrap data-field=body>
         <div data-field=navbar data-role=dummy>
-            <div class="navbar navbar-fixed-top">
-                <div class=navbar-inner>
-                    <div class=container>
-                        <span class=brand>Example Navbar</span>
-                        <ul class=nav>
-                            <li><a>Item</a>
-                            <li><a>Item</a>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+          <div class="navbar navbar-inverse">
+            <button data-field="info" type="button" class="glyphicon glyphicon-info-sign btn btn-default navbar-btn"></button>
+            <a class="navbar-brand">Grocery List</a>
+            <button type="button" class="glyphicon glyphicon-edit btn btn-default navbar-btn pull-right"></button>
+          </div>
         </div>
 
         <!-- Spacer. Prevents content from getting hidden underneath the fixed position navbar. -->
@@ -83,9 +77,14 @@
         <div id=push></div>
     </div>
     <div id=footer data-field=footer>
-        <div class=container>
-            <div class="muted credit" data-field=text>This is most definitely a footer.</div>
+      <div class="navbar navbar-inverse navbar-fixed-bottom">
+        <div class="btn-group dropup navbar-btn">
+          <button type="button" class="btn btn-default" data-field="list">
+            <span class="glyphicon glyphicon-list"></span>
+          </button>
         </div>
+        <div data-field="sortWidget" style="display: inline"></div>
+      </div>
     </div>
 </body>
 </html>

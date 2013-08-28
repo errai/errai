@@ -16,12 +16,12 @@
 
 package org.jboss.errai.ui.client.widget;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.BindableListChangeHandler;
 import org.jboss.errai.databinding.client.BindableListWrapper;
@@ -31,22 +31,12 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.*;
 
 /**
  * A type of widget that displays and manages a child widget for each item in a list of model
  * objects. The widget instances are managed by Errai's IOC container and are arranged in a
- * {@link ComplexPanel}. By default, a {@link VerticalPanel} is used, but an alternative can be
+ * {@link ComplexPanel}. By default, a {@link FlowPanel} is used, but an alternative can be
  * specified using {@link #ListWidget(ComplexPanel)}.
  * 
  * @param <M>
@@ -69,7 +59,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   private boolean valueChangeHandlerInitialized;
 
   protected ListWidget() {
-    this(new VerticalPanel());
+    this(new FlowPanel());
   }
 
   protected ListWidget(ComplexPanel panel) {
@@ -99,7 +89,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    *          the rendered item list. Every change to this list will update the corresponding
    *          rendered item widgets.
    */
-  protected void onItemsRendered(List<M> items) {};
+  protected void onItemsRendered(List<M> items) {}
 
   /**
    * Returns the panel that contains all item widgets.
@@ -118,7 +108,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    * If the standard synchronous bean manager is used it is guaranteed that all widgets have been
    * added to the panel when this method returns. In case the asynchronous bean manager is used this
    * method might return before the widgets have been added to the panel. See
-   * {@link #onItemsRendered()}.
+   * {@link #onItemsRendered(List)}.
    * 
    * @param items
    *          The list of model objects. If null or empty all existing child widgets will be

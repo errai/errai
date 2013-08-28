@@ -36,7 +36,7 @@ public class GestureUtility {
     source.addHandler(handler, SwipeStartEvent.getType());
   }
 
-  public void addSwipeStartHandler(SwipeMoveHandler handler) {
+  public void addSwipeMoveHandler(SwipeMoveHandler handler) {
     initialiseSwipeRecognizer();
     source.addHandler(handler, SwipeMoveEvent.getType());
   }

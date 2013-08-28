@@ -16,27 +16,32 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.demo.grocery.client.shared.Store;
-import org.jboss.errai.ui.client.widget.HasModel;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.errai.ui.shared.api.annotations.AutoBound;
-import org.jboss.errai.ui.shared.api.annotations.Bound;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
-
 import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ui.client.widget.HasModel;
+import org.jboss.errai.ui.cordova.events.touch.GestureUtility;
+import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapEvent;
+import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapHandler;
+import org.jboss.errai.ui.cordova.events.touch.swipe.*;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.shared.api.annotations.*;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 @Dependent
 @Templated("#main")
@@ -60,6 +65,10 @@ public class StoreWidget extends Composite implements HasModel<Store> {
     @Inject
     private TransitionTo<StorePage> toStorePage;
 
+    private @DataField Element panel = DOM.createDiv();
+
+    private boolean editMode;
+
     @Inject
     EntityManager em;
 
@@ -68,23 +77,80 @@ public class StoreWidget extends Composite implements HasModel<Store> {
         return storeBinder.getModel();
     }
 
+    @PostConstruct
+    public void init() {
+      final GestureUtility gestureUtility = new GestureUtility(this);
+      gestureUtility.addLongTapHandler(new LongTapHandler() {
+        @Override
+        public void onLongTap(LongTapEvent event) {
+          switchMode();
+        }
+      });
+      final Style style = StoreWidget.this.getElement().getStyle();
+      gestureUtility.addSwipeMoveHandler(new SwipeMoveHandler() {
+        @Override
+        public void onSwipeMove(SwipeMoveEvent event) {
+          int distance;
+          switch (event.getDirection()) {
+            case LEFT_TO_RIGHT:
+              distance = event.getDistance();
+              break;
+            case RIGHT_TO_LEFT:
+              distance = -event.getDistance();
+              break;
+            case TOP_TO_BOTTOM:
+            case BOTTOM_TO_TOP:
+            default:
+              distance = 0;
+          }
+          style.setLeft(distance, PX);
+        }
+      });
+      gestureUtility.addSwipeEndHandler(new SwipeEndHandler() {
+        @Override
+        public void onSwipeEnd(SwipeEndEvent event) {
+          if (event.isDistanceReached()) {
+            deleteThisStore();
+          }
+          else {
+            style.setLeft(0, PX);
+          }
+        }
+      });
+    }
+
     @Override
     public void setModel(Store store) {
         if (store.getName() == null || store.getName().trim().length() == 0) {
             store.setName("Unnamed Store"); // XXX this side effect is not in a great place
         }
         storeBinder.setModel(store, InitialState.FROM_MODEL);
-        departments.setText(store.getDepartments().size() + " Departments");
-    }
-
-    @EventHandler
-    private void onClick(ClickEvent e) {
-        toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
+        departments.setText(String.valueOf(store.getDepartments().size()));
     }
 
     @EventHandler("deleteButton")
     private void deleteThisStore(ClickEvent e) {
-        em.remove(getModel());
+      deleteThisStore();
+    }
+
+    private void deleteThisStore() {
+        //remove detached entity
+        em.remove(em.find(Store.class, getModel().getId()));
         em.flush();
+    }
+
+  @EventHandler
+    private void onClick(ClickEvent e) {
+        toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
+    }
+
+    public void switchMode() {
+      if (editMode) {
+        panel.addClassName("edit");
+      } else {
+        panel.removeClassName("edit");
+      }
+
+      editMode = !editMode;
     }
 }

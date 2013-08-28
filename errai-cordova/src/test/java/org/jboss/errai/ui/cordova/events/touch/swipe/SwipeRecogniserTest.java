@@ -1,7 +1,8 @@
 package org.jboss.errai.ui.cordova.events.touch.swipe;
 
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.jboss.errai.ui.cordova.events.touch.swipe.SwipeEvent.Direction;
+import static org.junit.Assert.*;
+
 import org.jboss.errai.ui.cordova.events.touch.mock.MockHasHandlers;
 import org.jboss.errai.ui.cordova.events.touch.mock.MockTouchEndEvent;
 import org.jboss.errai.ui.cordova.events.touch.mock.MockTouchMoveEvent;
@@ -10,7 +11,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.jboss.errai.ui.cordova.events.touch.swipe.SwipeEvent.Direction;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 
 /**
  * @author edewit@redhat.com
@@ -46,7 +48,7 @@ public class SwipeRecogniserTest {
     swipeRecognizer.onTouchStart(new MockTouchStartEvent(1, 0, 0));
 
     boolean first = true;
-    int i = 1;
+    int i;
     for (i = 1; i < 60; i++) {
       swipeRecognizer.onTouchMove(new MockTouchMoveEvent(1, i, 0));
       if (i >= swipeRecognizer.getThreshold()) {
@@ -55,25 +57,28 @@ public class SwipeRecogniserTest {
         if (first) {
           first = false;
           if (!(event instanceof SwipeStartEvent)) {
-            Assert.fail("swipe start event was not fired");
+            fail("swipe start event was not fired");
           }
           SwipeStartEvent swipeStartEvent = (SwipeStartEvent) event;
 
-          Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeStartEvent.getDirection());
-          Assert.assertEquals(swipeRecognizer.getThreshold(), swipeStartEvent.getDistance());
+          assertEquals(Direction.LEFT_TO_RIGHT, swipeStartEvent.getDirection());
+          assertEquals(swipeRecognizer.getThreshold(),
+                  swipeStartEvent.getDistance());
 
-        } else {
+        }
+        else {
           if (!(event instanceof SwipeMoveEvent)) {
-            Assert.fail("swipe move event was not fired");
+            fail("swipe move event was not fired");
           }
           SwipeMoveEvent swipeMoveEvent = (SwipeMoveEvent) event;
 
-          Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeMoveEvent.getDirection());
-          Assert.assertEquals(i, swipeMoveEvent.getDistance());
+          assertEquals(Direction.LEFT_TO_RIGHT, swipeMoveEvent.getDirection());
+          assertEquals(i, swipeMoveEvent.getDistance());
 
           if (swipeMoveEvent.getDistance() > swipeRecognizer.getMinDistance()) {
-            Assert.assertTrue(swipeMoveEvent.isDistanceReached());
-          } else {
+            assertTrue(swipeMoveEvent.isDistanceReached());
+          }
+          else {
             Assert.assertFalse(swipeMoveEvent.isDistanceReached());
           }
 
@@ -86,14 +91,14 @@ public class SwipeRecogniserTest {
     GwtEvent<?> event = hasHandlers.getEvent();
 
     if (!(event instanceof SwipeEndEvent)) {
-      Assert.fail("swipe end event was not fired");
+      fail("swipe end event was not fired");
     }
     SwipeEndEvent swipeEndEvent = (SwipeEndEvent) event;
 
-    Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeEndEvent.getDirection());
-    Assert.assertEquals(i - 1, swipeEndEvent.getDistance());
+    assertEquals(Direction.LEFT_TO_RIGHT, swipeEndEvent.getDirection());
+    assertEquals(i - 1, swipeEndEvent.getDistance());
 
-    Assert.assertTrue(swipeEndEvent.isDistanceReached());
+    assertTrue(swipeEndEvent.isDistanceReached());
 
   }
 
@@ -111,25 +116,28 @@ public class SwipeRecogniserTest {
         if (first) {
           first = false;
           if (!(event instanceof SwipeStartEvent)) {
-            Assert.fail("swipe start event was not fired");
+            fail("swipe start event was not fired");
           }
           SwipeStartEvent swipeStartEvent = (SwipeStartEvent) event;
 
-          Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeStartEvent.getDirection());
-          Assert.assertEquals(swipeRecognizer.getThreshold(), swipeStartEvent.getDistance());
+          assertEquals(Direction.LEFT_TO_RIGHT, swipeStartEvent.getDirection());
+          assertEquals(swipeRecognizer.getThreshold(),
+                  swipeStartEvent.getDistance());
 
-        } else {
+        }
+        else {
           if (!(event instanceof SwipeMoveEvent)) {
-            Assert.fail("swipe move event was not fired");
+            fail("swipe move event was not fired");
           }
           SwipeMoveEvent swipeMoveEvent = (SwipeMoveEvent) event;
 
-          Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeMoveEvent.getDirection());
-          Assert.assertEquals(i, swipeMoveEvent.getDistance());
+          assertEquals(Direction.LEFT_TO_RIGHT, swipeMoveEvent.getDirection());
+          assertEquals(i, swipeMoveEvent.getDistance());
 
           if (swipeMoveEvent.getDistance() > swipeRecognizer.getMinDistance()) {
-            Assert.assertTrue(swipeMoveEvent.isDistanceReached());
-          } else {
+            assertTrue(swipeMoveEvent.isDistanceReached());
+          }
+          else {
             Assert.assertFalse(swipeMoveEvent.isDistanceReached());
           }
 
@@ -142,14 +150,14 @@ public class SwipeRecogniserTest {
     GwtEvent<?> event = hasHandlers.getEvent();
 
     if (!(event instanceof SwipeEndEvent)) {
-      Assert.fail("swipe end event was not fired");
+      fail("swipe end event was not fired");
     }
     SwipeEndEvent swipeEndEvent = (SwipeEndEvent) event;
 
-    Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeEndEvent.getDirection());
-    Assert.assertEquals(i - 1, swipeEndEvent.getDistance());
+    assertEquals(Direction.LEFT_TO_RIGHT, swipeEndEvent.getDirection());
+    assertEquals(i - 1, swipeEndEvent.getDistance());
 
-    Assert.assertTrue(swipeEndEvent.isDistanceReached());
+    assertTrue(swipeEndEvent.isDistanceReached());
 
     swipeRecognizer.onTouchStart(new MockTouchStartEvent(1, 0, 0));
 
@@ -163,25 +171,28 @@ public class SwipeRecogniserTest {
         if (first) {
           first = false;
           if (!(event instanceof SwipeStartEvent)) {
-            Assert.fail("swipe start event was not fired");
+            fail("swipe start event was not fired");
           }
           SwipeStartEvent swipeStartEvent = (SwipeStartEvent) event;
 
-          Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeStartEvent.getDirection());
-          Assert.assertEquals(swipeRecognizer.getThreshold(), swipeStartEvent.getDistance());
+          assertEquals(Direction.LEFT_TO_RIGHT, swipeStartEvent.getDirection());
+          assertEquals(swipeRecognizer.getThreshold(),
+                  swipeStartEvent.getDistance());
 
-        } else {
+        }
+        else {
           if (!(event instanceof SwipeMoveEvent)) {
-            Assert.fail("swipe move event was not fired");
+            fail("swipe move event was not fired");
           }
           SwipeMoveEvent swipeMoveEvent = (SwipeMoveEvent) event;
 
-          Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeMoveEvent.getDirection());
-          Assert.assertEquals(i, swipeMoveEvent.getDistance());
+          assertEquals(Direction.LEFT_TO_RIGHT, swipeMoveEvent.getDirection());
+          assertEquals(i, swipeMoveEvent.getDistance());
 
           if (swipeMoveEvent.getDistance() > swipeRecognizer.getMinDistance()) {
-            Assert.assertTrue(swipeMoveEvent.isDistanceReached());
-          } else {
+            assertTrue(swipeMoveEvent.isDistanceReached());
+          }
+          else {
             Assert.assertFalse(swipeMoveEvent.isDistanceReached());
           }
 
@@ -194,14 +205,14 @@ public class SwipeRecogniserTest {
     event = hasHandlers.getEvent();
 
     if (!(event instanceof SwipeEndEvent)) {
-      Assert.fail("swipe end event was not fired");
+      fail("swipe end event was not fired");
     }
     swipeEndEvent = (SwipeEndEvent) event;
 
-    Assert.assertEquals(Direction.LEFT_TO_RIGHT, swipeEndEvent.getDirection());
-    Assert.assertEquals(i - 1, swipeEndEvent.getDistance());
+    assertEquals(Direction.LEFT_TO_RIGHT, swipeEndEvent.getDirection());
+    assertEquals(i - 1, swipeEndEvent.getDistance());
 
-    Assert.assertTrue(swipeEndEvent.isDistanceReached());
+    assertTrue(swipeEndEvent.isDistanceReached());
 
   }
 
@@ -219,25 +230,28 @@ public class SwipeRecogniserTest {
         if (first) {
           first = false;
           if (!(event instanceof SwipeStartEvent)) {
-            Assert.fail("swipe start event was not fired");
+            fail("swipe start event was not fired");
           }
           SwipeStartEvent swipeStartEvent = (SwipeStartEvent) event;
 
-          Assert.assertEquals(Direction.TOP_TO_BOTTOM, swipeStartEvent.getDirection());
-          Assert.assertEquals(swipeRecognizer.getThreshold(), swipeStartEvent.getDistance());
+          assertEquals(Direction.TOP_TO_BOTTOM, swipeStartEvent.getDirection());
+          assertEquals(swipeRecognizer.getThreshold(),
+                  swipeStartEvent.getDistance());
 
-        } else {
+        }
+        else {
           if (!(event instanceof SwipeMoveEvent)) {
-            Assert.fail("swipe move event was not fired");
+            fail("swipe move event was not fired");
           }
           SwipeMoveEvent swipeMoveEvent = (SwipeMoveEvent) event;
 
-          Assert.assertEquals(Direction.TOP_TO_BOTTOM, swipeMoveEvent.getDirection());
-          Assert.assertEquals(i, swipeMoveEvent.getDistance());
+          assertEquals(Direction.TOP_TO_BOTTOM, swipeMoveEvent.getDirection());
+          assertEquals(i, swipeMoveEvent.getDistance());
 
           if (swipeMoveEvent.getDistance() > swipeRecognizer.getMinDistance()) {
-            Assert.assertTrue(swipeMoveEvent.isDistanceReached());
-          } else {
+            assertTrue(swipeMoveEvent.isDistanceReached());
+          }
+          else {
             Assert.assertFalse(swipeMoveEvent.isDistanceReached());
           }
 
@@ -250,14 +264,14 @@ public class SwipeRecogniserTest {
     GwtEvent<?> event = hasHandlers.getEvent();
 
     if (!(event instanceof SwipeEndEvent)) {
-      Assert.fail("swipe end event was not fired");
+      fail("swipe end event was not fired");
     }
     SwipeEndEvent swipeEndEvent = (SwipeEndEvent) event;
 
-    Assert.assertEquals(Direction.TOP_TO_BOTTOM, swipeEndEvent.getDirection());
-    Assert.assertEquals(i - 1, swipeEndEvent.getDistance());
+    assertEquals(Direction.TOP_TO_BOTTOM, swipeEndEvent.getDirection());
+    assertEquals(i - 1, swipeEndEvent.getDistance());
 
-    Assert.assertTrue(swipeEndEvent.isDistanceReached());
+    assertTrue(swipeEndEvent.isDistanceReached());
 
   }
 
@@ -280,25 +294,28 @@ public class SwipeRecogniserTest {
         if (first) {
           first = false;
           if (!(event instanceof SwipeStartEvent)) {
-            Assert.fail("swipe start event was not fired");
+            fail("swipe start event was not fired");
           }
           SwipeStartEvent swipeStartEvent = (SwipeStartEvent) event;
 
-          Assert.assertEquals(Direction.TOP_TO_BOTTOM, swipeStartEvent.getDirection());
-          Assert.assertEquals(swipeRecognizer.getThreshold(), swipeStartEvent.getDistance());
+          assertEquals(Direction.TOP_TO_BOTTOM, swipeStartEvent.getDirection());
+          assertEquals(swipeRecognizer.getThreshold(),
+                  swipeStartEvent.getDistance());
 
-        } else {
+        }
+        else {
           if (!(event instanceof SwipeMoveEvent)) {
-            Assert.fail("swipe move event was not fired");
+            fail("swipe move event was not fired");
           }
           SwipeMoveEvent swipeMoveEvent = (SwipeMoveEvent) event;
 
-          Assert.assertEquals(Direction.TOP_TO_BOTTOM, swipeMoveEvent.getDirection());
-          Assert.assertEquals(i, swipeMoveEvent.getDistance());
+          assertEquals(Direction.TOP_TO_BOTTOM, swipeMoveEvent.getDirection());
+          assertEquals(i, swipeMoveEvent.getDistance());
 
           if (swipeMoveEvent.getDistance() > swipeRecognizer.getMinDistance()) {
-            Assert.assertTrue(swipeMoveEvent.isDistanceReached());
-          } else {
+            assertTrue(swipeMoveEvent.isDistanceReached());
+          }
+          else {
             Assert.assertFalse(swipeMoveEvent.isDistanceReached());
           }
 
@@ -311,14 +328,14 @@ public class SwipeRecogniserTest {
     GwtEvent<?> event = hasHandlers.getEvent();
 
     if (!(event instanceof SwipeEndEvent)) {
-      Assert.fail("swipe end event was not fired");
+      fail("swipe end event was not fired");
     }
     SwipeEndEvent swipeEndEvent = (SwipeEndEvent) event;
 
-    Assert.assertEquals(Direction.TOP_TO_BOTTOM, swipeEndEvent.getDirection());
-    Assert.assertEquals(i - 1, swipeEndEvent.getDistance());
+    assertEquals(Direction.TOP_TO_BOTTOM, swipeEndEvent.getDirection());
+    assertEquals(i - 1, swipeEndEvent.getDistance());
 
-    Assert.assertTrue(swipeEndEvent.isDistanceReached());
+    assertTrue(swipeEndEvent.isDistanceReached());
 
   }
 

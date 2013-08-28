@@ -16,14 +16,10 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 import org.jboss.errai.demo.grocery.client.local.producer.StoreListProducer.StoreChangedEvent;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.client.widget.ListWidget;
@@ -33,10 +29,12 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 @Dependent
 @Templated("#root")

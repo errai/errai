@@ -24,6 +24,7 @@ import javax.persistence.EntityManager;
 
 import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -32,16 +33,14 @@ import com.google.gwt.user.client.ui.Composite;
 
 @Dependent
 @Templated("#main")
-@Page
+@Page(role = DefaultPage.class)
 @ApplicationScoped
 public class ItemListPage extends Composite {
 
-    @Inject private ClientBeanManager bm;
     @Inject private EntityManager em;
 
     @Inject private @DataField GroceryListWidget listWidget;
     @Inject private @DataField ItemForm newItemForm;
-    @Inject private @DataField SortWidget sortWidget;
 
     @PostConstruct
     private void initInstance() {

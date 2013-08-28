@@ -16,20 +16,18 @@
  limitations under the License.
  -->
 <link href="css/bootstrap/css/bootstrap.css" rel="stylesheet">
-<link href="../../../../../../../../webapp/GroceryList.css" rel="stylesheet">
-<link href="css/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/GroceryList.css" rel="stylesheet">
 
-<div style="width: 400px">
-  <div class="item" data-field="main">
-    <div class="name" data-field="name">Item Name</div>
-    <div class="department" data-field="department">Department</div>
-    <div class="comment" data-field="comment">Notes</div>
-
-    <!-- The span tags around "Added" and "by" make them candidates for internationalization -->
-    <div class="moreInfo">
+<div class="list-group-item" data-field="main">
+  <h4 class="list-group-item-heading"><span data-field="name">Bread</span></h4>
+  <p class="list-group-item-text">
+    <span data-field="department">Department Bread</span>
+    <small><span data-field="comment">notes</span></small>
+  </p>
+  <p class="text-right">
+    <small>
       <span>Added</span> <span data-field="addedOn">3 Days Ago</span>
       <span>by</span> <span data-field="addedBy">jfuerth</span>
-    </div>
-    <hr>
-  </div>
+    </small>
+  </p>
 </div>

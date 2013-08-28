@@ -47,8 +47,8 @@ public class LongTapRecogniserTest {
     }
     LongTapEvent tapEvent = (LongTapEvent) event;
 
-    assertEquals(2, tapEvent.getStartPositions().get(0).getPageX());
-    assertEquals(3, tapEvent.getStartPositions().get(0).getPageY());
+    assertEquals(2, tapEvent.getStartPositions().get(0).getX());
+    assertEquals(3, tapEvent.getStartPositions().get(0).getY());
 
     assertSame(handlers, tapEvent.getSource());
   }
