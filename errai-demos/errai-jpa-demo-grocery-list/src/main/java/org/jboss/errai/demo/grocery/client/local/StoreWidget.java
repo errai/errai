@@ -41,6 +41,8 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
+
 @Dependent
 @Templated("#main")
 public class StoreWidget extends Composite implements HasModel<Store> {
@@ -84,6 +86,7 @@ public class StoreWidget extends Composite implements HasModel<Store> {
           switchMode();
         }
       });
+      final Style style = StoreWidget.this.getElement().getStyle();
       gestureUtility.addSwipeMoveHandler(new SwipeMoveHandler() {
         @Override
         public void onSwipeMove(SwipeMoveEvent event) {
@@ -100,7 +103,7 @@ public class StoreWidget extends Composite implements HasModel<Store> {
             default:
               distance = 0;
           }
-          StoreWidget.this.getElement().getStyle().setLeft(distance, Style.Unit.PX);
+          style.setLeft(distance, PX);
         }
       });
       gestureUtility.addSwipeEndHandler(new SwipeEndHandler() {
@@ -108,6 +111,9 @@ public class StoreWidget extends Composite implements HasModel<Store> {
         public void onSwipeEnd(SwipeEndEvent event) {
           if (event.isDistanceReached()) {
             deleteThisStore();
+          }
+          else {
+            style.setLeft(0, PX);
           }
         }
       });
