@@ -1,10 +1,13 @@
 package org.jboss.errai.ui.cordova.events.touch.swipe;
 
 import com.google.gwt.dom.client.Touch;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.TouchCancelEvent;
+import com.google.gwt.event.dom.client.TouchEndEvent;
+import com.google.gwt.event.dom.client.TouchMoveEvent;
+import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import org.jboss.errai.ui.cordova.events.touch.AbstractRecognizer;
-import org.jboss.errai.ui.cordova.events.touch.TouchUtil;
+import org.jboss.errai.ui.cordova.events.touch.TouchPoint;
 
 import static org.jboss.errai.ui.cordova.events.touch.swipe.SwipeEvent.Direction;
 
@@ -113,7 +116,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
           direction = touch.getPageX() - x > 0 ? Direction.LEFT_TO_RIGHT : Direction.RIGHT_TO_LEFT;
 
           SwipeStartEvent swipeStartEvent =
-                  new SwipeStartEvent(TouchUtil.cloneTouch(touch), touch.getPageX() - x, direction);
+                  new SwipeStartEvent(new TouchPoint(touch), touch.getPageX() - x, direction);
 
           source.fireEvent(swipeStartEvent);
 
@@ -124,7 +127,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
             direction = touch.getPageY() - y > 0 ? Direction.TOP_TO_BOTTOM : Direction.BOTTOM_TO_TOP;
 
             SwipeStartEvent swipeStartEvent =
-                    new SwipeStartEvent(TouchUtil.cloneTouch(touch), touch.getPageY() - y, direction);
+                    new SwipeStartEvent(new TouchPoint(touch), touch.getPageY() - y, direction);
 
             source.fireEvent(swipeStartEvent);
 
@@ -140,7 +143,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
           case BOTTOM_TO_TOP:
             lastDistance = Math.abs(touch.getPageY() - y);
             source.fireEvent(
-                    new SwipeMoveEvent(TouchUtil.cloneTouch(touch), lastDistance > minDistance,
+                    new SwipeMoveEvent(new TouchPoint(touch), lastDistance > minDistance,
                             lastDistance, direction));
             break;
 
@@ -148,7 +151,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
           case RIGHT_TO_LEFT:
             lastDistance = Math.abs(touch.getPageX() - x);
             source.fireEvent(
-                    new SwipeMoveEvent(TouchUtil.cloneTouch(touch), lastDistance > minDistance,
+                    new SwipeMoveEvent(new TouchPoint(touch), lastDistance > minDistance,
                             lastDistance, direction));
 
             break;

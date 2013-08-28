@@ -1,8 +1,8 @@
 package org.jboss.errai.ui.cordova.events.touch.longtap;
 
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.shared.GwtEvent;
+import org.jboss.errai.ui.cordova.events.touch.TouchPoint;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class LongTapEvent extends GwtEvent<LongTapHandler> {
 		return TYPE;
 	}
 
-	private final List<Touch> startPositions;
+	private final List<TouchPoint> startPositions;
 	private final int numberOfFingers;
 	private final int time;
 
@@ -36,7 +36,7 @@ public class LongTapEvent extends GwtEvent<LongTapHandler> {
 	 * @param time the time the fingers where touching
 	 * @param startPositions the start position of each finger
 	 */
-	public LongTapEvent(Object source, int numberOfFingers, int time, List<Touch> startPositions) {
+	public LongTapEvent(Object source, int numberOfFingers, int time, List<TouchPoint> startPositions) {
 		this.numberOfFingers = numberOfFingers;
 		this.time = time;
 		this.startPositions = startPositions;
@@ -77,7 +77,7 @@ public class LongTapEvent extends GwtEvent<LongTapHandler> {
 	 * 
 	 * @return the array of start positions
 	 */
-	public List<Touch> getStartPositions() {
+	public List<TouchPoint> getStartPositions() {
 		return startPositions;
 	}
 

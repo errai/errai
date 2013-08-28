@@ -17,6 +17,7 @@ package org.jboss.errai.ui.cordova.events.touch.swipe;
 
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.shared.GwtEvent;
+import org.jboss.errai.ui.cordova.events.touch.TouchPoint;
 
 /**
  * A {@link SwipeStartEvent} is fired when the user moves his finger over a
@@ -29,7 +30,7 @@ public class SwipeStartEvent extends SwipeEvent<SwipeStartHandler> {
 
 	private final static GwtEvent.Type<SwipeStartHandler> TYPE = new Type<SwipeStartHandler>();
 	private final int distance;
-	private final Touch touch;
+	private final TouchPoint touch;
 
 	public static GwtEvent.Type<SwipeStartHandler> getType() {
 		return TYPE;
@@ -42,7 +43,7 @@ public class SwipeStartEvent extends SwipeEvent<SwipeStartHandler> {
      * @param distance the distance the finger already moved
 	 * @param direction the direction of the finger
 	 */
-	public SwipeStartEvent(Touch touch, int distance, Direction direction) {
+	public SwipeStartEvent(TouchPoint touch, int distance, Direction direction) {
 		super(direction);
 		this.touch = touch;
 		this.distance = distance;
@@ -77,7 +78,7 @@ public class SwipeStartEvent extends SwipeEvent<SwipeStartHandler> {
 
 	}
 
-	public Touch getTouch() {
+	public TouchPoint getTouch() {
 		return touch;
 	}
 
