@@ -250,11 +250,13 @@ public class ClientSyncManager {
         System.out.println("    -> Delete " + dr.getEntity());
         E resolved = expectedStateEm.find(expectedStateEm.keyFor(dr.getEntity()), Collections.<String,Object>emptyMap());
         expectedStateEm.remove(resolved);
+        expectedStateEm.detach(resolved);
 
         // the DeleteResponse could be a reaction to our own delete request, in which case resolved == null
         resolved = desiredStateEm.find(desiredStateEm.keyFor(dr.getEntity()), Collections.<String,Object>emptyMap());
         if (resolved != null) {
           desiredStateEm.remove(resolved);
+          desiredStateEm.detach(resolved);
         }
       }
       else if (response instanceof IdChangeResponse) {

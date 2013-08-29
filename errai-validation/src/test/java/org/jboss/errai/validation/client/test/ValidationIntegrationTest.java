@@ -30,6 +30,7 @@ import org.jboss.errai.validation.client.BeanValidator;
 import org.jboss.errai.validation.client.ModuleWithInjectedValidator;
 import org.jboss.errai.validation.client.TestGroup;
 import org.jboss.errai.validation.client.TestModel;
+import org.jboss.errai.validation.client.TestModelWithoutConstraints;
 
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -121,6 +122,21 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
 
     violations = validator.validate(model, Default.class, TestGroup.class);
     assertEquals("Expected three constraint violations", 3, violations.size());
+  }
+  
+  public void testValidationOfTypeWithoutConstraints() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+    TestModelWithoutConstraints model = new TestModelWithoutConstraints(new TestModel());
+    Set<ConstraintViolation<TestModelWithoutConstraints>> violations = validator.validate(model);
+    assertEquals("Expected one constraint violations", 2, violations.size());
+
+    TestModel validModel = new TestModel();
+    validModel.setNumVal(101);
+    validModel.setStringVal("valid");
+    model.setModel(validModel);
+    violations = validator.validate(model);
+    assertEquals("Expected no constraint violations", 0, violations.size());
   }
 
 }

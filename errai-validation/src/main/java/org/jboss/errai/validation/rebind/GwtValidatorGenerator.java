@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Constraint;
+import javax.validation.Valid;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
@@ -38,6 +39,7 @@ import org.jboss.errai.reflections.util.ConfigurationBuilder;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.google.gwt.thirdparty.guava.common.collect.Sets;
 import com.google.gwt.validation.client.GwtValidation;
 
 /**
@@ -67,7 +69,9 @@ class GwtValidatorGenerator {
   ClassStructureBuilder<?> generate() {
     final Set<Class<?>> validationAnnotations = scanner.getTypesAnnotatedWith(Constraint.class);
     final SetMultimap<Class<?>, Annotation> validationConfig = getValidationConfig(validationAnnotations);
-    final Set<Class<?>> beans = validationConfig.keySet();
+    final Set<Class<?>> beans = Sets.newHashSet(validationConfig.keySet());
+    // look for beans that use @Valid but no other constraints.
+    addBeansAnnotatedWithValid(beans);
     final Set<Class<?>> groups = extractValidationGroups(validationConfig);
 
     ClassStructureBuilder<?> builder = ClassBuilder
@@ -104,9 +108,23 @@ class GwtValidatorGenerator {
       for (Field field : scanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation)) {
         beans.put(field.getDeclaringClass(), field.getAnnotation((Class<? extends Annotation>) annotation));
       }
+      for (Method method : scanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation)) {
+        beans.put(method.getDeclaringClass(), method.getAnnotation((Class<? extends Annotation>) annotation));
+      }
     }
 
     return beans;
+  }
+
+  private void addBeansAnnotatedWithValid(Set<Class<?>> beans) {
+    for (Field field : scanner.getFieldsAnnotatedWith(Valid.class)) {
+      beans.add(field.getDeclaringClass());
+      beans.add(field.getType());
+    }
+    for (Method method : scanner.getMethodsAnnotatedWith(Valid.class)) {
+      beans.add(method.getDeclaringClass());
+      beans.add(method.getReturnType());
+    }
   }
 
   private Set<Class<?>> extractValidationGroups(SetMultimap<Class<?>, Annotation> validationConfig) {
@@ -133,8 +151,6 @@ class GwtValidatorGenerator {
         throw new RuntimeException("Error invoking groups() parameter in " + annotation.getClass().getName(), e);
       }
     }
-
     return groups;
   }
-
 }
