@@ -56,7 +56,7 @@ public class PipeTest extends GWTTestCase {
       }
     });
 
-    delayTestFinish(3000);
+    delayTestFinish(6000);
   }
 
   public void testReadStandardJson() {
@@ -72,7 +72,7 @@ public class PipeTest extends GWTTestCase {
       }
     });
 
-    delayTestFinish(3000);
+    delayTestFinish(6000);
   }
 
   public void testSaveMapOfString() {
@@ -98,7 +98,7 @@ public class PipeTest extends GWTTestCase {
       }
     });
 
-    delayTestFinish(3000);
+    delayTestFinish(6000);
   }
 
   public void testPaging() {
@@ -118,7 +118,7 @@ public class PipeTest extends GWTTestCase {
       }
     });
 
-    delayTestFinish(3000);
+    delayTestFinish(6000);
   }
 
   public void testSecurity() {
@@ -139,7 +139,7 @@ public class PipeTest extends GWTTestCase {
       }
     });
 
-    delayTestFinish(3000);
+    delayTestFinish(6000);
   }
 
   public void testSecurityRegister() {
@@ -157,7 +157,7 @@ public class PipeTest extends GWTTestCase {
       }
     });
 
-    delayTestFinish(3000);
+    delayTestFinish(6000);
   }
 
   private native void cleanToken() /*-{
