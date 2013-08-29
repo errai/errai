@@ -389,12 +389,14 @@
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
           <scope>provided</scope>
+          <version>1.6.1</version>
         </dependency>
 
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
           <scope>provided</scope>
+          <version>1.6.1</version>
         </dependency>
 
         <dependency>
