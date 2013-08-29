@@ -17,6 +17,7 @@
 package org.jboss.errai.demo.grocery.client.local;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -24,9 +25,10 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import com.google.gwt.animation.client.Animation;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.DOM;
@@ -59,6 +61,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class ItemForm extends Composite {
 
     @Inject private EntityManager em;
+    @Inject private Validator validator;
     @Inject private User user;
     @Inject private GroceryList groceryList;
 
@@ -67,6 +70,7 @@ public class ItemForm extends Composite {
     // Example: property "item.name" tracks the value in the TextBox "name"
     @Inject @AutoBound private DataBinder<Item> itemBinder;
 
+    @Inject @DataField private Label overallErrorMessage;
     @Inject @Bound @DataField private SuggestBox name;
     @Inject @Bound @DataField private TextBox comment;
     @Inject @Bound(property="department.name") @DataField private SuggestBox department;
@@ -151,6 +155,14 @@ public class ItemForm extends Composite {
         item.setDepartment(resolvedDepartment);
         item.setAddedBy(user);
         item.setAddedOn(new Date());
+
+        final Set<ConstraintViolation<Item>> violations = validator.validate(item);
+        if (violations.size() > 0) {
+          ConstraintViolation<Item> violation = violations.iterator().next();
+          overallErrorMessage.setText(violation.getPropertyPath() + " " + violation.getMessage());
+          overallErrorMessage.setVisible(true);
+          return;
+        }
 
         groceryList.getItems().add(item);
         em.merge(groceryList);

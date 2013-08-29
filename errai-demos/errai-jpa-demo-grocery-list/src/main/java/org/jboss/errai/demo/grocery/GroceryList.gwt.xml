@@ -30,6 +30,8 @@
     <inherits name="org.gwtopenmaps.openlayers.OpenLayers" />
     <inherits name="org.jboss.errai.ui.Cordova" />
     <inherits name="com.google.gwt.gen2.picker.Picker" />
+    <inherits name="org.jboss.errai.validation.Validation" />
+    <inherits name="org.hibernate.validator.HibernateValidator" />
 
     <replace-with class="org.jboss.errai.demo.grocery.client.local.Config">
         <when-type-is class="org.jboss.errai.bus.client.framework.Configuration" />

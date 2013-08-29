@@ -25,6 +25,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.jboss.errai.databinding.client.api.Bindable;
 
@@ -38,6 +41,7 @@ public class Item {
     @GeneratedValue
     private long id;
 
+    @NotNull
     private String name;
 
     @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
