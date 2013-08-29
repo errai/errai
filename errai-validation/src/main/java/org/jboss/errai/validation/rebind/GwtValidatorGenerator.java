@@ -108,6 +108,9 @@ class GwtValidatorGenerator {
       for (Field field : scanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation)) {
         beans.put(field.getDeclaringClass(), field.getAnnotation((Class<? extends Annotation>) annotation));
       }
+      for (Method method : scanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation)) {
+        beans.put(method.getDeclaringClass(), method.getAnnotation((Class<? extends Annotation>) annotation));
+      }
     }
 
     return beans;
@@ -117,6 +120,10 @@ class GwtValidatorGenerator {
     for (Field field : scanner.getFieldsAnnotatedWith(Valid.class)) {
       beans.add(field.getDeclaringClass());
       beans.add(field.getType());
+    }
+    for (Method method : scanner.getMethodsAnnotatedWith(Valid.class)) {
+      beans.add(method.getDeclaringClass());
+      beans.add(method.getReturnType());
     }
   }
 
