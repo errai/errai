@@ -143,7 +143,7 @@ class CordovaMojo extends GroovyMojo {
 
     def void copy(dir, www) {
         ant.copy(todir: dir) {
-            fileset(dir: www, includes: '**/*.htm, **/*.html, **/*.gif, **/*.jpg, **/*.jpeg, **/*.png, **/*.js, **/*.css')
+            fileset(dir: www, excludes: '**/*.class, **/*.jar, **/*.java')
         }
     }
 
