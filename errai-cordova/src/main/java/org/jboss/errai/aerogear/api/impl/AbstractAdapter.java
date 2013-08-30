@@ -3,7 +3,8 @@ package org.jboss.errai.aerogear.api.impl;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
-import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
+import org.jboss.errai.enterprise.client.jaxrs.JacksonTransformer;
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import java.util.ArrayList;
@@ -15,12 +16,7 @@ import java.util.List;
 public abstract class AbstractAdapter<T> {
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
-    enableJacksonMarchalling();
   }
-
-  private native static void enableJacksonMarchalling() /*-{
-      $wnd.erraiJaxRsJacksonMarshallingActive = true;
-  }-*/;
 
   protected JavaScriptObject object;
   private final Class<T> type;
@@ -34,7 +30,7 @@ public abstract class AbstractAdapter<T> {
   }
 
   protected T fromJSON(String json) {
-    return MarshallingWrapper.fromJSON(json, type);
+    return Marshalling.fromJSON(JacksonTransformer.fromJackson(json), type);
   }
 
   protected T convertToType(JavaScriptObject object) {
