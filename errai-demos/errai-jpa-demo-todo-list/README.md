@@ -31,7 +31,7 @@ Prerequisites
 To configure the datasource in AS 7 or EAP 6, edit the file `standalone/configuration/standalone.xml`
 and add this immediately after the similar entry for `ExampleDS`:
 
-    <datasource jndi-name="java:jboss/datasources/ErraiTodoDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
+    <datasource jndi-name="java:jboss/datasources/ErraiTodoDS" pool-name="ErraiTodoDS" enabled="true" use-java-context="true">
       <connection-url>jdbc:h2:mem:erraiTodo;DB_CLOSE_DELAY=-1</connection-url>
       <driver>h2</driver>
       <security>
