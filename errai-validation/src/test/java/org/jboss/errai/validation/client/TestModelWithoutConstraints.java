@@ -18,6 +18,9 @@ package org.jboss.errai.validation.client;
 
 import javax.validation.Valid;
 
+import org.junit.Ignore;
+
+@Ignore
 public class TestModelWithoutConstraints {
 
   @Valid
