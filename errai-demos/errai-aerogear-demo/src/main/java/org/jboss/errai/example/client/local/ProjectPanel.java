@@ -55,8 +55,9 @@ public class ProjectPanel extends Composite {
   @DataField("project-form")
   private ProjectForm form;
 
+  @Inject
   @DataField("project-container")
-  private ListWidget<Project, ProjectItem> listWidget = new ProjectList();
+  private ListWidget<Project, ProjectItem> listWidget;
 
   @PostConstruct
   public void loadTasks() {
@@ -90,16 +91,5 @@ public class ProjectPanel extends Composite {
   public void onAddProjectClicked(ClickEvent event) {
     show(event.getRelativeElement());
     form.reset();
-  }
-
-  private class ProjectList extends ListWidget<Project, ProjectItem> {
-    private ProjectList() {
-      super(new FlowPanel());
-    }
-
-    @Override
-    protected Class<ProjectItem> getItemWidgetType() {
-      return ProjectItem.class;
-    }
   }
 }

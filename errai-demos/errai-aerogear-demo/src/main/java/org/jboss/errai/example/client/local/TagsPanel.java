@@ -53,8 +53,9 @@ public class TagsPanel extends Composite {
   @DataField
   private Element addTag = DOM.createDiv();
 
+  @Inject
   @DataField("taglist-container")
-  private ListWidget<Tag, TagItem> listWidget = new TagList();
+  private ListWidget<Tag, TagItem> listWidget;
 
   @PostConstruct
   public void loadTags() {
@@ -80,16 +81,5 @@ public class TagsPanel extends Composite {
   @EventHandler("addTag")
   public void onAddTagClicked(ClickEvent event) {
     show(event.getRelativeElement());
-  }
-
-  private class TagList extends ListWidget<Tag, TagItem> {
-    private TagList() {
-      super(new FlowPanel());
-    }
-
-    @Override
-    protected Class<TagItem> getItemWidgetType() {
-      return TagItem.class;
-    }
   }
 }

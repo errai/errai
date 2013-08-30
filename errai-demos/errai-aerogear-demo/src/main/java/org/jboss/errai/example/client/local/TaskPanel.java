@@ -42,8 +42,9 @@ public class TaskPanel extends Composite {
   @DataField
   private Element addTask = DOM.createElement("div");
 
+  @Inject
   @DataField("task-list-container")
-  ListWidget<Task, TaskItem> taskList = new TaskList();
+  ListWidget<Task, TaskItem> taskList;
 
   @Inject
   @DataField("task-form")
@@ -77,19 +78,5 @@ public class TaskPanel extends Composite {
   @EventHandler("addTask")
   public void onAddTaskClicked(ClickEvent event) {
     show(event.getRelativeElement());
-  }
-
-  /**
-   * ListWidget override to be able to use {@link FlowPanel}
-   */
-  private class TaskList extends ListWidget<Task, TaskItem> {
-    private TaskList() {
-      super(new FlowPanel());
-    }
-
-    @Override
-    protected Class<TaskItem> getItemWidgetType() {
-      return TaskItem.class;
-    }
   }
 }
