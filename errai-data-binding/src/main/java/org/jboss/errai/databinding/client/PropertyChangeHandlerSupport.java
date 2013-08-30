@@ -33,8 +33,8 @@ import com.google.common.collect.Multimap;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PropertyChangeHandlerSupport {
-  private final List<PropertyChangeHandler<?>> handlers = new ArrayList<PropertyChangeHandler<?>>();
-  private final Multimap<String, PropertyChangeHandler<?>> specificPropertyHandlers = ArrayListMultimap.create();
+  final List<PropertyChangeHandler<?>> handlers = new ArrayList<PropertyChangeHandler<?>>();
+  final Multimap<String, PropertyChangeHandler<?>> specificPropertyHandlers = ArrayListMultimap.create();
 
   /**
    * Adds a {@link PropertyChangeHandler} that will be notified when any property of the bound
@@ -129,31 +129,5 @@ public class PropertyChangeHandlerSupport {
     }
 
     return !event.getOldValue().equals(event.getNewValue());
-  }
-
-  /**
-   * Merges the {@link PropertyChangeHandler}s of the provided {@link PropertyChangeHandlerSupport}
-   * instance. If a handler instance is already registered it will NOT be added again.
-   * 
-   * @param propertyChangeHandlerSupport
-   *          the instance who's change handlers will be merged, must not be null.
-   */
-  @SuppressWarnings({ "rawtypes" })
-  public void merge(PropertyChangeHandlerSupport pchs) {
-    Assert.notNull(pchs);
-
-    for (PropertyChangeHandler pch : pchs.handlers) {
-      if (!handlers.contains(pch)) {
-        handlers.add(pch);
-      }
-    }
-
-    for (String pchKey : pchs.specificPropertyHandlers.keys()) {
-      for (PropertyChangeHandler pch : pchs.specificPropertyHandlers.get(pchKey)) {
-        if (!specificPropertyHandlers.containsEntry(pchKey, pch)) {
-          specificPropertyHandlers.put(pchKey, pch);
-        }
-      }
-    }
   }
 }
