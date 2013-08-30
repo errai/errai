@@ -325,7 +325,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       bindings.put(b.getProperty(), newProxy.getAgent().bind(b.getWidget(), b.getProperty(), b.getConverter()));
     }
     this.bindings = bindings;
-    newProxy.getAgent().getPropertyChangeHandlers().merge(propertyChangeHandlerSupport);
+    newProxy.getAgent().mergePropertyChangeHandlers(propertyChangeHandlerSupport);
     
     this.proxy = (T) newProxy;
     return this.proxy;

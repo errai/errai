@@ -441,7 +441,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
-      DataBinder nested = createNestedBinder(property);      
+      DataBinder nested = createNestedBinder(property);
       nested.addPropertyChangeHandler(property.substring(dotPos + 1), handler);
     }
 
@@ -462,8 +462,33 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (nested != null) {
         nested.removePropertyChangeHandler(property.substring(dotPos + 1), handler);
       }
-      
+
     }
     propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
+  }
+
+  /**
+   * Merges the {@link PropertyChangeHandler}s of the provided agent instance. If a handler instance
+   * is already registered on this agent, it will NOT be added again.
+   * 
+   * @param pchs
+   *          the instance who's change handlers will be merged, must not be null.
+   */
+  public void mergePropertyChangeHandlers(PropertyChangeHandlerSupport pchs) {
+    Assert.notNull(pchs);
+
+    for (PropertyChangeHandler pch : pchs.handlers) {
+      if (!propertyChangeHandlerSupport.handlers.contains(pch)) {
+        addPropertyChangeHandler(pch);
+      }
+    }
+
+    for (String pchKey : pchs.specificPropertyHandlers.keys()) {
+      for (PropertyChangeHandler pch : pchs.specificPropertyHandlers.get(pchKey)) {
+        if (!propertyChangeHandlerSupport.specificPropertyHandlers.containsEntry(pchKey, pch)) {
+          addPropertyChangeHandler(pchKey, pch);
+        }
+      }
+    }
   }
 }
