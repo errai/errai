@@ -21,6 +21,8 @@ package org.jboss.errai.bus.client.api.base;
  */
 @SuppressWarnings("serial")
 public class MessageDeliveryFailure extends RuntimeException {
+  private boolean rpcEndpointException = false;
+  
   public MessageDeliveryFailure() {
   }
 
@@ -31,8 +33,17 @@ public class MessageDeliveryFailure extends RuntimeException {
   public MessageDeliveryFailure(final String message, final Throwable cause) {
     super(message, cause);
   }
+  
+  public MessageDeliveryFailure(final String message, final Throwable cause, boolean rpcEndpointException) {
+    super(message, cause);
+    this.rpcEndpointException = rpcEndpointException;
+  }
 
   public MessageDeliveryFailure(final Throwable cause) {
     super(cause);
+  }
+  
+  public boolean isRpcEndpointException() {
+    return rpcEndpointException;
   }
 }
