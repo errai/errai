@@ -243,6 +243,22 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
     assertNull(esem.find(SimpleEntity.class, newEntity.getId()));
     assertNull(dsem.find(SimpleEntity.class, newEntity.getId()));
+
+    // finally, ensure the deleted entity is not stuck in the REMOVED state
+    // (should be NEW or DETACHED; we can verify by trying to merge it)
+    try {
+      esem.merge(newEntity);
+    }
+    catch (IllegalArgumentException e) {
+      fail("Merging removed entity failed: " + e);
+    }
+
+    try {
+      dsem.merge(newEntity);
+    }
+    catch (IllegalArgumentException e) {
+      fail("Merging removed entity failed: " + e);
+    }
   }
 
   public void testUpdateFromClient() {
