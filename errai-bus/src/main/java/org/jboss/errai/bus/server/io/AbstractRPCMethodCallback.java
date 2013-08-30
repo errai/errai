@@ -1,20 +1,25 @@
 package org.jboss.errai.bus.server.io;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.RpcContext;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
+import org.slf4j.Logger;
 
 /**
  * @author Mike Brock
  */
 public abstract class AbstractRPCMethodCallback implements MessageCallback {
+  private static final Logger log = getLogger(AbstractRPCMethodCallback.class);
+  
   protected final ServiceInstanceProvider serviceProvider;
   protected final Class[] targetTypes;
   protected final Method method;
@@ -49,7 +54,8 @@ public abstract class AbstractRPCMethodCallback implements MessageCallback {
       throw e;
     }
     catch (InvocationTargetException e) {
-      throw new MessageDeliveryFailure("error invoking endpoint", e.getCause());
+      log.debug("RPC endpoint threw exception:", e.getCause());
+      throw new MessageDeliveryFailure("error invoking endpoint", e.getCause(), true);
     }
     catch (Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);
