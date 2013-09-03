@@ -20,7 +20,7 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
 
   private final List<String> messageBeanTypeLog = new ArrayList<String>();
   private ClientMessageBusImpl backupBus;
-  
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.event.EventObserverTestModule";
@@ -37,9 +37,9 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
         super.send(message);
       }
     };
-    
+
     backupBus = UntestableFrameworkUtil.installAlternativeBusImpl(fakeBus);
-    
+
     super.gwtSetUp();
   }
 
@@ -47,14 +47,26 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
   protected void gwtTearDown() throws Exception {
     UntestableFrameworkUtil.installAlternativeBusImpl(backupBus);
   }
-  
+
   @Test
-  public void testLocalEventNeverAdvertisedToServer() {
-    
+  public void testLocalEventNotInitiallyAdvertisedToServer() {
+
     // this is the actual point of the test
     assertFalse("Local event should not have been advertised to the server", messageBeanTypeLog.contains(LocalEventA.class.getName()));
-    
+
     // this is an important safety check, because it would be too easy for the test to fake-pass if the implementation details change.
     assertTrue("Portable event should have been advertised to the server", messageBeanTypeLog.contains(MyEventImpl.class.getName()));
   }
+
+  @Test
+  public void testLocalEventNotReadvertisedToServer() {
+    CDI.resendSubscriptionRequestForAllEventTypes();
+
+    // this is the actual point of the test
+    assertFalse("Local event should not have been advertised to the server", messageBeanTypeLog.contains(LocalEventA.class.getName()));
+
+    // this is an important safety check, because it would be too easy for the test to fake-pass if the implementation details change.
+    assertTrue("Portable event should have been advertised to the server", messageBeanTypeLog.contains(MyEventImpl.class.getName()));
+  }
+
 }
