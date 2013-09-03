@@ -33,6 +33,7 @@ import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServerLaundryList;
+import org.jboss.errai.common.client.api.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,9 +108,9 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
     public HttpSessionWrapper(final SessionsContainer container, final String httpSessionId,
                               final String remoteQueueID) {
-      this.container = container;
-      this.remoteQueueID = remoteQueueID;
-      this.parentSessionId = httpSessionId;
+      this.container = Assert.notNull(container);
+      this.remoteQueueID = Assert.notNull(remoteQueueID);
+      this.parentSessionId = Assert.notNull(httpSessionId);
       this.sessionId = SecureHashUtil.nextSecureHash("SHA-256",
               httpSessionId.getBytes(), remoteQueueID.getBytes());
     }
