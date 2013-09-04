@@ -4,11 +4,14 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
 import org.jboss.errai.enterprise.client.jaxrs.JacksonTransformer;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author edewit@redhat.com
@@ -16,7 +19,12 @@ import java.util.List;
 public abstract class AbstractAdapter<T> {
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
+    enableJacksonMarchalling();
   }
+
+  private native static void enableJacksonMarchalling() /*-{
+      $wnd.erraiJaxRsJacksonMarshallingActive = true;
+  }-*/;
 
   protected JavaScriptObject object;
   private final Class<T> type;
@@ -35,6 +43,18 @@ public abstract class AbstractAdapter<T> {
 
   protected T convertToType(JavaScriptObject object) {
     return fromJSON(toJSON(object));
+  }
+
+  protected String convertToJson(T item) {
+    return MarshallingWrapper.toJSON(item);
+  }
+
+  protected String convertToJson(Map item) {
+    String json;
+    Map map = new HashMap();
+    map.putAll(item);
+    json = Marshalling.toJSON(map);
+    return json;
   }
 
   protected List<T> convertToType(JsArray jsArray) {

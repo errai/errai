@@ -56,12 +56,10 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
   @Override
   public void save(T item, AsyncCallback<T> callback) {
     String json;
-    if (!(item instanceof Map)) {
-      json = MarshallingWrapper.toJSON(item);
+    if (item instanceof Map) {
+      json = convertToJson((Map) item);
     } else {
-      Map map = new HashMap();
-      map.putAll((Map) item);
-      json = Marshalling.toJSON(map);
+      json = convertToJson(item);
     }
     save0(json, callback);
   }
