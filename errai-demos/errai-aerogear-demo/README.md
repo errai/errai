@@ -7,12 +7,15 @@ with Errai-UI and the wrappers. To make this work first checkout the Aerogear de
     git clone git@github.com:aerogear/TODO.git
 
 Then build the ear file:
+
     mvn clean install
 
 Build this project into a war:
+
     <errai-demo-location>/errai-aerogear-demo/mvn clean install
 
 Now we'll remove the original client war from the ``todo-ear.ear`` and replace it with this one
+
     cp <errai-demo-location>/errai-aerogear-demo/target/todo-www.war .
     zip -g ear/target/todo-ear.ear todo-www.war
 
