@@ -5,8 +5,6 @@ import com.google.gwt.core.client.JsArray;
 import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.datamanager.StoreType;
 import org.jboss.errai.aerogear.api.impl.AbstractAdapter;
-import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
-import org.jboss.errai.marshalling.client.Marshalling;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -41,14 +39,10 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
   @Override
   public T read(Serializable id) {
     if (id instanceof Number) {
-      return convertToType(read0((Number) id));
+      return convertToType(read0(String.valueOf(id)));
     }
     return convertToType(read0(id));
   }
-
-  private native JavaScriptObject read0(Number id) /*-{
-      return this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.read(Number(id))[0];
-  }-*/;
 
   private native JavaScriptObject read0(Serializable id) /*-{
       return this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.read(id)[0];
@@ -56,11 +50,11 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
 
   @Override
   public void save(T item) {
-    save0(MarshallingWrapper.toJSON(item));
+    save0(convertToJson(item));
   }
 
   private native void save0(String item) /*-{
-      this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.save(eval('[' + item + ']'));
+      this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.save(eval('[' + item + '][0]'));
   }-*/;
 
   @Override
