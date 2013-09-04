@@ -18,11 +18,11 @@ import static org.jboss.errai.aerogear.api.pipeline.PipeFactory.Config;
  */
 @ApplicationScoped
 public class PipeProducer {
+  public static final String BASE_URL = "/todo-server/";
   private final Authenticator auth;
 
   public PipeProducer() {
-    // //todo-server/
-    auth = new AuthenticationFactory().createAuthenticator("auth", "", "auth/enroll", "auth/login", "auth/logout");
+    auth = new AuthenticationFactory().createAuthenticator("auth", BASE_URL, "auth/enroll", "auth/login", "auth/logout");
   }
 
   @Produces
@@ -33,19 +33,19 @@ public class PipeProducer {
   @Produces
   @Tasks
   private Pipe<Task> createTaskPipe() {
-    return createPipe(Task.class, new Config("tasks"));
+    return createPipe(Task.class, new Config("tasks", "id", BASE_URL));
   }
 
   @Produces
   @Projects
   private Pipe<Project> createProjectPipe() {
-    return createPipe(Project.class, new Config("projects"));
+    return createPipe(Project.class, new Config("projects", "id", BASE_URL));
   }
 
   @Produces
   @Tags
   private Pipe<Tag> createTagPipe() {
-    return createPipe(Tag.class, new Config("tags"));
+    return createPipe(Tag.class, new Config("tags", "id", BASE_URL));
   }
 
   private <T> Pipe<T> createPipe(Class<T> type, Config config) {
