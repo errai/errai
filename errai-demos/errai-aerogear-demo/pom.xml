@@ -123,46 +123,16 @@
       <version>${project.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- Errai Core -->
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-bus</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-tools</artifactId>
     </dependency>
 
     <!-- CDI Integration Modules -->
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cdi-client</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-javax-enterprise</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-weld-integration</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-cdi-jetty</artifactId>
     </dependency>
 
     <dependency>
@@ -191,7 +161,7 @@
   </dependencies>
 
   <build>
-    <finalName>${project.artifactId}-${project.version}</finalName>
+    <finalName>todo-www</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -216,6 +186,14 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>${maven.war.plugin.version}</version>
+        <configuration>
+          <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
