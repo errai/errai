@@ -220,18 +220,22 @@ public class CDI {
    */
   public static void resendSubscriptionRequestForAllEventTypes() {
     if (isRemoteCommunicationEnabled()) {
-      LogUtil.log("requesting server to forward CDI events for " + eventObservers.size() + " existing observers");
+      int remoteEventCount = 0;
       for (Map.Entry<String, List<AbstractCDIEventCallback<?>>> mapEntry : eventObservers.entrySet()) {
         String eventType = mapEntry.getKey();
-        for (AbstractCDIEventCallback<?> callback : mapEntry.getValue()) {
-          MessageBuilder.createMessage()
-              .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
-              .command(CDICommands.RemoteSubscribe)
-              .with(CDIProtocol.BeanType, eventType)
-              .with(CDIProtocol.Qualifiers, callback.getQualifiers())
-              .noErrorHandling().sendNowWith(ErraiBus.get());
+        if (MarshallerFramework.canMarshall(eventType)) {
+          for (AbstractCDIEventCallback<?> callback : mapEntry.getValue()) {
+            remoteEventCount++;
+            MessageBuilder.createMessage()
+                .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+                .command(CDICommands.RemoteSubscribe)
+                .with(CDIProtocol.BeanType, eventType)
+                .with(CDIProtocol.Qualifiers, callback.getQualifiers())
+                .noErrorHandling().sendNowWith(ErraiBus.get());
+          }
         }
       }
+      LogUtil.log("requested server to forward CDI events for " + remoteEventCount + " existing observers");
     }
   }
 
