@@ -16,25 +16,21 @@
 
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-
 import java.util.Arrays;
 import java.util.Collection;
 
-public class DeliveryPlan {
-  private static final int MAX_GENERATIONS_BEFORE_DEOPTIMIZE = 100;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
-  private final int generation;
+public class DeliveryPlan {
+
   private final MessageCallback[] deliverTo;
 
   public DeliveryPlan() {
-    this.generation = 0;
     deliverTo = new MessageCallback[0];
   }
 
-  private DeliveryPlan(final int generation, MessageCallback[] deliverTo) {
-    this.generation = generation;
+  private DeliveryPlan(MessageCallback[] deliverTo) {
     this.deliverTo = deliverTo;
   }
 
@@ -43,7 +39,7 @@ public class DeliveryPlan {
       throw new NullPointerException("null callback");
     }
 
-    return new DeliveryPlan(0, new MessageCallback[]{callback});
+    return new DeliveryPlan(new MessageCallback[]{callback});
   }
 
   public void deliver(final Message m) {
@@ -79,10 +75,7 @@ public class DeliveryPlan {
     }
     newPlan[newPlan.length - 1] = callback;
 
-    if (generation > MAX_GENERATIONS_BEFORE_DEOPTIMIZE) {
-      return DynamicDeliveryPlan.newDynamicDeliveryPlan(deliverTo).newDeliveryPlanWith(callback);
-    }
-    return new DeliveryPlan(generation + 1, newPlan);
+    return new DeliveryPlan(newPlan);
   }
 
   public DeliveryPlan newDeliveryPlanWithOut(final MessageCallback callback) {
@@ -98,10 +91,6 @@ public class DeliveryPlan {
       newPlan[found ? i - 1 : i] = deliverTo[i];
     }
 
-    if (generation > MAX_GENERATIONS_BEFORE_DEOPTIMIZE) {
-      return DynamicDeliveryPlan.newDynamicDeliveryPlan(newPlan);
-    }
-
-    return new DeliveryPlan(generation + 1, newPlan);
+    return new DeliveryPlan(newPlan);
   }
 }
