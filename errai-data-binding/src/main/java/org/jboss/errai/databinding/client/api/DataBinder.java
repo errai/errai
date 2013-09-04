@@ -26,6 +26,7 @@ import org.jboss.errai.databinding.client.BindableProxyAgent;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.Binding;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
+import org.jboss.errai.databinding.client.InvalidPropertyExpressionException;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.PropertyChangeHandlerSupport;
 import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
@@ -163,6 +164,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
    *           If the {@code model} does not have a property with the given name.
+   * @throws InvalidPropertyExpressionException
+   *           If the provided property chain expression is invalid.
    * @throws WidgetAlreadyBoundException
    *           If the provided {@code widget} is already bound to a property of the model.
    */
@@ -188,6 +191,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
    *           If the {@code model} does not have a property with the given name.
+   * @throws InvalidPropertyExpressionException
+   *           If the provided property chain expression is invalid.
    * @throws WidgetAlreadyBoundException
    *           If the provided {@code widget} is already bound to a property of the model.
    */
@@ -215,6 +220,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The name of the property (or a property chain) to unbind, Must not be null.
    * 
    * @return the same {@link DataBinder} instance to support call chaining.
+   * @throws InvalidPropertyExpressionException
+   *           If the provided property chain expression is invalid.
    */
   public DataBinder<T> unbind(String property) {
     for (Binding binding : bindings.get(property)) {
@@ -326,7 +333,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     }
     this.bindings = bindings;
     newProxy.getAgent().mergePropertyChangeHandlers(propertyChangeHandlerSupport);
-    
+
     this.proxy = (T) newProxy;
     return this.proxy;
   }
@@ -400,5 +407,4 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(proxy), null);
     }
   }
-
 }

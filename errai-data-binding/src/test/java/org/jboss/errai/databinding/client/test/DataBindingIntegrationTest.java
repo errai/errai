@@ -594,16 +594,6 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     testDeclarativeBinding(module);
   }
 
-  @Test
-  public void testInjectedBindableTypeIsNotBound() {
-    ModuleWithInjectedBindable module =
-        IOC.getBeanManager().lookupBean(ModuleWithInjectedBindable.class).getInstance();
-
-    // injecting a bindable type without @Model qualification shouldn't result in a bindable proxy
-    assertEquals(SingletonBindable.class, module.getUnboundModel().getClass());
-    // verify that the injection scope is correct
-    assertSame(module.getUnboundModel2(), module.getUnboundModel());
-  }
 
   @Test
   public void testDeclarativeBindingUsingModelSetter() {
@@ -667,6 +657,17 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
         DeclarativeBindingModuleUsingBinder.TEST_DATE, model
             .getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", age.getValue(), model.getAge().toString());
+  }
+  
+  @Test
+  public void testInjectedBindableTypeIsNotBound() {
+    ModuleWithInjectedBindable module =
+        IOC.getBeanManager().lookupBean(ModuleWithInjectedBindable.class).getInstance();
+
+    // injecting a bindable type without @Model qualification shouldn't result in a bindable proxy
+    assertEquals(SingletonBindable.class, module.getUnboundModel().getClass());
+    // verify that the injection scope is correct
+    assertSame(module.getUnboundModel2(), module.getUnboundModel());
   }
 
   @Test

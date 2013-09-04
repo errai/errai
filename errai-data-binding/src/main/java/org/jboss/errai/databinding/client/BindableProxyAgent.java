@@ -188,6 +188,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         binder = DataBinder.forModel(proxy.get(bindableProperty), initialState);
       }
       binders.put(bindableProperty, binder);
+      for (PropertyChangeHandler<?> handler : propertyChangeHandlerSupport.specificPropertyHandlers.get("**")) {
+        binder.addPropertyChangeHandler("**", handler);
+      }
     }
     else {
       binder.setModel(proxy.get(bindableProperty), initialState);
@@ -199,7 +202,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   private void validatePropertyExpr(String property) {
     if (property.startsWith(".") || property.endsWith(".")) {
-      throw new RuntimeException("Binding expression (property chain) cannot start or end with '.' :" + property);
+      throw new InvalidPropertyExpressionException("Binding expression (property chain) cannot start or end with '.' : " + property);
+    }
+    if (property.contains("*.")) {
+      throw new InvalidPropertyExpressionException("Wildcards can only appear at the end of property expressions : "
+          + property);
     }
   }
 
@@ -439,10 +446,21 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   @Override
   public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+    validatePropertyExpr(property);
+
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       DataBinder nested = createNestedBinder(property);
       nested.addPropertyChangeHandler(property.substring(dotPos + 1), handler);
+    }
+    else if (property.equals("*")) {
+      propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
+    }
+    else if (property.equals("**")) {
+      for (DataBinder nested : binders.values()) {
+        nested.addPropertyChangeHandler(property, handler);
+      }
+      propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
     }
 
     propertyChangeHandlerSupport.addPropertyChangeHandler(property, handler);
@@ -455,6 +473,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   @Override
   public void removePropertyChangeHandler(String property, PropertyChangeHandler handler) {
+    validatePropertyExpr(property);
+
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       String bindableProperty = property.substring(0, dotPos);
@@ -462,8 +482,17 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (nested != null) {
         nested.removePropertyChangeHandler(property.substring(dotPos + 1), handler);
       }
-
     }
+    else if (property.equals("*")) {
+      propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
+    }
+    else if (property.equals("**")) {
+      for (DataBinder nested : binders.values()) {
+        nested.removePropertyChangeHandler(property, handler);
+      }
+      propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
+    }
+
     propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
   }
 
