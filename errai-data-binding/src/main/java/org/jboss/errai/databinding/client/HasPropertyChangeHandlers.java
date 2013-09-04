@@ -52,14 +52,17 @@ public interface HasPropertyChangeHandlers {
    * underlying object changes. Multiple handlers can be registered. If the same handler instance is
    * passed multiple times, it will be notified multiple times.
    * 
-   * @param name
-   *          The name of the property (or a property chain e.g. customer.address.street) to receive
-   *          events for. Must not be null.
+   * @param property
+   *          The name of the property or a property chain (e.g. customer.address.street) to receive
+   *          events for. A property expression can end in a wildcard to indicate that changes of
+   *          any property of the corresponding bean should be observed (e.g customer.address.*). A
+   *          double wildcard can be used at the end of a property expression to register a
+   *          cascading change handler for any nested property (e.g customer.**). Must not be null.
    * @param handler
    *          The {@link PropertyChangeHandler} instance that should receive the events. Must not be
    *          null.
    */
-  public <T> void addPropertyChangeHandler(String name, PropertyChangeHandler<T> handler);
+  public <T> void addPropertyChangeHandler(String property, PropertyChangeHandler<T> handler);
 
   /**
    * Removes a {@link PropertyChangeHandler}, previously registered by a call to
@@ -68,12 +71,12 @@ public interface HasPropertyChangeHandlers {
    * notified one less time after being removed. If the provided handler is null, or was never added
    * for the given property, no exception is thrown and no action is taken.
    * 
-   * @param name
-   *          The name of the property (or a property chain e.g. customer.address.street). Must not
-   *          be null.
+   * @param property
+   *          The name of the property or a property chain expression (e.g.
+   *          customer.address.street). Must not be null.
    * @param handler
    *          the {@link PropertyChangeHandler} instance
    */
-  public void removePropertyChangeHandler(String name, PropertyChangeHandler<?> handler);
+  public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler);
 
 }

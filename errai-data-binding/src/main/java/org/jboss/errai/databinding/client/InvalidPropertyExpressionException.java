@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client.test;
+package org.jboss.errai.databinding.client;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
- * Test suite running all data binding tests.
- *
+ * Thrown to indicate that a property expression is invalid. This exception is thrown by
+ * implementations of {@link HasProperties} (e.g proxies for {@link Bindable} types).
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-  ConverterIntegrationTest.class,
-  DataBindingIntegrationTest.class,
-  DataBindingValidatorTest.class,
-  DefaultConversionTest.class,
-  PropertyChangeHandlerIntegrationTest.class,
-  PropertyChangeHandlerSupportTest.class})
-public class AllDataBindingTests {
+@SuppressWarnings("serial")
+public class InvalidPropertyExpressionException extends RuntimeException {
+
+  public InvalidPropertyExpressionException(String message) {
+    super(message);
+  }
 
 }
