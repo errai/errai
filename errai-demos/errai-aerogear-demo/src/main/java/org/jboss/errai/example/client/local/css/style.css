@@ -299,7 +299,7 @@ label {
 /* Footer styles */
 footer {
     width: 100%;
-    background-image: url("../img/bg.png");
+    background-image: url("http://todo-aerogear.rhcloud.com/img/bg.png");
     background-position: bottom;
     background-repeat: repeat-x;
     min-height: 100px;
