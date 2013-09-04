@@ -43,10 +43,12 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
+import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 public abstract class AbstractInjector implements Injector {
@@ -558,6 +560,21 @@ public abstract class AbstractInjector implements Injector {
 
   @Override
   public void updateProxies() {
+  }
+
+  public static QualifyingMetadata getMetadataWithAny(QualifyingMetadata metadata) {
+    if (metadata == null)
+      return JSR330QualifyingMetadata.createFromAnnotations(new Annotation[] {BuiltInQualifiers.ANY_INSTANCE});
+    
+    Annotation[] qualifiers = new Annotation[metadata.getQualifiers().length+1];
+    
+    for (int i = 0; i < metadata.getQualifiers().length; i++) {
+      qualifiers[i] = metadata.getQualifiers()[i];
+    }
+    
+    qualifiers[qualifiers.length-1] = BuiltInQualifiers.ANY_INSTANCE;
+    
+    return JSR330QualifyingMetadata.createFromAnnotations(qualifiers);
   }
 }
 

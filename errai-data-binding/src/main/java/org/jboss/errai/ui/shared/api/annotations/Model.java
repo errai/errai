@@ -60,7 +60,6 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * @author Mike Brock
  */
 @Documented
-@Qualifier
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Model {

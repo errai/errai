@@ -37,6 +37,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectorRegistrationListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
 import javax.enterprise.inject.Disposes;
@@ -84,12 +85,7 @@ public class ProducerInjector extends AbstractInjector {
     this.creationalCallbackVarName = InjectUtil.getNewInjectorName().concat("_")
         .concat(injectedType.getName().concat("_creational"));
 
-    final Set<Annotation> qualifiers = new HashSet<Annotation>();
-    qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(producerMember.getAnnotations()));
-
-    if (qualifiers.isEmpty()) {
-      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
-    }
+    final Set<Annotation> qualifiers = JSR330QualifyingMetadata.createSetFromAnnotations(producerMember.getAnnotations());
 
     qualifiers.add(BuiltInQualifiers.ANY_INSTANCE);
 

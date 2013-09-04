@@ -28,7 +28,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.New;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Named;
 import javax.inject.Qualifier;
@@ -65,25 +67,38 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
       final JSR330QualifyingMetadata comparable = (JSR330QualifyingMetadata) metadata;
 
       final Set<Annotation> from = new HashSet<Annotation>();
-      addAllExceptDefault(from, qualifiers);
+      addQualifiersForSource(from, qualifiers);
 
       final Set<Annotation> to = new HashSet<Annotation>();
-      addAllExceptDefault(to, comparable.qualifiers);
+      addQualifiersForSink(to, comparable.qualifiers);
 
-      return ((to.size() == 1
-          && to.contains(BuiltInQualifiers.ANY_INSTANCE))
-          || from.size() == 1
-          && from.contains(BuiltInQualifiers.ANY_INSTANCE)
-          || doQualifiersMatch(from, to));
+      return doQualifiersMatch(from, to);
     }
     else return metadata == null;
   }
-
-  private static void addAllExceptDefault(final Set<Annotation> addTo, final Set<Annotation> from) {
+  
+  private static void addQualifiersForSink(final Set<Annotation> addTo, final Set<Annotation> from) {
     for (Annotation a : from) {
-      if (!a.annotationType().equals(Default.class)) {
+      if (!a.annotationType().equals(New.class))
         addTo.add(a);
+    }
+  }
+  
+  private static void addQualifiersForSource(final Set<Annotation> addTo, final Set<Annotation> from) {
+    boolean hasNew = false, hasAny = false;
+    
+    for (Annotation a : from) {
+      if (a.annotationType().equals(New.class)) {
+        hasNew = true;
+        continue;
       }
+      else if (a.annotationType().equals(Any.class))
+        hasAny = true;
+      addTo.add(a);
+    }
+    
+    if (!hasAny && !hasNew) {
+      addTo.add(BuiltInQualifiers.ANY_INSTANCE);
     }
   }
 
@@ -129,33 +144,43 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
     return true;
   }
 
+  /**
+   * Extract qualifiers from annotations. Because this method is used to get qualifier metadata
+   * for injection points and beans, {@link Any} is not implicitly added.
+   * 
+   * @param annotations The annotations from a observer, injection point, or bean
+   * @return An object containing metadata regarding qualifiers from the provided annotations
+   */
   public static JSR330QualifyingMetadata createFromAnnotations(final Annotation[] annotations) {
- //   if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
-
+    return new JSR330QualifyingMetadata(createSetFromAnnotations(annotations));
+  }
+  
+  public static Set<Annotation> createSetFromAnnotations(final Annotation[] annotations) {
     final Set<Annotation> qualifiers = new HashSet<Annotation>();
-
-    boolean hasNamed = false;
-
+    
+    final Set<Class<? extends Annotation>> defaults = new HashSet<Class<? extends Annotation>>();
+    defaults.add(Named.class);
+    defaults.add(Default.class);
+    
+    boolean addDefault = true;
+    
     for (final Annotation a : annotations) {
       if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
         qualifiers.add(a);
+        if (!defaults.contains(a.annotationType()))
+          addDefault = false;
       }
 
-      if (a.annotationType().equals(Named.class.getName())) {
-        hasNamed = true;
-      }
     }
-
-    if (qualifiers.isEmpty() && (qualifiers.size() == 1 && hasNamed)) {
-      return createDefaultQualifyingMetaData();
-    }
-
-
-    return qualifiers.isEmpty() ? createDefaultQualifyingMetaData() : new JSR330QualifyingMetadata(qualifiers);
+    
+    if (addDefault)
+      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
+    
+    return qualifiers;
   }
 
   private static final JSR330QualifyingMetadata DEFAULT_QUALIFYING_METADATA = new JSR330QualifyingMetadata(
-      Collections.<Annotation>unmodifiableCollection(Arrays.asList(BuiltInQualifiers.DEFAULT_QUALIFIERS)));
+          Collections.<Annotation> unmodifiableCollection(Arrays.asList(BuiltInQualifiers.DEFAULT_QUALIFIERS)));
 
   static JSR330QualifyingMetadata createDefaultQualifyingMetaData() {
     return DEFAULT_QUALIFYING_METADATA;
@@ -201,6 +226,15 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
     else if (!qualifiers.equals(other.qualifiers))
       return false;
     return true;
+  }
+
+  @Override
+  public QualifyingMetadata filter(Annotation annotation) {
+    Set<Annotation> retVal = new HashSet<Annotation>(qualifiers.size() - 1);
+    retVal.addAll(qualifiers);
+    retVal.remove(BuiltInQualifiers.ANY_INSTANCE);
+    
+    return new JSR330QualifyingMetadata(retVal);
   }
   
 }

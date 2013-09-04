@@ -47,7 +47,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
     this.delegate = delegate;
 
     this.qualifyingTypeInformation = parameterizedType;
-    this.qualifyingMetadata = delegate.getQualifyingMetadata();
+    this.qualifyingMetadata = getMetadataWithAny(delegate.getQualifyingMetadata());
 
     delegate.addRegistrationHook(
         new RegistrationHook() {

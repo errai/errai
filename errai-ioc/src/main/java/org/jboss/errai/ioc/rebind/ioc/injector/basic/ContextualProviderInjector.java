@@ -27,6 +27,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import java.lang.annotation.Annotation;
 
@@ -99,4 +100,16 @@ public class ContextualProviderInjector extends TypeInjector {
               .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
   }
+
+  @Override
+  public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
+    boolean parmTypesSatisfied = true;
+    if (parameterizedType != null) {
+      parmTypesSatisfied = parameterizedType.isAssignableFrom(getQualifyingTypeInformation());
+    }
+
+    return parmTypesSatisfied;
+  }
+  
+  
 }

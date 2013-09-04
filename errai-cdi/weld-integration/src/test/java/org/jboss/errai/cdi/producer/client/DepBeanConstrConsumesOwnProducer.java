@@ -23,7 +23,7 @@ public class DepBeanConstrConsumesOwnProducer {
   }
 
   @Produces @Produced
-  private WrappedThang produceWrappedThing(@Produced Thang thing) {
+  private WrappedThang produceWrappedThing(Thang thing) {
     return new WrappedThang(thing);
   }
 

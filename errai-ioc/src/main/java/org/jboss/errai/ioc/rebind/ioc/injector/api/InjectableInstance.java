@@ -32,11 +32,14 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
   private static final String TRANSIENT_DATA_KEY = "InjectableInstance::TransientData";
@@ -291,7 +294,8 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     final Statement val;
 
     if (getTargetInjector().getInjectedType().equals(getEnclosingType()) &&
-        getTargetInjector().getQualifyingMetadata().equals(getQualifyingMetadata()) &&
+        // @Any is only implicitly added to injection SOURCES, so we must filter it out to do an exact comparison
+        getTargetInjector().getQualifyingMetadata().filter(BuiltInQualifiers.ANY_INSTANCE).equals(getQualifyingMetadata()) &&
         getInjector() != null) {
 
       val = Refs.get(getInjector().getInstanceVarName());
@@ -347,11 +351,29 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
   public Injector getTargetInjector() {
     final MetaClass targetType = getInjector() == null ? getEnclosingType() : getInjector().getInjectedType();
 
-    if (isProxy()) {
-      return injectionContext.getProxiedInjector(targetType, getQualifyingMetadata());
-    }
-    else {
-      return injectionContext.getQualifiedInjector(targetType, getQualifyingMetadata());
+    switch(taskType) {
+    case PrivateMethod:
+    case Method:
+    case Field:
+    case PrivateField:
+      // injectors for method and field producers are still registered by their enclosing class
+      // so we must be sure to match against the qualifiers for that class
+      try {
+        // isProxy() does not compare against the right qualifiers, so instead
+        // just try to return a proxied injector and see if that works
+        return injectionContext.getProxiedInjector(targetType,
+                JSR330QualifyingMetadata.createFromAnnotations(targetType.getAnnotations()));
+      }
+      catch (InjectionFailure ex) {
+        return injectionContext.getInjector(targetType);
+      }
+    default:
+      if (isProxy()) {
+        return injectionContext.getProxiedInjector(targetType, getQualifyingMetadata());
+      }
+      else {
+        return injectionContext.getQualifiedInjector(targetType, getQualifyingMetadata());
+      }
     }
   }
 

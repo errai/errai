@@ -1,8 +1,9 @@
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.EntryPoint;
-
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -12,10 +13,10 @@ public class HappyInspector {
   @Inject
   private HappyService happyService;
 
-  @Inject
+  @Inject @Any
   private GenericService<Integer> integerService;
 
-  @Inject
+  @Inject @Any
   private GenericService<String> stringService;
   
   @Inject

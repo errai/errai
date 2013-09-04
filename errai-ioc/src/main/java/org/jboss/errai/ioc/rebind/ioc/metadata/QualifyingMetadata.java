@@ -20,6 +20,8 @@ import org.jboss.errai.codegen.Statement;
 
 import java.lang.annotation.Annotation;
 
+import javax.enterprise.inject.Any;
+
 /**
  * @author Mike Brock
  */
@@ -29,4 +31,12 @@ public interface QualifyingMetadata {
   public Statement render();
   
   public Annotation[] getQualifiers();
+
+  /**
+   * Return a copy of this object with the given annotation filtered out.
+   * 
+   * @param annotation A qualifier to be filtered out.
+   * @return A copy of this object less the filtered annotation.
+   */
+  public QualifyingMetadata filter(Annotation annotation);
 }

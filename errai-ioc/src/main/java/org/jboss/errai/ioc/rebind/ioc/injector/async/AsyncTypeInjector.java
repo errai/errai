@@ -37,6 +37,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
@@ -67,12 +68,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
 
     this.instanceVarName = InjectUtil.getNewInjectorName().concat("_").concat(type.getName());
 
-    final Set<Annotation> qualifiers = new HashSet<Annotation>();
-    qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
-
-    if (qualifiers.isEmpty()) {
-      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
-    }
+    final Set<Annotation> qualifiers = JSR330QualifyingMetadata.createSetFromAnnotations(type.getAnnotations());
 
     qualifiers.add(BuiltInQualifiers.ANY_INSTANCE);
 

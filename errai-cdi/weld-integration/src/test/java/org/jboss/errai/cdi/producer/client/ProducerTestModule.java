@@ -3,6 +3,7 @@ package org.jboss.errai.cdi.producer.client;
 import java.util.Random;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 
 import org.jboss.errai.cdi.client.qualifier.A;
@@ -46,7 +47,7 @@ public class ProducerTestModule {
     return Integer.toString(number);
   }
 
-  @Produces @D @E
+  @Produces @D @E @Default
   private Float floatDE = 1.1f;
 
   @Produces

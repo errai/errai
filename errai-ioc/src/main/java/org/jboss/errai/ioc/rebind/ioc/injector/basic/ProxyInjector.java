@@ -63,7 +63,7 @@ public class ProxyInjector extends AbstractInjector {
 
     this.proxiedType = proxiedType;
     this.varName = InjectUtil.getNewInjectorName() + "_proxy";
-    this.qualifyingMetadata = metadata;
+    this.qualifyingMetadata = AbstractInjector.getMetadataWithAny(metadata);
     final String proxyClassName = proxiedType.getName() + "_" + varName;
 
     this.closeStatements = new ArrayList<Statement>();
