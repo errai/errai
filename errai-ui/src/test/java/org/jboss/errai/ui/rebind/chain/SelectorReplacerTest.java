@@ -1,13 +1,13 @@
 package org.jboss.errai.ui.rebind.chain;
 
 import org.apache.xpath.XPathAPI;
-import org.jboss.errai.ui.shared.chain.Context;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,24 +21,17 @@ public class SelectorReplacerTest {
   @Test
   public void shouldReplaceClassSelectors() throws TransformerException {
     //given
-    SelectorReplacer minifier = new SelectorReplacer();
+    final HashMap<String, String> mapping = new HashMap<String, String>();
+    mapping.put("dropdown", OBFUSCATED_NAME);
+
+    SelectorReplacer minifier = new SelectorReplacer(mapping);
     final Element element = getElement();
-    final Context context = getContext();
-    context.put(TemplateCatalog.ELEMENT, element);
 
     //when
-    minifier.execute(context);
+    minifier.execute(element);
 
     //then
     assertEquals("btn " + OBFUSCATED_NAME, element.getAttribute("class"));
-  }
-
-  private Context getContext() {
-    final Context context = new Context();
-    final HashMap<String, String> mapping = new HashMap<String, String>();
-    mapping.put("dropdown", OBFUSCATED_NAME);
-    context.put(SelectorReplacer.MAPPING, mapping);
-    return context;
   }
 
   private Element getElement() throws TransformerException {

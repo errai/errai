@@ -1,5 +1,7 @@
 package org.jboss.errai.ui.shared.chain;
 
+import org.w3c.dom.Element;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,19 +17,10 @@ public class Chain implements Command {
   }
 
   @Override
-  public void execute(Context context) {
+  public void execute(Element element) {
     for (Command command : commands) {
-      command.execute(context);
+      command.execute(element);
     }
-  }
-
-  @Override
-  public Context createInitialContext() {
-    Context context = new Context();
-    for (Command command : commands) {
-      context.putAll(command.createInitialContext());
-    }
-    return context;
   }
 
   public List<Command> getCommands() {

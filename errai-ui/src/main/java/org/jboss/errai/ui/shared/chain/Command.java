@@ -1,11 +1,11 @@
 package org.jboss.errai.ui.shared.chain;
 
+import org.w3c.dom.Element;
+
 /**
  * @author edewit@redhat.com
  */
 public interface Command {
 
-  void execute(Context context);
-
-  Context createInitialContext();
+  void execute(Element element);
 }
