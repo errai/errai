@@ -30,7 +30,7 @@ public class ColorConverter implements Converter<String, String> {
   }
 
   private Color getColor(String modelValue) {
-    String[] colors = modelValue.split("-");
+    String[] colors = modelValue != null ? modelValue.split("-") : new String[] {"", "255", "255", "255"};
     Color color = new Color();
     try {
       color.setRGB(Integer.parseInt(colors[1]), Integer.parseInt(colors[2]), Integer.parseInt(colors[3]));
