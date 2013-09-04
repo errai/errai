@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
   DataBindingIntegrationTest.class,
   DataBindingValidatorTest.class,
   DefaultConversionTest.class,
+  PropertyChangeHandlerIntegrationTest.class,
   PropertyChangeHandlerSupportTest.class})
 public class AllDataBindingTests {
 
