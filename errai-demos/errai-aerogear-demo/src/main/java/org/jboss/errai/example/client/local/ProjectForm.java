@@ -70,10 +70,10 @@ public class ProjectForm extends ColorPickerForm {
   public void onSubmitClicked(ClickEvent event) {
     final com.google.gwt.dom.client.Element div = getContainer(event);
     Project project = projectDataBinder.getModel();
-    projectStore.save(project);
     projectPipe.save(project, new DefaultCallback<Project>() {
       @Override
       public void onSuccess(final Project newProject) {
+        projectStore.save(newProject);
         hide(div, new DefaultCallback<Void>() {
 
           @Override

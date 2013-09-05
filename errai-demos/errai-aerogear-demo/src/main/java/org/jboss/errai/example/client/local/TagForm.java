@@ -70,10 +70,10 @@ public class TagForm extends ColorPickerForm {
   public void onSubmitClicked(ClickEvent event) {
     final com.google.gwt.dom.client.Element div = getContainer(event);
     Tag tag = tagDataBinder.getModel();
-    tagStore.save(tag);
     pipe.save(tag, new DefaultCallback<Tag>() {
       @Override
       public void onSuccess(final Tag newTag) {
+        tagStore.save(newTag);
         hide(div, new DefaultCallback<Void>() {
 
           @Override
