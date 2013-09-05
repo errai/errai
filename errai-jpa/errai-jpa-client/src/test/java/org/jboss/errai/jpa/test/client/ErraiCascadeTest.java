@@ -1,11 +1,11 @@
 package org.jboss.errai.jpa.test.client;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
@@ -689,6 +689,32 @@ public class ErraiCascadeTest extends GWTTestCase {
     assertTrue(em.contains(from.getPersist()));
     assertTrue(em.contains(from.getRefresh()));
     assertTrue(em.contains(from.getRemove()));
+  }
+
+  /**
+   * Regression test for ERRAI-629.
+   */
+  public void testCascadeMergeBindableProxyIntoItsOwnTarget() throws Exception {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    CascadeFrom from = new CascadeFrom();
+    em.persist(from);
+
+    final DataBinder<CascadeFrom> dataBinder = DataBinder.forModel(from);
+    dataBinder.getModel().setMergeCollection(listOfCascadeTo(3));
+
+    assertNotNull(dataBinder.getModel().getMergeCollection().get(0).getString());
+    em.merge(dataBinder.getModel());
+    assertNotNull(dataBinder.getModel().getMergeCollection().get(0).getString());
+
+    em.flush();
+    em.clear();
+
+    CascadeFrom xFetched = em.find(CascadeFrom.class, from.getId());
+    assertNotNull(xFetched.getMergeCollection());
+    assertEquals(3, xFetched.getMergeCollection().size());
+    assertFalse(xFetched.getMergeCollection().get(0).getId() == 0);
+    assertEquals("string 0", xFetched.getMergeCollection().get(0).getString());
   }
 
   /**

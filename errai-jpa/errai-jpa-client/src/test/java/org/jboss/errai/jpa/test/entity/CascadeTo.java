@@ -6,7 +6,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
-@Entity
+import org.jboss.errai.databinding.client.api.Bindable;
+
+@Bindable @Entity
 public class CascadeTo {
 
   @Id @GeneratedValue

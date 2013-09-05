@@ -350,9 +350,21 @@ public class ErraiEntityManager implements EntityManager {
    *         manager.
    */
   private <T> EntityState getState(Key<T, ?> key, T instance) {
+
+    // unwrap the given instance to find its true identity
+    Object o = instance;
+    while (o instanceof WrappedPortable) {
+      o = ((WrappedPortable) instance).unwrap();
+    }
+
+    // unwrap the retrieved instance (which could be null) to find its true identity
+    Object inPersistenceContext = persistenceContext.get(key);
+    while (inPersistenceContext instanceof WrappedPortable) {
+      inPersistenceContext = ((WrappedPortable) inPersistenceContext).unwrap();
+    }
+
     final EntityState oldState;
-    final Object inPersistenceContext = persistenceContext.get(key);
-    if (inPersistenceContext == instance) {
+    if (inPersistenceContext == o) {
       oldState = EntityState.MANAGED;
     }
     else if (inPersistenceContext != null) {

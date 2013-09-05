@@ -57,4 +57,11 @@ public class HibernateCascadeTest extends ErraiCascadeTest {
   }
 
   // the actual test methods are inherited from the superclass
+
+  /**
+   * Disabled for Hibernate because there is no Bindable Proxy integration.
+   */
+  @Override
+  public void testCascadeMergeBindableProxyIntoItsOwnTarget() throws Exception {
+  }
 }
