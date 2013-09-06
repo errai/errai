@@ -9,7 +9,6 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jboss.errai</groupId>
   <artifactId>cordova-maven-plugin</artifactId>
   <name>Errai::Cordova::Maven Plugin</name>
   <packaging>maven-plugin</packaging>
@@ -98,6 +97,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
+            <version>1.8</version>
             <configuration>
               <projectsDirectory>src/it</projectsDirectory>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
