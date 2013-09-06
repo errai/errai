@@ -1,21 +1,12 @@
 package org.jboss.errai.reflections;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import org.jboss.errai.reflections.scanners.*;
-import org.jboss.errai.reflections.serializers.Serializer;
-import org.jboss.errai.reflections.util.ClasspathHelper;
-import org.jboss.errai.reflections.util.ConfigurationBuilder;
-import org.jboss.errai.reflections.util.FilterBuilder;
-import org.jboss.errai.reflections.util.Utils;
-import org.jboss.errai.reflections.vfs.Vfs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.format;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -28,7 +19,23 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
+import org.jboss.errai.reflections.scanners.Scanner;
+import org.jboss.errai.reflections.scanners.SubTypesScanner;
+import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
+import org.jboss.errai.reflections.serializers.Serializer;
+import org.jboss.errai.reflections.util.ClasspathHelper;
+import org.jboss.errai.reflections.util.ConfigurationBuilder;
+import org.jboss.errai.reflections.util.FilterBuilder;
+import org.jboss.errai.reflections.util.Utils;
+import org.jboss.errai.reflections.vfs.Vfs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Reflections one-stop-shop object
@@ -257,7 +264,7 @@ public class Reflections extends ReflectionUtils {
   }
 
   private void scan(Vfs.File file) {
-    String input = file.getRelativePath().replace('/', '.');
+    String input = file.getRelativePath();
     if (configuration.acceptsInput(input)) {
       for (Scanner scanner : configuration.getScanners()) {
         try {
