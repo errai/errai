@@ -253,7 +253,7 @@ public class CDI {
 
   private static void _fireEvent(final String beanType, final Message message) {
     if (eventObservers.containsKey(beanType)) {
-      for (final MessageCallback callback : eventObservers.get(beanType)) {
+      for (final MessageCallback callback : new ArrayList<MessageCallback>(eventObservers.get(beanType))) {
         fireIfNotFired(callback, message);
       }
     }
