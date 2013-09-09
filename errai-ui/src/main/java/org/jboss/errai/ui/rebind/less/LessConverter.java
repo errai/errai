@@ -15,6 +15,10 @@ import java.util.regex.Pattern;
 
 /**
  * Converts a less resource to a css file using the java LessCompiler wrapper.
+ * And adds deferred binding properties to the top of the sheet. So that you can
+ * use <code>user.agent</code> in less be sure to change '.' into '_' because variables with
+ * a '.' in the name are not valid in less.
+ * 
  * @author edewit@redhat.com
  */
 public class LessConverter {
