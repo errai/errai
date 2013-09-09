@@ -1,14 +1,26 @@
 package org.jboss.errai.ui.rebind.less;
 
+import com.google.gwt.core.ext.BadPropertyValueException;
+import com.google.gwt.core.ext.PropertyOracle;
+import com.google.gwt.core.ext.SelectionProperty;
+import com.google.gwt.core.ext.TreeLogger;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Scanner;
 
 import static junit.framework.Assert.*;
+import static org.mockito.AdditionalMatchers.not;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author edewit@redhat.com
@@ -16,28 +28,26 @@ import static junit.framework.Assert.*;
 public class LessConverterTest {
 
   @Test
-  public void shouldConvertLessToNormalCss() throws IOException {
+  public void shouldConvertLessToNormalCss() throws Exception {
     // given
     final URL resource = getClass().getResource("/org/jboss/errai/package.less");
+    final PropertyOracle oracle = noVariablesFoundOracle();
 
     // when
-    final File css = new LessConverter().convert(resource);
+    final File css = new LessConverter(TreeLogger.NULL, oracle).convert(resource);
 
     // then
     assertNotNull(css);
     assertTrue(css.exists());
 
-    StringBuilder buffer = new StringBuilder();
-    final Scanner scanner = new Scanner(css).useDelimiter("\n");
-    while (scanner.hasNext()) {
-      buffer.append(scanner.next());
-    }
-    assertEquals("#header {  color: #4d926f;}", buffer.toString());
+    String cssOutput = readFile(css);
+    assertEquals("#header {  color: #4d926f;}", cssOutput);
   }
 
   @Test
-  public void shouldTrowException() throws IOException {
+  public void shouldTrowException() throws Exception {
     // given
+    final PropertyOracle oracle = noVariablesFoundOracle();
     File lessError = File.createTempFile("error", ".less");
     final PrintWriter writer = new PrintWriter(lessError);
     writer.println(".header { color: @color; }");
@@ -46,7 +56,7 @@ public class LessConverterTest {
 
     // when
     try {
-      new LessConverter().convert(lessError.toURI().toURL());
+      new LessConverter(TreeLogger.NULL, oracle).convert(lessError.toURI().toURL());
       fail("exception should have been thrown, because color is not defined");
     } catch (IOException e) {
 
@@ -56,16 +66,58 @@ public class LessConverterTest {
   }
 
   @Test
-  public void shouldConvertLessFilesWithinJars() throws IOException {
+  public void shouldConvertLessFilesWithinJars() throws Exception {
     // given
+    final PropertyOracle oracle = noVariablesFoundOracle();
     final URL resource = getClass().getResource("/less.jar");
     final URL less = new URL("jar:" + resource + "!/org/jboss/errai/package.less");
 
     // when
-    final File css = new LessConverter().convert(less);
+    final File css = new LessConverter(TreeLogger.NULL, oracle).convert(less);
 
     // then
     final Scanner scanner = new Scanner(css);
     assertEquals("#header", scanner.next());
+    scanner.close();
+  }
+
+  @Test
+  public void shouldAppendPropertyOracleVaraiblesToStartOfLessFile() throws Exception {
+    //given
+    final URL resource = getClass().getResource("/user-agent.less");
+    final PropertyOracle oracle = mock(PropertyOracle.class);
+    final SelectionProperty property = mock(SelectionProperty.class);
+
+    // when
+    when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), eq("user.agent"))).thenReturn(property);
+    when(property.getCurrentValue()).thenReturn("safari");
+
+    when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), not(eq("user.agent"))))
+            .thenThrow(new BadPropertyValueException(""));
+    when(oracle.getConfigurationProperty(anyString())).thenThrow(new BadPropertyValueException(""));
+
+    final File css = new LessConverter(TreeLogger.NULL, oracle).convert(resource);
+
+    //then
+    assertNotNull(css);
+    assertEquals(".class1 {  background-color: black;}", readFile(css));
+  }
+
+  private PropertyOracle noVariablesFoundOracle() throws BadPropertyValueException {
+    final PropertyOracle oracle = mock(PropertyOracle.class);
+    when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), anyString()))
+            .thenThrow(new BadPropertyValueException(""));
+    when(oracle.getConfigurationProperty(anyString())).thenThrow(new BadPropertyValueException(""));
+    return oracle;
+  }
+
+  private String readFile(File css) throws FileNotFoundException {
+    StringBuilder buffer = new StringBuilder();
+    final Scanner scanner = new Scanner(css).useDelimiter("\n");
+    while (scanner.hasNext()) {
+      buffer.append(scanner.next());
+    }
+    scanner.close();
+    return buffer.toString();
   }
 }

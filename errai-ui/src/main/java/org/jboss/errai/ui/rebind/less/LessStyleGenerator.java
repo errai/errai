@@ -1,6 +1,7 @@
 package org.jboss.errai.ui.rebind.less;
 
 import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.PropertyOracle;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dom.client.StyleInjector;
@@ -15,6 +16,7 @@ import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.client.local.spi.LessStyleMapping;
 import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
+import org.jboss.errai.ui.rebind.chain.SelectorReplacer;
 import org.jboss.errai.ui.rebind.chain.TemplateChain;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
@@ -42,7 +44,9 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
   protected String generate(TreeLogger logger, GeneratorContext context) {
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(LessStyleMapping.class, GENERATED_CLASS_NAME);
     ConstructorBlockBuilder<?> constructor = classBuilder.publicConstructor();
-    final Map<String, String> styleMapping = LessStylesheetContext.getInstance().getStyleMapping();
+    final PropertyOracle oracle = context.getPropertyOracle();
+    final LessStylesheetContext stylesheetContext = new LessStylesheetContext(logger, oracle);
+    final Map<String, String> styleMapping = stylesheetContext.getStyleMapping();
     for (Map.Entry<String, String> entry : styleMapping.entrySet()) {
       constructor.append(Stmt.nestedCall(Refs.get("styleNameMapping")).invoke("put", entry.getKey(), entry.getValue()));
     }
@@ -54,21 +58,14 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
         String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
 
         final TemplateChain chain = new TemplateChain();
+        chain.addCommand(new SelectorReplacer(styleMapping));
         chain.visitTemplate(templateFileName);
       }
     }
 
-    constructor.append(Stmt.create().invokeStatic(StyleInjector.class, "inject", createStyleSheet()));
+    constructor.append(Stmt.create().invokeStatic(StyleInjector.class, "inject", stylesheetContext.getStylesheet()));
     constructor.finish();
 
     return classBuilder.toJavaString();
-  }
-
-  private static String createStyleSheet() {
-    StringBuilder sb = new StringBuilder();
-    for (StylesheetOptimizer stylesheet : LessStylesheetContext.getInstance().getOptimizedStylesheets()) {
-      sb.append(stylesheet.output());
-    }
-    return sb.toString();
   }
 }

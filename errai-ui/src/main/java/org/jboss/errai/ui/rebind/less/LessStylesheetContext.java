@@ -1,5 +1,7 @@
 package org.jboss.errai.ui.rebind.less;
 
+import com.google.gwt.core.ext.PropertyOracle;
+import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 import java.io.File;
@@ -12,25 +14,13 @@ import java.util.*;
  */
 public class LessStylesheetContext {
   private Set<StylesheetOptimizer> optimizedStylesheets = new HashSet<StylesheetOptimizer>();
-  private static LessStylesheetContext instance;
+  private final TreeLogger logger;
+  private final PropertyOracle oracle;
 
-  private static final Object lock = new Object();
-
-  private LessStylesheetContext() {
+  public LessStylesheetContext(TreeLogger logger, PropertyOracle oracle) {
+    this.oracle = oracle;
+    this.logger = logger;
     init();
-  }
-
-  public static LessStylesheetContext getInstance() {
-    if (instance == null) {
-      synchronized (lock) {
-
-        if (instance == null) {
-          instance = new LessStylesheetContext();
-        }
-      }
-    }
-
-    return instance;
   }
 
   private void init() {
@@ -47,7 +37,7 @@ public class LessStylesheetContext {
   private File convertToCss(URL resource) {
     final File cssFile;
     try {
-      cssFile = new LessConverter().convert(resource);
+      cssFile = new LessConverter(logger, oracle).convert(resource);
     } catch (IOException e) {
       throw new RuntimeException("could not read less stylesheet", e);
     }
@@ -64,15 +54,19 @@ public class LessStylesheetContext {
     return stylesheetOptimizer;
   }
 
-  public Set<StylesheetOptimizer> getOptimizedStylesheets() {
-    return new HashSet<StylesheetOptimizer>(optimizedStylesheets);
-  }
-
   public Map<String, String> getStyleMapping() {
     Map<String, String> styleMapping = new HashMap<String, String>();
-    for (StylesheetOptimizer stylesheet : getOptimizedStylesheets()) {
+    for (StylesheetOptimizer stylesheet : optimizedStylesheets) {
       styleMapping.putAll(stylesheet.getConvertedSelectors());
     }
     return styleMapping;
+  }
+
+  public String getStylesheet() {
+    StringBuilder sb = new StringBuilder();
+    for (StylesheetOptimizer stylesheet : optimizedStylesheets) {
+      sb.append(stylesheet.output());
+    }
+    return sb.toString();
   }
 }

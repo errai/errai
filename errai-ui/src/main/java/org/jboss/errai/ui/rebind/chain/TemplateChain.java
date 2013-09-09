@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.ui.rebind.less.LessStylesheetContext;
+import org.jboss.errai.ui.shared.chain.Command;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -24,6 +25,7 @@ import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.createTemplateCata
  * @author edewit@redhat.com
  */
 public class TemplateChain {
+  final TemplateCatalog catalog = createTemplateCatalog(new DummyRemover());
 
   public void visitTemplate(String templateFileName) {
     URL template = getClass().getClassLoader().getResource(templateFileName);
@@ -31,8 +33,6 @@ public class TemplateChain {
       throw new IllegalArgumentException("Could not find HTML template file: " + templateFileName);
     }
 
-    final TemplateCatalog catalog = createTemplateCatalog(
-            new SelectorReplacer(LessStylesheetContext.getInstance().getStyleMapping()), new DummyRemover());
     final Document result = catalog.visitTemplate(template);
     writeDocumentToFile(result, templateFileName);
   }
@@ -73,5 +73,9 @@ public class TemplateChain {
       throw new GenerationException("could not read template file", e);
     }
     return !template.contains("body");
+  }
+
+  public void addCommand(Command command) {
+    catalog.getChain().addCommand(command);
   }
 }
