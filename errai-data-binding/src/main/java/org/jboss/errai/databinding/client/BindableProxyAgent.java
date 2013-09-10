@@ -330,10 +330,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          The new value of the property.
    */
   private <P> void firePropertyChangeEvent(final String property, final P oldValue, final P newValue) {
+    knownValues.put(property, newValue);
+    
     PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, Assert.notNull(property), oldValue, newValue);
     propertyChangeHandlerSupport.notifyHandlers(event);
-
-    knownValues.put(property, newValue);
   }
 
   /**
