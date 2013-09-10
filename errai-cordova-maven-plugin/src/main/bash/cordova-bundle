@@ -1,4 +1,12 @@
 #!/bin/bash
+if [ -z "$1" ]; then
+  echo -e "Version not specified! \nuse: 'cordoave-bundle <version number>'";
+  exit;
+else
+  echo "Version to deploy '$1'";
+fi
+
+PROJECT_DIR=`pwd`
 cd /tmp
 cordova create Project
 cd Project
@@ -14,7 +22,9 @@ rm -rf `find . -name local.properties`
 rm -rf www/css/ www/spec* www/js/ www/index.html www/img/
 cp `which ios-sim` .
 
+cp -R $PROJECT_DIR/android-windows/* /tmp/Project/platforms/android/cordova
+
 tar zcvf ../project-template.tar.gz .
 
 cd ..
-mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/content/repositories/snapshots/ -DrepositoryId=jboss-snapshots-repository -DgroupId=org.jboss.errai -DartifactId=errai-cordova-template -Dversion=3.0-SNAPSHOT -Dpackaging=tar.gz
+mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/content/repositories/snapshots/ -DrepositoryId=jboss-snapshots-repository -DgroupId=org.jboss.errai -DartifactId=errai-cordova-template -Dversion=$1 -Dpackaging=tar.gz

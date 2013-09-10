@@ -11,13 +11,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import org.jboss.errai.databinding.client.api.Bindable;
+
 /**
  * An entity for testing cascade behaviour. Owns several relationships, each
  * with a different cascade type.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@Entity
+@Bindable @Entity
 public class CascadeFrom {
 
   @Id @GeneratedValue

@@ -59,7 +59,7 @@ class CordovaMojo extends GroovyMojo {
                         element(name('artifactItems'), element(name('artifactItem'),
                                 element(name('groupId'), 'org.jboss.errai'),
                                 element(name('artifactId'), 'errai-cordova-template'),
-                                element(name('version'), '3.0-SNAPSHOT'),
+                                element(name('version'), project.version),
                                 element(name('type'), 'tar.gz'),
                                 element(name('overWrite'), 'false'),
                                 element(name('outputDirectory'), '${project.build.directory}/template')

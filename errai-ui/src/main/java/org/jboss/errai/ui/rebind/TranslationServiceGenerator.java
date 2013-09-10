@@ -413,7 +413,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
      * @param bundlePath
      */
     public MessageBundleResourceScanner(String bundlePath) {
-      this.bundlePrefix = bundlePath.substring(0, bundlePath.lastIndexOf(".json")).replace('/', '.');
+      this.bundlePrefix = bundlePath.substring(0, bundlePath.lastIndexOf(".json"));
     }
 
     /**
