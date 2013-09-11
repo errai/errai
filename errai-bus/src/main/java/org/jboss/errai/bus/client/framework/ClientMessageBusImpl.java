@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -188,7 +189,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
 
-    Map<String, TransportHandler> m = new HashMap<String, TransportHandler>();
+    Map<String, TransportHandler> m = new LinkedHashMap<String, TransportHandler>();
     m.put(Capabilities.WebSockets.name(), new WebsocketHandler(transportToBusCallback, ClientMessageBusImpl.this));
     m.put(Capabilities.SSE.name(), new SSEHandler(transportToBusCallback, ClientMessageBusImpl.this));
     m.put(Capabilities.LongPolling.name(),
