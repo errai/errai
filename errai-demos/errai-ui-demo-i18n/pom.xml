@@ -146,10 +146,6 @@
     <dependency><groupId>org.jboss.weld</groupId><artifactId>weld-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.weld</groupId><artifactId>weld-spi</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>xml-apis</groupId><artifactId>xml-apis</artifactId><scope>provided</scope></dependency>
-
-    
-    <!-- These are pulled in transitively through errai-bus, but will be removed when we address ERRAI-534 -->
-    <dependency><groupId>org.jboss.netty</groupId><artifactId>netty</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.errai.io.netty</groupId><artifactId>netty</artifactId><scope>provided</scope></dependency>
 
     <!-- And finally, add this -->
