@@ -410,7 +410,9 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
       BusToolsCli.decodeToCallback(response.getText(), messageCallback);
 
-      schedule();
+      if (pendingRequests.isEmpty()) {
+        schedule();
+      }
     }
 
     public void schedule() {
@@ -498,8 +500,6 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       );
     }
 
-
-
     final long latencyTime = System.currentTimeMillis();
 
     final RequestBuilder builder = new RequestBuilder(
@@ -540,6 +540,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       return request;
     }
     catch (RequestException e) {
+      pendingRequests.remove(rxInfo);
       throw e;
     }
   }
@@ -737,6 +738,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         case 200:
           notifyConnected();
           undeliveredMessages.removeAll(toSend);
+          schedulePolling();
           break;
 
         default: {
@@ -767,6 +769,18 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
           LogUtil.log("failed to communicate with remote bus: " + exception);
         }
+      }
+      schedulePolling();
+    }
+    
+    private void schedulePolling() {
+      if (pendingRequests.isEmpty()) {
+        new Timer() {
+          @Override
+          public void run() {
+            performPoll();
+          }
+        }.schedule(1);
       }
     }
   }
