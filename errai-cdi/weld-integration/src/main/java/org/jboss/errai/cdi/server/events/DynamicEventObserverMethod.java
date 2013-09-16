@@ -108,10 +108,6 @@ public class DynamicEventObserverMethod implements ObserverMethod {
     final String sessionId;
     final EventConversationContext.Context ctx = EventConversationContext.get();
     if (aClass.isAnnotationPresent(Conversational.class) && ctx != null && ctx.getSessionId() != null) {
-      if (ctx.getEventObject() == event) {
-        log.debug("Not sending event; it is conversational and we are in its own conversation context");
-        return;
-      }
       sessionId = ctx.getSessionId();
     }
     else {
