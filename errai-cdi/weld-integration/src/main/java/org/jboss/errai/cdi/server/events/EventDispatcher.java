@@ -148,12 +148,10 @@ public class EventDispatcher implements MessageCallback {
           try {
             @SuppressWarnings("unchecked")
             final Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
-            List<Annotation> qualifiers = null;
+            List<Annotation> qualifiers = new ArrayList<Annotation>();
+
             if (qualifierNames != null) {
               for (final String qualifierName : qualifierNames) {
-                if (qualifiers == null) {
-                  qualifiers = new ArrayList<Annotation>();
-                }
                 final Annotation qualifier = allQualifiers.get(qualifierName);
                 if (qualifier != null) {
                   qualifiers.add(qualifier);
@@ -161,11 +159,15 @@ public class EventDispatcher implements MessageCallback {
               }
             }
 
-            if (qualifiers != null) {
-              beanManager.fireEvent(o, qualifiers.toArray(new Annotation[qualifiers.size()]));
-            }
-            else {
-              beanManager.fireEvent(o);
+            Annotation[] qualArray = qualifiers.toArray(new Annotation[qualifiers.size()]);
+            
+            Set<ObserverMethod<? super Object>> observerMethods = beanManager.resolveObserverMethods(o, qualArray);
+            
+            // Fire event to all local observers
+            for (ObserverMethod<? super Object> observer : observerMethods) {
+              if (!(observer instanceof DynamicEventObserverMethod)) {
+                observer.notify(o);
+              }
             }
           }
           finally {

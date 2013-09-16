@@ -103,10 +103,6 @@ public class DynamicEventObserverMethod implements ObserverMethod {
 
   @Override
   public void notify(final Object event) {
-    if (EventConversationContext.isEventObjectInContext(event)) {
-      log.debug("Not sending event to clients; it is not in context");
-      return;
-    }
 
     final Class<? extends Object> aClass = event.getClass();
     final String sessionId;
