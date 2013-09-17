@@ -25,7 +25,9 @@
          </informalexample>
          <para>
           If you are not using Maven for dependency management, add
-          <code>errai-data-binding-version.jar</code>
+          <code>errai-data-binding-</code>
+            <code>version</code>
+            <code>.jar</code>
           to your classpath.
         </para>
       </section>
@@ -253,7 +255,14 @@ dataBinder.bind(textBox, "name", customConverter);
         <code>DataBinder</code>
         allows for the registration of
         <code>PropertyChangeHandlers</code>
-        for both specific properties or all properties of a bound model. This provides a uniform notification mechanism for model and UI value changes.
+        for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g
+        <code>"customer.address.*"</code>
+        ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g
+        <code>"customer.**"</code>
+        ).
+      </para>
+      <para>
+        This provides a uniform notification mechanism for model and UI value changes.
         <code>PropertyChangeHandlers</code>
         can be used to carry out any additional logic that might be necessary after a model or UI value has changed.
       </para>
@@ -300,7 +309,7 @@ dataBinder.addPropertyChangeHandler("name", new PropertyChangeHandler() {
          <programlisting language="java">
 @Dependent
 public class CustomerView {
-  @Inject @Model 
+  @Inject @Model
   private Customer customer;
 
   @Inject @Bound
@@ -325,12 +334,12 @@ public class CustomerView {
         . This example uses field injection again but constructor and method injection are supported as well.
       </para>
       <informalexample>
-         <programlisting language="java"> 
+         <programlisting language="java">
 @Dependent
 public class CustomerView {
   @Inject @AutoBound
   private DataBinder&lt;Customer&gt; customerBinder;
-  
+
   @Inject @Bound
   private TextBox name;
 
@@ -463,7 +472,7 @@ private TextBox date;
             <programlisting language="java">
 @Dependent
 public class CustomerView {
-  @Inject @Model 
+  @Inject @Model
   private Customer customer;
 
   @Inject @Bound
@@ -499,6 +508,8 @@ public class CustomerView {
          <title>App.gwt.xml</title>
          <programlisting language="xml">
 &lt;inherits name="org.jboss.errai.validation.Validation" /&gt;
+
+&lt;inherits name="org.hibernate.validator.HibernateValidator" /&gt;
 </programlisting>
       </example>
       <para>To use Errai's bean validation module, you must add the module, the javax.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:</para>
@@ -551,7 +562,7 @@ public class CustomerView {
       <informalexample>
          <programlisting language="java">
 @Inject
-private Validator validator;  
+private Validator validator;
 </programlisting>
       </informalexample>
       <informalexample>

@@ -334,21 +334,6 @@ public class MyService implements MessageCallback {
 }
 </programlisting>
             </example>
-            <para>Or like so ...</para>
-            <example>
-               <title>Mapping a callback from a field of a bean</title>
-               <programlisting language="java">
-@Singleton
-public class MyAppBean {
-   @Service("MyService")
-   private final MessageCallback myService = new MesageCallback() {
-     public void callback(Message message) {
-       // ... //
-     }
-   }
-}
-</programlisting>
-            </example>
             <para>As with server-side use of the annotation, if a service name is not explicitly specified, the underlying class name or field name being annotated will be used as the service name.</para>
          </section>
          <section id="sid-20938797_BusServices-@Local">
@@ -609,6 +594,34 @@ public class MyClientBean {
 </programlisting>
             </example>
          </section>
+      </section>
+      <section id="sid-71467095">
+         <title>Timed Methods</title>
+         <para>
+          The
+          <code>@Timed</code>
+          annotation allows scheduling method executions on managed client-side beans. Timers are automatically scoped to the scope of the corresponding managed bean and participate in the same lifecycle (see
+          <xref linkend="sid-22872238"/>
+          for details).
+        </para>
+         <para>
+          In the following example the
+          <code>updateTime</code>
+          method is invoked repeatedly every second.
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Timed(type = TimerType.REPEATING, interval = 1, timeUnit = TimeUnit.SECONDS)
+private void updateTime() {
+  timeWidget.setTime(System.currentTimeMillis);
+}
+</programlisting>
+         </informalexample>
+         <para>
+          For delayed one-time execution of methods
+          <code>type = TimerType.DELAYED</code>
+          can be used instead.
+        </para>
       </section>
    </section>
    <section id="sid-21627016">

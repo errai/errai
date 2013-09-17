@@ -22,7 +22,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.4.0.Final</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <description>Adds support for deployments on JBoss Application Server</description>

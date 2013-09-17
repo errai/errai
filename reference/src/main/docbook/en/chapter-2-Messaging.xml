@@ -198,13 +198,13 @@ public class HelloWorld implements EntryPoint {
   public void onModuleLoad() {
      [...]
 
-     /**
-      * Declare a local service to receive messages on the subject
+     /*
+      * Declare a service to receive messages on the subject
       * "BroadcastReceiver".
       */
      bus.subscribe("BroadcastReceiver", new MessageCallback() {
        public void callback(CommandMessage message) {
-         /**
+         /*
           * When a message arrives, extract the "text" field and
           * do something with it
           */
@@ -222,6 +222,47 @@ public class HelloWorld implements EntryPoint {
           <code>"BroadcastReceiver"</code>
           which can now accept both local messages and remote messages from the server bus. The service will be available in the client to receive messages as long the client bus is and the service is not explicitly de-registered.
         </para>
+      </section>
+      <section id="sid-5931280_MessagingAPIBasics-LocalServices">
+         <title>Local Services</title>
+         <para>On the client or the server, you can create a local receiver which only receives messages that originated on the local bus. A local server-side service only receives messages that originate on that server, and a local client-side service only receives messages that originated on that client.</para>
+         <para>
+          To create a local receiver using the declarative API, use the
+          <code>@Local</code>
+          annotation in conjunction with
+          <code>@Service</code>
+          :
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Local
+@Service
+  public class HelloIntrovertService implements MessageCallback {
+    public void callback(Message message) {
+      System.out.println("Hello, me!");
+    }
+  }
+</programlisting>
+         </informalexample>
+         <para>
+          To create a local receiver using through programmatic service registration, use the
+          <code>subscribeLocal()</code>
+          method in place of
+          <code>subscribe()</code>
+          :
+        </para>
+         <informalexample>
+            <programlisting language="java">
+public void registerLocalService(MessageBus bus) {
+  bus.subscribeLocal("LocalBroadcastReceiver", new MessageCallback() {
+    public void callback(Message message) {
+       String messageText = message.get(String.class, "text");
+     }
+  });
+}
+</programlisting>
+         </informalexample>
+         <para>Both examples above work in client- and server-side code.</para>
       </section>
    </section>
    <section id="sid-24674472">
@@ -1286,7 +1327,7 @@ errai.bus.enable_web_socket_server=true
         </para>
          <informalexample>
             <programlisting language="java">
-&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="false"&gt;  
+&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="false"&gt;
 </programlisting>
          </informalexample>
          <para>to:</para>
@@ -1315,7 +1356,7 @@ errai.bus.enable_web_socket_server=true
 &lt;context-param&gt;
   &lt;param-name&gt;websocket-path-element&lt;/param-name&gt;
   &lt;param-value&gt;in.erraiBusWS&lt;/param-value&gt;
-&lt;/context-parm&gt;
+&lt;/context-param&gt;
 </programlisting>
          </informalexample>
          <para>

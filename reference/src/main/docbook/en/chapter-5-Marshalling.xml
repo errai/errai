@@ -536,31 +536,35 @@ public MySuperCustomEntityMapping extends MappingDefinition {
          <example>
             <title>DataMarshaller.java from the built-in marshallers</title>
             <programlisting language="java">
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(Date.class)
+@ServerMarshaller(Date.class)
 public class DateMarshaller extends AbstractNullableMarshaller&lt;Date&gt; {
   @Override
-  public Class&lt;Date&gt; getTypeHandled() {
-    return Date.class;
+  public Date[] getEmptyArray() {
+    return new Date[0];
   }
 
   @Override
-  public Date demarshall(EJValue o, MarshallingSession ctx) {
-    // check if the JSON element is null
-    if (o.isNull() != null) {
-      // if the JSON element is null, so is our object!
-      return null;
+  public Date doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
+    if (o.isObject() != null) {
+      EJValue qualifiedValue = o.isObject().get(SerializationParts.QUALIFIED_VALUE);
+      if (!qualifiedValue.isNull() &amp;&amp; qualifiedValue.isString() != null) {
+        return new Date(Long.parseLong(qualifiedValue.isString().stringValue()));
+      }
+      EJValue numericValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      if (!numericValue.isNull() &amp;&amp; numericValue.isNumber() != null) {
+        return new Date(new Double(numericValue.isNumber().doubleValue()).longValue());
+      }
+      if (!numericValue.isNull() &amp;&amp; numericValue.isString() != null) {
+        return new Date(Long.parseLong(numericValue.isString().stringValue()));
+      }
     }
 
-    // instantiate our Date!
-    return new Date(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
+    return null;
   }
 
   @Override
-  public String marshall(Date o, MarshallingSession ctx) {
-    // if the object is null, we encode "null"
-    if (o == null) { return "null"; }
-
-    // return the JSON representation of the object
+  public String doNotNullMarshall(final Date o, final MarshallingSession ctx) {
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
@@ -577,13 +581,13 @@ public class DateMarshaller extends AbstractNullableMarshaller&lt;Date&gt; {
         </para>
          <para>
           The
-          <code>demarshall()</code>
-          method does what its name implies: it is responsible for demarshalling the object from JSON and turning it back into a Java object.
+          <code>doNotNullDemarshall()</code>
+          method is responsible for converting the given JSON object (which has already been parsed and verified non-null) into a Java object.
         </para>
          <para>
           The
-          <code>marshall()</code>
-          method does the opposite, and encodes the object into JSON for transmission on the wire.
+          <code>doNotNullMarshall()</code>
+          method does roughly the inverse: it converts the given Java object into a String (which must be parseable as a JSON object) for transmission on the wire.
         </para>
       </section>
    </section>

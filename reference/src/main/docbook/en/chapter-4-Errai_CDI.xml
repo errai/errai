@@ -475,10 +475,6 @@ public class Foo {
 &lt;/web-app&gt;
 </programlisting>
             </informalexample>
-            <note>
-               <title>Errai-CDI maven archetype</title>
-               <para>Sounds terribly complicated, no? Don't worry we provide a maven archetype that takes care of all these setup steps and configuration details.</para>
-            </note>
          </section>
       </section>
       <section id="sid-5931501_DeployingErraiCDI-DeploymenttoaServletEngine">

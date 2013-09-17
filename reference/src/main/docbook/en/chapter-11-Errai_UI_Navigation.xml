@@ -55,7 +55,9 @@
          </informalexample>
          <para>
           If you are not using Maven for dependency management, add
-          <code>errai-navigation-version.jar</code>
+          <code>errai-navigation-</code>
+            <code>version</code>
+            <code>.jar</code>
           to the compile-time classpath of a project that's already set up for Errai UI templating.
         </para>
       </section>
@@ -254,7 +256,7 @@ public class ItemPage extends VerticalPanel {
             <code>@PageShown</code>
             methods are permitted one optional parameter of type
             <code>HistoryToken</code>
-            —more on this in the next section.
+            ---more on this in the next section.
           </para>
             <para>The lifespan of a Page instance is governed by CDI scope: Dependent and implict-scoped page beans are instantiated each time the user navigates to them, whereas Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.</para>
          </section>
@@ -345,16 +347,50 @@ public class ItemPage extends VerticalPanel {
           </para>
          </section>
       </section>
-      <section id="sid-54493676_ErraiUINavigation-DeclaringaLink">
-         <title>Declaring a Link</title>
+      <section id="sid-54493676_ErraiUINavigation-DeclaringaLinkwithTransitionAnchor">
+         <title>Declaring a Link with TransitionAnchor</title>
          <para>
-          To declare a link from one page to another, inject an instance of
+          The easiest way to declare a link between pages is to inject an instance of
+          <code>TransitionAnchor&lt;P&gt;</code>
+          , where
+          <code>P</code>
+          is the class of the target page.
+        </para>
+         <para>Here is an example declaring an anchor link from the templated welcome page to the item list page. The first code sample would go in WelcomePage.java while the second would go in the WelcomePage.html, the associated html template.</para>
+         <informalexample>
+            <programlisting language="java">
+@Page(startingPage=true)
+@Templated
+public class WelcomePage extends Composite {
+
+  @Inject @DataField TransitionAnchor&lt;ItemListPage&gt; itemLink;
+
+}
+</programlisting>
+         </informalexample>
+         <informalexample>
+            <programlisting language="xml">
+&lt;div&gt;
+  &lt;a data-field="itemLink"&gt;Go to Item List Page&lt;/a&gt;
+&lt;/div&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          You can inject any number of links into a page. The only restriction is that the target of the link must be a Widget type that is annotated with
+          <code>@Page</code>
+          . When the user clicks the link Errai will transition to the item list page.
+        </para>
+      </section>
+      <section id="sid-54493676_ErraiUINavigation-DeclaringaManualLink">
+         <title>Declaring a Manual Link</title>
+         <para>
+          Sometimes it is necessary to manually transition between pages (such as in response to an event being fired). To declare a manual link from one page to another, inject an instance of
           <code>TransitionTo&lt;P&gt;</code>
           , where
           <code>P</code>
           is the class of the target page.
         </para>
-         <para>For example, this code declares a link from the welcome page to the item list page:</para>
+         <para>This code declares a manual transition from the welcome page to the item list page:</para>
          <informalexample>
             <programlisting language="java">
 @Page(startingPage=true)
@@ -371,15 +407,17 @@ public class WelcomePage extends Composite {
           interface yourself; the framework creates the appropriate instance for you.
         </para>
          <para>
-          You can inject any number of links into a page. The only restriction is that the target of the link must be a Widget type that is annotated with
+          As with
+          <code>TransitionAnchor</code>
+          , the only restriction is that the target of the link must be a Widget type that is annotated with
           <code>@Page</code>
           .
         </para>
       </section>
-      <section id="sid-54493676_ErraiUINavigation-FollowingaLink">
-         <title>Following a Link</title>
+      <section id="sid-54493676_ErraiUINavigation-FollowingaManualLink">
+         <title>Following a Manual Link</title>
          <para>
-          To follow a link, simply call the
+          To follow a manual link, simply call the
           <code>go()</code>
           method on an injected
           <code>TransitionTo</code>
@@ -402,29 +440,12 @@ public class WelcomePage extends Composite {
       <section id="sid-54493676_ErraiUINavigation-InstallingtheNavigationPanelintotheUserInterface">
          <title>Installing the Navigation Panel into the User Interface</title>
          <para>
-          Now that you've created several pages and injected some links between them, there is one last step to seeing the results in the user interface: you must add the navigation panel somewhere in the document. The best time to do this is during application startup, for example in the
+          Beginning in version 2.4, Errai will automatically attach the Navigation Panel to the Root Panel, but it is possible to override this behaviour by simply adding the Navigation Panel to another component manually. The best time to do this is during application startup, for example in the
           <code>@PostConstruct</code>
           method of your
           <code>@EntryPoint</code>
-          class. You can allow Errai Navigation to control the full contents of the page, or you can opt to keep some parts of the page (headers, footers, and sidebars, for example) away from Errai Navigation.
+          class. By using the default behaviour you can allow Errai Navigation to control the full contents of the page, or you can opt to keep some parts of the page (headers, footers, and sidebars, for example) away from Errai Navigation by choosing an alternate location for the Navigation Panel.
         </para>
-         <para>This example code gives the Navigation system control of the full page contents:</para>
-         <informalexample>
-            <programlisting language="java">
-@EntryPoint
-public class Bootstrap {
-
-  @Inject
-  private Navigation navigation;
-
-  @PostConstruct
-  public void clientMain() {
-    RootPanel.get().add(navigation.getContentPanel());
-  }
-
-}
-</programlisting>
-         </informalexample>
          <para>The following example reserves space for header and footer content that is not affected by the navigation system:</para>
          <informalexample>
             <programlisting language="java">

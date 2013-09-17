@@ -956,4 +956,302 @@ public class StandaloneLifecycleListener {
          </itemizedlist>
       </section>
    </section>
+   <section id="sid-71467090">
+      <title>Errai JPA Data Sync</title>
+      <para>Traditional JPA implementations allow you to store and retrieve entity objects on the server side. Errai's JPA implementation allows you to store and retrieve entity objects in the web browser using the same APIs. All that's missing is the ability to synchronize the stored data between the server side and the client side.</para>
+      <para>This is where Errai JPA Data Sync comes in: it provides an easy mechanism for two-way synchronization of data sets between the client and the server.</para>
+      <section id="sid-71467090_ErraiJPADataSync-HowToUseIt">
+         <title>How To Use It</title>
+         <section id="sid-71467090_ErraiJPADataSync-Dependencies">
+            <title>Dependencies</title>
+            <para>
+            First, ensure your
+            <code>pom.xml</code>
+            includes a dependency on the Data Sync module. This module must be packaged in your application's WAR file, so include it with the default scope (compile):
+          </para>
+            <informalexample>
+               <programlisting language="xml">
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+    &lt;artifactId&gt;errai-jpa-datasync&lt;/artifactId&gt;
+    &lt;version&gt;${errai.version}&lt;/version&gt;
+  &lt;/dependency&gt;
+</programlisting>
+            </informalexample>
+            <para>
+            Then, ensure your project's
+            <code>gwt.xml</code>
+            module descriptor includes a dependency on the Data Sync GWT module:
+          </para>
+            <informalexample>
+               <programlisting language="xml">
+  &lt;inherits name="org.jboss.errai.jpa.sync.DataSync"/&gt;
+</programlisting>
+            </informalexample>
+         </section>
+         <section id="sid-71467090_ErraiJPADataSync-ARunningExample">
+            <title>A Running Example</title>
+            <para>
+            For the rest of this chapter, we will refer to the following Entity classes, which are defined in a
+            <code>shared</code>
+            package that's visible to client and server code:
+          </para>
+            <informalexample>
+               <programlisting language="java">
+@Portable
+@Entity
+@NamedQuery(name = "allUsers", query = "SELECT u FROM User u")
+public class User {
+
+  @Id
+  @GeneratedValue
+  private long id;
+
+  private String name;
+
+  // getters and setters omitted
+}
+</programlisting>
+            </informalexample>
+            <informalexample>
+               <programlisting language="java">
+@Portable
+@Entity
+@NamedQuery(name = "groceryListsForUser", query = "SELECT gl FROM GroceryList gl WHERE gl.owner=:user")
+public class GroceryList {
+
+  @Id
+  @GeneratedValue
+  private long id;
+
+  @ManyToOne
+  private User owner;
+
+  @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
+  private List&lt;Item&gt; items = new ArrayList&lt;Item&gt;();
+
+  // getters and setters omitted
+}
+</programlisting>
+            </informalexample>
+            <informalexample>
+               <programlisting language="java">
+@Portable
+@Entity
+@NamedQuery(name = "allItems", query = "SELECT i FROM Item i")
+public class Item {
+
+  @Id
+  @GeneratedValue
+  private long id;
+
+  private String name;
+  private String department;
+  private String comment;
+  private Date addedOn;
+
+  @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
+  private User addedBy;
+
+  // getters and setters omitted
+}
+</programlisting>
+            </informalexample>
+            <para>
+            To summarize: there are three entity types:
+            <code>User</code>
+            ,
+            <code>GroceryList</code>
+            , and
+            <code>Item</code>
+            . Each
+            <code>GroceryList</code>
+            belongs to a
+            <code>User</code>
+            and has a list of
+            <code>Item</code>
+            objects.
+          </para>
+            <note>
+               <para>
+              All the entities involved in the data synchronization request must be marshallable via Errai Marshalling. This is normally accomplished by adding the
+              <code>@Portable</code>
+              annotation to each JPA entity class, but it is also acceptable to list them in
+              <code>ErraiApp.properties</code>
+              . See the
+              <xref linkend="sid-5931328"/>
+              section for more details.
+            </para>
+            </note>
+            <para>Now let's say we want to synchronize the data for all of a user's grocery lists. This will make them available for offline use through Errai JPA, and at the same time it will update the server with the latest changes made on the client. Ultimately, the sync operation is accomplished in one asynchronous call, but first we have to prepare a few things on the client and the server.</para>
+         </section>
+         <section id="sid-71467090_ErraiJPADataSync-ClientSide">
+            <title>Client Side</title>
+            <informalexample>
+               <programlisting language="java">
+  @Inject private ClientSyncManager syncManager;
+  @Inject private EntityManager em;
+
+  public void syncGroceryLists(User forUser) {
+    RemoteCallback&lt;List&lt;SyncResponse&lt;GroceryList&gt;&gt;&gt; onCompletion = new RemoteCallback&lt;List&lt;SyncResponse&lt;GroceryList&gt;&gt;&gt;() {
+      @Override
+      public void callback(List&lt;SyncResponse&lt;GroceryList&gt;&gt; response) {
+        Window.alert("Data Sync Complete!");
+      }
+    };
+
+    ErrorCallback&lt;?&gt; onError = new BusErrorCallback() {
+
+      @Override
+      public boolean error(Message message, Throwable throwable) {
+        Window.alert("Data Sync failed!");
+        return false;
+      }
+    };
+
+    Map&lt;String, Object&gt; queryParams = new HashMap&lt;String, Object&gt;();
+    queryParams.put("user", forUser);
+
+    syncManager.coldSync("groceryListsForUser", GroceryList.class, queryParams, onCompletion, onError);
+  }
+</programlisting>
+            </informalexample>
+            <important>
+               <para>
+              The
+              <code>onCompletion</code>
+              and
+              <code>onError</code>
+              callbacks are optional. In the unlikely case that your application doesn't care if a data sync request completed successfully, you can pass
+              <code>null</code>
+              for either callback.
+            </para>
+            </important>
+            <para>
+            Once your
+            <code>onCompletion</code>
+            callback has been notified, the server and client will have the same entities stored in their respective databases for all entities reachable from the given query result.
+          </para>
+         </section>
+         <section id="sid-71467090_ErraiJPADataSync-ServerSide%E2%80%93DataSyncServiceImpl">
+            <title>Server Side – DataSyncServiceImpl</title>
+            <para>
+            During the
+            <code>coldSync()</code>
+            call, the client-side sync manager sends an
+            <link linkend="sid-5931313">Errai RPC</link>
+            request to the server. Although a server-side implementation of the remote interface is provided, you are responsible for implementing a thin wrapper around it. This wrapper serves two purposes:
+          </para>
+            <orderedlist inheritnum="ignore" continuation="restarts">
+               <listitem>
+                  <para>It allows you to determine how to obtain a reference to the JPA EntityManager (and to choose which persistence context the server-side data sync will operate on)</para>
+               </listitem>
+               <listitem>
+                  <para>It allows you to inspect the contents of each sync request and make security decisions about access to particular entities</para>
+               </listitem>
+            </orderedlist>
+            <para>If you are deploying to a container that supports CDI and EJB 3, you can use this DataSyncServiceImpl as a template for your own:</para>
+            <informalexample>
+               <programlisting language="java">
+@Stateless @org.jboss.errai.bus.server.annotations.Service
+public class DataSyncServiceImpl implements DataSyncService {
+
+  @PersistenceContext
+  private EntityManager em;
+
+  private final JpaAttributeAccessor attributeAccessor = new JavaReflectionAttributeAccessor();
+
+  @Inject private LoginService loginService;
+
+  @Override
+  public &lt;X&gt; List&lt;SyncResponse&lt;X&gt;&gt; coldSync(SyncableDataSet&lt;X&gt; dataSet, List&lt;SyncRequestOperation&lt;X&gt;&gt; remoteResults) {
+
+    // Ensure a user is logged in
+    User currentUser = loginService.whoAmI();
+    if (currentUser == null) {
+      throw new IllegalStateException("Nobody is logged in!");
+    }
+
+    // Ensure user is accessing their own data!
+    if (dataSet.getQueryName().equals("groceryListsForUser")) {
+      User requestedUser = (User) dataSet.getParameters().get("user");
+      if (!currentUser.getId().equals(requestedUser.getId())) {
+        throw new AccessDeniedException("You don't have permission to sync user " + requestedUser.getId());
+      }
+    }
+    else {
+      throw new IllegalArgumentException("You don't have permission to sync dataset " + dataSet.getQueryName());
+    }
+
+    DataSyncService dss = new org.jboss.errai.jpa.sync.server.DataSyncServiceImpl(em, attributeAccessor);
+    return dss.coldSync(dataSet, remoteResults);
+  }
+}
+</programlisting>
+            </informalexample>
+            <para>
+            If you are not using EJB 3, you will not be able to use the
+            <code>@PersistenceContext</code>
+            annotation. In this case, obtain a reference to your EntityManager the same way you would anywhere else in your application.
+          </para>
+         </section>
+         <section id="sid-71467090_ErraiJPADataSync-DealingWithConflicts">
+            <title>Dealing With Conflicts</title>
+            <para>
+            When the client sends the sync request to the server, it includes information about the state it expects each entity to be in. If an entity's state on the server does not match this expected state on the client, the server ignores the client's change request and includes a
+            <code>ConflictResponse</code>
+            object in the sync reply.
+          </para>
+            <para>When the client processes the sync responses from the server, it applies the new state from the server to the local data store. This overwrites the change that was initially requested from the client. In short, you could call this the "server wins" conflict resolution policy.</para>
+            <para>
+            In some cases, your application may be able to do something smarter: apply domain-specific knowledge to merge the conflict automatically, or prompt the user to perform a manual merge. In order to do this, you will have to examine the server response from inside the
+            <code>onCompletion</code>
+            callback you provided to the
+            <code>coldSync()</code>
+            method:
+          </para>
+            <informalexample>
+               <programlisting language="java">
+    RemoteCallback&lt;List&lt;SyncResponse&lt;GroceryList&gt;&gt;&gt; onCompletion = new RemoteCallback&lt;List&lt;SyncResponse&lt;GroceryList&gt;&gt;&gt;() {
+      @Override
+      public void callback(List&lt;SyncResponse&lt;GroceryList&gt;&gt; responses) {
+        for (SyncResponse&lt;GroceryList&gt; response : responses) {
+          if (response instanceof ConflictResponse) {
+            ConflictResponse&lt;GroceryList&gt; cr = (ConflictResponse&lt;GroceryList&gt;) response;
+            List&lt;Item&gt; expectedItems = cr.getExpected().getItems();
+            List&lt;Item&gt; serverItems = cr.getActualNew().getItems();
+            List&lt;Item&gt; clientItems = cr.getRequestedNew().getItems();
+
+            // merge the list of items by comparing each to expectedItems
+            List&lt;Item&gt; merged = ...;
+
+            // update local storage with the merged list
+            em.find(GroceryList.class, cr.getActualNew().getId()).setItems(merged);
+            em.flush();
+          }
+        }
+      }
+    };
+</programlisting>
+            </informalexample>
+            <para>
+            Remember, because of Errai's default "server wins" resolution policy, the call to
+            <code>em.find(GroceryList.class, cr.getActualNew().getId())</code>
+            will return a GroceryList object that has already been updated to match the state present in
+            <code>serverItems</code>
+            .
+          </para>
+            <note>
+               <para>
+              Searching for ConflictResponse objects in the
+              <code>onCompletion</code>
+              callback is the only way to recover client data that was clobbered in a conflict. If you do not merge this data back into local storage, or at least retain a reference to the
+              <code>cr.getRequestedNew()</code>
+              object, this conflicting client data will be lost forever.
+            </para>
+               <para>In a future release of Errai JPA, we plan to provide a client-side callback mechanism for custom conflict handling. If such a callback is registered, it will override the default behaviour.</para>
+            </note>
+         </section>
+      </section>
+   </section>
 </chapter>

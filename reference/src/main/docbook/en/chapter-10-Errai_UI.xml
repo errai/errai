@@ -996,6 +996,193 @@ public class LoginLayout extends PageLayout {
          </informalexample>
       </section>
    </section>
+   <section id="sid-51806600_ErraiUI-Stylesheetbinding">
+      <title>Stylesheet binding</title>
+      <para>When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part – which is an important usability consideration – is communicating that state to the user.</para>
+      <para>Let's start with the example case I just described. We have a control that we only want to be visible if the user is an admin. So the first thing we do is create a style binding annotation.</para>
+      <informalexample>
+         <programlisting language="java">
+@StyleBinding
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Admin {
+}
+</programlisting>
+      </informalexample>
+      <para>
+        This defines
+        <code>Adim</code>
+        as a stylebinding now we can use it like this:
+      </para>
+      <informalexample>
+         <programlisting language="java">
+@EntryPoint
+@Templated
+public class HelloWorldForm extends Composite {
+  @Inject @Admin @DataField Button deleteButton;
+  @Inject SessionManager sessionManager;
+
+
+  @EventHandler("deleteButton")
+  private void handleSendClick(ClickEvent event) {
+    // do some deleting!
+  }
+
+  @Admin
+  private void applyAdminStyling(Style style) {
+    if (!sessionManager.isAdmin()) {
+      style.setVisibility(Style.Visibility.HIDDEN);
+    }
+  }
+}
+</programlisting>
+      </informalexample>
+      <para>
+        Now before the form is shown to the user the
+        <code>applyAdminStyling</code>
+        method will be executed where the
+        <code>sessionManager</code>
+        is queried to see if the user is an admin if not the delete button that is also annotated with
+        <code>@Admin</code>
+        will be hidden from the view.
+      </para>
+      <para>In addition when using this in conjunction with Errai Databinding. Any Errai UI component which uses @AutoBound, will get live updating of the style rules for free, anytime the model changes. Allowing dynamic styling based on user input and other state changes.</para>
+   </section>
+   <section id="sid-51806600_ErraiUI-Internationalization%28i18n%29">
+      <title>Internationalization (i18n)</title>
+      <para>
+        User interfaces often need to be available in multiple languages. To get started with Errai's internationalization support, simply put the
+        <code>@Bundle("bundle.json")</code>
+        annotation on your entry point and add an empty
+        <code>bundle.json</code>
+        file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.
+      </para>
+      <para>
+        Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called
+        <code>errai-bundle-all.json</code>
+        and put it in your
+        <code>.errai</code>
+        directory. You can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.
+      </para>
+      <para>
+        The translation bundle files use the same naming scheme as Java (e.g.
+        <code>bundle_nl_BE.json</code>
+        for Belgian Dutch and
+        <code>bundle_nl.json</code>
+        for plain Dutch). Errai will also generate a file called
+        <code>errai-bundle-missing.json</code>
+        in the
+        <code>.errai</code>
+        folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations:
+      </para>
+      <informalexample>
+         <programlisting language="java">
+{
+"StoresPage.Stores!" : "Stores!",
+"WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front._-734987445" : "As you move toward a more and more declarative style, you allow the compiler and the framework to catch more mistakes up front. Broken links? A thing of the past!"
+}
+</programlisting>
+      </informalexample>
+      <para>
+        If you want to use your own keys instead of these generated ones you can specify them in your templates using the
+        <code>data-i18n-key</code>
+        attribute:
+      </para>
+      <informalexample>
+         <programlisting language="xml">
+&lt;html&gt;
+&lt;body&gt;
+  &lt;div data-field="content"&gt;
+  &lt;p data-i18n-key="welcome"&gt;Welcome to errai-ui i18n.&lt;/p&gt;
+&lt;div&gt;
+...
+</programlisting>
+      </informalexample>
+      <para>By adding this attribute in the template you can translate it with the following:</para>
+      <informalexample>
+         <programlisting language="java">
+{
+    "Widget.welcome": "Willkommen bei Errai-ui i18n."
+}
+</programlisting>
+      </informalexample>
+      <para>
+        Because your templates are designer templates and can contain some mock data that doesn't need to be translated, Errai has the ability to indicate that with an attribute
+        <code>data-role=dummy</code>
+        :
+      </para>
+      <informalexample>
+         <programlisting language="xml">
+&lt;div data-field=navbar data-role=dummy&gt;
+  &lt;div class="navbar navbar-fixed-top"&gt;
+    &lt;div class=navbar-inner&gt;
+      &lt;div class=container&gt;
+        &lt;span class=brand&gt;Example Navbar&lt;/span&gt;
+        &lt;ul class=nav&gt;
+          &lt;li&gt;&lt;a&gt;Item&lt;/a&gt;
+          &lt;li&gt;&lt;a&gt;Item&lt;/a&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</programlisting>
+      </informalexample>
+      <para>
+        Here the template fills out a navbar with dummy elements, useful for creating a design, adding
+        <code>data-role=dummy</code>
+        will not only exclude it form being translated it will also strip the children nodes from the template that will be used by the application.
+      </para>
+      <para>
+        When you have setup a translation of your application Errai will look at the browser locale and select the locale, if it's available, if not it will use the default (
+        <code>bundle.json</code>
+        ). If the users of your application need to be able to switch the language manually, Errai offers a pre build component you can easily add to your page:
+        <code>LocaleListBox</code>
+        will render a Listbox with all available languages. If you want more control of what this language selector looks like there is also a
+        <code>LocaleSelector</code>
+        that you can use to query and select the locale for example:
+      </para>
+      <informalexample>
+         <programlisting language="java">
+@Templated
+public class NavBar extends Composite {
+
+  @Inject
+  private LocaleSelector selector;
+
+  @Inject @DataField @OrderedList
+  ListWidget&lt;Locale, LanguageItem&gt; language;
+
+  @AfterInitialization
+  public void buildLangaugeList() {
+    language.setItems(new ArrayList&lt;Locale&gt;(selector.getSupportedLocales()));
+  }
+
+...
+// in LanguageItem we add a click handler on a link
+
+  @Inject
+  Navigation navigation;
+
+  @Inject
+  private LocaleSelector selector;
+
+  link.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selector.select(model.getLocale());
+        navigation.goTo(navigation.getCurrentPage().name());
+      }
+    });
+</programlisting>
+      </informalexample>
+      <important>
+         <para>
+          Note: Currently when pages are
+          <code>ApplicationScoped</code>
+          switching the language after initial load is not working
+        </para>
+      </important>
+   </section>
    <section id="sid-51806600_ErraiUI-ExtendedstylingwithLESS">
       <title>Extended styling with LESS</title>
       <para>
@@ -1018,5 +1205,20 @@ public class MyComponent extends Component {
 }
 </programlisting>
       </informalexample>
+      <para>Finally it will also add any deferred binding properties to the top of your LESS stylesheet, so for example you could use the user.agent in LESS like this:</para>
+      <informalexample>
+         <programlisting language="java">
+.mixin (@a) when (@a = "safari") {
+  background-color: black;
+}
+
+.mixin (@a) when (@a = "gecko1_8") {
+  background-color: white;
+}
+
+.class1 { .mixin(@user_agent) }
+</programlisting>
+      </informalexample>
+      <para>Because a dot is not allowed in LESS variables it's replaced with an underscore, so in the example above class1 will have a black background on Safari and Chrome and white on Firefox. On the top of this LESS stylesheet @user_agent: "safari" will get generated.</para>
    </section>
 </chapter>
