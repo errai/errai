@@ -55,7 +55,7 @@ public final class TemplateUtil {
   }
 
   /**
-   * Replace the {@link Element} with thte data-field of the given
+   * Replace the {@link Element} with the data-field of the given
    * {@link String} with the root {@link Element} of the given {@link UIObject}
    */
   public static void compositeComponentReplace(String componentType, String templateFile, Widget field,
