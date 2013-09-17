@@ -19,7 +19,7 @@ public interface CreationalContext {
     * Records a {@link InitializationCallback} to the creational context.
     *
     * @param beanInstance
-    *     the instance of the bean associated witht he {@link InitializationCallback}
+    *     the instance of the bean associated with the {@link InitializationCallback}
     * @param callback
     *     the instance of the {@link InitializationCallback}
     */
