@@ -38,12 +38,14 @@ import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
- *
+ * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 public final class TemplateUtil {
   private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
   private static TranslationService translationService = null;
+
   public static TranslationService getTranslationService() {
     if (translationService == null) {
       translationService = GWT.create(TranslationService.class);
@@ -55,7 +57,7 @@ public final class TemplateUtil {
   }
 
   /**
-   * Replace the {@link Element} with the data-field of the given
+   * Replace the {@link Element} with thte data-field of the given
    * {@link String} with the root {@link Element} of the given {@link UIObject}
    */
   public static void compositeComponentReplace(String componentType, String templateFile, Widget field,
@@ -92,13 +94,24 @@ public final class TemplateUtil {
       }
       parentElement.replaceChild(field.getElement(), element);
 
+      boolean hasI18nKey = !field.getElement().getAttribute("data-i18n-key").equals("");
+      boolean hasI18nPrefix = !field.getElement().getAttribute("data-i18n-prefix").equals("");
+      
       /*
        * Preserve template Element attributes.
        */
       final JsArray<Node> templateAttributes = getAttributes(element);
       for (int i = 0; i < templateAttributes.length(); i++) {
         final Node node = templateAttributes.get(i);
-        field.getElement().setAttribute(node.getNodeName(), node.getNodeValue());
+        String name = node.getNodeName();
+        String oldValue = node.getNodeValue();
+        /*
+         * If this new component is templated, do not overwrite i18n related attributes.
+         */
+        if ((name.equals("data-i18n-key") || name.equals("data-role") && oldValue.equals("dummy"))
+                && (hasI18nKey || hasI18nPrefix))
+          continue;
+        field.getElement().setAttribute(name, oldValue);
       }
     } catch (Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName
@@ -112,8 +125,8 @@ public final class TemplateUtil {
   }
 
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
-		component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
-  }-*/;
+                                                                                   component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
+                                                                                   }-*/;
 
   public static Element getRootTemplateElement(String templateContents, final String rootField) {
     Element parserDiv = DOM.createDiv();
@@ -150,7 +163,9 @@ public final class TemplateUtil {
   }
 
   /**
-   * Called to perform i18n translation on the given template.
+   * Called to perform i18n translation on the given template. Add i18n-prefix attribute to root of
+   * template to allow translation after bean creation.
+   * 
    * @param templateRoot
    */
   public static void translateTemplate(String templateFile, Element templateRoot) {
@@ -159,32 +174,16 @@ public final class TemplateUtil {
 
     logger.fine("Translating template: " + templateFile);
     final String i18nKeyPrefix = getI18nPrefix(templateFile);
-    DomVisit.visit(new ElementWrapper(templateRoot), new TemplateVisitor(i18nKeyPrefix) {
-      @Override
-      protected void visitElement(String i18nKeyPrefix, org.w3c.dom.Element element) {
-        String translationKey = i18nKeyPrefix + getTranslationKey(element);
-        String translationValue = getI18nValue(translationKey);
-        if (translationValue != null)
-          ((ElementWrapper) element).getElement().setInnerHTML(translationValue);
-      }
 
-      @Override
-      protected void visitAttribute(String i18nKeyPrefix, org.w3c.dom.Element element, String attributeName) {
-        String translationKey = i18nKeyPrefix + getElementKey(element);
-        translationKey += "-" + attributeName;
-        String translationValue = getI18nValue(translationKey);
-        if (translationValue != null)
-          element.setAttribute(attributeName, translationValue);
-      }
+    // Add i18n prefix attribute for post-creation translation
+    templateRoot.setAttribute("data-i18n-prefix", i18nKeyPrefix);
 
-      private String getI18nValue(String translationKey) {
-        return getTranslationService().getTranslation(translationKey);
-      }
-    });
+    DomVisit.visit(new ElementWrapper(templateRoot), new TemplateTranslationVisitor(i18nKeyPrefix));
   }
 
   /**
    * Generate an i18n key prefix from the given template filename.
+   * 
    * @param templateFile
    */
   public static String getI18nPrefix(String templateFile) {
@@ -219,7 +218,7 @@ public final class TemplateUtil {
 
     if (element == null) {
       throw new RuntimeException("A native event source was specified in " + component.getClass().getName()
-          + " but the corresponding data-field does not exist!");
+              + " but the corresponding data-field does not exist!");
     }
     DOM.setEventListener((com.google.gwt.user.client.Element) element, listener);
     DOM.sinkEvents((com.google.gwt.user.client.Element) element, eventsToSink);
@@ -255,7 +254,7 @@ public final class TemplateUtil {
   }
 
   private static native JsArray<Node> getAttributes(Element elem) /*-{
-		return elem.attributes;
-  }-*/;
+                                                                  return elem.attributes;
+                                                                  }-*/;
 
 }

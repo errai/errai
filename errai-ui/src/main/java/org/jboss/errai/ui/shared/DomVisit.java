@@ -6,6 +6,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * @author edewit@redhat.com
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 public class DomVisit {
 
@@ -24,6 +25,19 @@ public class DomVisit {
         visit((Element) childNode, visitor);
       }
     }
+  }
+
+  public static void revisit(Element element, DomRevisitor visitor) {
+    if (visitor.visit(element)) {
+      NodeList childNodes = element.getChildNodes();
+      for (int idx = 0; idx < childNodes.getLength(); idx++) {
+        Node childNode = childNodes.item(idx);
+        if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+          revisit((Element) childNode, visitor);
+        }
+      }
+    }
+    visitor.afterVisit(element);
   }
 
 }
