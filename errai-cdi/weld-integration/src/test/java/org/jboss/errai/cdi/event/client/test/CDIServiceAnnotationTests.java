@@ -8,8 +8,6 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import com.google.gwt.user.client.Timer;
 
@@ -20,7 +18,7 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
   public final static String REPLY_TO = "AnnotationTester";
   
   private final int POLL = 100;
-  private final int TIMEOUT = 10000;
+  private final int TIMEOUT = 60000;
 
   public CDIServiceAnnotationTests() {
     super();
@@ -58,6 +56,22 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
         runServiceTest("service2", null);
       }
     });
+  }
+  
+  public void testClassWithCommandMethod() throws Exception {
+    runServiceTest("ClassWithCommandMethod", "command");
+  }
+  
+  public void testNamedClassWithService() throws Exception {
+    runServiceTest("ANamedClassService", null);
+  }
+  
+  public void testClassWithNamedServiceMethod() throws Exception {
+    runServiceTest("ANamedServiceMethod", null);
+  }
+  
+  public void testClassWithNamedCommandMethod() throws Exception {
+    runServiceTest("ClassWithNamedCommandMethod", "ANamedCommandMethod");
   }
   
   private void runServiceTest(final String subject, String command) {

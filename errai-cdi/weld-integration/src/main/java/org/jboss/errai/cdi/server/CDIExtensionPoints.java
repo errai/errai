@@ -404,8 +404,6 @@ public class CDIExtensionPoints implements Extension {
           continue;
         }
 
-        final MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
-
         registered.remove(type);
 
         // Discriminate on @Command
@@ -421,10 +419,11 @@ public class CDIExtensionPoints implements Extension {
           }
         }
 
+        final Object callback = CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
         final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
 
         if (commandPoints.isEmpty()) {
-          bus.subscribe(subjectName, callback);
+          bus.subscribe(subjectName, (MessageCallback) callback);
         }
         else {
           bus.subscribeLocal(subjectName, new CommandBindingsCallback(commandPoints, callback, bus));
