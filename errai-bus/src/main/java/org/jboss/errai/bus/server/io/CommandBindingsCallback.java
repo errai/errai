@@ -52,6 +52,8 @@ public class CommandBindingsCallback implements MessageCallback {
         throw new IllegalStateException("method does not implement signature: " + entry.getValue().getName()
             + "(" + Message.class.getName() + ")");
       }
+      
+      entry.getValue().setAccessible(true);
 
       methodDispatchers.put(entry.getKey(),
           parmTypes.length == 0 ?
