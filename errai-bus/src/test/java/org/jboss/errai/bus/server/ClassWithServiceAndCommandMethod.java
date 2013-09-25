@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.event.server;
+package org.jboss.errai.bus.server;
 
 import javax.inject.Inject;
 
