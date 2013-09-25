@@ -27,6 +27,7 @@ public class ServiceMethodCallback implements MessageCallback {
   public ServiceMethodCallback(Object delegate, Method service) {
     this.delegate = delegate;
     this.service = service;
+    this.service.setAccessible(true);
     if (service.getParameterTypes().length == 0) {
       noArgs = true;
     }
