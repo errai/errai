@@ -18,55 +18,6 @@ package org.jboss.errai.cdi.server;
 import static java.util.ResourceBundle.getBundle;
 import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
 
-import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.bus.client.util.ErrorHelper;
-import org.jboss.errai.bus.server.AsyncDispatcher;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.SimpleDispatcher;
-import org.jboss.errai.bus.server.annotations.Command;
-import org.jboss.errai.bus.server.annotations.Remote;
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.io.CommandBindingsCallback;
-import org.jboss.errai.bus.server.io.RPCEndpointFactory;
-import org.jboss.errai.bus.server.io.RemoteServiceCallback;
-import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
-import org.jboss.errai.bus.server.util.SecureHashUtil;
-import org.jboss.errai.cdi.server.events.ConversationalEvent;
-import org.jboss.errai.cdi.server.events.EventDispatcher;
-import org.jboss.errai.cdi.server.events.EventRoutingTable;
-import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
-import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.framework.ProxyFactory;
-import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.rebind.ProxyUtil;
-import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
-import org.jboss.errai.enterprise.client.cdi.internal.ObserverModel;
-import org.jboss.errai.ioc.support.bus.client.Sender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -89,6 +40,57 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+
+import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.server.AsyncDispatcher;
+import org.jboss.errai.bus.server.ServerMessageBusImpl;
+import org.jboss.errai.bus.server.SimpleDispatcher;
+import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.io.RPCEndpointFactory;
+import org.jboss.errai.bus.server.io.RemoteServiceCallback;
+import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
+import org.jboss.errai.bus.server.util.NotAService;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
+import org.jboss.errai.bus.server.util.ServiceMethodParser;
+import org.jboss.errai.bus.server.util.ServiceParser;
+import org.jboss.errai.bus.server.util.ServiceTypeParser;
+import org.jboss.errai.cdi.server.events.ConversationalEvent;
+import org.jboss.errai.cdi.server.events.EventDispatcher;
+import org.jboss.errai.cdi.server.events.EventRoutingTable;
+import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.framework.ProxyFactory;
+import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.ProxyUtil;
+import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.jboss.errai.enterprise.client.cdi.internal.ObserverModel;
+import org.jboss.errai.ioc.support.bus.client.Sender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Extension points to the CDI container. Makes Errai components available as CDI beans (i.e. the
  * message bus) and registers CDI components as services with Errai.
@@ -96,6 +98,7 @@ import java.util.concurrent.TimeUnit;
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CDIExtensionPoints implements Extension {
@@ -192,13 +195,19 @@ public class CDIExtensionPoints implements Extension {
       }
 
       if (!isRpc) {
-        managedTypes.addServiceEndpoint(type);
+        try {
+          managedTypes.addService(new ServiceTypeParser(type.getJavaClass()));
+        } catch (NotAService e) {
+          e.printStackTrace();
+        }
       }
     }
-    else {
-      for (final AnnotatedMethod method : type.getMethods()) {
-        if (method.isAnnotationPresent(Service.class)) {
-          managedTypes.addServiceMethod(type, method);
+    for (final AnnotatedMethod method : type.getMethods()) {
+      if (method.isAnnotationPresent(Service.class)) {
+        try {
+          managedTypes.addService(new ServiceMethodParser(method.getJavaMember()));
+        } catch (NotAService e) {
+          e.printStackTrace();
         }
       }
     }
@@ -369,6 +378,9 @@ public class CDIExtensionPoints implements Extension {
     bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
   }
 
+  /**
+   * Registers beans (type and method services) as they become available from the bean manager.
+   */
   private class StartupCallback implements Runnable {
     private final Set<Object> registered = new HashSet<Object>();
     private final BeanManager beanManager;
@@ -381,16 +393,33 @@ public class CDIExtensionPoints implements Extension {
       this.beanManager = beanManager;
       this.bus = bus;
       this.scheduledExecutorService = scheduledExecutorService;
-      registered.addAll(managedTypes.getServiceEndpoints());
+      registered.addAll(managedTypes.getDelegateClasses());
 
       this.expiryTime = System.currentTimeMillis() + (timeOutInSeconds * 1000);
+    }
+    
+    private Annotation[] getQualifiers(Class<?> delegateClass) {
+      int length = 0;
+      for (Annotation anno : delegateClass.getAnnotations()) {
+        if (anno.annotationType().isAnnotationPresent(Qualifier.class))
+          length += 1;
+      }
+      
+      Annotation[] ret = new Annotation[length];
+      int i = 0;
+      for (Annotation anno : delegateClass.getAnnotations()) {
+        if (anno.annotationType().isAnnotationPresent(Qualifier.class))
+          ret[i++] = anno;
+      }
+      
+      return ret;
     }
 
     @Override
     public void run() {
       if (System.currentTimeMillis() > expiryTime) {
         scheduledExecutorService.shutdown();
-        throw new RuntimeException("failed to discover beans: " + managedTypes.getServiceEndpoints());
+        throw new RuntimeException("failed to discover beans: " + managedTypes.getDelegateClasses());
       }
 
       if (registered.isEmpty()) {
@@ -399,64 +428,32 @@ public class CDIExtensionPoints implements Extension {
         return;
       }
 
-      for (final AnnotatedType<?> type : managedTypes.getServiceEndpoints()) {
-        if (!registered.contains(type) || beanManager.getBeans(type.getJavaClass()).size() == 0) {
+      // As each delegate becomes available, register all the associated services (type and method)
+      for (final Class<?> delegateClass : managedTypes.getDelegateClasses()) {
+        if (!registered.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
           continue;
         }
 
-        registered.remove(type);
-
-        // Discriminate on @Command
-        final Map<String, Method> commandPoints = new HashMap<String, Method>();
-        for (final AnnotatedMethod method : type.getMethods()) {
-          if (method.isAnnotationPresent(Command.class)) {
-            final Command command = method.getAnnotation(Command.class);
-            for (String cmdName : command.value()) {
-              if (cmdName.equals(""))
-                cmdName = method.getJavaMember().getName();
-              commandPoints.put(cmdName, method.getJavaMember());
+        registered.remove(delegateClass);
+        
+        for (final ServiceParser svcParser : managedTypes.getDelegateServices(delegateClass)) {
+          final Object delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
+          final MessageCallback callback = svcParser.getCallback(delegateInstance, bus);
+          
+          if (callback != null) {
+            if (svcParser.isLocal()) {
+              bus.subscribeLocal(svcParser.getServiceName(), callback);
+            }
+            else {
+              bus.subscribe(svcParser.getServiceName(), callback);
             }
           }
-        }
-
-        final Object callback = CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
-        final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
-
-        if (commandPoints.isEmpty()) {
-          bus.subscribe(subjectName, (MessageCallback) callback);
-        }
-        else {
-          bus.subscribeLocal(subjectName, new CommandBindingsCallback(commandPoints, callback, bus));
         }
       }
     }
   }
 
   private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
-    for (final Map.Entry<AnnotatedType, List<AnnotatedMethod>> entry : managedTypes.getServiceMethods().entrySet()) {
-      final Class<?> type = entry.getKey().getJavaClass();
-
-      for (final AnnotatedMethod method : entry.getValue()) {
-        final Service svc = method.getAnnotation(Service.class);
-        final String svcName = svc.value().equals("") ? method.getJavaMember().getName() : svc.value();
-
-        final Method callMethod = method.getJavaMember();
-
-        bus.subscribe(svcName, new MessageCallback() {
-
-          @Override
-          public void callback(final Message message) {
-            final Object targetBean = CDIServerUtil.lookupBean(beanManager, type);
-
-            try {
-              callMethod.invoke(targetBean, message);
-            } catch (Exception e) {
-              ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
-            }
-          }
-        });
-      }
-    }
 
     /**
      * Due to the lack of contract in CDI guaranteeing when beans will be available, we use an

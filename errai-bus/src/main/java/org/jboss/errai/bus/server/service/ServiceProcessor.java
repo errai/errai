@@ -21,25 +21,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
-import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.RPCEndpointFactory;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
-import org.jboss.errai.bus.server.io.ServiceMethodCallback;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
+import org.jboss.errai.bus.server.util.NotAService;
+import org.jboss.errai.bus.server.util.ServiceMethodParser;
+import org.jboss.errai.bus.server.util.ServiceParser;
+import org.jboss.errai.bus.server.util.ServiceTypeParser;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
@@ -82,10 +81,11 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
   private void processServiceClass(final Class<?> loadClass, final BootstrapContext context,
           final ErraiServiceConfiguratorImpl config) {
-    Object svc = null;
-
-    Service svcAnnotation = loadClass.getAnnotation(Service.class);
-    if (null == svcAnnotation) {
+    ServiceParser svcParser;
+    try {
+      svcParser = new ServiceTypeParser(loadClass);
+    }
+    catch (NotAService ex) {
       // Diagnose Errai-111
       StringBuilder sb = new StringBuilder();
       sb.append("Service annotation cannot be loaded. (See https://jira.jboss.org/browse/ERRAI-111)\n");
@@ -95,84 +95,20 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       return;
     }
 
-    boolean local = loadClass.isAnnotationPresent(Local.class);
-
-    String svcName = svcAnnotation.value();
-
-    // If no name is specified, just use the class name as the service by default.
-    if ("".equals(svcName)) {
-      svcName = loadClass.getSimpleName();
-    }
-
-    Map<String, Method> commandPoints = new HashMap<String, Method>();
-    for (final Method method : loadClass.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(Command.class)) {
-        Command command = method.getAnnotation(Command.class);
-        for (String cmdName : command.value()) {
-          if (cmdName.equals(""))
-            cmdName = method.getName();
-          commandPoints.put(cmdName, method);
-        }
-      }
-    }
-
-    Class remoteImpl = getRemoteImplementation(loadClass);
+    Class<?> remoteImpl = ((ServiceTypeParser) svcParser).getRemoteImplementation();
     if (remoteImpl != null) {
-      svc = createRPCScaffolding(remoteImpl, loadClass, context);
+      createRPCScaffolding(remoteImpl, loadClass, context);
     }
 
-    if (MessageCallback.class.isAssignableFrom(loadClass)) {
-      final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
-      log.debug("discovered service: " + clazz.getName());
-      try {
-        svc = createServiceInjector(clazz, context, config, true);
-      } catch (Throwable t) {
-        t.printStackTrace();
-      }
-
-      if (commandPoints.isEmpty()) {
-        // Subscribe the service to the bus.
-        if (local) {
-          context.getBus().subscribeLocal(svcName, (MessageCallback) svc);
-        }
-        else {
-          context.getBus().subscribe(svcName, (MessageCallback) svc);
-        }
-      }
-    }
-
-    if (svc == null) {
-      svc = createServiceInjector(loadClass, context, config, false);
-    }
-
-    RolesRequiredRule rule = null;
-    if (loadClass.isAnnotationPresent(RequireRoles.class)) {
-      rule = new RolesRequiredRule(loadClass.getAnnotation(RequireRoles.class).value(), context.getBus());
-    }
-    else if (loadClass.isAnnotationPresent(RequireAuthentication.class)) {
-      rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
-    }
-
-    if (!commandPoints.isEmpty()) {
-      if (local) {
-        context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
-      }
-      else {
-        context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
-      }
-    }
-
-    if (rule != null) {
-      context.getBus().addRule(svcName, rule);
-    }
+    processService(svcParser, context);
   }
 
   private void processServiceMethod(final Method loadMethod, final BootstrapContext context,
           final ErraiServiceConfiguratorImpl config) {
-    Object svc = null;
-
-    Service svcAnnotation = loadMethod.getAnnotation(Service.class);
-    if (null == svcAnnotation) {
+    ServiceParser svcParser;
+    try {
+      svcParser = new ServiceMethodParser(loadMethod);
+    } catch (NotAService ex) {
       // Diagnose Errai-111
       StringBuilder sb = new StringBuilder();
       sb.append("Service annotation cannot be loaded. (See https://jira.jboss.org/browse/ERRAI-111)\n");
@@ -183,54 +119,54 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       return;
     }
 
-    boolean local = loadMethod.isAnnotationPresent(Local.class);
-
-    String svcName = svcAnnotation.value();
-
-    // If no name is specified, just use the class name as the service by default.
-    if ("".equals(svcName)) {
-      svcName = loadMethod.getName();
-    }
-
-    Map<String, Method> commandPoints = new HashMap<String, Method>();
-    if (loadMethod.isAnnotationPresent(Command.class)) {
-      Command command = loadMethod.getAnnotation(Command.class);
-      for (String cmdName : command.value()) {
-        if (cmdName.equals(""))
-          cmdName = loadMethod.getName();
-        commandPoints.put(cmdName, loadMethod);
-      }
-    }
-
-    if (loadMethod.getParameterTypes().length == 0 || loadMethod.getParameterTypes().length == 1 && loadMethod.getParameterTypes()[0].equals(Message.class)) {
-      log.debug("discovered service: " + loadMethod.getDeclaringClass().getName());
+    processService(svcParser, context);
+  }
+  
+  private void processService(ServiceParser svcParser, BootstrapContext context) {
+    Object svc = null;
+    ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+    Class<?> loadClass = svcParser.getDelegateClass();
+    
+    // Now try and get the appropriate injector
+    
+    // Will never return true for service methods
+    if (svcParser.isCallback()) {
+      final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
+      log.debug("discovered service: " + clazz.getName());
       try {
-        svc = createServiceInjector(loadMethod.getDeclaringClass(), context, config, false);
+        svc = createServiceInjector(clazz, context, config, true);
       } catch (Throwable t) {
         t.printStackTrace();
-      }
-
-      if (commandPoints.isEmpty()) {
-        // Subscribe the service to the bus.
-        if (local) {
-          context.getBus().subscribeLocal(svcName, new ServiceMethodCallback(svc, loadMethod));
-        }
-        else {
-          context.getBus().subscribe(svcName, new ServiceMethodCallback(svc, loadMethod));
-        }
       }
     }
 
     if (svc == null) {
-      svc = createServiceInjector(loadMethod.getDeclaringClass(), context, config, false);
+      svc = createServiceInjector(loadClass, context, config, false);
     }
 
-    if (!commandPoints.isEmpty()) {
-      if (local) {
-        context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
-      }
-      else {
-        context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
+    RolesRequiredRule rule = null;
+    
+    // Will never return true for service methods
+    if (svcParser.hasRule()) {
+      rule = new RolesRequiredRule(loadClass.getAnnotation(RequireRoles.class).value(), context.getBus());
+    }
+    else if (svcParser.hasAuthentication()) {
+      rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
+    }
+
+    // If we have created an injector, get a callback and register it
+    if (svc != null) {
+      MessageCallback callback = svcParser.getCallback(svc, context.getBus());
+      if (callback != null) {
+        if (svcParser.isLocal()) {
+          context.getBus().subscribeLocal(svcParser.getServiceName(), callback);
+        }
+        else {
+          context.getBus().subscribe(svcParser.getServiceName(), callback);
+        }
+        if (rule != null) {
+          context.getBus().addRule(svcParser.getServiceName(), rule);
+        }
       }
     }
   }

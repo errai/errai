@@ -16,14 +16,14 @@
 package org.jboss.errai.cdi.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
+import org.jboss.errai.bus.server.util.ServiceParser;
 
 /**
  * Holds references to the types discovered when CDI bootraps.
@@ -32,37 +32,41 @@ import javax.enterprise.inject.spi.AnnotatedType;
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 public class TypeRegistry {
 
-  private final List<AnnotatedType> serviceEndpoints = new ArrayList<AnnotatedType>();
-  private final Map<AnnotatedType, List<AnnotatedMethod>> serviceMethods = new HashMap<AnnotatedType, List<AnnotatedMethod>>();
   private final Set<Class<?>> remoteInterfaces = new HashSet<Class<?>>();
-
-  public void addServiceEndpoint(final AnnotatedType service) {
-    serviceEndpoints.add(service);
-  }
-
-  public void addServiceMethod(final AnnotatedType service, final AnnotatedMethod method) {
-    if (!serviceMethods.containsKey(service)) {
-      serviceMethods.put(service, new ArrayList<AnnotatedMethod>());
-    }
-    serviceMethods.get(service).add(method);
-  }
+  private final Map<Class<?>, List<ServiceParser>> services = new HashMap<Class<?>, List<ServiceParser>>();
 
   public void addRemoteInterface(final Class<?> intf) {
     remoteInterfaces.add(intf);
   }
 
-  public List<AnnotatedType> getServiceEndpoints() {
-    return serviceEndpoints;
-  }
-
-  public Map<AnnotatedType, List<AnnotatedMethod>> getServiceMethods() {
-    return serviceMethods;
-  }
-
   public Set<Class<?>> getRemoteInterfaces() {
     return remoteInterfaces;
+  }
+  
+  /**
+   * @return All registered beans which are services or contain methods which are services.
+   */
+  public Collection<Class<?>> getDelegateClasses() {
+    return services.keySet();
+  }
+  
+  /**
+   * Get all the services associated with a delegate class.
+   */
+  public Collection<ServiceParser> getDelegateServices(Class<?> delegateClass) {
+    return services.get(delegateClass);
+  }
+  
+  /**
+   * Register a service.
+   */
+  public void addService(ServiceParser service) {
+    if (!services.containsKey(service.getDelegateClass()))
+      services.put(service.getDelegateClass(), new ArrayList<ServiceParser>());
+    services.get(service.getDelegateClass()).add(service);
   }
 }

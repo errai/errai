@@ -17,7 +17,6 @@ package org.jboss.errai.cdi.server;
 
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.server.annotations.Service;
 
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -29,14 +28,16 @@ import java.lang.annotation.Annotation;
  */
 public class CDIServerUtil {
   @SuppressWarnings("unchecked")
-  public static <T> T lookupBean(final BeanManager beanManager, final Class<T> serviceType) {
-    final Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType));
+  public static <T> T lookupBean(final BeanManager beanManager,
+      final Class<T> serviceType, Annotation... annotations) {
+    final Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType, annotations));
 
     if (bean == null) {
       return null;
     }
 
-    return (T) beanManager.getReference(bean, serviceType, beanManager.createCreationalContext(bean));
+    return (T) beanManager.getReference(bean, serviceType,
+        beanManager.createCreationalContext(bean));
   }
 
   public static QueueSession getSession(final Message message) {
@@ -58,16 +59,6 @@ public class CDIServerUtil {
 
     return (T) beanManager.getReference(bean, beanClass, beanManager.createCreationalContext(bean));
   }
-
-  public static String resolveServiceName(final Class<?> type) {
-    String subjectName = type.getAnnotation(Service.class).value();
-
-    if (subjectName.equals(""))
-      subjectName = type.getSimpleName();
-
-    return subjectName;
-  }
-
 
   static class AnnotationHolder implements Annotation {
     private final Class<? extends Annotation> annotationType;
