@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -696,6 +697,42 @@ public abstract class AbstractMetaClassTest {
     
 
     assertEquals(expectedMethods.toString(), methodSignatures.toString());
+  }
+
+  @Test
+  public void testGetFields() {
+    final List<String> expectedFields = Lists.newLinkedList();
+    expectedFields.add(Child.class.getCanonicalName() + "." + "childPublic");
+    expectedFields.add(Parent.class.getCanonicalName() + "." + "parentPublic");
+
+    final ArrayList<String> actualFields = new ArrayList<String>();
+    for (MetaField field : getMetaClass(Child.class).getFields()) {
+      actualFields.add(field.getDeclaringClass().getCanonicalName() + "." + field.getName());
+    }
+
+    Collections.sort(expectedFields);
+    Collections.sort(actualFields);
+
+    assertEquals(expectedFields.toString(), actualFields.toString());
+  }
+
+  @Test
+  public void testGetDeclaredFields() {
+    final List<String> expectedFields = Lists.newLinkedList();
+    expectedFields.add(Child.class.getCanonicalName() + "." + "childPrivate");
+    expectedFields.add(Child.class.getCanonicalName() + "." + "childPackage");
+    expectedFields.add(Child.class.getCanonicalName() + "." + "childProtected");
+    expectedFields.add(Child.class.getCanonicalName() + "." + "childPublic");
+
+    final ArrayList<String> actualFields = new ArrayList<String>();
+    for (MetaField field : getMetaClass(Child.class).getDeclaredFields()) {
+      actualFields.add(field.getDeclaringClass().getCanonicalName() + "." + field.getName());
+    }
+
+    Collections.sort(expectedFields);
+    Collections.sort(actualFields);
+
+    assertEquals(expectedFields.toString(), actualFields.toString());
   }
 
 }
