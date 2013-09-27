@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.builder.impl.Scope;
@@ -269,16 +270,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return fromMethodArray(oracle, type.getMethods());
   }
 
-  private static MetaField[] fromFieldArray(final TypeOracle oracle, final JField[] methods) {
-    final List<MetaField> methodList = new ArrayList<MetaField>();
-
-    for (final JField f : methods) {
-      methodList.add(new GWTField(oracle, f));
-    }
-
-    return methodList.toArray(new MetaField[methodList.size()]);
-  }
-
   @Override
   public MetaClass getErased() {
     if (getParameterizedType() == null) {
@@ -291,16 +282,33 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaField[] getFields() {
-    final JClassType type = getEnclosedMetaObject().isClassOrInterface();
-    if (type == null) {
-      return null;
+    final List<MetaField> fields = Lists.newArrayList();
+
+    JClassType type = getEnclosedMetaObject().isClass();
+    while (type != null) {
+      for (JField field : type.getFields()) {
+        if (field.isPublic()) {
+          fields.add(new GWTField(oracle, field));
+        }
+      }
+      type = type.getSuperclass();
     }
-    return fromFieldArray(oracle, type.getFields());
+
+    return fields.toArray(new MetaField[fields.size()]);
   }
 
   @Override
   public MetaField[] getDeclaredFields() {
-    return getFields();
+    final List<MetaField> fields = Lists.newArrayList();
+    final JClassType type = getEnclosedMetaObject().isClass();
+
+    if (type != null) {
+      for (JField field : type.getFields()) {
+        fields.add(new GWTField(oracle, field));
+      }
+    }
+
+    return fields.toArray(new MetaField[fields.size()]);
   }
 
   @Override
