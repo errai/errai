@@ -152,7 +152,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     if (propertyTypes.get(property).isList()) {
       proxy.set(property, ensureBoundListIsProxied(property));
     }
-    syncState(widget, property, initialState);
+    syncState(widget, property, converter);
 
     return binding;
   }
@@ -344,11 +344,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          The widget to synchronize. Must not be null.
    * @param property
    *          The name of the model property that should be synchronized. Must not be null.
-   * @param initialState
-   *          Specifies the origin of the initial state of both model and UI widget. If null, no
-   *          state synchronization should be carried out.
+   * @param converter
+   *          The converter specified for the property binding. Null allowed.
    */
-  private void syncState(final Widget widget, final String property, final InitialState initialState) {
+  private void syncState(final Widget widget, final String property, final Converter converter) {
     Assert.notNull(widget);
     Assert.notNull(property);
 
@@ -365,8 +364,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         updateWidgetsAndFireEvent(property, knownValues.get(property), value);
       }
       else if (initialState == InitialState.FROM_UI) {
-        proxy.set(property, value);
-        firePropertyChangeEvent(property, knownValues.get(property), value);
+        Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, value, converter);
+        proxy.set(property, newValue);
+        firePropertyChangeEvent(property, knownValues.get(property), newValue);
       }
     }
   }

@@ -245,4 +245,29 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "bindingSpecificConverter", textBox.getText());
   }
+  
+  @Test
+  public void testInitialStateSyncWithConverter() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return 1701;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "customConverter";
+      }
+    };
+    
+    TextBox textBox = new TextBox();
+    textBox.setValue("123");
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_UI).bind(textBox, "age", converter);
+    assertEquals("Model not initialized based on widget's state", Integer.valueOf(1701), binder.getModel().getAge());
+
+    TestModel model = new TestModel();
+    model.setAge(123);
+    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name", converter);
+    assertEquals("Model not initialized based on widget's state", "customConverter", textBox.getValue());
+  }
 }

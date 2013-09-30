@@ -266,7 +266,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name");
     assertEquals("Model not initialized based on widget's state", "initial model value", textBox.getValue());
   }
-
+  
   @Test
   public void testBindingToCustomHasValueType() {
     TestModelWidget widget = new TestModelWidget();
@@ -405,8 +405,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     binder.unbind("child.name");
     assertEquals("Only one bound property should be left", 1, binder.getBoundProperties().size());
     model.getChild().setName("model change");
-    assertEquals("Widget should not have been updated because unbind was called for this property", "", nameTextBox
-        .getText());
+    assertEquals("Widget should not have been updated because unbind was called for this property", "", 
+        nameTextBox.getText());
 
     nameTextBox.setValue("UI change", true);
     assertEquals("Model should not have been updated because unbind was called for this property", "model change",
@@ -428,8 +428,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Widget should not have been updated because unbind was called", "", valueTextBox.getText());
 
     valueTextBox.setValue("UI change", true);
-    assertEquals("Model should not have been updated because unbind was called", "model change", model.getChild()
-        .getValue());
+    assertEquals("Model should not have been updated because unbind was called", "model change", 
+        model.getChild().getValue());
   }
 
   @Test
@@ -594,7 +594,6 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     testDeclarativeBinding(module);
   }
 
-
   @Test
   public void testDeclarativeBindingUsingModelSetter() {
     DeclarativeBindingModuleUsingModel module =
@@ -654,8 +653,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
     assertEquals("Model (lastUpdate) was not updated using custom converter!",
-        DeclarativeBindingModuleUsingBinder.TEST_DATE, model
-            .getLastChanged());
+        DeclarativeBindingModuleUsingBinder.TEST_DATE, model.getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", age.getValue(), model.getAge().toString());
   }
   
