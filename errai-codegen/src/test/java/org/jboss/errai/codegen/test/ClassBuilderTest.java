@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.test.model.Baz;
+import org.jboss.errai.codegen.test.model.tree.Parent;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Test;
 
@@ -148,6 +149,21 @@ public class ClassBuilderTest extends AbstractCodegenTest {
         .toJavaString();
 
     assertEquals("failed to generate class with parent", CLASS_WITH_PARENT, cls);
+  }
+
+  @Test
+  public void testDefineClassWithFieldInheritance() {
+    final String cls = ClassBuilder
+        .define("org.foo.Foo", Parent.class)
+        .publicScope()
+        .body()
+        .publicConstructor()
+        .append(Stmt.loadVariable("parentProtected").assignValue(0))
+        .append(Stmt.loadVariable("parentPublic").assignValue(0))
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with parent", CLASS_WITH_FIELD_INHERITANCE, cls);
   }
 
   @Test

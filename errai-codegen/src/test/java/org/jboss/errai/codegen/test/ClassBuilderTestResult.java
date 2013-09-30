@@ -76,6 +76,18 @@ public interface ClassBuilderTestResult {
           "   }" +
           " }";
 
+  public static final String CLASS_WITH_FIELD_INHERITANCE =
+      "     package org.foo;" +
+          "" +
+          " import org.jboss.errai.codegen.test.model.tree.Parent;" +
+          "" +
+          " public class Foo extends Parent {" +
+          "   public Foo() {" +
+          "     parentProtected = 0;" +
+          "     parentPublic = 0;" +
+          "   }" +
+          " }";
+
   public static final String ABSTRACT_CLASS =
       "     package org.foo;\n" +
           "\n" +

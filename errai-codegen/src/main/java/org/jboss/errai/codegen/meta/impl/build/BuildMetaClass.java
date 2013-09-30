@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.ObjectArrays;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
@@ -206,13 +208,31 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public MetaField[] getFields() {
-    if (_fieldsCache != null) return _fieldsCache;
-    return _fieldsCache = fields.toArray(new MetaField[fields.size()]);
+    if (_fieldsCache == null) {
+      final List<MetaField> publicFields = Lists.newArrayList();
+      for (BuildMetaField field : fields) {
+        if (field.isPublic()) {
+          publicFields.add(field);
+        }
+      }
+      _fieldsCache = publicFields.toArray(new MetaField[publicFields.size()]);
+      if (superClass != null) {
+        _fieldsCache = ObjectArrays.concat(_fieldsCache, superClass.getFields(), MetaField.class);
+      }
+    }
+
+    return _fieldsCache;
   }
+
+  private MetaField[] _declaredFieldsCache;
 
   @Override
   public MetaField[] getDeclaredFields() {
-    return getFields();
+    if (_declaredFieldsCache == null) {
+      _declaredFieldsCache = fields.toArray(new MetaField[fields.size()]);
+    }
+
+    return _declaredFieldsCache;
   }
 
   @Override
@@ -576,7 +596,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     MetaClass sCls = getSuperClass();
     if (sCls != null) {
       do {
-        for (final MetaField metaField : sCls.getFields()) {
+        for (final MetaField metaField : sCls.getDeclaredFields()) {
           if (!metaField.isPrivate()) {
             context.addVariable(Variable.create(metaField.getName(), metaField.getType()));
           }
