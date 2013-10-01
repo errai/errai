@@ -112,9 +112,9 @@ public class MessageBusProxy implements ServerMessageBus {
   @Override
   public synchronized Subscription subscribeLocal(String subject, MessageCallback receiver) {
     Assert.notNull("message callback cannot be null", receiver);
-
+    
     if (proxyClosed) {
-      return proxied.subscribe(subject, receiver);
+      return proxied.subscribeLocal(subject, receiver);
     }
     else {
       heldLocalSubscribe.put(subject, receiver);
@@ -279,7 +279,7 @@ public class MessageBusProxy implements ServerMessageBus {
     }
 
     for (Map.Entry<String, MessageCallback> entry : heldLocalSubscribe.entries()) {
-      bus.subscribe(entry.getKey(), entry.getValue());
+      bus.subscribeLocal(entry.getKey(), entry.getValue());
     }
 
     for (SubscribeListener subscribeListener : heldSubscribeListener) {

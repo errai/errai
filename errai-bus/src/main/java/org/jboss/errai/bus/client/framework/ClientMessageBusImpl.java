@@ -910,7 +910,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final List<Message> highPriority = new ArrayList<Message>();
     for (final Message message : new ArrayList<Message>(deferredMessages)) {
       if (message.hasPart(MessageParts.PriorityProcessing)) {
-        highPriority.add(message);
+        if (remotes.containsKey(message.getSubject()))
+          highPriority.add(message);
         deferredMessages.remove(message);
       }
     }
@@ -918,7 +919,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final List<Message> lowPriority = new ArrayList<Message>();
     do {
       for (final Message message : new ArrayList<Message>(deferredMessages)) {
-        lowPriority.add(message);
+        if (remotes.containsKey(message.getSubject()))
+          lowPriority.add(message);
         deferredMessages.remove(message);
       }
     }
