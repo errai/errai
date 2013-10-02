@@ -86,6 +86,7 @@ import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityManagerFactory;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
@@ -291,9 +292,11 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
             .extend();
 
-    entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
-        .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
-        .finish();
+    if (!java.lang.reflect.Modifier.isAbstract(et.getJavaType().getModifiers())) {
+      entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
+          .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
+          .finish();
+    }
 
     generateLifecycleEventDeliveryMethods(met, entityTypeSubclass, globalListeners);
 
@@ -310,7 +313,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
    *          The metaclass representing the entity type.
    * @param classBuilder
    *     The target builder to receive the generated methods. For the generated code to be
-   *     valid, this should be a builder of a subclass of {@link ErraiEntityType}.
+   *     valid, this should be a builder of a subclass of {@link ErraiIdentifiableType}.
    * @param globalEntityListeners
    *          A list of the global entity listeners
    */
@@ -534,6 +537,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
       if (sourceObject instanceof PluralAttribute && method.getName().equals("createEmptyCollection")) {
         return generateCreateEmptyCollectionMethod(sourceObject);
+      }
+
+      if (sourceObject instanceof ManagedType && method.getParameters().length > 0) {
+        return new StringStatement("throw new RuntimeException(\"Not implemented\")");
       }
 
       // allow SnapshotMaker default (read value and create snapshot)

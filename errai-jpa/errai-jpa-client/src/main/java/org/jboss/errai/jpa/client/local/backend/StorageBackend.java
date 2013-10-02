@@ -3,7 +3,7 @@ package org.jboss.errai.jpa.client.local.backend;
 import java.util.List;
 
 import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.Key;
 
 /**
@@ -64,7 +64,7 @@ public interface StorageBackend {
    *          The matcher that decides which entity instances will be retrieved.
    * @return all matching entities of the given type.
    */
-  <X> List<X> getAll(ErraiEntityType<X> type, EntityJsonMatcher matcher);
+  <X> List<X> getAll(ErraiIdentifiableType<X> type, EntityJsonMatcher matcher);
 
   /**
    * Tests if this backend contains data for the given key.

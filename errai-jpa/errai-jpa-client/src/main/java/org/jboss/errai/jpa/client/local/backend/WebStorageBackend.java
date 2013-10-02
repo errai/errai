@@ -6,7 +6,8 @@ import java.util.List;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
+import org.jboss.errai.jpa.client.local.ErraiManagedType;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.Key;
 
@@ -88,7 +89,7 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public <X> void put(Key<X,?> key, X value) {
-    ErraiEntityType<X> entityType = key.getEntityType();
+    ErraiManagedType<X> entityType = key.getEntityType();
     String keyJson = namespace + key.toJson();
     JSONValue valueJson = entityType.toJson(em, value);
     System.out.println(">>>put '" + keyJson + "'");
@@ -97,7 +98,7 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public <X> X get(Key<X, ?> key) {
-    ErraiEntityType<X> entityType = key.getEntityType();
+    ErraiManagedType<X> entityType = key.getEntityType();
     String keyJson = namespace + key.toJson();
     String valueJson = LocalStorage.get(keyJson);
     System.out.println("<<<get '" + keyJson + "' : " + valueJson);
@@ -113,7 +114,7 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
-  public <X> List<X> getAll(final ErraiEntityType<X> type, final EntityJsonMatcher matcher) {
+  public <X> List<X> getAll(final ErraiIdentifiableType<X> type, final EntityJsonMatcher matcher) {
     // TODO index entries by entity type
 
     final List<X> entities = new ArrayList<X>();
@@ -165,7 +166,7 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public <X> boolean isModified(Key<X, ?> key, X value) {
-    ErraiEntityType<X> entityType = key.getEntityType();
+    ErraiManagedType<X> entityType = key.getEntityType();
     String keyJson = namespace + key.toJson();
     JSONValue newValueJson = entityType.toJson(em, value);
     JSONValue oldValueJson = JSONParser.parseStrict(LocalStorage.get(keyJson));

@@ -169,7 +169,7 @@ public class ErraiEntityManager implements EntityManager {
    * required side effects during the state transition.
    */
   private <X> X applyCascadingOperation(X entity, CascadeType newState) {
-    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    ErraiIdentifiableType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
 
     final Key<X, ?> key = keyFor(entityType, entity);
     final EntityState oldState = getState(key, entity);
@@ -294,7 +294,7 @@ public class ErraiEntityManager implements EntityManager {
    * be generated on demand</b>. This version of the {@code keyFor()} method
    * assumes the given object's entity type can be obtained by calling {@code
    * entity.getClass()}. If you already have a specific entity type in mind, use
-   * the {@link #keyFor(ErraiEntityType, Object)} version of the method.
+   * the {@link #keyFor(ErraiIdentifiableType, Object)} version of the method.
    *
    * @param entityType
    *          The entity type of the entity
@@ -305,7 +305,7 @@ public class ErraiEntityManager implements EntityManager {
    *         just been set on the entity.
    */
   public <X> Key<X, ?> keyFor(X entity) {
-    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    ErraiIdentifiableType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
     return keyFor(entityType, entity);
   }
 
@@ -322,7 +322,7 @@ public class ErraiEntityManager implements EntityManager {
    * @return The key for the given entity, which--for generated values--may have
    *         just been set on the entity.
    */
-  public <X> Key<X, ?> keyFor(ErraiEntityType<X> entityType, X entity) {
+  public <X> Key<X, ?> keyFor(ErraiIdentifiableType<X> entityType, X entity) {
     ErraiSingularAttribute<? super X, ?> idAttr;
     switch (entityType.getIdType().getPersistenceType()) {
     case BASIC:
@@ -471,7 +471,7 @@ public class ErraiEntityManager implements EntityManager {
    *           became managed).
    */
   private <X> void updateInBackend(Key<X, ?> key, X entity) {
-    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    ErraiIdentifiableType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
     if (backend.isModified(key, entity)) {
       Object currentId = entityType.getId(Object.class).get(entity);
       if (!key.getId().equals(currentId)) {
@@ -525,7 +525,7 @@ public class ErraiEntityManager implements EntityManager {
   /**
    * EXPERIMENTAL. This method is very unlikely to survive in the long run.
    */
-  public <X> List<X> findAll(ErraiEntityType<X> type, EntityJsonMatcher matcher) {
+  public <X> List<X> findAll(ErraiIdentifiableType<X> type, EntityJsonMatcher matcher) {
     return backend.getAll(type, matcher);
   }
 
