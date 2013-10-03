@@ -86,7 +86,7 @@
     <appengine.version>1.7.6</appengine.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <slf4j.version>1.6.1</slf4j.version>
-    <mvel.version>2.1.6.Final</mvel.version>
+    <mvel.version>2.1.7.Final</mvel.version>
     <argLine></argLine>
   </properties>
 

@@ -68,7 +68,7 @@
     <log4.version>1.2.16</log4.version>
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
-    <mvel.version>2.1.6.Final</mvel.version>
+    <mvel.version>2.1.7.Final</mvel.version>
     <plexus.interpolation.version>1.14</plexus.interpolation.version>
     <plexus.classwords.version>2.4</plexus.classwords.version>
     <plexus.component.annotations.version>1.5.5</plexus.component.annotations.version>
