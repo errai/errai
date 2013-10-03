@@ -108,7 +108,6 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       }
     });
 
-    // only used for the case the {@see FinishEvent} was not received
     verifyInBackupTimer(firstVerifier, 120000);
     delayTestFinish(240000);
   }
@@ -173,7 +172,6 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       }
     });
 
-    // only used for the case the {@see FinishEvent} was not received
     verifyInBackupTimer(verifier, 120000);
     delayTestFinish(240000);
   }
@@ -182,6 +180,26 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     DependentEventObserverTestModule module = IOC.getBeanManager().lookupBean(DependentEventObserverTestModule.class).getInstance();
     IOC.getBeanManager().destroyBean(module);
     assertTrue("Bean wasn't destroyed", module.isDestroyed());
+  }
+  
+  // Regression test for ERRAI-646
+  public void testDestroyBeanWithEventObserversDoesNotUnsubscribeOtherObservers() {
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        DependentEventObserverTestModule module = IOC.getBeanManager().lookupBean(DependentEventObserverTestModule.class).getInstance();
+        IOC.getBeanManager().destroyBean(module);
+      }
+    });
+    
+    new Timer() {
+      @Override
+      public void run() {
+        testEventObservers();
+      }
+    }.schedule(15000);
+    
+    delayTestFinish(240000);
   }
 
 }
