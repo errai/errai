@@ -54,7 +54,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <weld.version>1.1.6.Final</weld.version>
-    <mvel.version>2.1.Beta8</mvel.version>
+    <mvel.version>2.1.6.Final</mvel.version>
     <jetty.version>6.1.25</jetty.version>
     <slf4j.version>1.6.1</slf4j.version>
     <log4j.version>1.2.16</log4j.version>

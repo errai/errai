@@ -82,11 +82,11 @@
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
     <guice.version>3.0</guice.version>
-    <guava.version>14.0.1</guava.version>
-    <mvel.version>2.1.Beta8</mvel.version>
+    <guava.version>14.0.1</guava.version>    
     <appengine.version>1.7.6</appengine.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <slf4j.version>1.6.1</slf4j.version>
+    <mvel.version>2.1.6.Final</mvel.version>
     <argLine></argLine>
   </properties>
 
@@ -698,7 +698,7 @@
       <dependency>
          <groupId>org.jboss.weld.se</groupId>
          <artifactId>weld-se-core</artifactId>
-	 <version>1.1.6.Final</version>
+	       <version>1.1.6.Final</version>
       </dependency>
 
       <dependency>
