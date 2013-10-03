@@ -16,16 +16,7 @@
 package org.jboss.errai.enterprise.client.cdi.api;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
@@ -192,17 +183,27 @@ public class CDI {
   private static void unsubscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
     if (eventObservers.containsKey(eventType)) {
       eventObservers.get(eventType).remove(callback);
-      if (eventObservers.get(eventType).isEmpty()) {
-        eventObservers.remove(eventType);
+      
+      boolean shouldUnsubscribe = true;
+      for (AbstractCDIEventCallback<?> cb : eventObservers.get(eventType)) {
+        if (cb.getQualifiers().equals(callback.getQualifiers())) {
+          // found another matching observer -> do not unsubscribe
+          shouldUnsubscribe = false;
+          break;
+        }
       }
-
-      if (isRemoteCommunicationEnabled()) {
+      
+      if (isRemoteCommunicationEnabled() && shouldUnsubscribe) {
         MessageBuilder.createMessage()
             .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
             .command(CDICommands.RemoteUnsubscribe)
             .with(CDIProtocol.BeanType, eventType)
             .with(CDIProtocol.Qualifiers, callback.getQualifiers())
             .noErrorHandling().sendNowWith(ErraiBus.get());
+      }
+      
+      if (eventObservers.get(eventType).isEmpty()) {
+        eventObservers.remove(eventType);
       }
     }
   }

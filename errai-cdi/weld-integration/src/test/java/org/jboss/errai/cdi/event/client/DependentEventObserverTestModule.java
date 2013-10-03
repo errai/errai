@@ -1,5 +1,16 @@
 package org.jboss.errai.cdi.event.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+
 import org.jboss.errai.cdi.client.event.FinishEvent;
 import org.jboss.errai.cdi.client.event.StartEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
@@ -7,21 +18,6 @@ import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Test module used by {@see EventObserverIntegrationTest}.
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
- */
 @Dependent
 public class DependentEventObserverTestModule extends EventTestObserverSuperClass {
   private final Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
