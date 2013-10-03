@@ -230,7 +230,8 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       globalEntityListeners.add(MetaClassFactory.get(globalListener));
     }
 
-    for (final EntityType<?> et : mm.getEntities()) {
+    for (final ManagedType<?> mt : ClassSorter.supertypesFirst(mm.getEntities())) {
+      EntityType<?> et = (EntityType<?>) mt;
 
       // first, create a variable for the EntityType
       String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners);
@@ -489,10 +490,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     public Statement generateMethodBody(MetaMethod method, Object sourceObject,
                                         ClassStructureBuilder<?> containingClassBuilder) {
       // provide reference to declaring type (et) from its attributes
-      if (sourceObject instanceof Attribute
-          && method.getName().equals("getDeclaringType")
-          && ((Attribute<?, ?>) sourceObject).getDeclaringType() == et) {
-        return Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue();
+      // note this is never a forward reference: the entity types are sorted to put supertypes before their subtypes
+      if (sourceObject instanceof Attribute && method.getName().equals("getDeclaringType")) {
+        Class<?> declaringType = ((Attribute<?, ?>) sourceObject).getDeclaringType().getJavaType();
+        return Stmt.loadVariable(entitySnapshotVarName(declaringType)).returnValue();
       }
 
       // provide get method
