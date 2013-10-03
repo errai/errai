@@ -574,6 +574,15 @@ public class TypedQueryFactoryGenerator {
       }
       throw new UnsupportedOperationException("The JPQL function " + methodNameNode.getOriginalText() + " is not supported");
 
+
+      // JUNK EXPRESSIONS
+    case HqlSqlTokenTypes.FILTERS:
+      // Hibernate inserts one of these into the second-level parse tree when the query is on a type
+      // which has a supertype which is also an entity. it's a SQL snippet that tests the discriminator
+      // column to ensure the type is what we want.
+      traverser.fastForwardToNextSiblingOf(ast);
+      return generateExpression(traverser, dotNodeResolver, containingMethod);
+
     default:
       throw new UnexpectedTokenException(ast.getType(), "an expression (boolean, literal, JPQL path, method call, or named parameter)");
     }

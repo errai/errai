@@ -202,8 +202,8 @@ public class InheritanceTest extends GWTTestCase {
 
     em.flush();
 
-    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
-    query.setParameter("protectedFieldAtLeast", 2);
+    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("childOfParentConcreteEntity", ParentConcreteEntity.class);
+    query.setParameter("protectedFieldAtLeast", 1);
     query.setParameter("protectedFieldAtMost", 2);
     List<ParentConcreteEntity> resultList = query.getResultList();
 

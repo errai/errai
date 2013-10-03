@@ -1,8 +1,12 @@
 package org.jboss.errai.jpa.test.entity.inherit;
 
 import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQuery(
+        name="childOfParentConcreteEntity",
+        query="SELECT cpce FROM ChildOfConcreteParentEntity cpce WHERE cpce.protectedParentField >= :protectedFieldAtLeast AND cpce.protectedParentField <= :protectedFieldAtMost")
 public class ChildOfConcreteParentEntity extends ParentConcreteEntity {
 
   // id is inherited
