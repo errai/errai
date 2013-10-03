@@ -44,21 +44,36 @@ public class ProxyMakerTest extends AbstractCodegenTest {
   private static final List<String> expectedChunks = Arrays.asList(
       "public class ToProxy_Proxy extends org.jboss.errai.codegen.test.model.ToProxyBean {\n" +
           "  private org.jboss.errai.codegen.test.model.ToProxyBean $$_proxy_$$;\n",
+          "  private boolean $$_init_$$;\n",
 
       "  @Override public String getName() {\n" +
-          "    return $$_proxy_$$.getName();\n" +
+          "    if ($$_init_$$) {\n" +
+          "      return $$_proxy_$$.getName();\n" +
+          "    } else {\n" +
+          "      return null;\n" +
+          "    }\n" +
           "  }\n",
 
       "  @Override public org.jboss.errai.codegen.test.model.Integer getBlah() {\n" +
-          "    return $$_proxy_$$.getBlah();\n" +
+          "    if ($$_init_$$) {\n" +
+          "      return $$_proxy_$$.getBlah();\n" +
+          "    } else {\n" +
+          "      return null;\n" +
+          "    }\n" +
           "  }\n",
 
       "  @Override public void methodWithTypeArgs(Class a0, com.google.common.collect.Multimap a1) {\n" +
-          "    $$_proxy_$$.methodWithTypeArgs(a0, a1);\n" +
+          "    if ($$_init_$$) {\n" +
+          "      $$_proxy_$$.methodWithTypeArgs(a0, a1);\n" +
+          "    }\n" +
           "  }\n",
 
       "  @Override public String toString() {\n" +
-          "    return $$_proxy_$$.toString();\n" +
+          "    if ($$_init_$$) {\n" +
+          "      return $$_proxy_$$.toString();\n" +
+          "    } else {\n" +
+          "      return null;\n" +
+          "    }\n" +
           "  }\n",
 
       "  @Override public int hashCode() {\n" +
@@ -79,6 +94,7 @@ public class ProxyMakerTest extends AbstractCodegenTest {
 
       "  public void __$setProxiedInstance$(org.jboss.errai.codegen.test.model.ToProxyBean proxy) {\n" +
           "    $$_proxy_$$ = proxy;\n" +
+          "    $$_init_$$ = true;\n" +
           "  }\n",
       "}\n");
 
