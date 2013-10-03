@@ -75,6 +75,27 @@ public abstract class ErraiManagedType<X> implements ManagedType<X> {
   }
 
   /**
+   * Returns true if this managed type represents the same Java class or a
+   * superclass of the given type.
+   *
+   * @param other
+   *          the ManagedType to check
+   * @return true if the Java type of this managed is a superclass of the Java
+   *         type of the other managed type.
+   */
+  public boolean isSuperclassOf(ManagedType<?> other) {
+    Class<?> myClass = getJavaType();
+    Class<?> otherClass = other.getJavaType();
+    while (otherClass != null) {
+      if (myClass == otherClass) {
+        return true;
+      }
+      otherClass = otherClass.getSuperclass();
+    }
+    return false;
+  }
+
+  /**
    * Converts the given JSONValue, which represents an instance of this entity
    * type, into the actual instance of this entity type that exists in the given
    * EntityManager's persistence context. References to other identifiable

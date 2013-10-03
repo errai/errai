@@ -124,7 +124,7 @@ public class WebStorageBackend implements StorageBackend {
         Key<?, ?> k = parseNamespacedKey(em, key, false);
         if (k == null) return;
         System.out.println("getAll(): considering " + value);
-        if (k.getEntityType() == type) {
+        if (type.isSuperclassOf(k.getEntityType())) {
           System.out.println(" --> correct type");
           JSONObject candidate = JSONParser.parseStrict(value).isObject();
           Assert.notNull(candidate);
@@ -136,7 +136,7 @@ public class WebStorageBackend implements StorageBackend {
             // creating the key, doing a backend.get(), parsing the JSON value, ...)
             // it would be nice to avoid this, but we have to go back to the entity manager in case the
             // thing we want is in the persistence context.
-            entities.add(em.find(type.getJavaType(), typedKey.getId()));
+            entities.add((X) em.find(k.getEntityType().getJavaType(), typedKey.getId()));
           }
           else {
             System.out.println(" --> but not a match");

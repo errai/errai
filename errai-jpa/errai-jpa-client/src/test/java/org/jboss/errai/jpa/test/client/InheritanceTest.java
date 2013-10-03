@@ -1,13 +1,17 @@
 package org.jboss.errai.jpa.test.client;
 
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfConcreteParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ParentConcreteEntity;
 
@@ -32,8 +36,10 @@ public class InheritanceTest extends GWTTestCase {
   protected EntityManager getEntityManager() {
     JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
-    assertNotNull(testClient.entityManager);
-    return JpaTestClient.INSTANCE.entityManager;
+    EntityManager em = testClient.entityManager;
+    assertNotNull(em);
+    ((ErraiEntityManager) em).removeAll();
+    return em;
   }
 
   @Override
@@ -56,6 +62,7 @@ public class InheritanceTest extends GWTTestCase {
     pc.setProtectedParentField(432344);
     pc.setPublicParentField(99887766);
     em.persist(pc);
+    em.flush();
 
     em.clear();
 
@@ -73,6 +80,7 @@ public class InheritanceTest extends GWTTestCase {
     cc.setPublicParentField(99887766);
     cc.setChildField(101010);
     em.persist(cc);
+    em.flush();
 
     em.clear();
 
@@ -96,5 +104,111 @@ public class InheritanceTest extends GWTTestCase {
     assertEquals(childEntityType, declaredAttribute.getDeclaringType());
   }
 
-  // TODO test polymorphic query (entities can appear in query results for their supertypes)
+  /**
+   * Tests that a query for a parent type also returns entities from subtypes that match the criteria.
+   */
+  public void testPolymorphicQueryReturningConcreteParentAndConcreteChild() throws Exception {
+    EntityManager em = getEntityManager();
+
+    ParentConcreteEntity pc = new ParentConcreteEntity();
+    pc.setPrivateParentField(1);
+    pc.setPackagePrivateParentField(1);
+    pc.setProtectedParentField(1);
+    pc.setPublicParentField(1);
+    em.persist(pc);
+
+    ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
+    cc.setPrivateParentField(2);
+    cc.setPackagePrivateParentField(2);
+    cc.setProtectedParentField(2);
+    cc.setPublicParentField(2);
+    cc.setChildField(2);
+    em.persist(cc);
+
+    ChildOfConcreteParentEntity cc2 = new ChildOfConcreteParentEntity();
+    cc2.setPrivateParentField(3);
+    cc2.setPackagePrivateParentField(3);
+    cc2.setProtectedParentField(3);
+    cc2.setPublicParentField(3);
+    cc2.setChildField(3);
+    em.persist(cc2);
+
+    em.flush();
+
+    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
+    query.setParameter("protectedFieldAtLeast", 1);
+    query.setParameter("protectedFieldAtMost", 2);
+    List<ParentConcreteEntity> resultList = query.getResultList();
+
+    assertEquals(2, resultList.size());
+    assertTrue(resultList.contains(pc));
+    assertTrue(resultList.contains(cc));
+  }
+
+  public void testPolymorphicQueryReturningOnlyConcreteChild() throws Exception {
+    EntityManager em = getEntityManager();
+
+    ParentConcreteEntity pc = new ParentConcreteEntity();
+    pc.setPrivateParentField(1);
+    pc.setPackagePrivateParentField(1);
+    pc.setProtectedParentField(1);
+    pc.setPublicParentField(1);
+    em.persist(pc);
+
+    ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
+    cc.setPrivateParentField(2);
+    cc.setPackagePrivateParentField(2);
+    cc.setProtectedParentField(2);
+    cc.setPublicParentField(2);
+    cc.setChildField(2);
+    em.persist(cc);
+
+    em.flush();
+
+    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
+    query.setParameter("protectedFieldAtLeast", 2);
+    query.setParameter("protectedFieldAtMost", 2);
+    List<ParentConcreteEntity> resultList = query.getResultList();
+
+    assertEquals(1, resultList.size());
+    assertTrue(resultList.contains(cc));
+  }
+
+  public void testPolymorphicQueryForOnlyConcreteChild() throws Exception {
+    EntityManager em = getEntityManager();
+
+    ParentConcreteEntity pc = new ParentConcreteEntity();
+    pc.setPrivateParentField(1);
+    pc.setPackagePrivateParentField(1);
+    pc.setProtectedParentField(1);
+    pc.setPublicParentField(1);
+    em.persist(pc);
+
+    ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
+    cc.setPrivateParentField(2);
+    cc.setPackagePrivateParentField(2);
+    cc.setProtectedParentField(2);
+    cc.setPublicParentField(2);
+    cc.setChildField(2);
+    em.persist(cc);
+
+    ChildOfConcreteParentEntity cc2 = new ChildOfConcreteParentEntity();
+    cc2.setPrivateParentField(3);
+    cc2.setPackagePrivateParentField(3);
+    cc2.setProtectedParentField(3);
+    cc2.setPublicParentField(3);
+    cc2.setChildField(3);
+    em.persist(cc2);
+
+    em.flush();
+
+    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
+    query.setParameter("protectedFieldAtLeast", 2);
+    query.setParameter("protectedFieldAtMost", 2);
+    List<ParentConcreteEntity> resultList = query.getResultList();
+
+    assertEquals(1, resultList.size());
+    assertTrue(resultList.contains(cc));
+  }
+
 }

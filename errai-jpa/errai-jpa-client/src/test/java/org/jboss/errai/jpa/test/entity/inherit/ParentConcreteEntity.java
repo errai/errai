@@ -3,8 +3,12 @@ package org.jboss.errai.jpa.test.entity.inherit;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQuery(
+        name="parentConcreteEntity",
+        query="SELECT pce FROM ParentConcreteEntity pce WHERE pce.protectedParentField >= :protectedFieldAtLeast AND pce.protectedParentField <= :protectedFieldAtMost")
 public class ParentConcreteEntity {
   @Id @GeneratedValue protected long id;
 
