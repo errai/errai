@@ -31,8 +31,12 @@ import java.util.Set;
 
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.codegen.builder.StatementEnd;
+import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
+import org.jboss.errai.codegen.literal.MetaClassLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -146,6 +150,7 @@ public class ProxyMaker {
     }
 
     final String proxyVar = "$$_proxy_$$";
+    final String stateVar = "$$_init_$$";
 
     final Set<String> renderedMethods = new HashSet<String>();
 
@@ -160,6 +165,9 @@ public class ProxyMaker {
     }
 
     builder.privateField(proxyVar, toProxy).finish();
+    
+    // Create state variable for tracking initialization
+    builder.privateField(stateVar, boolean.class).finish();
 
     final Set<Map.Entry<String, ProxyProperty>> entries = proxyProperties.entrySet();
     for (final Map.Entry<String, ProxyProperty> entry : entries) {
@@ -198,9 +206,13 @@ public class ProxyMaker {
           .annotatedWith(OVERRIDE_ANNOTATION)
           .parameters(defParameters)
           .throws_(method.getCheckedExceptions());
+      
+      // Put method body into conditional, executed only after initialization
+      BlockBuilder<ElseBlockBuilder> ifBody = Stmt.create().if_(
+              BooleanExpressionBuilder.create(Stmt.loadVariable(stateVar)));
 
-      methBody.appendAll(getAroundInvokeStatements(method));
-      methBody.appendAll(getBeforeStatements(method));
+      ifBody.appendAll(getAroundInvokeStatements(method));
+      ifBody.appendAll(getBeforeStatements(method));
 
       final List<Parameter> parms = defParameters.getParameters();
 
@@ -217,24 +229,38 @@ public class ProxyMaker {
         System.arraycopy(statementVars, 0, privateAccessStmts, 1, statementVars.length);
 
         if (method.getReturnType().isVoid()) {
-          methBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts));
+          ifBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts));
         }
         else {
-          methBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts).returnValue());
+          ifBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts).returnValue());
         }
       }
       else {
         if (method.getReturnType().isVoid()) {
-          methBody._(loadVariable(proxyVar).invoke(method, statementVars));
+          ifBody._(loadVariable(proxyVar).invoke(method, statementVars));
         }
         else {
-          methBody._(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
+          ifBody._(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
         }
       }
 
-      methBody.appendAll(getAfterStatements(method));
-      methBody.appendAll(getAroundInvokeStatements(method));
+      ifBody.appendAll(getAfterStatements(method));
+      ifBody.appendAll(getAroundInvokeStatements(method));
 
+      BlockBuilder<StatementEnd> elseBody = ifBody.finish().else_();
+      // Must return in else body if method is not void
+      if (!method.getReturnType().isVoid()) {
+        Statement retVal;
+        if (method.getReturnType().isPrimitive() || method.getReturnType().isPrimitiveWrapper()) {
+          retVal = getDefaultValue(method.getReturnType());
+        } else {
+          retVal = Stmt.loadLiteral(null).returnValue();
+        }
+        
+        elseBody.append(retVal);
+      }
+      
+      methBody.append(elseBody.finish());
       methBody.finish();
     }
 
@@ -267,11 +293,40 @@ public class ProxyMaker {
           )
           .finish();
     }
-
+    
     builder.publicMethod(void.class, PROXY_BIND_METHOD).parameters(DefParameters.of(Parameter.of(toProxy, "proxy")))
-        ._(loadVariable(proxyVar).assignValue(loadVariable("proxy"))).finish();
+        ._(loadVariable(proxyVar).assignValue(loadVariable("proxy")))
+        // Set proxy state to initialized
+        ._(loadVariable(stateVar).assignValue(true))
+        .finish();
 
     return builder.getClassDefinition();
+  }
+
+  private static Statement getDefaultValue(MetaClass returnType) {
+    MetaClass boxed = returnType.asBoxed();
+    
+    if (boxed.isAssignableTo(Byte.class)
+            || boxed.isAssignableTo(Short.class)
+            || boxed.isAssignableTo(Integer.class)
+            || boxed.isAssignableTo(Long.class)) {
+      return Stmt.loadLiteral(0).returnValue();
+    }
+    else if (boxed.isAssignableTo(Float.class)) {
+      return Stmt.loadLiteral(0.0f).returnValue();
+    }
+    else if (boxed.isAssignableTo(Double.class)) {
+      return Stmt.loadLiteral(0.0).returnValue();
+    }
+    else if (boxed.isAssignableTo(Boolean.class)) {
+      return Stmt.loadLiteral(false).returnValue();
+    }
+    else if (boxed.isAssignableTo(Character.class)) {
+      return Stmt.loadLiteral('\u0000').returnValue();
+    }
+    else {
+      throw new RuntimeException("unrecognized primitive type for proxied-method return type: " + returnType.getFullyQualifiedName());
+    }
   }
 
   private Collection<Statement> getWeavingStatements(final MetaMethod method, final WeaveType type) {
