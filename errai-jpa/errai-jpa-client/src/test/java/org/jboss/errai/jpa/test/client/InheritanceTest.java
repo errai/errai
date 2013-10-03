@@ -13,6 +13,7 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfConcreteParentEntity;
+import org.jboss.errai.jpa.test.entity.inherit.GrandchildOfConcreteParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ParentConcreteEntity;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -107,7 +108,7 @@ public class InheritanceTest extends GWTTestCase {
   /**
    * Tests that a query for a parent type also returns entities from subtypes that match the criteria.
    */
-  public void testPolymorphicQueryReturningConcreteParentAndConcreteChild() throws Exception {
+  public void testPolymorphicQueryReturningSubtypesOfConcreteParent() throws Exception {
     EntityManager em = getEntityManager();
 
     ParentConcreteEntity pc = new ParentConcreteEntity();
@@ -125,24 +126,36 @@ public class InheritanceTest extends GWTTestCase {
     cc.setChildField(2);
     em.persist(cc);
 
+    GrandchildOfConcreteParentEntity gcc = new GrandchildOfConcreteParentEntity();
+    gcc.setPrivateParentField(3);
+    gcc.setPackagePrivateParentField(3);
+    gcc.setProtectedParentField(3);
+    gcc.setPublicParentField(3);
+    gcc.setChildField(3);
+    em.persist(gcc);
+
     ChildOfConcreteParentEntity cc2 = new ChildOfConcreteParentEntity();
-    cc2.setPrivateParentField(3);
-    cc2.setPackagePrivateParentField(3);
-    cc2.setProtectedParentField(3);
-    cc2.setPublicParentField(3);
-    cc2.setChildField(3);
+    cc2.setPrivateParentField(4);
+    cc2.setPackagePrivateParentField(4);
+    cc2.setProtectedParentField(4);
+    cc2.setPublicParentField(4);
+    cc2.setChildField(4);
     em.persist(cc2);
 
     em.flush();
 
     TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
     query.setParameter("protectedFieldAtLeast", 1);
-    query.setParameter("protectedFieldAtMost", 2);
+    query.setParameter("protectedFieldAtMost", 3);
     List<ParentConcreteEntity> resultList = query.getResultList();
 
-    assertEquals(2, resultList.size());
+    assertEquals(3, resultList.size());
     assertTrue(resultList.contains(pc));
     assertTrue(resultList.contains(cc));
+    assertTrue(resultList.contains(gcc));
+
+    // this one was out of range for the WHERE clause
+    assertFalse(resultList.contains(cc2));
   }
 
   public void testPolymorphicQueryReturningOnlyConcreteChild() throws Exception {
