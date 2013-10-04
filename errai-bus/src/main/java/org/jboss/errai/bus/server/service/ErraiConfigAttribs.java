@@ -69,7 +69,7 @@ public enum ErraiConfigAttribs {
   LONG_POLL_TIMEOUT("errai.bus.long_poll_timeout", "45000"),
 
   ENABLE_SSE_SUPPORT("errai.bus.enable_sse_support", "true"),
-  SSE_TIMEOUT("errai.bus.servlet_sse_timeout", "60000"),
+  SSE_TIMEOUT("errai.bus.servlet_sse_timeout", "45000"),
 
   ENABLE_WEB_SOCKET_SERVER("errai.bus.enable_web_socket_server", "false"),
   WEB_SOCKET_URL("errai.bus.web_socket_url", "/websocket.bus"),

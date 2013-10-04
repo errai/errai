@@ -48,8 +48,10 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException,
       IOException {
-
+    
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
+    session.setAttribute("NoSSE", Boolean.TRUE);
+    
     final MessageQueue queue = service.getBus().getQueue(session);
 
     if (queue == null) {
@@ -65,19 +67,12 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     queue.heartBeat();
 
     final OutputStreamWriteAdapter writer;
+    final AsyncContext asyncContext = request.startAsync();
+    asyncContext.setTimeout(60000);
+    queue.setTimeout(65000);
+    writer = new OutputStreamWriteAdapter(asyncContext.getResponse().getOutputStream());
 
-    if (isSSERequest(request)) {
-      final AsyncContext asyncContext = request.startAsync();
-      asyncContext.setTimeout(getSSETimeout());
-      queue.setTimeout(getSSETimeout() + 5000);
-      
-      final HttpServletResponse asynResponse = (HttpServletResponse) asyncContext.getResponse();
-      prepareSSE(asynResponse);
-      prepareSSEContinue(asynResponse);
-      asynResponse.getOutputStream().flush();
-      writer = new OutputStreamWriteAdapter(asynResponse.getOutputStream());
-
-      asyncContext.addListener(new AsyncListener() {
+    asyncContext.addListener(new AsyncListener() {
         @Override
         public void onComplete(final AsyncEvent event) throws IOException {
           synchronized (queue.getActivationLock()) {
@@ -101,116 +96,48 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         }
       });
 
-      synchronized (queue.getActivationLock()) {
-        if (queue.messagesWaiting()) {
-          queue.poll(writer);
-          writer.write(SSE_TERMINATION_BYTES);
-          writer.flush();
-          return;
-        }
-
-        queue.setActivationCallback(new QueueActivationCallback() {
-          @Override
-          public void activate(final MessageQueue queue) {
-            try {
-              queue.poll(writer);
-
-              writer.write(SSE_TERMINATION_BYTES);
-
-              queue.heartBeat();
-              writer.flush();
-
-              prepareSSEContinue(asynResponse);
-            }
-            catch (IOException e) {
-              log.debug("Closing queue with id: " + queue.getSession().getSessionId() + " due to IOException", e);
-              queue.stopQueue();
-            }
-            catch (final Throwable t) {
-              try {
-                writeExceptionToOutputStream((HttpServletResponse) asyncContext.getResponse(), t);
-              }
-              catch (Throwable t2) {
-                log.debug("Failed to write exception to dead client", t2);
-              }
-            }
-          }
-        });
+    synchronized (queue.getActivationLock()) {
+      if (queue.messagesWaiting()) {
+        queue.poll(writer);
+        asyncContext.complete();
+        return;
       }
-    }
 
-    else {
-      final AsyncContext asyncContext = request.startAsync();
-      asyncContext.setTimeout(60000);
-      queue.setTimeout(65000);
-      writer = new OutputStreamWriteAdapter(asyncContext.getResponse().getOutputStream());
-
-      asyncContext.addListener(new AsyncListener() {
-          @Override
-          public void onComplete(final AsyncEvent event) throws IOException {
-            synchronized (queue.getActivationLock()) {
-              queue.setActivationCallback(null);
-              asyncContext.complete();
-            }
-          }
-
-          @Override
-          public void onTimeout(final AsyncEvent event) throws IOException {
-            onComplete(event);
-          }
-
-          @Override
-          public void onError(final AsyncEvent event) throws IOException {
+      queue.setActivationCallback(new QueueActivationCallback() {
+        @Override
+        public void activate(final MessageQueue queue) {
+          try {
+            queue.poll(writer);
             queue.setActivationCallback(null);
+
+            queue.heartBeat();
+            writer.flush();
           }
-
-          @Override
-          public void onStartAsync(final AsyncEvent event) throws IOException {
+          catch (IOException e) {
+            log.debug("Closing queue with id: " + queue.getSession().getSessionId() + " due to IOException", e);
+            
           }
-        });
-
-      synchronized (queue.getActivationLock()) {
-        if (queue.messagesWaiting()) {
-          queue.poll(writer);
-          asyncContext.complete();
-          return;
-        }
-
-        queue.setActivationCallback(new QueueActivationCallback() {
-          @Override
-          public void activate(final MessageQueue queue) {
+          catch (final Throwable t) {
             try {
-              queue.poll(writer);
-              queue.setActivationCallback(null);
-
-              queue.heartBeat();
-              writer.flush();
+              writeExceptionToOutputStream((HttpServletResponse) asyncContext.getResponse(), t);
             }
-            catch (IOException e) {
-              log.debug("Closing queue with id: " + queue.getSession().getSessionId() + " due to IOException", e);
-              
-            }
-            catch (final Throwable t) {
-              try {
-                writeExceptionToOutputStream((HttpServletResponse) asyncContext.getResponse(), t);
-              }
-              catch (Throwable t2) {
-                log.debug("Failed to write exception to dead client", t2);
-              }
-            }
-            finally {
-              asyncContext.complete();
+            catch (Throwable t2) {
+              log.debug("Failed to write exception to dead client", t2);
             }
           }
-        });
-        writer.flush();
-      }
+          finally {
+            asyncContext.complete();
+          }
+        }
+      });
+      writer.flush();
     }
   }
 
   @Override
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
+    session.setAttribute("NoSSE", Boolean.TRUE);
     try {
       try {
         service.store(createCommandMessage(session, request));

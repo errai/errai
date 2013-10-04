@@ -308,9 +308,6 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     Assert.notNull(model);
 
     BindableProxy<T> newProxy;
-    // The whole initial state concept serves no real purpose and should be removed in Errai 3. We
-    // only keep it for API compatibility reasons in 2.x. In the future, we should just
-    // always sync the initial state from the model object.
     InitialState newInitState = (initialState != null) ? initialState : getAgent().getInitialState();
     if (model instanceof BindableProxy) {
       newProxy = (BindableProxy<T>) model;

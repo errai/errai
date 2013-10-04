@@ -18,10 +18,8 @@ package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.server.QueueUnavailableException;
-import org.jboss.errai.bus.server.api.MessageQueue;
-import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -33,8 +31,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.QueueUnavailableException;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
@@ -173,23 +174,22 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
       queue.heartBeat();
 
       if (sse) {
-        final long timeout = System.currentTimeMillis() + getSSETimeout();
-        while (System.currentTimeMillis() < timeout) {
+        while (!queue.isStale()) {
           prepareSSEContinue(httpServletResponse);
-          outputStream.flush();
           queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
           outputStream.write(SSE_TERMINATION_BYTES);
+          outputStream.flush();
           queue.heartBeat();
         }
       }
       else if (wait) {
         queue.poll(TimeUnit.MILLISECONDS, getLongPollTimeout(), new OutputStreamWriteAdapter(outputStream));
+        outputStream.close();
       }
       else {
         queue.poll(new OutputStreamWriteAdapter(outputStream));
+        outputStream.close();
       }
-
-      outputStream.close();
     }
     catch (final Throwable t) {
       writeExceptionToOutputStream(httpServletResponse, t);

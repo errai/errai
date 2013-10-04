@@ -77,7 +77,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
    * Bus subscription that receives ping responses from the server bus. This is
    * used for verifying that the SSE channel is actually working.
    */
-  private Subscription sseAgentSubscription;
+  private final Subscription sseAgentSubscription;
 
   public SSEHandler(final MessageCallback messageCallback, final ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
@@ -160,6 +160,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
       var errorHandler = function (e) {
           $wnd.console.log("SSE channel error (according to the browser)");
+          $wnd.console.log(e);
           thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::verifyConnected()();
       };
 
