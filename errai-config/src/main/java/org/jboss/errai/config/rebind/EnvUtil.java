@@ -20,6 +20,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.QuickDeps;
+import org.jboss.errai.common.client.api.annotations.LocalEvent;
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
@@ -311,6 +312,10 @@ public abstract class EnvUtil {
       }
     }
     return false;
+  }
+  
+  public static boolean isLocalEventType(final Class<?> cls) {
+    return cls.isAnnotationPresent(LocalEvent.class);
   }
 
   public static Set<Class<?>> getAllPortableConcreteSubtypes(final Class<?> clazz) {

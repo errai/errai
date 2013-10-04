@@ -55,7 +55,9 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
     final ClassStructureBuilder<?> builder = generatorMappingContext.getClassStructureBuilder();
 
     for (final ObserverPoint observerPoint : scanForObserverPointsInClassPath()) {
-      if (!EnvUtil.isPortableType(observerPoint.getObservedType())) continue;
+      if (!EnvUtil.isPortableType(observerPoint.getObservedType())
+              || EnvUtil.isLocalEventType(observerPoint.getObservedType()))
+        continue;
 
       final MetaClass eventObserverType
               = parameterizedAs(Event.class, typeParametersOf(observerPoint.getObservedType()));

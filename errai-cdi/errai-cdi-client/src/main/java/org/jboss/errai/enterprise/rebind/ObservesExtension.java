@@ -109,7 +109,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final String subscrVar = InjectUtil.getUniqueVarName();
 
     final String subscribeMethod;
-    if (EnvUtil.isPortableType(parm.getType().asClass())) {
+    if (EnvUtil.isPortableType(parm.getType().asClass()) && !EnvUtil.isLocalEventType(parm.getType().asClass())) {
       subscribeMethod = "subscribe";
     }
     else {
@@ -134,12 +134,14 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         .append(Stmt.loadVariable(subscrVar).invoke("remove")).append(Stmt.codeComment("WEEEEE!"));
 
     for (final Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
-      final String subscrHandle = InjectUtil.getUniqueVarName();
-      statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
-          .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
-              CDI.getSubjectNameByType(cls.getName()),
-              Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
-      destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
+      if (!EnvUtil.isLocalEventType(cls)) {
+        final String subscrHandle = InjectUtil.getUniqueVarName();
+        statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
+            .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
+                CDI.getSubjectNameByType(cls.getName()),
+                Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
+        destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
+      }
     }
 
     final Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",

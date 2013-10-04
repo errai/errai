@@ -327,7 +327,7 @@ public class CDIExtensionPoints implements Extension {
 
     ClassScanner.setReflectionsScanning(true);
 
-    if (type != null && EnvUtil.isPortableType(type)) {
+    if (type != null && EnvUtil.isPortableType(type) && !EnvUtil.isLocalEventType(type)) {
       final Set<Annotation> annotations = processObserverMethod.getObserverMethod().getObservedQualifiers();
       final Annotation[] methodQualifiers = annotations.toArray(new Annotation[annotations.size()]);
       for (final Annotation qualifier : methodQualifiers) {
