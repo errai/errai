@@ -12,8 +12,10 @@ import javax.persistence.metamodel.Metamodel;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.test.entity.inherit.ChildOfAbstractParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfConcreteParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.GrandchildOfConcreteParentEntity;
+import org.jboss.errai.jpa.test.entity.inherit.ParentAbstractEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ParentConcreteEntity;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -87,6 +89,32 @@ public class InheritanceTest extends GWTTestCase {
 
     ChildOfConcreteParentEntity found = em.find(ChildOfConcreteParentEntity.class, cc.getId());
     assertEquals(cc.toString(), found.toString());
+
+    // ensure lookup by superclass also works
+    ParentConcreteEntity found2 = em.find(ParentConcreteEntity.class, cc.getId());
+    assertSame(found, found2);
+  }
+
+  public void testStoreAndRetrieveChildofAbstractParent() throws Exception {
+    EntityManager em = getEntityManager();
+
+    ChildOfAbstractParentEntity ac = new ChildOfAbstractParentEntity();
+    ac.setPrivateParentField(-4);
+    ac.setPackagePrivateParentField(2);
+    ac.setProtectedParentField(432344);
+    ac.setPublicParentField(99887766);
+    ac.setChildField(101010);
+    em.persist(ac);
+    em.flush();
+
+    em.clear();
+
+    ChildOfAbstractParentEntity found = em.find(ChildOfAbstractParentEntity.class, ac.getId());
+    assertEquals(ac.toString(), found.toString());
+
+    // ensure lookup by superclass also works
+    ParentAbstractEntity found2 = em.find(ParentAbstractEntity.class, ac.getId());
+    assertSame(found, found2);
   }
 
   public void testMetamodelOfConcreteChild() throws Exception {

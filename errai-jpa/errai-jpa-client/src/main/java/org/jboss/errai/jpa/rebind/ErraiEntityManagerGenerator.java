@@ -230,8 +230,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       globalEntityListeners.add(MetaClassFactory.get(globalListener));
     }
 
+    final Set<Class<?>> entityTypes = new HashSet<Class<?>>();
     for (final ManagedType<?> mt : ClassSorter.supertypesFirst(mm.getEntities())) {
       EntityType<?> et = (EntityType<?>) mt;
+      entityTypes.add(mt.getJavaType());
 
       // first, create a variable for the EntityType
       String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners);
@@ -250,6 +252,15 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
             attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
         cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
+      }
+
+      // register this entity type with all its supertypes which are also entities
+      Class<?> superclass = mt.getJavaType();
+      while (superclass != null) {
+        if (entityTypes.contains(superclass)) {
+          cmm.append(Stmt.loadVariable(entitySnapshotVarName(superclass)).invoke("addSubtype", Stmt.loadVariable(entityTypeVarName)));
+        }
+        superclass = superclass.getSuperclass();
       }
 
       // XXX using StringStatement because this gives OutOfScopeException for metamodel:

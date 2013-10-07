@@ -39,6 +39,7 @@ public abstract class ErraiManagedType<X> implements ManagedType<X> {
   private final Set<PluralAttribute<? super X, ?, ?>> pluralAttributes = new HashSet<PluralAttribute<? super X, ?, ?>>();
 
   protected final Class<X> javaType;
+  private Collection<ErraiManagedType<? extends X>> subtypes = new HashSet<ErraiManagedType<? extends X>>();
 
   public ErraiManagedType(Class<X> javaType) {
     this.javaType = javaType;
@@ -93,6 +94,24 @@ public abstract class ErraiManagedType<X> implements ManagedType<X> {
       otherClass = otherClass.getSuperclass();
     }
     return false;
+  }
+
+  /**
+   * Returns the collection of entity types that are subclasses of this managed
+   * type. The returned collection includes this type itself (the trivial
+   * subtype)!
+   *
+   * @return
+   */
+  public Collection<ErraiManagedType<? extends X>> getSubtypes() {
+    return subtypes;
+  }
+
+  /**
+   * Only intended for use by the generated code that bootstraps Errai JPA.
+   */
+  void addSubtype(ErraiManagedType<? extends X> subtype) {
+    subtypes.add(subtype);
   }
 
   /**

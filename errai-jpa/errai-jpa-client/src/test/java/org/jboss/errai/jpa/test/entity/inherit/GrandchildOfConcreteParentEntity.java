@@ -21,7 +21,7 @@ public class GrandchildOfConcreteParentEntity extends ChildOfConcreteParentEntit
 
   @Override
   public String toString() {
-    return "ChildOfConcreteParentEntity [id=" + id + ", privateParentField=" + getPrivateParentField()
+    return "GrandchildOfConcreteParentEntity [id=" + id + ", privateParentField=" + getPrivateParentField()
             + ", protectedParentField=" + protectedParentField + ", packagePrivateParentField="
             + packagePrivateParentField + ", publicParentField=" + publicParentField + ", childField="
             + getChildField() + ", grandchildField=" + grandchildField + "]";

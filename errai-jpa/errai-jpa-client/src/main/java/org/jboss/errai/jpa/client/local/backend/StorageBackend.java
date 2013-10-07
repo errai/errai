@@ -55,8 +55,8 @@ public interface StorageBackend {
   <X> X get(Key<X, ?> key);
 
   /**
-   * Returns all entities of the given type whose JSON representations are
-   * accepted by the given matcher.
+   * Returns all entities of the given type (and its subtypes) whose JSON
+   * representations are accepted by the given matcher.
    *
    * @param type
    *          The type of entities to retrieve

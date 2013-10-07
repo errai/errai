@@ -97,20 +97,20 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
-  public <X> X get(Key<X, ?> key) {
-    ErraiManagedType<X> entityType = key.getEntityType();
-    String keyJson = namespace + key.toJson();
-    String valueJson = LocalStorage.get(keyJson);
-    System.out.println("<<<get '" + keyJson + "' : " + valueJson);
-    X entity;
-    if (valueJson == null) {
-      entity = null;
+  public <X> X get(Key<X, ?> requestedKey) {
+    for (ErraiManagedType<? extends X> entityType : requestedKey.getEntityType().getSubtypes()) {
+      Key<X, ?> key = new Key<X, Object>((ErraiManagedType<X>) entityType, (Object) requestedKey.getId());
+      String keyJson = namespace + key.toJson();
+      String valueJson = LocalStorage.get(keyJson);
+      System.out.println("<<<get '" + keyJson + "' : " + valueJson);
+      X entity;
+      if (valueJson != null) {
+        entity = entityType.fromJson(em, JSONParser.parseStrict(valueJson));
+        System.out.println("   returning " + entity);
+        return entity;
+      }
     }
-    else {
-      entity = entityType.fromJson(em, JSONParser.parseStrict(valueJson));
-    }
-    System.out.println("   returning " + entity);
-    return entity;
+    return null;
   }
 
   @Override

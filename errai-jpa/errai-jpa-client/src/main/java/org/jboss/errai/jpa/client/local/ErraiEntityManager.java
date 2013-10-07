@@ -48,9 +48,9 @@ public class ErraiEntityManager implements EntityManager {
   final ErraiMetamodel metamodel;
 
   /**
-   * All persistent instances known to this entity manager.
+   * Container for all the live objects managed by this entity manager.
    */
-  final Map<Key<?, ?>, Object> persistenceContext = new HashMap<Key<?, ?>, Object>();
+  final PersistenceContext persistenceContext;
 
   /**
    * All removed instances known to this entity manager.
@@ -86,6 +86,7 @@ public class ErraiEntityManager implements EntityManager {
           StorageBackendFactory storageBackendFactory) {
     this.metamodel = Assert.notNull(metamodel);
     this.namedQueries = Assert.notNull(namedQueries);
+    this.persistenceContext = new PersistenceContext(metamodel);
 
     // Caution: we're handing out a reference to this partially constructed instance!
     this.backend = storageBackendFactory.createInstanceFor(this);
@@ -609,9 +610,7 @@ public class ErraiEntityManager implements EntityManager {
       entity = backend.get(key);
       if (entity != null) {
         persistenceContext.put(key, entity);
-
-        // XXX when persistenceContext gets its own class, this should go on the ultimate ingress point
-        getMetamodel().entity(key.getEntityType().getJavaType()).deliverPostLoad(entity);
+        ((ErraiIdentifiableType<X>) key.getEntityType()).deliverPostLoad(entity);
       }
     }
     return entity;
