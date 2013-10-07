@@ -22,9 +22,20 @@
       </listitem>
    </itemizedlist>
    <para>
-      If you want to get started right away with a working Errai JAX-RS CRUD application, you can use our jaxrs-quickstart Maven archetype. See the
-      <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5833096">Quickstart Guide</ulink>
-      for details. If you want to set up a project from scratch see the next chapter.
+      To get started with a working demo that makes use of Errai JAX-RS you can either download and unzip the
+      <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">Errai tutorial project</ulink>
+      or check out the CRUD demo part of our
+      <ulink url="https://github.com/errai/errai/tree/master/errai-demos">demo collection</ulink>
+      . If you prefer getting started from scratch keep reading
+      <figure float="0">
+         <title>TODO Gliffy image title empty</title>
+         <mediaobject>
+            <imageobject>
+               <imagedata fileref="author/images/icons/emoticons/smile.gif"/>
+            </imageobject>
+         </mediaobject>
+      </figure>
+      .
     </para>
    <section id="sid-19398997_ErraiJAX-RS-GettingStarted">
       <title>Getting Started</title>

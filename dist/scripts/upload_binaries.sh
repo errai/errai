@@ -49,10 +49,8 @@ echo "Done!"
 echo "Uploading documentation..."
 
 (cd ../reference/target/docbook/publish/en/pdf && mv Reference_Guide.pdf Errai_${version}_Reference_Guide.pdf)
-(cd ../quickstart/target/docbook/publish/en/pdf && mv Quickstart_Guide.pdf Errai_${version}_Quickstart_Guide.pdf)
 
 (cd ../reference/target/docbook/publish/en  && scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference)
-(cd ../quickstart/target/docbook/publish/en && scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/quickstart)
 
 echo "Copying images from a previous release (yecch...)"
 

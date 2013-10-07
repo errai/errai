@@ -104,8 +104,8 @@ public class HelloWorld implements EntryPoint {
             <para>When using Errai IOC or CDI, you can also use the Sender&lt;T&gt; interface to send messages.</para>
          </important>
       </section>
-      <section id="sid-5931280_MessagingAPIBasics-RecievingMessagesontheServerBus%2FServerServices">
-         <title>Recieving Messages on the Server Bus / Server Services</title>
+      <section id="sid-5931280_MessagingAPIBasics-ReceivingMessagesontheServerBus%2FServerServices">
+         <title>Receiving Messages on the Server Bus / Server Services</title>
          <para>Every message has a sender and at least one receiver. A receiver is as it sounds--it receives the message and does something with it. Implementing a receiver (also referred to as a service) is as simple as implementing our standard MessageCallback interface, which is used pervasively across, both client and server code. Let's begin with server side component that receives messages:</para>
          <informalexample>
             <programlisting language="java">
@@ -265,109 +265,176 @@ public void registerLocalService(MessageBus bus) {
          <para>Both examples above work in client- and server-side code.</para>
       </section>
    </section>
-   <section id="sid-24674472">
-      <title>Conversations</title>
-      <para>Conversations are message exchanges which are between a single client and a service. They are a fundmentally important concept in ErraiBus, since by default, a message will be broadcast to all client services listening on a particular channel.</para>
-      <para>When you create a reply with an incoming message, you ensure that the message you are sending back is received by the same client which sent the incoming message. A simple example:</para>
+   <section id="sid-5931284">
+      <title>Single-Response Conversations &amp; Pseudo-Synchronous Messaging</title>
+      <para>
+        It is possible to contruct a message and a default response handler as part of the
+        <code>MessageBuilder</code>
+        API. It should be noted, that multiple replies will not be possible and will result an exception if attempted. Using this aspect of the API is very useful for doing simple psuedo-synchronous conversive things.
+      </para>
+      <para>
+        You can do this by specifying a
+        <code>MessageCallback</code>
+        using the
+        <code>repliesTo()</code>
+        method in the
+        <code>MessageBuilder</code>
+        API after specifying the error handling of the message.
+      </para>
       <informalexample>
          <programlisting language="java">
-@Service
-public class HelloWorldService implements MessageCallback {
-  public void callback(CommandMessage message) {
-    // Send a message to the 'HelloWorldClient' on the client that sent us the
-    // the message.
-    MessageBuilder.createConversation(message)
-      .toSubject("HelloWorldClient")
-      .signalling()
-      .with("text", "Hi There! We're having a reply!")
-      .noErrorHandling().reply();
-    });
-  }
-}
+MessageBuilder.createMessage()
+  .toSubject("ConversationalService").signalling()
+  .with("SomeField", someValue)
+  .noErrorHandling()
+  .repliesTo(new MessageCallback() {
+    public void callback(Message message) {
+      System.out.println("I received a response");
+    }
+   })
+</programlisting>
+      </informalexample>
+      <para>See the next section on how to build conversational services that can respond to such messages.</para>
+   </section>
+   <section id="sid-5931289">
+      <title>Sender Inferred Subjects</title>
+      <para>
+        It is possible for the sender to infer, to whatever conversational service it is calling, what subject it would like the reply to go to. This is accomplished by utilizing the standard
+        <code>MessageParts.ReplyTo</code>
+        message part. Using this methodology for building conversations is generally encouraged.
+      </para>
+      <para>Consider the following client side code:</para>
+      <informalexample>
+         <programlisting language="java">
+  MessageBuilder.createMessage()
+    .toSubject("ObjectService").signalling()
+    .with(MessageParts.ReplyTo, "ClientEndpoint")
+    .noErrorHandling().sendNowWith(dispatcher);
 </programlisting>
       </informalexample>
       <para>
-        Note that the only difference between the example in the  previous section and this is the use of the
-        <code>createConversation()</code>
-        method with
-        <code>MessageBuilder</code>
-        .
+        And the conversational code on the server (for service
+        <emphasis role="italics">ObjectService</emphasis>
+        ):
+      </para>
+      <informalexample>
+         <programlisting language="java">
+  MessageBuilder.createConversation(message)
+    .subjectProvided().signalling()
+    .with("Records", records)
+    .noErrorHandling().reply();
+</programlisting>
+      </informalexample>
+      <para>
+        In the above examples, assuming that the latter example is inside a service called "
+        <code>ObjectService</code>
+        " and is referencing the incoming message that was sent in the former example, the message created will automatically reference the
+        <code>ReplyTo</code>
+        subject that was provided by the sender, and send the message back to the subject desired by the client on the client that sent the message.
       </para>
    </section>
-   <section id="sid-59146643">
-      <title>Bus Lifecycle</title>
-      <section id="sid-59146643_BusLifecycle-TurningServerCommunicationOnandOff">
-         <title>Turning Server Communication On and Off</title>
-         <para>By default, Errai's client-side message bus attempts to connect to the server as soon as the ErraiBus module has been loaded. The bus will stay connected until a lengthy (about 45 seconds) communication failure occurs, or the web page is unloaded.</para>
-         <para>The application can affect bus communication through two mechanisms:</para>
-         <orderedlist inheritnum="ignore" continuation="restarts">
-            <listitem>
-               <para>
-              By setting a global JavaScript variable
-              <code>erraiBusRemoteCommunicationEnabled = false</code>
-              before the GWT scripts load, bus communication with the server is permanently disabled
-            </para>
-            </listitem>
-            <listitem>
-               <para>
-              By calling
-              <code>((ClientMessageBus) ErraiBus.get()).stop()</code>
-              , the bus disconnects from the server
-            </para>
-            </listitem>
-         </orderedlist>
+   <section id="sid-5931291">
+      <title>Broadcasting</title>
+      <para>Broadcasting messages to all clients listening on a specific subject is quite simple and involves nothing more than forgoing use of the reply API. For instance:</para>
+      <informalexample>
+         <programlisting language="java">
+MessageBuilder.createMessage().
+    .toSubject("MessageListener")
+    .with("Text", "Hello, from your overlords in the cloud")
+    .noErrorHandling().sendGlobalWith(dispatcher);
+</programlisting>
+      </informalexample>
+      <para>
+        If sent from the server, all clients currently connected, who are listening to the subject
+        <code>"MessageListener"</code>
+        will receive the message. It's as simple as that.
+      </para>
+   </section>
+   <section id="sid-5931293">
+      <title>Client-to-Client Communication</title>
+      <para>Communication from one client to another client is not directly possible within the bus federation, by design. This isn't to say that it's not possible. But one client cannot see a service within the federation of another client. We institute this limitation as a matter of basic security. But many software engineers will likely find the prospects of such communication appealing, so this section will provide some basic pointers on how to go about accomplishing it.</para>
+      <section id="sid-5931293_Client-to-ClientCommunication-RelayServices">
+         <title>Relay Services</title>
+         <para>The essential architectural thing you'll need to do is create a relay service that runs on the server. Since a service advertised on the server is visible to all clients and all clients are visible to the server, you might already see where we're going with this.</para>
+         <para>By creating a service on the server which accepts messages from clients, you can create a simple protocol on-top of the bus to enable quasi peer-to-peer communication. (We say quasi, because it still needs to be routed through the server)</para>
          <para>
-          To resume server communication after a call to
-          <code>ClientMessageBus.stop()</code>
-          or after communication with the server has exceeded the bus' retry timeout, call
-          <code>((ClientMessageBus) ErraiBus.get()).init()</code>
-          . You can use a
-          <code>BusLifecycleListener</code>
-          to monitor the success or failure of this attempt. See the next section for details.
+          While you can probably imagine simply creating a broadcast-like service which accepts a message from one client and broadcasts it to the rest of the world, it may be less clear how to go about routing from one particular client to another particular client, so we'll focus on that problem. This is covered in
+          <xref linkend="sid-5931301"/>
         </para>
       </section>
-      <section id="sid-59146643_BusLifecycle-ObservingBusLifecycleStateandCommunicationStatus">
-         <title>Observing Bus Lifecycle State and Communication Status</title>
-         <para>In a perfect world, the client message bus would always be able to communicate with the server message bus. But in the real world, there's a whole array of reasons why the communication link between the server and the client might be interrupted.</para>
-         <para>
-          On its own, the client message bus will attempt to reconnect with the server whenever communication has been disrupted. Errai applications can monitor the status of the bus' communication link (whether it is disconnected, attempting to connect, or fully connected) through the
-          <code>BusLifecycleListener</code>
-          interface:
-        </para>
-         <informalexample>
-            <programlisting language="java">
-class BusStatusLogger implements BusLifecycleListener {
-
-  @Override
-  public void busAssociating(BusLifecycleEvent e) {
-    GWT.log("Errai Bus trying to connect...");
-  }
-
-  @Override
-  public void busOnline(BusLifecycleEvent e) {
-    GWT.log("Errai Bus connected!");
-  }
-
-  @Override
-  public void busOffline(BusLifecycleEvent e) {
-    GWT.log("Errai Bus trying to connect...");
-  }
-
-  @Override
-  public void busDisassociating(BusLifecycleEvent e) {
-    GWT.log("Errai Bus going into local-only mode.");
-  }
-}
+   </section>
+   <section id="sid-5931301">
+      <title>Message Routing Information</title>
+      <para>Every message that is sent between a local and remote (or server and client) buses contain session routing information. This information is used by the bus to determine what outbound queues to use to deliver the message to, so they will reach their intended recipients. It is possible to manually specify this information to indicate to the bus, where you want a specific message to go.</para>
+      <para>
+        You can obtain the
+        <code>SessionID</code>
+        directly from a
+        <code>Message</code>
+        by getting the
+        <code>QueueSession</code>
+        resource:
+      </para>
+      <informalexample>
+         <programlisting language="java">
+   QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
+   String sessionId = sess.getSessionId();
 </programlisting>
-         </informalexample>
-         <para>To attach such a listener to the bus, make the following call in client-side code:</para>
-         <informalexample>
-            <programlisting language="java">
-ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
-bus.addLifecycleListener(new BusStatusLogger());
+      </informalexample>
+      <para>
+        You can extract the
+        <code>SessionID</code>
+        from a message so that you may use it for routing by obtaining the
+        <code>QueueSession</code>
+        resource from the
+        <code>Message</code>
+        . For example:
+      </para>
+      <informalexample>
+         <programlisting language="java">
+...
+  public void callback(Message message) {
+   QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
+   String sessionId = sess.getSessionId();
+
+    // Record this sessionId somewhere.
+    ...
+  }
 </programlisting>
-         </informalexample>
-      </section>
+      </informalexample>
+      <para>
+        The
+        <code>SessionID</code>
+        can then be stored in a medium, say a Map, to cross-reference specific users or whatever  identifier you wish to allow one client to obtain a reference to the specific
+        <code>SessionID</code>
+        of another client. In which case, you can then provide the
+        <code>SessionID</code>
+        as a  MessagePart to indicate to the bus where you want the message to go.
+      </para>
+      <informalexample>
+         <programlisting language="java">
+  MessageBuilder.createMessage()
+    .toSubject("ClientMessageListener")
+    .signalling()
+    .with(MessageParts.SessionID, sessionId)
+    .with("Message", "We're relaying a message!")
+    .noErrorHandling().sendNowWith(dispatcher);
+</programlisting>
+      </informalexample>
+      <para>
+        By providing the
+        <code>SessionID</code>
+        part in the message, the bus will see this and use it for routing the message to the relevant queue.
+      </para>
+      <para>
+        It may be tempting however, to try and include destination
+        <code>SessionIDs</code>
+        at the client level, assuming that this will make the infrastructure simpler. But this will not achieve the desired results, as the bus treats
+        <code>SessionIDs</code>
+        as transient. Meaning, the
+        <code>SessionID</code>
+        information is not ever transmitted from bus-to-bus, and therefore is only directly relevant to the proximate bus.
+      </para>
    </section>
    <section id="sid-5931306">
       <title>Handling Errors</title>
@@ -425,115 +492,34 @@ MessageBuilder.createMessage()
         <code>true</code>
         here, unless you are trying to explicitly surpress some undesirably activity by Errai, such as automatic subject-termination in conversations. But this is almost never the case.
       </para>
-      <para>Errai further provides a subject to subscribe to for handling global errors on the client (such as a disconnected server bus or an invalid response code) that occur outside a regular application message exchange. Subscribing to this subject is useful to detect errors early (e.g. due to failing heartbeat requests). A use case that comes to mind here is activating your application's offline mode.</para>
-      <informalexample>
-         <programlisting language="java">
-bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-  @Override
-  public void callback(Message message) {
-    try {
-      caught = message.get(Throwable.class, MessageParts.Throwable);
-      throw caught;
-    }
-    catch(TransportIOException e) {
-      // thrown in case the server can't be reached or an unexpected status code was returned
-    }
-    catch (Throwable throwable) {
-      // handle system errors (e.g response marshalling errors) - that of course should never happen :)
-    }
-  }
-});
-</programlisting>
-      </informalexample>
-   </section>
-   <section id="sid-54493380">
-      <title>Handling Transport Errors</title>
-      <para>
-        You may need to detect problems which occur on the bus at runtime. The client bus API provides a facility for doing this in the
-        <code>org.jboss.errai.bus.client.framework.ClientMessageBus</code>
-        using the
-        <code>addTransportErrorHandler()</code>
-        method.
-      </para>
-      <para>
-        A
-        <code>TransportErrorHandler</code>
-        is an interface which you can use to define error handling behavior in the event of a transport problem.
-      </para>
-      <para>For example:</para>
-      <informalexample>
-         <programlisting language="java">
+      <section id="sid-5931306_HandlingErrors-Handlingglobalmessagetransporterrors">
+         <title>Handling global message transport errors</title>
+         <para>
+          You may need to detect problems which occur on the bus at runtime. The client bus API provides a facility for doing this in the
+          <code>org.jboss.errai.bus.client.framework.ClientMessageBus</code>
+          using the
+          <code>addTransportErrorHandler()</code>
+          method.
+        </para>
+         <para>
+          A
+          <code>TransportErrorHandler</code>
+          is an interface which you can use to define error handling behavior in the event of a transport problem.
+        </para>
+         <para>For example:</para>
+         <informalexample>
+            <programlisting language="java">
 messageBus.addTransportErrorHandler(new TransportErrorHandler() {
   public void onError(TransportError error) {
     // error handling code.
   }
 });
 </programlisting>
-      </informalexample>
-      <para>
-        The
-        <code>TransportError</code>
-        interface represents the details of an an error from the bus. It contains a set of methods which can be used for determining information on the initial request which triggered the error, if the error occurred over HTTP or WebSockets, status code information, etc. See the JavaDoc for more information.
-      </para>
-   </section>
-   <section id="sid-5931284">
-      <title>Single-Response Conversations &amp; Pseudo-Synchronous Messaging</title>
-      <para>
-        It is possible to contruct a message and a default response handler as part of the
-        <code>MessageBuilder</code>
-        API. It should be noted, that multiple replies will not be possible and will result an exception if attempted. Using this aspect of the API is very useful for doing simple psuedo-synchronous conversive things.
-      </para>
-      <para>
-        You can do this by specifying a
-        <code>MessageCallback</code>
-        using the
-        <code>repliesTo()</code>
-        method in the
-        <code>MessageBuilder</code>
-        API after specifying the error handling of the message.
-      </para>
-      <informalexample>
-         <programlisting language="java">
-MessageBuilder.createMessage()
-  .toSubject("ConversationalService").signalling()
-  .with("SomeField", someValue)
-  .noErrorHandling()
-  .repliesTo(new MessageCallback() {
-    public void callback(Message message) {
-      System.out.println("I received a response");
-    }
-   })
-</programlisting>
-      </informalexample>
-      <para>See the next section on how to build conversational services that can respond to such messages.</para>
-   </section>
-   <section id="sid-5931291">
-      <title>Broadcasting</title>
-      <para>Broadcasting messages to all clients listening on a specific subject is quite simple and involves nothing more than forgoing use of the reply API. For instance:</para>
-      <informalexample>
-         <programlisting language="java">
-MessageBuilder.createMessage().
-    .toSubject("MessageListener")
-    .with("Text", "Hello, from your overlords in the cloud")
-    .noErrorHandling().sendGlobalWith(dispatcher);
-</programlisting>
-      </informalexample>
-      <para>
-        If sent from the server, all clients currently connected, who are listening to the subject
-        <code>"MessageListener"</code>
-        will receive the message. It's as simple as that.
-      </para>
-   </section>
-   <section id="sid-5931293">
-      <title>Client-to-Client Communication</title>
-      <para>Communication from one client to another client is not directly possible within the bus federation, by design. This isn't to say that it's not possible. But one client cannot see a service within the federation of another client. We institute this limitation as a matter of basic security. But many software engineers will likely find the prospects of such communication appealing, so this section will provide some basic pointers on how to go about accomplishing it.</para>
-      <section id="sid-5931293_Client-to-ClientCommunication-RelayServices">
-         <title>Relay Services</title>
-         <para>The essential architectural thing you'll need to do is create a relay service that runs on the server. Since a service advertised on the server is visible to all clients and all clients are visible to the server, you might already see where we're going with this.</para>
-         <para>By creating a service on the server which accepts messages from clients, you can create a simple protocol on-top of the bus to enable quasi peer-to-peer communication. (We say quasi, because it still needs to be routed through the server)</para>
+         </informalexample>
          <para>
-          While you can probably imagine simply creating a broadcast-like service which accepts a message from one client and broadcasts it to the rest of the world, it may be less clear how to go about routing from one particular client to another particular client, so we'll focus on that problem. This is covered in
-          <xref linkend="sid-5931301"/>
+          The
+          <code>TransportError</code>
+          interface represents the details of an an error from the bus. It contains a set of methods which can be used for determining information on the initial request which triggered the error, if the error occurred over HTTP or WebSockets, status code information, etc. See the JavaDoc for more information.
         </para>
       </section>
    </section>
@@ -632,116 +618,6 @@ AsyncTask task = MessageBuilder.createConversation(message)
   task.cancel(true);
 </programlisting>
       </informalexample>
-   </section>
-   <section id="sid-5931289">
-      <title>Sender Inferred Subjects</title>
-      <para>
-        It is possible for the sender to infer, to whatever conversational service it is calling, what subject it would like the reply to go to. This is accomplished by utilizing the standard
-        <code>MessageParts.ReplyTo</code>
-        message part. Using this methodology for building conversations is generally encouraged.
-      </para>
-      <para>Consider the following client side code:</para>
-      <informalexample>
-         <programlisting language="java">
-  MessageBuilder.createMessage()
-    .toSubject("ObjectService").signalling()
-    .with(MessageParts.ReplyTo, "ClientEndpoint")
-    .noErrorHandling().sendNowWith(dispatcher);
-</programlisting>
-      </informalexample>
-      <para>
-        And the conversational code on the server (for service
-        <emphasis role="italics">ObjectService</emphasis>
-        ):
-      </para>
-      <informalexample>
-         <programlisting language="java">
-  MessageBuilder.createConversation(message)
-    .subjectProvided().signalling()
-    .with("Records", records)
-    .noErrorHandling().reply();
-</programlisting>
-      </informalexample>
-      <para>
-        In the above examples, assuming that the latter example is inside a service called "
-        <code>ObjectService</code>
-        " and is referencing the incoming message that was sent in the former example, the message created will automatically reference the
-        <code>ReplyTo</code>
-        subject that was provided by the sender, and send the message back to the subject desired by the client on the client that sent the message.
-      </para>
-   </section>
-   <section id="sid-5931301">
-      <title>Message Routing Information</title>
-      <para>Every message that is sent between a local and remote (or server and client) buses contain session routing information. This information is used by the bus to determine what outbound queues to use to deliver the message to, so they will reach their intended recipients. It is possible to manually specify this information to indicate to the bus, where you want a specific message to go.</para>
-      <para>
-        You can obtain the
-        <code>SessionID</code>
-        directly from a
-        <code>Message</code>
-        by getting the
-        <code>QueueSession</code>
-        resource:
-      </para>
-      <informalexample>
-         <programlisting language="java">
-   QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
-   String sessionId = sess.getSessionId();
-</programlisting>
-      </informalexample>
-      <para>
-        You can extract the
-        <code>SessionID</code>
-        from a message so that you may use it for routing by obtaining the
-        <code>QueueSession</code>
-        resource from the
-        <code>Message</code>
-        . For example:
-      </para>
-      <informalexample>
-         <programlisting language="java">
-...
-  public void callback(Message message) {
-   QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
-   String sessionId = sess.getSessionId();
-
-    // Record this sessionId somewhere.
-    ...
-  }
-</programlisting>
-      </informalexample>
-      <para>
-        The
-        <code>SessionID</code>
-        can then be stored in a medium, say a Map, to cross-reference specific users or whatever  identifier you wish to allow one client to obtain a reference to the specific
-        <code>SessionID</code>
-        of another client. In which case, you can then provide the
-        <code>SessionID</code>
-        as a  MessagePart to indicate to the bus where you want the message to go.
-      </para>
-      <informalexample>
-         <programlisting language="java">
-  MessageBuilder.createMessage()
-    .toSubject("ClientMessageListener")
-    .signalling()
-    .with(MessageParts.SessionID, sessionId)
-    .with("Message", "We're relaying a message!")
-    .noErrorHandling().sendNowWith(dispatcher);
-</programlisting>
-      </informalexample>
-      <para>
-        By providing the
-        <code>SessionID</code>
-        part in the message, the bus will see this and use it for routing the message to the relevant queue.
-      </para>
-      <para>
-        It may be tempting however, to try and include destination
-        <code>SessionIDs</code>
-        at the client level, assuming that this will make the infrastructure simpler. But this will not achieve the desired results, as the bus treats
-        <code>SessionIDs</code>
-        as transient. Meaning, the
-        <code>SessionID</code>
-        information is not ever transmitted from bus-to-bus, and therefore is only directly relevant to the proximate bus.
-      </para>
    </section>
    <section id="sid-5931315">
       <title>Queue Sessions</title>
@@ -1292,6 +1168,35 @@ public class TestService implements MessageCallback {
          </section>
       </section>
    </section>
+   <section id="sid-24674472">
+      <title>Conversations</title>
+      <para>Conversations are message exchanges which are between a single client and a service. They are a fundmentally important concept in ErraiBus, since by default, a message will be broadcast to all client services listening on a particular channel.</para>
+      <para>When you create a reply with an incoming message, you ensure that the message you are sending back is received by the same client which sent the incoming message. A simple example:</para>
+      <informalexample>
+         <programlisting language="java">
+@Service
+public class HelloWorldService implements MessageCallback {
+  public void callback(CommandMessage message) {
+    // Send a message to the 'HelloWorldClient' on the client that sent us the
+    // the message.
+    MessageBuilder.createConversation(message)
+      .toSubject("HelloWorldClient")
+      .signalling()
+      .with("text", "Hi There! We're having a reply!")
+      .noErrorHandling().reply();
+    });
+  }
+}
+</programlisting>
+      </informalexample>
+      <para>
+        Note that the only difference between the example in the  previous section and this is the use of the
+        <code>createConversation()</code>
+        method with
+        <code>MessageBuilder</code>
+        .
+      </para>
+   </section>
    <section id="sid-53380177">
       <title>WebSockets</title>
       <para>ErraiBus has support for WebSocket-based communication. When WebSockets are enabled, capable web browsers will attempt to upgrade their COMET-based communication with the server-side bus to use a WebSocket channel.</para>
@@ -1400,6 +1305,81 @@ errai.bus.enable_web_socket_server=true
          </note>
       </section>
    </section>
+   <section id="sid-59146643">
+      <title>Bus Lifecycle</title>
+      <section id="sid-59146643_BusLifecycle-TurningServerCommunicationOnandOff">
+         <title>Turning Server Communication On and Off</title>
+         <para>By default, Errai's client-side message bus attempts to connect to the server as soon as the ErraiBus module has been loaded. The bus will stay connected until a lengthy (about 45 seconds) communication failure occurs, or the web page is unloaded.</para>
+         <para>The application can affect bus communication through two mechanisms:</para>
+         <orderedlist inheritnum="ignore" continuation="restarts">
+            <listitem>
+               <para>
+              By setting a global JavaScript variable
+              <code>erraiBusRemoteCommunicationEnabled = false</code>
+              before the GWT scripts load, bus communication with the server is permanently disabled
+            </para>
+            </listitem>
+            <listitem>
+               <para>
+              By calling
+              <code>((ClientMessageBus) ErraiBus.get()).stop()</code>
+              , the bus disconnects from the server
+            </para>
+            </listitem>
+         </orderedlist>
+         <para>
+          To resume server communication after a call to
+          <code>ClientMessageBus.stop()</code>
+          or after communication with the server has exceeded the bus' retry timeout, call
+          <code>((ClientMessageBus) ErraiBus.get()).init()</code>
+          . You can use a
+          <code>BusLifecycleListener</code>
+          to monitor the success or failure of this attempt. See the next section for details.
+        </para>
+      </section>
+      <section id="sid-59146643_BusLifecycle-ObservingBusLifecycleStateandCommunicationStatus">
+         <title>Observing Bus Lifecycle State and Communication Status</title>
+         <para>In a perfect world, the client message bus would always be able to communicate with the server message bus. But in the real world, there's a whole array of reasons why the communication link between the server and the client might be interrupted.</para>
+         <para>
+          On its own, the client message bus will attempt to reconnect with the server whenever communication has been disrupted. Errai applications can monitor the status of the bus' communication link (whether it is disconnected, attempting to connect, or fully connected) through the
+          <code>BusLifecycleListener</code>
+          interface:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+class BusStatusLogger implements BusLifecycleListener {
+
+  @Override
+  public void busAssociating(BusLifecycleEvent e) {
+    GWT.log("Errai Bus trying to connect...");
+  }
+
+  @Override
+  public void busOnline(BusLifecycleEvent e) {
+    GWT.log("Errai Bus connected!");
+  }
+
+  @Override
+  public void busOffline(BusLifecycleEvent e) {
+    GWT.log("Errai Bus trying to connect...");
+  }
+
+  @Override
+  public void busDisassociating(BusLifecycleEvent e) {
+    GWT.log("Errai Bus going into local-only mode.");
+  }
+}
+</programlisting>
+         </informalexample>
+         <para>To attach such a listener to the bus, make the following call in client-side code:</para>
+         <informalexample>
+            <programlisting language="java">
+ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
+bus.addLifecycleListener(new BusStatusLogger());
+</programlisting>
+         </informalexample>
+      </section>
+   </section>
    <section id="sid-68355291">
       <title>Shadow Services</title>
       <para>Shadow Services is a Service that will get invoked when there is no longer a connection with the server. This is particular helpful when developing an application for mobile. To create a Shadow Service for a specific Services all you have to do is annotate a new client side implementation with the @ShadowService:</para>
@@ -1425,5 +1405,37 @@ public class SignupServiceShadow implements SignupService {
 </programlisting>
       </informalexample>
       <para>In this shadow service we can create logic that will deal with the temporary connection loss. For instance you could save the data that needs to get send to the server with JPA on the client and then when the bus get online again sent the data to the server.</para>
+   </section>
+   <section id="sid-5931386">
+      <title>Debugging Messaging Problems</title>
+      <para>Errai includes a bus monitoring application, which allows you to monitor all of the message exchange activity on the bus in order to help track down any potential problems It allows you to inspect individual messages to examine their state and structure.</para>
+      <para>
+        To utilize the bus monitor, you'll need to include the _errai-tools _ package as part of your application's dependencies. When you run your application in development mode, you will simply need to add the following JVM options to your run configuration in order to launch the monitor:
+        <code>-Derrai.tools.bus_monitor_attach=true</code>
+      </para>
+      <para>
+        <figure float="0">
+            <title>TODO InformalFigure image title empty</title>
+            <mediaobject>
+               <imageobject>
+                  <imagedata fileref="author/download/attachments/5931386/MonitorOverview.png"/>
+               </imageobject>
+            </mediaobject>
+         </figure>
+      </para>
+      <para>The monitor provides you a real-time perspective on what's going on inside the bus. The left side of the main screen lists the services that are currently available, and the right side is the service-explorer, which will show details about the service.</para>
+      <para>To see what's going on with a specific service, simply double-click on the service or highlight the service, then click "Monitor Service...". This will bring up the service activity monitor.</para>
+      <para>
+        <figure float="0">
+            <title>TODO InformalFigure image title empty</title>
+            <mediaobject>
+               <imageobject>
+                  <imagedata fileref="author/download/attachments/5931386/MonitorOverview2.png"/>
+               </imageobject>
+            </mediaobject>
+         </figure>
+      </para>
+      <para>The service activity monitor will display a list of all the messages that were transmitted on the bus since the monitor became active. You do not need to actually have each specific monitor window open in order to actively monitor the bus activity. All activity on the bus is recorded.</para>
+      <para>The monitor allows you select individual messages, an view their individual parts. Clicking on a message part will bring up the object inspector, which will allow you to explore the state of any objects contained within the message, not unlike the object inspectors provided by debuggers in your favorite IDE. This can be a powerful tool for looking under the covers of your application.</para>
    </section>
 </chapter>

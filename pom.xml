@@ -1391,8 +1391,7 @@
     <profile>
       <id>distro</id>
       <modules>
-        <module>reference</module>
-        <module>quickstart</module>
+        <module>reference</module>        
         <module>dist</module>
       </modules>
       <repositories>

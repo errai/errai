@@ -1175,13 +1175,6 @@ public class NavBar extends Composite {
     });
 </programlisting>
       </informalexample>
-      <important>
-         <para>
-          Note: Currently when pages are
-          <code>ApplicationScoped</code>
-          switching the language after initial load is not working
-        </para>
-      </important>
    </section>
    <section id="sid-51806600_ErraiUI-ExtendedstylingwithLESS">
       <title>Extended styling with LESS</title>
