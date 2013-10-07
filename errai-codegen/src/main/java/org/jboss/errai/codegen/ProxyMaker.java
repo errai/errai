@@ -48,6 +48,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 
@@ -250,14 +251,7 @@ public class ProxyMaker {
       BlockBuilder<StatementEnd> elseBody = ifBody.finish().else_();
       // Must return in else body if method is not void
       if (!method.getReturnType().isVoid()) {
-        Statement retVal;
-        if (method.getReturnType().isPrimitive() || method.getReturnType().isPrimitiveWrapper()) {
-          retVal = getDefaultValue(method.getReturnType());
-        } else {
-          retVal = Stmt.loadLiteral(null).returnValue();
-        }
-        
-        elseBody.append(retVal);
+        elseBody.append(ProxyUtil.generateProxyMethodReturnStatement(method));
       }
       
       methBody.append(elseBody.finish());
@@ -301,32 +295,6 @@ public class ProxyMaker {
         .finish();
 
     return builder.getClassDefinition();
-  }
-
-  private static Statement getDefaultValue(MetaClass returnType) {
-    MetaClass boxed = returnType.asBoxed();
-    
-    if (boxed.isAssignableTo(Byte.class)
-            || boxed.isAssignableTo(Short.class)
-            || boxed.isAssignableTo(Integer.class)
-            || boxed.isAssignableTo(Long.class)) {
-      return Stmt.loadLiteral(0).returnValue();
-    }
-    else if (boxed.isAssignableTo(Float.class)) {
-      return Stmt.loadLiteral(0.0f).returnValue();
-    }
-    else if (boxed.isAssignableTo(Double.class)) {
-      return Stmt.loadLiteral(0.0).returnValue();
-    }
-    else if (boxed.isAssignableTo(Boolean.class)) {
-      return Stmt.loadLiteral(false).returnValue();
-    }
-    else if (boxed.isAssignableTo(Character.class)) {
-      return Stmt.loadLiteral('\u0000').returnValue();
-    }
-    else {
-      throw new RuntimeException("unrecognized primitive type for proxied-method return type: " + returnType.getFullyQualifiedName());
-    }
   }
 
   private Collection<Statement> getWeavingStatements(final MetaMethod method, final WeaveType type) {

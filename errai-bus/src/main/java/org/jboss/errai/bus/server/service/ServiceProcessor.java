@@ -39,6 +39,7 @@ import org.jboss.errai.bus.server.util.NotAService;
 import org.jboss.errai.bus.server.util.ServiceMethodParser;
 import org.jboss.errai.bus.server.util.ServiceParser;
 import org.jboss.errai.bus.server.util.ServiceTypeParser;
+import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
@@ -46,7 +47,6 @@ import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.common.metadata.MetaDataProcessor;
 import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.config.rebind.ProxyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

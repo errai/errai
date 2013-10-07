@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config.rebind;
+package org.jboss.errai.codegen.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -31,9 +31,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.util.Bool;
-import org.jboss.errai.codegen.util.If;
-import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
