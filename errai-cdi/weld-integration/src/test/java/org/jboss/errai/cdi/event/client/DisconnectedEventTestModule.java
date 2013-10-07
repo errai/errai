@@ -19,7 +19,7 @@ import org.jboss.errai.cdi.client.qualifier.B;
  * @author Mike Brock
  */
 @ApplicationScoped
-public class LocalEventTestModule {
+public class DisconnectedEventTestModule {
   @Inject private Event<LocalEventA> localEventAEvent;
   @Inject private Event<DataBoundEvent> dataBoundEvent;
   @Inject @A private Event<LocalEventA> localEventAEventQualifiers;

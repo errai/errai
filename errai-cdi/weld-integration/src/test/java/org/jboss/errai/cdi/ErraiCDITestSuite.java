@@ -4,7 +4,7 @@ import org.jboss.errai.cdi.event.client.test.EventAdvertisingIntegrationTest;
 import org.jboss.errai.cdi.event.client.test.EventObserverIntegrationTest;
 import org.jboss.errai.cdi.event.client.test.EventProducerIntegrationTest;
 import org.jboss.errai.cdi.event.client.test.EventRoutingIntegrationTest;
-import org.jboss.errai.cdi.event.client.test.LocalEventIntegrationTest;
+import org.jboss.errai.cdi.event.client.test.DisconnectedEventIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.BeanManagerIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.CyclicDepsIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.DependentScopeIntegrationTest;
@@ -35,7 +35,7 @@ import org.junit.runners.Suite;
     ExperimentalDependentScopeTest.class,
     SpecializationIntegrationTest.class,
     StereotypesIntegrationTest.class,
-    LocalEventIntegrationTest.class,
+    DisconnectedEventIntegrationTest.class,
     EventObserverIntegrationTest.class,
     EventProducerIntegrationTest.class,
     EventRoutingIntegrationTest.class,

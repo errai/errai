@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jboss.errai.cdi.client.event.DataBoundEvent;
 import org.jboss.errai.cdi.client.event.LocalEventA;
-import org.jboss.errai.cdi.event.client.LocalEventTestModule;
+import org.jboss.errai.cdi.event.client.DisconnectedEventTestModule;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -14,7 +14,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 /**
  * @author Mike Brock
  */
-public class LocalEventIntegrationTest extends AbstractErraiCDITest {
+public class DisconnectedEventIntegrationTest extends AbstractErraiCDITest {
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.event.LocalEventTestModule";
@@ -40,8 +40,8 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
-        final LocalEventTestModule testModule
-            = IOC.getBeanManager().lookupBean(LocalEventTestModule.class).getInstance();
+        final DisconnectedEventTestModule testModule
+            = IOC.getBeanManager().lookupBean(DisconnectedEventTestModule.class).getInstance();
 
         final String testText = "NOQUAL";
         final String qualText = "QUAL";
@@ -78,8 +78,8 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
-        final LocalEventTestModule module
-            = IOC.getBeanManager().lookupBean(LocalEventTestModule.class).getInstance();
+        final DisconnectedEventTestModule module
+            = IOC.getBeanManager().lookupBean(DisconnectedEventTestModule.class).getInstance();
 
         DataBoundEvent dbe = DataBinder.forModel(new DataBoundEvent()).getModel();
         dbe.setValue("testValue");
