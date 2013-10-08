@@ -37,7 +37,7 @@ public class BigIntegerIdGenerator<X> implements ErraiIdGenerator<BigInteger> {
   @Override
   public BigInteger next(ErraiEntityManager entityManager) {
     BigInteger nextAvailableId = nextCandidateId;
-    while (entityManager.backendContains(new Key<X, BigInteger>((ErraiIdentifiableType<X>) attr.getDeclaringType(), nextAvailableId))) {
+    while (entityManager.isKeyInUse(new Key<X, BigInteger>((ErraiIdentifiableType<X>) attr.getDeclaringType(), nextAvailableId))) {
       nextAvailableId = nextAvailableId.add(new BigInteger(String.valueOf(Math.random() * probeJumpSize)));
     }
     nextCandidateId = nextAvailableId.add(BigInteger.ONE);

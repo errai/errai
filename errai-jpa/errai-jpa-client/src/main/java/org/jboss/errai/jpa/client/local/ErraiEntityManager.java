@@ -531,19 +531,31 @@ public class ErraiEntityManager implements EntityManager {
   }
 
   /**
-   * Tests if this entity manager's storage backend contains an entity with the
-   * given key. This method is free of side effects: it will not affect the
-   * contents of the persistence context, and it will not affect the persistence
-   * state of any entity (hence it will not deliver any events to JPA lifecycle
-   * listeners).
+   * Tests if this entity manager's storage backend contains an entity that
+   * could conflict with the given key. This method is free of side effects: it
+   * will not affect the contents of the persistence context, and it will not
+   * affect the persistence state of any entity (hence it will not deliver any
+   * events to JPA lifecycle listeners).
    *
    * @param key
    *          The key to test for in backend storage. Not null.
    * @return true if and only if this entity manager's storage backend contains
    *         an entity with the given key.
    */
-  public boolean backendContains(Key<?, ?> key) {
-    return backend.contains(key);
+  public boolean isKeyInUse(Key<?, ?> key) {
+
+    // search up the supertype chain for the most generic entity type reachable from the type given in the key
+    ErraiManagedType<?> superManagedType = key.getEntityType();
+    Class<?> javaType = key.getEntityType().getJavaType().getSuperclass();
+    while (javaType != null) {
+      ErraiManagedType<?> mt = metamodel.entity(javaType.getName(), false);
+      if (mt != null) {
+        superManagedType = mt;
+      }
+      javaType = javaType.getSuperclass();
+    }
+    Key<?, ?> mostGenericKey = new Key<Object, Object>((ErraiManagedType<Object>) superManagedType, key.getId());
+    return backend.contains(mostGenericKey);
   }
 
   // -------------- Actual JPA API below this line -------------------

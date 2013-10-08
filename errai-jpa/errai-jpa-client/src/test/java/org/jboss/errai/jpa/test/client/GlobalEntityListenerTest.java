@@ -220,7 +220,7 @@ public class GlobalEntityListenerTest extends GWTTestCase {
     TestingGlobalEntityListener.CALLBACK_LOG.clear();
 
     ErraiEntityManager eem = (ErraiEntityManager) em;
-    assertTrue(eem.backendContains(eem.keyFor(album)));
+    assertTrue(eem.isKeyInUse(eem.keyFor(album)));
 
     // Finally, ensure there were no events fired as a result of the probe
     // (originally, we were getting a PostLoad for artist, because it was being cascade-fetched from album)

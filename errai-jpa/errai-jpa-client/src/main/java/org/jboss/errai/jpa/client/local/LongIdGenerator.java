@@ -36,7 +36,7 @@ public class LongIdGenerator<X> implements ErraiIdGenerator<Long> {
 
   @Override
   public Long next(ErraiEntityManager entityManager) {
-    while (entityManager.backendContains(new Key<X, Long>((ErraiIdentifiableType<X>) attr.getDeclaringType(), nextCandidateId))) {
+    while (entityManager.isKeyInUse(new Key<X, Long>((ErraiIdentifiableType<X>) attr.getDeclaringType(), nextCandidateId))) {
       nextCandidateId += (long) (Math.random() * probeJumpSize);
 
       // control rollover in case we run out of values

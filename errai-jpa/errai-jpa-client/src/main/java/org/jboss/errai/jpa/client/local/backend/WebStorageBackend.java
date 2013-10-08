@@ -151,10 +151,15 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
-  public boolean contains(Key<?, ?> key) {
-    String keyJson = namespace + key.toJson();
-    boolean contains = LocalStorage.get(keyJson) != null;
-    System.out.println("<<<contains '" + keyJson + "' : " + contains);
+  public <X, Y> boolean contains(Key<X, Y> key) {
+    boolean contains = false;
+    for (ErraiManagedType<X> type : key.getEntityType().getSubtypes()) {
+      Key<?, ?> k = new Key<X, Y>(type, key.getId());
+      String keyJson = namespace + k.toJson();
+      contains = LocalStorage.get(keyJson) != null;
+      System.out.println("<<<contains '" + keyJson + "' : " + contains);
+      if (contains) break;
+    }
     return contains;
   }
 

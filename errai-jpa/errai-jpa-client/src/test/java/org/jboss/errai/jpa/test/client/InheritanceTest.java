@@ -15,6 +15,8 @@ import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfAbstractParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfConcreteParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.GrandchildOfConcreteParentEntity;
+import org.jboss.errai.jpa.test.entity.inherit.IdTestingEntity1;
+import org.jboss.errai.jpa.test.entity.inherit.IdTestingEntity2;
 import org.jboss.errai.jpa.test.entity.inherit.ParentAbstractEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ParentConcreteEntity;
 
@@ -250,6 +252,20 @@ public class InheritanceTest extends GWTTestCase {
 
     assertEquals(1, resultList.size());
     assertTrue(resultList.contains(cc));
+  }
+
+  public void testIdGenerationIsUniqueWithinInheritanceGroup() throws Exception {
+    EntityManager em = getEntityManager();
+
+    // IdTestingEntity1 and IdTestingEntity2 share a common superclass entity. their ids must not overlap.
+    IdTestingEntity1 idte1 = new IdTestingEntity1();
+    IdTestingEntity2 idte2 = new IdTestingEntity2();
+
+    em.persist(idte1);
+    em.persist(idte2);
+    em.flush();
+
+    assertFalse(idte1.getId() == idte2.getId());
   }
 
 }
