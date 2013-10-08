@@ -6,7 +6,8 @@ import java.util.List;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
+import org.jboss.errai.jpa.client.local.ErraiManagedType;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.Key;
 
@@ -88,7 +89,7 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public <X> void put(Key<X,?> key, X value) {
-    ErraiEntityType<X> entityType = key.getEntityType();
+    ErraiManagedType<X> entityType = key.getEntityType();
     String keyJson = namespace + key.toJson();
     JSONValue valueJson = entityType.toJson(em, value);
     System.out.println(">>>put '" + keyJson + "'");
@@ -96,24 +97,24 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
-  public <X> X get(Key<X, ?> key) {
-    ErraiEntityType<X> entityType = key.getEntityType();
-    String keyJson = namespace + key.toJson();
-    String valueJson = LocalStorage.get(keyJson);
-    System.out.println("<<<get '" + keyJson + "' : " + valueJson);
-    X entity;
-    if (valueJson == null) {
-      entity = null;
+  public <X> X get(Key<X, ?> requestedKey) {
+    for (ErraiManagedType<? extends X> entityType : requestedKey.getEntityType().getSubtypes()) {
+      Key<X, ?> key = new Key<X, Object>((ErraiManagedType<X>) entityType, (Object) requestedKey.getId());
+      String keyJson = namespace + key.toJson();
+      String valueJson = LocalStorage.get(keyJson);
+      System.out.println("<<<get '" + keyJson + "' : " + valueJson);
+      X entity;
+      if (valueJson != null) {
+        entity = entityType.fromJson(em, JSONParser.parseStrict(valueJson));
+        System.out.println("   returning " + entity);
+        return entity;
+      }
     }
-    else {
-      entity = entityType.fromJson(em, JSONParser.parseStrict(valueJson));
-    }
-    System.out.println("   returning " + entity);
-    return entity;
+    return null;
   }
 
   @Override
-  public <X> List<X> getAll(final ErraiEntityType<X> type, final EntityJsonMatcher matcher) {
+  public <X> List<X> getAll(final ErraiIdentifiableType<X> type, final EntityJsonMatcher matcher) {
     // TODO index entries by entity type
 
     final List<X> entities = new ArrayList<X>();
@@ -123,7 +124,7 @@ public class WebStorageBackend implements StorageBackend {
         Key<?, ?> k = parseNamespacedKey(em, key, false);
         if (k == null) return;
         System.out.println("getAll(): considering " + value);
-        if (k.getEntityType() == type) {
+        if (type.isSuperclassOf(k.getEntityType())) {
           System.out.println(" --> correct type");
           JSONObject candidate = JSONParser.parseStrict(value).isObject();
           Assert.notNull(candidate);
@@ -135,7 +136,7 @@ public class WebStorageBackend implements StorageBackend {
             // creating the key, doing a backend.get(), parsing the JSON value, ...)
             // it would be nice to avoid this, but we have to go back to the entity manager in case the
             // thing we want is in the persistence context.
-            entities.add(em.find(type.getJavaType(), typedKey.getId()));
+            entities.add((X) em.find(k.getEntityType().getJavaType(), typedKey.getId()));
           }
           else {
             System.out.println(" --> but not a match");
@@ -150,10 +151,15 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
-  public boolean contains(Key<?, ?> key) {
-    String keyJson = namespace + key.toJson();
-    boolean contains = LocalStorage.get(keyJson) != null;
-    System.out.println("<<<contains '" + keyJson + "' : " + contains);
+  public <X, Y> boolean contains(Key<X, Y> key) {
+    boolean contains = false;
+    for (ErraiManagedType<X> type : key.getEntityType().getSubtypes()) {
+      Key<?, ?> k = new Key<X, Y>(type, key.getId());
+      String keyJson = namespace + k.toJson();
+      contains = LocalStorage.get(keyJson) != null;
+      System.out.println("<<<contains '" + keyJson + "' : " + contains);
+      if (contains) break;
+    }
     return contains;
   }
 
@@ -165,7 +171,7 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public <X> boolean isModified(Key<X, ?> key, X value) {
-    ErraiEntityType<X> entityType = key.getEntityType();
+    ErraiManagedType<X> entityType = key.getEntityType();
     String keyJson = namespace + key.toJson();
     JSONValue newValueJson = entityType.toJson(em, value);
     JSONValue oldValueJson = JSONParser.parseStrict(LocalStorage.get(keyJson));

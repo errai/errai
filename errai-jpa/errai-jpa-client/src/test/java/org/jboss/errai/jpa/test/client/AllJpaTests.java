@@ -31,6 +31,8 @@ import org.junit.runners.Suite;
   HibernateJpaTest.class,
   QueryTest.class,
   HibernateQueryTest.class,
+  InheritanceTest.class,
+  HibernateInheritanceTest.class,
   GlobalEntityListenerTest.class,
   IdGeneratorTest.class,
   ErraiCascadeTest.class,

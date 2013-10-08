@@ -86,6 +86,7 @@ import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityManagerFactory;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
@@ -229,7 +230,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       globalEntityListeners.add(MetaClassFactory.get(globalListener));
     }
 
-    for (final EntityType<?> et : mm.getEntities()) {
+    final Set<Class<?>> entityTypes = new HashSet<Class<?>>();
+    for (final ManagedType<?> mt : ClassSorter.supertypesFirst(mm.getEntities())) {
+      EntityType<?> et = (EntityType<?>) mt;
+      entityTypes.add(mt.getJavaType());
 
       // first, create a variable for the EntityType
       String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners);
@@ -248,6 +252,15 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
             attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
         cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
+      }
+
+      // register this entity type with all its supertypes which are also entities
+      Class<?> superclass = mt.getJavaType();
+      while (superclass != null) {
+        if (entityTypes.contains(superclass)) {
+          cmm.append(Stmt.loadVariable(entitySnapshotVarName(superclass)).invoke("addSubtype", Stmt.loadVariable(entityTypeVarName)));
+        }
+        superclass = superclass.getSuperclass();
       }
 
       // XXX using StringStatement because this gives OutOfScopeException for metamodel:
@@ -291,9 +304,11 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
             .extend();
 
-    entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
-        .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
-        .finish();
+    if (!java.lang.reflect.Modifier.isAbstract(et.getJavaType().getModifiers())) {
+      entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
+          .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
+          .finish();
+    }
 
     generateLifecycleEventDeliveryMethods(met, entityTypeSubclass, globalListeners);
 
@@ -310,7 +325,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
    *          The metaclass representing the entity type.
    * @param classBuilder
    *     The target builder to receive the generated methods. For the generated code to be
-   *     valid, this should be a builder of a subclass of {@link ErraiEntityType}.
+   *     valid, this should be a builder of a subclass of {@link ErraiIdentifiableType}.
    * @param globalEntityListeners
    *          A list of the global entity listeners
    */
@@ -486,10 +501,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     public Statement generateMethodBody(MetaMethod method, Object sourceObject,
                                         ClassStructureBuilder<?> containingClassBuilder) {
       // provide reference to declaring type (et) from its attributes
-      if (sourceObject instanceof Attribute
-          && method.getName().equals("getDeclaringType")
-          && ((Attribute<?, ?>) sourceObject).getDeclaringType() == et) {
-        return Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue();
+      // note this is never a forward reference: the entity types are sorted to put supertypes before their subtypes
+      if (sourceObject instanceof Attribute && method.getName().equals("getDeclaringType")) {
+        Class<?> declaringType = ((Attribute<?, ?>) sourceObject).getDeclaringType().getJavaType();
+        return Stmt.loadVariable(entitySnapshotVarName(declaringType)).returnValue();
       }
 
       // provide get method
@@ -534,6 +549,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
       if (sourceObject instanceof PluralAttribute && method.getName().equals("createEmptyCollection")) {
         return generateCreateEmptyCollectionMethod(sourceObject);
+      }
+
+      if (sourceObject instanceof ManagedType && method.getParameters().length > 0) {
+        return new StringStatement("throw new RuntimeException(\"Not implemented\")");
       }
 
       // allow SnapshotMaker default (read value and create snapshot)

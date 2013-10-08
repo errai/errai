@@ -35,7 +35,17 @@ public class UndefinedConstructorException extends GenerationException {
     super(msg);
   }
 
+  public UndefinedConstructorException(String msg, Throwable cause) {
+    super(msg, cause);
+  }
+
   public UndefinedConstructorException(MetaClass type, MetaClass... parameterTypes) {
+    this.type = type;
+    this.parameterTypes = parameterTypes;
+  }
+
+  public UndefinedConstructorException(MetaClass type, Throwable cause, MetaClass... parameterTypes) {
+    super(cause);
     this.type = type;
     this.parameterTypes = parameterTypes;
   }

@@ -36,8 +36,8 @@ public abstract class TypedQueryFactory {
    *
    * @param resultType
    *          The expected result type
-   * @param the
-   *          EntityManager the query will be executed in. Must not be null.
+   * @param entityManager
+   *          the EntityManager the query will be executed in. Must not be null.
    * @param <T>
    *          The result type of the queries produced by this factory
    * @return A new instance of TypedQuery, whose result type is assignable to
@@ -46,11 +46,14 @@ public abstract class TypedQueryFactory {
    *           if the query's result type is not assignable to the given type.
    */
   public <T> TypedQuery<T> createIfCompatible(Class<T> resultType, ErraiEntityManager entityManager) {
-    // FIXME this test for exact type should be replaced by a more correct assignability test once we figure out how :)
-    if (resultType != actualResultType) {
-      throw new IllegalArgumentException("Expected return type " + resultType + " is not assignable from actual return type " + actualResultType);
+    Class<?> resultSupertype = actualResultType;
+    while (resultSupertype != null) {
+      if (resultType == resultSupertype) {
+        return createQuery(entityManager);
+      }
+      resultSupertype = resultSupertype.getSuperclass();
     }
-    return createQuery(entityManager);
+    throw new IllegalArgumentException("Expected return type " + resultType + " is not assignable from actual return type " + actualResultType);
   }
 
   /**

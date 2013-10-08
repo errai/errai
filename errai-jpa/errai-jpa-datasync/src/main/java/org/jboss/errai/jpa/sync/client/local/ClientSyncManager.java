@@ -15,7 +15,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
 import org.jboss.errai.jpa.client.local.Key;
@@ -266,7 +266,7 @@ public class ClientSyncManager {
         newEntity = expectedStateEm.merge(newEntity);
 
         @SuppressWarnings("unchecked")
-        ErraiEntityType<E> entityType = desiredStateEm.getMetamodel().entity((Class<E>) newEntity.getClass());
+        ErraiIdentifiableType<E> entityType = desiredStateEm.getMetamodel().entity((Class<E>) newEntity.getClass());
         ErraiSingularAttribute<? super E, Object> idAttr = entityType.getId(Object.class);
         changeId(entityType, icr.getOldId(), idAttr.get(newEntity));
         desiredStateEm.merge(newEntity);
@@ -281,7 +281,7 @@ public class ClientSyncManager {
         Key<E, ?> conflictingKey = desiredStateEm.keyFor(nrer.getEntity());
         E inTheWay = desiredStateEm.find(conflictingKey, Collections.<String,Object>emptyMap());
         if (inTheWay != null) {
-          ErraiEntityType<E> entityType = desiredStateEm.getMetamodel().entity(entityClass);
+          ErraiIdentifiableType<E> entityType = desiredStateEm.getMetamodel().entity(entityClass);
           ErraiSingularAttribute<? super E, Object> idAttr = entityType.getId(Object.class);
           ErraiIdGenerator<Object> idGenerator = idAttr.getValueGenerator();
           if (idGenerator != null && idGenerator.hasNext(desiredStateEm)) {
@@ -318,7 +318,7 @@ public class ClientSyncManager {
    * @param oldId The ID that the entity currently has.
    * @param newId The ID that the entity will have when this method returns.
    */
-  private <E> void changeId(ErraiEntityType<E> entityType, Object oldId, Object newId) {
+  private <E> void changeId(ErraiIdentifiableType<E> entityType, Object oldId, Object newId) {
     // XXX this routine is probably better handled internally by the ErraiEntityManager
     // TODO what about related entities that refer to this one? (needs tests)
 

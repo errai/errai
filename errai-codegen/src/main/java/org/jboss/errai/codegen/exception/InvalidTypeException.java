@@ -26,11 +26,15 @@ public class InvalidTypeException extends GenerationException {
     super();
   }
 
-  public InvalidTypeException(Throwable t) {
-    super(t);
+  public InvalidTypeException(Throwable cause) {
+    super(cause);
   }
 
   public InvalidTypeException(String msg) {
     super(msg);
+  }
+
+  public InvalidTypeException(String msg, Throwable cause) {
+    super(msg, cause);
   }
 }

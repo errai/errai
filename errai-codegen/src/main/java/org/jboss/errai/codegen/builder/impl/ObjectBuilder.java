@@ -49,6 +49,8 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   private Statement extendsBlock;
 
+  private final RuntimeException blame = new RuntimeException("Problem was caused by this call");
+
   ObjectBuilder(final MetaClass type, final Context context, final CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
 
@@ -145,7 +147,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
         @Override
         public void doDeferred(final CallWriter writer, final Context context, final Statement statement) {
           if (extendsBlock == null && (type.isAbstract() || type.isInterface() || type.isPrimitive()))
-            throw new InvalidTypeException("Cannot instantiate type:" + type);
+            throw new InvalidTypeException("Cannot instantiate type:" + type, blame);
 
           writer.reset();
 
@@ -157,7 +159,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
               // fall-through
             }
             else {
-              throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
+              throw new UndefinedConstructorException(type, blame, callParameters.getParameterTypes());
             }
           }
 

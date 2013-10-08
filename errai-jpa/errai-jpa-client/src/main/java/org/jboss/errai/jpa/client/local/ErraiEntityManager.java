@@ -48,9 +48,9 @@ public class ErraiEntityManager implements EntityManager {
   final ErraiMetamodel metamodel;
 
   /**
-   * All persistent instances known to this entity manager.
+   * Container for all the live objects managed by this entity manager.
    */
-  final Map<Key<?, ?>, Object> persistenceContext = new HashMap<Key<?, ?>, Object>();
+  final PersistenceContext persistenceContext;
 
   /**
    * All removed instances known to this entity manager.
@@ -86,6 +86,7 @@ public class ErraiEntityManager implements EntityManager {
           StorageBackendFactory storageBackendFactory) {
     this.metamodel = Assert.notNull(metamodel);
     this.namedQueries = Assert.notNull(namedQueries);
+    this.persistenceContext = new PersistenceContext(metamodel);
 
     // Caution: we're handing out a reference to this partially constructed instance!
     this.backend = storageBackendFactory.createInstanceFor(this);
@@ -169,7 +170,7 @@ public class ErraiEntityManager implements EntityManager {
    * required side effects during the state transition.
    */
   private <X> X applyCascadingOperation(X entity, CascadeType newState) {
-    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    ErraiIdentifiableType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
 
     final Key<X, ?> key = keyFor(entityType, entity);
     final EntityState oldState = getState(key, entity);
@@ -294,7 +295,7 @@ public class ErraiEntityManager implements EntityManager {
    * be generated on demand</b>. This version of the {@code keyFor()} method
    * assumes the given object's entity type can be obtained by calling {@code
    * entity.getClass()}. If you already have a specific entity type in mind, use
-   * the {@link #keyFor(ErraiEntityType, Object)} version of the method.
+   * the {@link #keyFor(ErraiIdentifiableType, Object)} version of the method.
    *
    * @param entityType
    *          The entity type of the entity
@@ -305,7 +306,7 @@ public class ErraiEntityManager implements EntityManager {
    *         just been set on the entity.
    */
   public <X> Key<X, ?> keyFor(X entity) {
-    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    ErraiIdentifiableType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
     return keyFor(entityType, entity);
   }
 
@@ -322,7 +323,7 @@ public class ErraiEntityManager implements EntityManager {
    * @return The key for the given entity, which--for generated values--may have
    *         just been set on the entity.
    */
-  public <X> Key<X, ?> keyFor(ErraiEntityType<X> entityType, X entity) {
+  public <X> Key<X, ?> keyFor(ErraiIdentifiableType<X> entityType, X entity) {
     ErraiSingularAttribute<? super X, ?> idAttr;
     switch (entityType.getIdType().getPersistenceType()) {
     case BASIC:
@@ -471,7 +472,7 @@ public class ErraiEntityManager implements EntityManager {
    *           became managed).
    */
   private <X> void updateInBackend(Key<X, ?> key, X entity) {
-    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    ErraiIdentifiableType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
     if (backend.isModified(key, entity)) {
       Object currentId = entityType.getId(Object.class).get(entity);
       if (!key.getId().equals(currentId)) {
@@ -525,24 +526,36 @@ public class ErraiEntityManager implements EntityManager {
   /**
    * EXPERIMENTAL. This method is very unlikely to survive in the long run.
    */
-  public <X> List<X> findAll(ErraiEntityType<X> type, EntityJsonMatcher matcher) {
+  public <X> List<X> findAll(ErraiIdentifiableType<X> type, EntityJsonMatcher matcher) {
     return backend.getAll(type, matcher);
   }
 
   /**
-   * Tests if this entity manager's storage backend contains an entity with the
-   * given key. This method is free of side effects: it will not affect the
-   * contents of the persistence context, and it will not affect the persistence
-   * state of any entity (hence it will not deliver any events to JPA lifecycle
-   * listeners).
+   * Tests if this entity manager's storage backend contains an entity that
+   * could conflict with the given key. This method is free of side effects: it
+   * will not affect the contents of the persistence context, and it will not
+   * affect the persistence state of any entity (hence it will not deliver any
+   * events to JPA lifecycle listeners).
    *
    * @param key
    *          The key to test for in backend storage. Not null.
    * @return true if and only if this entity manager's storage backend contains
    *         an entity with the given key.
    */
-  public boolean backendContains(Key<?, ?> key) {
-    return backend.contains(key);
+  public boolean isKeyInUse(Key<?, ?> key) {
+
+    // search up the supertype chain for the most generic entity type reachable from the type given in the key
+    ErraiManagedType<?> superManagedType = key.getEntityType();
+    Class<?> javaType = key.getEntityType().getJavaType().getSuperclass();
+    while (javaType != null) {
+      ErraiManagedType<?> mt = metamodel.entity(javaType.getName(), false);
+      if (mt != null) {
+        superManagedType = mt;
+      }
+      javaType = javaType.getSuperclass();
+    }
+    Key<?, ?> mostGenericKey = new Key<Object, Object>((ErraiManagedType<Object>) superManagedType, key.getId());
+    return backend.contains(mostGenericKey);
   }
 
   // -------------- Actual JPA API below this line -------------------
@@ -609,9 +622,7 @@ public class ErraiEntityManager implements EntityManager {
       entity = backend.get(key);
       if (entity != null) {
         persistenceContext.put(key, entity);
-
-        // XXX when persistenceContext gets its own class, this should go on the ultimate ingress point
-        getMetamodel().entity(key.getEntityType().getJavaType()).deliverPostLoad(entity);
+        ((ErraiIdentifiableType<X>) key.getEntityType()).deliverPostLoad(entity);
       }
     }
     return entity;

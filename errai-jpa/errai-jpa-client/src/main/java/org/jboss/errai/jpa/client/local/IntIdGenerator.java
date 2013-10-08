@@ -36,7 +36,7 @@ public class IntIdGenerator<X> implements ErraiIdGenerator<Integer> {
 
   @Override
   public Integer next(ErraiEntityManager entityManager) {
-    while (entityManager.backendContains(new Key<X, Integer>((ErraiEntityType<X>) attr.getDeclaringType(), nextCandidateId))) {
+    while (entityManager.isKeyInUse(new Key<X, Integer>((ErraiIdentifiableType<X>) attr.getDeclaringType(), nextCandidateId))) {
       nextCandidateId += (int) (Math.random() * probeJumpSize);
 
       // control rollover in case we run out of values

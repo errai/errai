@@ -19,7 +19,7 @@ import com.google.gwt.json.client.JSONValue;
  */
 public class Key<X, T> {
 
-  private final ErraiEntityType<X> entityType;
+  private final ErraiManagedType<X> entityType;
   private final T id;
 
   /**
@@ -31,7 +31,7 @@ public class Key<X, T> {
    * @param id The ID of the entity. Must not be null.
    * @throws NullPointerException if either argument is null.
    */
-  public Key(ErraiEntityType<X> entityType, T id) {
+  public Key(ErraiManagedType<X> entityType, T id) {
     this.entityType = Assert.notNull(entityType);
     this.id = Assert.notNull(id);
   }
@@ -53,16 +53,16 @@ public class Key<X, T> {
    *           if {@code entityClass} is not a known JPA entity type.
    */
   public static <X, T> Key<X, T> get(ErraiEntityManager em, Class<X> entityClass, T id) {
-    ErraiEntityType<X> entityType = em.getMetamodel().entity(entityClass);
+    ErraiIdentifiableType<X> entityType = em.getMetamodel().entity(entityClass);
     return new Key<X, T>(entityType, id);
   }
 
   /**
-   * Returns the entity type for this key.
+   * Returns the managed type this key refers to.
    *
    * @return the entity type of the key. Never null.
    */
-  public ErraiEntityType<X> getEntityType() {
+  public ErraiManagedType<X> getEntityType() {
     return entityType;
   }
 
@@ -182,7 +182,7 @@ public class Key<X, T> {
    */
   public static Key<?, ?> fromJsonObject(ErraiEntityManager em, JSONObject key, boolean failIfNotFound) {
     String entityClassName = key.get("entityType").isString().stringValue();
-    ErraiEntityType<Object> et = em.getMetamodel().entity(entityClassName, failIfNotFound);
+    ErraiIdentifiableType<Object> et = em.getMetamodel().entity(entityClassName, failIfNotFound);
     if (et == null) {
       return null;
     }

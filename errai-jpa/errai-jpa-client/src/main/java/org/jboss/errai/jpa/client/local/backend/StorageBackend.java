@@ -3,7 +3,7 @@ package org.jboss.errai.jpa.client.local.backend;
 import java.util.List;
 
 import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.Key;
 
 /**
@@ -45,7 +45,9 @@ public interface StorageBackend {
    * particular key, use {@link #contains(Key)}.
    *
    * @param key
-   *          The identity of the object to be retrieved. Null is not permitted.
+   *          The identity of the object to be retrieved. The actual entity
+   *          returned may be a subtype of the type specified in the key. Null
+   *          is not permitted.
    * @param <X>
    *          The entity's Java type
    * @return The retrieved object, reconstituted from its backend (serialized)
@@ -55,8 +57,8 @@ public interface StorageBackend {
   <X> X get(Key<X, ?> key);
 
   /**
-   * Returns all entities of the given type whose JSON representations are
-   * accepted by the given matcher.
+   * Returns all entities of the given type (and its subtypes) whose JSON
+   * representations are accepted by the given matcher.
    *
    * @param type
    *          The type of entities to retrieve
@@ -64,10 +66,13 @@ public interface StorageBackend {
    *          The matcher that decides which entity instances will be retrieved.
    * @return all matching entities of the given type.
    */
-  <X> List<X> getAll(ErraiEntityType<X> type, EntityJsonMatcher matcher);
+  <X> List<X> getAll(ErraiIdentifiableType<X> type, EntityJsonMatcher matcher);
 
   /**
-   * Tests if this backend contains data for the given key.
+   * Tests if this backend contains data for the given key. As with
+   * {@link #get(Key)}, subtypes are taken into account. If this backend
+   * contains an entity with the same ID as the given key and the same type or a
+   * subtype of the type specified in the key, this method will return true.
    *
    * @param key
    *          The identity of the object to be tested for. Null is not
@@ -75,7 +80,7 @@ public interface StorageBackend {
    * @return True if the backend contains the entity instance associated with
    *         the given key, and false otherwise.
    */
-  boolean contains(Key<?, ?> key);
+  <X, Y> boolean contains(Key<X, Y> key);
 
   /**
    * Removes the key and its associated value (if any) from this storage

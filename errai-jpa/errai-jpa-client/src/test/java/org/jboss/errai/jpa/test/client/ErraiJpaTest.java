@@ -65,7 +65,8 @@ public class ErraiJpaTest extends GWTTestCase {
     JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
     assertNotNull(testClient.entityManager);
-    return JpaTestClient.INSTANCE.entityManager;
+    ((ErraiEntityManager) testClient.entityManager).removeAll();
+    return testClient.entityManager;
   }
 
   @Override
