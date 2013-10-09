@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <authorgroup>
    <author>
+      <firstname>Max</firstname>
+      <surname>Barkley</surname>
+      <email>mbarkley@redhat.com</email>
+   </author>
+   <author>
       <firstname>Lincoln</firstname>
       <surname>Baxter III</surname>
       <email>lincolnbaxter@gmail.com</email>
@@ -39,5 +44,10 @@
       <firstname>Maciej</firstname>
       <surname>Swiderski</surname>
       <email>swiderski.maciej@gmail.com</email>
+   </author>
+   <author>
+      <firstname>Eric</firstname>
+      <surname>Wittmann</surname>
+      <email>eric.wittmann@redhat.com</email>
    </author>
 </authorgroup>

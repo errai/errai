@@ -20,9 +20,9 @@
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
                href="chapter-11-Errai_UI_Navigation.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-12-Configuration.xml"/>
+               href="chapter-12-Errai_Cordova_Mobile_Support_.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-13-Debugging_Errai_Applications.xml"/>
+               href="chapter-13-Configuration.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
                href="chapter-14-Troubleshooting_FAQ.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -33,7 +33,5 @@
                href="chapter-18-Reporting_problems.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
                href="chapter-19-Errai_License.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-20-Errai_Cordova.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="Revision_History.xml"/>
 </book>

@@ -402,11 +402,7 @@ public class Foo {
    </section>
    <section id="sid-5931501">
       <title>Deploying Errai CDI</title>
-      <para>
-        If you do not care about the deployment details for now and just want to get started take a look at the
-        <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5833096">Quickstart Guide</ulink>
-        .
-      </para>
+      <para>If you do not care about the deployment details for now and just want to get started take a look at the ERRAI:Quickstart Guide.</para>
       <para>The CDI integration is a plugin to the Errai core framework and represents a CDI portable extension. Which means it is discovered automatically by both Errai and the CDI container. In order to use it, you first need to understand the different runtime models involved when working GWT, Errai and CDI.</para>
       <para>
         Typically a GWT application lifecycle begins in
@@ -475,10 +471,6 @@ public class Foo {
 &lt;/web-app&gt;
 </programlisting>
             </informalexample>
-            <note>
-               <title>Errai-CDI maven archetype</title>
-               <para>Sounds terribly complicated, no? Don't worry we provide a maven archetype that takes care of all these setup steps and configuration details.</para>
-            </note>
          </section>
       </section>
       <section id="sid-5931501_DeployingErraiCDI-DeploymenttoaServletEngine">

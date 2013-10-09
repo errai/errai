@@ -35,7 +35,11 @@ public class MyRemoteServiceImpl implements MyRemoteService {
       annotation as described in Section 2.4. The presence of the remote interface tips Errai off as to what you want to do with the class.
     </para>
    <warning>
-      <para>Beginning with Errai 2.0.CR1, the default for automatic service discovery has changed in favour of CDI based applications, meaning RPC must be explicitly turned on. This can be done using an init-param in the servlet config of your web.xml:</para>
+      <para>
+        Beginning with Errai 2.0.CR1, the default for automatic service discovery has changed in favour of CDI based applications, meaning RPC service discovery must be explicitly turned on in case Errai CDI is not used (the
+        <code>weld-integration.jar</code>
+        is not on the classpath). This can be done using an init-param in the servlet config of your web.xml:
+      </para>
    </warning>
    <informalexample>
       <programlisting language="xml">&lt;servlet&gt;
