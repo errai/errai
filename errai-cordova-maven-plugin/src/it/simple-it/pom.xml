@@ -5,7 +5,7 @@
 
   <groupId>sample.plugin.it</groupId>
   <artifactId>simple-it</artifactId>
-  <version>@project.version@</version>
+  <version>5</version>
   <packaging>war</packaging>
 
   <description>A simple IT verifying the basic use case.</description>
