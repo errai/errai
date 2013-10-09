@@ -27,4 +27,9 @@ cp -R $PROJECT_DIR/android-windows/* /tmp/Project/platforms/android/cordova
 tar zcvf ../project-template.tar.gz .
 
 cd ..
-mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/content/repositories/snapshots/ -DrepositoryId=jboss-snapshots-repository -DgroupId=org.jboss.errai -DartifactId=errai-cordova-template -Dversion=$1 -Dpackaging=tar.gz
+if [[ "$1" == *SNAPSHOT* ]]
+then
+  mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/content/repositories/snapshots/ -DrepositoryId=jboss-snapshots-repository -DgroupId=org.jboss.errai -DartifactId=errai-cordova-template -Dversion=$1 -Dpackaging=tar.gz
+else
+  mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/content/repositories/releases/ -DrepositoryId=jboss-releases-repository -DgroupId=org.jboss.errai -DartifactId=errai-cordova-template -Dversion=$1 -Dpackaging=tar.gz
+fi
