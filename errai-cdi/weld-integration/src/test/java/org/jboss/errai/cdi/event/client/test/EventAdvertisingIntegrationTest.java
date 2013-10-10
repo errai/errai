@@ -7,6 +7,7 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.cdi.client.event.LocalEventA;
 import org.jboss.errai.cdi.client.event.MyEventImpl;
+import org.jboss.errai.cdi.event.client.shared.PortableLocalEventA;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -64,6 +65,27 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
 
     // this is the actual point of the test
     assertFalse("Local event should not have been advertised to the server", messageBeanTypeLog.contains(LocalEventA.class.getName()));
+
+    // this is an important safety check, because it would be too easy for the test to fake-pass if the implementation details change.
+    assertTrue("Portable event should have been advertised to the server", messageBeanTypeLog.contains(MyEventImpl.class.getName()));
+  }
+  
+  @Test
+  public void testPortableLocalEventNotInitiallyAdvertisedToServer() {
+    
+    // this is the actual point of the test
+    assertFalse("Local event should not have been advertised to the server", messageBeanTypeLog.contains(PortableLocalEventA.class.getName()));
+
+    // this is an important safety check, because it would be too easy for the test to fake-pass if the implementation details change.
+    assertTrue("Portable event should have been advertised to the server", messageBeanTypeLog.contains(MyEventImpl.class.getName()));
+  }
+  
+  @Test
+  public void testPortableLocalEventNotReadvertisedToServer() {
+    CDI.resendSubscriptionRequestForAllEventTypes();
+
+    // this is the actual point of the test
+    assertFalse("Local event should not have been advertised to the server", messageBeanTypeLog.contains(PortableLocalEventA.class.getName()));
 
     // this is an important safety check, because it would be too easy for the test to fake-pass if the implementation details change.
     assertTrue("Portable event should have been advertised to the server", messageBeanTypeLog.contains(MyEventImpl.class.getName()));
