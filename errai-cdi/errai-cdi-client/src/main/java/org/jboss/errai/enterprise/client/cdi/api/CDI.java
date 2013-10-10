@@ -55,6 +55,7 @@ public class CDI {
   private static boolean active = false;
 
   private static Map<String, List<AbstractCDIEventCallback<?>>> eventObservers = new HashMap<String, List<AbstractCDIEventCallback<?>>>();
+  private static Set<String> localObserverTypes = new HashSet<String>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
   private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<String, List<MessageFireDeferral>>();
 
@@ -83,6 +84,7 @@ public class CDI {
     active = false;
     fireOnSubscribe.clear();
     eventObservers.clear();
+    localObserverTypes.clear();
     lookupTable = Collections.emptyMap();
   }
 
@@ -152,10 +154,19 @@ public class CDI {
   }
 
   public static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback) {
+    return subscribeLocal(eventType, callback, true);
+  }
+
+  private static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback,
+          boolean isLocal) {
     if (!eventObservers.containsKey(eventType)) {
       eventObservers.put(eventType, new ArrayList<AbstractCDIEventCallback<?>>());
     }
     eventObservers.get(eventType).add(callback);
+    
+    if (isLocal) {
+      localObserverTypes.add(eventType);
+    }
 
     return new Subscription() {
       @Override
@@ -164,7 +175,6 @@ public class CDI {
       }
     };
   }
-
 
   public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
 
@@ -177,33 +187,35 @@ public class CDI {
           .noErrorHandling().sendNowWith(ErraiBus.get());
     }
 
-    return subscribeLocal(eventType, callback);
+    return subscribeLocal(eventType, callback, false);
   }
 
   private static void unsubscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
     if (eventObservers.containsKey(eventType)) {
       eventObservers.get(eventType).remove(callback);
       
-      boolean shouldUnsubscribe = true;
-      for (AbstractCDIEventCallback<?> cb : eventObservers.get(eventType)) {
-        if (cb.getQualifiers().equals(callback.getQualifiers())) {
-          // found another matching observer -> do not unsubscribe
-          shouldUnsubscribe = false;
-          break;
+      if (!localObserverTypes.contains(eventType)) {
+        boolean shouldUnsubscribe = true;
+        for (AbstractCDIEventCallback<?> cb : eventObservers.get(eventType)) {
+          if (cb.getQualifiers().equals(callback.getQualifiers())) {
+            // found another matching observer -> do not unsubscribe
+            shouldUnsubscribe = false;
+            break;
+          }
         }
-      }
-      
-      if (isRemoteCommunicationEnabled() && shouldUnsubscribe) {
-        MessageBuilder.createMessage()
-            .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
-            .command(CDICommands.RemoteUnsubscribe)
-            .with(CDIProtocol.BeanType, eventType)
-            .with(CDIProtocol.Qualifiers, callback.getQualifiers())
-            .noErrorHandling().sendNowWith(ErraiBus.get());
-      }
-      
-      if (eventObservers.get(eventType).isEmpty()) {
-        eventObservers.remove(eventType);
+        
+        if (isRemoteCommunicationEnabled() && shouldUnsubscribe) {
+          MessageBuilder.createMessage()
+              .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+              .command(CDICommands.RemoteUnsubscribe)
+              .with(CDIProtocol.BeanType, eventType)
+              .with(CDIProtocol.Qualifiers, callback.getQualifiers())
+              .noErrorHandling().sendNowWith(ErraiBus.get());
+        }
+        
+        if (eventObservers.get(eventType).isEmpty()) {
+          eventObservers.remove(eventType);
+        }
       }
     }
   }
@@ -224,7 +236,7 @@ public class CDI {
       int remoteEventCount = 0;
       for (Map.Entry<String, List<AbstractCDIEventCallback<?>>> mapEntry : eventObservers.entrySet()) {
         String eventType = mapEntry.getKey();
-        if (MarshallerFramework.canMarshall(eventType)) {
+        if (MarshallerFramework.canMarshall(eventType) && !localObserverTypes.contains(eventType)) {
           for (AbstractCDIEventCallback<?> callback : mapEntry.getValue()) {
             remoteEventCount++;
             MessageBuilder.createMessage()
