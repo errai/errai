@@ -59,7 +59,7 @@ Release Steps
         
 1. Deploy the Errai Cordova project template
 
-        % ./errai-cordova-maven-plugin/src/main/bash/cordova-bundle
+        % sudo ./errai-cordova-maven-plugin/src/main/bash/cordova-bundle a.b.c.Final
 
 1. Upload the docs and the distro zipfile
 
