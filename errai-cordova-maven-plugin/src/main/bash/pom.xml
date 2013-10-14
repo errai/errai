@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011 JBoss, by Red Hat, Inc
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-cordova-template</artifactId>
+  <version>$VERSION</version>
+  <packaging>pom</packaging>
+  <name>Errai Cordova Template for Cordova CLI</name>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Mike Brock</name>
+        </developer>
+        <developer>
+            <name>Christian Sadilek</name>
+        </developer>
+        <developer>
+            <name>Jonathan Fuerth</name>
+        </developer>
+        <developer>
+            <name>Lincoln Baxter, III</name>
+        </developer>
+        <developer>
+            <name>Heiko Braun</name>
+        </developer>
+        <developer>
+            <name>Erik Jan de Wit</name>
+        </developer>
+    </developers>
+
+
+    <scm>
+        <connection>scm:git:git@github.com:errai/errai.git</connection>
+        <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
+        <url>scm:git:git@github.com:errai/errai.git</url>
+    </scm>
+
+</project>
