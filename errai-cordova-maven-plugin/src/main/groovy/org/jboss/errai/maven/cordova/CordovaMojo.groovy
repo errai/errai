@@ -48,7 +48,7 @@ class CordovaMojo extends GroovyMojo {
     def supportedPlatforms = ['Android', 'Ios']
 
     void unpackProjectTemplate() {
-        def templateVersion = project.build.plugins.find { it.artifactId = 'cordova-maven-plugin' }.version
+        def templateVersion = project.build.plugins.find { it.artifactId == 'cordova-maven-plugin' }.version
         executeMojo(
                 plugin(
                         groupId('org.apache.maven.plugins'),
