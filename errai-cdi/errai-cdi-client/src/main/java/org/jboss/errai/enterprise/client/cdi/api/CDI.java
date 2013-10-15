@@ -16,7 +16,16 @@
 package org.jboss.errai.enterprise.client.cdi.api;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
@@ -25,6 +34,8 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.framework.BusState;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -178,7 +189,8 @@ public class CDI {
 
   public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
 
-    if (isRemoteCommunicationEnabled()) {
+    if (isRemoteCommunicationEnabled() && ErraiBus.get() instanceof ClientMessageBusImpl
+            && ((ClientMessageBusImpl) ErraiBus.get()).getState().equals(BusState.CONNECTED)) {
       MessageBuilder.createMessage()
           .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
           .command(CDICommands.RemoteSubscribe)
