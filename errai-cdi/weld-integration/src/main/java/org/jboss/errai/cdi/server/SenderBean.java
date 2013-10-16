@@ -19,6 +19,7 @@ package org.jboss.errai.cdi.server;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
@@ -29,26 +30,24 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
-import org.jboss.errai.ioc.support.bus.client.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
 import org.jboss.errai.ioc.support.bus.client.ErraiMessageSender;
-import org.jboss.weld.Container;
-import org.jboss.weld.injection.CurrentInjectionPoint;
-import org.jboss.weld.util.collections.Arrays2;
+import org.jboss.errai.ioc.support.bus.client.Sender;
 
 /**
  * @author Mike Brock
  */
 public class SenderBean implements Bean {
 
-  private Set<Annotation> qualifiers;
+  private final Set<Annotation> qualifiers;
   private final MessageBus bus;
   private final Set<Type> typesSet;
  
   public SenderBean(final Type type, final Set<Annotation> qualifiers, final MessageBus bus) {
     this.bus = bus;
     this.qualifiers = qualifiers;
-    typesSet = Arrays2.<Type>asSet(type);
+    typesSet = new HashSet<Type>();
+    typesSet.add(type);
   }
 
   @Override
@@ -56,6 +55,7 @@ public class SenderBean implements Bean {
     return ErraiMessageSender.class;
   }
 
+  @Override
   public Set<Type> getTypes() {
     return typesSet;
   }
@@ -97,20 +97,6 @@ public class SenderBean implements Bean {
 
   @Override
   public Object create(final CreationalContext creationalContext) {
-    final InjectionPoint injectionPoint = Container.instance().services().get(CurrentInjectionPoint.class).peek();
-    final Set<Annotation> qualifiers = injectionPoint.getQualifiers();
-    
-//    final ParameterizedType injectionPointType = (ParameterizedType) injectionPoint.getType();
-//    final Type innerType = injectionPointType.getActualTypeArguments()[0];
-//    Class senderType = null;
-//
-//    if (innerType instanceof Class) {
-//      senderType = (Class) innerType;
-//    }
-//    else if (innerType instanceof ParameterizedType) {
-//      senderType = (Class) ((ParameterizedType) innerType).getRawType();
-//    }
-        
     String toSubject = null, replyTo = null;
 
     for (final Annotation a : qualifiers) {
