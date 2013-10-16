@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.ThrowsDeclaration;
 import org.jboss.errai.codegen.builder.BuildCallback;
 import org.jboss.errai.codegen.builder.ClassDefinitionBuilderAbstractOption;
+import org.jboss.errai.codegen.builder.ClassDefinitionBuilderCommentOption;
 import org.jboss.errai.codegen.builder.ClassDefinitionBuilderInterfaces;
 import org.jboss.errai.codegen.builder.ClassDefinitionBuilderScope;
 import org.jboss.errai.codegen.builder.ClassDefinitionStaticOption;
@@ -51,6 +52,7 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
+        ClassDefinitionBuilderCommentOption<T>,
         ClassDefinitionBuilderScope<T>,
         ClassDefinitionStaticOption<T>,
         ClassStructureBuilder<T> {
@@ -69,15 +71,15 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     context.attachClass(classDefinition);
   }
 
-  public static ClassDefinitionBuilderScope<?> define(final String fullyQualifiedName) {
+  public static ClassDefinitionBuilderCommentOption<?> define(final String fullyQualifiedName) {
     return new ClassBuilder<DefaultClassStructureBuilder>(fullyQualifiedName, null, Context.create().autoImport());
   }
 
-  public static ClassDefinitionBuilderScope<?> define(final String fullQualifiedName, final MetaClass parent) {
+  public static ClassDefinitionBuilderCommentOption<?> define(final String fullQualifiedName, final MetaClass parent) {
     return new ClassBuilder<DefaultClassStructureBuilder>(fullQualifiedName, parent, Context.create().autoImport());
   }
 
-  public static ClassDefinitionBuilderScope<?> define(final String fullQualifiedName, final Class<?> parent) {
+  public static ClassDefinitionBuilderCommentOption<?> define(final String fullQualifiedName, final Class<?> parent) {
     return define(fullQualifiedName, MetaClassFactory.get(parent));
   }
 
@@ -131,6 +133,12 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   @Override
   public ClassStructureBuilder<T> body() {
+    return this;
+  }
+
+  @Override
+  public ClassDefinitionBuilderScope<T> classComment(String comment) {
+    classDefinition.setClassComment(comment);
     return this;
   }
 
