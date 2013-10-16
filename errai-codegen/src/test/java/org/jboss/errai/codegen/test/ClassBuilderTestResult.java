@@ -286,4 +286,11 @@ public interface ClassBuilderTestResult {
           "   private Integer i;\n" +
           "   private org.jboss.errai.codegen.test.model.Integer j;\n" +
           " }";
+
+  public static final String CLASS_WITH_CLASS_COMMENT =
+      "     package org.foo;" +
+          "" +
+          " // A foo-ish bar" +
+          " public class Bar {" +
+          " }";
 }

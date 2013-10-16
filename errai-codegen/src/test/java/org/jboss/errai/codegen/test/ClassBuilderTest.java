@@ -560,4 +560,15 @@ public class ClassBuilderTest extends AbstractCodegenTest {
         "  }\n" +
         "}", cls);
   }
+
+  @Test
+  public void testClassComment() throws Exception {
+    final String cls = ClassBuilder.define("org.foo.Bar")
+        .classComment("A foo-ish bar")
+        .publicScope()
+        .body()
+        .toJavaString();
+
+    assertEquals(CLASS_WITH_CLASS_COMMENT, cls);
+  }
 }
