@@ -1,5 +1,18 @@
 package org.jboss.errai.ui.nav.client.local;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
+import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
@@ -8,17 +21,8 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Queue;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
-import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
-import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 /**
  * Central control point for navigating between pages of the application.
@@ -65,7 +69,7 @@ public class Navigation {
 
   }
 
-  private final NavigatingContainer navigatingContainer = GWT.create(NavigatingContainer.class);
+  private final SimplePanel contentPanel = new SimplePanel();
 
   private final NavigationGraph navGraph = GWT.create(NavigationGraph.class);
 
@@ -236,7 +240,7 @@ public class Navigation {
    * Hide the page currently displayed and call the associated lifecycle methods.
    */
   private void hideCurrentPage() {
-      IsWidget currentContent = navigatingContainer.getWidget();
+    IsWidget currentContent = contentPanel.getWidget();
 
     // Note: Optimized out in production mode
     if (currentPage != null &&
@@ -251,7 +255,7 @@ public class Navigation {
     }
 
     // Ensure clean contentPanel regardless of currentPage being null
-    navigatingContainer.clear();
+    contentPanel.clear();
 
     if (currentPage != null && currentWidget != null) {
       currentPage.pageHidden(currentWidget);
@@ -272,7 +276,7 @@ public class Navigation {
         toPage.pageShowing(widget, state);
         setCurrentPage(toPage);
         currentWidget = widget;
-          navigatingContainer.setWidget(widget);
+        contentPanel.add(widget);
         toPage.pageShown(widget, state);
       }
     });
@@ -297,7 +301,7 @@ public class Navigation {
    *         time.
    */
   public IsWidget getContentPanel() {
-      return navigatingContainer.asWidget();
+    return contentPanel;
   }
 
   /**
