@@ -500,6 +500,52 @@ public class OverallPageStrucutre extends Composite {
 </programlisting>
          </informalexample>
       </section>
+      <section id="sid-54493676_ErraiUINavigation-OverridingthedefaultNagivatingPaneltype">
+         <title>Overriding the default Nagivating Panel type</title>
+         <para>
+            By default Errai uses <code>com.âgoogle.âgwt.âuser.âclient.âui.SimplePanel</code> as a container for Navigation Panel. Sometimes it's not sufficient and users would prefer to use another implementation. For example, when building web application it is more common to use <code>com.google.gwt.user.client.ui.SimpleLayoutPanel</code> that manages child size state. 
+         </para>
+         <para>
+            To provide own implementation of the Navigation Panel you must implement <code>org.jboss.errai.ui.nav.client.local.NavigatingContainer</code>. For example:
+         </para>
+         <informalexample>
+            <programlisting language="java">
+public class NavigatingPanel implements NavigatingContainer {
+
+    SimplePanel panel = new SimpleLayoutPanel();
+
+    public void clear() {
+        this.panel.clear();
+    }
+
+    public Widget asWidget() {
+        return panel.asWidget();
+    }
+
+    public Widget getWidget() {
+        return panel.getWidget();
+    }
+
+    public void setWidget(Widget childWidget) {
+        panel.add(childWidget);
+    }
+
+    public void setWidget(IsWidget childWidget) {
+        panel.add(childWidget);
+    }
+
+}
+</programlisting>
+         </informalexample>
+         <para>Then in your GWT module descriptor you need to override default Navigation Panel (<code>org.jboss.errai.ui.nav.client.local.NavigatingContainer</code>) by adding:</para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;replace-with class=&quot;com.company.application.client.NavigatingPanel&quot;&gt;
+  &lt;when-type-is class=&quot;org.jboss.errai.ui.nav.client.local.NavigatingContainer&quot;/&gt;
+&lt;/replace-with&gt;
+</programlisting>
+         </informalexample>
+      </section>
       <section id="sid-54493676_ErraiUINavigation-ViewingtheGeneratedNavigationGraph">
          <title>Viewing the Generated Navigation Graph</title>
          <para>
