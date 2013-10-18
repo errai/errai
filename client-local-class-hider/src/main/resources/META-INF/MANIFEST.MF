@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Premain-Class: org.jboss.errai.ClientLocalClassHidingAgent
+Can-Redefine-Classes: true
+Can-Retransform-Classes: false
+Can-Set-Native-Method-Prefix: false
