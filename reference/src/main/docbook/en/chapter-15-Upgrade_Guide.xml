@@ -172,6 +172,20 @@
           </para>
          </listitem>
       </itemizedlist>
+      <itemizedlist>
+         <listitem>
+            <para>
+               <code>IOCBeanManager</code>
+            was replaced by two new types
+            <code>SyncBeanManager</code>
+            and
+            <code>AsyncBeanManager</code>
+            that need to be used instead. See
+            <xref linkend="sid-21627016"/>
+            for details.
+          </para>
+         </listitem>
+      </itemizedlist>
       <para>Note: Errai 3 is still changing rapidly, so this section is a work in progress. Please add any additional steps you had to take in upgrading your own codebase.</para>
    </section>
 </chapter>

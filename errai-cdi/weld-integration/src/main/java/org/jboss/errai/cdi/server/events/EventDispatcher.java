@@ -38,7 +38,6 @@ import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.cdi.server.CDIServerUtil;
-import org.jboss.errai.cdi.server.ScopeUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
@@ -95,8 +94,6 @@ public class EventDispatcher implements MessageCallback {
       return;
 
     try {
-      ScopeUtil.associateRequestContext(message);
-
       final LocalContext localContext = LocalContext.get(message);
 
       switch (CDICommands.valueOf(message.getCommandType())) {

@@ -138,7 +138,7 @@ public class TimeService {
             <para>
                <code>IOCBeanManagerProvider :</code>
             Makes Errai's client-side bean manager,
-            <code>IOCBeanManager</code>
+            <code>ClientBeanManager</code>
             , available for injection.
           </para>
          </listitem>
@@ -627,16 +627,29 @@ private void updateTime() {
    <section id="sid-21627016">
       <title>Client-Side Bean Manager</title>
       <para>
-        It may be necessary at times to obtain instances of beans managed by Errai IOC from outside the container managed scope or creating a hard dependency from your bean.  Errai IOC provides a simple client-side bean manager for handling these scenarios:
-        <code>org.jboss.errai.ioc.client.container.IOCBeanManager</code>
+        It may be necessary at times to manually obtain instances of beans managed by Errai IOC from outside the container managed scope or creating a hard dependency from your bean. Errai IOC provides a simple client-side bean manager for handling these scenarios:
+        <code>org.jboss.errai.ioc.client.container.ClientBeanManager</code>
         .
       </para>
-      <para>As you might expect, you can inject the bean manager into any of your managed beans.</para>
+      <para>
+        As you might expect, you can inject a bean manager instance into any of your managed beans. If you use Errai IOC in its default mode you will need to inject the synchronous bean manager (
+        <code>org.jboss.errai.ioc.client.container.SyncBeanManager</code>
+        ).
+      </para>
+      <para>
+        If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager (
+        <code>org.jboss.errai.ioc.client.container.async.AsyncBeanManager</code>
+        ) instead. Asynchronous IOC brings support for
+        <ulink url="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html">code splitting</ulink>
+        . That means that any bean annotated with
+        <code>@LoadAsync</code>
+        can be compiled into a separate JavaScript file that's downloaded when the bean is first needed on the client.
+      </para>
       <example>
          <title>Injecting the client-side bean manager</title>
          <programlisting language="java">
 public MyManagedBean {
-  @Inject IOCBeanManager manager;
+  @Inject SyncBeanManager manager;
 
   // class body
 }
@@ -650,25 +663,22 @@ public MyManagedBean {
          <title>Looking up beans</title>
          <para>
           Looking up beans can be done through the use of the
-          <code>lookupBean()</code>
-          method in
-          <code>IOCBeanManager</code>
-          . Here's a basic example:
+          <code>lookupBeans()</code>
+          method. Here's a basic example:
         </para>
          <example>
             <title>Example lookup of a bean</title>
             <programlisting language="java">
 public MyManagedBean {
-  @Inject IOCBeanManager manager;
+  @Inject SyncBeanManager manager;
 
   public void lookupBean() {
     IOCBeanDef&lt;SimpleBean&gt; bean = manager.lookupBean(SimpleBean.class);
 
-    // check to see if the bean exists
     if (bean != null) {
       // get the instance of the bean
-      SimpleBean inst = bean.getInstance();
-    }
+      SimpleBean inst = bean.getInstance();    
+    }    
   }
 }
 </programlisting>
@@ -695,8 +705,8 @@ MyOtherQualifier qual2 = new MyOtherQualifier() {
   }
 }
 
-// pass qualifiers to IOCBeanManager.lookupBean
-IOCBean&lt;SimpleInterface&gt; bean = beanManager.lookupBean(SimpleBean.class, qual, qual2);
+// pass qualifiers to ClientBeanManager.lookupBeans
+IOCBeanDef&lt;SimpleBean&gt; bean = beanManager.lookupBean(SimpleBean.class, qual, qual2);
 </programlisting>
          </example>
          <para>In this example we manually construct instances of qualifier annotations in order to pass it to the bean manager for lookup. This is a necessary step since there's currently no support for annotation literals in Errai client code.</para>
@@ -880,7 +890,7 @@ public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&
             <title>Destruction of bean</title>
             <programlisting language="java">
 public MyManagedBean {
-  @Inject IOCBeanManager manager;
+  @Inject SyncBeanManager manager;
 
   public void createABeanThenDestroyIt() {
     // get a new bean.
@@ -921,7 +931,7 @@ public class SimpleBean {
             <title>Destroying bean from subgraph</title>
             <programlisting language="java">
 public MyManagedBean {
-  @Inject IOCBeanManager manager;
+  @Inject SyncBeanManager manager;
 
   public void createABeanThenDestroyIt() {
     // get a new bean.
