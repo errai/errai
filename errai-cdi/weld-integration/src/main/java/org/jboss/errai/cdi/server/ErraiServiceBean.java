@@ -18,9 +18,11 @@ package org.jboss.errai.cdi.server;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceImpl;
-import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
@@ -31,17 +33,17 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.util.AnnotationLiteral;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
  */
-public class ErraiServiceBean implements Bean {
+public class ErraiServiceBean implements Bean, PassivationCapable {
 
   final InjectionTarget it;
   final String name;
@@ -67,43 +69,53 @@ public class ErraiServiceBean implements Bean {
     this.name = name;
   }
 
+  @Override
   public Class<?> getBeanClass() {
     return ErraiService.class;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public Set<InjectionPoint> getInjectionPoints() {
     return it.getInjectionPoints();
   }
 
+  @Override
   public String getName() {
     return "ErraiServiceBean" + name;
   }
 
+  @Override
   public Set<Annotation> getQualifiers() {
   return qualifiers;
   }
 
+  @Override
   public Class<? extends Annotation> getScope() {
     return ApplicationScoped.class;
   }
 
+  @Override
   public Set<Class<? extends Annotation>> getStereotypes() {
     return Collections.emptySet();
   }
 
+  @Override
   public Set<Type> getTypes() {
     return types;
   }
 
+  @Override
   public boolean isAlternative() {
     return false;
   }
 
+  @Override
   public boolean isNullable() {
     return false;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public Object create(final CreationalContext ctx) {
     final Object instance = ErraiServiceSingleton.getService();
@@ -112,10 +124,16 @@ public class ErraiServiceBean implements Bean {
     return instance;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public void destroy(final Object instance, final CreationalContext ctx) {
     it.preDestroy(instance);
     it.dispose(instance);
     ctx.release();
+  }
+
+  @Override
+  public String getId() {
+    return this.getClass().getName();
   }
 }
