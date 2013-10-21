@@ -19,7 +19,7 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractRPCMethodCallback implements MessageCallback {
   private static final Logger log = getLogger(AbstractRPCMethodCallback.class);
-  
+
   protected final ServiceInstanceProvider serviceProvider;
   protected final Class[] targetTypes;
   protected final Method method;
@@ -55,7 +55,7 @@ public abstract class AbstractRPCMethodCallback implements MessageCallback {
     }
     catch (InvocationTargetException e) {
       log.debug("RPC endpoint threw exception:", e.getCause());
-      throw new MessageDeliveryFailure("error invoking endpoint", e.getCause(), true);
+      throw new MessageDeliveryFailure("error invoking RPC endpoint " + method, e.getCause(), true);
     }
     catch (Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);

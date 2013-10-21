@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
@@ -38,7 +37,6 @@ import com.google.gwt.user.client.Timer;
  * @author Mike Brock
  */
 public class WebsocketHandler implements TransportHandler, TransportStatistics {
-  private final MessageCallback messageCallback;
   private final ClientMessageBusImpl messageBus;
 
   private String webSocketUrl;
@@ -60,10 +58,9 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   private String unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
 
-  public WebsocketHandler(final MessageCallback messageCallback, final ClientMessageBusImpl messageBus) {
-    this.longPollingTransport = HttpPollingHandler.newLongPollingInstance(messageCallback, messageBus);
-    this.messageCallback = Assert.notNull(messageCallback);
-    this.messageBus = messageBus;
+  public WebsocketHandler(final ClientMessageBusImpl messageBus) {
+    this.longPollingTransport = HttpPollingHandler.newLongPollingInstance(messageBus);
+    this.messageBus = Assert.notNull(messageBus);
   }
 
   @Override
@@ -182,7 +179,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   }
 
   private void handleReceived(String json) {
-    BusToolsCli.decodeToCallback(json, messageCallback);
+    BusToolsCli.decodeToCallback(json, messageBus);
     rxCount++;
     lastTransmission = System.currentTimeMillis();
   }

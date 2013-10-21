@@ -26,7 +26,16 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.client.tests.support.*;
+import org.jboss.errai.bus.client.tests.support.GenericServiceB;
+import org.jboss.errai.bus.client.tests.support.NonPortableException;
+import org.jboss.errai.bus.client.tests.support.Person;
+import org.jboss.errai.bus.client.tests.support.RandomProvider;
+import org.jboss.errai.bus.client.tests.support.SType;
+import org.jboss.errai.bus.client.tests.support.SpecificEntity;
+import org.jboss.errai.bus.client.tests.support.SubService;
+import org.jboss.errai.bus.client.tests.support.TestException;
+import org.jboss.errai.bus.client.tests.support.TestRPCService;
+import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -274,17 +283,17 @@ public class BusCommunicationTests extends AbstractErraiTest {
               @Override
               public boolean error(final Message message, final Throwable caught) {
                 assertNotNull("Message is null.", message);
-                assertNotNull("Throwable is null.", caught);
 
-                try {
-                  throw caught;
-                }
-                catch (TestException e) {
-                  finishTest();
-                }
-                catch (Throwable throwable) {
-                  fail("Received wrong Throwable.");
-                }
+                String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
+                assertNotNull("Server-provided stack trace is null.", additionalDetails);
+                assertTrue("Additional detail string did not contain a frame for the RPC call. Message contents:\n\n" + message,
+                        additionalDetails.contains("TestRPCServiceImpl.exception("));
+
+                assertNotNull("Exception is null.", caught);
+                System.out.println("The exception delivered to the error handler (portable case):");
+                assertEquals("Received wrong kind of Throwable.", TestException.class, caught.getClass());
+                assertStackContains("TestRPCServiceImpl.exception(", caught);
+                finishTest();
                 return false;
               }
             },
@@ -308,13 +317,20 @@ public class BusCommunicationTests extends AbstractErraiTest {
               @Override
               public boolean error(final Message message, final Throwable caught) {
                 assertNotNull("Message is null.", message);
-                assertNotNull("Throwable is null.", caught);
 
+                String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
+                assertNotNull("Server-provided stack trace is null.", additionalDetails);
+                assertTrue("Additional detail string did not contain a frame for the RPC call. Message contents:\n\n" + message,
+                        additionalDetails.contains("TestRPCServiceImpl.nonPortableException("));
+
+                assertNotNull("Throwable is null.", caught);
+                System.out.println("The exception delivered to the error handler (non-portable case):");
+                caught.printStackTrace(System.out);
                 try {
                   throw caught;
                 }
                 catch (Throwable throwable) {
-                  assertEquals(NonPortableException.class.getName() + ":" + "message", throwable.getMessage());     
+                  assertEquals(NonPortableException.class.getName() + ":" + "message", throwable.getMessage());
                   finishTest();
                 }
                 return false;
@@ -718,5 +734,17 @@ public class BusCommunicationTests extends AbstractErraiTest {
         fail("should have thrown exception because service should have been de-registered");
       }
     });
+  }
+
+  static void assertStackContains(String string, Throwable t) {
+    while (t != null) {
+      for (StackTraceElement ste : t.getStackTrace()) {
+        if (ste.toString().contains(string)) {
+          return;
+        }
+      }
+      t = t.getCause();
+    }
+    fail("Stack trace does not contain the string: " + string);
   }
 }

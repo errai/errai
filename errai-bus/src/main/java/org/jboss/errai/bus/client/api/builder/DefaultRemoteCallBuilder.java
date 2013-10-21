@@ -16,24 +16,23 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.BusErrorCallback;
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.common.client.framework.ProxyFactory;
-import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.common.client.framework.RpcStub;
-import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.protocols.MessageParts;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.framework.ProxyFactory;
+import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
+import org.jboss.errai.common.client.framework.RpcStub;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * Facilitates the building of a remote call. Ensures that the remote call is constructed properly.
@@ -120,6 +119,7 @@ public class DefaultRemoteCallBuilder {
                   if (remoteCallback != null) {
                     bus.unsubscribeAll(replyTo);
                   }
+                  message.set(MessageParts.AdditionalDetails, m.get(String.class, MessageParts.AdditionalDetails));
                   message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
                 }
               }
@@ -140,7 +140,6 @@ public class DefaultRemoteCallBuilder {
 
       @Override
       public RemoteCallSendable defaultErrorHandling() {
-        message.errorsCall(DefaultErrorCallback.INSTANCE);
         return sendable;
       }
     };

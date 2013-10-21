@@ -39,7 +39,6 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   private static final String SSE_AGENT_SERVICE = "SSEAgent";
 
   private final ClientMessageBusImpl clientMessageBus;
-  private final MessageCallback messageCallback;
 
   private final HttpPollingHandler pollingHandler;
   private String sseEntryPoint;
@@ -79,10 +78,9 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
    */
   private final Subscription sseAgentSubscription;
 
-  public SSEHandler(final MessageCallback messageCallback, final ClientMessageBusImpl clientMessageBus) {
+  public SSEHandler(final ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
-    this.messageCallback = messageCallback;
-    this.pollingHandler = HttpPollingHandler.newNoPollingInstance(messageCallback, clientMessageBus);
+    this.pollingHandler = HttpPollingHandler.newNoPollingInstance(clientMessageBus);
 
     sseAgentSubscription = clientMessageBus.subscribe(SSE_AGENT_SERVICE, new MessageCallback() {
       @Override
@@ -144,7 +142,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   private void handleReceived(final String json) {
     rxCount++;
-    BusToolsCli.decodeToCallback(json, messageCallback);
+    BusToolsCli.decodeToCallback(json, clientMessageBus);
   }
 
   private static native void disconnect(Object channel) /*-{

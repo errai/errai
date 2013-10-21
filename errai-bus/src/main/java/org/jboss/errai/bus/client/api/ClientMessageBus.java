@@ -16,10 +16,11 @@
 
 package org.jboss.errai.bus.client.api;
 
+import java.util.Set;
+
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-
-import java.util.Set;
 
 /**
  * An extended client-specific/in-browser interface of {@link org.jboss.errai.bus.client.api.messaging.MessageBus}, which defines client-specific functionality.
@@ -115,4 +116,13 @@ public interface ClientMessageBus extends MessageBus {
   public void setProperty(String name, String value);
 
   public void clearProperties();
+
+  /**
+   * Delivers the given message to all local callbacks that subscribe to its
+   * subject. Does not transmit the message to other buses.
+   *
+   * @param message
+   *          The message to deliver to local subscribers.
+   */
+  public void sendLocal(Message message);
 }

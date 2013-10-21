@@ -16,16 +16,20 @@
 
 package org.jboss.errai.bus.client.util;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.api.HasEncoded;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.util.LogUtil;
@@ -35,22 +39,19 @@ import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 
 public class BusToolsCli {
   private static boolean autoDemarshall = true;
 
-  public static boolean decodeToCallback(final String jsonString, final MessageCallback callback) {
+  public static boolean decodeToCallback(final String jsonString, final ClientMessageBus bus) {
     //LogUtil.log("[bus] RX: " + jsonString);
     final List<Message> messages = decodePayload(jsonString);
 
     for (final Message message : messages)  {
-      callback.callback(message);
+      bus.sendLocal(message);
     }
 
     return messages.size() > 0;
