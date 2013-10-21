@@ -16,10 +16,14 @@
 
 package org.jboss.errai.bus.server.service;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.api.messaging.Message;
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
@@ -32,11 +36,8 @@ import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.slf4j.LoggerFactory.getLogger;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Default implementation of the ErraiBus server-side service.
@@ -49,8 +50,11 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
   private SessionProvider<S> sessionProvider;
   private RequestDispatcher dispatcher;
   private List<Runnable> shutdownHooks = new ArrayList<Runnable>();
-  private Logger log = getLogger(getClass());
+  private final Logger log = getLogger(getClass());
 
+  // Silence WELD-001529
+  private ErraiServiceImpl() {}
+  
   /**
    * Initializes the errai service with a bus and configurator
    *
@@ -78,6 +82,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
    *
    * @param message - the message to store/deliver
    */
+  @Override
   public void store(Message message) {
     if (message == null) {
       return;
@@ -110,6 +115,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     }
   }
 
+  @Override
   public void stopService() {
     bus.stop();
     DefaultTaskManager.get().requestStop();
@@ -137,6 +143,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
    *
    * @return the bus associated with this service
    */
+  @Override
   public ServerMessageBus getBus() {
     return bus;
   }
@@ -146,6 +153,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
    *
    * @return the errai service configurator
    */
+  @Override
   public ErraiServiceConfigurator getConfiguration() {
     return config;
   }
@@ -155,10 +163,12 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     shutdownHooks.add(runnable);
   }
 
+  @Override
   public SessionProvider<S> getSessionProvider() {
     return sessionProvider;
   }
 
+  @Override
   public void setSessionProvider(SessionProvider<S> sessionProvider) {
     if (this.sessionProvider != null) {
       throw new IllegalStateException("cannot set session provider more than once.");
@@ -166,10 +176,12 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     this.sessionProvider = sessionProvider;
   }
 
+  @Override
   public RequestDispatcher getDispatcher() {
     return dispatcher;
   }
 
+  @Override
   public void setDispatcher(RequestDispatcher dispatcher) {
     if (this.sessionProvider != null) {
       throw new IllegalStateException("cannot set dispatcher more than once.");
