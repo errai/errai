@@ -1,7 +1,6 @@
 package org.jboss.errai.ui.shared.api;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
@@ -9,7 +8,6 @@ import org.jboss.errai.databinding.client.api.Bindable;
  * @author edewit@redhat.com
  */
 @Bindable
-@Portable
 public class Locale {
   private String locale;
   private String label;
