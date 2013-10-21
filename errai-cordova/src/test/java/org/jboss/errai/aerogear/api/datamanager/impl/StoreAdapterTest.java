@@ -3,8 +3,8 @@ package org.jboss.errai.aerogear.api.datamanager.impl;
 import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.aerogear.api.datamanager.DataManager;
 import org.jboss.errai.aerogear.api.datamanager.Store;
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 import java.util.Collection;
 

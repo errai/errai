@@ -2,8 +2,8 @@ package org.jboss.errai.bus.client.tests.support;
 
 import java.util.Arrays;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * An immutable portable entity class that contains a references to an enum type.

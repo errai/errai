@@ -1,7 +1,7 @@
 package org.jboss.errai.otec.client;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.otec.client.operation.OpPair;
 
 /**
@@ -9,8 +9,8 @@ import org.jboss.errai.otec.client.operation.OpPair;
  */
 @Portable
 public class OpPairDto {
-  private OpDto remoteOp;
-  private OpDto localOp;
+  private final OpDto remoteOp;
+  private final OpDto localOp;
 
   public OpPairDto(@MapsTo("remoteOp") OpDto remoteOp, @MapsTo("localOp") OpDto localOp) {
     this.remoteOp = remoteOp;

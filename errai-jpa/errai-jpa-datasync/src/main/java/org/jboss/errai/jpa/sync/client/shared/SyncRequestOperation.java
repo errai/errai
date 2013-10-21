@@ -1,7 +1,7 @@
 package org.jboss.errai.jpa.sync.client.shared;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 @Portable
 public class SyncRequestOperation<X> {

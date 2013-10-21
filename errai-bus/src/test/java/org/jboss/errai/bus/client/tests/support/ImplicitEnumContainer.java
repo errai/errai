@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.client.tests.support;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * @author Mike Brock

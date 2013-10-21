@@ -16,8 +16,8 @@
 
 package org.jboss.errai.otec.client.mutation;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.otec.client.StringState;
 
 

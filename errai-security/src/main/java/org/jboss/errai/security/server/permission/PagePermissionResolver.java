@@ -1,6 +1,6 @@
 package org.jboss.errai.security.server.permission;
 
-import org.jboss.errai.ui.nav.client.shared.PageRequest;
+import org.jboss.errai.common.client.PageRequest;
 import org.picketlink.permission.PermissionResolver;
 
 import javax.enterprise.context.ApplicationScoped;

@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * An entity type that uses the Josh Bloch builder pattern. Acts as a regression test for ERRAI-234.

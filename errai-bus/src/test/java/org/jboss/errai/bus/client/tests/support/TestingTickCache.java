@@ -7,8 +7,8 @@ import java.util.Queue;
 
 import javax.annotation.Nonnull;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * Test for regression in marshaller generator.

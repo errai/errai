@@ -1,7 +1,7 @@
 package org.jboss.errai.marshalling.tests.res;
 
 
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 
 import java.util.List;
 

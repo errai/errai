@@ -9,8 +9,8 @@ import org.jboss.errai.aerogear.api.pipeline.ReadFilter;
 import org.jboss.errai.aerogear.api.pipeline.auth.AuthenticationFactory;
 import org.jboss.errai.aerogear.api.pipeline.auth.Authenticator;
 import org.jboss.errai.aerogear.api.pipeline.auth.User;
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 import java.util.HashMap;
 import java.util.List;

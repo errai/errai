@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.client.api.base;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.Key;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * Thrown when an attempt at sending or receiving a message results in an error on the network level (e.g. an HTTP

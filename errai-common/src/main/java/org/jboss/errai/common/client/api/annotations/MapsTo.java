@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.api.annotations;
+package org.jboss.errai.common.client.api.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

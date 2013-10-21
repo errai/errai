@@ -8,8 +8,8 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 @Portable
 public class SyncableDataSet<E> {

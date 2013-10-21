@@ -1,8 +1,8 @@
 package org.jboss.errai.jpa.sync.client.shared;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * Sync response that indicates that the given entity has been modified since

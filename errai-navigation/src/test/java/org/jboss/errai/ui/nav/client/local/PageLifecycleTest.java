@@ -2,13 +2,13 @@ package org.jboss.errai.ui.nav.client.local;
 
 import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.lifecycleTracer;
 
+import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.*;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
-import org.jboss.errai.ui.nav.client.shared.PageRequest;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;

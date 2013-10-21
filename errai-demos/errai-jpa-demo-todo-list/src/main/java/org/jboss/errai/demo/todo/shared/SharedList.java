@@ -1,8 +1,8 @@
 package org.jboss.errai.demo.todo.shared;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 import java.util.ArrayList;
 import java.util.List;

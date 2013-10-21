@@ -3,9 +3,9 @@ package org.jboss.errai.enterprise.jaxrs.client.shared.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 @Portable
 public class ImmutableEntity {

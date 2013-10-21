@@ -1,13 +1,13 @@
 package org.jboss.errai.security;
 
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
+import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.security.server.SecurityRoleInterceptor;
 import org.jboss.errai.security.shared.*;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
-import org.jboss.errai.ui.nav.client.shared.PageRequest;
 import org.junit.Before;
 import org.junit.Test;
 
