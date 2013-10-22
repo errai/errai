@@ -30,11 +30,9 @@ import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
-import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 
@@ -56,7 +54,6 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
   private boolean configured;
 
-  private final MessageCallback messageCallback;
   private final ClientMessageBusImpl messageBus;
 
   private final List<Message> heldMessages = new ArrayList<Message>();
@@ -110,31 +107,27 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
    */
   private LongPollRequestCallback receiveCommCallback = new NoPollRequestCallback();
 
-  private HttpPollingHandler(final MessageCallback messageCallback, final ClientMessageBusImpl messageBus) {
-    this.messageCallback = Assert.notNull(messageCallback);
+  private HttpPollingHandler(final ClientMessageBusImpl messageBus) {
     this.messageBus = messageBus;
   }
 
-  public static HttpPollingHandler newLongPollingInstance(final MessageCallback messageCallback,
-                                                          final ClientMessageBusImpl messageBus) {
+  public static HttpPollingHandler newLongPollingInstance(final ClientMessageBusImpl messageBus) {
 
-    final HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
+    final HttpPollingHandler handler = new HttpPollingHandler(messageBus);
     handler.receiveCommCallback = handler.new LongPollRequestCallback();
     return handler;
   }
 
-  public static HttpPollingHandler newShortPollingInstance(final MessageCallback messageCallback,
-                                                           final ClientMessageBusImpl messageBus) {
+  public static HttpPollingHandler newShortPollingInstance(final ClientMessageBusImpl messageBus) {
 
-    final HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
+    final HttpPollingHandler handler = new HttpPollingHandler(messageBus);
     handler.receiveCommCallback = handler.new ShortPollRequestCallback();
     return handler;
   }
 
-  public static HttpPollingHandler newNoPollingInstance(final MessageCallback messageCallback,
-                                                        final ClientMessageBusImpl messageBus) {
+  public static HttpPollingHandler newNoPollingInstance(final ClientMessageBusImpl messageBus) {
 
-    final HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
+    final HttpPollingHandler handler = new HttpPollingHandler(messageBus);
     handler.receiveCommCallback = handler.new NoPollRequestCallback();
     return handler;
   }
@@ -396,7 +389,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
           case 307:
             break;
           case 401:
-            BusToolsCli.decodeToCallback(response.getText(), messageCallback);
+            BusToolsCli.decodeToCallback(response.getText(), messageBus);
             break;
           default:
             onError(request,
@@ -408,7 +401,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
       notifyConnected();
 
-      BusToolsCli.decodeToCallback(response.getText(), messageCallback);
+      BusToolsCli.decodeToCallback(response.getText(), messageBus);
 
       if (pendingRequests.isEmpty()) {
         schedule();
@@ -695,7 +688,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
             undeliveredMessages.removeAll(toSend);
           }
           try {
-            if (BusToolsCli.decodeToCallback(response.getText(), messageCallback)) {
+            if (BusToolsCli.decodeToCallback(response.getText(), messageBus)) {
               break;
             }
           }
@@ -755,7 +748,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         }
       }
 
-      BusToolsCli.decodeToCallback(response.getText(), messageCallback);
+      BusToolsCli.decodeToCallback(response.getText(), messageBus);
     }
 
     @Override
@@ -772,7 +765,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       }
       schedulePolling();
     }
-    
+
     private void schedulePolling() {
       if (pendingRequests.isEmpty()) {
         new Timer() {

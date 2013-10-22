@@ -78,6 +78,7 @@ import com.google.gwt.user.client.Window;
  * @author Mike Brock
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
+
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
   }
@@ -107,21 +108,136 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   };
 
   /**
-   * Puts every message received onto this message bus. This is the mechanism by
-   * which messages received from the remote server bus are delivered to local
-   * message subscribers.
+   * This callback processes all messages sent to the
+   * {@link DefaultErrorCallback#CLIENT_ERROR_SUBJECT} on this bus.
    */
-  private final MessageCallback transportToBusCallback = new MessageCallback() {
+  private final class ErrorProcessor implements MessageCallback {
     @Override
     public void callback(final Message message) {
-      processMessageFromTransportLayer(message.getSubject(), message);
+      final String errorTo = message.get(String.class, MessageParts.ErrorTo);
+      if (errorTo == null) {
+        managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
+                message.get(String.class, MessageParts.AdditionalDetails), null);
+      }
+      else {
+        message.toSubject(errorTo);
+        message.set(MessageParts.ErrorTo, null);
+        message.sendNowWith(ClientMessageBusImpl.this);
+      }
     }
-  };
+  }
+  private final ErrorProcessor clientBusErrorsCallback = new ErrorProcessor();
+
+  /**
+   * Processes bus protocol commands and passes protocol extensions to the
+   * underlying transport handlers. Protocol commands include RemoteSubscribe,
+   * SessionExpired, Disconnect, and so on. The complete set lives in the
+   * {@link BusCommand} enum.
+   */
+  private final class ProtocolCommandProcessor implements MessageCallback {
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public void callback(final Message message) {
+      BusCommand busCommand;
+      if (message.getCommandType() == null) {
+        busCommand = BusCommand.Unknown;
+      }
+      else {
+        busCommand = BusCommand.valueOf(message.getCommandType());
+      }
+      if (busCommand == null) {
+        busCommand = BusCommand.Unknown;
+      }
+
+      switch (busCommand) {
+        case RemoteSubscribe:
+          if (message.hasPart(MessageParts.SubjectsList)) {
+            LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
+
+            for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
+              remoteSubscribe(subject);
+            }
+          }
+          else {
+            remoteSubscribe(message.get(String.class, Subject));
+          }
+          break;
+
+        case RemoteUnsubscribe:
+          unsubscribeAll(message.get(String.class, Subject));
+          break;
+
+        case FinishAssociation:
+          sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
+          LogUtil.log("my queue session id: " + sessionId);
+
+          loadRpcProxies();
+          processCapabilities(message);
+
+          for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+            remoteSubscribe(svc);
+          }
+
+          remoteSubscribe(BuiltInServices.ServerBus.name());
+
+          if (!deferredSubscriptions.isEmpty()) {
+            for (final Runnable deferredSubscription : deferredSubscriptions) {
+              deferredSubscription.run();
+            }
+            deferredSubscriptions.clear();
+
+            encodeAndTransmit(CommandMessage.create()
+                .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.RemoteSubscribe)
+                .set(PriorityProcessing, "1")
+                .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
+          }
+
+          // We don't want to declare the subscription listeners until after we've sent our initial state
+          // to the bus.
+          declareSubscriptionListeners();
+
+          setState(BusState.CONNECTED);
+          sendAllDeferred();
+          InitVotes.voteFor(ClientMessageBus.class);
+          LogUtil.log("bus federated and running.");
+          break;
+
+        case SessionExpired:
+          LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
+
+          // try to reconnect
+          InitVotes.reset();
+          stop(false);
+          init();
+
+          break;
+
+        case Disconnect:
+          stop(false);
+          if (message.hasPart(MessageParts.Reason)) {
+            managementConsole
+                .displayError("The bus was disconnected by the server", "Reason: "
+                    + message.get(String.class, "Reason"), null);
+          }
+          break;
+
+        case Heartbeat:
+        case Resend:
+          break;
+
+        case Unknown:
+        default:
+          transportHandler.handleProtocolExtension(message);
+          break;
+      }
+    }
+  }
+  private final ProtocolCommandProcessor protocolCommandCallback = new ProtocolCommandProcessor();
 
   private Map<String, TransportHandler> availableHandlers;
 
   private final TransportHandler BOOTSTRAP_HANDLER
-      = HttpPollingHandler.newNoPollingInstance(transportToBusCallback, ClientMessageBusImpl.this);
+      = HttpPollingHandler.newNoPollingInstance(ClientMessageBusImpl.this);
 
   /**
    * The current transport handler that's in use. This field is never null; it bottoms out at the No-polling version
@@ -190,12 +306,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     Map<String, TransportHandler> m = new LinkedHashMap<String, TransportHandler>();
-    m.put(Capabilities.WebSockets.name(), new WebsocketHandler(transportToBusCallback, ClientMessageBusImpl.this));
-    m.put(Capabilities.SSE.name(), new SSEHandler(transportToBusCallback, ClientMessageBusImpl.this));
+    m.put(Capabilities.WebSockets.name(), new WebsocketHandler(ClientMessageBusImpl.this));
+    m.put(Capabilities.SSE.name(), new SSEHandler(ClientMessageBusImpl.this));
     m.put(Capabilities.LongPolling.name(),
-            HttpPollingHandler.newLongPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
+            HttpPollingHandler.newLongPollingInstance(ClientMessageBusImpl.this));
     m.put(Capabilities.ShortPolling.name(),
-            HttpPollingHandler.newShortPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
+            HttpPollingHandler.newShortPollingInstance(ClientMessageBusImpl.this));
     availableHandlers = Collections.unmodifiableMap(m);
   }
 
@@ -231,121 +347,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     if (!isSubscribed(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)) {
-      directSubscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-        @Override
-        public void callback(final Message message) {
-          final String errorTo = message.get(String.class, MessageParts.ErrorTo);
-          if (errorTo == null) {
-            managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
-                message.get(String.class, MessageParts.AdditionalDetails), null);
-          }
-          else {
-            message.toSubject(errorTo);
-            message.sendNowWith(ClientMessageBusImpl.this);
-          }
-        }
-      }, false);
+      directSubscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, clientBusErrorsCallback, false);
     }
 
     if (!isSubscribed(BuiltInServices.ClientBus.name())) {
-      directSubscribe(BuiltInServices.ClientBus.name(), new MessageCallback() {
-        @Override
-        @SuppressWarnings({"unchecked"})
-        public void callback(final Message message) {
-          BusCommand busCommand;
-          if (message.getCommandType() == null) {
-            busCommand = BusCommand.Unknown;
-          }
-          else {
-            busCommand = BusCommand.valueOf(message.getCommandType());
-          }
-          if (busCommand == null) {
-            busCommand = BusCommand.Unknown;
-          }
-
-          switch (busCommand) {
-            case RemoteSubscribe:
-              if (message.hasPart(MessageParts.SubjectsList)) {
-                LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
-
-                for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
-                  remoteSubscribe(subject);
-                }
-              }
-              else {
-                remoteSubscribe(message.get(String.class, Subject));
-              }
-              break;
-
-            case RemoteUnsubscribe:
-              unsubscribeAll(message.get(String.class, Subject));
-              break;
-
-            case FinishAssociation:
-              sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
-              LogUtil.log("my queue session id: " + sessionId);
-
-              loadRpcProxies();
-              processCapabilities(message);
-
-              for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
-                remoteSubscribe(svc);
-              }
-
-              remoteSubscribe(BuiltInServices.ServerBus.name());
-
-              if (!deferredSubscriptions.isEmpty()) {
-                for (final Runnable deferredSubscription : deferredSubscriptions) {
-                  deferredSubscription.run();
-                }
-                deferredSubscriptions.clear();
-
-                encodeAndTransmit(CommandMessage.create()
-                    .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.RemoteSubscribe)
-                    .set(PriorityProcessing, "1")
-                    .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
-              }
-
-              // We don't want to declare the subscription listeners until after we've sent our initial state
-              // to the bus.
-              declareSubscriptionListeners();
-
-              setState(BusState.CONNECTED);
-              sendAllDeferred();
-              InitVotes.voteFor(ClientMessageBus.class);
-              LogUtil.log("bus federated and running.");
-              break;
-
-            case SessionExpired:
-              LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
-
-              // try to reconnect
-              InitVotes.reset();
-              stop(false);
-              init();
-
-              break;
-
-            case Disconnect:
-              stop(false);
-              if (message.hasPart(MessageParts.Reason)) {
-                managementConsole
-                    .displayError("The bus was disconnected by the server", "Reason: "
-                        + message.get(String.class, "Reason"), null);
-              }
-              break;
-
-            case Heartbeat:
-            case Resend:
-              break;
-
-            case Unknown:
-            default:
-              transportHandler.handleProtocolExtension(message);
-              break;
-          }
-        }
-      }, false);
+      directSubscribe(BuiltInServices.ClientBus.name(), protocolCommandCallback, false);
     }
 
     // The purpose of this timer is to let the bus yield and give other modules a chance to register
@@ -795,10 +801,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private void processMessageFromTransportLayer(final String subject, final Message msg) {
-    if (subscriptions.containsKey(subject)) {
-      final ArrayList<MessageCallback> messageCallbacks = new ArrayList<MessageCallback>(subscriptions.get(subject));
-      for (final MessageCallback cb : messageCallbacks) {
+  @Override
+  public void sendLocal(final Message msg) {
+    final String subject = msg.getSubject();
+    final List<MessageCallback> messageCallbacks = subscriptions.get(subject);
+    if (messageCallbacks != null) {
+      // iterating over a copy of the list in case a subscriber unsubscribes during callback
+      for (final MessageCallback cb : new ArrayList<MessageCallback>(messageCallbacks)) {
         cb.callback(msg);
       }
     }

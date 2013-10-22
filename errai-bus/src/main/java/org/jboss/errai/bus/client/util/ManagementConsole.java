@@ -42,11 +42,7 @@ public class ManagementConsole {
   }
 
   public void displayError(final String message, final String additionalDetails, final Throwable e) {
-    showError(message + " -- Additional Details: " + additionalDetails, e);
-  }
-
-  private void showError(final String message, final Throwable e) {
-    errorDialog.addError(message, "", e);
+    errorDialog.addError(message, additionalDetails, e);
 
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
       nativeLog(message);

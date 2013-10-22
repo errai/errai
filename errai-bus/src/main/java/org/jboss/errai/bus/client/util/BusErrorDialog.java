@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.client.util;
 
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,7 +36,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 
 /**
  * The built-in, default error dialog.
@@ -131,7 +132,7 @@ public class BusErrorDialog extends DialogBox {
     panel.add(contentPanel);
     add(panel);
 
-    getElement().getStyle().setZIndex(16777271);
+    getElement().getStyle().setZIndex(16777271);   // WTF? 2^24 + 55?
   }
 
   public void addError(final String message, final String additionalDetails, final Throwable e) {
