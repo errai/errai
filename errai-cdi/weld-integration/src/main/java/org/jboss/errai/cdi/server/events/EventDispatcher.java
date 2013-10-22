@@ -43,7 +43,6 @@ import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +115,7 @@ public class EventDispatcher implements MessageCallback {
 
               if (!activeObserverMethods.contains(observerMethod)) {
                 afterBeanDiscovery.addObserverMethod(observerMethod);
-                int clearCount = clearBeanManagerObserverCaches(((BeanManagerImpl) beanManager));
+                int clearCount = clearBeanManagerObserverCaches(beanManager);
                 log.debug("Cleared observer resolution caches of " + clearCount + " bean managers");
                 activeObserverMethods.add(observerMethod);
               }
@@ -237,38 +236,62 @@ public class EventDispatcher implements MessageCallback {
    *          bean managers from.
    * @return The number of bean managers whose caches were cleared.
    */
-  private static int clearBeanManagerObserverCaches(BeanManagerImpl bm) {
+  @SuppressWarnings("unchecked")
+  private static int clearBeanManagerObserverCaches(BeanManager bm) {
     int clearCount = 1;
-    clearObserverCache(bm);
-    for (BeanManagerImpl accessibleBm : bm.getAccessibleManagers()) {
-      clearObserverCache(accessibleBm);
-      clearCount++;
+    try {
+      Class<?> bmImplClass = Class.forName("org.jboss.weld.manager.BeanManagerImpl");
+      clearObserverCache(bmImplClass, bm);
+      
+      Method accessibleBms = bmImplClass.getMethod("getAccessibleManagers");
+      for (BeanManager accessibleBm : (Iterable<BeanManager>) accessibleBms.invoke(bm)) {
+        clearObserverCache(bmImplClass, accessibleBm);
+        clearCount++;
+      }
     }
+    catch (ClassNotFoundException e) {
+      log.debug("Aborting attempt to clear Weld's event observer cache. " +
+      		"Weld does not seem to be used by this container or deployment.", e);
+    }
+    catch (Exception e) {
+      log.warn("Did not find a way to clear Weld's event observer cache. Some CDI events may be undeliverable to clients. " +
+      		"Problematic BeanManagerImpl is " + bm.getClass(), e);
+    }
+    
     return clearCount;
   }
 
   /**
    * Clears the observer cache on a Weld BeanManagerImpl. Tested on Weld 1.1.5, 1.1.8, and 1.1.13.
    */
-  private static void clearObserverCache(BeanManagerImpl bm) {
-    // Weld renamed this public method from getObserverResolver() to getAccessibleObserverNotifier() in the 1.1.9 release
-    // The return type was also renamed, but in both cases the returned object has a clear() method we need to call.
-    // AS 7.1.1 uses Weld 1.1.5; EAP and Wildfly use Weld >= 1.1.9. We need to try both getter methods.
+  private static void clearObserverCache(Class<?> bmImplClass, BeanManager bm) throws Exception {
+    // Weld renamed this public method from getObserverResolver() to getAccessibleObserverNotifier()
+    // in the 1.1.9 release and again to getGlobalStrictObserverNotifier() in 2.1. The return type
+    // was also renamed, but in all cases the returned object has a clear() method we need to call.
+    // AS 7.1.1 uses Weld 1.1.5; EAP and WildFly 8.Alpha use Weld >=1.1.9, WildFly 8.Beta uses Weld
+    // >= 2.1. We need to try all these getter methods.
+    Method getterMethod;
     try {
-      Method getterMethod;
+      getterMethod = bmImplClass.getMethod("getObserverResolver");
+    }
+    catch (NoSuchMethodException e) {
+      // Weld >= 1.1.9
       try {
-        getterMethod = bm.getClass().getMethod("getObserverResolver");
+        getterMethod = bmImplClass.getMethod("getAccessibleObserverNotifier");
       }
-      catch (NoSuchMethodException e) {
-        // Weld >= 1.1.9
-        getterMethod = bm.getClass().getMethod("getAccessibleObserverNotifier");
+      catch (NoSuchMethodException nsme) {
+        // Weld >= 2.1
+        
+        // In case the bean manager instance is a proxy we need to unwrap it first
+        Class<?> bmProxyClass = Class.forName("org.jboss.weld.bean.builtin.BeanManagerProxy");
+        Method unwrapMethod = bmProxyClass.getMethod("unwrap", BeanManager.class);
+        bm = (BeanManager) unwrapMethod.invoke(null, bm);
+        
+        getterMethod = bmImplClass.getMethod("getGlobalStrictObserverNotifier");
       }
-      Object thingToCallClearOn = getterMethod.invoke(bm);
-      Method clearMethod = thingToCallClearOn.getClass().getMethod("clear");
-      clearMethod.invoke(thingToCallClearOn);
     }
-    catch (Exception e) {
-      log.warn("Did not find a way to clear the CDI observer cache. Some CDI events may be undeliverable to clients. Problematic BeanManagerImpl is " + bm.getClass(), e);
-    }
+    Object thingToCallClearOn = getterMethod.invoke(bm);
+    Method clearMethod = thingToCallClearOn.getClass().getMethod("clear");
+    clearMethod.invoke(thingToCallClearOn);
   }
 }
