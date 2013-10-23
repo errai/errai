@@ -94,7 +94,7 @@ class CordovaMojo extends GroovyMojo {
 
     void updateConfig() {
         for (platform in supportedPlatforms) {
-            def baseDir = new File("${project.build.directory}/template/platforms/$platform")
+            def baseDir = new File("${project.build.directory}/template/platforms/${platform.toLowerCase()}")
             def parser = Class.forName("org.jboss.errai.maven.cordova.${platform}Parser").newInstance(baseDir)
             parser.updateProject(getConfig())
         }
@@ -132,11 +132,14 @@ class CordovaMojo extends GroovyMojo {
     }
 
     String getWarSourceDir() {
-        Xpp3Dom config = project.buildPlugins.find{it.key == 'org.apache.maven.plugins:maven-war-plugin'}.configuration
-        if (config) {
-            def found = config.getChildren().find { it.name == 'warSourceDirectory' }
-            if (found) {
-                return found.value
+        def pluginRef = project.buildPlugins.find{it.key == 'org.apache.maven.plugins:maven-war-plugin'}
+        if( pluginRef) {
+            Xpp3Dom config = pluginRef.configuration
+            if (config) {
+                def found = config.getChildren().find { it.name == 'warSourceDirectory' }
+                if (found) {
+                    return found.value
+                }
             }
         }
         return 'src/main/webapp'
