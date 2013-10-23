@@ -23,27 +23,9 @@ import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProce
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.jboss.errai.bus.client.api.BusLifecycleEvent;
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.BusMonitor;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
-import org.jboss.errai.bus.client.api.RoutingFlag;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.Subscription;
-import org.jboss.errai.bus.client.api.TransportError;
-import org.jboss.errai.bus.client.api.TransportErrorHandler;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -66,6 +48,7 @@ import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Timer;
@@ -91,6 +74,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private final List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
   private final List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
+  private final List<UncaughtExceptionHandler> uncaughtExceptionHandlers = new ArrayList<UncaughtExceptionHandler>();
 
   /**
    * Forwards every message received across the communication link to the remote
@@ -115,9 +99,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     @Override
     public void callback(final Message message) {
       final String errorTo = message.get(String.class, MessageParts.ErrorTo);
+      
       if (errorTo == null) {
-        managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
-                message.get(String.class, MessageParts.AdditionalDetails), null);
+        Throwable t = message.get(Throwable.class, MessageParts.Throwable);
+        GWT.getUncaughtExceptionHandler().onUncaughtException(t);
+
+        if (!uncaughtExceptionHandlers.isEmpty()) {
+          for (UncaughtExceptionHandler handler : uncaughtExceptionHandlers) {
+            handler.onUncaughtException(t);
+          }
+        }
+        else {
+          managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
+                  message.get(String.class, MessageParts.AdditionalDetails), null);
+        }
       }
       else {
         message.toSubject(errorTo);
@@ -125,6 +120,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         message.sendNowWith(ClientMessageBusImpl.this);
       }
     }
+    
   }
   private final ErrorProcessor clientBusErrorsCallback = new ErrorProcessor();
 
@@ -1196,5 +1192,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
     }
+  }
+
+  public void addUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
+    Assert.notNull(handler);
+    uncaughtExceptionHandlers.add(handler);
+  }
+  
+  public void removeUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
+    Assert.notNull(handler);
+    uncaughtExceptionHandlers.remove(handler);
   }
 }
