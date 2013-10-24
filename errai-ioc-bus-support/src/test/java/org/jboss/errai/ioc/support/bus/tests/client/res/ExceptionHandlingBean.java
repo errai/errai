@@ -24,34 +24,34 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 @EntryPoint
 public class ExceptionHandlingBean {
-  
+
   public interface VerificationCallback {
     public void callback(Throwable t1, Throwable t2);
   }
-  
+
   private Throwable throwable1;
   private Throwable throwable2;
   private VerificationCallback callback;
-  
+
   @Inject
   private Caller<ExceptionService> exceptionServiceCaller;
-  
+
   @UncaughtException
   private void onException1(Throwable t) {
     throwable1 = t;
-    if (throwable2 != null) {
+    if (throwable2 != null && callback != null) {
       callback.callback(throwable1, throwable2);
     }
   }
-  
+
   @UncaughtException
   public void onException2(Throwable t) {
     throwable2 = t;
-    if (throwable1 != null) {
+    if (throwable1 != null && callback != null) {
       callback.callback(throwable1, throwable2);
     }
   }
-  
+
   public void setVerificationCallback(VerificationCallback callback) {
     this.callback = callback;
   }
@@ -59,5 +59,5 @@ public class ExceptionHandlingBean {
   public Caller<ExceptionService> getCaller() {
     return exceptionServiceCaller;
   }
-  
+
 }

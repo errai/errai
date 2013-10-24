@@ -28,6 +28,9 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.support.bus.client.BatchCallerProvider;
 import org.jboss.errai.ioc.support.bus.tests.client.res.RpcBatchService;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+
 /**
  * Tests RPC batching.
  * 
@@ -147,6 +150,17 @@ public class BatchCallerIntegrationTest extends AbstractErraiIOCBusTest {
   }
 
   public void testBatchedRpcWithErrorCallback() {
+    final UncaughtExceptionHandler oldHandler = GWT.getUncaughtExceptionHandler();
+    GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+      @Override
+      public void onUncaughtException(Throwable t) {
+        if (!(t.getMessage().equals("batchedMethodThrowsException"))) { 
+          // only let the test fail in case we get an exception we didn't anticipate
+          oldHandler.onUncaughtException(t);
+        }
+      }
+    });
+
     runAfterInit(new Runnable() {
       @Override
       public void run() {
