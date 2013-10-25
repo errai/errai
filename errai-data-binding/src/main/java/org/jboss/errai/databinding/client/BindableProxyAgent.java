@@ -193,16 +193,18 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
     }
     else {
-      binder.setModel(proxy.get(bindableProperty), initialState);
+      binder.setModel(proxy.get(bindableProperty), initialState, true);
     }
     proxy.set(bindableProperty, binder.getModel());
+    knownValues.put(bindableProperty, binder.getModel());
 
     return binder;
   }
 
   private void validatePropertyExpr(String property) {
     if (property.startsWith(".") || property.endsWith(".")) {
-      throw new InvalidPropertyExpressionException("Binding expression (property chain) cannot start or end with '.' : " + property);
+      throw new InvalidPropertyExpressionException(
+          "Binding expression (property chain) cannot start or end with '.' : " + property);
     }
     if (property.contains("*.")) {
       throw new InvalidPropertyExpressionException("Wildcards can only appear at the end of property expressions : "
@@ -251,7 +253,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
         DataBinder nestedBinder = binders.get(property);
         if (nestedBinder != null) {
-          nestedBinder.setModel(actualValue, InitialState.FROM_MODEL);
+          nestedBinder.setModel(actualValue, InitialState.FROM_MODEL, true);
           proxy.set(property, nestedBinder.getModel());
         }
         updateWidgetsAndFireEvent(property, knownValue, actualValue);
@@ -331,7 +333,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   private <P> void firePropertyChangeEvent(final String property, final P oldValue, final P newValue) {
     knownValues.put(property, newValue);
-    
+
     PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, Assert.notNull(property), oldValue, newValue);
     propertyChangeHandlerSupport.notifyHandlers(event);
   }
@@ -497,8 +499,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Merges the {@link PropertyChangeHandler}s of the provided agent instance. If a handler instance
-   * is already registered on this agent, it will NOT be added again.
+   * Merges the provided {@link PropertyChangeHandler}s of the provided agent instance. If a handler
+   * instance is already registered on this agent, it will NOT be added again.
    * 
    * @param pchs
    *          the instance who's change handlers will be merged, must not be null.
@@ -517,6 +519,34 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         if (!propertyChangeHandlerSupport.specificPropertyHandlers.containsEntry(pchKey, pch)) {
           addPropertyChangeHandler(pchKey, pch);
         }
+      }
+    }
+  }
+
+  /**
+   * Compares property values between this agent and the provided agent recursively and fires
+   * {@link PropertyChangeEvent}s for all differences.
+   * 
+   * @param other
+   *          the agent to compare against.
+   */
+  public void fireChangeEvents(BindableProxyAgent other) {
+    for (String property : propertyTypes.keySet()) {
+      Object curValue = knownValues.get(property);
+      Object oldValue = other.knownValues.get(property);
+
+      if ((curValue == null && oldValue != null) ||
+          (curValue != null && !curValue.equals(oldValue))) {
+
+        DataBinder nestedBinder = binders.get(property);
+        DataBinder otherNestedBinder = (DataBinder) other.binders.get(property);
+        if (nestedBinder != null && otherNestedBinder != null) {
+          BindableProxyAgent nestedAgent = ((BindableProxy<T>) nestedBinder.getModel()).getAgent();
+          BindableProxyAgent otherNestedAgent = ((BindableProxy<T>) otherNestedBinder.getModel()).getAgent();
+          nestedAgent.fireChangeEvents(otherNestedAgent);
+        }
+
+        firePropertyChangeEvent(property, oldValue, curValue);
       }
     }
   }
