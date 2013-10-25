@@ -303,8 +303,29 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         {@link #forModel(Object)} and {@link #forType(Class)}) if changes should be
    *         automatically synchronized with the UI (also accessible using {@link #getModel()}).
    */
-  @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
+    return setModel(model, initialState, false);
+  }
+
+  /**
+   * Changes the underlying model instance. The existing bindings stay intact but only affect the
+   * new model instance. The previously associated model instance will no longer be kept in sync
+   * with the UI.
+   * 
+   * @param model
+   *          The instance of a {@link Bindable} type, must not be null.
+   * @param initialState
+   *          Specifies the origin of the initial state of both model and UI widget. Null if no
+   *          initial state synchronization should be carried out.
+   * @param fireChangeEvents
+   *          Specifies whether or not {@link PropertyChangeEvent}s should be fired as a consequence
+   *          of the model change.
+   * @return The model instance which has to be used in place of the provided model (see
+   *         {@link #forModel(Object)} and {@link #forType(Class)}) if changes should be
+   *         automatically synchronized with the UI (also accessible using {@link #getModel()}).
+   */
+  @SuppressWarnings("unchecked")
+  public T setModel(T model, InitialState initialState, boolean fireChangeEvents) {
     Assert.notNull(model);
 
     BindableProxy<T> newProxy;
@@ -315,6 +336,11 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     }
     else {
       newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model, newInitState);
+    }
+
+    newProxy.getAgent().mergePropertyChangeHandlers(propertyChangeHandlerSupport);
+    if (fireChangeEvents) {
+      newProxy.getAgent().fireChangeEvents(getAgent());
     }
 
     if (newProxy != this.proxy) {
@@ -329,8 +355,6 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       bindings.put(b.getProperty(), newProxy.getAgent().bind(b.getWidget(), b.getProperty(), b.getConverter()));
     }
     this.bindings = bindings;
-    newProxy.getAgent().mergePropertyChangeHandlers(propertyChangeHandlerSupport);
-
     this.proxy = (T) newProxy;
     return this.proxy;
   }

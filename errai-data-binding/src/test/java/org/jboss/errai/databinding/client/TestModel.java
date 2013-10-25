@@ -169,36 +169,34 @@ public class TestModel {
       return true;
     if (obj == null)
       return false;
-    if (getClass() != obj.getClass())
-      return false;
     TestModel other = (TestModel) obj;
     if (_age == null) {
-      if (other._age != null)
+      if (other.getAge() != null)
         return false;
     }
-    else if (!_age.equals(other._age))
+    else if (!_age.equals(other.getAge()))
       return false;
     if (_name == null) {
-      if (other._name != null)
+      if (other.getName() != null)
         return false;
     }
-    else if (!_name.equals(other._name))
+    else if (!_name.equals(other.getName()))
       return false;
-    if (active != other.active)
+    if (active != other.isActive())
       return false;
     if (child == null) {
-      if (other.child != null)
+      if (other.getChild() != null)
         return false;
     }
-    else if (!child.equals(other.child))
+    else if (!child.equals(other.getChild()))
       return false;
-    if (id != other.id)
+    if (id != other.getId())
       return false;
     if (value == null) {
-      if (other.value != null)
+      if (other.getValue() != null)
         return false;
     }
-    else if (!value.equals(other.value))
+    else if (!value.equals(other.getValue()))
       return false;
     return true;
   }
