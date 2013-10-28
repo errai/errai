@@ -57,6 +57,7 @@
 
     <modules>
         <module>jetty</module>
+        <module>jboss</module>
         <module>errai-cdi-client</module>
         <module>weld-integration</module>        
     </modules>
