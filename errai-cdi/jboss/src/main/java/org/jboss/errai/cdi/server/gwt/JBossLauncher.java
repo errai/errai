@@ -65,7 +65,7 @@ public class JBossLauncher extends ServletContainerLauncher {
               e);
     }
 
-    final String JBOSS_START = JBOSS_HOME + "/bin/" + getStartScriptName();
+    final String JBOSS_START = getStartScriptName(JBOSS_HOME);
 
     Process process;
     try {
@@ -146,9 +146,10 @@ public class JBossLauncher extends ServletContainerLauncher {
     CopyUtil.copyFile(to, from);
   }
 
-  // TODO make portable
-  private String getStartScriptName() {
-    return "standalone.sh";
+  private String getStartScriptName(String jbossHome) {
+    final String script = System.getProperty("os.name").toLowerCase().contains("windows") ? "standalone.bat" : "standalone.sh";
+    
+    return String.format("%s%cbin%c%s", jbossHome, File.separatorChar, File.separatorChar, script);
   }
   
   private void inheritIO(final InputStream in, final OutputStream to) {
