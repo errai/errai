@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jboss.errai</groupId>
-  <artifactId>client-local-class-hider</artifactId>
+  <artifactId>errai-client-local-class-hider</artifactId>
   <version>3.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>client-local-class-hider</name>
+  <name>Errai::Client::Local::Class::Hider</name>
 
   <description>
     A Java Agent designed to hide the web of classes that should only be deployed as
