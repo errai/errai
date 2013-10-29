@@ -96,7 +96,9 @@ public final class TransitionAnchor<P extends IsWidget> extends Anchor implement
    */
   @Override
   public void onClick(ClickEvent event) {
-    navigation.goTo(toPageWidgetType, this.state);
+    if (isEnabled())
+      navigation.goTo(toPageWidgetType, this.state);
+    
     event.stopPropagation();
     event.preventDefault();
   }
