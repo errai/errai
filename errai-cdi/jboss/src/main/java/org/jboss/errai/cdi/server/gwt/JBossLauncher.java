@@ -2,8 +2,11 @@ package org.jboss.errai.cdi.server.gwt;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.BindException;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.errai.cdi.server.as.JBossServletContainerAdaptor;
 import org.jboss.errai.cdi.server.gwt.util.CopyUtil;
 import org.jboss.errai.cdi.server.gwt.util.StackTreeLogger;
@@ -79,10 +82,12 @@ public class JBossLauncher extends ServletContainerLauncher {
               String.format("-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n -javaagent:%s", DEBUG_PORT,
                       CLASS_HIDING_JAVA_AGENT));
 
-      logger.log(Type.INFO, "Redirecting stdout and stderr to share with this process");
-      builder.inheritIO();
-
       process = builder.start();
+
+      logger.log(Type.INFO, "Redirecting stdout and stderr to share with this process");
+      inheritIO(process.getInputStream(), System.out);
+      inheritIO(process.getErrorStream(), System.err);
+      
       logger.log(Type.INFO, "Executing AS instance...");
     } catch (IOException e) {
       logger.log(TreeLogger.Type.ERROR, "Failed to start JBoss AS process", e);
@@ -144,5 +149,19 @@ public class JBossLauncher extends ServletContainerLauncher {
   // TODO make portable
   private String getStartScriptName() {
     return "standalone.sh";
+  }
+  
+  private void inheritIO(final InputStream in, final OutputStream to) {
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          IOUtils.copy(in, to);
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }.start();
   }
 }
