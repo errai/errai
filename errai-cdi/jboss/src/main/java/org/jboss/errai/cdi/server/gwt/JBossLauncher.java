@@ -24,6 +24,7 @@ public class JBossLauncher extends ServletContainerLauncher {
   private final String JBOSS_DEBUG_PORT_PROPERTY = "errai.jboss.debug.port";
   private final String TEMPLATE_CONFIG_FILE_PROPERTY = "errai.jboss.config.file";
   private final String CLASS_HIDING_JAVA_AGENT_PROPERTY = "errai.jboss.javaagent.path";
+  private final String APP_CONTEXT_PROPERTY = "errai.dev.context";
 
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
 
@@ -40,6 +41,7 @@ public class JBossLauncher extends ServletContainerLauncher {
     final String DEBUG_PORT = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
     final String TEMPLATE_CONFIG_FILE = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
     final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
+    final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
 
     if (JBOSS_HOME == null) {
       logger.log(Type.ERROR, String.format(
@@ -108,8 +110,8 @@ public class JBossLauncher extends ServletContainerLauncher {
     logger.branch(Type.INFO, "Creating servlet container controller...");
 
     try {
-      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, logger.peek(),
-              process);
+      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, DEPLOYMENT_CONTEXT,
+              logger.peek(), process);
       logger.log(Type.INFO, "Controller created");
       logger.unbranch();
       return controller;
@@ -147,8 +149,9 @@ public class JBossLauncher extends ServletContainerLauncher {
   }
 
   private String getStartScriptName(String jbossHome) {
-    final String script = System.getProperty("os.name").toLowerCase().contains("windows") ? "standalone.bat" : "standalone.sh";
-    
+    final String script = System.getProperty("os.name").toLowerCase().contains("windows") ? "standalone.bat"
+            : "standalone.sh";
+
     return String.format("%s%cbin%c%s", jbossHome, File.separatorChar, File.separatorChar, script);
   }
   

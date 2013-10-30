@@ -24,7 +24,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
   private final int port;
   private final StackTreeLogger logger;
-  private final File appRootDir;
+  private final String context;
   @SuppressWarnings("unused")
   private final Process jbossProcess;
 
@@ -35,16 +35,19 @@ public class JBossServletContainerAdaptor extends ServletContainer {
    *          The port to which the JBoss instance binds. (not yet implemented!)
    * @param appRootDir
    *          The exploded war directory to be deployed.
+   * @param context
+   *          The deployment context for the app.
    * @param treeLogger
    *          For logging events from this container.
    * @throws UnableToCompleteException
    *           Thrown if this container cannot properly connect or deploy.
    */
-  public JBossServletContainerAdaptor(int port, File appRootDir, TreeLogger treeLogger, Process jbossProcess) throws UnableToCompleteException {
+  public JBossServletContainerAdaptor(int port, File appRootDir, String context, TreeLogger treeLogger,
+          Process jbossProcess) throws UnableToCompleteException {
     this.port = port;
-    this.appRootDir = appRootDir;
     logger = new StackTreeLogger(treeLogger);
     this.jbossProcess = jbossProcess;
+    this.context = context;
 
     logger.branch(Type.INFO, "Starting container initialization...");
 
@@ -64,7 +67,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
       }
 
       try {
-logger.branch(Type.INFO, "Connecting to JBoss AS...");
+        logger.branch(Type.INFO, "Connecting to JBoss AS...");
 
         ctx.handle("connect localhost:9999");
 
@@ -103,7 +106,8 @@ logger.branch(Type.INFO, "Connecting to JBoss AS...");
          * file, false iff an exploded archive enabled : true iff war should be automatically
          * scanned and deployed
          */
-        logger.branch(Type.INFO, String.format("Adding deployment %s at %s...", getAppName(), appRootDir.getAbsolutePath()));
+        logger.branch(Type.INFO,
+                String.format("Adding deployment %s at %s...", getAppName(), appRootDir.getAbsolutePath()));
 
         ctx.handle(String.format("/deployment=%s:add(content=[{\"path\"=>\"%s\",\"archive\"=>false}], enabled=false)",
                 getAppName(), appRootDir.getAbsolutePath()));
@@ -204,7 +208,7 @@ logger.branch(Type.INFO, "Connecting to JBoss AS...");
    */
   private String getAppName() {
     // Deployment names must end with .war
-    return appRootDir.getName().endsWith(".war") ? appRootDir.getName() : appRootDir.getName() + ".war";
+    return context.endsWith(".war") ? context : context + ".war";
   }
 
 }
