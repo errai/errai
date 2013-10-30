@@ -23,6 +23,15 @@ import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.getConstructionStrategy;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.enterprise.inject.Specializes;
+import javax.inject.Named;
+
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -44,14 +53,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
-
-import javax.enterprise.inject.Specializes;
-import javax.inject.Named;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
@@ -104,7 +105,8 @@ public class TypeInjector extends AbstractInjector {
 
   @Override
   public void renderProvider(final InjectableInstance injectableInstance) {
-    if (isRendered() && isEnabled()) {
+    if ((isRendered() && isEnabled()) ||
+        injectableInstance.getInjectionContext().isBlacklisted(type)) {
       return;
     }
 
@@ -252,6 +254,7 @@ public class TypeInjector extends AbstractInjector {
     return qualifiers;
   }
 
+  @Override
   public boolean isPseudo() {
     return replaceable;
   }
@@ -266,6 +269,7 @@ public class TypeInjector extends AbstractInjector {
     return type;
   }
 
+  @Override
   public String getCreationalCallbackVarName() {
     return creationalCallbackVarName;
   }

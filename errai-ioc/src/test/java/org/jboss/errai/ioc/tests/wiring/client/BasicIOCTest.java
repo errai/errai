@@ -37,8 +37,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 
 @RunWith(IOCSimulatedTestRunner.class)
-//@Ignore
-public class  BasicIOCTest extends IOCClientTestCase {
+public class BasicIOCTest extends IOCClientTestCase {
 
   static {
     // Force classloading of SimpleBean so the package is discovered.
@@ -180,9 +179,6 @@ public class  BasicIOCTest extends IOCClientTestCase {
     assertNotNull(dependentBean);
     assertNotNull(dependentBean.getTestProvidedIface());
     assertEquals("foo", dependentBean.getTestProvidedIface().getText());
-
-
-
   }
-
+  
 }

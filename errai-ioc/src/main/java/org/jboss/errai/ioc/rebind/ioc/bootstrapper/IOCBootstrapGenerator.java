@@ -103,6 +103,7 @@ public class IOCBootstrapGenerator {
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String ENABLED_ALTERNATIVES_PROPERTY = "errai.ioc.enabled.alternatives";
+  public static final String BLACKLIST_PROPERTY = "errai.ioc.blacklist";
   public static final String EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY
       = "errai.ioc.experimental.infer_dependent_by_reachability";
 
@@ -247,6 +248,14 @@ public class IOCBootstrapGenerator {
         for (final String alternative : alternatives) {
           injectionContextBuilder.enabledAlternative(alternative.trim());
         }
+      }
+    }
+    
+    final Collection<String> blackList = props.get(BLACKLIST_PROPERTY);
+    for (final String list : blackList) {
+      final String[] types = list.split("\\s");
+      for (final String type : types) {
+        injectionContextBuilder.addToBlacklist(type.trim());
       }
     }
 

@@ -21,18 +21,7 @@ import static java.util.Collections.unmodifiableCollection;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Stereotype;
@@ -58,7 +47,6 @@ import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +76,7 @@ public class InjectionContext {
   private final ReachableTypes reachableTypes;
 
   private final Set<String> enabledAlternatives;
+  private final Set<String> blacklist;
 
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
@@ -119,6 +108,7 @@ public class InjectionContext {
     this.processingContext = builder.processingContext;
     this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(builder.enabledAlternatives));
     this.reachableTypes = Assert.notNull(builder.reachableTypes);
+    this.blacklist = Assert.notNull(builder.blacklist);
     this.async = builder.async;
     this.injectorFactory = new InjectorFactory(this.async);
   }
@@ -128,6 +118,7 @@ public class InjectionContext {
     private ReachableTypes reachableTypes = ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     private boolean async;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
+    private final HashSet<String> blacklist = new HashSet<String>();
 
     public static Builder create() {
       return new Builder();
@@ -140,6 +131,11 @@ public class InjectionContext {
 
     public Builder enabledAlternative(final String fqcn) {
       enabledAlternatives.add(fqcn);
+      return this;
+    }
+    
+    public Builder addToBlacklist(final String item) {
+      blacklist.add(item);
       return this;
     }
 
@@ -377,6 +373,24 @@ public class InjectionContext {
     return false;
   }
 
+  public boolean isBlacklisted(final MetaClass type) {
+    String fcqn = type.getFullyQualifiedName();
+    for (String blacklistItem : blacklist) {
+      if (blacklistItem.endsWith(".*")) {
+        if (fcqn.startsWith(blacklistItem.substring(0, blacklistItem.length() - 1))) {
+          return true;
+        }
+      }
+      else {
+        if (fcqn.equals(blacklistItem)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+  
   public List<Injector> getInjectors(final MetaClass type) {
     List<Injector> injectorList = injectors.get(type);
     if (injectorList == null) {
