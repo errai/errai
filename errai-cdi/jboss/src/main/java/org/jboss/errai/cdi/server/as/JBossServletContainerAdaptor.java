@@ -32,7 +32,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
    * Initialize the command context for a remote JBoss AS instance.
    * 
    * @param port
-   *          The port to which the JBoss instance binds. (not yet implemented!)
+   *          The port to which the JBoss instance binds.
    * @param appRootDir
    *          The exploded war directory to be deployed.
    * @param context
