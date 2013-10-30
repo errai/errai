@@ -70,16 +70,20 @@ public class MetaDataScannerTest {
     assertNotNull("Jar file not found: " + jarFile, testJarURL);
 
     ClassLoader loader = URLClassLoader.newInstance(new URL[] { testJarURL }, getClass().getClassLoader());
+    /*
+     * Errai Common now has an ErraiApp.properties file.
+     * Thus the temporary properties file made in this test will be the second url returned.
+     */
     List<URL> urls = MetaDataScanner.getConfigUrls(loader);
     assertFalse("No URLs returned", urls.isEmpty());
-    String[] segments = urls.get(0).getPath().split("/");
+    String[] segments = urls.get(1).getPath().split("/");
 
     assertTrue("No path segments found in URL", segments.length > 0);
     assertEquals("URL not properly decoded", jarFile.getName() +"!", segments[segments.length - 1]);
-    assertNotNull("Could not open jar", new ZipDir(urls.get(0)).getFiles());
+    assertNotNull("Could not open jar", new ZipDir(urls.get(1)).getFiles());
 
     Set<String> zipContents = new TreeSet<String>();
-    for (Vfs.File path : new ZipDir(urls.get(0)).getFiles()) {
+    for (Vfs.File path : new ZipDir(urls.get(1)).getFiles()) {
       if (!path.getRelativePath().endsWith("/")) {
         zipContents.add(path.getRelativePath());
       }
