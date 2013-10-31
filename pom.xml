@@ -1469,7 +1469,25 @@
                             <id>generate-all</id>
                             <phase>package</phase>
                             <configuration>
-                                <excludePackageNames>*.demo:*.example:*.samples:*.test:javax:com.google:java.lang:*.bootstrap:org.jboss.servlet</excludePackageNames>
+                                <excludePackageNames>*.demo:*.example:*.samples:*.test:com.google:java.lang:*.bootstrap:org.jboss.servlet</excludePackageNames>
+                                <groups>
+                                    <group>
+                                        <title>Errai Messaging</title>
+                                        <packages>org.jboss.errai.bus.client:org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.api.base:org.jboss.errai.bus.client.api.messaging:org.jboss.errai.bus.server.annotations:org.jboss.errai.server.api</packages>
+                                    </group>
+                                    <group>
+                                        <title>Errai CDI</title>
+                                        <packages>org.jboss.errai.common.client.api.annotation:org.jboss.errai.enterprise.client.cdi.api:org.jboss.errai.enterprise.client.cdi.events</packages>
+                                    </group>
+                                    <group>
+                                        <title>Errai UI, Navigation, and Databinding</title>
+                                        <packages>org.jboss.errai.databinding.client.api:org.jboss.errai.ui.client.widget:org.jboss.errai.ui.nav.client.local:org.jboss.errai.ui.rebind.less:org.jboss.errai.ui.shared.api*</packages>
+                                    </group>
+                                    <group>
+                                        <title>Errai IOC</title>
+                                        <packages>org.jboss.errai.ioc.client.api:javax.inject</packages>
+                                    </group>
+                                </groups>
                             </configuration>
                             <goals>
                                 <goal>aggregate-jar</goal>
