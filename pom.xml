@@ -1455,6 +1455,30 @@
             </dependencies>
         </dependencyManagement>
     </profile>
+    
+    <profile>
+        <id>javadoc</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>generate-all</id>
+                            <phase>package</phase>
+                            <configuration>
+                                <excludePackageNames>*.demo:*.example:*.samples:*.test:javax:com.google:java.lang:*.bootstrap:org.jboss.servlet</excludePackageNames>
+                            </configuration>
+                            <goals>
+                                <goal>aggregate-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
   </profiles>
 
 </project>
