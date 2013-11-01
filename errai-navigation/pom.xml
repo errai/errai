@@ -13,7 +13,7 @@
    <parent>
       <artifactId>errai-parent</artifactId>
       <groupId>org.jboss.errai</groupId>
-      <version>3.0.0.20131101-M2</version>
+      <version>3.0-SNAPSHOT</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
 
