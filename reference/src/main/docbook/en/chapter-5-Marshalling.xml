@@ -231,7 +231,7 @@ public class Person {
       return this;
     }
 
-    public BuilderEntity build() {
+    public Person build() {
       return new Person(name, age);
     }
   }

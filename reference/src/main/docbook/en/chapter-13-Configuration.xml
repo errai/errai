@@ -334,10 +334,37 @@ bus. Set this
           <code>org.jboss.errai.bus.server.servlet</code>
           .
         </para>
-         <note>
+         <important>
             <title>One is Enough!</title>
             <para>You should use just one of the options below. Configuring multiple ErraiServlet implementations in the same application will lead to unpredictable behaviour!</para>
             <para>Remember that all Errai demos and archetypes are preconfigured with DefaultBlockingServlet as a servlet. You will need to remove this default setup if you choose to use a different ErraiServlet implementation in your app.</para>
+         </important>
+         <note>
+            <title>Rolling your own security? Beware!</title>
+            <para>
+            All of the following examples use a wildcard mapping for
+            <code>*.erraiBus</code>
+            with no path prefix. This allows Errai Bus to communicate from any point in your application's URI hierarchy, which allows bus communication to work properly no matter where you choose to put your GWT host page.
+          </para>
+            <para>For example, all of the following are equivalent from Errai's point of view:</para>
+            <itemizedlist>
+               <listitem>
+                  <para>/in.erraiBus</para>
+               </listitem>
+               <listitem>
+                  <para>/foo/bar/in.erraiBus</para>
+               </listitem>
+               <listitem>
+                  <para>/long/path/to/get/to.erraiBus</para>
+               </listitem>
+            </itemizedlist>
+            <para>
+            If you rely on your own security rules or a custom security filter to control access to Errai Bus (rather than the security framework within Errai Bus,) ensure you use the same mapping pattern for that
+            <code>filter-mapping</code>
+            or
+            <code>security-constraint</code>
+            as you do for the Errai Servlet itself.
+          </para>
          </note>
          <section id="sid-5931338_Messaging%28ErraiBus%29Configuration-DefaultBlockingServlet">
             <title>DefaultBlockingServlet</title>
