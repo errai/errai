@@ -185,6 +185,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jboss.weld.servlet</groupId>
+      <artifactId>weld-servlet-core</artifactId>
+      <scope>${weld.scope}</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
       <scope>${weld.scope}</scope>
