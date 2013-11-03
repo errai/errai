@@ -106,7 +106,7 @@ public class TypeInjector extends AbstractInjector {
   @Override
   public void renderProvider(final InjectableInstance injectableInstance) {
     if ((isRendered() && isEnabled()) ||
-        injectableInstance.getInjectionContext().isBlacklisted(type)) {
+        !injectableInstance.getInjectionContext().isIncluded(type)) {
       return;
     }
 
