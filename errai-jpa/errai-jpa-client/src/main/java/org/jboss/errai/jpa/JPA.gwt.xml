@@ -8,6 +8,11 @@
   <inherits name="org.jboss.errai.databinding.DataBinding"/>
   <inherits name="de.benediktmeurer.gwt.slf4j.api.API"/>
   <inherits name="de.benediktmeurer.gwt.slf4j.jul.JUL"/>
+  <inherits name="com.google.gwt.logging.Logging"/>
+  
+  <set-property name="gwt.logging.logLevel" value="FINEST"/>
+  <set-property name="gwt.logging.systemHandler" value="ENABLED" />
+  <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
 
   <super-source path="api"/>
   <source path="client" />
