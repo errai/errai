@@ -47,7 +47,7 @@ public class WhiteListingBeansIntegrationTest extends AbstractErraiIOCTest {
       IOC.getBeanManager().lookupBean(WhitelistedBean.class).getInstance();
     }
     catch (final IOCResolutionException e) {
-      fail("Should not be able to resolve a whitelisted bean!");
+      fail("Should be able to resolve a whitelisted bean!");
     }
   }
 }
