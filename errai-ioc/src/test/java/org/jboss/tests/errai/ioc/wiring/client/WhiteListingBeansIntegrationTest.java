@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client;
+package org.jboss.tests.errai.ioc.wiring.client;
 
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-import org.jboss.errai.ioc.tests.wiring.client.res2.NotWhitelistedBean;
-import org.jboss.errai.ioc.tests.wiring.client.res2.WhitelistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res2.NotWhitelistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res2.WhitelistedAndBlacklistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res2.WhitelistedBean;
 
 /**
  * @author (htfv) Aliaksei Lahachou
@@ -29,7 +30,7 @@ public class WhiteListingBeansIntegrationTest extends AbstractErraiIOCTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
+    return "org.jboss.tests.errai.ioc.wiring.IOCWiringTests";
   }
 
   public void testNotWhitelistedPackage() throws Exception {
@@ -48,6 +49,16 @@ public class WhiteListingBeansIntegrationTest extends AbstractErraiIOCTest {
     }
     catch (final IOCResolutionException e) {
       fail("Should be able to resolve a whitelisted bean!");
+    }
+  }
+
+  public void testWhitelistedAndBlacklistedBean() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(WhitelistedAndBlacklistedBean.class).getInstance();
+      fail("Should not be able to resolve a whitelisted bean if it is blacklisted!");
+    }
+    catch (final IOCResolutionException e) {
+      // expected
     }
   }
 }

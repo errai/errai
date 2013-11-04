@@ -79,6 +79,9 @@ public class InjectionContext {
   private final Set<String> whitelist;
   private final Set<String> blacklist;
 
+  private static final Collection<String> implicitWhitelist = Arrays.asList(
+          "org.jboss.errai.*");
+
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
   private final Multimap<Class<? extends Annotation>, Class<? extends Annotation>> metaAnnotationAliases
@@ -388,6 +391,12 @@ public class InjectionContext {
   public boolean isWhitelisted(final MetaClass type) {
     if (whitelist.isEmpty()) {
       return true;
+    }
+
+    for (final String whitelistMask : implicitWhitelist) {
+      if (match(type, whitelistMask)) {
+        return true;
+      }
     }
 
     for (final String whitelistMask : whitelist) {
