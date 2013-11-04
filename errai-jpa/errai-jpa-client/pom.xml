@@ -36,13 +36,11 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-data-binding</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -65,6 +63,12 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+        <groupId>de.benediktmeurer.gwt-slf4j</groupId>
+        <artifactId>gwt-slf4j</artifactId>
+        <version>0.0.2</version>
     </dependency>
 
   </dependencies>

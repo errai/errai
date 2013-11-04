@@ -6,6 +6,8 @@
   <inherits name="org.jboss.errai.marshalling.ErraiMarshalling" />
   <inherits name="org.jboss.errai.ioc.Container"/>
   <inherits name="org.jboss.errai.databinding.DataBinding"/>
+  <inherits name="de.benediktmeurer.gwt.slf4j.api.API"/>
+  <inherits name="de.benediktmeurer.gwt.slf4j.jul.JUL"/>
 
   <super-source path="api"/>
   <source path="client" />
