@@ -28,6 +28,8 @@ import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.StorageBackendFactory;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Errai implementation and specialization of the JPA 2.0 EntityManager interface.
@@ -74,6 +76,11 @@ public class ErraiEntityManager implements EntityManager {
    * GeneratedErraiEntityManager subclass.
    */
   final Map<String, TypedQueryFactory> namedQueries;
+  
+  /**
+   * The logging interface.
+   */
+  private final Logger logger;
 
   /**
    * Constructor for building custom-purpose EntityManager instances. For common
@@ -87,6 +94,7 @@ public class ErraiEntityManager implements EntityManager {
     this.metamodel = Assert.notNull(metamodel);
     this.namedQueries = Assert.notNull(namedQueries);
     this.persistenceContext = new PersistenceContext(metamodel);
+    this.logger = LoggerFactory.getLogger(ErraiEntityManager.class);
 
     // Caution: we're handing out a reference to this partially constructed instance!
     this.backend = storageBackendFactory.createInstanceFor(this);
@@ -175,7 +183,7 @@ public class ErraiEntityManager implements EntityManager {
     final Key<X, ?> key = keyFor(entityType, entity);
     final EntityState oldState = getState(key, entity);
 
-    System.out.println("+++ Performing " + newState + " operation on " + oldState + " entity: " + entity);
+    logger.trace("+++ Performing " + newState + " operation on " + oldState + " entity: " + entity);
     X entityToReturn = entity;
 
     switch (newState) {
@@ -401,13 +409,13 @@ public class ErraiEntityManager implements EntityManager {
     }
 
     R sourceRelatedEntity = cascadeAcross.get(sourceEntity);
-    System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + sourceRelatedEntity + "?");
+    logger.trace("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + sourceRelatedEntity + "?");
 
     if (sourceRelatedEntity == null) {
-      System.out.println("    No (because it's null)");
+      logger.trace("    No (because it's null)");
     }
     else if (cascadeAcross.cascades(cascadeType)) {
-      System.out.println("    Yes");
+      logger.trace("    Yes");
       if (cascadeAcross.isCollection()) {
         R collectionOfMergeTargets = ((ErraiPluralAttribute<X, R, ?>) cascadeAcross).createEmptyCollection();
         for (Object element : (Iterable<?>) sourceRelatedEntity) {
@@ -429,7 +437,7 @@ public class ErraiEntityManager implements EntityManager {
       }
     }
     else {
-      System.out.println("    No");
+      logger.trace("    No");
       R resolvedTargetRelatedEntity = cascadeAcross.get(targetEntity);
       boolean relatedEntitiesAreManaged = true;
       if (cascadeAcross.isCollection()) {

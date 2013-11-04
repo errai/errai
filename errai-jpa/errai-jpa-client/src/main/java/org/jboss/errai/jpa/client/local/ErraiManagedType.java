@@ -17,6 +17,8 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNull;
@@ -40,9 +42,12 @@ public abstract class ErraiManagedType<X> implements ManagedType<X> {
 
   protected final Class<X> javaType;
   private Collection<ErraiManagedType<X>> subtypes = new HashSet<ErraiManagedType<X>>();
+  
+  private final Logger logger;
 
   public ErraiManagedType(Class<X> javaType) {
     this.javaType = javaType;
+    this.logger = LoggerFactory.getLogger(ErraiManagedType.class);
   }
 
   public <Y> void addAttribute(Attribute<X, Y> attribute) {
@@ -391,7 +396,7 @@ public abstract class ErraiManagedType<X> implements ManagedType<X> {
     if (attrJsonValue == null || attrJsonValue.isNull() != null) return;
 
     Key<Y, ?> key = (Key<Y, ?>) Key.fromJsonObject(eem, attrJsonValue.isObject(), true);
-    System.out.println("   looking for " + key);
+    logger.trace("   looking for " + key);
     Y value = eem.find(key, Collections.<String,Object>emptyMap());
     attr.set(targetEntity, value);
   }
@@ -411,7 +416,7 @@ public abstract class ErraiManagedType<X> implements ManagedType<X> {
     for (int i = 0; i < attrJsonValues.size(); i++) {
       Key<E, ?> key = (Key<E, ?>) Key.fromJsonObject(eem, attrJsonValues.get(i).isObject(), true);
 
-      System.out.println("   looking for " + key);
+      logger.trace("   looking for " + key);
       E value = eem.getPartiallyConstructedEntity(key);
       if (value == null) {
         value = eem.find(key, Collections.<String,Object>emptyMap());

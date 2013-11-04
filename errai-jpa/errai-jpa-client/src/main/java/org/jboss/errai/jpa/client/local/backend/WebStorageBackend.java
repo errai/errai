@@ -10,6 +10,8 @@ import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.ErraiManagedType;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.Key;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -39,6 +41,8 @@ public class WebStorageBackend implements StorageBackend {
 
   private final ErraiEntityManager em;
   private final String namespace;
+  
+  private final Logger logger;
 
   /**
    * Creates a WebStorageBackend that works with entities in the default storage
@@ -65,6 +69,7 @@ public class WebStorageBackend implements StorageBackend {
   public WebStorageBackend(ErraiEntityManager erraiEntityManager, String namespace) {
     em = Assert.notNull(erraiEntityManager);
     this.namespace = Assert.notNull(namespace);
+    this.logger = LoggerFactory.getLogger(WebStorageBackend.class);
   }
 
   @Override
@@ -92,7 +97,7 @@ public class WebStorageBackend implements StorageBackend {
     ErraiManagedType<X> entityType = key.getEntityType();
     String keyJson = namespace + key.toJson();
     JSONValue valueJson = entityType.toJson(em, value);
-    System.out.println(">>>put '" + keyJson + "'");
+    logger.trace(">>>put '" + keyJson + "'");
     LocalStorage.put(keyJson, valueJson.toString());
   }
 
@@ -102,11 +107,11 @@ public class WebStorageBackend implements StorageBackend {
       Key<X, ?> key = new Key<X, Object>((ErraiManagedType<X>) entityType, (Object) requestedKey.getId());
       String keyJson = namespace + key.toJson();
       String valueJson = LocalStorage.get(keyJson);
-      System.out.println("<<<get '" + keyJson + "' : " + valueJson);
+      logger.trace("<<<get '" + keyJson + "' : " + valueJson);
       X entity;
       if (valueJson != null) {
         entity = entityType.fromJson(em, JSONParser.parseStrict(valueJson));
-        System.out.println("   returning " + entity);
+        logger.trace("   returning " + entity);
         return entity;
       }
     }
@@ -123,9 +128,9 @@ public class WebStorageBackend implements StorageBackend {
       public void visit(String key, String value) {
         Key<?, ?> k = parseNamespacedKey(em, key, false);
         if (k == null) return;
-        System.out.println("getAll(): considering " + value);
+        logger.trace("getAll(): considering " + value);
         if (type.isSuperclassOf(k.getEntityType())) {
-          System.out.println(" --> correct type");
+          logger.trace(" --> correct type");
           JSONObject candidate = JSONParser.parseStrict(value).isObject();
           Assert.notNull(candidate);
           if (matcher.matches(candidate)) {
@@ -139,11 +144,11 @@ public class WebStorageBackend implements StorageBackend {
             entities.add((X) em.find(k.getEntityType().getJavaType(), typedKey.getId()));
           }
           else {
-            System.out.println(" --> but not a match");
+            logger.trace(" --> but not a match");
           }
         }
         else {
-          System.out.println(" --> wrong type");
+          logger.trace(" --> wrong type");
         }
       }
     });
@@ -157,7 +162,7 @@ public class WebStorageBackend implements StorageBackend {
       Key<?, ?> k = new Key<X, Y>(type, key.getId());
       String keyJson = namespace + k.toJson();
       contains = LocalStorage.get(keyJson) != null;
-      System.out.println("<<<contains '" + keyJson + "' : " + contains);
+      logger.trace("<<<contains '" + keyJson + "' : " + contains);
       if (contains) break;
     }
     return contains;
@@ -177,9 +182,9 @@ public class WebStorageBackend implements StorageBackend {
     JSONValue oldValueJson = JSONParser.parseStrict(LocalStorage.get(keyJson));
     boolean modified = !JsonUtil.equals(newValueJson, oldValueJson);
     if (modified) {
-      System.out.println("Detected modified entity " + key);
-      System.out.println("   Old: " + oldValueJson);
-      System.out.println("   New: " + newValueJson);
+      logger.trace("Detected modified entity " + key);
+      logger.trace("   Old: " + oldValueJson);
+      logger.trace("   New: " + newValueJson);
     }
     return modified;
   }

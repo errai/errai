@@ -94,6 +94,8 @@ import org.jboss.errai.jpa.client.local.IntIdGenerator;
 import org.jboss.errai.jpa.client.local.LongIdGenerator;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -104,6 +106,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   private final static String GENERATED_PACKAGE = ErraiEntityManager.class.getPackage().getName();
   private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManagerFactory";
   private static final List<Class<? extends Annotation>> LIFECYCLE_EVENT_TYPES;
+  private final Logger logger = LoggerFactory.getLogger(ErraiEntityManager.class);
 
   static {
     List<Class<? extends Annotation>> l = new ArrayList<Class<? extends Annotation>>();
@@ -210,11 +213,9 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
     RebindUtils.writeStringToFile(cacheFile, out);
 
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---ErraiEntityManager-->");
-      System.out.println(out);
-      System.out.println("<--ErraiEntityManager---");
-    }
+    this.logger.debug("---ErraiEntityManager-->");
+    this.logger.debug(out);
+    this.logger.debug("<--ErraiEntityManager---");
 
     return out;
   }
