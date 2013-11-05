@@ -214,6 +214,7 @@
           <runTarget>http://localhost:8080/aerogear/index.html</runTarget>
           <soyc>false</soyc>
           <webappDirectory>src/main/webapp</webappDirectory>
+          <strict>true</strict>
         </configuration>
       </plugin>
       <plugin>

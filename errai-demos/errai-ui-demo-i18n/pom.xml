@@ -171,6 +171,7 @@
           <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:MaxPermSize=256m -XX:CompileThreshold=1000</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <logLevel>INFO</logLevel>
+          <strict>true</strict>
         </configuration>
         <executions>
           <execution>

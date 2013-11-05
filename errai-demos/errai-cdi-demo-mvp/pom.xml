@@ -296,6 +296,7 @@
           <disableCastChecking>true</disableCastChecking>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
+          <strict>true</strict>
         </configuration>
         <executions>
           <execution>

@@ -190,6 +190,7 @@
           <extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <webappDirectory>src/main/webapp/</webappDirectory>
+          <strict>true</strict>
         </configuration>
         <executions>
           <execution>
