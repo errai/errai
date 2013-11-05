@@ -76,7 +76,10 @@ public class InjectionContext {
   private final ReachableTypes reachableTypes;
 
   private final Set<String> enabledAlternatives;
+  private final Set<String> whitelist;
   private final Set<String> blacklist;
+
+  private static final String[] implicitWhitelist = { "org.jboss.errai.*" };
 
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
@@ -108,6 +111,7 @@ public class InjectionContext {
     this.processingContext = builder.processingContext;
     this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(builder.enabledAlternatives));
     this.reachableTypes = Assert.notNull(builder.reachableTypes);
+    this.whitelist = Assert.notNull(builder.whitelist);
     this.blacklist = Assert.notNull(builder.blacklist);
     this.async = builder.async;
     this.injectorFactory = new InjectorFactory(this.async);
@@ -118,6 +122,7 @@ public class InjectionContext {
     private ReachableTypes reachableTypes = ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     private boolean async;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
+    private final HashSet<String> whitelist = new HashSet<String>();
     private final HashSet<String> blacklist = new HashSet<String>();
 
     public static Builder create() {
@@ -133,7 +138,12 @@ public class InjectionContext {
       enabledAlternatives.add(fqcn);
       return this;
     }
-    
+
+    public Builder addToWhitelist(final String item) {
+      whitelist.add(item);
+      return this;
+    }
+
     public Builder addToBlacklist(final String item) {
       blacklist.add(item);
       return this;
@@ -373,24 +383,48 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isBlacklisted(final MetaClass type) {
-    String fcqn = type.getFullyQualifiedName();
-    for (String blacklistItem : blacklist) {
-      if (blacklistItem.endsWith(".*")) {
-        if (fcqn.startsWith(blacklistItem.substring(0, blacklistItem.length() - 1))) {
-          return true;
-        }
-      }
-      else {
-        if (fcqn.equals(blacklistItem)) {
-          return true;
-        }
+  public boolean isIncluded(final MetaClass type) {
+    return isWhitelisted(type) && !isBlacklisted(type);
+  }
+
+  public boolean isWhitelisted(final MetaClass type) {
+    if (whitelist.isEmpty()) {
+      return true;
+    }
+
+    for (final String whitelistMask : implicitWhitelist) {
+      if (match(type, whitelistMask)) {
+        return true;
       }
     }
-    
+
+    for (final String whitelistMask : whitelist) {
+      if (match(type, whitelistMask)) {
+        return true;
+      }
+    }
+
     return false;
   }
-  
+
+  public boolean isBlacklisted(final MetaClass type) {
+    for (final String blacklistItem : blacklist) {
+      if (match(type, blacklistItem)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean match(final MetaClass type, final String mask) {
+    final String fcqn = type.getFullyQualifiedName();
+    if (mask.endsWith("*")) {
+      return fcqn.startsWith(mask.substring(0, mask.length() - 1));
+    } else {
+      return fcqn.equals(mask);
+    }
+  }
+
   public List<Injector> getInjectors(final MetaClass type) {
     List<Injector> injectorList = injectors.get(type);
     if (injectorList == null) {
