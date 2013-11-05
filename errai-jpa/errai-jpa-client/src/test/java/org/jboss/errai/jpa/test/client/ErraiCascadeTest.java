@@ -10,11 +10,10 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.CascadeFrom;
 import org.jboss.errai.jpa.test.entity.CascadeThirdGeneration;
 import org.jboss.errai.jpa.test.entity.CascadeTo;
-
-import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Tests the cascade behaviour for entity state changes under Errai's JPA EntityManager.
@@ -25,7 +24,7 @@ import com.google.gwt.junit.client.GWTTestCase;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class ErraiCascadeTest extends GWTTestCase {
+public class ErraiCascadeTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {

@@ -9,9 +9,8 @@ import org.jboss.errai.jpa.client.local.backend.LocalStorage;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.StorageBackendFactory;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.Genre;
-
-import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Tests the JPA EntityManager facilities provided by Errai JPA.
@@ -22,7 +21,7 @@ import com.google.gwt.junit.client.GWTTestCase;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class NamespacedEntityManagerTest extends GWTTestCase {
+public class NamespacedEntityManagerTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {

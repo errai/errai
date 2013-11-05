@@ -18,20 +18,19 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
 import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
 import org.jboss.errai.jpa.test.entity.TestingGlobalEntityListener;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
-import com.google.gwt.junit.client.GWTTestCase;
-
 /**
  * Tests the client-side {@link GlobalEntityListener} annotation.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class GlobalEntityListenerTest extends GWTTestCase {
+public class GlobalEntityListenerTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {

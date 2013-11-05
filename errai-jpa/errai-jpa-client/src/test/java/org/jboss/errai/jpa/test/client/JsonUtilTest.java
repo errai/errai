@@ -1,11 +1,11 @@
 package org.jboss.errai.jpa.test.client;
 
 import org.jboss.errai.jpa.client.local.JsonUtil;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 
 import com.google.gwt.json.client.JSONNull;
-import com.google.gwt.junit.client.GWTTestCase;
 
-public class JsonUtilTest extends GWTTestCase {
+public class JsonUtilTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {

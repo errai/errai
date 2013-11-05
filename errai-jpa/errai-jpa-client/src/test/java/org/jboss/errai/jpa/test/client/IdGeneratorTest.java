@@ -8,13 +8,12 @@ import javax.persistence.EntityManager;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.EntityWithBigIntegerId;
 import org.jboss.errai.jpa.test.entity.EntityWithBoxedIntId;
 import org.jboss.errai.jpa.test.entity.EntityWithBoxedLongId;
 import org.jboss.errai.jpa.test.entity.EntityWithPrimitiveIntId;
 import org.jboss.errai.jpa.test.entity.EntityWithPrimitiveLongId;
-
-import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Tests the ability of Errai JPA to generate key values for all allowable
@@ -22,7 +21,7 @@ import com.google.gwt.junit.client.GWTTestCase;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class IdGeneratorTest extends GWTTestCase {
+public class IdGeneratorTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {

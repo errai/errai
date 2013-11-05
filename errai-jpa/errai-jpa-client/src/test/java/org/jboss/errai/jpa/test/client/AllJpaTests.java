@@ -40,5 +40,4 @@ import org.junit.runners.Suite;
   JsonUtilTest.class,
   NamespacedEntityManagerTest.class})
 public class AllJpaTests {
-
 }

@@ -12,6 +12,7 @@ import javax.persistence.metamodel.Metamodel;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfAbstractParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfConcreteParentEntity;
 import org.jboss.errai.jpa.test.entity.inherit.GrandchildOfConcreteParentEntity;
@@ -19,8 +20,6 @@ import org.jboss.errai.jpa.test.entity.inherit.IdTestingEntity1;
 import org.jboss.errai.jpa.test.entity.inherit.IdTestingEntity2;
 import org.jboss.errai.jpa.test.entity.inherit.ParentAbstractEntity;
 import org.jboss.errai.jpa.test.entity.inherit.ParentConcreteEntity;
-
-import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Tests the JPA EntityManager facilities provided by Errai JPA.
@@ -31,7 +30,7 @@ import com.google.gwt.junit.client.GWTTestCase;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class InheritanceTest extends GWTTestCase {
+public class InheritanceTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {

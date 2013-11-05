@@ -15,19 +15,18 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
 import org.jboss.errai.jpa.test.entity.Format;
 import org.jboss.errai.jpa.test.entity.Zentity;
-
-import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Tests the query behaviour of Errai JPA.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class QueryTest extends GWTTestCase {
+public class QueryTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {

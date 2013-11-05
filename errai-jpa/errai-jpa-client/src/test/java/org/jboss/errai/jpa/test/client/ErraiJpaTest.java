@@ -30,6 +30,7 @@ import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.LocalStorage;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
+import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
 import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
@@ -42,7 +43,6 @@ import org.jboss.errai.jpa.test.entity.Zentity;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
@@ -54,7 +54,7 @@ import com.google.gwt.user.client.ui.TextBox;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class ErraiJpaTest extends GWTTestCase {
+public class ErraiJpaTest extends JpaClientTestCase {
 
   @Override
   public String getModuleName() {
