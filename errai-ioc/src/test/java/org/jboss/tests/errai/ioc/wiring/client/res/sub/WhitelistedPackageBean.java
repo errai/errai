@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.tests.errai.ioc.wiring.client.res2;
+package org.jboss.tests.errai.ioc.wiring.client.res.sub;
 
 import javax.inject.Singleton;
 
 @Singleton
-public class WhitelistedAndBlacklistedBean {
+public class WhitelistedPackageBean {
+
 }

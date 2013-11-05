@@ -19,12 +19,14 @@ package org.jboss.tests.errai.ioc.wiring.client;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-import org.jboss.tests.errai.ioc.wiring.client.res2.NotWhitelistedBean;
-import org.jboss.tests.errai.ioc.wiring.client.res2.WhitelistedAndBlacklistedBean;
-import org.jboss.tests.errai.ioc.wiring.client.res2.WhitelistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res.NotWhitelistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res.WhitelistedAndBlacklistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res.WhitelistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res.sub.WhitelistedPackageBean;
 
 /**
  * @author (htfv) Aliaksei Lahachou
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class WhiteListingBeansIntegrationTest extends AbstractErraiIOCTest {
 
@@ -59,6 +61,15 @@ public class WhiteListingBeansIntegrationTest extends AbstractErraiIOCTest {
     }
     catch (final IOCResolutionException e) {
       // expected
+    }
+  }
+  
+  public void testWhitelistedPackage() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(WhitelistedPackageBean.class).getInstance();
+    }
+    catch (IOCResolutionException e) {
+      fail("Should be able to resolve a bean in a whitelisted package!");
     }
   }
 }
