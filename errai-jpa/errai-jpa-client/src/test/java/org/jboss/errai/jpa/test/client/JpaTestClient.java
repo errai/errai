@@ -22,7 +22,7 @@ public class JpaTestClient {
     logger = LoggerFactory.getLogger(JpaTestClient.class);
     fallbackToSessionStorage();
     if (INSTANCE != null) {
-      logger.warn("overwriting JpaTestClient singleton reference from " + INSTANCE + " to " + this);
+      logger.debug("overwriting JpaTestClient singleton reference from " + INSTANCE + " to " + this);
     }
     INSTANCE = this;
   }
