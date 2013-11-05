@@ -62,6 +62,12 @@
       <artifactId>shrinkwrap-impl-base</artifactId>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>de.benediktmeurer.gwt-slf4j</groupId>
+      <artifactId>gwt-slf4j</artifactId>
+      <version>0.0.2</version>
+    </dependency>
 
   </dependencies>
 </project>
