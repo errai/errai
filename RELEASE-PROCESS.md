@@ -55,7 +55,7 @@ Release Steps
 
 1. Create the a-la-carte binary Errai distribution and docs
 
-        % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
+        % mvn install -Pdistro,javadoc -Dmaven.test.skip=true -Dgwt.compiler.skip=true
         
 1. Deploy the Errai Cordova project template
 
