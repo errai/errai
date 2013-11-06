@@ -48,6 +48,8 @@
                 <include>org.jboss.errai:errai-javax-enterprise</include>
                 <include>org.jboss.errai:errai-weld-integration</include>
                 <include>org.jboss.errai:errai-cdi-jetty</include>
+                <include>org.jboss.errai:errai-cdi-jboss</include>
+                <include>org.jboss.errai:errai-client-local-class-hider</include>
                 <include>org.jboss.errai:errai-jaxrs-client</include>
                 <include>org.jboss.errai:errai-jaxrs-provider</include>
                 <include>org.jboss.errai:errai-uibinder</include>
