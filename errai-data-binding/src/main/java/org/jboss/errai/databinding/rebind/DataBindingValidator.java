@@ -40,7 +40,8 @@ public class DataBindingValidator {
    * @return True if the given property chain is resolvable from the given bindable type.
    */
   public static boolean isValidPropertyChain(MetaClass bindableType, String propertyChain) {
-    if (!bindableType.isAnnotationPresent(Bindable.class)) {
+    if (!bindableType.isAnnotationPresent(Bindable.class) && 
+        !DataBindingUtil.getConfiguredBindableTypes().contains(bindableType)) {
       return false;
     }
 

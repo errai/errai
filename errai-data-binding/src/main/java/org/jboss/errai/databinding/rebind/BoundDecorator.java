@@ -92,8 +92,9 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
         throw new GenerationException("Invalid binding of field " + ctx.getMemberName()
             + " in class " + ctx.getInjector().getInjectedType() + "! Property " + property
-            + " not resolvable from class " + binderLookup.getDataModelType() +
-            ". Hint: All types in a property chain must be @Bindable!");
+            + " not resolvable from class " + binderLookup.getDataModelType()
+            + "! Hint: Is " + binderLookup.getDataModelType() + " marked as @Bindable? When binding to a "
+            + "property chain, all properties but the last in a chain must be of a @Bindable type!");
       }
 
       Statement widget = ctx.getValueStatement();
