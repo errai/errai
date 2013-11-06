@@ -86,8 +86,8 @@
             <outputDirectory>docs/reference</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../quickstart/target/docbook/publish/en</directory>
-            <outputDirectory>docs/quickstart</outputDirectory>
+            <directory>../target/apidocs/</directory>
+            <outputDirectory>docs/javadocs</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../errai-demos</directory>
