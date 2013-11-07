@@ -3,8 +3,8 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
 <module>
 
-   <inherits name="org.jboss.errai.ui.nav.Navigation" />
-
-   <source path="client"/>
+  <inherits name="org.jboss.errai.ui.nav.Navigation" />
+  <inherits name="org.jboss.errai.enterprise.CDI" />
+  <source path="client" />
 
 </module>

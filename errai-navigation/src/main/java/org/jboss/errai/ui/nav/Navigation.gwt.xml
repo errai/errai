@@ -2,11 +2,9 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
 <module>
-
    <inherits name="com.google.common.collect.Collect" />
    <inherits name="org.jboss.errai.common.ErraiCommon" />
    <inherits name="org.jboss.errai.ioc.Container" />
-   <inherits name="org.jboss.errai.enterprise.CDI" />
 
    <generate-with class="org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.spi.NavigationGraph"/>
@@ -15,5 +13,4 @@
    <replace-with class="org.jboss.errai.ui.nav.client.local.SimpleNavigationPanel">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/>
    </replace-with>
-
 </module>
