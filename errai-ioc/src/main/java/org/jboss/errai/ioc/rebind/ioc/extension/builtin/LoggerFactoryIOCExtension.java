@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.extension.builtin;
 
+import javax.inject.Named;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -37,14 +39,22 @@ public class LoggerFactoryIOCExtension implements IOCExtensionConfigurator {
       }
 
       @Override
+      @SuppressWarnings("unchecked")
       public Statement getBeanInstance(InjectableInstance injectableInstance) {
         setCreated(true);
         setRendered(true);
 
         final String loggerVarName = InjectUtil.getUniqueVarName();
-        final String enclosingClassName = injectableInstance.getEnclosingType().getFullyQualifiedName();
+        final String loggerName;
+        if (injectableInstance.isAnnotationPresent(Named.class)) {
+          loggerName = ((Named) injectableInstance.getAnnotation(Named.class)).value();
+        }
+        else {
+          loggerName = injectableInstance.getEnclosingType().getFullyQualifiedName();
+        }
+        
         context.append(Stmt.declareFinalVariable(loggerVarName, Logger.class,
-                Stmt.invokeStatic(LoggerFactory.class, "getLogger", enclosingClassName)));
+                Stmt.invokeStatic(LoggerFactory.class, "getLogger", loggerName)));
 
         if (injectionContext.isAsync()) {
           context.append(Stmt.loadVariable(InjectUtil.getVarNameFromType(MetaClassFactory.get(Logger.class),
