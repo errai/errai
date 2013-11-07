@@ -19,6 +19,7 @@
 <module>
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="org.jboss.errai.common.ErraiCommon"/>
+  <inherits name="org.jboss.errai.common.Logging"/>
   <inherits name="javax.enterprise.Support"/>
 
   <entry-point class='org.jboss.errai.ioc.client.Container'/>
