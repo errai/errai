@@ -24,6 +24,7 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
   MessageBus bus = ErraiBus.get();
   private boolean received;
   private Message receivedMessage;
+  private Timer timer;
   public final static String REPLY_TO_BASE = "AnnotationTester";
   public static String REPLY_TO;
   private static Integer counter = 0;
@@ -53,6 +54,7 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
 
   @Override
   protected void gwtTearDown() throws Exception {
+    timer.cancel();
     super.gwtTearDown();
     
     bus.unsubscribeAll(REPLY_TO);
@@ -178,7 +180,7 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
               }
             }).sendNowWith(bus);
 
-    new Timer() {
+    timer = new Timer() {
 
       @Override
       public void run() {
@@ -193,7 +195,8 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
           fail("Message should not have been received!");
         }
       }
-    }.scheduleRepeating(POLL);
+    };
+    timer.scheduleRepeating(POLL);
   }
 
   private void runServiceTest(final String subject, String command, String value) {
@@ -227,7 +230,7 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
       }
     }).sendNowWith(bus);
 
-    new Timer() {
+    timer = new Timer() {
 
       @Override
       public void run() {
@@ -242,7 +245,8 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
           finish.run();
         }
       }
-    }.scheduleRepeating(POLL);
+    };
+    timer.scheduleRepeating(POLL);
   }
 
 }
