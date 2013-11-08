@@ -13,6 +13,7 @@ import org.jboss.errai.cdi.injection.client.test.InjectionIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.InstanceInjectionIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.PostConstructOrderTest;
 import org.jboss.errai.cdi.invalid.producer.client.test.InvalidProducerIntegrationTest;
+import org.jboss.errai.cdi.producer.client.test.LoggerProviderTest;
 import org.jboss.errai.cdi.producer.client.test.ProducerIntegrationTest;
 import org.jboss.errai.cdi.rpc.client.test.RpcIntegrationTest;
 import org.jboss.errai.cdi.scheduler.client.test.TimedMethodAPITests;
@@ -43,7 +44,8 @@ import org.junit.runners.Suite;
     InstanceInjectionIntegrationTest.class,
     InvalidProducerIntegrationTest.class,
     RpcIntegrationTest.class,
-    TimedMethodAPITests.class
+    TimedMethodAPITests.class,
+    LoggerProviderTest.class
 })
 public class ErraiCDITestSuite {
 
