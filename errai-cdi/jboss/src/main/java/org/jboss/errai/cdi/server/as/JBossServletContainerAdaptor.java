@@ -1,11 +1,15 @@
 package org.jboss.errai.cdi.server.as;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.jboss.as.cli.CliInitializationException;
 import org.jboss.as.cli.CommandContext;
 import org.jboss.as.cli.CommandContextFactory;
 import org.jboss.as.cli.CommandLineException;
+import org.jboss.as.controller.client.helpers.ClientConstants;
+import org.jboss.as.controller.client.helpers.Operations;
+import org.jboss.dmr.ModelNode;
 import org.jboss.errai.cdi.server.gwt.util.StackTreeLogger;
 
 import com.google.gwt.core.ext.ServletContainer;
@@ -14,7 +18,8 @@ import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
- * Acts as a an adaptor between gwt's ServletContainer interface and a JBoss AS 7 instance.
+ * Acts as a an adaptor between gwt's ServletContainer interface and a JBoss AS
+ * 7 instance.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -53,6 +58,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
     CommandContext ctx = null;
     try {
+      // Create command context
       try {
         logger.branch(Type.INFO, "Creating new command context...");
 
@@ -66,35 +72,39 @@ public class JBossServletContainerAdaptor extends ServletContainer {
         throw new UnableToCompleteException();
       }
 
-      try {
-        logger.branch(Type.INFO, "Connecting to JBoss AS...");
+      attemptCommandContextConnection(9);
 
-        ctx.handle("connect localhost:9999");
-
-        logger.log(Type.INFO, "Connected to JBoss AS");
-        logger.unbranch();
-      } catch (CommandLineException e) {
-        logger.branch(Type.ERROR, "Could not connect to AS", e);
-        throw new UnableToCompleteException();
-      }
-
+      // Change to given port
       try {
         logger.branch(Type.INFO, String.format("Setting AS to listen for http requests on port %d...", port));
+        // Build operations (change port then restart)
+        ModelNode[] operations = new ModelNode[] {
+            Operations.createOperation(
+                    ClientConstants.WRITE_ATTRIBUTE_OPERATION,
+                    new ModelNode().add(ClientConstants.SOCKET_BINDING_GROUP, "standard-sockets").add(
+                            ClientConstants.SOCKET_BINDING, "http")), Operations.createOperation("reload") };
+        operations[0].get(ClientConstants.NAME).set("port");
+        operations[0].get(ClientConstants.VALUE).set(port);
 
-        ctx.handle(String.format(
-                "/socket-binding-group=standard-sockets/socket-binding=http:write-attribute(name=port,value=%d)", port));
-        ctx.handle(":reload");
-        // Give the server time to reload
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          logger.log(Type.WARN, "Interrupted while waiting for JBoss AS to reload", e);
+        for (final ModelNode operation : operations) {
+          ModelNode result = ctx.getModelControllerClient().execute(operation);
+          if (!Operations.isSuccessfulOutcome(result)) {
+            logger.log(Type.ERROR, String.format("Could not switch ports:\nInput:\n%s\nOutput:\n%s",
+                    operation.toJSONString(false), result.toJSONString(false)));
+            throw new UnableToCompleteException();
+          }
         }
+
+        logger.branch(Type.INFO, "Port change successful. Waiting for AS to reload...");
+        // Disconnect from server then attempt to reconnect (which should be unsuccessful until it has reloaded).
+        ctx.disconnectController();
+        attemptCommandContextConnection(4);
+        logger.unbranch();
 
         logger.log(Type.INFO, "Port change successful");
         logger.unbranch();
-      } catch (CommandLineException e1) {
-        logger.branch(Type.ERROR, String.format("Could not change the http port to %d", port), e1);
+      } catch (IOException e) {
+        logger.branch(Type.ERROR, String.format("Could not change the http port to %d", port), e);
         throw new UnableToCompleteException();
       }
 
@@ -102,34 +112,29 @@ public class JBossServletContainerAdaptor extends ServletContainer {
         /*
          * Need to add deployment resource to specify exploded archive
          * 
-         * path : the absolute path the deployment file/directory archive : true iff the an archived
-         * file, false iff an exploded archive enabled : true iff war should be automatically
-         * scanned and deployed
+         * path : the absolute path the deployment file/directory archive : true
+         * iff the an archived file, false iff an exploded archive enabled :
+         * true iff war should be automatically scanned and deployed
          */
         logger.branch(Type.INFO,
                 String.format("Adding deployment %s at %s...", getAppName(), appRootDir.getAbsolutePath()));
 
-        ctx.handle(String.format("/deployment=%s:add(content=[{\"path\"=>\"%s\",\"archive\"=>false}], enabled=false)",
-                getAppName(), appRootDir.getAbsolutePath()));
+        final ModelNode operation = getAddOperation(appRootDir.getAbsolutePath());
+        final ModelNode result = ctx.getModelControllerClient().execute(operation);
+        if (!Operations.isSuccessfulOutcome(result)) {
+          logger.log(Type.ERROR, String.format("Could not add deployment:\nInput:\n%s\nOutput:\n%s",
+                  operation.toJSONString(false), result.toJSONString(false)));
+          throw new UnableToCompleteException();
+        }
 
         logger.log(Type.INFO, "Deployment resource added");
         logger.unbranch();
-      } catch (CommandLineException e) {
+      } catch (IOException e) {
         logger.branch(Type.ERROR, String.format("Could not add deployment %s", getAppName()), e);
         throw new UnableToCompleteException();
       }
 
-      try {
-        logger.branch(Type.INFO, String.format("Deploying %s...", getAppName()));
-
-        ctx.handle(String.format("/deployment=%s:deploy", getAppName()));
-
-        logger.log(Type.INFO, String.format("%s deployed", getAppName()));
-        logger.unbranch();
-      } catch (CommandLineException e) {
-        logger.branch(Type.ERROR, String.format("Could not deploy %s", getAppName()), e);
-        throw new UnableToCompleteException();
-      }
+      attemptDeploy();
 
     } catch (UnableToCompleteException e) {
       logger.branch(Type.INFO, "Attempting to stop container...");
@@ -147,17 +152,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
   @Override
   public void refresh() throws UnableToCompleteException {
-    try {
-      logger.branch(Type.INFO, String.format("Redeploying %s...", getAppName()));
-
-      ctx.handle(String.format("/deployment=%s:redeploy", getAppName()));
-
-      logger.log(Type.INFO, String.format("%s redeployed", getAppName()));
-      logger.unbranch();
-    } catch (CommandLineException e) {
-      logger.log(Type.ERROR, String.format("Failed to redeploy %s", getAppName()), e);
-      throw new UnableToCompleteException();
-    }
+    attemptDeploymentRelatedOp(ClientConstants.DEPLOYMENT_REDEPLOY_OPERATION);
   }
 
   @Override
@@ -165,11 +160,20 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     try {
       logger.branch(Type.INFO, String.format("Removing %s from deployments...", getAppName()));
 
-      ctx.handle(String.format("/deployment=%s:remove", getAppName()));
+      final ModelNode operation = Operations.createRemoveOperation(new ModelNode().add(ClientConstants.DEPLOYMENT,
+              getAppName()));
+      ModelNode result = ctx.getModelControllerClient().execute(operation);
+      if (!Operations.isSuccessfulOutcome(result)) {
+        logger.log(
+                Type.ERROR,
+                String.format("Could not shutdown AS:\nInput:\n%s\nOutput:\n%s", operation.toJSONString(false),
+                        result.toJSONString(false)));
+        throw new UnableToCompleteException();
+      }
 
       logger.log(Type.INFO, String.format("%s removed", getAppName()));
       logger.unbranch();
-    } catch (CommandLineException e) {
+    } catch (IOException e) {
       logger.log(Type.ERROR, "Could not shutdown AS", e);
       throw new UnableToCompleteException();
     } finally {
@@ -177,12 +181,40 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     }
   }
 
+  private void attemptCommandContextConnection(final int maxRetries) throws UnableToCompleteException {
+    for (int retry = 0; retry < maxRetries; retry++) {
+      try {
+        logger.branch(Type.INFO, "Attempting to connect to JBoss AS...");
+        ctx.connectController();
+        logger.log(Type.INFO, "Connected to JBoss AS");
+
+        return;
+      } catch (CommandLineException e) {
+        if (retry < maxRetries) {
+          logger.log(Type.INFO, String.format("Attempt %d failed", retry + 1), e);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e1) {
+            logger.log(Type.WARN, "Thread was interrupted while waiting for AS to reload", e1);
+          }
+        }
+        else {
+          logger.log(Type.ERROR, "Could not connect to AS", e);
+          throw new UnableToCompleteException();
+        }
+      } finally {
+        logger.unbranch();
+      }
+    }
+  }
+
   private void stopHelper() {
     logger.branch(Type.INFO, "Attempting to stop JBoss AS instance...");
     /*
-     * There is a problem with Process#destroy where it will not reliably kill the JBoss instance.
-     * So instead we must try and send a shutdown signal. If that is not possible or does not work,
-     * we will log it's failure, advising the user to manually kill this process.
+     * There is a problem with Process#destroy where it will not reliably kill
+     * the JBoss instance. So instead we must try and send a shutdown signal. If
+     * that is not possible or does not work, we will log it's failure, advising
+     * the user to manually kill this process.
      */
     try {
       if (ctx.getControllerHost() == null) {
@@ -203,12 +235,57 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     logger.unbranch();
   }
 
+  private void attemptDeploy() throws UnableToCompleteException {
+    attemptDeploymentRelatedOp(ClientConstants.DEPLOYMENT_DEPLOY_OPERATION);
+  }
+
+  private void attemptDeploymentRelatedOp(final String opName) throws UnableToCompleteException {
+    try {
+      logger.branch(Type.INFO, String.format("Deploying %s...", getAppName()));
+
+      final ModelNode operation = Operations.createOperation(opName,
+              new ModelNode().add(ClientConstants.DEPLOYMENT, getAppName()));
+      final ModelNode result = ctx.getModelControllerClient().execute(operation);
+
+      if (!Operations.isSuccessfulOutcome(result)) {
+        logger.log(
+                Type.ERROR,
+                String.format("Could not %s %s:\nInput:\n%s\nOutput:\n%s", opName, getAppName(),
+                        operation.toJSONString(false), result.toJSONString(false)));
+        throw new UnableToCompleteException();
+      }
+
+      logger.log(Type.INFO, String.format("%s %sed", getAppName(), opName));
+      logger.unbranch();
+    } catch (IOException e) {
+      logger.branch(Type.ERROR, String.format("Could not %s %s", opName, getAppName()), e);
+      throw new UnableToCompleteException();
+    }
+  }
+
   /**
    * @return The runtime-name for the given deployment.
    */
   private String getAppName() {
     // Deployment names must end with .war
     return context.endsWith(".war") ? context : context + ".war";
+  }
+
+  private ModelNode getAddOperation(String path) {
+    final ModelNode command = Operations.createAddOperation(new ModelNode().add(ClientConstants.DEPLOYMENT,
+            getAppName()));
+    final ModelNode content = new ModelNode();
+    final ModelNode contentObj = new ModelNode();
+
+    // Construct content list
+    contentObj.get("path").set(path);
+    contentObj.get("archive").set(false);
+    content.add(contentObj);
+
+    command.get("content").set(content);
+    command.get("enabled").set(false);
+
+    return command;
   }
 
 }

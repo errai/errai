@@ -53,7 +53,7 @@ public class JBossLauncher extends ServletContainerLauncher {
       logger.log(
               Type.ERROR,
               String.format(
-                      "The local path the artifact errai.org.jboss:class-local-class-hider:jar must be given as the property %s",
+                      "The local path to the artifact errai.org.jboss:class-local-class-hider:jar must be given as the property %s",
                       CLASS_HIDING_JAVA_AGENT_PROPERTY));
       throw new UnableToCompleteException();
     }
@@ -72,6 +72,11 @@ public class JBossLauncher extends ServletContainerLauncher {
     Process process;
     try {
       logger.branch(Type.INFO, String.format("Preparing JBoss AS instance (%s)", JBOSS_START));
+      final File startScript = new File(JBOSS_START);
+      if (!startScript.canExecute() && !startScript.setExecutable(true)) {
+        logger.log(Type.ERROR, "Can not execute " + JBOSS_START);
+        throw new UnableToCompleteException();
+      }
       ProcessBuilder builder = new ProcessBuilder(JBOSS_START, "-c", TMP_CONFIG_FILE);
 
       logger.log(Type.INFO, String.format("Adding JBOSS_HOME=%s to instance environment", JBOSS_HOME));
@@ -89,7 +94,7 @@ public class JBossLauncher extends ServletContainerLauncher {
       logger.log(Type.INFO, "Redirecting stdout and stderr to share with this process");
       inheritIO(process.getInputStream(), System.out);
       inheritIO(process.getErrorStream(), System.err);
-      
+
       logger.log(Type.INFO, "Executing AS instance...");
     } catch (IOException e) {
       logger.log(TreeLogger.Type.ERROR, "Failed to start JBoss AS process", e);
@@ -97,14 +102,6 @@ public class JBossLauncher extends ServletContainerLauncher {
       throw new UnableToCompleteException();
     }
 
-    // TODO figure out better way to identify when AS is up
-    try {
-      logger.log(Type.INFO, "Waiting for AS instance...");
-      Thread.sleep(5000);
-    } catch (InterruptedException e1) {
-      // Don't care too much if this is interrupted... but I guess we'll log it
-      logger.log(Type.WARN, "Launcher was interrupted while waiting for JBoss AS to start", e1);
-    }
     logger.unbranch();
 
     logger.branch(Type.INFO, "Creating servlet container controller...");
@@ -154,15 +151,14 @@ public class JBossLauncher extends ServletContainerLauncher {
 
     return String.format("%s%cbin%c%s", jbossHome, File.separatorChar, File.separatorChar, script);
   }
-  
+
   private void inheritIO(final InputStream in, final OutputStream to) {
     new Thread() {
       @Override
       public void run() {
         try {
           IOUtils.copy(in, to);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
           throw new RuntimeException(e);
         }
       }

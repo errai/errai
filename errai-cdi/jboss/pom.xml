@@ -6,6 +6,10 @@
   <artifactId>errai-cdi-jboss</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <jboss.version>7.2.0.Final</jboss.version>
+  </properties>
+
   <!-- Parent -->
   <parent>
     <groupId>org.jboss.errai</groupId>
@@ -20,18 +24,18 @@
     <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-cli</artifactId>
-      <version>7.1.1.Final</version>
+      <version>${jboss.version}</version>
       <exclusions>
-          <exclusion>
-              <groupId>org.jboss.xnio</groupId>
-              <artifactId>xnio-api</artifactId>
-          </exclusion>
+        <exclusion>
+          <groupId>org.jboss.remoting3</groupId>
+          <artifactId>jboss-remoting</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-        <groupId>org.jboss.xnio</groupId>
-        <artifactId>xnio-api</artifactId>
-        <version>3.0.3.GA</version>
+        <groupId>org.jboss.remoting3</groupId>
+        <artifactId>jboss-remoting</artifactId>
+        <version>3.2.14.GA</version>
     </dependency>
 
     <!-- GWT -->
