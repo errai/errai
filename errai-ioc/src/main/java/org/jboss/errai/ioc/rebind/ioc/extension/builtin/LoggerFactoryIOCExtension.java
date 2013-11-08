@@ -1,11 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.extension.builtin;
 
-import javax.inject.Named;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.annotations.AltLogger;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
@@ -46,8 +45,8 @@ public class LoggerFactoryIOCExtension implements IOCExtensionConfigurator {
 
         final String loggerVarName = InjectUtil.getUniqueVarName();
         final String loggerName;
-        if (injectableInstance.isAnnotationPresent(Named.class)) {
-          loggerName = ((Named) injectableInstance.getAnnotation(Named.class)).value();
+        if (injectableInstance.isAnnotationPresent(AltLogger.class)) {
+          loggerName = ((AltLogger) injectableInstance.getAnnotation(AltLogger.class)).value();
         }
         else {
           loggerName = injectableInstance.getEnclosingType().getFullyQualifiedName();
