@@ -43,10 +43,12 @@ public class JBossLauncher extends ServletContainerLauncher {
     final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
     final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
 
-    if (JBOSS_HOME == null) {
-      logger.log(Type.ERROR, String.format(
-              "No value for %s was found: The root directory of your JBoss installation must be given to the JVM",
-              JBOSS_HOME_PROPERTY));
+    if (JBOSS_HOME == null || JBOSS_HOME.equals("")) {
+      logger.log(
+              Type.ERROR,
+              String.format(
+                      "No value for %s was given: The root directory of your Jboss installation must be provided through the property %s in your pom.xml",
+                      JBOSS_HOME_PROPERTY, JBOSS_HOME_PROPERTY));
       throw new UnableToCompleteException();
     }
     if (CLASS_HIDING_JAVA_AGENT == null) {
