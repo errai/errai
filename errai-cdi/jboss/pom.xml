@@ -20,12 +20,22 @@
 
   <dependencies>
 
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-client-local-class-hider</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+
     <!-- JBoss -->
     <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-cli</artifactId>
       <version>${jboss.version}</version>
       <exclusions>
+        <exclusion>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-build-config</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.jboss.remoting3</groupId>
           <artifactId>jboss-remoting</artifactId>
@@ -36,6 +46,13 @@
         <groupId>org.jboss.remoting3</groupId>
         <artifactId>jboss-remoting</artifactId>
         <version>3.2.14.GA</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.as</groupId>
+      <artifactId>jboss-as-dist</artifactId>
+      <version>7.1.1.Final</version>
+      <type>zip</type>
     </dependency>
 
     <!-- GWT -->
