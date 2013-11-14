@@ -31,11 +31,13 @@ import javax.validation.groups.Default;
 
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.ioc.util.PropertiesUtil;
 import org.jboss.errai.reflections.Reflections;
-import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
-import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.override.FilterFieldAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.override.FilterTypeAnnotationsScanner;
 import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -43,7 +45,8 @@ import com.google.gwt.thirdparty.guava.common.collect.Sets;
 import com.google.gwt.validation.client.GwtValidation;
 
 /**
- * Generates the GWT {@link Validator} interface based on validation annotations.
+ * Generates the GWT {@link Validator} interface based on validation
+ * annotations.
  * 
  * @author Johannes Barop <jb@barop.de>
  */
@@ -52,13 +55,19 @@ class GwtValidatorGenerator {
   class ValidationScanner extends Reflections {
 
     ValidationScanner() {
-      super(new ConfigurationBuilder()
-              .setUrls(ClasspathHelper.forClassLoader())
-              .setScanners(new TypeAnnotationsScanner(), new FieldAnnotationsScanner()));
+      super(new ConfigurationBuilder().setUrls(ClasspathHelper.forClassLoader())
+      // Override default scanners
+              .setScanners(
+                      new FilterTypeAnnotationsScanner(new SimplePackageFilter(PropertiesUtil.getPropertyValues(
+                              BLACKLIST_PROPERTY, "\\s"))),
+                      new FilterFieldAnnotationsScanner(new SimplePackageFilter(PropertiesUtil.getPropertyValues(
+                              BLACKLIST_PROPERTY, "\\s")))));
       scan();
     }
 
   }
+
+  public static final String BLACKLIST_PROPERTY = "errai.validation.blacklist";
 
   private final ValidationScanner scanner;
 
@@ -74,12 +83,8 @@ class GwtValidatorGenerator {
     addBeansAnnotatedWithValid(beans);
     final Set<Class<?>> groups = extractValidationGroups(validationConfig);
 
-    ClassStructureBuilder<?> builder = ClassBuilder
-            .define("Gwt" + Validator.class.getSimpleName())
-            .publicScope()
-            .interfaceDefinition()
-            .implementsInterface(Validator.class)
-            .body();
+    ClassStructureBuilder<?> builder = ClassBuilder.define("Gwt" + Validator.class.getSimpleName()).publicScope()
+            .interfaceDefinition().implementsInterface(Validator.class).body();
 
     builder.getClassDefinition().addAnnotation(new GwtValidation() {
       @Override

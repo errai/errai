@@ -1,8 +1,14 @@
 package org.jboss.errai.reflections.util;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Sets;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.jboss.errai.reflections.Configuration;
 import org.jboss.errai.reflections.adapters.JavassistAdapter;
 import org.jboss.errai.reflections.adapters.MetadataAdapter;
@@ -12,12 +18,9 @@ import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
 import org.jboss.errai.reflections.serializers.Serializer;
 import org.jboss.errai.reflections.serializers.XmlSerializer;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Sets;
 
 /**
  * a fluent builder for {@link org.jboss.errai.reflections.Configuration}, to be used for constructing a {@link org.jboss.errai.reflections.Reflections} instance
@@ -36,7 +39,7 @@ import java.util.concurrent.Executors;
  */
 @SuppressWarnings({"RawUseOfParameterizedType"})
 public class ConfigurationBuilder implements Configuration {
-    private final Set<Scanner> scanners = Sets.<Scanner>newHashSet(new TypeAnnotationsScanner(), new SubTypesScanner());
+    private final Map<String, Scanner> scanners = new HashMap<String, Scanner>();
     private Set<URL> urls = Sets.newHashSet();
     private MetadataAdapter metadataAdapter = new JavassistAdapter();
     private Predicate<String> inputsFilter = Predicates.alwaysTrue();
@@ -44,15 +47,21 @@ public class ConfigurationBuilder implements Configuration {
     private ExecutorService executorService;
 
     public ConfigurationBuilder() {
+      final Scanner[] builtins = new Scanner[] {new TypeAnnotationsScanner(), new SubTypesScanner()};
+      for (final Scanner scanner : builtins) {
+        scanners.put(scanner.getName(), scanner);
+      }
     }
 
     public Set<Scanner> getScanners() {
-		return scanners;
+      return new HashSet<Scanner>(scanners.values());
 	}
 
     /** set the scanners instances for scanning different metadata */
     public ConfigurationBuilder setScanners(final Scanner... scanners) {
-        this.scanners.addAll(Arrays.asList(scanners));
+        for (final Scanner scanner : scanners) {
+          this.scanners.put(scanner.getName(), scanner);
+        }
         return this;
     }
 

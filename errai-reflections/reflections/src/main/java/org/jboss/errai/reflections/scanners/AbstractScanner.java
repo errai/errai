@@ -3,25 +3,36 @@ package org.jboss.errai.reflections.scanners;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Multimap;
+
 import org.jboss.errai.reflections.Configuration;
 import org.jboss.errai.reflections.ReflectionsException;
 import org.jboss.errai.reflections.adapters.MetadataAdapter;
+import org.jboss.errai.reflections.scanners.reg.ScannerRegistry;
 import org.jboss.errai.reflections.util.Utils;
 import org.jboss.errai.reflections.vfs.Vfs;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- *
- */
 @SuppressWarnings({"RawUseOfParameterizedType", "unchecked"})
 public abstract class AbstractScanner implements Scanner {
 
 	private Configuration configuration;
 	private Multimap<String, String> store;
 	private Predicate<String> resultFilter = Predicates.alwaysTrue(); //accept all by default
+	
+	public AbstractScanner() {
+	  /*
+	   * Used to register all scanner sub-types names.
+	   */
+	  ScannerRegistry.getRegistry().setName(this.getClass(), getName());
+	}
 
+  /**
+   * Get the name of this scanner. This is normally the class name of the
+   * scanner. Subclasses designed to override the behaviour of built-in scanners
+   * should return the name of the scanner they wish to override.
+   */
     public String getName() {
         return getClass().getName();
     }
