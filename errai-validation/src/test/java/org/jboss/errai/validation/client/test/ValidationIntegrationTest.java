@@ -129,7 +129,7 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
 
     TestModelWithoutConstraints model = new TestModelWithoutConstraints(new TestModel());
     Set<ConstraintViolation<TestModelWithoutConstraints>> violations = validator.validate(model);
-    assertEquals("Expected one constraint violations", 2, violations.size());
+    assertEquals("Expected two constraint violations", 2, violations.size());
 
     TestModel validModel = new TestModel();
     validModel.setNumVal(101);
