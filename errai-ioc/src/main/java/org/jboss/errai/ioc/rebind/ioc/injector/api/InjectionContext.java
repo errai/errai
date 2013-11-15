@@ -21,7 +21,18 @@ import static java.util.Collections.unmodifiableCollection;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Stereotype;
@@ -48,6 +59,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -392,37 +404,18 @@ public class InjectionContext {
       return true;
     }
 
-    for (final String whitelistMask : implicitWhitelist) {
-      if (match(type, whitelistMask)) {
-        return true;
-      }
-    }
-
-    for (final String whitelistMask : whitelist) {
-      if (match(type, whitelistMask)) {
-        return true;
-      }
-    }
-
-    return false;
+    final SimplePackageFilter implicitFilter = new SimplePackageFilter(Arrays.asList(implicitWhitelist));
+    final SimplePackageFilter whitelistFilter = new SimplePackageFilter(whitelist);
+    final String fullName = type.getFullyQualifiedName();
+    
+    return implicitFilter.matches(fullName) || whitelistFilter.matches(fullName);
   }
 
   public boolean isBlacklisted(final MetaClass type) {
-    for (final String blacklistItem : blacklist) {
-      if (match(type, blacklistItem)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean match(final MetaClass type, final String mask) {
-    final String fcqn = type.getFullyQualifiedName();
-    if (mask.endsWith("*")) {
-      return fcqn.startsWith(mask.substring(0, mask.length() - 1));
-    } else {
-      return fcqn.equals(mask);
-    }
+    final SimplePackageFilter blacklistFilter = new SimplePackageFilter(blacklist);
+    final String fullName = type.getFullyQualifiedName();
+    
+    return blacklistFilter.matches(fullName);
   }
 
   public List<Injector> getInjectors(final MetaClass type) {

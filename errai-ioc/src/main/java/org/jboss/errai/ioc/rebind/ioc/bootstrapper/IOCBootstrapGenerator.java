@@ -80,6 +80,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
+import org.jboss.errai.ioc.util.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,28 +243,18 @@ public class IOCBootstrapGenerator {
         }
       }
 
-      final Collection<String> enabledAlternativesProperties = props.get(ENABLED_ALTERNATIVES_PROPERTY);
-
-      for (final String prop : enabledAlternativesProperties) {
-        final String[] alternatives = prop.split("\\s");
-        for (final String alternative : alternatives) {
-          injectionContextBuilder.enabledAlternative(alternative.trim());
-        }
+      final Collection<String> alternatives = PropertiesUtil.getPropertyValues(ENABLED_ALTERNATIVES_PROPERTY, "\\s");
+      for (final String alternative : alternatives) {
+        injectionContextBuilder.enabledAlternative(alternative.trim());
       }
-    }
-
-    final Collection<String> whitelists = props.get(WHITELIST_PROPERTY);
-    for (final String whitelist : whitelists) {
-      final String[] items = whitelist.split("\\s");
-      for (final String item : items) {
+      
+      final Collection<String> whitelistItems = PropertiesUtil.getPropertyValues(WHITELIST_PROPERTY, "\\s");
+      for (final String item : whitelistItems) {
         injectionContextBuilder.addToWhitelist(item.trim());
       }
-    }
 
-    final Collection<String> blackList = props.get(BLACKLIST_PROPERTY);
-    for (final String list : blackList) {
-      final String[] types = list.split("\\s");
-      for (final String type : types) {
+      final Collection<String> blacklistItems = PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, "\\s");
+      for (final String type : blacklistItems) {
         injectionContextBuilder.addToBlacklist(type.trim());
       }
     }
