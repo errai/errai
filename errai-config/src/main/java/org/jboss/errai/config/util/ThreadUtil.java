@@ -29,7 +29,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class ThreadUtil {
   private static final ExecutorService executorService
-      = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+      = Executors.newFixedThreadPool(Math.max(2, Runtime.getRuntime().availableProcessors()));
 
   public static void execute(final Runnable runnable) {
     executorService.execute(runnable);
