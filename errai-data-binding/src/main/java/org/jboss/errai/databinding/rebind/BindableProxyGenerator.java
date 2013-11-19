@@ -325,11 +325,7 @@ public class BindableProxyGenerator {
         if (!readMethod.getReturnType().isAnnotationPresent(Bindable.class)
                 && !DataBindingUtil.getConfiguredBindableTypes().contains(readMethod.getReturnType())) {
           stmt.addStatement(
-              Stmt.loadVariable(cloneVar)
-              .invoke(
-                  writeMethod,
-                  target().invoke(readMethod)
-               )
+              Stmt.loadVariable(cloneVar).invoke(writeMethod,target().invoke(readMethod))
           );
         }
         else {
@@ -342,8 +338,7 @@ public class BindableProxyGenerator {
                           writeMethod,
                           Cast.to(
                               readMethod.getReturnType(),
-                              Stmt.castTo(BindableProxy.class, Stmt.loadVariable("this")
-                                  .invoke(readMethod)
+                              Stmt.castTo(BindableProxy.class, Stmt.loadVariable("this").invoke(readMethod)
                               )
                               .invoke(methodName)
                           )
@@ -352,8 +347,7 @@ public class BindableProxyGenerator {
               .finish()
               .else_()
                   .append(
-                      Stmt.loadVariable(cloneVar)
-                      .invoke(writeMethod, target().invoke(readMethod))
+                      Stmt.loadVariable(cloneVar).invoke(writeMethod, target().invoke(readMethod))
                   )
               .finish()
           );
