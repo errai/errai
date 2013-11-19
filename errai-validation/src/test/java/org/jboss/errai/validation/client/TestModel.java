@@ -38,6 +38,7 @@ public class TestModel {
   @Min(value=100)
   private int numVal;
 
+  @NotNull
   private String stringVal;
 
   @TestConstraint(groups = TestGroup.class)
@@ -54,7 +55,6 @@ public class TestModel {
     this.numVal = numVal;
   }
 
-  @NotNull
   public String getStringVal() {
     return stringVal;
   }
