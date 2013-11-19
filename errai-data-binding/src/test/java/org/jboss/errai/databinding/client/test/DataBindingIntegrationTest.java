@@ -555,6 +555,41 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("TextBox should have been updated", "model change", textBox.getText());
     assertEquals("Unexpected property change events received", Arrays.asList("value"), changedProperties);
   }
+  
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testDeepUnwrap() {
+    TestModel parent = new TestModel("v0");
+    parent.setName("parent");
+    
+    TestModel child = new TestModel("v1");
+    child.setName("child");
+    
+    TestModel grandChild = new TestModel("v2");
+    grandChild.setName("grandChild");
+      
+    child.setChild(grandChild);
+    parent.setChild(child);
+    
+    DataBinder<TestModel> binder = DataBinder.forModel(parent)
+      .bind(new TextBox(), "child.value")
+      .bind(new TextBox(), "child.child.value");
+    
+    TestModel unwrapped = ((BindableProxy<TestModel>) binder.getModel()).deepUnwrap();
+    assertNotNull(unwrapped);
+    assertNotNull(unwrapped.getChild());
+    assertNotNull(unwrapped.getChild().getChild());
+    
+    assertNotSame(unwrapped, parent);
+    assertNotSame(unwrapped.getChild(), parent.getChild());
+    assertNotSame(unwrapped.getChild().getChild(), parent.getChild().getChild());
+    
+    assertFalse(unwrapped instanceof BindableProxy);
+    assertFalse(unwrapped.getChild() instanceof BindableProxy);
+    assertFalse(unwrapped.getChild().getChild() instanceof BindableProxy);
+    
+    assertEquals(unwrapped, parent);
+  }
 
   @Test
   public void testUpdateWidgetsWithBindablePropertyChain() {
