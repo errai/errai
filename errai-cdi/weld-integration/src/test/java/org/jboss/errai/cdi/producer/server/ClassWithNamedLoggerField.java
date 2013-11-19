@@ -9,7 +9,7 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.cdi.producer.client.shared.LoggerTestUtil;
 import org.jboss.errai.cdi.producer.client.shared.LoggerTestUtil.TestCommand;
-import org.jboss.errai.common.client.api.annotations.AltLogger;
+import org.jboss.errai.common.client.api.annotations.NamedLogger;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.slf4j.Logger;
 
@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 public class ClassWithNamedLoggerField implements MessageCallback {
 
   @Inject
-  @AltLogger(LoggerTestUtil.LOGGER_NAME)
+  @NamedLogger(LoggerTestUtil.LOGGER_NAME)
   private Logger logger;
   @Inject
   private MessageBus bus;

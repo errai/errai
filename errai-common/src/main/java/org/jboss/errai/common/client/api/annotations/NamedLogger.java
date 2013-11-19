@@ -16,16 +16,16 @@ import org.slf4j.Logger;
  * 
  * <pre>
  * // Gets root logger
- * {@literal @Inject @AltLogger} Logger logger;
+ * {@literal @Inject @NamedLogger} Logger logger;
  * 
  * // Gets logger with name 'LoggerName'
- * {@literal @Inject @AltLogger("LoggerName")} Logger logger;
+ * {@literal @Inject @NamedLogger("LoggerName")} Logger logger;
  * </pre>
  * 
  * @author mbarkley <mbarkley@redhat.com>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface AltLogger {
+public @interface NamedLogger {
   String value() default org.slf4j.Logger.ROOT_LOGGER_NAME;
 }
