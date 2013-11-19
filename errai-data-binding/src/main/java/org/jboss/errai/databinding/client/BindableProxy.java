@@ -43,4 +43,11 @@ public interface BindableProxy<T> extends WrappedPortable, HasProperties {
    * proxy (e.g direct field access by JPA).
    */
   public void updateWidgets();
+  
+  /**
+   * Get a non-proxied instance with state copied recursively from this target.
+   * 
+   * @return A recursively unwrapped (i.e. non-proxied) instance with state copied from the proxy target.
+   */
+  public T deepUnwrap();
 }

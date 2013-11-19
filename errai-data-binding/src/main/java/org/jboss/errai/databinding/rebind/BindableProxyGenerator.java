@@ -102,6 +102,9 @@ public class BindableProxyGenerator {
         .publicMethod(bindable, "unwrap")
         .append(target().returnValue())
         .finish()
+        .publicMethod(bindable, "deepUnwrap")
+        .append(generateDeepUnwrapMethodBody("deepUnwrap"))
+        .finish()
         .publicMethod(boolean.class, "equals", Parameter.of(Object.class, "obj"))
         .append(
             If.instanceOf(Variable.get("obj"), classBuilder.getClassDefinition())
@@ -305,6 +308,62 @@ public class BindableProxyGenerator {
       }
     }
     return (block.isEmpty()) ? EmptyStatement.INSTANCE : block;
+  }
+  
+  /**
+   * Generates method body for recursively unwrapping a {@link BindableProxy}.
+   */
+  private Statement generateDeepUnwrapMethodBody(final String methodName) {
+    final String cloneVar = "clone";
+    final BlockStatement stmt = new BlockStatement();
+    stmt.addStatement(Stmt.declareFinalVariable(cloneVar, bindable, Stmt.newObject(bindable)));
+    
+    for (final String property : bindable.getBeanDescriptor().getProperties()) {
+      final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
+      final MetaMethod writeMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
+      if (readMethod != null && writeMethod != null) {
+        if (!readMethod.getReturnType().isAnnotationPresent(Bindable.class)
+                && !DataBindingUtil.getConfiguredBindableTypes().contains(readMethod.getReturnType())) {
+          stmt.addStatement(
+              Stmt.loadVariable(cloneVar)
+              .invoke(
+                  writeMethod,
+                  target().invoke(readMethod)
+               )
+          );
+        }
+        else {
+          final Statement field = target().invoke(readMethod);
+          stmt.addStatement(
+              If.instanceOf(field, BindableProxy.class)
+                  .append(
+                      Stmt.loadVariable(cloneVar)
+                      .invoke(
+                          writeMethod,
+                          Cast.to(
+                              readMethod.getReturnType(),
+                              Stmt.castTo(BindableProxy.class, Stmt.loadVariable("this")
+                                  .invoke(readMethod)
+                              )
+                              .invoke(methodName)
+                          )
+                      )
+                  )
+              .finish()
+              .else_()
+                  .append(
+                      Stmt.loadVariable(cloneVar)
+                      .invoke(writeMethod, target().invoke(readMethod))
+                  )
+              .finish()
+          );
+        }
+      }
+    }
+    
+    stmt.addStatement(Stmt.loadVariable(cloneVar).returnValue());
+    
+    return stmt;
   }
 
   private String inferSafeAgentFieldName() {

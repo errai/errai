@@ -85,7 +85,7 @@ public class BeanValidator extends AbstractGwtValidator {
   @SuppressWarnings("unchecked")
   private <T> T maybeUnwrapBindable(T object) {
     if (object instanceof BindableProxy) {
-      object = (T) ((BindableProxy<T>) object).unwrap();
+      object = (T) ((BindableProxy<T>) object).deepUnwrap();
     }
     return object;
   }
