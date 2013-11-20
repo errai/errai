@@ -65,15 +65,7 @@ public class IOCGenerator extends AbstractAsyncGenerator {
     final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(context, logger,
         translatablePackages, false);
 
-    final String out = iocBootstrapGenerator.generate(packageName, className);
-
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---IOC Bootstrapper--->");
-      System.out.println(out);
-      System.out.println("<--IOC bootstrapper---");
-    }
-
-    return out;
+    return iocBootstrapGenerator.generate(packageName, className);
   }
 
 }

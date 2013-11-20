@@ -160,15 +160,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     validateDefaultPagePresent(pages, pageRoles);
     validateUnique(pageRoles);
 
-    String out = classBuilder.toJavaString();
-
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---NavigationGraph-->");
-      System.out.println(out);
-      System.out.println("<--NavigationGraph---");
-    }
-
-    return out;
+    return classBuilder.toJavaString();
   }
 
   private String getPageName(MetaClass pageClass) {

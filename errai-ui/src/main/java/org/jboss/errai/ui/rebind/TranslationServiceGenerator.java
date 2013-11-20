@@ -155,14 +155,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     generateI18nHelperFilesInto(discoveredI18nMap, RebindUtils.getErraiCacheDir());
 
-    // Possibly output the translation service generated code
-    String out = classBuilder.toJavaString();
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---TranslationService-->");
-      System.out.println(out);
-      System.out.println("<--TranslationService---");
-    }
-    return out;
+    return classBuilder.toJavaString();
   }
 
   /**
