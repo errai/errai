@@ -24,6 +24,17 @@ import static org.jboss.errai.codegen.util.Implementations.implement;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -57,16 +68,6 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.util.TypeLiteral;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -141,10 +142,6 @@ public class MarshallerGeneratorFactory {
     final long time = System.currentTimeMillis();
     gen = _generate(packageName, clazzName);
     log.info("generated marshalling class in " + (System.currentTimeMillis() - time) + "ms.");
-
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println(gen);
-    }
 
     return gen;
   }

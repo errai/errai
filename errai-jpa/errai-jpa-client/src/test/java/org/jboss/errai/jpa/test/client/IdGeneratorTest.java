@@ -52,8 +52,6 @@ public class IdGeneratorTest extends JpaClientTestCase {
    * {@link ErraiEntityManagerGenerator} failed to output a compilable class. In
    * that case, try re-running this test with
    * {@code -Derrai.codegen.permissive=true} and
-   * {@code -Derrai.codegen.printOut=true}. This should allow you to inspect the
-   * generated source code and to see the Java compiler errors.
    */
   public void testEntityManagerInjection() throws Exception {
     getEntityManager(); // has its own assertions

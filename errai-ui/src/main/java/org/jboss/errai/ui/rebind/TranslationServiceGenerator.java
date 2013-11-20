@@ -19,12 +19,27 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.*;
+import org.codehaus.jackson.JsonEncoding;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
@@ -53,6 +68,8 @@ import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -61,13 +78,6 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 /**
  * Generates a concrete subclass of {@link TranslationService}. This class is
@@ -154,14 +164,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     generateI18nHelperFilesInto(discoveredI18nMap, RebindUtils.getErraiCacheDir());
 
-    // Possibly output the translation service generated code
-    String out = classBuilder.toJavaString();
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---TranslationService-->");
-      System.out.println(out);
-      System.out.println("<--TranslationService---");
-    }
-    return out;
+    return classBuilder.toJavaString();
   }
 
   /**

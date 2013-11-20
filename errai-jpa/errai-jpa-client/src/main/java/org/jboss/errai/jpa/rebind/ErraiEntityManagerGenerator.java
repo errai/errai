@@ -1,6 +1,5 @@
 package org.jboss.errai.jpa.rebind;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
@@ -8,37 +7,10 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.enterprise.util.TypeLiteral;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.GeneratedValue;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
+import javax.persistence.*;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
@@ -81,17 +53,7 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
-import org.jboss.errai.jpa.client.local.ErraiEntityManager;
-import org.jboss.errai.jpa.client.local.ErraiEntityManagerFactory;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
-import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
-import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
-import org.jboss.errai.jpa.client.local.ErraiMetamodel;
-import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
-import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
-import org.jboss.errai.jpa.client.local.IntIdGenerator;
-import org.jboss.errai.jpa.client.local.LongIdGenerator;
+import org.jboss.errai.jpa.client.local.*;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 import org.slf4j.Logger;
@@ -206,18 +168,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     cnqm.append(Stmt.loadVariable("namedQueries").returnValue());
     cnqm.finish();
 
-    String out = classBuilder.toJavaString();
-    final File fileCacheDir = RebindUtils.getErraiCacheDir();
-    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/"
-        + classBuilder.getClassDefinition().getName() + ".java");
-
-    RebindUtils.writeStringToFile(cacheFile, out);
-
-    this.logger.debug("---ErraiEntityManager-->");
-    this.logger.debug(out);
-    this.logger.debug("<--ErraiEntityManager---");
-
-    return out;
+    return classBuilder.toJavaString();
   }
 
   private void generateCreateMetamodelMethod(
