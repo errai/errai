@@ -16,16 +16,17 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.util.ThreadUtil;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.util.ThreadUtil;
+
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
 
 /**
  * Base class of all asynchronous code generators.
@@ -93,8 +94,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
               }
             })
             .build()
-            // this causes all asynchronous code generators to run if this is the first one that
-            // executes.
+            // this causes all asynchronous code generators to run if this is the first one that executes.
             .submit();
 
         final String gen = future.get();
