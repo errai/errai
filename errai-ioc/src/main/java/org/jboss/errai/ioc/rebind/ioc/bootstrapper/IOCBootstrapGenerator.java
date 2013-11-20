@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -61,7 +60,6 @@ import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
@@ -131,9 +129,6 @@ public class IOCBootstrapGenerator {
         return _bootstrapperCache;
       }
 
-      final File fileCacheDir = RebindUtils.getErraiCacheDir();
-      final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-
       final String gen;
 
       log.info("generating IOC bootstrapping class...");
@@ -144,15 +139,6 @@ public class IOCBootstrapGenerator {
       gen = generateBootstrappingClassSource(injectionContext);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
           + "(" + injectionContext.getAllKnownInjectionTypes().size() + " beans processed)");
-
-      ThreadUtil.execute(new Runnable() {
-        @Override
-        public void run() {
-          RebindUtils.writeStringToFile(cacheFile, gen);
-        }
-      });
-
-      log.info("using IOC bootstrapping code at: " + cacheFile.getAbsolutePath());
 
       return _bootstrapperCache = gen;
     }
