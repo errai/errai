@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.test.basic.client;
+package org.jboss.errai.ui.test.basic.client.res;
 
-import org.jboss.errai.ui.test.basic.client.res.BasicComponent;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-public interface BasicTemplateTestApp {
-  
-  public BasicComponent getComponent();
+@Templated
+public class BasicComponentUsingIds extends BasicComponent {
 
 }
