@@ -19,4 +19,5 @@
 <module>
     <inherits name="de.benediktmeurer.gwt.slf4j.api.API"/>
     <inherits name="de.benediktmeurer.gwt.slf4j.jul.JUL"/>
+    <set-property name="gwt.logging.popupHandler" value="DISABLED"/>
 </module>
