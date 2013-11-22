@@ -25,5 +25,18 @@ public class DesignerTemplateTest extends AbstractErraiCDITest {
     assertNotNull(Document.get().getElementById("basic"));
     assertNotNull(Document.get().getElementById("h2"));
   }
+  
+  @Test
+  public void testInsertAndReplaceNestedUsingIdsAndClasses() {
+    DesignerTemplateTestAppUsingIdsAndClasses app = IOC.getBeanManager().lookupBean(DesignerTemplateTestAppUsingIdsAndClasses.class).getInstance();
+    assertNotNull(app.getComponent());
+    System.out.println(app.getRoot().getElement().getInnerHTML());
+
+    assertNotNull(Document.get().getElementById("btn"));
+    assertEquals("Will be rendered inside button", app.getComponent().getButton().getElement().getInnerHTML());
+    assertNotNull(Document.get().getElementById("somethingNew"));
+    assertNotNull(Document.get().getElementById("basic"));
+    assertNotNull(Document.get().getElementById("h2"));
+  }
 
 }

@@ -114,8 +114,9 @@ public final class TemplateUtil {
         field.getElement().setAttribute(name, oldValue);
       }
     } catch (Exception e) {
-      throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName
-              + "] - Did you already @Insert or @Replace a parent Element?", e);
+      throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName + "]" +
+      		" - Did you already @Insert or @Replace a parent Element?" +
+      		" Is an element referenced by more than one @DataField?", e);
     }
   }
 
@@ -134,25 +135,27 @@ public final class TemplateUtil {
 
     if (rootField != null && !rootField.trim().isEmpty()) {
       logger.fine("Locating root element: " + rootField);
-      VisitContext<Element> context = Visit.depthFirst(parserDiv, new Visitor<Element>() {
+      VisitContext<TaggedElement> context = Visit.depthFirst(parserDiv, new Visitor<TaggedElement>() {
         @Override
-        public boolean visit(VisitContextMutable<Element> context, Element element) {
-          if (element.hasAttribute("data-field") && element.getAttribute("data-field").equals(rootField)) {
-            Element result = DOM.createDiv();
-            result.appendChild(element);
-            context.setResult(result);
-            context.setVisitComplete();
-            return false;
+        public boolean visit(VisitContextMutable<TaggedElement> context, Element element) {
+          for (AttributeType attrType : AttributeType.values()) {
+            String attrName = attrType.getAttributeName();
+            TaggedElement existingCandidate = context.getResult();
+            if (element.hasAttribute(attrName) && element.getAttribute(attrName).equals(rootField)
+                && (existingCandidate == null || existingCandidate.getAttributeType().ordinal() < attrType.ordinal())) {
+              context.setResult(new TaggedElement(attrType, element));
+            }
           }
           return true;
         }
       });
 
       if (context.getResult() != null) {
-        parserDiv = context.getResult();
+        parserDiv = DOM.createDiv();
+        parserDiv.appendChild(context.getResult().getElement());
       }
       else {
-        throw new IllegalStateException("Could not locate Element in template with data-field=[" + rootField + "]\n"
+        throw new IllegalStateException("Could not locate Element in template with data-field, id or class = [" + rootField + "]\n"
                 + parserDiv.getInnerHTML());
       }
     }
@@ -230,50 +233,37 @@ public final class TemplateUtil {
   }
 
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
-    try {
-      final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
+    final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
 
-      logger.fine("Searching template for fields.");
-      // TODO do this as browser split deferred binding using
-      // Document.querySelectorAll() -
-      // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
-      Visit.depthFirst(templateRoot, new Visitor<Object>() {
-        @Override
-        public boolean visit(VisitContextMutable<Object> context, Element element) {
-          for (AttributeType attrType : AttributeType.values()) {
-            String attrName = attrType.getAttributeName();
-            if (element.hasAttribute(attrName)) {
-              logger.fine("Located " + attrName + ": " + element.getAttribute(attrName));
-
-              /*
-               * <div id=root>
-               *   <a data-field=foo id=foo href=bar.html>My Link</a>
-               *   <span class=foo>My Span</a>
-               *   <div data-field=foo></div>
-               * </div>
-               */
-              TaggedElement existingCandidate = childTemplateElements.get(element.getAttribute(attrName));
+    logger.fine("Searching template for fields.");
+    // TODO do this as browser split deferred binding using
+    // Document.querySelectorAll() -
+    // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
+    Visit.depthFirst(templateRoot, new Visitor<Object>() {
+      @Override
+      public boolean visit(VisitContextMutable<Object> context, Element element) {
+        for (AttributeType attrType : AttributeType.values()) {
+          String attrName = attrType.getAttributeName();
+          if (element.hasAttribute(attrName)) {
+            logger.fine("Located " + attrName + ": " + element.getAttribute(attrName));
+            for (String dataFieldName : element.getAttribute(attrName).split(" +")) {
+              TaggedElement existingCandidate = childTemplateElements.get(dataFieldName);
               if (existingCandidate == null || existingCandidate.getAttributeType().ordinal() < attrType.ordinal()) {
-                childTemplateElements.put(element.getAttribute(attrName), new TaggedElement(attrType, element));
+                childTemplateElements.put(dataFieldName, new TaggedElement(attrType, element));
               }
             }
           }
-          return true;
         }
-      });
-
-      Map<String, Element> untaggedTemplateElements = new LinkedHashMap<String, Element>();
-      for (Map.Entry<String, TaggedElement> entry : childTemplateElements.entrySet()) {
-        untaggedTemplateElements.put(entry.getKey(), entry.getValue().getElement());
+        return true;
       }
+    });
 
-      return untaggedTemplateElements;
+    Map<String, Element> untaggedTemplateElements = new LinkedHashMap<String, Element>();
+    for (Map.Entry<String, TaggedElement> entry : childTemplateElements.entrySet()) {
+      untaggedTemplateElements.put(entry.getKey(), entry.getValue().getElement());
     }
-    catch (Throwable t) {
-      System.out.println("error while enumerating templates!");
-      t.printStackTrace(System.out);
-      throw new RuntimeException(t);
-    }
+
+    return untaggedTemplateElements;
   }
 
   public static void setupNativeEventListener(Composite component, Element element, EventListener listener,

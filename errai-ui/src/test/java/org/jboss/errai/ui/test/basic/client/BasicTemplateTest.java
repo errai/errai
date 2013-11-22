@@ -96,5 +96,15 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
     assertEquals(c6.getElement(), c5.getElement().getFirstChildElement());
   }
+  
+  @Test
+  public void testPrecedenceRules() throws Exception {
+    PrecedenceTemplateTestApp app = IOC.getBeanManager().lookupBean(PrecedenceTemplateTestApp.class).getInstance();
+   
+    assertEquals(app.getComponent().getA().getText(), "This is a");
+    assertEquals(app.getComponent().getB().getText(), "This is b");
+    assertEquals(app.getComponent().getC().getText(), "This is c");
+    assertEquals(app.getComponent().getE().getText(), "This is d, e, and f");
+  }
 
 }
