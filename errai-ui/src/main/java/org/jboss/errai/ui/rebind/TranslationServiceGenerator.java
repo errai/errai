@@ -291,6 +291,9 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
       final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
+      if (resource == null) {
+        throw new IllegalArgumentException("Could not find template " + templateFileName + " for @Templated class " + templatedAnnotatedClass.getName());
+      }
       Document templateNode = new TemplateCatalog().parseTemplate(resource);
       if (templateNode == null) // TODO log that the template failed to parse
         continue;
