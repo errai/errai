@@ -22,6 +22,8 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     testInsertAndReplace(app);
     app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingIds.class).getInstance();
     testInsertAndReplace(app);
+    app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingStyleClasses.class).getInstance();
+    testInsertAndReplace(app);
   }
 
   private void testInsertAndReplace(BasicTemplateTestApp app) {
@@ -45,11 +47,13 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     testAttributesFromTemplateOverrideComponentElement(app);
     app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingIds.class).getInstance();
     testAttributesFromTemplateOverrideComponentElement(app);
+    app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingStyleClasses.class).getInstance();
+    testAttributesFromTemplateOverrideComponentElement(app);
   }
 
   private void testAttributesFromTemplateOverrideComponentElement(BasicTemplateTestApp app) {
     Element c1 = app.getComponent().getLabel().getElement();
-    assertEquals("content", c1.getAttribute("class"));
+    assertEquals("c1", c1.getAttribute("class"));
     assertEquals("left", c1.getAttribute("align"));
 
     Element c3 = app.getComponent().getTextBox().getElement();
@@ -61,6 +65,8 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     BasicTemplateTestApp app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingDataFields.class).getInstance();
     testHasHTMLPreservesInnerHTML(app);
     app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingIds.class).getInstance();
+    testHasHTMLPreservesInnerHTML(app);
+    app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingStyleClasses.class).getInstance();
     testHasHTMLPreservesInnerHTML(app);
   }
 
@@ -78,6 +84,8 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     BasicTemplateTestApp app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingDataFields.class).getInstance();
     testHasHTMLReparentsChildElements(app);
     app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingIds.class).getInstance();
+    testHasHTMLReparentsChildElements(app);
+    app = IOC.getBeanManager().lookupBean(BasicTemplateTestAppUsingStyleClasses.class).getInstance();
     testHasHTMLReparentsChildElements(app);
   }
 

@@ -5,6 +5,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.test.basic.client.res.BasicComponent;
+import org.jboss.errai.ui.test.basic.client.res.BasicComponentUsingDataFields;
 
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -15,7 +16,7 @@ public class BasicTemplateTestAppUsingDataFields implements BasicTemplateTestApp
   private RootPanel root;
 
   @Inject
-  private BasicComponent component;
+  private BasicComponentUsingDataFields component;
 
   @PostConstruct
   public void setup() {

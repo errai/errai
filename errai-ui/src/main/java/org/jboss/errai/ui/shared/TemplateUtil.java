@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
 
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.shared.GWT;
@@ -34,7 +35,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
@@ -63,13 +63,13 @@ public final class TemplateUtil {
   public static void compositeComponentReplace(String componentType, String templateFile, Widget field,
           final Map<String, Element> dataFieldElements, String fieldName) {
     if (field == null) {
-      throw new IllegalStateException("Widget to be composited into [" + componentType + "] data-field [" + fieldName
+      throw new IllegalStateException("Widget to be composited into [" + componentType + "] field [" + fieldName
               + "] was null. Did you forget to @Inject or initialize this @DataField?");
     }
     Element element = dataFieldElements.get(fieldName);
     if (element == null) {
       throw new IllegalStateException("Template [" + templateFile
-              + "] did not contain data-field attribute for field [" + componentType + "." + fieldName + "]");
+              + "] did not contain data-field, id or class attribute for field [" + componentType + "." + fieldName + "]");
     }
     logger.fine("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
@@ -125,8 +125,8 @@ public final class TemplateUtil {
   }
 
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
-                                                                                   component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
-                                                                                   }-*/;
+    component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
+  }-*/;
 
   public static Element getRootTemplateElement(String templateContents, final String rootField) {
     Element parserDiv = DOM.createDiv();
@@ -163,6 +163,43 @@ public final class TemplateUtil {
   }
 
   /**
+   * Indicates the type of attribute a data field was discovered from.
+   */
+  private enum AttributeType {
+    CLASS("class"),
+    ID("id"),
+    DATA_FIELD("data-field");
+    
+    private final String attributeName;
+    
+    AttributeType(String attributeName) {
+      this.attributeName = attributeName;
+    }
+    
+    public String getAttributeName() {
+      return attributeName;
+    }
+  }
+  
+  private static class TaggedElement {
+    private final AttributeType attributeType;
+    private final Element element;
+    
+    public TaggedElement(AttributeType attributeType, Element element) {
+      this.attributeType = attributeType;
+      this.element = element;
+    }
+    
+    public AttributeType getAttributeType() {
+      return attributeType;
+    }
+    
+    public Element getElement() {
+      return element;
+    }
+  }
+  
+  /**
    * Called to perform i18n translation on the given template. Add i18n-prefix attribute to root of
    * template to allow translation after bean creation.
    * 
@@ -193,24 +230,50 @@ public final class TemplateUtil {
   }
 
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
-    final Map<String, Element> childTemplateElements = new LinkedHashMap<String, Element>();
+    try {
+      final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
 
-    logger.fine("Searching template for fields.");
-    // TODO do this as browser split deferred binding using
-    // Document.querySelectorAll() -
-    // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
-    Visit.depthFirst(templateRoot, new Visitor<Object>() {
-      @Override
-      public boolean visit(VisitContextMutable<Object> context, Element element) {
-        if (element.hasAttribute("data-field")) {
-          logger.fine("Located field: " + element.getAttribute("data-field"));
-          childTemplateElements.put(element.getAttribute("data-field"), element);
+      logger.fine("Searching template for fields.");
+      // TODO do this as browser split deferred binding using
+      // Document.querySelectorAll() -
+      // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
+      Visit.depthFirst(templateRoot, new Visitor<Object>() {
+        @Override
+        public boolean visit(VisitContextMutable<Object> context, Element element) {
+          for (AttributeType attrType : AttributeType.values()) {
+            String attrName = attrType.getAttributeName();
+            if (element.hasAttribute(attrName)) {
+              logger.fine("Located " + attrName + ": " + element.getAttribute(attrName));
+
+              /*
+               * <div id=root>
+               *   <a data-field=foo id=foo href=bar.html>My Link</a>
+               *   <span class=foo>My Span</a>
+               *   <div data-field=foo></div>
+               * </div>
+               */
+              TaggedElement existingCandidate = childTemplateElements.get(element.getAttribute(attrName));
+              if (existingCandidate == null || existingCandidate.getAttributeType().ordinal() < attrType.ordinal()) {
+                childTemplateElements.put(element.getAttribute(attrName), new TaggedElement(attrType, element));
+              }
+            }
+          }
+          return true;
         }
-        return true;
-      }
-    });
+      });
 
-    return childTemplateElements;
+      Map<String, Element> untaggedTemplateElements = new LinkedHashMap<String, Element>();
+      for (Map.Entry<String, TaggedElement> entry : childTemplateElements.entrySet()) {
+        untaggedTemplateElements.put(entry.getKey(), entry.getValue().getElement());
+      }
+
+      return untaggedTemplateElements;
+    }
+    catch (Throwable t) {
+      System.out.println("error while enumerating templates!");
+      t.printStackTrace(System.out);
+      throw new RuntimeException(t);
+    }
   }
 
   public static void setupNativeEventListener(Composite component, Element element, EventListener listener,
@@ -254,7 +317,7 @@ public final class TemplateUtil {
   }
 
   private static native JsArray<Node> getAttributes(Element elem) /*-{
-                                                                  return elem.attributes;
-                                                                  }-*/;
+    return elem.attributes;
+  }-*/;
 
 }
