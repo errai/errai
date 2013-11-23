@@ -193,9 +193,9 @@
           <plugin>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
-              <testExcludes>
+              <excludes>
                 <exclude>com/google/gwt/junit/JUnitShell.java</exclude>
-              </testExcludes>
+              </excludes>
             </configuration>
           </plugin>
           <plugin>
