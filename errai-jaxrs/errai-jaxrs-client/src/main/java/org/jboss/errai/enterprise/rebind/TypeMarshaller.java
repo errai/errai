@@ -40,6 +40,10 @@ public class TypeMarshaller {
   public static Statement marshal(Statement statement) {
     return marshal(statement, "text/plain");
   }
+  
+  public static Statement marshal(MetaClass type, Statement statement) {
+    return marshal(type, statement, "text/plain");
+  }
 
   public static Statement marshal(Statement statement, String contentType) {
     if (statement instanceof Parameter) {
@@ -89,9 +93,9 @@ public class TypeMarshaller {
    * Works for all types that have a 'copy constructor', a toString() representation and a valueOf() method (all
    * primitive wrapper types and java.lang.String). Will only be used in case text/plain was specified as mime type.
    */
-  private static class PrimitiveTypeMarshaller {
+  public static class PrimitiveTypeMarshaller {
 
-    private static boolean canHandle(MetaClass type, String mimeType) {
+    public static boolean canHandle(MetaClass type, String mimeType) {
       boolean canHandle = false;
       if (("text/plain".equals(mimeType) && type.asUnboxed().isPrimitive())
           || type.equals(MetaClassFactory.get(String.class))) {

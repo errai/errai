@@ -21,6 +21,9 @@ import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import javax.ws.rs.QueryParam;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
@@ -33,14 +36,19 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
+import org.jboss.errai.enterprise.rebind.TypeMarshaller.PrimitiveTypeMarshaller;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.URL;
@@ -127,30 +135,86 @@ public class JaxrsProxyMethodGenerator {
             .invoke("concat", encodePath(marshal(params.getMatrixParameter(matrixParamName))));
       }
     }
+    
     ContextualStatementBuilder urlBuilder = Stmt.loadVariable("url").invoke(APPEND, pathValue);
-
+    block.addStatement(urlBuilder);
+    
     // construct query using @QueryParams
     if (params.getQueryParameters() != null) {
       urlBuilder = urlBuilder.invoke(APPEND, "?");
-
       int i = 0;
       for (String queryParamName : params.getQueryParameters().keySet()) {
         for (Statement queryParam : params.getQueryParameters(queryParamName)) {
-          if (i++ > 0)
-            urlBuilder = urlBuilder.invoke(APPEND, "&");
-
-          urlBuilder = urlBuilder.invoke(APPEND, queryParamName).invoke(APPEND, "=")
+          
+          MetaClass queryParamType = queryParam.getType();
+          if (isListOrSet(queryParamType)) {
+            MetaClass paramType = assertValidCollectionParam(queryParamType, queryParamName, QueryParam.class);
+            block.addStatement(
+              Stmt.loadVariable(((Parameter) queryParam).getName()).foreach("p")
+                .append(If.not(Stmt.loadVariable("url").invoke("toString").invoke("endsWith", "?"))
+                    .append(Stmt.loadVariable("url").invoke(APPEND, "&")).finish())
+                .append(Stmt.loadVariable("url").invoke(APPEND, queryParamName).invoke(APPEND, "=")
+                    .invoke(APPEND, encodeQuery(marshal(paramType, Stmt.loadVariable("p")))))
+                .finish()
+              );
+          }
+          else {
+            if (i++ > 0) {
+              urlBuilder = urlBuilder.invoke(APPEND, "&");
+            }
+            urlBuilder = urlBuilder.invoke(APPEND, queryParamName).invoke(APPEND, "=")
               .invoke(APPEND, encodeQuery(marshal(queryParam)));
+          }
         }
       }
     }
 
-    if (urlBuilder != null)
-      block.addStatement(urlBuilder);
-
     return block;
   }
+  
+  /**
+   * Checks if the provided type is a {@link List} or {@link Set}.
+   * 
+   * @param paramType
+   *          the type to check
+   * @return true if the type can be assigned to a List or Set, otherwise false.
+   */
+  private boolean isListOrSet(MetaClass paramType) {
+    return paramType.isAssignableTo(List.class) || paramType.isAssignableTo(Set.class);
+  }
 
+  /**
+   * Asserts that the provided type is a valid collection type for JAX-RS resource parameters.
+   * 
+   * @param paramType
+   *          the provided type.
+   * @param paramName
+   *          the name of the resource parameter for error reporting.
+   * @param jaxrsParamType
+   *          the JAX-RS resource parameter type for error reporting.
+   * 
+   * @return the element type.
+   * @throws GenerationException
+   *           if the type parameters of the collection type are invalid for JAX-RS resource
+   *           parameters.
+   */
+  private MetaClass assertValidCollectionParam(MetaClass paramType, String paramName, Class<?> jaxrsParamType) {
+    MetaParameterizedType queryParamPType = paramType.getParameterizedType();
+    MetaType[] typeParams = (queryParamPType != null) ? queryParamPType.getTypeParameters() : null;
+    if (typeParams != null && typeParams.length == 1 && typeParams[0] instanceof MetaClass
+          && PrimitiveTypeMarshaller.canHandle((MetaClass) typeParams[0], "text/plain")) {
+
+      return (MetaClass) typeParams[0];
+
+    }
+    else {
+      throw new GenerationException(
+            "Unsupported type parameter found on " + jaxrsParamType.getSimpleName() + " with name "
+                + paramName + " in method " + resourceMethod.getMethod() +  
+                " (check the JavaDocs of " + jaxrsParamType.getName() + " for details!)");
+    }
+  }
+    
   /**
    * Generates the declaration for a new {@link RequestBuilder} instance, initialized with the generated URL
    * {@link #generateUrl(JaxrsResourceMethodParameters)}
@@ -221,7 +285,7 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generated the logic required to make this proxy method interceptable.
+   * Generates the logic required to make this proxy method interceptable.
    * 
    * @return statement representing the interceptor logic.
    */
@@ -294,7 +358,6 @@ public class JaxrsProxyMethodGenerator {
    * 
    * @return statement representing the request
    */
-
   private Statement generateRequest(final ContextualStatementBuilder requestBuilder,
       final ContextualStatementBuilder proxy) {
     Statement sendRequest = null;
@@ -311,7 +374,7 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generate an anonymous implementation/instance of {@link ResponseDemarshallingCallback} that will handle the
+   * Generates an anonymous implementation/instance of {@link ResponseDemarshallingCallback} that will handle the
    * demarshalling of the HTTP response.
    * 
    * @return statement representing the {@link ResponseDemarshallingCallback}.

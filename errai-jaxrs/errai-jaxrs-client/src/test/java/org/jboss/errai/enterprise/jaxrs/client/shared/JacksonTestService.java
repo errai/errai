@@ -16,8 +16,12 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import java.util.List;
+
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 
@@ -139,4 +143,8 @@ public interface JacksonTestService {
   @POST
   @Path("/map")
   public String postJacksonMap(String jackson);
+  
+  @GET
+  @Path("/ids")
+  public String getWithQueryParamListOfStrings(@QueryParam("id") List<String> ids);
 }

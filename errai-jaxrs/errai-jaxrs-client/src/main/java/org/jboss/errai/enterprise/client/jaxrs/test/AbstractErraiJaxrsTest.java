@@ -34,7 +34,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected String jaxRsApplicationRoot = "/";
   private final TestErrorCallback errorCallback = new TestErrorCallback();;
- 
+
   @Override
   protected void gwtSetUp() throws Exception {
     RestClient.setApplicationRoot(jaxRsApplicationRoot);
@@ -46,8 +46,9 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, successCodes);
   }
-  
-  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, RestErrorCallback errorCallback, Integer... successCodes) {
+
+  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, RestErrorCallback errorCallback,
+      Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, successCodes);
   }
 
@@ -96,7 +97,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
       finishTest();
     }
   }
-  
+
   private class TestErrorCallback implements RestErrorCallback {
     @Override
     public boolean error(Request request, Throwable throwable) {

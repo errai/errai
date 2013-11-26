@@ -140,4 +140,19 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       return null;
     }
   }
+
+  @Override
+  public String getWithQueryParamListOfStrings(List<String> ids) {
+    if (ids.size() != 3)
+      throw new IllegalArgumentException("Expected 3 id parameters");
+
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.writeValueAsString(ids);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
 }

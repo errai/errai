@@ -328,4 +328,22 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     assertNotNull("key5 should not be null", map);
     assertEquals("mapValue", map.get("mapKey"));
   }
+  
+  
+  @Test
+  public void testGetWithQueryParamListOfStrings() {
+    delayTestFinish(5000);
+    final List<String> strings = Arrays.asList("abc", "def", "ghi");
+    
+    call(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            List<String> result = MarshallingWrapper.fromJSON(jackson, List.class, String.class);
+            assertEquals(strings, result);
+            finishTest();
+          }        
+        }).getWithQueryParamListOfStrings(strings);
+  }
 }
