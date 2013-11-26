@@ -195,7 +195,7 @@
             <configuration>
               <excludes>
                 <exclude>com/google/gwt/junit/JUnitShell.java</exclude>
-              </excludes>
+              </excludes>              
             </configuration>
           </plugin>
           <plugin>
@@ -255,6 +255,14 @@
                 </property>
 
               </systemProperties>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <exclude>com/google/gwt/junit/JUnitShell.java</exclude>
+              </excludes>              
             </configuration>
           </plugin>
         </plugins>
