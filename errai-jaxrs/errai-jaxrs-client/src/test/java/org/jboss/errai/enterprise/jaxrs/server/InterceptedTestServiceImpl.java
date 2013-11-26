@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import java.util.List;
+
 import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedTestService;
 
 /**
@@ -41,6 +43,11 @@ public class InterceptedTestServiceImpl implements InterceptedTestService {
     return result;
   }
 
+  @Override
+  public List<String> interceptedGetWithListParameterManipulation(List<String> result) {
+    return result;
+  }
+  
   @Override
   public String interceptedGetWithChainedInterceptors(String result) {
     return result;

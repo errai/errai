@@ -149,8 +149,10 @@ public class JaxrsProxyMethodGenerator {
           MetaClass queryParamType = queryParam.getType();
           if (isListOrSet(queryParamType)) {
             MetaClass paramType = assertValidCollectionParam(queryParamType, queryParamName, QueryParam.class);
-            block.addStatement(
-              Stmt.loadVariable(((Parameter) queryParam).getName()).foreach("p")
+            ContextualStatementBuilder listParam = (queryParam instanceof Parameter) ? 
+                Stmt.loadVariable(((Parameter) queryParam).getName()) : Stmt.nestedCall(queryParam); 
+            
+            block.addStatement(listParam.foreach("p")
                 .append(If.not(Stmt.loadVariable("url").invoke("toString").invoke("endsWith", "?"))
                     .append(Stmt.loadVariable("url").invoke(APPEND, "&")).finish())
                 .append(Stmt.loadVariable("url").invoke(APPEND, queryParamName).invoke(APPEND, "=")

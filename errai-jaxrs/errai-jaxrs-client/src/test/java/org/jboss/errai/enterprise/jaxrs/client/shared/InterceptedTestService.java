@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,6 +27,7 @@ import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallBypassingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorOne;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorTwo;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallListParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallResultManipulatingInterceptor;
 
@@ -57,7 +60,12 @@ public interface InterceptedTestService {
   public String interceptedGetWithParameterManipulation(@PathParam("result") String result);
   
   @GET
-  @Path("/4/{p1}/{p2}")
+  @Path("/4")
+  @InterceptedCall(RestCallListParameterManipulatingInterceptor.class)
+  public List<String> interceptedGetWithListParameterManipulation(@QueryParam("result") List<String> result);
+  
+  @GET
+  @Path("/5/{p1}/{p2}")
   @InterceptedCall(RestCallBypassingInterceptor.class)
   public String interceptedGetWithPrimitiveAndBoxedParameters(@PathParam("p1") Long p1, @PathParam("p2") long p2);
 }
