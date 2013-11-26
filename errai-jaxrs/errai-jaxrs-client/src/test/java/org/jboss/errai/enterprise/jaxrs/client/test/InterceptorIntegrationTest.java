@@ -16,6 +16,9 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedTestService;
 import org.junit.Test;
@@ -38,12 +41,20 @@ public class InterceptorIntegrationTest extends AbstractErraiJaxrsTest {
         new AssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGetWithEndpointBypassing();
   }
-
+  
   @Test
   public void testInterceptedRestCallWithParameterManipulation() {
     call(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGetWithParameterManipulation("will be replaced by interceptor");
+  }
+  
+  @Test
+  public void testInterceptedRestCallWithListParameterManipulation() {
+    List<String> list = Arrays.asList("1", "2", "3");
+    call(InterceptedTestService.class,
+        new AssertionCallback<List<String>>("Request was not intercepted", Arrays.asList("intercepted", "2", "3")))
+        .interceptedGetWithListParameterManipulation(list);
   }
 
   @Test

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared.interceptor;
 
+import java.util.Arrays;
+
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestClientInterceptor;
 
@@ -24,11 +26,11 @@ import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestClientInterce
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class RestCallParameterManipulatingInterceptor implements RestClientInterceptor {
+public class RestCallListParameterManipulatingInterceptor implements RestClientInterceptor {
 
   @Override
   public void aroundInvoke(final RestCallContext context) {
-    context.setParameters(new Object[]{"intercepted"});
+    context.setParameters(new Object[]{Arrays.asList("intercepted", "2", "3")});
     context.proceed();
   }
 }

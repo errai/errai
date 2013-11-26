@@ -340,6 +340,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
           @Override
           public void callback(String jackson) {
             assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            @SuppressWarnings("unchecked")
             List<String> result = MarshallingWrapper.fromJSON(jackson, List.class, String.class);
             assertEquals(strings, result);
             finishTest();
