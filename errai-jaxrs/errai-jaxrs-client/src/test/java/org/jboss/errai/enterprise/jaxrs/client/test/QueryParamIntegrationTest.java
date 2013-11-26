@@ -16,6 +16,12 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 import org.junit.Test;
@@ -60,6 +66,51 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
         new AssertionCallback<String>("@GET with @QueryParams failed", "1/2")).getWithMultipleQueryParams(1l, 2l);
   }
 
+  @Test
+  public void testGetWithQueryParamListOfLongs() {
+    List<Long> longs = Arrays.asList(1l,2l,3l);
+    call(QueryParamTestService.class,
+        new AssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", longs)).getWithQueryParamListOfLongs(longs);
+  }
+  
+  @Test
+  public void testGetWithQueryParamSetOfStrings() {
+    Set<String> strings = new HashSet<String>(Arrays.asList("1", "2", "3"));
+    call(QueryParamTestService.class,
+        new AssertionCallback<Set<String>>("@GET with Set<String> as @QueryParams failed", strings)).getWithQueryParamSetOfStrings(strings);
+  }
+  
+  @Test
+  public void testGetWithQueryParamListOfStrings() {
+    List<String> strings = new ArrayList<String>();
+    strings.add("1");
+    strings.add("2");
+    strings.add("3");
+    call(QueryParamTestService.class,
+        new AssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", strings)).getWithQueryParamListOfStrings(strings);
+  }
+  
+  @Test
+  public void testGetWithMultipleQueryParamListOfStrings() {
+    List<String> list1 = Arrays.asList("1", "2", "3");
+    List<String> list2 = Arrays.asList("5", "6", "7");
+    List<String> expected = Arrays.asList("1", "2", "3", "4", "5", "6", "7");
+    
+    call(QueryParamTestService.class,
+        new AssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", expected))
+        .getWithMultipleQueryParamListOfStrings(list1, "4", list2);
+  }
+  
+  @Test
+  public void testGetWithMultipleQueryParamsAndListOfStrings() {
+    List<String> list = Arrays.asList("2", "3", "4");
+    List<String> expected = Arrays.asList("1", "2", "3", "4", "5");
+    
+    call(QueryParamTestService.class,
+        new AssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", expected))
+        .getWithMultipleQueryParamsAndListOfStrings("1", list, "5");
+  }
+  
   @Test
   public void testPostWithQueryParam() {
     call(QueryParamTestService.class,

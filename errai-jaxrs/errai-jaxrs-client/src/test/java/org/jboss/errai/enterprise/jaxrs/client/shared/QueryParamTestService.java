@@ -16,6 +16,9 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import java.util.List;
+import java.util.Set;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -43,6 +46,28 @@ public interface QueryParamTestService {
   @GET 
   @Path("/3")
   public String getWithMultipleQueryParams(@QueryParam("id1") long id1, @QueryParam("id2") long id2);
+  
+  @GET
+  @Path("/4")
+  public List<Long> getWithQueryParamListOfLongs(@QueryParam("id") List<Long> id);
+  
+  @GET
+  @Path("/5")
+  public Set<String> getWithQueryParamSetOfStrings(@QueryParam("id") Set<String> id);
+  
+  @GET
+  @Path("/6")
+  public List<String> getWithQueryParamListOfStrings(@QueryParam("id") List<String> id);
+  
+  @GET
+  @Path("/7")
+  public List<String> getWithMultipleQueryParamListOfStrings(@QueryParam("id1") List<String> id1,
+      @QueryParam("id2") String id, @QueryParam("id3") List<String> id2);
+  
+  @GET
+  @Path("/8")
+  public List<String> getWithMultipleQueryParamsAndListOfStrings(@QueryParam("id1") String id1,
+      @QueryParam("id2") List<String> id2, @QueryParam("id3") String id3);
 
   @POST
   public int postWithQueryParam(String entity, @QueryParam("id") int id);

@@ -16,6 +16,10 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 
 /**
@@ -34,12 +38,47 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
   public String getWithStringQueryParam(String id) {
     return id;
   }
-  
+
   @Override
   public String getWithMultipleQueryParams(long id1, long id2) {
     return "" + id1 + "/" + id2;
-  } 
+  }
+
+  @Override
+  public List<Long> getWithQueryParamListOfLongs(List<Long> id) {
+    return id;
+  }
+
+  @Override
+  public Set<String> getWithQueryParamSetOfStrings(Set<String> id) {
+    return id;
+  }
+
+  @Override
+  public List<String> getWithQueryParamListOfStrings(List<String> id) {
+    return id;
+  }
+
+  @Override
+  public List<String> getWithMultipleQueryParamListOfStrings(List<String> id1, String id, List<String> id2) {
+     List<String> list = new ArrayList<String>();
+     list.addAll(id1);
+     list.add(id);
+     list.addAll(id2);
+     
+     return list;
+  }
   
+  @Override
+  public List<String> getWithMultipleQueryParamsAndListOfStrings(String id1, List<String> id2, String id3) {
+    List<String> list = new ArrayList<String>();
+    list.add(id1);
+    list.addAll(id2);
+    list.add(id3);
+    
+    return list;
+  }
+
   @Override
   public int postWithQueryParam(String entity, int id) {
     return id;
@@ -56,6 +95,6 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
   }
 
   @Override
-  public void headWithQueryParam(long id) {
-  }
+  public void headWithQueryParam(long id) {}
+
 }
