@@ -62,6 +62,8 @@ public class JBossLauncher extends ServletContainerLauncher {
 
     try {
       copyConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, JBOSS_HOME);
+      logger.log(Type.INFO,
+              String.format("Created temporary config file %s, copied from %s.", TMP_CONFIG_FILE, TEMPLATE_CONFIG_FILE));
     } catch (IOException e) {
       logger.log(
               Type.ERROR,
