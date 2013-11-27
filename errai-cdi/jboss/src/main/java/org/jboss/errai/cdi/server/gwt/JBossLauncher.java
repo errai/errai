@@ -25,6 +25,7 @@ public class JBossLauncher extends ServletContainerLauncher {
   private final String TEMPLATE_CONFIG_FILE_PROPERTY = "errai.jboss.config.file";
   private final String CLASS_HIDING_JAVA_AGENT_PROPERTY = "errai.jboss.javaagent.path";
   private final String APP_CONTEXT_PROPERTY = "errai.dev.context";
+  private final String JBOSS_JAVA_OPTS_PROPERTY = "errai.jboss.javaopts";
 
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
 
@@ -42,6 +43,7 @@ public class JBossLauncher extends ServletContainerLauncher {
     final String TEMPLATE_CONFIG_FILE = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
     final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
     final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
+    String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "");
 
     if (JBOSS_HOME == null || JBOSS_HOME.equals("")) {
       logger.log(
@@ -90,8 +92,8 @@ public class JBossLauncher extends ServletContainerLauncher {
       // Allows JVM to be debugged
       builder.environment().put(
               "JAVA_OPTS",
-              String.format("-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n -javaagent:%s", DEBUG_PORT,
-                      CLASS_HIDING_JAVA_AGENT));
+              String.format("%s -Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n -javaagent:%s", JAVA_OPTS,
+                      DEBUG_PORT, CLASS_HIDING_JAVA_AGENT).trim());
 
       process = builder.start();
 
