@@ -24,11 +24,16 @@ public interface MarshallingSession {
 
   /**
    * Returns a marshaller for the provided type.
-   * 
+   *
    * @param fqcn
-   *          fully qualified class name of the type to be marshalled.
-   * 
-   * @return marshaller instance, or null if no marshaller was found for the provided type.
+   *          fully qualified class name of the type to be marshalled, in the
+   *          format returned by {@link java.lang.Class#getName()} and
+   *          {@link org.jboss.errai.codegen.meta.MetaClass#getFullyQualifiedName()}.
+   *          Null is permitted, and yields a marshaller that can only marshal
+   *          and demarshal null references.
+   *
+   * @return marshaller instance, or null if no marshaller was found for the
+   *         given type.
    */
   public Marshaller<Object> getMarshallerInstance(String fqcn);
 
@@ -36,7 +41,7 @@ public interface MarshallingSession {
 
   /**
    * Records a new object to the session with the specified <tt>hashCode</tt> identifier.
-   * 
+   *
    * @param hashCode
    *          a unique identifier
    * @param instance
@@ -46,7 +51,7 @@ public interface MarshallingSession {
 
   /**
    * Checks if the object is already in the context based on the object reference.
-   * 
+   *
    * @param reference
    *          the entity reference
    * @return true if the session contains the object reference.
@@ -55,7 +60,7 @@ public interface MarshallingSession {
 
   /**
    * Checks if the object is already in the context based on the hash code.
-   * 
+   *
    * @param hashCode
    *          the hash code
    * @return true if the session contains the object reference.
@@ -65,7 +70,7 @@ public interface MarshallingSession {
   /**
    * Returns a unique identifier for the specified object reference. Returns a new identifier if the object is unknown
    * to the session, or returns the existing one if it is known.
-   * 
+   *
    * @param reference
    *          the entity reference
    * @return a new or existing identifier within this session
@@ -75,7 +80,7 @@ public interface MarshallingSession {
   /**
    * Looks up the object based on the specified <tt>hashCode</tt> identifier. Returns null if the specified identifier
    * does not exist.
-   * 
+   *
    * @param type
    *          the type of entity being looked up
    * @param hashCode
@@ -85,7 +90,7 @@ public interface MarshallingSession {
    * @return the instance of the entity or null if not present
    */
   public <T> T getObject(Class<T> type, String hashCode);
-  
+
   public String getAssumedElementType();
 
   public void setAssumedElementType(String assumedElementType);

@@ -20,6 +20,19 @@ package org.jboss.errai.marshalling.client.api;
  * @author Mike Brock
  */
 public interface MappingContext {
+
+  /**
+   * Returns the Marshaller instance that can handle the given type.
+   *
+   * @param clazz
+   *          fully qualified class name of the type to be marshalled, in the
+   *          format returned by {@link java.lang.Class#getName()} and
+   *          {@link org.jboss.errai.codegen.meta.MetaClass#getFullyQualifiedName()}.
+   *          Null is permitted, and yields a marshaller that can only marshal
+   *          and demarshal null references.
+   * @return a marshaller instance that can handle the given type, or null if
+   *         the type can't be handled in this mapping context.
+   */
   public Marshaller<Object> getMarshaller(String clazz);
 
   public boolean hasMarshaller(String clazzName);
