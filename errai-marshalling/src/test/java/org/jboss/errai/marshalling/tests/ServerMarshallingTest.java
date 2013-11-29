@@ -105,6 +105,16 @@ public class ServerMarshallingTest {
     }
   }
 
+  /**
+   * Tests that the MappingContext.getMarshaller() returns null when asked for a
+   * marshaller it doesn't have. In particular, it should not throw an exception.
+   */
+  @Test
+  public void testMissingTypeGetsNullMarshaller() {
+    Marshaller<Object> marshaller = MappingContextSingleton.get().getMarshaller("does.not.Exist");
+    Assert.assertNull(marshaller);
+  }
+
   @Test
   public void testString() {
     testEncodeDecode(String.class, "ThisIsOurTestString");
@@ -239,17 +249,17 @@ public class ServerMarshallingTest {
   public void testDouble0dot9635950160419999() {
     testEncodeDecode(Double.class, 0.9635950160419999d);
   }
-  
+
   @Test
   public void testDoubleNan() {
     testEncodeDecode(Double.class, Double.NaN);
   }
-  
+
   @Test
   public void testDoublePosInf() {
     testEncodeDecode(Double.class, Double.POSITIVE_INFINITY);
   }
-  
+
   @Test
   public void testDoubleNegInf() {
     testEncodeDecode(Double.class, Double.NEGATIVE_INFINITY);
@@ -269,7 +279,7 @@ public class ServerMarshallingTest {
   public void testFloatRandomValue() {
     testEncodeDecode(Float.class, new Random(System.currentTimeMillis()).nextFloat());
   }
-  
+
   @Test
   public void testFloatNan() {
     testEncodeDecode(Float.class, Float.NaN);
@@ -284,7 +294,7 @@ public class ServerMarshallingTest {
   public void testFloatNegInf() {
     testEncodeDecode(Float.class, Float.NEGATIVE_INFINITY);
   }
-  
+
   @Test
   public void testByteMaxValue() {
     testEncodeDecode(Byte.class, Byte.MAX_VALUE);

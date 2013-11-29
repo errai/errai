@@ -232,7 +232,7 @@ public class MappingContextSingleton {
 
           addArrayMarshaller(def.getMappingClass().asArrayOf(1));
         }
-        
+
         for (final MappingDefinition def : factory.getMappingDefinitions()) {
           for (final MemberMapping mapping : def.getMemberMappings()) {
             if (mapping.getType().isArray()) {
@@ -262,9 +262,9 @@ public class MappingContextSingleton {
             compType = MetaClassFactory.get(Object.class);
             marshaller = factory.getDefinition(Object.class).getMarshallerInstance();
           }
-          
+
           if (marshaller == null) {
-            throw new MarshallingException("Failed to generate array marshaller for " + type.getCanonicalName() + 
+            throw new MarshallingException("Failed to generate array marshaller for " + type.getCanonicalName() +
                 " because marshaller for " + compType + " could not be found.");
           }
 
@@ -296,7 +296,7 @@ public class MappingContextSingleton {
         final MappingDefinition def = factory.getDefinition(clazz);
 
         if (def == null) {
-          throw new MarshallingException("class is not available to the marshaller framework: " + clazz);
+           return null;
         }
 
         return def.getMarshallerInstance();
