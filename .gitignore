@@ -32,3 +32,4 @@ release.properties
 gwt-unitCache/
 class_list.txt
 *.jpage
+.factorypath
