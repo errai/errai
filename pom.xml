@@ -37,6 +37,12 @@
     A GWT framework.
   </description>
 
+  <parent>
+    <groupId>org.jboss.integration-platform</groupId>
+    <artifactId>jboss-integration-platform-parent</artifactId>
+    <version>6.0.0-SNAPSHOT</version>
+  </parent>
+
   <developers>
     <developer>
       <name>Mike Brock</name>
@@ -137,6 +143,13 @@
     <dependencies>
       <!-- Errai Dependencies -->
       <!-- Project Dependencies provided by Errai -->
+      <dependency>
+        <groupId>org.jboss.integration-platform</groupId>
+        <artifactId>jboss-integration-platform-bom</artifactId>
+        <version>6.0.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-bus</artifactId>
