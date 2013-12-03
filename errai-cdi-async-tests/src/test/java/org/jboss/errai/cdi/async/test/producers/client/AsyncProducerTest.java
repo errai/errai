@@ -1,17 +1,22 @@
 package org.jboss.errai.cdi.async.test.producers.client;
 
+import static org.junit.Assert.*;
+
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncProducerDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncSingletonProducerDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.AustenProducerDependnetBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.BeanConstrConsumesOwnProducer;
+import org.jboss.errai.cdi.async.test.producers.client.res.DepBeanProducerConsumer;
 import org.jboss.errai.cdi.async.test.producers.client.res.Fooblie;
 import org.jboss.errai.cdi.async.test.producers.client.res.FooblieDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.FooblieMaker;
+import org.jboss.errai.cdi.async.test.producers.client.res.PseudoBeanProducerConsumer;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanQuery;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -179,6 +184,38 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
                 });
               }
             });
+          }
+        });
+      }
+    });
+  }
+  
+  public void testNormalDependentProducer() throws Exception {
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(DepBeanProducerConsumer.class)
+        .getInstance(new CreationalCallback<DepBeanProducerConsumer>() {
+          @Override
+          public void callback(DepBeanProducerConsumer bean) {
+            assertNotNull(bean.getProducable());
+            finishTest();
+          }
+        });
+      }
+    });
+  }
+  
+  public void testPseudoProducer() throws Exception {
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(PseudoBeanProducerConsumer.class)
+        .getInstance(new CreationalCallback<PseudoBeanProducerConsumer>() {
+          @Override
+          public void callback(PseudoBeanProducerConsumer bean) {
+            assertNotNull(bean.getProducable());
+            finishTest();
           }
         });
       }
