@@ -33,12 +33,14 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
+import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
@@ -292,16 +294,21 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
     final Statement[] stmt;
     final Statement val;
+    final Injector inj;
 
     if (getTargetInjector().getInjectedType().equals(getEnclosingType()) &&
         // @Any is only implicitly added to injection SOURCES, so we must filter it out to do an exact comparison
         getTargetInjector().getQualifyingMetadata().filter(BuiltInQualifiers.ANY_INSTANCE).equals(getQualifyingMetadata()) &&
         getInjector() != null) {
-
-      val = Refs.get(getInjector().getInstanceVarName());
+      inj = getInjector();
     }
     else {
-      val = Refs.get(getTargetInjector().getInstanceVarName());
+      inj = getTargetInjector();
+    }
+    if (getInjector() == null && inj.isDependent() && inj.isRegularTypeInjector()) {
+      val = inj.getBeanInstance(this);
+    } else {
+      val = Refs.get(inj.getInstanceVarName());
     }
 
     switch (taskType) {

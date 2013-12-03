@@ -19,7 +19,29 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
-import com.google.gwt.core.ext.TreeLogger.Type;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeSet;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Provider;
+import javax.inject.Scope;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
@@ -50,26 +72,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Provider;
-import javax.inject.Scope;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeSet;
+import com.google.gwt.core.ext.TreeLogger.Type;
 
 /**
  * The main IOC configuration processor. This class is responsible for scanning the classpath, finding beans,
@@ -470,6 +473,32 @@ public class IOCConfigProcessor {
               Collection<MetaClass> classes;
 
               classes = ClassScanner.getTypesAnnotatedWith(annotationClass, context.getPackages());
+              
+              // Get producer classes which are implicitly dependent
+              if (annotationClass.equals(Dependent.class)) {
+                classes = new ArrayList<MetaClass>(classes);
+                final Collection<MetaClass> toCheck = new ArrayList<MetaClass>();
+                for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Produces.class, context.getPackages())) {
+                  toCheck.add(method.getDeclaringClass());
+                }
+                for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(Produces.class, context.getPackages())) {
+                  toCheck.add(field.getDeclaringClass());
+                }
+                
+                for (final MetaClass clazz : toCheck) {
+                  boolean scoped = false;
+                  for (final Annotation anno : clazz.getAnnotations()) {
+                    if (anno.annotationType().isAnnotationPresent(Scope.class)
+                            || anno.annotationType().isAnnotationPresent(NormalScope.class)) {
+                      scoped = true;
+                      break;
+                    }
+                  }
+                  if (!scoped) {
+                    classes.add(clazz);
+                  }
+                }
+              }
 
               if (annotationClass.equals(Dependent.class)
                   && Boolean.getBoolean(IOCBootstrapGenerator.EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY)
