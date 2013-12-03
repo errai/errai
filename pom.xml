@@ -1,21 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2011 JBoss, by Red Hat, Inc
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~    http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<!-- ~ Copyright 2011 JBoss, by Red Hat, Inc ~ ~ Licensed under the Apache License, Version 2.0 (the "License"); ~ you may not use this file except in compliance with the License. ~ You may obtain a copy 
+  of the License at ~ ~ http://www.apache.org/licenses/LICENSE-2.0 ~ ~ Unless required by applicable law or agreed to in writing, software ~ distributed under the License is distributed on an "AS IS" BASIS, 
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. ~ See the License for the specific language governing permissions and ~ limitations under the License. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <name>Errai</name>
   <groupId>org.jboss.errai</groupId>
@@ -88,7 +75,7 @@
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
     <guice.version>3.0</guice.version>
-    <guava.version>14.0.1</guava.version>    
+    <guava.version>14.0.1</guava.version>
     <appengine.version>1.7.6</appengine.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <slf4j.version>1.6.1</slf4j.version>
@@ -309,16 +296,16 @@
       </dependency>
 
       <dependency>
-          <groupId>com.github.branflake2267</groupId>
-          <artifactId>gwt-maps-api</artifactId>
-          <version>3.9.0-build-16</version>
+        <groupId>com.github.branflake2267</groupId>
+        <artifactId>gwt-maps-api</artifactId>
+        <version>3.9.0-build-16</version>
       </dependency>
 
 
       <dependency>
-          <groupId>com.googlecode.gwtphonegap</groupId>
-          <artifactId>gwtphonegap</artifactId>
-          <version>2.4.0.0</version>
+        <groupId>com.googlecode.gwtphonegap</groupId>
+        <artifactId>gwtphonegap</artifactId>
+        <version>2.4.0.0</version>
       </dependency>
 
       <dependency>
@@ -336,9 +323,9 @@
       </dependency>
 
       <dependency>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-          <version>1.4</version>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>1.4</version>
       </dependency>
 
       <dependency>
@@ -369,9 +356,7 @@
         <version>${guava.version}</version>
       </dependency>
 
-      <!-- Guava and Reflections both depend on JSR 305 from the findbugs
-        project, but they specify different versions. This pins to the newer of the
-        two. -->
+      <!-- Guava and Reflections both depend on JSR 305 from the findbugs project, but they specify different versions. This pins to the newer of the two. -->
       <dependency>
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
@@ -379,9 +364,9 @@
       </dependency>
 
       <dependency>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-incubator</artifactId>
-          <version>2.0.1</version>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-incubator</artifactId>
+        <version>2.0.1</version>
       </dependency>
 
       <dependency>
@@ -397,27 +382,27 @@
       </dependency>
 
       <dependency>
-          <groupId>com.google.gwt.google-apis</groupId>
-          <artifactId>gwt-ajaxloader</artifactId>
-          <version>1.1.0</version>
+        <groupId>com.google.gwt.google-apis</groupId>
+        <artifactId>gwt-ajaxloader</artifactId>
+        <version>1.1.0</version>
       </dependency>
 
       <dependency>
-          <groupId>com.h2database</groupId>
-          <artifactId>h2</artifactId>
-          <version>1.3.168</version>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>1.3.168</version>
       </dependency>
 
       <dependency>
-          <groupId>com.sun.grizzly</groupId>
-          <artifactId>grizzly-comet</artifactId>
-          <version>1.9.19-beta2</version>
+        <groupId>com.sun.grizzly</groupId>
+        <artifactId>grizzly-comet</artifactId>
+        <version>1.9.19-beta2</version>
       </dependency>
 
       <dependency>
-          <groupId>com.sun.grizzly</groupId>
-          <artifactId>grizzly-nio-framework</artifactId>
-          <version>1.9.19-beta2</version>
+        <groupId>com.sun.grizzly</groupId>
+        <artifactId>grizzly-nio-framework</artifactId>
+        <version>1.9.19-beta2</version>
       </dependency>
 
       <dependency>
@@ -427,9 +412,9 @@
       </dependency>
 
       <dependency>
-          <groupId>commons-configuration</groupId>
-          <artifactId>commons-configuration</artifactId>
-          <version>1.9</version>
+        <groupId>commons-configuration</groupId>
+        <artifactId>commons-configuration</artifactId>
+        <version>1.9</version>
       </dependency>
 
       <dependency>
@@ -437,29 +422,29 @@
         <artifactId>commons-logging</artifactId>
         <version>1.1.1</version>
       </dependency>
-      
-	  <dependency>
+
+      <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.4</version>
-      </dependency>      
-
-      <dependency>
-          <groupId>dom4j</groupId>
-          <artifactId>dom4j</artifactId>
-          <version>1.6.1</version>
       </dependency>
 
       <dependency>
-          <groupId>hsqldb</groupId>
-          <artifactId>hsqldb</artifactId>
-          <version>1.8.0.7</version>
+        <groupId>dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>1.6.1</version>
       </dependency>
 
       <dependency>
-          <groupId>javax</groupId>
-          <artifactId>javaee-api</artifactId>
-          <version>6.0</version>
+        <groupId>hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>1.8.0.7</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax</groupId>
+        <artifactId>javaee-api</artifactId>
+        <version>6.0</version>
       </dependency>
 
       <dependency>
@@ -475,15 +460,15 @@
       </dependency>
 
       <dependency>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
-          <version>1</version>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
       </dependency>
 
       <dependency>
-          <groupId>javax.annotation</groupId>
-          <artifactId>jsr250-api</artifactId>
-          <version>1.0</version>
+        <groupId>javax.annotation</groupId>
+        <artifactId>jsr250-api</artifactId>
+        <version>1.0</version>
       </dependency>
 
       <dependency>
@@ -518,9 +503,9 @@
       </dependency>
 
       <dependency>
-          <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
-          <artifactId>ostermiller-syntax</artifactId>
-          <version>1.1.1</version>
+        <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
+        <artifactId>ostermiller-syntax</artifactId>
+        <version>1.1.1</version>
       </dependency>
 
       <dependency>
@@ -536,9 +521,9 @@
       </dependency>
 
       <dependency>
-          <groupId>org.apache.maven</groupId> 
-          <artifactId>maven-project</artifactId> 
-          <version>2.0.7</version>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-project</artifactId>
+        <version>2.0.7</version>
       </dependency>
 
       <dependency>
@@ -566,21 +551,21 @@
       </dependency>
 
       <dependency>
-          <groupId>org.apache.tomcat</groupId>
-          <artifactId>catalina</artifactId>
-          <version>6.0.20</version>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>catalina</artifactId>
+        <version>6.0.20</version>
       </dependency>
 
       <dependency>
-          <groupId>org.codehaus.gmaven</groupId>
-          <artifactId>gmaven-mojo</artifactId>
-          <version>1.5</version>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>gmaven-mojo</artifactId>
+        <version>1.5</version>
       </dependency>
 
       <dependency>
-          <groupId>org.codehaus.gmaven</groupId>
-          <artifactId>gmaven-mojo-support</artifactId>
-          <version>1.5</version>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>gmaven-mojo-support</artifactId>
+        <version>1.5</version>
       </dependency>
 
       <dependency>
@@ -626,15 +611,15 @@
       </dependency>
 
       <dependency>
-          <groupId>org.glassfish.web</groupId>
-          <artifactId>el-impl</artifactId>
-          <version>2.1.2-b04</version>
+        <groupId>org.glassfish.web</groupId>
+        <artifactId>el-impl</artifactId>
+        <version>2.1.2-b04</version>
       </dependency>
 
       <dependency>
-          <groupId>org.gwtopenmaps.openlayers</groupId>
-          <artifactId>gwt-openlayers-client</artifactId>
-          <version>0.8</version>
+        <groupId>org.gwtopenmaps.openlayers</groupId>
+        <artifactId>gwt-openlayers-client</artifactId>
+        <version>0.8</version>
       </dependency>
 
       <dependency>
@@ -645,15 +630,15 @@
 
       <!-- FIXME this apparently does not exist, and even if it did, it looks redundant with the one that follows. -->
       <dependency>
-          <groupId>org.jboss.ejb3</groupId>
-          <artifactId>jboss-ejb3-api</artifactId>
-          <version>3.1.0</version>
+        <groupId>org.jboss.ejb3</groupId>
+        <artifactId>jboss-ejb3-api</artifactId>
+        <version>3.1.0</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.spec.javax.ejb</groupId>
-          <artifactId>jboss-ejb-api_3.1_spec</artifactId>
-          <version>1.0.2.Final</version>
+        <groupId>org.jboss.spec.javax.ejb</groupId>
+        <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+        <version>1.0.2.Final</version>
       </dependency>
 
       <dependency>
@@ -663,21 +648,21 @@
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.as</groupId>
-          <artifactId>jboss-as-websockets</artifactId>
-          <version>0.2.Alpha1</version>
+        <groupId>org.jboss.as</groupId>
+        <artifactId>jboss-as-websockets</artifactId>
+        <version>0.2.Alpha1</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss</groupId>
-          <artifactId>jboss-common-core</artifactId>
-          <version>2.2.14.GA</version>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-common-core</artifactId>
+        <version>2.2.14.GA</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.errai.io.netty</groupId>
-          <artifactId>netty</artifactId>
-          <version>4.0.0.Alpha1.errai.r1</version>
+        <groupId>org.jboss.errai.io.netty</groupId>
+        <artifactId>netty</artifactId>
+        <version>4.0.0.Alpha1.errai.r1</version>
       </dependency>
 
       <dependency>
@@ -705,63 +690,63 @@
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.shrinkwrap</groupId>
-          <artifactId>shrinkwrap-api</artifactId>
-          <version>1.0.0-beta-5</version>
+        <groupId>org.jboss.shrinkwrap</groupId>
+        <artifactId>shrinkwrap-api</artifactId>
+        <version>1.0.0-beta-5</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.shrinkwrap</groupId>
-          <artifactId>shrinkwrap-impl-base</artifactId>
-          <version>1.0.0-beta-5</version>
+        <groupId>org.jboss.shrinkwrap</groupId>
+        <artifactId>shrinkwrap-impl-base</artifactId>
+        <version>1.0.0-beta-5</version>
       </dependency>
 
       <dependency>
-         <groupId>org.jboss.weld.se</groupId>
-         <artifactId>weld-se-core</artifactId>
-	       <version>1.1.6.Final</version>
+        <groupId>org.jboss.weld.se</groupId>
+        <artifactId>weld-se-core</artifactId>
+        <version>1.1.6.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet</artifactId>
-          <version>1.1.6.Final</version>
+        <groupId>org.jboss.weld.servlet</groupId>
+        <artifactId>weld-servlet</artifactId>
+        <version>1.1.6.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet</artifactId>
-          <classifier>sources</classifier>
-          <version>1.1.6.Final</version>
+        <groupId>org.jboss.weld.servlet</groupId>
+        <artifactId>weld-servlet</artifactId>
+        <classifier>sources</classifier>
+        <version>1.1.6.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet-core</artifactId>
-          <version>1.1.6.Final</version>
+        <groupId>org.jboss.weld.servlet</groupId>
+        <artifactId>weld-servlet-core</artifactId>
+        <version>1.1.6.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jboss.weld</groupId>
-          <artifactId>weld-api</artifactId>
-          <version>1.1.Final</version>
+        <groupId>org.jboss.weld</groupId>
+        <artifactId>weld-api</artifactId>
+        <version>1.1.Final</version>
       </dependency>
       <dependency>
-          <groupId>org.jboss.weld</groupId>
-          <artifactId>weld-spi</artifactId>
-          <version>1.1.Final</version>
-      </dependency>
-
-      <dependency>
-          <groupId>org.jboss</groupId>
-          <artifactId>jboss-vfs</artifactId>
-          <version>3.0.1.GA</version>
+        <groupId>org.jboss.weld</groupId>
+        <artifactId>weld-spi</artifactId>
+        <version>1.1.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.jgroups</groupId>
-          <artifactId>jgroups</artifactId>
-          <version>3.2.0.Final</version>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-vfs</artifactId>
+        <version>3.0.1.GA</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jgroups</groupId>
+        <artifactId>jgroups</artifactId>
+        <version>3.2.0.Final</version>
       </dependency>
 
       <dependency>
@@ -771,24 +756,24 @@
       </dependency>
 
       <dependency>
-          <groupId>org.powermock</groupId>
-          <artifactId>powermock-module-junit4</artifactId>
-          <version>1.5</version>
-          <scope>test</scope>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>1.5</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
-          <groupId>org.powermock</groupId>
-          <artifactId>powermock-api-mockito</artifactId>
-          <version>1.5</version>
-          <scope>test</scope>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-api-mockito</artifactId>
+        <version>1.5</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-all</artifactId>
-          <version>1.9.5</version>
-          <scope>test</scope>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.9.5</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
@@ -810,9 +795,9 @@
       </dependency>
 
       <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-simple</artifactId>
-          <version>${slf4j.version}</version>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
 
       <dependency>
@@ -822,106 +807,105 @@
       </dependency>
 
       <dependency>
-          <groupId>org.timepedia.exporter</groupId>
-          <artifactId>gwtexporter</artifactId>
-          <version>2.3.0</version>
+        <groupId>org.timepedia.exporter</groupId>
+        <artifactId>gwtexporter</artifactId>
+        <version>2.3.0</version>
       </dependency>
 
       <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-annotations</artifactId>
-          <version>3.4.0.GA</version>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-annotations</artifactId>
+        <version>3.4.0.GA</version>
       </dependency>
 
       <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-entitymanager</artifactId>
-          <version>4.2.0.Final</version>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>4.2.0.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.hibernate.common</groupId>
-          <artifactId>hibernate-commons-annotations</artifactId>
-          <version>4.0.1.Final</version>
+        <groupId>org.hibernate.common</groupId>
+        <artifactId>hibernate-commons-annotations</artifactId>
+        <version>4.0.1.Final</version>
       </dependency>
       <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-core</artifactId>
-          <version>4.2.0.Final</version>
-      </dependency>
-
-      <dependency>
-          <groupId>org.hibernate.javax.persistence</groupId>
-          <artifactId>hibernate-jpa-2.0-api</artifactId>
-          <version>1.0.1.Final</version>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>4.2.0.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-jpamodelgen</artifactId>
-          <version>1.1.1.Final</version>
+        <groupId>org.hibernate.javax.persistence</groupId>
+        <artifactId>hibernate-jpa-2.0-api</artifactId>
+        <version>1.0.1.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-validator</artifactId>
-          <version>4.2.0.Final</version>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-jpamodelgen</artifactId>
+        <version>1.1.1.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-validator</artifactId>
-          <version>4.2.0.Final</version>
-          <classifier>sources</classifier>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>4.2.0.Final</version>
       </dependency>
 
       <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
-          <version>6.1.25</version>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>4.2.0.Final</version>
+        <classifier>sources</classifier>
       </dependency>
 
       <dependency>
-          <groupId>org.objenesis</groupId>
-          <artifactId>objenesis</artifactId>
-          <version>1.0</version>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty</artifactId>
+        <version>6.1.25</version>
       </dependency>
 
       <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-plus</artifactId>
-          <version>6.1.25</version>
+        <groupId>org.objenesis</groupId>
+        <artifactId>objenesis</artifactId>
+        <version>1.0</version>
       </dependency>
 
       <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-naming</artifactId>
-          <version>6.1.25</version>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-plus</artifactId>
+        <version>6.1.25</version>
       </dependency>
 
       <dependency>
-    	  <groupId>org.quartz-scheduler</groupId>
-    	  <artifactId>quartz</artifactId>
-    	  <version>2.1.6</version>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-naming</artifactId>
+        <version>6.1.25</version>
       </dependency>
 
       <dependency>
-          <groupId>org.twdata.maven</groupId>
-          <artifactId>mojo-executor</artifactId>
-          <version>2.0</version>
+        <groupId>org.quartz-scheduler</groupId>
+        <artifactId>quartz</artifactId>
+        <version>2.1.6</version>
       </dependency>
 
       <dependency>
-          <groupId>xmlunit</groupId>
-          <artifactId>xmlunit</artifactId>
-          <version>1.3</version>
+        <groupId>org.twdata.maven</groupId>
+        <artifactId>mojo-executor</artifactId>
+        <version>2.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>xmlunit</groupId>
+        <artifactId>xmlunit</artifactId>
+        <version>1.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
-    <!-- include module descriptors from src/main/java in order not to break
-            the Intellij GWT plugin -->
+    <!-- include module descriptors from src/main/java in order not to break the Intellij GWT plugin -->
     <resources>
       <resource>
         <directory>src/main/java</directory>
@@ -1108,9 +1092,9 @@
           <version>2.4</version>
         </plugin>
         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.8.1</version>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.8.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -1143,29 +1127,29 @@
           <version>2.3</version>
         </plugin>
         <plugin>
-            <groupId>org.jboss.as.plugins</groupId>
-            <artifactId>jboss-as-maven-plugin</artifactId>
-            <version>7.1.0.Final</version>
+          <groupId>org.jboss.as.plugins</groupId>
+          <artifactId>jboss-as-maven-plugin</artifactId>
+          <version>7.1.0.Final</version>
         </plugin>
         <plugin>
-            <groupId>org.jboss.maven.plugins</groupId>
-            <artifactId>maven-jdocbook-plugin</artifactId>
-            <version>2.3.5</version>
-            <extensions>true</extensions>
-            <dependencies>
-                <dependency>
-                    <groupId>org.jboss.pressgang</groupId>
-                    <artifactId>pressgang-jdocbook-style</artifactId>
-                    <type>jdocbook-style</type>
-                    <version>2.0.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.pressgang</groupId>
-                    <!--Non-namespaced version for DocBook 4.5 compatibility. For XSD namespaced version, use pressgang-xslt-ns-->
-                    <artifactId>pressgang-xslt</artifactId>
-                    <version>2.0.0</version>
-                </dependency>
-            </dependencies>
+          <groupId>org.jboss.maven.plugins</groupId>
+          <artifactId>maven-jdocbook-plugin</artifactId>
+          <version>2.3.5</version>
+          <extensions>true</extensions>
+          <dependencies>
+            <dependency>
+              <groupId>org.jboss.pressgang</groupId>
+              <artifactId>pressgang-jdocbook-style</artifactId>
+              <type>jdocbook-style</type>
+              <version>2.0.0</version>
+            </dependency>
+            <dependency>
+              <groupId>org.jboss.pressgang</groupId>
+              <!--Non-namespaced version for DocBook 4.5 compatibility. For XSD namespaced version, use pressgang-xslt-ns -->
+              <artifactId>pressgang-xslt</artifactId>
+              <version>2.0.0</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -1175,31 +1159,31 @@
             <lifecycleMappingMetadata>
               <pluginExecutions>
                 <pluginExecution>
-                    <pluginExecutionFilter>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <versionRange>[1.3,)</versionRange>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </pluginExecutionFilter>
-                    <action>
-                        <ignore></ignore>
-                    </action>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <versionRange>[1.3,)</versionRange>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
                 </pluginExecution>
                 <pluginExecution>
-                    <pluginExecutionFilter>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <versionRange>[1.0,)</versionRange>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                            <goal>unpack</goal>
-                        </goals>
-                    </pluginExecutionFilter>
-                    <action>
-                        <ignore></ignore>
-                    </action>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                      <goal>copy-dependencies</goal>
+                      <goal>unpack</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
                 </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
@@ -1207,11 +1191,11 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <versionRange>[1.2.1,)</versionRange>
                     <goals>
-                        <goal>java</goal>
+                      <goal>java</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                      <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -1228,17 +1212,17 @@
                   </action>
                 </pluginExecution>
                 <pluginExecution>
-                    <pluginExecutionFilter>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>xml-maven-plugin</artifactId>
-                        <versionRange>[1.0,)</versionRange>
-                        <goals>
-                            <goal>transform</goal>
-                        </goals>
-                      </pluginExecutionFilter>
-                      <action>
-                          <ignore></ignore>
-                      </action>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xml-maven-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                      <goal>transform</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
                 </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
@@ -1267,18 +1251,18 @@
                   </action>
                 </pluginExecution>
                 <pluginExecution>
-                    <pluginExecutionFilter>
-                        <groupId>org.jboss.maven.plugins</groupId>
-                        <artifactId>maven-jdocbook-plugin</artifactId>
-                        <versionRange>[2.3.5,)</versionRange>
-                        <goals>
-                            <goal>generate</goal>
-                            <goal>resources</goal>
-                        </goals>
-                    </pluginExecutionFilter>
-                    <action>
-                        <ignore></ignore>
-                    </action>
+                  <pluginExecutionFilter>
+                    <groupId>org.jboss.maven.plugins</groupId>
+                    <artifactId>maven-jdocbook-plugin</artifactId>
+                    <versionRange>[2.3.5,)</versionRange>
+                    <goals>
+                      <goal>generate</goal>
+                      <goal>resources</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
                 </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
@@ -1314,9 +1298,9 @@
           </configuration>
         </plugin>
         <plugin>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>jacoco-gwt-maven-plugin</artifactId>
-            <version>0.5.4.201202141554</version>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>jacoco-gwt-maven-plugin</artifactId>
+          <version>0.5.4.201202141554</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -1358,14 +1342,12 @@
           <family>mac</family>
         </os>
       </activation>
-      <!-- If we could limit this profile to JDK <=6 on Mac, we'd include -d32 in argLine.
-           But we can't, because profile activation settings are ORed rather than ANDed together.
-           See http://jira.codehaus.org/browse/MNG-4565 -->
+      <!-- If we could limit this profile to JDK <=6 on Mac, we'd include -d32 in argLine. But we can't, because profile activation settings are ORed rather than ANDed together. See http://jira.codehaus.org/browse/MNG-4565 -->
       <properties>
         <argLine>-XX:CompileThreshold=1000 -Djava.awt.headless=true</argLine>
       </properties>
     </profile>
-    
+
     <profile>
       <id>integration-test</id>
       <build>
@@ -1414,12 +1396,12 @@
           <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
       </distributionManagement>
-    </profile>    
-    
+    </profile>
+
     <profile>
       <id>distro</id>
       <modules>
-        <module>reference</module>        
+        <module>reference</module>
         <module>dist</module>
       </modules>
       <repositories>
@@ -1431,92 +1413,92 @@
           <releases>
             <updatePolicy>always</updatePolicy>
           </releases>
-      </repository>
-    </repositories>
+        </repository>
+      </repositories>
     </profile>
 
     <profile>
-        <id>updateDocs</id>
-        <!-- the download will fail unless jboss-credentials.properties contains jboss.username and jboss.password entries -->
-        <activation>
-            <file>
-                <exists>jboss-credentials.properties</exists>
-            </file>
-        </activation>
-        <dependencyManagement>
-            <dependencies>
-                <dependency>
-                    <groupId>net.sf.saxon</groupId>
-                    <artifactId>Saxon-HE</artifactId>
-                    <version>9.4.0.6</version>
-                </dependency>
-            </dependencies>
-        </dependencyManagement>
+      <id>updateDocs</id>
+      <!-- the download will fail unless jboss-credentials.properties contains jboss.username and jboss.password entries -->
+      <activation>
+        <file>
+          <exists>jboss-credentials.properties</exists>
+        </file>
+      </activation>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <version>9.4.0.6</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
     </profile>
 
     <profile>
-        <id>jboss7</id>
-        <dependencyManagement>
-            <dependencies>
-                <dependency>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                    <version>1.0.b2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.weld</groupId>
-                    <artifactId>weld-api</artifactId>
-                    <version>1.1.Final</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.weld</groupId>
-                    <artifactId>weld-spi</artifactId>
-                    <version>1.1.Final</version>
-                </dependency>
-            </dependencies>
-        </dependencyManagement>
+      <id>jboss7</id>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.0.b2</version>
+          </dependency>
+          <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-api</artifactId>
+            <version>1.1.Final</version>
+          </dependency>
+          <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-spi</artifactId>
+            <version>1.1.Final</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
     </profile>
-    
+
     <profile>
-        <id>javadoc</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>generate-all</id>
-                            <phase>package</phase>
-                            <configuration>
-                                <excludePackageNames>*.demo:*.example:*.samples:*.test:com.google:java.lang:*.bootstrap:org.jboss.servlet</excludePackageNames>
-                                <groups>
-                                    <group>
-                                        <title>Errai Messaging</title>
-                                        <packages>org.jboss.errai.bus.client:org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.api.base:org.jboss.errai.bus.client.api.messaging:org.jboss.errai.bus.server.annotations:org.jboss.errai.server.api</packages>
-                                    </group>
-                                    <group>
-                                        <title>Errai CDI</title>
-                                        <packages>org.jboss.errai.common.client.api.annotation:org.jboss.errai.enterprise.client.cdi.api:org.jboss.errai.enterprise.client.cdi.events</packages>
-                                    </group>
-                                    <group>
-                                        <title>Errai UI, Navigation, and Databinding</title>
-                                        <packages>org.jboss.errai.databinding.client.api:org.jboss.errai.ui.client.widget:org.jboss.errai.ui.nav.client.local:org.jboss.errai.ui.rebind.less:org.jboss.errai.ui.shared.api*</packages>
-                                    </group>
-                                    <group>
-                                        <title>Errai IOC</title>
-                                        <packages>org.jboss.errai.ioc.client.api:javax.inject</packages>
-                                    </group>
-                                </groups>
-                            </configuration>
-                            <goals>
-                                <goal>aggregate-jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
+      <id>javadoc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>generate-all</id>
+                <phase>package</phase>
+                <configuration>
+                  <excludePackageNames>*.demo:*.example:*.samples:*.test:com.google:java.lang:*.bootstrap:org.jboss.servlet</excludePackageNames>
+                  <groups>
+                    <group>
+                      <title>Errai Messaging</title>
+                      <packages>org.jboss.errai.bus.client:org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.api.base:org.jboss.errai.bus.client.api.messaging:org.jboss.errai.bus.server.annotations:org.jboss.errai.server.api</packages>
+                    </group>
+                    <group>
+                      <title>Errai CDI</title>
+                      <packages>org.jboss.errai.common.client.api.annotation:org.jboss.errai.enterprise.client.cdi.api:org.jboss.errai.enterprise.client.cdi.events</packages>
+                    </group>
+                    <group>
+                      <title>Errai UI, Navigation, and Databinding</title>
+                      <packages>org.jboss.errai.databinding.client.api:org.jboss.errai.ui.client.widget:org.jboss.errai.ui.nav.client.local:org.jboss.errai.ui.rebind.less:org.jboss.errai.ui.shared.api*</packages>
+                    </group>
+                    <group>
+                      <title>Errai IOC</title>
+                      <packages>org.jboss.errai.ioc.client.api:javax.inject</packages>
+                    </group>
+                  </groups>
+                </configuration>
+                <goals>
+                  <goal>aggregate-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
