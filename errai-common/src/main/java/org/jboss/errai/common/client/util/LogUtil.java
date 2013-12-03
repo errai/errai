@@ -16,22 +16,26 @@
 
 package org.jboss.errai.common.client.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gwt.core.client.GWT;
 
 /**
+ * Use {@link Logger} instead.
+ * 
  * @author Mike Brock
  */
+@Deprecated
 public final class LogUtil {
+  
+  private static final Logger logger = LoggerFactory.getLogger(LogUtil.class);
+  
   private LogUtil() {
   }
 
   public static void log(final String message) {
-    if (GWT.isClient() && isNativeJavaScriptLoggerSupported()) {
-      nativeLog("[errai] " + message);
-    }
-    else {
-      System.out.println("[errai] " + message);
-    }
+    logger.info(message);
   }
 
   public static native boolean isNativeJavaScriptLoggerSupported() /*-{
