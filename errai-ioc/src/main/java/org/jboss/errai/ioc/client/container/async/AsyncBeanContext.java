@@ -1,8 +1,5 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import com.google.gwt.user.client.Timer;
-import org.jboss.errai.common.client.util.LogUtil;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,11 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.user.client.Timer;
+
 /**
  * @author Mike Brock
  */
 public class AsyncBeanContext {
   private String comment;
+  private Logger logger = LoggerFactory.getLogger(getClass());
 
   private static final CreationalCallback<?> DUMMY = new CreationalCallback<Object>() {
     @Override
@@ -64,11 +67,11 @@ public class AsyncBeanContext {
     @Override
     public void run() {
       timeOut.cancel();
-      LogUtil.log("FAILED FOR: " + comment);
+      logger.warn("FAILED FOR: " + comment);
 
-      LogUtil.log("unsatisfied dependencies:");
+      logger.warn("unsatisfied dependencies:");
       for (final CreationalCallback callback : allDependencies) {
-        LogUtil.log(" --unsatisfied-> " + callback.toString());
+        logger.warn(" --unsatisfied-> " + callback.toString());
       }
     }
   };
@@ -151,7 +154,7 @@ public class AsyncBeanContext {
 
   private void _finishCheck() {
     if (finishFireState == FireState.FIRED) {
-      LogUtil.log("WARNING: finish did not fire because state is already FIRED");
+      logger.warn("finish did not fire because state is already FIRED");
       return;
     }
     if (allDependencies.isEmpty()) {

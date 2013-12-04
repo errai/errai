@@ -16,24 +16,26 @@
 
 package org.jboss.errai.ioc.client;
 
-import static org.jboss.errai.common.client.util.LogUtil.displayDebuggerUtilityTitle;
-import static org.jboss.errai.common.client.util.LogUtil.displaySeparator;
-import static org.jboss.errai.common.client.util.LogUtil.log;
-
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import org.jboss.errai.ioc.client.container.BeanRef;
-import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
-import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jboss.errai.ioc.client.container.BeanRef;
+import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+
 public class Container implements EntryPoint {
+  
+  private static final Logger logger = LoggerFactory.getLogger(Container.class);
+  
   @Override
   public void onModuleLoad() {
     bootstrapContainer();
@@ -53,10 +55,10 @@ public class Container implements EntryPoint {
         }
       });
 
-      log("IOC bootstrapper successfully initialized.");
+      logger.info("IOC bootstrapper successfully initialized.");
 
       if (GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync()) {
-        log("bean manager initialized in async mode.");
+        logger.info("bean manager initialized in async mode.");
       }
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
@@ -89,11 +91,11 @@ public class Container implements EntryPoint {
 
   private void finishInit() {
     init = true;
-    log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
+    logger.info(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
     declareDebugFunction();
     new CallbacksRunnable().run();
 
-    log("bean manager now in service.");
+    logger.info("bean manager now in service.");
 
   }
 
@@ -150,18 +152,19 @@ public class Container implements EntryPoint {
   }-*/;
 
   /**
-   * Displays the the bean manager status to the JavaScript debugging console in the browser.
+   * Logs the bean manager status with gwt-slf4j.
    */
   private static void displayBeanManagerStatus() {
-    displayDebuggerUtilityTitle("BeanManager Status");
+    logger.info("BeanManager Status");
+    logger.info("-------------------------------------------------------------------");
 
-    log("[WIRED BEANS]");
+    logger.info("[WIRED BEANS]");
     for (final BeanRef ref : injectionContext.getRootContext().getAllCreatedBeans()) {
-      log(" -> " + ref.getClazz().getName());
-      log("     qualifiers: " + annotationsToString(ref.getAnnotations()) + ")");
+      logger.info(" -> " + ref.getClazz().getName());
+      logger.info("     qualifiers: " + annotationsToString(ref.getAnnotations()) + ")");
     }
-    log("Total: " + injectionContext.getRootContext().getAllCreatedBeans().size());
-    displaySeparator();
+    logger.info("Total: " + injectionContext.getRootContext().getAllCreatedBeans().size());
+    logger.info("-------------------------------------------------------------------");
   }
 
   /**

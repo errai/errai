@@ -16,15 +16,16 @@
 
 package org.jboss.errai.otec.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.operation.OTOperation;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock
@@ -35,6 +36,8 @@ public class ClientOTPeerImpl implements OTPeer {
   private final OTEngine engine;
   private final Map<Integer, Integer> lastSentSequences = new HashMap<Integer, Integer>();
   private boolean synced = false;
+  
+  private static final Logger logger = LoggerFactory.getLogger(ClientOTPeerImpl.class);
 
   public ClientOTPeerImpl(final MessageBus bus, final OTEngine engine) {
     this.bus = bus;
@@ -55,7 +58,7 @@ public class ClientOTPeerImpl implements OTPeer {
         .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);
 
-    LogUtil.log("SEND PURGE HINT: " + revision) ;
+    logger.debug("SEND PURGE HINT: " + revision) ;
   }
 
   @Override
@@ -67,7 +70,7 @@ public class ClientOTPeerImpl implements OTPeer {
         .set("lTX", getLastKnownRemoteSequence(operation.getEntityId()))
         .sendNowWith(bus);
 
-    LogUtil.log("TRANSMIT:" + operation);
+    logger.debug("TRANSMIT:" + operation);
 
     lastSentSequences.put(operation.getEntityId(), operation.getRevision());
   }

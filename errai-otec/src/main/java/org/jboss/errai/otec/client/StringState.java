@@ -16,11 +16,12 @@
 
 package org.jboss.errai.otec.client;
 
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.otec.client.util.Md5Digest;
-
 import java.util.LinkedList;
 import java.util.List;
+
+import org.jboss.errai.otec.client.util.Md5Digest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock
@@ -30,6 +31,8 @@ public class StringState implements State<String> {
   private List<StateChangeListener> stateChangeListeners = new LinkedList<StateChangeListener>();
   public StringBuffer buffer;
   public String stateId = "<initial>";
+  
+  private static final Logger logger = LoggerFactory.getLogger(StringState.class);
 
   private StringState(final String buffer) {
     this.buffer = new StringBuffer(buffer);
@@ -112,7 +115,7 @@ public class StringState implements State<String> {
       if (cursorPos > pos) {
         cursorPos += offset;
 
-        LogUtil.log("change pos: " + pos + "; offset: " + offset + "; newCursor: " + cursorPos);
+        logger.debug("change pos: " + pos + "; offset: " + offset + "; newCursor: " + cursorPos);
       }
 
       if (cursorPos < 0) {

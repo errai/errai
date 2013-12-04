@@ -27,7 +27,8 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
-import org.jboss.errai.common.client.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
@@ -64,7 +65,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     @Override
     public void run() {
       if (!connected) {
-        LogUtil.log(this + ": initial timeout expired");
+        logger.warn(this + ": initial timeout expired");
         notifyDisconnected();
       }
     }
@@ -77,6 +78,8 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
    * used for verifying that the SSE channel is actually working.
    */
   private final Subscription sseAgentSubscription;
+  
+  private static final Logger logger = LoggerFactory.getLogger(SSEHandler.class);
 
   public SSEHandler(final ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
@@ -97,7 +100,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     if (!isSSESupported()) {
       hosed = true;
       unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
-      LogUtil.log("this browser does not support SSE");
+      logger.warn("this browser does not support SSE");
       return;
     }
 
@@ -110,7 +113,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   public void start() {
     stopped = false;
     if (connected) {
-      LogUtil.log("did not start SSE handler: already started.");
+      logger.info("did not start SSE handler: already started.");
       return;
     }
     sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint);
@@ -201,7 +204,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     if (!connected) {
       connected = true;
       connectedTime = System.currentTimeMillis();
-      LogUtil.log(this + ": SSE channel is active.");
+      logger.info(this + ": SSE channel is active.");
     }
 
     if (clientMessageBus.getState() == BusState.CONNECTION_INTERRUPTED) {
@@ -213,7 +216,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     connected = false;
 
     pingTimeout.cancel();
-    LogUtil.log(this + " channel disconnected.");
+    logger.info(this + " channel disconnected.");
     connectedTime = -1;
     clientMessageBus.setState(BusState.CONNECTION_INTERRUPTED);
 

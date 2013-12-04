@@ -40,12 +40,13 @@ import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CDI client interface.
@@ -70,6 +71,8 @@ public class CDI {
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
   private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<String, List<MessageFireDeferral>>();
 
+  private static Logger logger = LoggerFactory.getLogger(CDI.class);
+  
   public static final MessageCallback ROUTING_CALLBACK = new MessageCallback() {
     @Override
     public void callback(final Message message) {
@@ -260,7 +263,7 @@ public class CDI {
           }
         }
       }
-      LogUtil.log("requested server to forward CDI events for " + remoteEventCount + " existing observers");
+      logger.info("requested server to forward CDI events for " + remoteEventCount + " existing observers");
     }
   }
 
@@ -354,7 +357,7 @@ public class CDI {
 
       fireAllIfWaiting();
 
-      LogUtil.log("activated CDI eventing subsystem.");
+      logger.info("activated CDI eventing subsystem.");
       InitVotes.voteFor(CDI.class);
     }
   }

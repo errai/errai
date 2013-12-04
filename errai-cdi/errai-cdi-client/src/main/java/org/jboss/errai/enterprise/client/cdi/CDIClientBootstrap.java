@@ -26,9 +26,10 @@ import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.EntryPoint;
 
@@ -40,12 +41,13 @@ import com.google.gwt.core.client.EntryPoint;
  */
 public class CDIClientBootstrap implements EntryPoint {
   static final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+  private static final Logger logger = LoggerFactory.getLogger(CDIClientBootstrap.class);
 
   final static Runnable initRemoteCdiSubsystem = new Runnable() {
 
     @Override
     public void run() {
-      LogUtil.log("CDI subsystem syncing with server ...");
+      logger.info("CDI subsystem syncing with server ...");
 
       BusErrorCallback serverDispatchErrorCallback = new BusErrorCallback() {
         @Override
@@ -54,7 +56,7 @@ public class CDIClientBootstrap implements EntryPoint {
             throw throwable;
           }
           catch (NoSubscribersToDeliverTo e) {
-            LogUtil.log("Server did not subscribe to " + CDI.SERVER_DISPATCHER_SUBJECT +
+            logger.warn("Server did not subscribe to " + CDI.SERVER_DISPATCHER_SUBJECT +
                 ". To activate the full Errai CDI functionality, make sure that Errai's Weld " +
                 "integration module has been deployed on the server.");
             CDI.activate();
@@ -88,7 +90,7 @@ public class CDIClientBootstrap implements EntryPoint {
     @Override
     public void run() {
       if (!bus.isSubscribed(CDI.CLIENT_DISPATCHER_SUBJECT)) {
-        LogUtil.log("declare CDI dispatch service");
+        logger.info("declare CDI dispatch service");
         bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
           @Override
           public void callback(final Message message) {

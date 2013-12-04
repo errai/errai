@@ -16,9 +16,6 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import org.jboss.errai.common.client.util.LogUtil;
-
-import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +24,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Provider;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock
@@ -45,6 +47,8 @@ public abstract class AbstractCreationalContext implements CreationalContext {
       = new LinkedHashMap<BeanRef, List<ProxyResolver>>();
 
   protected final Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
+  
+  private static final Logger logger = LoggerFactory.getLogger(AbstractCreationalContext.class);
 
   protected AbstractCreationalContext(final Class<? extends Annotation> scope) {
     this.immutableContext = false;
@@ -196,7 +200,7 @@ public abstract class AbstractCreationalContext implements CreationalContext {
         entry.getValue().init(entry.getKey());
       }
       catch (Throwable t) {
-        LogUtil.log("error initializing bean: " + entry.getKey().getClass().getName() + ": " + t.getMessage());
+        logger.error("error initializing bean: " + entry.getKey().getClass().getName(), t);
         throw new RuntimeException("error in bean initialization", t);
       }
     }

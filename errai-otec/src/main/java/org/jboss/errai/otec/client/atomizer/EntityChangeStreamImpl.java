@@ -18,7 +18,8 @@ package org.jboss.errai.otec.client.atomizer;
 
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createOperation;
 
-import org.jboss.errai.common.client.util.LogUtil;
+import java.util.Collections;
+
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
@@ -26,8 +27,8 @@ import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.mutation.StringMutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
-
-import java.util.Collections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock
@@ -43,6 +44,8 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
   private int cursor = 0;
   private final StringState insertState = StringState.of("");
   private final StringState deleteState = StringState.of("");
+  
+  private static final Logger logger = LoggerFactory.getLogger(EntityChangeStreamImpl.class);
 
   public EntityChangeStreamImpl(final OTEngine engine, final OTEntity entity) {
     this.engine = engine;
@@ -111,7 +114,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
       engine.notifyOperation(operation);
       insertState.clear();
       deleteState.clear();
-      LogUtil.log("FLUSH: " + operation + ";rev=" + operation.getRevision());
+      logger.debug("FLUSH: " + operation + ";rev=" + operation.getRevision());
     }
     catch (Throwable t) {
       t.printStackTrace();

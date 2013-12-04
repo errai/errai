@@ -16,8 +16,6 @@
 
 package org.jboss.errai.common.client.api.extension;
 
-import static org.jboss.errai.common.client.util.LogUtil.log;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,8 +27,9 @@ import java.util.Set;
 
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.common.client.util.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
 
@@ -65,6 +64,8 @@ public final class InitVotes {
   private static boolean _initWait = false;
 
   private static final Object lock = new Object();
+  
+  private static final Logger logger = LoggerFactory.getLogger(InitVotes.class);
 
   /**
    * Resets the state, clearing all current waiting votes and disarming the startup process. Calling
@@ -73,7 +74,7 @@ public final class InitVotes {
    */
   public static void reset() {
     synchronized (lock) {
-      LogUtil.log("init polling system reset ...");
+      logger.info("init polling system reset ...");
 
       cancelFailTimer();
       _clearOneTimeRunnables(preInitCallbacks);
@@ -129,7 +130,7 @@ public final class InitVotes {
       if (waitForSet.contains(topic))
         return;
 
-      log("wait for: " + topic);
+      logger.info("wait for: " + topic);
 
       if (!armed && waitForSet.isEmpty()) {
         beginInit();
@@ -155,7 +156,7 @@ public final class InitVotes {
   private static void voteFor(final String topic) {
     synchronized (lock) {
       if (waitForSet.remove(topic)) {
-        log("vote for: " + topic);
+        logger.info("vote for: " + topic);
 
         completedSet.add(topic);
       }
@@ -163,7 +164,7 @@ public final class InitVotes {
       _runAllRunnables(dependencyCallbacks.get(topic));
 
       if (!waitForSet.isEmpty())
-        log("  still waiting for -> " + waitForSet);
+        logger.info("  still waiting for -> " + waitForSet);
 
       if (armed && waitForSet.isEmpty()) {
         scheduleFinish();
@@ -282,7 +283,7 @@ public final class InitVotes {
 
   public static void startInitPolling() {
     if (armed) {
-      LogUtil.log("WARN: did not start polling. already armed.");
+      logger.warn("did not start polling. already armed.");
       return;
     }
     beginInit();
@@ -314,9 +315,9 @@ public final class InitVotes {
             final Set<String> failedTopics = Collections.unmodifiableSet(new HashSet<String>(waitForSet));
             _fireFailedInit(failedTopics);
 
-            log("components failed to initialize");
+            logger.error("components failed to initialize");
             for (final String comp : waitForSet) {
-              log("   [failed] -> " + comp);
+              logger.error("   [failed] -> " + comp);
             }
           }
         }

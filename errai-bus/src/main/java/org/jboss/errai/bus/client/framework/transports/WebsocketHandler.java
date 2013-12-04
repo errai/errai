@@ -29,7 +29,8 @@ import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.user.client.Timer;
 
@@ -57,6 +58,8 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   private int retries;
 
   private String unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
+  
+  private static Logger logger = LoggerFactory.getLogger(WebsocketHandler.class);
 
   public WebsocketHandler(final ClientMessageBusImpl messageBus) {
     this.longPollingTransport = HttpPollingHandler.newLongPollingInstance(messageBus);
@@ -69,7 +72,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
     if (!isWebSocketSupported()) {
       unsupportedReason = UNSUPPORTED_MESSAGE_NO_CLIENT_SUPPORT;
-      LogUtil.log("websockets not supported by browser");
+      logger.warn("websockets not supported by browser");
       hosed = true;
       return;
     }
@@ -80,7 +83,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
     hosed = (webSocketUrl == null || webSocketToken == null);
 
     if (hosed) {
-      LogUtil.log("server reported it supports websockets but did not send configuration information.");
+      logger.warn("server reported it supports websockets but did not send configuration information.");
     }
   }
 
@@ -92,7 +95,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
     longPollingTransport.start();
 
-    LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
+    logger.info("attempting web sockets connection at URL: " + webSocketUrl);
 
     attemptWebSocketConnect(webSocketUrl);
   }
@@ -115,7 +118,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   public void handleProtocolExtension(final Message message) {
     switch (BusCommand.valueOf(message.getCommandType())) {
       case WebsocketChannelVerify:
-        LogUtil.log("received verification token for websocket connection");
+        logger.info("received verification token for websocket connection");
 
         longPollingTransport
             .transmit(Collections.singletonList(CommandMessage.create()
@@ -134,7 +137,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
         webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
 
-        LogUtil.log("web socket channel successfully negotiated. comet channel deactivated. (reconnect token: "
+        logger.info("web socket channel successfully negotiated. comet channel deactivated. (reconnect token: "
             + webSocketToken + ")");
 
         retries = 0;
@@ -166,7 +169,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   }
 
   public void attachWebSocketChannel(final Object o) {
-    LogUtil.log("web socket opened. sending negotiation message.");
+    logger.info("web socket opened. sending negotiation message.");
     transmitToSocket(o, getWebSocketNegotiationString());
     webSocketChannel = o;
     connectedTime = System.currentTimeMillis();
@@ -242,7 +245,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   }-*/;
 
   private void notifyDisconnected() {
-    LogUtil.log("websocket disconnected");
+    logger.info("websocket disconnected");
 
     messageBus.setState(BusState.CONNECTION_INTERRUPTED);
     disconnectSocket(webSocketChannel);
@@ -254,7 +257,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
       new Timer() {
         @Override
         public void run() {
-          LogUtil.log("attempting reconnection ... ");
+          logger.info("attempting reconnection ... ");
           longPollingTransport.stop(false);
           start();
         }
