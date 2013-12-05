@@ -86,12 +86,9 @@ Release Steps
      the artifacts are present
 
 1. Update the version number of errai in the getting started demo's pom.xml:
-  https://github.com/errai/summit-demo-2013/blob/master/pom.xml
+  https://github.com/errai/errai-tutorial/blob/master/pom.xml
 
-1. Update http://www.jboss.org/errai/Documentation to provide the download links for
-   the generated/released docs and distribution.
-
-1. Update the announcement on the welcome page (https://www.jboss.org/author/)
+1. Update the website with links to the new version (https://github.com/errai/errai.github.com)
 
 1. Publish a release blog entry at http://errai-blog.blogspot.com/
 
