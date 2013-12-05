@@ -85,6 +85,22 @@
               </para>
                </listitem>
             </itemizedlist>
+            <itemizedlist>
+               <listitem>
+                  <para>
+                     <emphasis role="strong">errai.ioc.blacklist</emphasis>
+                specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).
+              </para>
+               </listitem>
+            </itemizedlist>
+            <itemizedlist>
+               <listitem>
+                  <para>
+                     <emphasis role="strong">errai.ioc.whitelist</emphasis>
+                when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).
+              </para>
+               </listitem>
+            </itemizedlist>
          </section>
       </section>
       <section id="sid-5931354_ErraiApp.properties-">

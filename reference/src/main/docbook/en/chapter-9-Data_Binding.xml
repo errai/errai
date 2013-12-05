@@ -571,5 +571,14 @@ Set&lt;ConstraintViolation&lt;Customer&gt;&gt; violations  = validator.validate(
 // display violations
 </programlisting>
       </informalexample>
+      <section id="sid-51282340_DataBinding-ExcludingClassesfromValidation">
+         <title>Excluding Classes from Validation</title>
+         <para>By default, Errai scans the entire classpath for classes with constraints. But sometimes it is necessary or desirable to exclude some shared classes from being validated on the client side. This can be done by adding a list of classes and package masks to the ErraiApp.properties file like so:</para>
+         <informalexample>
+            <programlisting language="ini"># The following blacklists the class some.fully.qualified.ClassName and all classes in some.package.mask (and subpackages thereof).
+errai.validation.blacklist = some.fully.qualified.ClassName \
+                             some.package.mask.*</programlisting>
+         </informalexample>
+      </section>
    </section>
 </chapter>

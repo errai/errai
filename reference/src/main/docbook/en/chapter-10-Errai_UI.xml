@@ -182,9 +182,13 @@ public class LoginForm extends Composite {
    <section id="sid-51806600_ErraiUI-CreateanHTMLtemplate">
       <title>Create an HTML template</title>
       <para>
-        Templates in Errai UI may be designed either as an HTML snippit, or as a full HTML document. You may even take an existing HTML page and use it as a template. With either approach, the
-        <code>"data-field"</code>
-        annotation is used to identify fragments (by name) in the template, which are used in the Composite component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.
+        Templates in Errai UI may be designed either as an HTML snippet or as a full HTML document. You can even take an existing HTML page and use it as a template. With either approach, the
+        <code>id</code>
+        ,
+        <code>class</code>
+        , and
+        <code>data-field</code>
+        attributes in the template identify elements by name. These elements and their children are used in the Composite component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.
       </para>
       <para>
         We will begin by creating a simple HTML login form to accompany our
@@ -210,37 +214,47 @@ public class LoginForm extends Composite {
       <section id="sid-51806600_ErraiUI-SelectatemplatefromalargerHTMLfile">
          <title>Select a template from a larger HTML file</title>
          <para>
-          Or as a full HTML document which may be more easily previewed during design without running the application; however, in this case we must also specify the location of our root component DOM Element using a
+          Or as a full HTML document which may be more easily previewed during design without running the application; however, in this case we must also specify the location of our component's root DOM Element using a
           <code>"data-field"</code>
-          matching the value of the @Templated annotation. There is no limit to how many component classes may share a given HTML template.
+          ,
+          <code>id</code>
+          , or
+          <code>class</code>
+          attribute matching the value of the @Templated annotation. There is no limit to how many component classes may share a given HTML template.
         </para>
          <informalexample>
             <programlisting language="java">
 @Templated("my-template.html#login-form")
 public class LoginForm extends Composite {
-   /* Specifies that &lt;... data-field="login-form"&gt; be used as the root Element of this Widget  */
+   /* Specifies that &lt;... id="login-form"&gt; be used as the root Element of this Widget  */
 }
 </programlisting>
          </informalexample>
          <para>
-          Notice the corresponding HTML data-field attribute in the form Element below, and also note that multiple components may use the same template provided that they specify a corresponding
+          Notice the corresponding HTML
+          <code>id</code>
+          attribute in the form Element below (we could have used
           <code>data-field</code>
-          attribute. Also note that two or more components may share the same template
+          or
+          <code>class</code>
+          instead). Note that multiple components may use the same template provided that they specify a corresponding
           <code>data-field</code>
-          DOM elements; there is no conflict since components each receive a unique copy of the template DOM from the designated
-          <code>data-field</code>
-          at runtime (or from the root element if a fragment is not specified.)
+          ,
+          <code>id</code>
+          , or
+          <code>class</code>
+          attribute. Also note that two or more components may share the same DOM elements; there is no conflict since components each receive a unique copy of the template DOM rooted at the designated element at runtime (or from the root element if a fragment is not specified.)
         </para>
          <informalexample>
             <programlisting language="xml">
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    &lt;title&gt;A full HTML snippit&lt;/title&gt;
+    &lt;title&gt;A full HTML snippet&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
     &lt;div&gt;
-        &lt;form data-field="login-form"&gt;
+        &lt;form id="login-form"&gt;
           &lt;legend&gt;Log in to your account&lt;/legend&gt;
 
           &lt;label for="username"&gt;Username&lt;/label&gt;
@@ -255,7 +269,7 @@ public class LoginForm extends Composite {
     &lt;/div&gt;
 
     &lt;hr&gt;
-    &lt;footer data-field="theme-footer"&gt;
+    &lt;footer id="theme-footer"&gt;
         &lt;p&gt;(c) Company 2012&lt;/p&gt;
     &lt;/footer&gt;
 &lt;/body&gt;
@@ -267,7 +281,7 @@ public class LoginForm extends Composite {
             <programlisting language="java">
 @Templated("my-template.html#theme-footer")
 public class Footer extends Composite {
-   /* Specifies that &lt;... data-field="theme-footer"&gt; be used as the root Element of this Widget  */
+   /* Specifies that &lt;... id="theme-footer"&gt; be used as the root Element of this Widget  */
 }
 </programlisting>
          </informalexample>
@@ -279,9 +293,13 @@ public class Footer extends Composite {
       <section id="sid-51806600_ErraiUI-AnnotateWidgetsinthetemplatewith@DataField">
          <title>Annotate Widgets in the template with @DataField</title>
          <para>
-          In order to composite Widgets into the template DOM, you must annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a corresponding
+          In order to composite Widgets into the template DOM, you annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a correspondingly named
           <code>data-field</code>
-          attribute. This informs Errai UI that the contents of the field should replace the element marked by data-field in the template; thus, fields annotated with @DataField must either be @Inject or initialize valid Widget or Element instances.
+          ,
+          <code>id</code>
+          , or
+          <code>class</code>
+          attribute. This informs Errai UI which element in the template the Widget should replace. All replacements happen while the @Templated Composite component is being constructed; thus, fields annotated with @DataField must either be {{@Inject}}ed or provide their own Widget or Element instances in field initializers.
         </para>
          <informalexample>
             <programlisting language="java">
@@ -291,12 +309,12 @@ public class LoginForm extends Composite {
    @DataField
    private Element form = DOM.createForm();
 
-   // If not otherwise specified, the data-field name defaults to the name of the field; in this case, the data-field name would be "username"
+   // If not otherwise specified, the name to match in the HTML template defaults to the name of the field; in this case, the name would be "username"
    @Inject
    @DataField
    private TextBox username;
 
-   // The data-field name may also be specified manually
+   // The name to reference in the template can also be specified manually
    @Inject
    @DataField("pass")
    private PasswordTextBox password;
@@ -314,21 +332,109 @@ public class LoginForm extends Composite {
           
         </para>
       </section>
-      <section id="sid-51806600_ErraiUI-Addcorrespondingdatafieldattributes">
-         <title>Add corresponding data-field attributes</title>
-         <para>We must also add data-field attributes to the corresponding locations in our template HTML file. This, combined with the @DataField annotation in our Composite component allow Errai UI to determine where and what should be composited when creating component instances.</para>
+      <section id="sid-51806600_ErraiUI-AddcorrespondingattributestotheHTMLtemplate">
+         <title>Add corresponding attributes to the HTML template</title>
+         <para>Each @DataField reference in the Java class must match an element in the HTML template. The matching of Java references to HTML elements is performed as follows:</para>
+         <orderedlist inheritnum="ignore" continuation="restarts">
+            <listitem>
+               <para>
+              A
+              <emphasis role="italics">name</emphasis>
+              for the Java reference is determined. If the
+              <code>@DataField</code>
+              annotation has a value argument, that is used as the reference name. For fields, the default reference name is the field name. Method and constructor parameters have no default name, so they must always specify a value.
+            </para>
+            </listitem>
+            <listitem>
+               <para>
+              If there is an element in the HTML template with attribute
+              <code>data-field=name</code>
+              , the Java reference will point to this element. If there is more than one such element, the Java reference points to the first.
+            </para>
+            </listitem>
+            <listitem>
+               <para>
+              Otherwise, if there is an element in the HTML template with attribute
+              <code>id=name</code>
+              , the Java reference will point to this element. If there is more than one such element, the Java reference points to the first.
+            </para>
+            </listitem>
+            <listitem>
+               <para>
+              Otherwise, if there is an element in the HTML template with a CSS style class
+              <code>name</code>
+              , the Java reference will point to this element. If there is more than one such element, the Java reference points to the first. For elements with more than one CSS style, each style name is considered individually. For example:
+            </para>
+               <informalexample>
+                  <programlisting language="java">
+   &lt;div class="eat drink be-merry"&gt;
+  </programlisting>
+               </informalexample>
+               <para>
+              matches Java references named
+              <code>eat</code>
+              ,
+              <code>drink</code>
+              , or
+              <code>be-merry</code>
+              .
+            </para>
+            </listitem>
+            <listitem>
+               <para>If no matching element is found by this point, it is an error.</para>
+            </listitem>
+         </orderedlist>
+         <para>
+          If more than one Java reference matches the same HTML element in the template, it is an error. For example,
+          
+          given a template containing the element
+          <code>&lt;div class="eat drink be-merry"&gt;</code>
+          , the following Java code
+          
+          is in error:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Templated
+public class ErroneousTemplate extends Composite {
+ @Inject @DataField
+ private Label eat;
+
+ @Inject @DataField
+ private Label drink;
+}
+</programlisting>
+         </informalexample>
+         <para>
+          because both fields
+          <code>eat</code>
+          and
+          <code>drink</code>
+          refer to the same HTML
+          <code>div</code>
+          element.
+        </para>
+         <para>
+          So now we must ensure there are
+          <code>data-field</code>
+          ,
+          <code>id</code>
+          , or
+          <code>class</code>
+          attributes in the right places in our template HTML file. This, combined with the @DataField annotation in our Composite component allow Errai UI to determine where and what should be composited when creating component instances.
+        </para>
          <informalexample>
             <programlisting language="xml">
-&lt;form data-field="form"&gt;
+&lt;form id="form"&gt;
   &lt;legend&gt;Log in to your account&lt;/legend&gt;
 
   &lt;label for="username"&gt;Username&lt;/label&gt;
-  &lt;input data-field="username" id="username" type="text" placeholder="Username"&gt;
+  &lt;input id="username" type="text" placeholder="Username"&gt;
 
   &lt;label for="password"&gt;Password&lt;/label&gt;
   &lt;input data-field="pass" id="password" type="password" placeholder="Password"&gt;
 
-  &lt;button data-field="submit"&gt;Log in&lt;/button&gt;
+  &lt;button id="submit"&gt;Log in&lt;/button&gt;
   &lt;button&gt;Cancel&lt;/button&gt;
 &lt;/form&gt;
 </programlisting>
@@ -419,11 +525,9 @@ This text will be ignored.
           <code>&lt;div&gt;</code>
           Label in our Composite component field. This does not, however, change the behavior of the attribute merge - the new
           <code>&lt;div&gt;</code>
-          was still be rendered inline, because we have specified this style in our template, and the template always wins in competition with attributes set programatically before composition occurs. In short, whatever is in the
+          was still be rendered inline, because we have specified this style in our template, and the template always wins in competition with attributes set programatically before composition occurs. In short, whatever is inside the
           <code>@DataField</code>
-          in your class will replace the
-          <code>data-field</code>
-          in your template.
+          in your class will replace the children of the corresponding element in your template.
         </para>
       </section>
       <section id="sid-51806600_ErraiUI-InnertextandinnerHTML%28preservedwhencomponentimplementsHasTextorHasHTML%29">
@@ -540,12 +644,16 @@ public class ElementHandlerComponent extends Composite {
           <code>@DataField</code>
           be configured in the class; only the HTML
           <code>data-field</code>
+          ,
+          <code>id</code>
+          , or
+          <code>class</code>
           template attribute is required.
         </para>
          <informalexample>
             <programlisting language="xml">
 &lt;div&gt;
-   &lt;a data-field="link" href="/page"
+   &lt;a id="link" href="/page"&gt;this is a hyperlink&lt;/a&gt;
    &lt;div data-field="div"&gt; Some content &lt;/div&gt;
 &lt;/div&gt;
 </programlisting>
@@ -560,7 +668,7 @@ public class ElementHandlerComponent extends Composite {
           reference in the component class is optional.
         </para>
          <important>
-            <para>Only one @EventHandler may be specified for a given data-field when @SinkNative is used to handle native DOM events.</para>
+            <para>Only one @EventHandler may be specified for a given template element when @SinkNative is used to handle native DOM events.</para>
          </important>
          <para>
           
@@ -918,16 +1026,16 @@ public class ComponentOne extends Composite {
          <informalexample>
             <programlisting language="xml">
 &lt;div class="container"&gt;
-   &lt;div data-field="header"&gt; Default header &lt;/div&gt;
-   &lt;div data-field="content"&gt; Default content &lt;/div&gt;
-   &lt;div data-field="footer"&gt; Default footer &lt;/div&gt;
+   &lt;div id="header"&gt; Default header &lt;/div&gt;
+   &lt;div id="content"&gt; Default content &lt;/div&gt;
+   &lt;div id="footer"&gt; Default footer &lt;/div&gt;
 &lt;/div&gt;
 </programlisting>
          </informalexample>
       </section>
       <section id="sid-51806600_ErraiUI-Parentcomponent">
          <title>Parent component</title>
-         <para>This component provides the common features of our page layout, including header and footer, but does not specify any content. The missing data-field will be supplied with unique content by the individual page components extending from this parent component.</para>
+         <para>This component provides the common features of our page layout, including header and footer, but does not specify any content. The missing @DataField "content" will be provided by the individual page components extending from this parent component.</para>
          <informalexample>
             <programlisting language="java">
 @Templated
@@ -951,11 +1059,7 @@ public class PageLayout extends Composite {
       </section>
       <section id="sid-51806600_ErraiUI-Childcomponent">
          <title>Child component</title>
-         <para>
-          We are free to fill in the missing "content"
-          <code>data-field</code>
-          with a Widget of our choosing. Note that it is not required to fill in all omitted data-field references.
-        </para>
+         <para>We are free to fill in the missing "content" @DataField with a Widget of our choosing. Note that it is not required to fill in all omitted @DataField references.</para>
          <informalexample>
             <programlisting language="java">
 @Templated("PageLayout.html")
@@ -973,9 +1077,7 @@ public class LoginLayout extends PageLayout {
           <code>@DataField</code>
           references defined in the parent component, simply by specifying a
           <code>@DataField</code>
-          with the same name in the child component, as is done with the "footer"
-          <code>data-field</code>
-          below.
+          with the same name in the child component, as is done with the "footer" data field below.
         </para>
          <informalexample>
             <programlisting language="java">
@@ -1010,7 +1112,7 @@ public @interface Admin {
       </informalexample>
       <para>
         This defines
-        <code>Adim</code>
+        <code>Admin</code>
         as a stylebinding now we can use it like this:
       </para>
       <informalexample>
@@ -1091,7 +1193,7 @@ public class HelloWorldForm extends Composite {
          <programlisting language="xml">
 &lt;html&gt;
 &lt;body&gt;
-  &lt;div data-field="content"&gt;
+  &lt;div id="content"&gt;
   &lt;p data-i18n-key="welcome"&gt;Welcome to errai-ui i18n.&lt;/p&gt;
 &lt;div&gt;
 ...
@@ -1112,7 +1214,7 @@ public class HelloWorldForm extends Composite {
       </para>
       <informalexample>
          <programlisting language="xml">
-&lt;div data-field=navbar data-role=dummy&gt;
+&lt;div id=navbar data-role=dummy&gt;
   &lt;div class="navbar navbar-fixed-top"&gt;
     &lt;div class=navbar-inner&gt;
       &lt;div class=container&gt;
