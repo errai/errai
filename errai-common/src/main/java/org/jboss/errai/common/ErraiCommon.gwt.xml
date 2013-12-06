@@ -19,6 +19,7 @@
 <module>
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.json.JSON"/>
+    <inherits name="org.jboss.errai.common.Logging"/>
 
     <entry-point class="org.jboss.errai.common.client.InitCoordinator" />
 </module>
