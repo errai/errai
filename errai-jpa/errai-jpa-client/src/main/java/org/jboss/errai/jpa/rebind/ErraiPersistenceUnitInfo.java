@@ -59,7 +59,7 @@ class ErraiPersistenceUnitInfo implements PersistenceUnitInfo {
 
   @Override
   public URL getPersistenceUnitRootUrl() {
-    return getClass().getClassLoader().getResource("");
+    return null;
   }
 
   @Override
