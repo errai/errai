@@ -69,8 +69,8 @@ public class LoggingHandlerConfigurator implements EntryPoint {
    *          The type of an {@link ErraiLogHandler}.
    * @return The active {@link Handler} of the requested type.
    */
-  public Handler getHandler(Class<? extends ErraiLogHandler> handlerType) {
-    return handlers.get(handlerType);
+  public <H extends ErraiLogHandler> H getHandler(Class<H> handlerType) {
+    return (H) handlers.get(handlerType);
   }
 
 }
