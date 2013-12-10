@@ -21,7 +21,7 @@
   <name>Errai::Cordova::Demos::Aerogear</name>
   <groupId>org.jboss.errai.example</groupId>
   <artifactId>errai-aerogear-demo</artifactId>
-  <version>2.4.3.Final</version>
+  <version>2.4.4-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <licenses>
