@@ -14,8 +14,14 @@ import com.google.gwt.logging.client.SystemLogHandler;
  */
 public class ErraiSystemLogHandler extends SystemLogHandler implements ErraiLogHandler {
   
+  /*
+   * Workaround to so that superlcass does not overwrite log level
+   */
+  private boolean init = false;
+  
   private ErraiSystemLogHandler(final Formatter formatter) {
     setFormatter(formatter);
+    init = true;
   }
   
   public ErraiSystemLogHandler() {
@@ -29,7 +35,8 @@ public class ErraiSystemLogHandler extends SystemLogHandler implements ErraiLogH
   
   @Override
   public void setLevel(Level newLevel) {
-    staticSetLevel(newLevel.getName());
+    if (init)
+      staticSetLevel(newLevel.getName());
   }
   
   @Override

@@ -13,9 +13,15 @@ import com.google.gwt.logging.client.ConsoleLogHandler;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class ErraiConsoleLogHandler extends ConsoleLogHandler implements ErraiLogHandler {
+  
+  /*
+   * Workaround to so that superlcass does not overwrite log level
+   */
+  private boolean init = false;
 
   public ErraiConsoleLogHandler(final Formatter formatter) {
     setFormatter(formatter);
+    init = true;
   }
   
   public ErraiConsoleLogHandler() {
@@ -29,7 +35,8 @@ public class ErraiConsoleLogHandler extends ConsoleLogHandler implements ErraiLo
   
   @Override
   public void setLevel(Level newLevel) {
-    staticSetLevel(newLevel.getName());
+    if (init)
+      staticSetLevel(newLevel.getName());
   }
   
   @Override

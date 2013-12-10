@@ -14,8 +14,14 @@ import com.google.gwt.logging.client.DevelopmentModeLogHandler;
  */
 public class ErraiDevelopmentModeLogHandler extends DevelopmentModeLogHandler implements ErraiLogHandler {
   
+  /*
+   * Workaround to so that superlcass does not overwrite log level
+   */
+  private boolean init = false;
+  
   public ErraiDevelopmentModeLogHandler(final Formatter formatter) {
     setFormatter(formatter);
+    init = true;
   }
   
   public ErraiDevelopmentModeLogHandler() {
@@ -29,7 +35,8 @@ public class ErraiDevelopmentModeLogHandler extends DevelopmentModeLogHandler im
   
   @Override
   public void setLevel(Level newLevel) {
-    staticSetLevel(newLevel.getName());
+    if (init)
+      staticSetLevel(newLevel.getName());
   }
   
   @Override

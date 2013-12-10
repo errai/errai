@@ -14,8 +14,14 @@ import com.google.gwt.logging.client.FirebugLogHandler;
  */
 public class ErraiFirebugLogHandler extends FirebugLogHandler implements ErraiLogHandler {
 
+  /*
+   * Workaround to so that superlcass does not overwrite log level
+   */
+  private boolean init = false;
+  
   public ErraiFirebugLogHandler(final Formatter formatter) {
     setFormatter(formatter);
+    init = true;
   }
   
   public ErraiFirebugLogHandler() {
@@ -29,7 +35,8 @@ public class ErraiFirebugLogHandler extends FirebugLogHandler implements ErraiLo
   
   @Override
   public void setLevel(Level newLevel) {
-    staticSetLevel(newLevel.getName());
+    if (init)
+      staticSetLevel(newLevel.getName());
   }
   
   @Override
