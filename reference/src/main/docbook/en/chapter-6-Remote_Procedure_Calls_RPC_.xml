@@ -159,6 +159,26 @@ MessageBuilder.createCall(
         <xref linkend="sid-5931306"/>
         .
       </para>
+      <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-GlobalRPCexceptionhandler">
+         <title>Global RPC exception handler</title>
+         <para>In a scenario where many different remote calls potentially throw the same exception types (e.g. exceptions related to authentication or authorization) it can be easier to register a global exception handler instead of providing error callbacks at each RPC invocation. This global exception handler is called in case an exception occurs in the process of a remote call that has no error callback associated with it. So, it will handle an otherwise uncaught exception.</para>
+         <informalexample>
+            <programlisting language="java">
+@UncaughtException
+private void onUncaughtException(Throwable t) {
+  try {
+    throw caught;
+  }
+  catch (UserNotLoggedInException e) {
+    // navigate to login dialog
+  }
+  catch (Throwable t) {
+    GWT.log("An unexpected error has occurred", t);
+  }
+}
+</programlisting>
+         </informalexample>
+      </section>
    </section>
    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-ClientsideInterceptors">
       <title>Client-side Interceptors</title>

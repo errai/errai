@@ -33,6 +33,9 @@
                   <listitem>
                      <para>Circular and self references work properly</para>
                   </listitem>
+                  <listitem>
+                     <para>Polymorphic queries and collections (queries for a base entity type can result in instances of its subtypes)</para>
+                  </listitem>
                </itemizedlist>
             </listitem>
             <listitem>
@@ -846,8 +849,8 @@ public class StandaloneLifecycleListener {
           </para>
          </section>
       </section>
-      <section id="sid-54493688_ErraiJPA-JPAFeaturesNotImplementedinErrai2.1">
-         <title>JPA Features Not Implemented in Errai 2.1</title>
+      <section id="sid-54493688_ErraiJPA-JPAFeaturesNotImplementedinErrai2.4">
+         <title>JPA Features Not Implemented in Errai 2.4</title>
          <para>The following features are not yet implemented, but could conceivably be implemented in a future Errai JPA release:</para>
          <itemizedlist>
             <listitem>
@@ -855,9 +858,6 @@ public class StandaloneLifecycleListener {
             </listitem>
             <listitem>
                <para>Transactions, including EntityManager.getTransaction()</para>
-            </listitem>
-            <listitem>
-               <para>More than one persistence context</para>
             </listitem>
             <listitem>
                <para>In named queries:</para>
@@ -885,14 +885,6 @@ public class StandaloneLifecycleListener {
             </listitem>
             <listitem>
                <para>Compound identifiers (presently, only basic types are supported for entity IDs)</para>
-            </listitem>
-            <listitem>
-               <para>Polymorphic relations (eg. relationship to a collection of a base entity type)</para>
-            </listitem>
-            <listitem>
-               <para>
-                  <code>EntityManager.merge()</code>
-               </para>
             </listitem>
             <listitem>
                <para>

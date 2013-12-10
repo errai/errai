@@ -518,27 +518,27 @@ public class OverallPageStrucutre extends Composite {
             <programlisting language="java">
 public class NavigatingPanel implements NavigatingContainer {
 
-  SimplePanel panel = new SimpleLayoutPanel();
+  SimplePanel panel = new SimpleLayoutPanel();
 
-  public void clear() {
-    this.panel.clear();
-  }
+  public void clear() {
+    this.panel.clear();
+  }
 
-  public Widget asWidget() {
-    return panel.asWidget();
-  }
+  public Widget asWidget() {
+    return panel.asWidget();
+  }
 
-  public Widget getWidget() {
-    return panel.getWidget();
-  }
+  public Widget getWidget() {
+    return panel.getWidget();
+  }
 
-  public void setWidget(Widget childWidget) {
-    panel.add(childWidget);
-  }
+  public void setWidget(Widget childWidget) {
+    panel.add(childWidget);
+  }
 
-  public void setWidget(IsWidget childWidget) {
-    panel.add(childWidget);
-  }
+  public void setWidget(IsWidget childWidget) {
+    panel.add(childWidget);
+  }
 
 }
 </programlisting>
@@ -551,7 +551,7 @@ public class NavigatingPanel implements NavigatingContainer {
          <informalexample>
             <programlisting language="xml">
 &lt;replace-with class="com.company.application.client.NavigatingPanel"&gt;
-  &lt;when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/&gt;
+  &lt;when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/&gt;
 &lt;/replace-with&gt;
 </programlisting>
          </informalexample>
