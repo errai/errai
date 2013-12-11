@@ -74,40 +74,6 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
       attemptCommandContextConnection(9);
 
-      // Change to given port
-      try {
-        logger.branch(Type.INFO, String.format("Setting AS to listen for http requests on port %d...", port));
-        // Build operations (change port then restart)
-        ModelNode[] operations = new ModelNode[] {
-            Operations.createOperation(
-                    ClientConstants.WRITE_ATTRIBUTE_OPERATION,
-                    new ModelNode().add(ClientConstants.SOCKET_BINDING_GROUP, "standard-sockets").add(
-                            ClientConstants.SOCKET_BINDING, "http")), Operations.createOperation("reload") };
-        operations[0].get(ClientConstants.NAME).set("port");
-        operations[0].get(ClientConstants.VALUE).set(port);
-
-        for (final ModelNode operation : operations) {
-          ModelNode result = ctx.getModelControllerClient().execute(operation);
-          if (!Operations.isSuccessfulOutcome(result)) {
-            logger.log(Type.ERROR, String.format("Could not switch ports:\nInput:\n%s\nOutput:\n%s",
-                    operation.toJSONString(false), result.toJSONString(false)));
-            throw new UnableToCompleteException();
-          }
-        }
-
-        logger.branch(Type.INFO, "Port change successful. Waiting for AS to reload...");
-        // Disconnect from server then attempt to reconnect (which should be unsuccessful until it has reloaded).
-        ctx.disconnectController();
-        attemptCommandContextConnection(4);
-        logger.unbranch();
-
-        logger.log(Type.INFO, "Port change successful");
-        logger.unbranch();
-      } catch (IOException e) {
-        logger.branch(Type.ERROR, String.format("Could not change the http port to %d", port), e);
-        throw new UnableToCompleteException();
-      }
-
       try {
         /*
          * Need to add deployment resource to specify exploded archive

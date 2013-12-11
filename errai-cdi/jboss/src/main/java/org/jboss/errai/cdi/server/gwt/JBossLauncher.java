@@ -1,14 +1,20 @@
 package org.jboss.errai.cdi.server.gwt;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.BindException;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.commons.io.IOUtils;
 import org.jboss.errai.cdi.server.as.JBossServletContainerAdaptor;
-import org.jboss.errai.cdi.server.gwt.util.CopyUtil;
+import org.jboss.errai.cdi.server.gwt.util.SimpleTranslator;
+import org.jboss.errai.cdi.server.gwt.util.SimpleTranslator.AttributeEntry;
+import org.jboss.errai.cdi.server.gwt.util.SimpleTranslator.Tag;
 import org.jboss.errai.cdi.server.gwt.util.StackTreeLogger;
 
 import com.google.gwt.core.ext.ServletContainer;
@@ -17,6 +23,11 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
+/**
+ * For starting a {@link JBossServletContainerAdaptor} controlling a standalone Jboss/Wildfly AS.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 public class JBossLauncher extends ServletContainerLauncher {
 
   // Property names
@@ -63,7 +74,7 @@ public class JBossLauncher extends ServletContainerLauncher {
     }
 
     try {
-      copyConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, JBOSS_HOME);
+      createTempConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, JBOSS_HOME, port);
       logger.log(Type.INFO,
               String.format("Created temporary config file %s, copied from %s.", TMP_CONFIG_FILE, TEMPLATE_CONFIG_FILE));
     } catch (IOException e) {
@@ -124,7 +135,7 @@ public class JBossLauncher extends ServletContainerLauncher {
     }
   }
 
-  private void copyConfigFile(String fromName, String toName, String jBossHome) throws IOException,
+  private void createTempConfigFile(String fromName, String toName, String jBossHome, int port) throws IOException,
           UnableToCompleteException {
     File configDir = new File(jBossHome, "standalone/configuration");
     File from = new File(configDir, fromName);
@@ -148,7 +159,25 @@ public class JBossLauncher extends ServletContainerLauncher {
     to.createNewFile();
     to.deleteOnExit();
 
-    CopyUtil.copyFile(to, from);
+    InputStream inStream = new FileInputStream(from);
+    OutputStream outStream = new FileOutputStream(to);
+    
+    // Replace default http port with provided port
+    SimpleTranslator trans = new SimpleTranslator();
+    trans.addFilter(new Tag("socket-binding", new AttributeEntry("name", "http")));
+    trans.addNewTag("socket-binding-group", new Tag("socket-binding", new AttributeEntry("name", "http"), new AttributeEntry("port", String.valueOf(port))));
+    
+    try {
+      trans.translate(inStream, outStream);
+    }
+    catch (XMLStreamException e) {
+      logger.log(Type.ERROR, "Could not create copy of configuration from " + from.getAbsolutePath(), e);
+      throw new UnableToCompleteException();
+    }
+    finally {
+      inStream.close();
+      outStream.close();
+    }
   }
 
   private String getStartScriptName(String jbossHome) {
