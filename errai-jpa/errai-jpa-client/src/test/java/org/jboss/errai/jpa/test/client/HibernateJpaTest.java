@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.jboss.errai.jpa.test.entity.Album;
 
@@ -69,6 +71,15 @@ public class HibernateJpaTest extends ErraiJpaTest {
    */
   @Override
   public void testStoreAndFetchOneWithEverythingUsingFieldAccess() throws Exception {
+    // skip
+  }
+
+  /**
+   * Regression check for ERRAI-675.
+   * Hibernate is allowed to find the non client entity since it manages client as well as server entities.
+   */
+  @Override
+  public void testNonClientEntityIsNotInEntityManager() {
     // skip
   }
 

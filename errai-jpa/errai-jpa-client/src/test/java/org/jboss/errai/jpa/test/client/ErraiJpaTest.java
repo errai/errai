@@ -27,6 +27,7 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.LocalStorage;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
@@ -107,6 +108,20 @@ public class ErraiJpaTest extends JpaClientTestCase {
   }
 
   /**
+   * Regression check for ERRAI-675.
+   */
+  public void testNonClientEntityIsNotInEntityManager() {
+    try {
+      // we cannot use the class name to test here since the class is not available in client side code generation
+      ((ErraiMetamodel)getEntityManager().getMetamodel()).entity("org.jboss.errai.jpa.test.not.on.gwt.path.NonClientEntity");
+      // it's actually more likely that the whole code generation thing fails
+      fail("NonClientEntity was included");
+    } catch (IllegalArgumentException ex) {
+      // this is the behaviour we are testing for
+    }
+  }
+
+    /**
    * Tests the persistence of one entity with no related entities.
    */
   public void testPersistOneAlbum() {
