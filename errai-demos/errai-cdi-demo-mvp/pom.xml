@@ -294,8 +294,7 @@
           <runTarget>Contacts.html</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g</extraJvmArgs>
           <disableCastChecking>true</disableCastChecking>
-          <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
+          <hostedWebapp>src/main/webapp/</hostedWebapp>          
           <strict>true</strict>
         </configuration>
         <executions>
