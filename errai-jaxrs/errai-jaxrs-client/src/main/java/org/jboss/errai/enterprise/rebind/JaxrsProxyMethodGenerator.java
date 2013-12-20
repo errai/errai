@@ -27,6 +27,7 @@ import javax.ws.rs.QueryParam;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -44,13 +45,16 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
+import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.rebind.TypeMarshaller.PrimitiveTypeMarshaller;
 
 import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Cookies;
 
@@ -101,8 +105,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates a {@link StringBuilder} constructing the request URL based on the method parameters annotated with JAX-RS
-   * annotations.
+   * Generates a {@link StringBuilder} constructing the request URL based on the method parameters
+   * annotated with JAX-RS annotations.
    * 
    * @param params
    *          the resource method's parameters
@@ -120,7 +124,7 @@ public class JaxrsProxyMethodGenerator {
     for (String pathParamName : JaxrsResourceMethodParameters.getPathParameterNames(path)) {
       String pathParamId = pathParamName;
       if (pathParamName.contains(":")) {
-        pathParamId = pathParamName.split(":")[0]; 
+        pathParamId = pathParamName.split(":")[0];
       }
       Statement pathParam = marshal(params.getPathParameter(pathParamId));
       if (params.needsEncoding(pathParamId)) {
@@ -135,37 +139,37 @@ public class JaxrsProxyMethodGenerator {
             .invoke("concat", encodePath(marshal(params.getMatrixParameter(matrixParamName))));
       }
     }
-    
+
     ContextualStatementBuilder urlBuilder = Stmt.loadVariable("url").invoke(APPEND, pathValue);
     block.addStatement(urlBuilder);
-    
+
     // construct query using @QueryParams
     if (params.getQueryParameters() != null) {
       urlBuilder = urlBuilder.invoke(APPEND, "?");
       int i = 0;
       for (String queryParamName : params.getQueryParameters().keySet()) {
         for (Statement queryParam : params.getQueryParameters(queryParamName)) {
-          
+
           MetaClass queryParamType = queryParam.getType();
           if (isListOrSet(queryParamType)) {
             MetaClass paramType = assertValidCollectionParam(queryParamType, queryParamName, QueryParam.class);
-            ContextualStatementBuilder listParam = (queryParam instanceof Parameter) ? 
-                Stmt.loadVariable(((Parameter) queryParam).getName()) : Stmt.nestedCall(queryParam); 
-            
+            ContextualStatementBuilder listParam = (queryParam instanceof Parameter) ?
+                Stmt.loadVariable(((Parameter) queryParam).getName()) : Stmt.nestedCall(queryParam);
+
             block.addStatement(listParam.foreach("p")
                 .append(If.not(Stmt.loadVariable("url").invoke("toString").invoke("endsWith", "?"))
                     .append(Stmt.loadVariable("url").invoke(APPEND, "&")).finish())
                 .append(Stmt.loadVariable("url").invoke(APPEND, queryParamName).invoke(APPEND, "=")
                     .invoke(APPEND, encodeQuery(marshal(paramType, Stmt.loadVariable("p")))))
                 .finish()
-              );
+                );
           }
           else {
             if (i++ > 0) {
               urlBuilder = urlBuilder.invoke(APPEND, "&");
             }
             urlBuilder = urlBuilder.invoke(APPEND, queryParamName).invoke(APPEND, "=")
-              .invoke(APPEND, encodeQuery(marshal(queryParam)));
+                .invoke(APPEND, encodeQuery(marshal(queryParam)));
           }
         }
       }
@@ -173,7 +177,7 @@ public class JaxrsProxyMethodGenerator {
 
     return block;
   }
-  
+
   /**
    * Checks if the provided type is a {@link List} or {@link Set}.
    * 
@@ -212,14 +216,14 @@ public class JaxrsProxyMethodGenerator {
     else {
       throw new GenerationException(
             "Unsupported type parameter found on " + jaxrsParamType.getSimpleName() + " with name "
-                + paramName + " in method " + resourceMethod.getMethod() +  
+                + paramName + " in method " + resourceMethod.getMethod() +
                 " (check the JavaDocs of " + jaxrsParamType.getName() + " for details!)");
     }
   }
-    
+
   /**
-   * Generates the declaration for a new {@link RequestBuilder} instance, initialized with the generated URL
-   * {@link #generateUrl(JaxrsResourceMethodParameters)}
+   * Generates the declaration for a new {@link RequestBuilder} instance, initialized with the
+   * generated URL {@link #generateUrl(JaxrsResourceMethodParameters)}
    * 
    * @return the RequestBuilder statement
    */
@@ -234,11 +238,13 @@ public class JaxrsProxyMethodGenerator {
 
   /**
    * Generates calls to set the appropriate headers on the generated {@link RequestBuilder} (see
-   * {@link #generateRequestBuilder()}) based on the method parameters annotated with JAX-RS annotations.
+   * {@link #generateRequestBuilder()}) based on the method parameters annotated with JAX-RS
+   * annotations.
    * 
    * @param params
    *          the resource method's parameters
-   * @return a block statement with the corresponding calls to {@link RequestBuilder#setHeader(String, String)}
+   * @return a block statement with the corresponding calls to
+   *         {@link RequestBuilder#setHeader(String, String)}
    */
   private Statement generateHeaders(final JaxrsResourceMethodParameters params) {
     BlockStatement block = new BlockStatement();
@@ -310,7 +316,25 @@ public class JaxrsProxyMethodGenerator {
             .append(generateHeaders(jaxrsParams))
             .append(new StringStatement("setRequestBuilder(requestBuilder)"))
             .finish()
-            .finish();
+            .publicOverridesMethod("proceed", Parameter.of(ResponseCallback.class, "interceptorCallback", true))
+              .append(Stmt.declareVariable(RemoteCallback.class).asFinal().named("providedCallback").initializeWith(
+                  Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback")))
+              .append(
+                  Stmt.loadVariable("remoteCallback").assignValue(Stmt.newObject(ResponseCallback.class).extend()
+                      .publicOverridesMethod("callback", Parameter.of(Response.class, "response"))
+                      .append(Stmt.declareVariable(ResponseCallback.class).named("intCallback")
+                          .initializeWith(Stmt.loadVariable("interceptorCallback")))
+                      .append(StringStatement.of("setResult(response)"))
+                      .append(Stmt.loadVariable("intCallback").invoke("callback",
+                          Cast.to(Response.class, StringStatement.of("getResult()", Object.class))))
+                      .append(Stmt.loadVariable("providedCallback").invoke("callback",
+                          StringStatement.of("getResult()", Object.class)))
+                      .finish()
+                      .finish())
+              )
+             .append(Stmt.loadVariable("this").invoke("proceed"))
+             .finish()
+             .finish();
 
     return Stmt.try_()
             .append(
@@ -328,12 +352,14 @@ public class JaxrsProxyMethodGenerator {
                 Stmt.loadVariable("callContext").invoke("proceed"))
             .finish()
             .catch_(Throwable.class, "throwable")
-            .append(Stmt.loadStatic(declaringClass, "this").invoke("handleError", Variable.get("throwable"), null, null))
+            .append(
+                Stmt.loadStatic(declaringClass, "this").invoke("handleError", Variable.get("throwable"), null, null))
             .finish();
   }
 
   /**
-   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
+   * Generates the call to
+   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
    * interceptable methods.
    * 
    * @return statement representing the request
@@ -345,7 +371,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
+   * Generates the call to
+   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
    * non-interceptable methods.
    * 
    * @return statement representing the request
@@ -355,7 +382,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
+   * Generates the call to
+   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
    * proxy methods.
    * 
    * @return statement representing the request
@@ -376,8 +404,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates an anonymous implementation/instance of {@link ResponseDemarshallingCallback} that will handle the
-   * demarshalling of the HTTP response.
+   * Generates an anonymous implementation/instance of {@link ResponseDemarshallingCallback} that
+   * will handle the demarshalling of the HTTP response.
    * 
    * @return statement representing the {@link ResponseDemarshallingCallback}.
    */
@@ -422,8 +450,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the return statement of this proxy method if required. If the proxy method returns void, it will just
-   * finish the method block.
+   * Generates the return statement of this proxy method if required. If the proxy method returns
+   * void, it will just finish the method block.
    */
   private void generateReturnStatement() {
     Statement returnStatement = ProxyUtil.generateProxyMethodReturnStatement(resourceMethod.getMethod());
