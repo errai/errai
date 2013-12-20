@@ -16,9 +16,12 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.api.interceptor;
 
-import com.google.gwt.http.client.RequestBuilder;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
+
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.Response;
 
 /**
  * Represents the context of an intercepted JAX-RS (REST) remote call.
@@ -49,4 +52,14 @@ public abstract class RestCallContext extends RemoteCallContext {
   public void setRequestBuilder(RequestBuilder requestBuilder) {
     this.requestBuilder = Assert.notNull(requestBuilder);
   }
+  
+  /**
+   * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all interceptors
+   * have been executed.
+   * 
+   * @param callback
+   *          The response callback that receives the {@link Response} of the call. This callback is guaranteed to be
+   *          invoked before the callback provided on the actual call site. Cannot be null.
+   */
+  public abstract void proceed(ResponseCallback callback);
 }

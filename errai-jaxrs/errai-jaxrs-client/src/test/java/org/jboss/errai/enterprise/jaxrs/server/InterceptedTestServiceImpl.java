@@ -57,4 +57,9 @@ public class InterceptedTestServiceImpl implements InterceptedTestService {
   public String interceptedGetWithPrimitiveAndBoxedParameters(Long p1, long p2) {
     return "";
   }
+
+  @Override
+  public String interceptedGetWithResponseCallback(String result) {
+    return result;
+  }
 }

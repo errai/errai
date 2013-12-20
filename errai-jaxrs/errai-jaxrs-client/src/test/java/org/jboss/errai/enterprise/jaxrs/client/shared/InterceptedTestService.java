@@ -27,6 +27,7 @@ import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallBypassingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorOne;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorTwo;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorUsingResponseCallback;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallListParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallResultManipulatingInterceptor;
@@ -68,4 +69,9 @@ public interface InterceptedTestService {
   @Path("/5/{p1}/{p2}")
   @InterceptedCall(RestCallBypassingInterceptor.class)
   public String interceptedGetWithPrimitiveAndBoxedParameters(@PathParam("p1") Long p1, @PathParam("p2") long p2);
+  
+  @GET
+  @Path("/6")
+  @InterceptedCall(RestCallInterceptorUsingResponseCallback.class)
+  public String interceptedGetWithResponseCallback(@QueryParam("result") String result);
 }
