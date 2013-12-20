@@ -243,8 +243,7 @@ public class JaxrsProxyMethodGenerator {
    * 
    * @param params
    *          the resource method's parameters
-   * @return a block statement with the corresponding calls to
-   *         {@link RequestBuilder#setHeader(String, String)}
+   * @return a block statement with the corresponding calls to {@link RequestBuilder#setHeader(String, String)}
    */
   private Statement generateHeaders(final JaxrsResourceMethodParameters params) {
     BlockStatement block = new BlockStatement();
@@ -309,13 +308,6 @@ public class JaxrsProxyMethodGenerator {
     Statement callContext =
         ProxyUtil.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
             resourceMethod.getMethod(), generateInterceptedRequest(), interceptedCall)
-            .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
-            .append(new StringStatement("super.setParameters(parameters)"))
-            .append(generateUrl(jaxrsParams))
-            .append(generateRequestBuilder())
-            .append(generateHeaders(jaxrsParams))
-            .append(new StringStatement("setRequestBuilder(requestBuilder)"))
-            .finish()
             .publicOverridesMethod("proceed", Parameter.of(ResponseCallback.class, "interceptorCallback", true))
               .append(Stmt.declareVariable(RemoteCallback.class).asFinal().named("providedCallback").initializeWith(
                   Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback")))
@@ -332,9 +324,16 @@ public class JaxrsProxyMethodGenerator {
                       .finish()
                       .finish())
               )
-             .append(Stmt.loadVariable("this").invoke("proceed"))
-             .finish()
-             .finish();
+              .append(Stmt.loadVariable("this").invoke("proceed"))
+            .finish()
+            .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
+              .append(new StringStatement("super.setParameters(parameters)"))
+              .append(generateUrl(jaxrsParams))
+              .append(generateRequestBuilder())
+              .append(generateHeaders(jaxrsParams))
+              .append(new StringStatement("setRequestBuilder(requestBuilder)"))
+            .finish()
+            .finish();
 
     return Stmt.try_()
             .append(
@@ -358,9 +357,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to
-   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
-   * interceptable methods.
+   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} 
+   * for interceptable methods.
    * 
    * @return statement representing the request
    */
@@ -371,9 +369,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to
-   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
-   * non-interceptable methods.
+   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} 
+   * for non-interceptable methods.
    * 
    * @return statement representing the request
    */
@@ -382,9 +379,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to
-   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
-   * proxy methods.
+   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} 
+   * for proxy methods.
    * 
    * @return statement representing the request
    */
