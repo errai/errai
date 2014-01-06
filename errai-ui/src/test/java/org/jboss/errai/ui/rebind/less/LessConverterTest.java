@@ -103,6 +103,27 @@ public class LessConverterTest {
     assertEquals(".class1 {  background-color: black;}", readFile(css));
   }
 
+  @Test
+  public void shouldImportLessFiles() throws Exception {
+    // given
+    final URL resource = getClass().getResource("/import.less");
+    final PropertyOracle oracle = mock(PropertyOracle.class);
+    final SelectionProperty property = mock(SelectionProperty.class);
+
+    // when
+    when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), eq("user.agent"))).thenReturn(property);
+    when(property.getCurrentValue()).thenReturn("mozilla");
+
+    when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), not(eq("user.agent"))))
+            .thenThrow(new BadPropertyValueException(""));
+    when(oracle.getConfigurationProperty(anyString())).thenThrow(new BadPropertyValueException(""));
+
+    final File css = new LessConverter(TreeLogger.NULL, oracle).convert(resource);
+
+    // then
+    assertEquals(".class1 {  background-color: white;}.theclass {  color: #808080;}", readFile(css));
+  }
+
   private PropertyOracle noVariablesFoundOracle() throws BadPropertyValueException {
     final PropertyOracle oracle = mock(PropertyOracle.class);
     when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), anyString()))
@@ -113,9 +134,9 @@ public class LessConverterTest {
 
   private String readFile(File css) throws FileNotFoundException {
     StringBuilder buffer = new StringBuilder();
-    final Scanner scanner = new Scanner(css).useDelimiter("\n");
-    while (scanner.hasNext()) {
-      buffer.append(scanner.next());
+    final Scanner scanner = new Scanner(css);
+    while (scanner.hasNextLine()) {
+      buffer.append(scanner.nextLine());
     }
     scanner.close();
     return buffer.toString();

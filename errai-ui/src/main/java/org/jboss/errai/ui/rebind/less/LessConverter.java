@@ -9,19 +9,21 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Scanner;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.MULTILINE;
 
 /**
  * Converts a less resource to a css file using the java LessCompiler wrapper.
  * And adds deferred binding properties to the top of the sheet. So that you can
  * use <code>user.agent</code> in less be sure to change '.' into '_' because variables with
  * a '.' in the name are not valid in less.
- * 
+ *
  * @author edewit@redhat.com
  */
 public class LessConverter {
+  private static final Pattern IMPORT_PATTERN = Pattern.compile("^(?!\\s*//\\s*)@import\\s+(url\\()?\\s*(\"|')(.+)\\s*(\"|')(\\))?\\s*;.*$", MULTILINE);
   private static final Pattern LESS_VAR = Pattern.compile("@(\\w+)");
 
   private final TreeLogger logger;
@@ -35,7 +37,7 @@ public class LessConverter {
   public File convert(URL resource) throws IOException {
     LessCompiler lessCompiler = new LessCompiler();
     try {
-      String lessFile = readLessFile(resource);
+      String lessFile = parseLess(resource);
       final String css = lessCompiler.compile(lessFile);
       return createCssFile(css);
     } catch (LessException e) {
@@ -51,30 +53,35 @@ public class LessConverter {
     return compiled;
   }
 
-  private String readLessFile(URL resource) throws IOException {
+  private String parseLess(URL resource) throws IOException {
+    String lessFile = resourceToString(resource);
+    lessFile = resolveImports(resource, lessFile);
+    lessFile = replaceVariables(lessFile);
+    return lessFile;
+  }
+
+  private String resourceToString(URL resource) throws IOException {
     Scanner scanner = new Scanner(resource.openStream());
     StringBuilder lessFile = new StringBuilder();
-    while (scanner.hasNext()) {
-      String line = scanner.nextLine();
-      final Matcher matcher = LESS_VAR.matcher(line);
-      if (matcher.find()) {
-        findVariableInLine(matcher, lessFile);
-      }
-      lessFile.append(line).append('\n');
-
+    while (scanner.hasNextLine()) {
+      lessFile.append(scanner.nextLine()).append('\n');
     }
     scanner.close();
     return lessFile.toString();
   }
 
-  private void findVariableInLine(MatchResult result, StringBuilder lessFile) {
-    for (int i = 1; i < result.groupCount() + 1; i++) {
-      final String lessVariable = result.group(i);
-      final String value = evaluate(lessVariable.replace('_', '.'));
-      if (value != null) {
-        lessFile.insert(0, "@" + lessVariable + ": \"" + value + "\";");
+  private String replaceVariables(String lessFile) {
+    final Matcher matcher = LESS_VAR.matcher(lessFile);
+    while (matcher.find()) {
+      for (int i = 1; i < matcher.groupCount() + 1; i++) {
+        final String lessVariable = matcher.group(i);
+        final String value = evaluate(lessVariable.replace('_', '.'));
+        if (value != null) {
+          lessFile = "@" + lessVariable + ": \"" + value + "\";\n" + lessFile;
+        }
       }
     }
+    return lessFile;
   }
 
   private String evaluate(String lessVariable) {
@@ -90,4 +97,20 @@ public class LessConverter {
       }
     }
   }
+
+  private String resolveImports(URL base, String content) throws IOException {
+    Matcher importMatcher = IMPORT_PATTERN.matcher(content);
+    while (importMatcher.find()) {
+      String importedFile = importMatcher.group(3);
+      importedFile = importedFile.matches(".*\\.(le?|c)ss$") ? importedFile : importedFile + ".less";
+      boolean css = importedFile.matches(".*css$");
+      if (!css) {
+        String importedLess = parseLess(new URL(base, importedFile));
+        content = content.substring(0, importMatcher.start()) + importedLess + content.substring(importMatcher.end());
+      }
+    }
+
+    return content;
+  }
+
 }
