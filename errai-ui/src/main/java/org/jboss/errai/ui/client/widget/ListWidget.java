@@ -126,12 +126,17 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    */
   public void setItems(List<M> items) {
     boolean changed = this.items != items;
-    
+
     if (items instanceof BindableListWrapper) {
       this.items = (BindableListWrapper<M>) items;
     }
     else {
-      this.items = new BindableListWrapper<M>(items);
+      if (items != null) {
+        this.items = new BindableListWrapper<M>(items);
+      }
+      else {
+        this.items = new BindableListWrapper<M>(new ArrayList<M>());
+      }
     }
 
     if (changed) {
@@ -195,13 +200,14 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    * @param model
    *          the model displayed by the widget
    * 
-   * @return the widget displaying the provided model instance, null if no widget was found for the model.
+   * @return the widget displaying the provided model instance, null if no widget was found for the
+   *         model.
    */
   public W getWidget(M model) {
     int index = items.indexOf(model);
     return getWidget(index);
   }
-  
+
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<M>> handler) {
     if (!valueChangeHandlerInitialized) {
@@ -219,7 +225,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   @Override
   public List<M> getValue() {
     if (items == null) {
-      items = new BindableListWrapper<M>(new ArrayList<M>()); 
+      items = new BindableListWrapper<M>(new ArrayList<M>());
       items.addChangeHandler(this);
     }
     return items;

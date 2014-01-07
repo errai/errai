@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -105,6 +106,18 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertEquals("Second model object was not updated!", "1-updated", itemWidget1.getModel().getName());
   }
 
+  @Test
+  public void testListBindingOfNullList() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    BindingListWidget listWidget = app.getListWidget();
+    listWidget.setValue(null);
+    List<TestModel> proxiedList = listWidget.getValue();
+    
+    assertNotNull(proxiedList);
+    assertTrue(proxiedList instanceof BindableListWrapper);
+    assertTrue(proxiedList.isEmpty());
+  }
+  
   @Test
   public void shouldCreateULorOL() {
     List<TestModel> modelList = new ArrayList<TestModel>();
