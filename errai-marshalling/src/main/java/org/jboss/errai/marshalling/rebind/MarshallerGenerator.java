@@ -28,9 +28,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
-import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
@@ -45,10 +43,11 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * Generator for a single marshaller (used for custom portable types).
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-@GenerateAsync(MarshallerFactory.class)
-public class MarshallersGenerator extends AbstractAsyncGenerator {
+public class MarshallerGenerator extends Generator {
   private static final Logger logger = LoggerFactory.getLogger(Generator.class);
 
   public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai.marshalling.server.impl";
@@ -76,7 +75,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
 
   private static final DiscoveryStrategy[] rootDiscoveryStrategies;
 
-  private static final Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
+  private static final Logger log = LoggerFactory.getLogger(MarshallerGenerator.class);
 
   static {
     // define the strategies which will be used to figure out where to deposit the server-side marshaller
@@ -218,7 +217,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
     logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
-    return startAsyncGeneratorsAndWaitFor(MarshallerFactory.class, context, logger, packageName, className);
+    return generate(logger, context);
   }
 
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
@@ -227,7 +226,6 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   private static volatile String _clientMarshallerCache;
   private static final Object generatorLock = new Object();
 
-  @Override
   protected String generate(final TreeLogger treeLogger, final GeneratorContext context) {
     synchronized (generatorLock) {
       final boolean junitOrDevMode = !EnvUtil.isProdMode();

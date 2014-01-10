@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 
 /**
  * {@link CallElement} to create a class reference.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoadClassReference extends AbstractCallElement {
@@ -74,13 +74,13 @@ public class LoadClassReference extends AbstractCallElement {
     return getClassReference(metaClass, context, true);
   }
 
-  private static final RenderCacheStore<MetaType, String> CLASS_LITERAL_RENDER_CACHE
-          = new RenderCacheStore<MetaType, String>() {
-    @Override
-    public String getName() {
-      return "CLASS_LITERAL_RENDER_CACHE";
-    }
-  };
+  private static final RenderCacheStore<MetaType, String> CLASS_LITERAL_RENDER_CACHE =
+      new RenderCacheStore<MetaType, String>() {
+        @Override
+        public String getName() {
+          return "CLASS_LITERAL_RENDER_CACHE";
+        }
+      };
 
   public static String getClassReference(final MetaType metaClass, final Context context, final boolean typeParms) {
     final Map<MetaType, String> cacheStore = context.getRenderingCache(CLASS_LITERAL_RENDER_CACHE);
@@ -158,7 +158,7 @@ public class LoadClassReference extends AbstractCallElement {
             // fix to a weirdness in the GWT deferred bining API;
             final String ref = getClassReference(typeParameter, context);
             if ("Object".equals(ref)) {
-              //ignore;
+              // ignore;
               return "";
             }
 

@@ -35,6 +35,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -42,8 +43,10 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
@@ -51,6 +54,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.CommonConfigAttribs;
 import org.jboss.errai.config.rebind.ReachableTypes;
+import org.jboss.errai.marshalling.client.api.GeneratedMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -67,6 +71,8 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gwt.core.shared.GWT;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -247,18 +253,18 @@ public class MarshallerGeneratorFactory {
     }
 
     BlockBuilder<?> getMarshallerMethod =
-      classStructureBuilder.publicMethod(parameterizedAs(Marshaller.class, typeParametersOf(Object.class)),
-          "getMarshaller").parameters(String.class, String.class)
-          .body()
-          .append(
-              If.isNull(loadVariable("a1"))
-                  .append(Stmt.loadLiteral(null).returnValue()).finish())
-          .append(
-              If.cond(Stmt.loadVariable(MARSHALLERS_VAR).invoke("containsKey", Stmt.loadVariable("a1")))
-                  .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
-                  .finish()
-          );
-    
+        classStructureBuilder.publicMethod(parameterizedAs(Marshaller.class, typeParametersOf(Object.class)),
+            "getMarshaller").parameters(String.class, String.class)
+            .body()
+            .append(
+                If.isNull(loadVariable("a1"))
+                    .append(Stmt.loadLiteral(null).returnValue()).finish())
+            .append(
+                If.cond(Stmt.loadVariable(MARSHALLERS_VAR).invoke("containsKey", Stmt.loadVariable("a1")))
+                    .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
+                    .finish()
+            );
+
     generateMarshallers(getMarshallerMethod);
     getMarshallerMethod.append(Stmt.loadLiteral(null).returnValue()).finish();
 
@@ -304,10 +310,24 @@ public class MarshallerGeneratorFactory {
         }
       }
 
+      BuildMetaClass customMarshaller = 
+          ClassBuilder
+              .define("MarshallerFor_" + getVarName(cls)).packageScope()
+              .abstractClass()
+              .implementsInterface(
+                  MetaClassFactory.get(GeneratedMarshaller.class))
+              .body().getClassDefinition();
+      
+      getMarshallerMethod.append(new InnerClass(customMarshaller));
+
       addMarshaller(compType);
-      conditionalGenerationBlock.append(Stmt.codeComment("Marshaller m = GWT.create(Marshaller_Type.class);"));
-      conditionalGenerationBlock.append(Stmt.codeComment("marshallers.put(a1, m)"));
-      conditionalGenerationBlock.append(Stmt.codeComment("return m"));
+
+      conditionalGenerationBlock.append(
+          Stmt.declareFinalVariable("m", Marshaller.class, Stmt.invokeStatic(GWT.class, "create", customMarshaller)));
+      conditionalGenerationBlock.append(
+          Stmt.create(classContext).loadVariable(MARSHALLERS_VAR).invoke("put", loadVariable("a1"), loadVariable("m")));
+      conditionalGenerationBlock.append(Stmt.loadVariable("m").returnValue());
+
       getMarshallerMethod.append(conditionalGenerationBlock.finish());
     }
 
@@ -350,8 +370,8 @@ public class MarshallerGeneratorFactory {
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
           .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
 
-      for (final Map.Entry<String, String> aliasEntry : 
-        mappingContext.getDefinitionsFactory().getMappingAliases().entrySet()) {
+      for (final Map.Entry<String, String> aliasEntry : mappingContext.getDefinitionsFactory().getMappingAliases()
+          .entrySet()) {
 
         if (aliasEntry.getValue().equals(type.getFullyQualifiedName())) {
           constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
