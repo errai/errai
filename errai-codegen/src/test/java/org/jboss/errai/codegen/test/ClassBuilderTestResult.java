@@ -38,6 +38,14 @@ public interface ClassBuilderTestResult {
           "   private String name;\n" +
           " }";
 
+  public static final String CLASS_DECLARING_INNER_CLASS =
+      "     package foo.bar;" +
+          "\n" +
+          " public class Baz {\n" +
+          "    public class Inner {\n" +
+          "   }" +
+          " }";
+
   public static final String CLASS_WITH_METHOD_USING_INNER_CLASS =
       "     package foo.bar;" +
           "\n" +

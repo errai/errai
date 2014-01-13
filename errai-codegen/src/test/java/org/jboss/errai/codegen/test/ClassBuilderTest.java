@@ -19,6 +19,10 @@ package org.jboss.errai.codegen.test;
 import static org.jboss.errai.codegen.test.ClassBuilderTestResult.*;
 import static org.junit.Assert.fail;
 
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -31,10 +35,6 @@ import org.jboss.errai.codegen.test.model.Baz;
 import org.jboss.errai.codegen.test.model.tree.Parent;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Test;
-
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.util.Map;
 
 /**
  * Tests the {@link ClassBuilder} API.
@@ -74,7 +74,22 @@ public class ClassBuilderTest extends AbstractCodegenTest {
   }
 
   @Test
-  public void testDefineInnerClass() {
+  public void testDefineClassWithInnerClass() {
+    final ClassStructureBuilder<?> innerClass = ClassBuilder.define("Inner")
+        .publicScope().body();
+
+    final String cls = ClassBuilder.define("foo.bar.Baz")
+        .publicScope()
+        .body()
+        .declaresInnerClass(new InnerClass(innerClass.getClassDefinition()))
+        .toJavaString();
+
+    assertEquals("failed to generate class with method using inner class",
+        CLASS_DECLARING_INNER_CLASS, cls);
+  }
+
+  @Test
+  public void testDefineInnerClassInMethod() {
     final ClassStructureBuilder<?> innerClass = ClassBuilder.define("Inner")
         .packageScope()
         .implementsInterface(Serializable.class)
@@ -96,7 +111,6 @@ public class ClassBuilderTest extends AbstractCodegenTest {
 
     assertEquals("failed to generate class with method using inner class",
         CLASS_WITH_METHOD_USING_INNER_CLASS, cls);
-
   }
 
   @Test
