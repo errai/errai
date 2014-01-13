@@ -163,7 +163,6 @@ public class MarshallerGeneratorFactory {
           @Override
           public Statement demarshall(final MetaClass type, final Statement value) {
             final String variable = createDemarshallerIfNeeded(type.asBoxed());
-
             return Stmt.loadVariable(variable).invoke("demarshall", value, Stmt.loadVariable("a1"));
           }
 
@@ -220,26 +219,20 @@ public class MarshallerGeneratorFactory {
 
       final String varName = getVarName(clsName);
 
+      Statement marshaller = null;
       if (marshallerCls.isAnnotationPresent(AlwaysQualify.class)) {
-        classStructureBuilder.privateField(varName,
-            MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
-                MetaClassFactory.typeParametersOf(cls)))
-            .finish();
+        MetaClass type = MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
+            MetaClassFactory.typeParametersOf(cls));
 
-        constructor.append(Stmt.create(classContext)
-            .loadVariable(varName).assignValue(
-                Stmt.newObject(QualifyingMarshallerWrapper.class)
-                    .withParameters(Stmt.newObject(marshallerCls), marshallerCls)));
+        marshaller = Stmt.declareFinalVariable(varName, type, Stmt.newObject(QualifyingMarshallerWrapper.class)
+            .withParameters(Stmt.newObject(marshallerCls), marshallerCls));
       }
       else {
-        classStructureBuilder.privateField(varName, marshallerCls).finish();
-
-        constructor.append(Stmt.create(classContext)
-            .loadVariable(varName).assignValue(Stmt.newObject(marshallerCls)));
+        marshaller = Stmt.declareFinalVariable(varName, marshallerCls, Stmt.newObject(marshallerCls));
       }
-
-      constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-          .invoke("put", clsName, loadVariable(varName)));
+      constructor.append(marshaller);
+      constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR).invoke("put", clsName,
+          loadVariable(varName)));
 
       for (final Map.Entry<String, String> aliasEntry : mappingContext.getDefinitionsFactory().getMappingAliases()
           .entrySet()) {
@@ -263,10 +256,15 @@ public class MarshallerGeneratorFactory {
                 If.cond(Stmt.loadVariable(MARSHALLERS_VAR).invoke("containsKey", Stmt.loadVariable("a1")))
                     .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
                     .finish()
-            );
+            )
+            .append(Stmt.declareVariable("m", Marshaller.class, Stmt.loadLiteral(null)));
 
     generateMarshallers(getMarshallerMethod);
-    getMarshallerMethod.append(Stmt.loadLiteral(null).returnValue()).finish();
+    getMarshallerMethod.append(
+        If.isNotNull(Stmt.loadVariable("m")).append(
+            Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+                .invoke("put", loadVariable("a1"), loadVariable("m"))).finish());
+    getMarshallerMethod.append(Stmt.loadVariable("m").returnValue()).finish();
 
     if (CommonConfigAttribs.MAKE_DEFAULT_ARRAY_MARSHALLERS.getBoolean()) {
       for (final MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
@@ -310,23 +308,20 @@ public class MarshallerGeneratorFactory {
         }
       }
 
-      BuildMetaClass customMarshaller = 
+      BuildMetaClass customMarshaller =
           ClassBuilder
-              .define("MarshallerFor_" + getVarName(cls)).packageScope()
+              .define("Marshaller_for_" + getVarName(cls)).packageScope()
               .abstractClass()
               .implementsInterface(
                   MetaClassFactory.get(GeneratedMarshaller.class))
               .body().getClassDefinition();
-      
-      getMarshallerMethod.append(new InnerClass(customMarshaller));
 
-      addMarshaller(compType);
+      classStructureBuilder.declaresInnerClass(new InnerClass(customMarshaller));
+
+      // addMarshaller(compType);
 
       conditionalGenerationBlock.append(
-          Stmt.declareFinalVariable("m", Marshaller.class, Stmt.invokeStatic(GWT.class, "create", customMarshaller)));
-      conditionalGenerationBlock.append(
-          Stmt.create(classContext).loadVariable(MARSHALLERS_VAR).invoke("put", loadVariable("a1"), loadVariable("m")));
-      conditionalGenerationBlock.append(Stmt.loadVariable("m").returnValue());
+          Stmt.loadVariable("m").assignValue(Stmt.invokeStatic(GWT.class, "create", customMarshaller)));
 
       getMarshallerMethod.append(conditionalGenerationBlock.finish());
     }
