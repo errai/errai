@@ -34,6 +34,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.jboss.spec</groupId>
+        <artifactId>jboss-javaee-6.0</artifactId>
+        <version>${version.org.jboss.spec.jboss.javaee.6.0}</version>
+        <type>pom</type>
+      </dependency>
 
       <!-- All Errai Modules -->
       <dependency>
@@ -183,6 +189,11 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>reflections</artifactId>
+        <version>${version.org.jboss.errai}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-cdi-jboss</artifactId>
         <version>${version.org.jboss.errai}</version>
       </dependency>
 

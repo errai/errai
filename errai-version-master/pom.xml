@@ -78,6 +78,7 @@
     <slf4j.version>1.6.1</slf4j.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <weld.version>1.1.13.Final</weld.version>
+    <gwt.slf4j.version>0.0.2</gwt.slf4j.version>
   </properties>
 
   <dependencyManagement>
@@ -363,6 +364,12 @@
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jaxrs</artifactId>
         <version>${resteasy.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.benediktmeurer.gwt-slf4j</groupId>
+        <artifactId>gwt-slf4j</artifactId>
+        <version>${gwt.slf4j.version}</version>
       </dependency>
 
     </dependencies>
