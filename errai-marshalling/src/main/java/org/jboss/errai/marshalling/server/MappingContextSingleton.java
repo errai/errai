@@ -121,12 +121,12 @@ public class MappingContextSingleton {
 
           @Override
           public boolean hasMarshaller(final String fqcn) {
-            return marshallerFactory.getMarshaller(null, fqcn) != null;
+            return marshallerFactory.getMarshaller(fqcn) != null;
           }
 
           @Override
           public Marshaller getMarshaller(final String fqcn) {
-            return marshallerFactory.getMarshaller(null, fqcn);
+            return marshallerFactory.getMarshaller(fqcn);
           }
 
         });
@@ -139,12 +139,12 @@ public class MappingContextSingleton {
 
       @Override
       public Marshaller<Object> getMarshaller(final String clazz) {
-        return marshallerFactory.getMarshaller(null, clazz);
+        return marshallerFactory.getMarshaller(clazz);
       }
 
       @Override
       public boolean hasMarshaller(final String clazzName) {
-        return marshallerFactory.getMarshaller(null, clazzName) != null;
+        return marshallerFactory.getMarshaller(clazzName) != null;
       }
 
       @Override

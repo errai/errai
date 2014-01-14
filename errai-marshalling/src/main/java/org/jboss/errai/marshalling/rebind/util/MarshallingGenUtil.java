@@ -16,19 +16,26 @@
 
 package org.jboss.errai.marshalling.rebind.util;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -217,6 +224,8 @@ public class MarshallingGenUtil {
   public static boolean isUseStaticMarshallers() {
     if (isForceStaticMarshallers()) return true;
 
+    if (EnvUtil.isDevMode() && !EnvUtil.isJUnitTest()) return false;
+    
     if (System.getProperty(USE_STATIC_MARSHALLERS) != null) {
       return Boolean.getBoolean(USE_STATIC_MARSHALLERS);
     }
@@ -241,6 +250,15 @@ public class MarshallingGenUtil {
     }
     else {
       return false;
+    }
+  }
+  
+  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder, MetaClass type) {
+    String fieldName = MarshallingGenUtil.getVarName(type);
+    
+    if (classStructureBuilder.getClassDefinition().getField(fieldName) == null) {
+      classStructureBuilder.privateField(fieldName, parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))
+        .initializesWith(Stmt.invokeStatic(Marshalling.class, "getMarshaller", Stmt.loadLiteral(type.asClass()))).finish();
     }
   }
 }

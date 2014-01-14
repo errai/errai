@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 
 /**
  * Utility which provides convenience methods for generating marshallers for the server-side.
- *
+ * 
  * @author Mike Brock
  */
 public abstract class ServerMarshallUtil {
@@ -114,7 +114,9 @@ public abstract class ServerMarshallUtil {
     final String classStr = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.Java)
             .generate(packageName, className);
 
-     final File directory =
+    System.out.println(classStr);
+    
+    final File directory =
             new File(RebindUtils.getTempDirectory()
                     + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
 

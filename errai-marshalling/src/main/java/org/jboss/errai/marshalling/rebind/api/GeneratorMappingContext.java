@@ -21,8 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -45,24 +43,14 @@ public class GeneratorMappingContext implements ServerMappingContext {
   private final Set<String> generatedMarshallers = new HashSet<String>();
   private final List<String> renderedMarshallers = new ArrayList<String>();
 
-  private final Context codegenContext;
-
-  private final MetaClass generatedBootstrapClass;
-  private final ClassStructureBuilder<?> classStructureBuilder;
   private final ArrayMarshallerCallback arrayMarshallerCallback;
 
   private final Set<String> exposedMembers = new HashSet<String>();
 
   public GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
-                                 final Context codegenContext,
-                                 final MetaClass generatedBootstrapClass,
-                                 final ClassStructureBuilder<?> classStructureBuilder,
                                  final ArrayMarshallerCallback callback) {
 
     this.marshallerGeneratorFactory = marshallerGeneratorFactory;
-    this.codegenContext = codegenContext;
-    this.generatedBootstrapClass = generatedBootstrapClass;
-    this.classStructureBuilder = classStructureBuilder;
     this.arrayMarshallerCallback = callback;
   }
 
@@ -98,24 +86,12 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }
 
-  public Context getCodegenContext() {
-    return codegenContext;
-  }
-
   public void markRendered(final MetaClass metaClass) {
     renderedMarshallers.add(metaClass.asBoxed().getFullyQualifiedName());
   }
 
   public boolean isRendered(final MetaClass metaClass) {
     return renderedMarshallers.contains(metaClass.asBoxed().getFullyQualifiedName());
-  }
-
-  public MetaClass getGeneratedBootstrapClass() {
-    return generatedBootstrapClass;
-  }
-
-  public ClassStructureBuilder<?> getClassStructureBuilder() {
-    return classStructureBuilder;
   }
 
   public ArrayMarshallerCallback getArrayMarshallerCallback() {

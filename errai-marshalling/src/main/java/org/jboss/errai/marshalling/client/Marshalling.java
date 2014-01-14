@@ -40,11 +40,12 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 public abstract class Marshalling {
 
   /**
-   * Returns true if the given type is marshallable by the Errai Marshalling system, and false otherwise.
+   * Returns true if the given type is marshallable by the Errai Marshalling system, and false
+   * otherwise.
    * <p>
-   * Marshallable types include all native Java types, most built-in Java API types, types annotated with
-   * {@code @Portable}, types configured for marshalling via {@code ErraiApp.properties}, and arrays, Collections, and
-   * Maps of marshallable types.
+   * Marshallable types include all native Java types, most built-in Java API types, types annotated
+   * with {@code @Portable}, types configured for marshalling via {@code ErraiApp.properties}, and
+   * arrays, Collections, and Maps of marshallable types.
    * 
    * @param type
    *          The type to check for marshallability.
@@ -55,12 +56,31 @@ public abstract class Marshalling {
   }
 
   /**
-   * Returns a JSON representation of the given object, recursively including all of its nested attributes.
+   * Returns a marshaller for the type with the provided fully qualified class name. In case no
+   * marshaller can be found for that type a RuntimeException will be thrown.
+   * 
+   * @param fqcn
+   *          the fully qualified class name of the marshallable type.
+   * 
+   * @return the marshaller instance, never null.
+   */
+  public static <T> Marshaller<T> getMarshaller(final Class<T> type) {
+    Marshaller<T> m = MarshallingSessionProviderFactory.getProvider().getMarshaller(type.getName());
+    if (m == null) {
+      throw new RuntimeException("No marshaller for type: " + type.getName());
+    }
+    return m;
+  }
+
+  /**
+   * Returns a JSON representation of the given object, recursively including all of its nested
+   * attributes.
    * 
    * @param obj
-   *          The object to marshall. Should be of a type for which {@link #canHandle(Class)} returns true. Null is
-   *          permitted.
-   * @return The JSON representation of the given object and all nested properties reachable from it.
+   *          The object to marshall. Should be of a type for which {@link #canHandle(Class)}
+   *          returns true. Null is permitted.
+   * @return The JSON representation of the given object and all nested properties reachable from
+   *         it.
    */
   public static String toJSON(Object obj) {
     if (obj == null) {
@@ -69,7 +89,7 @@ public abstract class Marshalling {
     }
 
     final MarshallingSession session = MarshallingSessionProviderFactory.getEncoding();
-    
+
     obj = MarshallUtil.maybeUnwrap(obj);
 
     if (needsQualification(obj)) {
@@ -78,21 +98,21 @@ public abstract class Marshalling {
     else {
       final Marshaller<Object> marshaller = MarshallUtil.getMarshaller(obj, session);
       if (marshaller == null) {
-        throw new RuntimeException("No marshaller for type: "+obj.getClass().getName());
+        throw new RuntimeException("No marshaller for type: " + obj.getClass().getName());
       }
       return marshaller.marshall(obj, session);
     }
   }
 
   /**
-   * Appends a JSON representation of the given object to the given Appendable, recursively including all of its nested
-   * attributes.
+   * Appends a JSON representation of the given object to the given Appendable, recursively
+   * including all of its nested attributes.
    * 
    * @param appendTo
    *          the Appendable to write the JSON representation to.
    * @param obj
-   *          The object to marshall. Should be of a type for which {@link #canHandle(Class)} returns true. Null is
-   *          permitted.
+   *          The object to marshall. Should be of a type for which {@link #canHandle(Class)}
+   *          returns true. Null is permitted.
    * 
    */
   public static void toJSON(final Appendable appendTo, final Object obj) throws IOException {
@@ -123,7 +143,8 @@ public abstract class Marshalling {
   }
 
   /**
-   * Converts the given JSON message to a Java object, recursively decoding nested attributes contained in that message.
+   * Converts the given JSON message to a Java object, recursively decoding nested attributes
+   * contained in that message.
    * 
    * @param json
    *          The JSON representation of the object graph to demarshall.
@@ -136,16 +157,17 @@ public abstract class Marshalling {
   }
 
   /**
-   * Converts the given JSON message (which is likely a collection) to a Java object, recursively decoding nested
-   * attributes contained in that message.
+   * Converts the given JSON message (which is likely a collection) to a Java object, recursively
+   * decoding nested attributes contained in that message.
    * 
    * @param json
    *          The JSON representation of the object graph to demarshall.
    * @param type
    *          The expected type of the root of the object graph.
    * @param assumedElementType
-   *          the type of elements assumed to be in the root collection. A null value means that either the root object
-   *          is not a collection, or its element type is provided in the JSON message.
+   *          the type of elements assumed to be in the root collection. A null value means that
+   *          either the root object is not a collection, or its element type is provided in the
+   *          JSON message.
    * @return the root of the reconstructed object graph.
    */
   @SuppressWarnings("unchecked")
@@ -161,15 +183,15 @@ public abstract class Marshalling {
     }
     final Marshaller<Object> marshallerInstance = session.getMarshallerInstance(type.getName());
     if (marshallerInstance == null) {
-        throw new RuntimeException("No marshaller for type: " + type.getName());
+      throw new RuntimeException("No marshaller for type: " + type.getName());
     }
 
     return (T) marshallerInstance.demarshall(parsedValue, session);
   }
 
   /**
-   * Converts the given JSON message to a Java map object, recursively decoding nested attributes contained in that
-   * message.
+   * Converts the given JSON message to a Java map object, recursively decoding nested attributes
+   * contained in that message.
    * 
    * @param json
    *          The JSON representation of the object graph to demarshall.
@@ -198,8 +220,8 @@ public abstract class Marshalling {
   }
 
   /**
-   * Converts the given JSON message to a Java object, recursively decoding nested attributes contained in that message,
-   * which must contain type information for the root object.
+   * Converts the given JSON message to a Java object, recursively decoding nested attributes
+   * contained in that message, which must contain type information for the root object.
    * 
    * @param json
    *          The JSON representation of the object graph to demarshall.

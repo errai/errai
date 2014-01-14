@@ -16,10 +16,18 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import org.jboss.errai.codegen.exception.GenerationException;
+import java.io.File;
+import java.io.PrintWriter;
+
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContextFactory;
+import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -32,18 +40,47 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallerGenerator extends Generator {
+  private final String packageName = MarshallerFramework.class.getPackage().getName();
 
+  // TODO use incremental generator
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
-    String fqcn = typeName.replace(MarshallerFactory.class.getName() + "Impl", "")
-        .replace(".Marshaller_for_", "")
+    String fqcnOfCustomType = typeName.replace(MarshallerFactory.class.getName() + "Impl", "")
+        .replace("." + MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX, "")
         .replaceAll("_", ".");
 
-    MetaClass type = MetaClassFactory.get(fqcn);
+    MetaClass type = MetaClassFactory.get(fqcnOfCustomType);
+    String marshallerClassName =
+        MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "Impl";
+    
+    MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
+    final MappingStrategy strategy = MappingStrategyFactory
+          .createStrategy(true, GeneratorMappingContextFactory.getFor(target), type);
+    
+    if (strategy == null) {
+      throw new RuntimeException("no available marshaller for class: " + type.getFullyQualifiedName());
+    }
+    
+    final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(packageName + "." + marshallerClassName);
 
-    // TODO get access to the damn MappingStrategy???
+//    if (type.isAnnotationPresent(AlwaysQualify.class)) {
+//      constructor.append(loadVariable(varName).assignValue(
+//            Stmt.newObject(QualifyingMarshallerWrapper.class, marshaller, type)));
+//    }
+//    else {
+//      constructor.append(loadVariable(varName).assignValue(marshaller));
+//    }
+    
+    final String gen = marshaller.toJavaString();
+    final PrintWriter printWriter = context.tryCreate(logger, packageName, marshallerClassName);
+    printWriter.append(gen);
 
-    throw new GenerationException(type.getFullyQualifiedName());
+    final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + marshallerClassName + ".java");
+    RebindUtils.writeStringToFile(tmpFile, gen);
+
+    context.commit(logger, printWriter);
+    
+    return packageName + "." + marshallerClassName;
+    
   }
-
 }

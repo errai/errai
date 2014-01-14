@@ -27,10 +27,12 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.TernaryStatement;
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassDefinitionStaticOption;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
@@ -45,13 +47,14 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.GeneratedMarshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
@@ -101,10 +104,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     return new ObjectMapper() {
       @Override
-      public Statement getMarshaller() {
-        final AnonymousClassStructureBuilder classStructureBuilder = Stmt.create(context.getCodegenContext())
-            .newObject(parameterizedAs(Marshaller.class, typeParametersOf(toMap))).extend();
-
+      public ClassStructureBuilder<?> getMarshaller(String marshallerClassName) {
+        ClassDefinitionStaticOption<?> staticOption = ClassBuilder.define(marshallerClassName).publicScope();
+        
+        ClassStructureBuilder<?> classStructureBuilder = null;
+        if (!gwtTarget)
+          classStructureBuilder = staticOption.staticClass().implementsInterface(
+              parameterizedAs(GeneratedMarshaller.class, typeParametersOf(toMap))).body();
+        else {
+          classStructureBuilder = staticOption.implementsInterface(
+              parameterizedAs(GeneratedMarshaller.class, typeParametersOf(toMap))).body();
+        }
+        
         final MetaClass arrayType = toMap.asArrayOf(1);
         classStructureBuilder.privateField("EMPTY_ARRAY", arrayType).initializesWith(Stmt.newArray(toMap, 0)).finish();
 
@@ -118,7 +129,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
          *
          */
         final BlockBuilder<?> builder =
-            classStructureBuilder.publicOverridesMethod("demarshall",
+            classStructureBuilder.publicMethod(toMap, "demarshall",
                 Parameter.of(EJValue.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
         builder.append(Stmt.declareVariable(EJObject.class).named("obj")
@@ -154,6 +165,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
             for (final Mapping mapping : mappingDefinition.getInstantiationMapping().getMappings()) {
               final MetaClass type = mapping.getType().asBoxed();
+              MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, type);
               if (type.isArray()) {
                 MetaClass toMap = type;
                 while (toMap.isArray()) {
@@ -193,11 +205,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     .initializeWith(Stmt.newObject(toMap, constructorParameters.toArray(new Object[constructorParameters.size()]))));
               }
               else {
-                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), constructor);
+                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder, constructor);
                 builder.append(Stmt.declareVariable(toMap).named("entity")
                     .initializeWith(
                         Stmt.invokeStatic(
-                            context.getClassStructureBuilder().getClassDefinition(),
+                            classStructureBuilder.getClassDefinition(),
                             PrivateAccessUtil.getPrivateMethodName(constructor),
                             constructorParameters.toArray(new Object[constructorParameters.size()]))));
               }
@@ -228,6 +240,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
          */
         for (final MemberMapping memberMapping : mappingDefinition.getMemberMappings()) {
           if (!memberMapping.canWrite()) continue;
+          MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, memberMapping.getType().asBoxed());
 
           if (memberMapping.getTargetType().isConcrete() && !context.isRendered(memberMapping.getTargetType())) {
             context.getMarshallerGeneratorFactory().addMarshaller(memberMapping.getTargetType());
@@ -273,12 +286,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               }
               else {
                 if (!context.isExposed(field)) {
-                  PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), field);
+                  PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder, field);
                   context.markExposed(field);
                 }
 
                 // Bind via JSNI
-                bindingStatement = Stmt.invokeStatic(context.getGeneratedBootstrapClass(),
+                bindingStatement = Stmt.invokeStatic(classStructureBuilder.getClassDefinition(),
                     PrivateAccessUtil.getPrivateFieldInjectorName(field),
                     loadVariable("entity"), val);
               }
@@ -309,14 +322,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
          * MARSHAL METHOD
          *
          */
-        final BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
+        final BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicMethod(String.class, "marshall",
             Parameter.of(toMap, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
-        marshallToJSON(marshallMethodBlock, toMap, mappingDefinition);
+        marshallToJSON(marshallMethodBlock, toMap, mappingDefinition, classStructureBuilder);
 
         marshallMethodBlock.finish();
 
-        return classStructureBuilder.finish();
+        return classStructureBuilder;
       }
     };
   }
@@ -403,7 +416,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public void marshallToJSON(final BlockBuilder<?> builder,
                              final MetaClass toType,
-                             final MappingDefinition definition) {
+                             final MappingDefinition definition,
+                             final ClassStructureBuilder classStructureBuilder) {
 
     if (!context.canMarshal(toType.getFullyQualifiedName())) {
       throw new NoAvailableMarshallerException(toType.getName());
@@ -480,7 +494,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         throw new NoAvailableMarshallerException(compType.getFullyQualifiedName());
       }
 
-      Statement valueStatement = valueAccessorFor(mapping.getReadingMember());
+      Statement valueStatement = valueAccessorFor(mapping.getReadingMember(), classStructureBuilder);
       if (targetType.isArray()) {
         valueStatement = context.getArrayMarshallerCallback().marshal(targetType, valueStatement);
       }
@@ -518,7 +532,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     return "\"" + value + "\"";
   }
 
-  public Statement valueAccessorFor(final MetaClassMember member) {
+  public Statement valueAccessorFor(final MetaClassMember member, ClassStructureBuilder<?> classStructureBuilder) {
     if (member instanceof MetaField) {
       final MetaField field = (MetaField) member;
       if (!field.isPublic()) {
@@ -530,11 +544,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
         else {
           if (!context.isExposed(field)) {
-            PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), field);
+            PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder, field);
             context.markExposed(field);
           }
 
-          return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), PrivateAccessUtil
+          return Stmt.invokeStatic(classStructureBuilder.getClassDefinition(), PrivateAccessUtil
               .getPrivateFieldInjectorName(field),
               loadVariable("a0"));
         }
@@ -547,11 +561,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       final MetaMethod method = (MetaMethod) member;
       if (!method.isPublic()) {
         if (!context.isExposed(method)) {
-          PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), method);
+          PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder, method);
           context.markExposed(method);
         }
 
-        return Stmt.invokeStatic(context.getGeneratedBootstrapClass(),
+        return Stmt.invokeStatic(classStructureBuilder.getClassDefinition(),
                 PrivateAccessUtil.getPrivateMethodName(method), loadVariable("a0"));
       }
       else {
@@ -602,13 +616,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       final String varName = MarshallingGenUtil.getVarName(toType);
 
       if (toType.equals(MetaClassFactory.get(Object.class))) {
-        return Stmt.create(context.getCodegenContext())
-            .loadVariable(varName)
+        return Stmt.castTo(ObjectMarshaller.class, Stmt.loadVariable(varName))
             .invoke("demarshall", targetType.asClass(), valueStatement, loadVariable("a1"));
       }
 
-      return Stmt.create(context.getCodegenContext())
-          .loadVariable(varName)
+      return Stmt.loadVariable(varName)
           .invoke("demarshall", valueStatement, loadVariable("a1"));
     }
   }

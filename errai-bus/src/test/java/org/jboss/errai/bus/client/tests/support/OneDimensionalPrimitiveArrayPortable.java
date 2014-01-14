@@ -22,7 +22,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  * @author Mike Brock
  */
 @Portable
-public class DummyPortable {
+public class OneDimensionalPrimitiveArrayPortable {
   private int[] intArray;
   private long[] longArray;
   private short[] shortArray;
