@@ -4,6 +4,6 @@
       http://java.sun.com/xml/ns/javaee/beans_1_0.xsd">
   <interceptors>
     <class>org.jboss.errai.security.server.SecurityUserInterceptor</class>
-    <class>org.jboss.errai.security.server.SecurityRoleInterceptor</class>
+    <class>org.jboss.errai.security.server.ServerSecurityRoleInterceptor</class>
   </interceptors>
 </beans>

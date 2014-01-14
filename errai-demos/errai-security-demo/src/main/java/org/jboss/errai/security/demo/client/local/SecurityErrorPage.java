@@ -1,9 +1,10 @@
 package org.jboss.errai.security.demo.client.local;
 
-import com.google.gwt.user.client.ui.Composite;
-import org.jboss.errai.security.shared.SecurityError;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+
+import com.google.gwt.user.client.ui.Composite;
 
 /**
  * @author edewit@redhat.com

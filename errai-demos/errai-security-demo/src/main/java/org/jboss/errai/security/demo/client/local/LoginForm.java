@@ -9,14 +9,15 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
+
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.security.client.local.Identity;
-import org.jboss.errai.security.shared.LoginPage;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShown;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
 import javax.enterprise.context.Dependent;
