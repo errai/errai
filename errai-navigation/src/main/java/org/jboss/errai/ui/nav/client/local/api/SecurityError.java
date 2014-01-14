@@ -1,4 +1,4 @@
-package org.jboss.errai.security.shared;
+package org.jboss.errai.ui.nav.client.local.api;
 
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 

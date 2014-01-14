@@ -1,16 +1,18 @@
 package org.jboss.errai.security.server;
 
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.RequireRoles;
-import org.jboss.errai.security.shared.Role;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
+
+import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.Role;
+import org.jboss.errai.security.shared.SecurityInterceptor;
 
 /**
  * SecurityRoleInterceptor server side implementation of the SecurityRoleInterceptor does the same,
@@ -20,12 +22,12 @@ import java.util.List;
  */
 @RequireRoles("")
 @Interceptor
-public class SecurityRoleInterceptor extends org.jboss.errai.security.client.local.SecurityRoleInterceptor {
+public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
 
   private final AuthenticationService authenticationService;
 
   @Inject
-  public SecurityRoleInterceptor(AuthenticationService authenticationService) {
+  public ServerSecurityRoleInterceptor(AuthenticationService authenticationService) {
     this.authenticationService = authenticationService;
   }
 

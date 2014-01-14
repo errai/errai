@@ -5,7 +5,7 @@ import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.security.server.SecurityRoleInterceptor;
+import org.jboss.errai.security.server.ServerSecurityRoleInterceptor;
 import org.jboss.errai.security.shared.*;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.junit.Before;
@@ -27,12 +27,12 @@ import static org.mockito.Mockito.*;
  */
 public class SecurityRoleInterceptorTest {
   private AuthenticationService authenticationService;
-  private SecurityRoleInterceptor interceptor;
+  private ServerSecurityRoleInterceptor interceptor;
 
   @Before
   public void setUp() throws Exception {
     authenticationService = mock(AuthenticationService.class);
-    interceptor = new SecurityRoleInterceptor(authenticationService);
+    interceptor = new ServerSecurityRoleInterceptor(authenticationService);
   }
 
   @Test
@@ -108,7 +108,8 @@ public class SecurityRoleInterceptorTest {
     });
 
     final Boolean[] redirectToLoginPage = {Boolean.FALSE};
-    interceptor = new SecurityRoleInterceptor(authenticationService) {
+    final org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor interceptor =
+            new org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor() {
       @Override
       protected void navigateToPage(Class<? extends UniquePageRole> roleClass) {
         redirectToLoginPage[0] = Boolean.TRUE;

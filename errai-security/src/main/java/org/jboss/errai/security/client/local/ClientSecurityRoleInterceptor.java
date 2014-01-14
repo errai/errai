@@ -1,25 +1,26 @@
 package org.jboss.errai.security.client.local;
 
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.SecurityError;
-
-import java.lang.annotation.Annotation;
-import java.util.List;
+import org.jboss.errai.security.shared.SecurityInterceptor;
+import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
 /**
  * Will 'redirect' users that try to make use of services annotated with {@link RequireRoles} that are not logged in
- * to the {@link org.jboss.errai.security.shared.LoginPage} or do not have specified role
- * go to the {@link org.jboss.errai.security.shared.SecurityError}. In other cases the service call will proceed
+ * to the {@link org.jboss.errai.ui.nav.client.local.api.LoginPage} or do not have specified role
+ * go to the {@link org.jboss.errai.ui.nav.client.local.api.SecurityError}. In other cases the service call will proceed
  *
- * @see org.jboss.errai.security.shared.LoginPage
+ * @see org.jboss.errai.ui.nav.client.local.api.LoginPage
  * @author edewit@redhat.com
  */
-public class SecurityRoleInterceptor extends SecurityInterceptor {
+public class ClientSecurityRoleInterceptor extends SecurityInterceptor implements RemoteCallInterceptor<RemoteCallContext> {
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
     securityCheck(getRequiredRoleAnnotation(context.getAnnotations()).value(), new Command() {
@@ -52,23 +53,4 @@ public class SecurityRoleInterceptor extends SecurityInterceptor {
     }, AuthenticationService.class).isLoggedIn();
   }
 
-  protected boolean hasAllRoles(List<Role> roles, String[] roleNames) {
-    for (String roleName : roleNames) {
-      final Role role = new Role(roleName);
-      if (!roles.contains(role)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  protected RequireRoles getRequiredRoleAnnotation(Annotation[] annotations) {
-    for (Annotation annotation : annotations) {
-      if (annotation instanceof RequireRoles) {
-        return (RequireRoles) annotation;
-      }
-    }
-    return null;
-  }
 }

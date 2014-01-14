@@ -1,4 +1,4 @@
-package org.jboss.errai.security.server;
+package org.jboss.errai.security.rebind;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -7,11 +7,11 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
-import org.jboss.errai.security.client.local.SecurityInterceptor;
-import org.jboss.errai.security.client.local.SecurityRoleInterceptor;
+import org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor;
 import org.jboss.errai.security.client.local.SecurityUserInterceptor;
 import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.SecurityInterceptor;
 import org.jboss.errai.ui.nav.client.local.Page;
 
 import java.lang.annotation.Annotation;
@@ -22,9 +22,9 @@ import java.util.List;
  * @author edewit@redhat.com
  */
 @CodeDecorator
-public class AuthenitcationCodeDecorator extends IOCDecoratorExtension<Page> {
+public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
 
-  public AuthenitcationCodeDecorator(Class<Page> decoratesWith) {
+  public AuthenticationCodeDecorator(Class<Page> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -34,7 +34,7 @@ public class AuthenitcationCodeDecorator extends IOCDecoratorExtension<Page> {
     if (ctx.getTaskType() == TaskType.Type) {
       final Annotation[] annotations = ctx.getElementType().getAnnotations();
       if (isRequireRoleAnnotated(annotations)) {
-        createInterceptor(stmts, SecurityRoleInterceptor.class);
+        createInterceptor(stmts, ClientSecurityRoleInterceptor.class);
         stmts.add(Stmt.loadVariable("interceptor").invoke(
                 "securityCheck", getAnnotation(annotations, RequireRoles.class).value(), null)
         );

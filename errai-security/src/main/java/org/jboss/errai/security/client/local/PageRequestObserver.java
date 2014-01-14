@@ -4,8 +4,8 @@ import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.SecurityError;
 import org.jboss.errai.ui.nav.client.local.Navigation;
+import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
 
 import javax.enterprise.context.ApplicationScoped;

@@ -2,6 +2,7 @@ package org.jboss.errai.security.client.local;
 
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -14,10 +15,11 @@ import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 import javax.enterprise.context.SessionScoped;
+
 import java.io.Serializable;
 import java.util.List;
 
-import static org.jboss.errai.security.shared.LoginPage.CURRENT_PAGE_COOKIE;
+import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COOKIE;
 
 /**
  * Identity holds the username and password and performs the authentication tasks.
