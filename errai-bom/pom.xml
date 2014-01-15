@@ -197,34 +197,6 @@
         <version>${version.org.jboss.errai}</version>
       </dependency>
 
-      <!-- Google Web Toolkit (GWT) -->
-      <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-user</artifactId>
-        <version>${version.com.google.gwt}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-dev</artifactId>
-        <version>${version.com.google.gwt}</version>
-      </dependency>
-
-      <!-- GWT validation also requires the validation API sources at compile time -->
-      <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${version.javax.validation}</version>
-        <classifier>sources</classifier>
-      </dependency>
-
-      <!-- MVEL -->
-      <dependency>
-        <groupId>org.mvel</groupId>
-        <artifactId>mvel2</artifactId>
-        <version>${version.org.mvel}</version>
-      </dependency>
-
     </dependencies>
   </dependencyManagement>
 
