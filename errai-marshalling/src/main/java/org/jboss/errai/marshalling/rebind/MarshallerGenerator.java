@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2014 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import java.io.PrintWriter;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContextFactory;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -45,42 +46,62 @@ public class MarshallerGenerator extends Generator {
   // TODO use incremental generator
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
-    String fqcnOfCustomType = typeName.replace(MarshallerFactory.class.getName() + "Impl", "")
-        .replace("." + MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX, "")
-        .replaceAll("_", ".");
-
-    MetaClass type = MetaClassFactory.get(fqcnOfCustomType);
-    String marshallerClassName =
-        MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "Impl";
+    MetaClass type = MetaClassFactory.get(distillTargetTypeName(typeName));
     
     MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
     final MappingStrategy strategy = MappingStrategyFactory
           .createStrategy(true, GeneratorMappingContextFactory.getFor(target), type);
-    
-    if (strategy == null) {
-      throw new RuntimeException("no available marshaller for class: " + type.getFullyQualifiedName());
-    }
-    
-    final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(packageName + "." + marshallerClassName);
 
-//    if (type.isAnnotationPresent(AlwaysQualify.class)) {
-//      constructor.append(loadVariable(varName).assignValue(
-//            Stmt.newObject(QualifyingMarshallerWrapper.class, marshaller, type)));
-//    }
-//    else {
-//      constructor.append(loadVariable(varName).assignValue(marshaller));
-//    }
-    
-    final String gen = marshaller.toJavaString();
-    final PrintWriter printWriter = context.tryCreate(logger, packageName, marshallerClassName);
+    String className = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
+    String gen = null;
+    if (type.isArray()) {
+      BuildMetaClass marshallerClass = MarshallerGeneratorFactory.generateArrayMarshaller(type, packageName + "." + className);
+      gen = marshallerClass.toJavaString();
+    }
+    else {
+      final ClassStructureBuilder<?> marshaller =
+          strategy.getMapper().getMarshaller(packageName + "." + className);
+      gen = marshaller.toJavaString();
+    }
+
+    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     printWriter.append(gen);
 
-    final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + marshallerClassName + ".java");
+    final File tmpFile =
+        new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
     RebindUtils.writeStringToFile(tmpFile, gen);
 
     context.commit(logger, printWriter);
     
-    return packageName + "." + marshallerClassName;
-    
+    return packageName + "." + className;
+  }
+
+  private String distillTargetTypeName(String marshallerName) {
+    int pos = marshallerName.lastIndexOf(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX);
+    String typeName = marshallerName.substring(pos).replace(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX, "");
+
+    boolean isArrayType = typeName.startsWith(MarshallingGenUtil.ARRAY_VAR_PREFIX);
+    typeName = typeName.replace(MarshallingGenUtil.ARRAY_VAR_PREFIX, "");
+    typeName = typeName.replace("_", ".");
+
+    if (isArrayType) {
+      int lastDot = typeName.lastIndexOf(".");
+      int dimension = Integer.parseInt(typeName.substring(lastDot + 2));
+      typeName = typeName.substring(0, lastDot);
+
+      String primitiveName = AbstractMetaClass.getInternalPrimitiveNameFrom(typeName);
+      boolean isPrimitiveArrayType = !primitiveName.equals(typeName);
+
+      typeName = "";
+      for (int i = 0; i < dimension; i++) {
+        typeName += "[";
+      }
+      typeName += primitiveName;
+      if (!isPrimitiveArrayType) {
+        typeName += ";";
+      }
+    }
+
+    return typeName;
   }
 }

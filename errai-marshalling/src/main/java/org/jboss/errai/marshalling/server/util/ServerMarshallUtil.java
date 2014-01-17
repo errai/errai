@@ -114,8 +114,6 @@ public abstract class ServerMarshallUtil {
     final String classStr = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.Java)
             .generate(packageName, className);
 
-    System.out.println(classStr);
-    
     final File directory =
             new File(RebindUtils.getTempDirectory()
                     + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));

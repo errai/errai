@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
@@ -59,16 +60,40 @@ public abstract class Marshalling {
    * Returns a marshaller for the type with the provided fully qualified class name. In case no
    * marshaller can be found for that type a RuntimeException will be thrown.
    * 
-   * @param fqcn
-   *          the fully qualified class name of the marshallable type.
+   * @param type
+   *          the marshallable type.
    * 
    * @return the marshaller instance, never null.
    */
   public static <T> Marshaller<T> getMarshaller(final Class<T> type) {
+    return getMarshaller(type, null);
+  }
+
+  /**
+   * Returns a marshaller for the type with the provided fully qualified class name. In case no
+   * marshaller can be found for that type a RuntimeException will be thrown.
+   * 
+   * @param type
+   *          the marshallable type.
+   * @param creationCallback
+   *          A callback that will be used to create a marshaller for the provided type in case it
+   *          hasn't already been created.
+   * 
+   * @return the marshaller instance, never null.
+   */
+  public static <T> Marshaller<T> getMarshaller(final Class<T> type,
+      final DeferredMarshallerCreationCallback<T> creationCallback) {
     Marshaller<T> m = MarshallingSessionProviderFactory.getProvider().getMarshaller(type.getName());
+
+    if (m == null && creationCallback != null) {
+      m = creationCallback.create(type);
+      MarshallingSessionProviderFactory.getProvider().registerMarshaller(type.getName(), m);
+    }
+
     if (m == null) {
       throw new RuntimeException("No marshaller for type: " + type.getName());
     }
+
     return m;
   }
 

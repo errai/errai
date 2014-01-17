@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -43,19 +44,18 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 public class MarshallingGenUtil {
   private static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
   private static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
+  public static final String ARRAY_VAR_PREFIX = "arrayOf_";
 
   public static String getVarName(final MetaClass clazz) {
     return clazz.isArray()
             ? getArrayVarName(clazz.getOuterComponentType().getFullyQualifiedName())
-            + "_D" + GenUtil.getArrayDimensions(clazz)
+                + "_D" + GenUtil.getArrayDimensions(clazz)
             : getVarName(clazz.asBoxed().getFullyQualifiedName());
   }
 
   public static String getVarName(final Class<?> clazz) {
     return getVarName(MetaClassFactory.get(clazz));
   }
-
-  private static final String ARRAY_VAR_PREFIX = "arrayOf_";
 
   public static String getArrayVarName(final String clazz) {
     final char[] newName = new char[clazz.length() + ARRAY_VAR_PREFIX.length()];
@@ -84,7 +84,8 @@ public class MarshallingGenUtil {
 
   public static MetaMethod findGetterMethod(MetaClass cls, String key) {
     MetaMethod metaMethod = _findGetterMethod("get", cls, key);
-    if (metaMethod != null) return metaMethod;
+    if (metaMethod != null)
+      return metaMethod;
     metaMethod = _findGetterMethod("is", cls, key);
     return metaMethod;
   }
@@ -108,10 +109,11 @@ public class MarshallingGenUtil {
    * <li>toType's type parameter is a non-abstract (concrete) type
    * <li>toType's type parameter is not java.lang.Object
    * </ul>
-   *
-   * @param toType The type to check for a known concrete collection element type.
-   * @return The concrete element type meeting all above-mentioned criteria, or null if one or more of the criteria
-   *         fails.
+   * 
+   * @param toType
+   *          The type to check for a known concrete collection element type.
+   * @return The concrete element type meeting all above-mentioned criteria, or null if one or more
+   *         of the criteria fails.
    */
   public static MetaClass getConcreteCollectionElementType(MetaClass toType) {
     if (toType.isAssignableTo(Collection.class)) {
@@ -128,10 +130,11 @@ public class MarshallingGenUtil {
    * <li>toType's type parameter is a non-abstract (concrete) type
    * <li>toType's type parameter is not java.lang.Object
    * </ul>
-   *
-   * @param toType The type to check for a known concrete collection element type.
-   * @return The concrete element type meeting all above-mentioned criteria, or null if one or more of the criteria
-   *         fails.
+   * 
+   * @param toType
+   *          The type to check for a known concrete collection element type.
+   * @return The concrete element type meeting all above-mentioned criteria, or null if one or more
+   *         of the criteria fails.
    */
   public static MetaClass getConcreteElementType(MetaClass toType) {
     return getConcreteTypeParameter(toType, 0, 1);
@@ -144,10 +147,11 @@ public class MarshallingGenUtil {
    * <li>toType's key type is not a wildcard
    * <li>toType's key type is a non-abstract (concrete) type
    * </ul>
-   *
-   * @param toType The type to check for a known concrete map key type.
-   * @return The concrete map key type meeting all above-mentioned criteria, or null if one or more of the criteria
-   *         fails.
+   * 
+   * @param toType
+   *          The type to check for a known concrete map key type.
+   * @return The concrete map key type meeting all above-mentioned criteria, or null if one or more
+   *         of the criteria fails.
    */
   public static MetaClass getConcreteMapKeyType(MetaClass toType) {
     if (toType.isAssignableTo(Map.class)) {
@@ -163,10 +167,11 @@ public class MarshallingGenUtil {
    * <li>toType's value type is not a wildcard
    * <li>toType's value type is a non-abstract (concrete) type
    * </ul>
-   *
-   * @param toType The type to check for a known concrete map key type.
-   * @return The concrete map value type meeting all above-mentioned criteria, or null if one or more of the criteria
-   *         fails.
+   * 
+   * @param toType
+   *          The type to check for a known concrete map key type.
+   * @return The concrete map value type meeting all above-mentioned criteria, or null if one or
+   *         more of the criteria fails.
    */
   public static MetaClass getConcreteMapValueType(MetaClass toType) {
     if (toType.isAssignableTo(Map.class)) {
@@ -189,7 +194,7 @@ public class MarshallingGenUtil {
           typeParameter = (MetaClass) typeParms[typeParamIndex];
         }
 
-       return typeParameter;
+        return typeParameter;
       }
     }
     return null;
@@ -222,10 +227,12 @@ public class MarshallingGenUtil {
   }
 
   public static boolean isUseStaticMarshallers() {
-    if (isForceStaticMarshallers()) return true;
+    if (isForceStaticMarshallers())
+      return true;
 
-    if (EnvUtil.isDevMode() && !EnvUtil.isJUnitTest()) return false;
-    
+    if (EnvUtil.isDevMode() && !EnvUtil.isJUnitTest())
+      return false;
+
     if (System.getProperty(USE_STATIC_MARSHALLERS) != null) {
       return Boolean.getBoolean(USE_STATIC_MARSHALLERS);
     }
@@ -252,13 +259,36 @@ public class MarshallingGenUtil {
       return false;
     }
   }
-  
-  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder, MetaClass type) {
+
+  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder,
+      MetaClass marshallerForType, MetaClass type) {
+    ensureMarshallerFieldCreated(classStructureBuilder, marshallerForType, type, null);
+  }
+
+  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder, MetaClass marshallerForType, MetaClass type,
+      Statement marshallerCreationCallback) {
     String fieldName = MarshallingGenUtil.getVarName(type);
+
+    Statement marshallerLookup = null;
     
+      if (type.equals(marshallerForType)) {
+        marshallerLookup = Stmt.loadVariable("this");
+      }
+      else if (marshallerCreationCallback == null) {
+        marshallerLookup = 
+          Stmt.invokeStatic(Marshalling.class, "getMarshaller", Stmt.loadLiteral(type.asBoxed().asClass()));
+      }
+      else {
+        marshallerLookup = 
+          Stmt.invokeStatic(Marshalling.class, "getMarshaller", 
+              Stmt.loadLiteral(type.asBoxed().asClass()), marshallerCreationCallback);
+      }
+
+      
     if (classStructureBuilder.getClassDefinition().getField(fieldName) == null) {
-      classStructureBuilder.privateField(fieldName, parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))
-        .initializesWith(Stmt.invokeStatic(Marshalling.class, "getMarshaller", Stmt.loadLiteral(type.asClass()))).finish();
+      classStructureBuilder.privateField(fieldName,
+          parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))
+          .initializesWith(marshallerLookup).finish();
     }
   }
 }

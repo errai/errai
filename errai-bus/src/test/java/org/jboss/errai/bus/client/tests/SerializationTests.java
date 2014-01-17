@@ -25,6 +25,7 @@ import java.util.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.*;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.marshalling.client.Marshalling;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -41,7 +42,7 @@ public class SerializationTests extends AbstractErraiTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    //Marshalling.getMarshaller(OneDimensionalPrimitiveArrayPortable.class);
+    Marshalling.getMarshaller(OneDimensionalPrimitiveArrayPortable.class);
   }
   
   public void testString() {

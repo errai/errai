@@ -77,6 +77,11 @@ public class MarshallerFramework implements EntryPoint {
         public Marshaller getMarshaller(final String fqcn) {
           return MarshallerFramework.getMarshallerFactory().getMarshaller(fqcn);
         }
+
+        @Override
+        public void registerMarshaller(String fqcn, Marshaller m) {
+          MarshallerFramework.getMarshallerFactory().registerMarshaller(fqcn, m);
+        }
       });
     }
   }

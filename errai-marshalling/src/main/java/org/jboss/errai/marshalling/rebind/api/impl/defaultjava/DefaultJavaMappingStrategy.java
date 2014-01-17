@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.codegen.Cast;
+import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.TernaryStatement;
@@ -39,6 +40,7 @@ import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
@@ -55,6 +57,7 @@ import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerEx
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
+import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
@@ -165,15 +168,23 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
             for (final Mapping mapping : mappingDefinition.getInstantiationMapping().getMappings()) {
               final MetaClass type = mapping.getType().asBoxed();
-              MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, type);
               if (type.isArray()) {
                 MetaClass toMap = type;
                 while (toMap.isArray()) {
                   toMap = toMap.getComponentType();
                 }
                 if (context.canMarshal(toMap.getFullyQualifiedName())) {
-                  constructorParameters.add(context.getArrayMarshallerCallback()
-                      .demarshall(type, extractJSONObjectProperty(mapping.getKey(), EJObject.class)));
+                  if (gwtTarget) {
+                    BuildMetaClass arrayMarshaller = MarshallerGeneratorFactory.createArrayMarshallerClass(type);
+                    classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
+                    Statement deferred = context.getArrayMarshallerCallback().deferred(type, arrayMarshaller);
+                    MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type, deferred);
+                  }
+                  else {
+                    MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type);
+                    constructorParameters.add(context.getArrayMarshallerCallback()
+                        .demarshall(type, extractJSONObjectProperty(mapping.getKey(), EJObject.class)));
+                  }
                 }
                 else {
                   throw new MarshallingException("Encountered non-marshallable type " + toMap +
@@ -181,6 +192,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 }
               }
               else {
+                MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type);
                 if (context.canMarshal(type.getFullyQualifiedName())) {
                   Statement s = maybeAddAssumedTypes(builder,
                       "c" + constructorParameters.size(),
@@ -240,8 +252,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
          */
         for (final MemberMapping memberMapping : mappingDefinition.getMemberMappings()) {
           if (!memberMapping.canWrite()) continue;
-          MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, memberMapping.getType().asBoxed());
-
           if (memberMapping.getTargetType().isConcrete() && !context.isRendered(memberMapping.getTargetType())) {
             context.getMarshallerGeneratorFactory().addMarshaller(memberMapping.getTargetType());
           }
@@ -252,12 +262,22 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           context.getMarshallerGeneratorFactory().addOrMarkMarshallerUnlazy(memberMapping.getType().getOuterComponentType());
 
           if (memberMapping.getType().isArray()) {
+            if (gwtTarget) {
+              BuildMetaClass arrayMarshaller = MarshallerGeneratorFactory.createArrayMarshallerClass(memberMapping.getType().asBoxed());
+              classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
+              Statement deferred = context.getArrayMarshallerCallback().deferred(memberMapping.getType().asBoxed(), arrayMarshaller);
+              MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, memberMapping.getType().asBoxed(), deferred);
+            }
+            else {
+              MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, memberMapping.getType().asBoxed());
+            }
             val =
                 context.getArrayMarshallerCallback()
                     .demarshall(memberMapping.getType(),
                         extractJSONObjectProperty(memberMapping.getKey(), EJObject.class));
           }
           else {
+            MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, memberMapping.getType().asBoxed());
             val = fieldDemarshall(memberMapping, MetaClassFactory.get(EJObject.class));
           }
 
