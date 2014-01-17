@@ -299,6 +299,5 @@ public interface ClassBuilderTestResult {
       "     package org.foo;" +
           "" +
           " // A foo-ish bar" +
-          " public class Bar {" +
-          " }";
+          " public class Bar {}";
 }
