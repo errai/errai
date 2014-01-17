@@ -43,7 +43,6 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public class MarshallerGenerator extends Generator {
   private final String packageName = MarshallerFramework.class.getPackage().getName();
 
-  // TODO use incremental generator
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
     MetaClass type = MetaClassFactory.get(distillTargetTypeName(typeName));
@@ -82,7 +81,7 @@ public class MarshallerGenerator extends Generator {
 
     boolean isArrayType = typeName.startsWith(MarshallingGenUtil.ARRAY_VAR_PREFIX);
     typeName = typeName.replace(MarshallingGenUtil.ARRAY_VAR_PREFIX, "");
-    typeName = typeName.replace("_", ".");
+    typeName = typeName.replace("__", "$").replace("_", ".");
 
     if (isArrayType) {
       int lastDot = typeName.lastIndexOf(".");
@@ -95,6 +94,9 @@ public class MarshallerGenerator extends Generator {
       typeName = "";
       for (int i = 0; i < dimension; i++) {
         typeName += "[";
+      }
+      if (!isPrimitiveArrayType) {
+        typeName += "L";
       }
       typeName += primitiveName;
       if (!isPrimitiveArrayType) {

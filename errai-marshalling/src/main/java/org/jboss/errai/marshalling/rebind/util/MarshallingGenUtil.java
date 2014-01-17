@@ -40,6 +40,7 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingGenUtil {
   private static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
@@ -67,7 +68,7 @@ public class MarshallingGenUtil {
   public static String getVarName(String clazz) {
     final char[] newName = new char[clazz.length()];
     _replaceAllDotsWithUnderscores(clazz, newName, 0);
-    return new String(newName);
+    return new String(newName).replace("$", "__");
   }
 
   private static void _replaceAllDotsWithUnderscores(String sourceString, char[] destArray, int offset) {
@@ -265,26 +266,26 @@ public class MarshallingGenUtil {
     ensureMarshallerFieldCreated(classStructureBuilder, marshallerForType, type, null);
   }
 
-  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder, MetaClass marshallerForType, MetaClass type,
+  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder,
+      MetaClass marshallerForType, MetaClass type,
       Statement marshallerCreationCallback) {
     String fieldName = MarshallingGenUtil.getVarName(type);
 
     Statement marshallerLookup = null;
-    
-      if (type.equals(marshallerForType)) {
-        marshallerLookup = Stmt.loadVariable("this");
-      }
-      else if (marshallerCreationCallback == null) {
-        marshallerLookup = 
-          Stmt.invokeStatic(Marshalling.class, "getMarshaller", Stmt.loadLiteral(type.asBoxed().asClass()));
-      }
-      else {
-        marshallerLookup = 
-          Stmt.invokeStatic(Marshalling.class, "getMarshaller", 
-              Stmt.loadLiteral(type.asBoxed().asClass()), marshallerCreationCallback);
-      }
 
-      
+    if (type.equals(marshallerForType)) {
+      marshallerLookup = Stmt.loadVariable("this");
+    }
+    else if (marshallerCreationCallback == null) {
+      marshallerLookup =
+          Stmt.invokeStatic(Marshalling.class, "getMarshaller", Stmt.loadLiteral(type.asBoxed().asClass()));
+    }
+    else {
+      marshallerLookup =
+          Stmt.invokeStatic(Marshalling.class, "getMarshaller",
+              Stmt.loadLiteral(type.asBoxed().asClass()), marshallerCreationCallback);
+    }
+
     if (classStructureBuilder.getClassDefinition().getField(fieldName) == null) {
       classStructureBuilder.privateField(fieldName,
           parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))

@@ -297,9 +297,9 @@ public class MarshallerGeneratorFactory {
     }
 
     classStructureBuilder.publicMethod(void.class, "registerMarshaller").parameters(String.class, Marshaller.class)
-       .body()
-       .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("put", Stmt.loadVariable("a0"), Stmt.loadVariable("a1")))
-       .finish();
+        .body()
+        .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("put", Stmt.loadVariable("a0"), Stmt.loadVariable("a1")))
+        .finish();
 
     return classStructureBuilder.toJavaString();
   }

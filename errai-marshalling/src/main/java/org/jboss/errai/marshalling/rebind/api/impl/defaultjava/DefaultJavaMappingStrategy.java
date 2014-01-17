@@ -179,6 +179,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
                     Statement deferred = context.getArrayMarshallerCallback().deferred(type, arrayMarshaller);
                     MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type, deferred);
+                    constructorParameters.add(
+                        Stmt.loadVariable(MarshallingGenUtil.getVarName(type)).invoke("demarshall", 
+                            extractJSONObjectProperty(mapping.getKey(), EJObject.class), Stmt.loadVariable("a1")));
                   }
                   else {
                     MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type);
