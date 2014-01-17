@@ -206,4 +206,6 @@ public interface TestSerializationRPCService {
   public EntityWithInheritedTypeVariable<String> testEntityWithInheritedTypeVariable(EntityWithInheritedTypeVariable<String> entity);
 
   public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(GenericEntityWithConstructorMapping<String> entity);
+  
+  public EntityWithUnderscore_InClassName testEntityWithUnderscore_InClassName(EntityWithUnderscore_InClassName e);
 }

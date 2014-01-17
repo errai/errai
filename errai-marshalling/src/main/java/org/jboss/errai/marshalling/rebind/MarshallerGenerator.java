@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.rebind;
 import java.io.File;
 import java.io.PrintWriter;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -36,7 +37,7 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
- * Generator for a single marshaller (used for custom portable types).
+ * Generator for a single marshaller used to lazily generate marshallers for custom portable types.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -80,9 +81,11 @@ public class MarshallerGenerator extends Generator {
     String typeName = marshallerName.substring(pos).replace(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX, "");
 
     boolean isArrayType = typeName.startsWith(MarshallingGenUtil.ARRAY_VAR_PREFIX);
-    typeName = typeName.replace(MarshallingGenUtil.ARRAY_VAR_PREFIX, "");
-    typeName = typeName.replace("__", "$").replace("_", ".");
-
+    typeName = StringUtils.replace(typeName, MarshallingGenUtil.ARRAY_VAR_PREFIX, "");
+    typeName = StringUtils.replace(typeName, "_", ".");
+    typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_DOLLARSIGN_REPLACEMENT, "$");
+    typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_UNDERSCORE_REPLACEMENT, "_");
+    
     if (isArrayType) {
       int lastDot = typeName.lastIndexOf(".");
       int dimension = Integer.parseInt(typeName.substring(lastDot + 2));

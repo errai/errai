@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -46,6 +47,8 @@ public class MarshallingGenUtil {
   private static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
   private static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
   public static final String ARRAY_VAR_PREFIX = "arrayOf_";
+  public static final String ERRAI_DOLLARSIGN_REPLACEMENT = ".erraiD.";
+  public static final String ERRAI_UNDERSCORE_REPLACEMENT = ".erraiU.";
 
   public static String getVarName(final MetaClass clazz) {
     return clazz.isArray()
@@ -59,28 +62,19 @@ public class MarshallingGenUtil {
   }
 
   public static String getArrayVarName(final String clazz) {
-    final char[] newName = new char[clazz.length() + ARRAY_VAR_PREFIX.length()];
-    _replaceAllDotsWithUnderscores(ARRAY_VAR_PREFIX, newName, 0);
-    _replaceAllDotsWithUnderscores(clazz, newName, ARRAY_VAR_PREFIX.length());
-    return new String(newName);
+    return ARRAY_VAR_PREFIX + normalizeName(clazz);
   }
 
   public static String getVarName(String clazz) {
-    final char[] newName = new char[clazz.length()];
-    _replaceAllDotsWithUnderscores(clazz, newName, 0);
-    return new String(newName).replace("$", "__");
+    return normalizeName(clazz);
   }
 
-  private static void _replaceAllDotsWithUnderscores(String sourceString, char[] destArray, int offset) {
-    char c;
-    for (int i = 0; i < sourceString.length(); i++) {
-      if ((c = sourceString.charAt(i)) == '.') {
-        destArray[i + offset] = '_';
-      }
-      else {
-        destArray[i + offset] = c;
-      }
-    }
+  private static String normalizeName(final String sourceString) {
+    String result = sourceString;
+    result = StringUtils.replace(result, "_", ERRAI_UNDERSCORE_REPLACEMENT);
+    result = StringUtils.replace(result, "$", ERRAI_DOLLARSIGN_REPLACEMENT);
+    result = StringUtils.replace(result, ".", "_");
+    return result;
   }
 
   public static MetaMethod findGetterMethod(MetaClass cls, String key) {

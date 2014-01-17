@@ -443,4 +443,9 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(GenericEntityWithConstructorMapping<String> entity) {
     return entity;
   }
+
+  @Override
+  public EntityWithUnderscore_InClassName testEntityWithUnderscore_InClassName(EntityWithUnderscore_InClassName e) {
+    return e;
+  }
 }

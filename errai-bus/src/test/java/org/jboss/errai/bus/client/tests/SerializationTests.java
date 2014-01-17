@@ -2144,4 +2144,23 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  public void testEntityWithUnderscore_InClassName() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithUnderscore_InClassName entity = new EntityWithUnderscore_InClassName();
+        entity.setText("foo");
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithUnderscore_InClassName>() {
+          @Override
+          public void callback(EntityWithUnderscore_InClassName response) {
+            assertEquals(entity, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testEntityWithUnderscore_InClassName(entity);
+      }
+    });
+  }
 }
