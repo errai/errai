@@ -55,7 +55,7 @@ public class MarshallerGenerator extends Generator {
     String className = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
     String gen = null;
     if (type.isArray()) {
-      BuildMetaClass marshallerClass = MarshallerGeneratorFactory.generateArrayMarshaller(type, packageName + "." + className);
+      BuildMetaClass marshallerClass = MarshallerGeneratorFactory.generateArrayMarshaller(type, packageName + "." + className, true);
       gen = marshallerClass.toJavaString();
     }
     else {

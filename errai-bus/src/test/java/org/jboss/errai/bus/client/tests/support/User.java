@@ -33,7 +33,8 @@ public class User extends Person {
   private List<Group> groups;
   private Map<User, String> userStringMap;
   private Map<String, User> userMapString;
-
+  private Group group;
+  
   public User() {}
   
   public User(int id, String name) {
@@ -81,27 +82,7 @@ public class User extends Person {
     this.userMapString = userMapString;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof User)) return false;
-
-    User user = (User) o;
-
-    if (id != user.id) return false;
-    if (groups != null ? !groups.equals(user.groups) : user.groups != null) return false;
-    if (name != null ? !name.equals(user.name) : user.name != null) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = id;
-    result = 31 * result + (name != null ? name.hashCode() : 0);
-    result = 31 * result + (groups != null ? groups.hashCode() : 0);
-    return result;
-  }
+ 
 
   @Override
   public String toString() {
@@ -139,5 +120,72 @@ public class User extends Person {
     user.userMapString.put("bar", user);
 
     return user;
+  }
+
+  @Override
+  public Group getGroup() {
+    return group;
+  }
+
+  @Override
+  public void setGroup(Group group) {
+    this.group = group;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((group == null) ? 0 : group.hashCode());
+    result = prime * result + ((groups == null) ? 0 : groups.hashCode());
+    result = prime * result + id;
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((userMapString == null) ? 0 : userMapString.hashCode());
+    result = prime * result + ((userStringMap == null) ? 0 : userStringMap.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    User other = (User) obj;
+    if (group == null) {
+      if (other.group != null)
+        return false;
+    }
+    else if (!group.equals(other.group))
+      return false;
+    if (groups == null) {
+      if (other.groups != null)
+        return false;
+    }
+    else if (!groups.equals(other.groups))
+      return false;
+    if (id != other.id)
+      return false;
+    if (name == null) {
+      if (other.name != null)
+        return false;
+    }
+    else if (!name.equals(other.name))
+      return false;
+    if (userMapString == null) {
+      if (other.userMapString != null)
+        return false;
+    }
+    else if (!userMapString.equals(other.userMapString))
+      return false;
+    if (userStringMap == null) {
+      if (other.userStringMap != null)
+        return false;
+    }
+    else if (!userStringMap.equals(other.userStringMap))
+      return false;
+    return true;
   }
 }

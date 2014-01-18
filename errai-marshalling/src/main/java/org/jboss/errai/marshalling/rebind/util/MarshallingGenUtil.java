@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -34,6 +35,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.Marshalling;
@@ -256,15 +258,36 @@ public class MarshallingGenUtil {
   }
 
   public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder,
-      MetaClass marshallerForType, MetaClass type) {
-    ensureMarshallerFieldCreated(classStructureBuilder, marshallerForType, type, null);
+      MetaClass marshallerForType, MetaClass type, BlockBuilder<?> initMethod) {
+    ensureMarshallerFieldCreated(classStructureBuilder, marshallerForType, type, initMethod, null);
   }
 
   public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder,
-      MetaClass marshallerForType, MetaClass type,
+      MetaClass marshallerForType, MetaClass type, BlockBuilder<?> initMethod,
       Statement marshallerCreationCallback) {
     String fieldName = MarshallingGenUtil.getVarName(type);
 
+    if (classStructureBuilder.getClassDefinition().getField(fieldName) == null) {
+      Statement marshallerLookup = createMarshallerLookup(marshallerForType, type, marshallerCreationCallback);
+      if (initMethod == null) {
+        classStructureBuilder.privateField(fieldName,
+            parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))
+            .initializesWith(marshallerLookup).finish();
+      }
+      else {
+        classStructureBuilder.privateField(fieldName,
+            parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))
+            .initializesWith(Stmt.load(null)).finish();
+        
+        initMethod.append(
+            If.isNull(Stmt.loadVariable(fieldName)).append(
+                Stmt.loadVariable(fieldName).assignValue(marshallerLookup)).finish());
+      }
+    }
+  }
+
+  private static Statement createMarshallerLookup(MetaClass marshallerForType, MetaClass type,
+      Statement marshallerCreationCallback) {
     Statement marshallerLookup = null;
 
     if (type.equals(marshallerForType)) {
@@ -280,10 +303,6 @@ public class MarshallingGenUtil {
               Stmt.loadLiteral(type.asBoxed().asClass()), marshallerCreationCallback);
     }
 
-    if (classStructureBuilder.getClassDefinition().getField(fieldName) == null) {
-      classStructureBuilder.privateField(fieldName,
-          parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))
-          .initializesWith(marshallerLookup).finish();
-    }
+    return marshallerLookup;
   }
 }
