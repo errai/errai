@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -43,15 +44,19 @@ public class GeneratorMappingContext implements ServerMappingContext {
   private final Set<String> generatedMarshallers = new HashSet<String>();
   private final List<String> renderedMarshallers = new ArrayList<String>();
 
+  private final ClassStructureBuilder<?> classStructureBuilder;
   private final ArrayMarshallerCallback arrayMarshallerCallback;
 
   private final Set<String> exposedMembers = new HashSet<String>();
 
   public GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
-                                 final ArrayMarshallerCallback callback) {
+      final ClassStructureBuilder<?> classStructureBuilder,
+
+      final ArrayMarshallerCallback callback) {
 
     this.marshallerGeneratorFactory = marshallerGeneratorFactory;
     this.arrayMarshallerCallback = callback;
+    this.classStructureBuilder = classStructureBuilder;
   }
 
   public MarshallerGeneratorFactory getMarshallerGeneratorFactory() {
@@ -97,7 +102,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
   public ArrayMarshallerCallback getArrayMarshallerCallback() {
     return arrayMarshallerCallback;
   }
-
+  
   private static String getPrivateMemberName(final MetaClassMember member) {
     if (member instanceof MetaField) {
       return PrivateAccessUtil.getPrivateFieldInjectorName((MetaField) member);
@@ -113,5 +118,9 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   public boolean isExposed(final MetaClassMember member) {
     return exposedMembers.contains(getPrivateMemberName(member));
+  }
+
+  public ClassStructureBuilder<?> getClassStructureBuilder() {
+    return classStructureBuilder;
   }
 }

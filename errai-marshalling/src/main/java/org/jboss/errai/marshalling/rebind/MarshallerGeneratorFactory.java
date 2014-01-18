@@ -155,7 +155,7 @@ public class MarshallerGeneratorFactory {
 
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
     classContext = classStructureBuilder.getClassDefinition().getContext();
-    mappingContext = GeneratorMappingContextFactory.create(target, this,
+    mappingContext = GeneratorMappingContextFactory.create(target, this, classStructureBuilder,
         new ArrayMarshallerCallback() {
           @Override
           public Statement marshal(final MetaClass type, final Statement value) {

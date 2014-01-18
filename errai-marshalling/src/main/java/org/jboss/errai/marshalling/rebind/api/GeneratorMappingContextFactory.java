@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.rebind.api;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerOutputTarget;
@@ -42,10 +43,11 @@ public class GeneratorMappingContextFactory {
 
   public static GeneratorMappingContext create(final MarshallerOutputTarget target,
       final MarshallerGeneratorFactory marshallerGeneratorFactory,
+      final ClassStructureBuilder<?> classStructureBuilder,
       final ArrayMarshallerCallback arrayMarshallerCallback) {
 
     GeneratorMappingContext context =
-        new GeneratorMappingContext(marshallerGeneratorFactory, arrayMarshallerCallback);
+        new GeneratorMappingContext(marshallerGeneratorFactory, classStructureBuilder, arrayMarshallerCallback);
 
     contexts.put(target, context);
 
