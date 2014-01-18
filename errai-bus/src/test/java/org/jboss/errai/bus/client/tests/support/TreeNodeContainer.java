@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 import java.io.Serializable;
+
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -63,4 +63,37 @@ public class TreeNodeContainer implements Serializable {
   public void setParentNodeId(int parentNodeId) {
     this.parentNodeId = parentNodeId;
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + nodeId;
+    result = prime * result + ((nodeName == null) ? 0 : nodeName.hashCode());
+    result = prime * result + parentNodeId;
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    TreeNodeContainer other = (TreeNodeContainer) obj;
+    if (nodeId != other.nodeId)
+      return false;
+    if (nodeName == null) {
+      if (other.nodeName != null)
+        return false;
+    }
+    else if (!nodeName.equals(other.nodeName))
+      return false;
+    if (parentNodeId != other.parentNodeId)
+      return false;
+    return true;
+  }
+  
 }

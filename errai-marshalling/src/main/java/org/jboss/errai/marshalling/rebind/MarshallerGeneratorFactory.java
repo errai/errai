@@ -143,7 +143,7 @@ public class MarshallerGeneratorFactory {
 
   public String generate(final String packageName, final String clazzName) {
     final String gen;
-    log.info("generating marshaller factory class...");
+    log.info("generating marshaller factory class for " + ((target == MarshallerOutputTarget.GWT) ? "client" : "server"));
     final long time = System.currentTimeMillis();
     gen = _generate(packageName, clazzName);
     log.info("generated marshaller factory class in " + (System.currentTimeMillis() - time) + "ms.");
@@ -321,7 +321,7 @@ public class MarshallerGeneratorFactory {
         continue;
       }
 
-      if (lazyEnabled && definition.isLazy()) {
+      if (target == MarshallerOutputTarget.Java && lazyEnabled && definition.isLazy()) {
         if (unlazyMarshallers.contains(compType.getFullyQualifiedName())) {
           definition.setLazy(false);
         }

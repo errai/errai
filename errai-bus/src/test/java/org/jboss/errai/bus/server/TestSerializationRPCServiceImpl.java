@@ -326,7 +326,6 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers) {
     int count = 0;
     for (TreeNodeContainer tc : listOfContainers) {
-      System.out.println(tc);
       count++;
     }
 

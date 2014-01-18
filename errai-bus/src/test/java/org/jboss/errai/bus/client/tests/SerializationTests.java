@@ -626,7 +626,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        List<TreeNodeContainer> testList = new ArrayList<TreeNodeContainer>();
+        final List<TreeNodeContainer> testList = new ArrayList<TreeNodeContainer>();
         testList.add(new TreeNodeContainer(10, "Foo\\", 0));
         testList.add(new TreeNodeContainer(15, "Bar", 10));
         testList.add(new StudyTreeNodeContainer(20, "Foobie", 15, 100));
@@ -637,9 +637,7 @@ public class SerializationTests extends AbstractErraiTest {
           @Override
           public void callback(List<TreeNodeContainer> response) {
             assertEquals(4, response.size());
-            for (TreeNodeContainer tc : response) {
-              System.out.println(tc);
-            }
+            assertEquals(response, testList);
 
             finishTest();
           }

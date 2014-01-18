@@ -263,7 +263,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           final Statement val;
 
           context.getMarshallerGeneratorFactory().addOrMarkMarshallerUnlazy(memberMapping.getType().getOuterComponentType());
-
+          
           if (memberMapping.getType().isArray()) {
             if (gwtTarget) {
               BuildMetaClass arrayMarshaller = MarshallerGeneratorFactory.createArrayMarshallerClass(memberMapping.getType().asBoxed());
