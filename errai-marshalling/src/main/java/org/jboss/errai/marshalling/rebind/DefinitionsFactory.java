@@ -129,4 +129,6 @@ public interface DefinitionsFactory {
   void resetDefinitionsAndReload();
 
   Set<MetaClass> getArraySignatures();
+  
+  boolean hasBuiltInDefinition(MetaClass type);
 }

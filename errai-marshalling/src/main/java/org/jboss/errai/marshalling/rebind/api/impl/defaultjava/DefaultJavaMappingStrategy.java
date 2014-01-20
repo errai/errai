@@ -529,7 +529,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         continue;
       }
 
-      BlockBuilder<?> lazyInitMethod = (needsLazyInit(mapping.getType())) ? initMethod : null;      
+      BlockBuilder<?> lazyInitMethod = (needsLazyInit(mapping.getType())) ? initMethod : null;
       MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, mapping.getType()
             .asBoxed(), lazyInitMethod);
 
@@ -683,6 +683,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   private boolean needsLazyInit(MetaClass type) {
     MetaClass compType = type.getOuterComponentType().getErased();
-    return (!compType.asUnboxed().isPrimitive() && !compType.equals(MetaClassFactory.get(String.class)));
+    return (!compType.asUnboxed().isPrimitive() && !compType.equals(MetaClassFactory.get(String.class)) && !context
+        .getDefinitionsFactory().hasBuiltInDefinition(compType));
   }
 }
