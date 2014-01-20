@@ -326,10 +326,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     + field.getDeclaringClass().getFullyQualifiedName() + "#" + field.getName());
               }
               else {
-                if (!context.isExposed(field)) {
+                if (!context.isExposed(field, classStructureBuilder.getClassDefinition().getName())) {
                   PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder,
                       field);
-                  context.markExposed(field);
+                  context.markExposed(field, classStructureBuilder.getClassDefinition().getName());
                 }
 
                 // Bind via JSNI
@@ -594,9 +594,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           return loadVariable("a0").invoke(getterMethod);
         }
         else {
-          if (!context.isExposed(field)) {
+          if (!context.isExposed(field, classStructureBuilder.getClassDefinition().getName())) {
             PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder, field);
-            context.markExposed(field);
+            context.markExposed(field, classStructureBuilder.getClassDefinition().getName());
           }
 
           return Stmt.invokeStatic(classStructureBuilder.getClassDefinition(), PrivateAccessUtil
@@ -611,9 +611,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     else {
       final MetaMethod method = (MetaMethod) member;
       if (!method.isPublic()) {
-        if (!context.isExposed(method)) {
+        if (!context.isExposed(method, classStructureBuilder.getClassDefinition().getName())) {
           PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder, method);
-          context.markExposed(method);
+          context.markExposed(method, classStructureBuilder.getClassDefinition().getName());
         }
 
         return Stmt.invokeStatic(classStructureBuilder.getClassDefinition(),

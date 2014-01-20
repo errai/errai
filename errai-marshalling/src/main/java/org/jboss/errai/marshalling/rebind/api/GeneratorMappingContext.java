@@ -112,12 +112,12 @@ public class GeneratorMappingContext implements ServerMappingContext {
     }
   }
 
-  public void markExposed(final MetaClassMember member) {
-    exposedMembers.add(getPrivateMemberName(member));
+  public void markExposed(final MetaClassMember member, final String marshallerClass) {
+    exposedMembers.add(marshallerClass  + "." + getPrivateMemberName(member));
   }
 
-  public boolean isExposed(final MetaClassMember member) {
-    return exposedMembers.contains(getPrivateMemberName(member));
+  public boolean isExposed(final MetaClassMember member, final String marshallerClass) {
+    return exposedMembers.contains(marshallerClass  + "." + getPrivateMemberName(member));
   }
 
   public ClassStructureBuilder<?> getClassStructureBuilder() {
