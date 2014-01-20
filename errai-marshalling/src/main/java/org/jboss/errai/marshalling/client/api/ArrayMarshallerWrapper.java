@@ -1,10 +1,10 @@
 package org.jboss.errai.marshalling.client.api;
 
+import java.util.Arrays;
+
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.AbstractNullableMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
-
-import java.util.Arrays;
 
 /**
  * A marshaller that wraps another marshaller, producing and consuming arrays of
@@ -21,14 +21,6 @@ public class ArrayMarshallerWrapper extends AbstractNullableMarshaller<Object> {
     this.wrappedMarshaller = wrappedMarshaller;
   }
 
-//  /**
-//   * Throws UnsupportedOperationException.
-//   */
-//  @Override
-//  public Class<Object> getTypeHandled() {
-//    throw new UnsupportedOperationException("Not implemented");
-//  }
-
   @Override
   public Object doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return ListMarshaller.INSTANCE.demarshall(o, ctx).toArray(wrappedMarshaller.getEmptyArray());
@@ -36,7 +28,8 @@ public class ArrayMarshallerWrapper extends AbstractNullableMarshaller<Object> {
 
   @Override
   public String doNotNullMarshall(final Object o, final MarshallingSession ctx) {
-    return ListMarshaller.INSTANCE.marshall(Arrays.asList((Object[]) o), o.getClass().getName(), ctx);
+    return ListMarshaller.INSTANCE.marshall(Arrays.asList((Object[]) o), 
+        o.getClass().getName(), ctx);
   }
 
   @Override

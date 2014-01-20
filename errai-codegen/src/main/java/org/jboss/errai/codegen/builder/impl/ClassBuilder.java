@@ -16,26 +16,18 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
+import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.ThrowsDeclaration;
-import org.jboss.errai.codegen.builder.BuildCallback;
-import org.jboss.errai.codegen.builder.ClassDefinitionBuilderAbstractOption;
-import org.jboss.errai.codegen.builder.ClassDefinitionBuilderCommentOption;
-import org.jboss.errai.codegen.builder.ClassDefinitionBuilderInterfaces;
-import org.jboss.errai.codegen.builder.ClassDefinitionBuilderScope;
-import org.jboss.errai.codegen.builder.ClassDefinitionStaticOption;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ClassStructureBuilderAbstractMethodOption;
-import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
-import org.jboss.errai.codegen.builder.DefaultClassStructureBuilder;
-import org.jboss.errai.codegen.builder.FieldBuildStart;
-import org.jboss.errai.codegen.builder.MethodBuildCallback;
-import org.jboss.errai.codegen.builder.MethodCommentBuilder;
+import org.jboss.errai.codegen.builder.*;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -43,9 +35,6 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaConstructor;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
-
-import java.lang.annotation.Annotation;
-import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -493,6 +482,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     }, scope, type, name);
   }
 
+  @Override
   public BuildMetaClass getClassDefinition() {
     return classDefinition;
   }
@@ -506,5 +496,11 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
       GenUtil.throwIfUnhandled("error generating class: " + classDefinition.getFullyQualifiedName(), t);
       return null;
     }
+  }
+
+  @Override
+  public ClassStructureBuilder<T> declaresInnerClass(InnerClass ic) {
+    classDefinition.addInnerClass(ic);
+    return this;
   }
 }

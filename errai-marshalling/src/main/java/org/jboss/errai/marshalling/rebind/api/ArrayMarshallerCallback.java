@@ -25,4 +25,5 @@ import org.jboss.errai.codegen.meta.MetaClass;
 public interface ArrayMarshallerCallback {
   public Statement marshal(MetaClass type, Statement value);
   public Statement demarshall(MetaClass type, Statement value);
+  public Statement deferred(MetaClass type, MetaClass marshaller);
 }

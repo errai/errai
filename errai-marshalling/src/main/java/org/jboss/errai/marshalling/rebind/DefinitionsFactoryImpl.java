@@ -18,17 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -178,7 +168,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         if (!envExposedClasses.contains(definition.getMappingClass())) {
           definition.setLazy(true);
         }
-
         exposedClasses.add(definition.getMappingClass());
 
         if (log.isDebugEnabled())

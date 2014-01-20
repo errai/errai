@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 JBoss, by Red Hat, Inc
+ * Copyright 2014 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.tests.support;
-
-import org.jboss.errai.common.client.api.annotations.Portable;
+package org.jboss.errai.marshalling.client.api;
 
 /**
- * @author Mike Brock
+ * A callback to lazily create marshaller instances at runtime.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Portable
-public class DummyPortable {
-  private int[] intArray;
-  private long[] longArray;
-  private short[] shortArray;
-  private double[] doubleArray;
-  private boolean[] booleanArray;
-  private float[] floatArray;
-  private byte[] byteArray;
+public interface DeferredMarshallerCreationCallback<T> {
+
+  /**
+   * Create a marshaller for the provided type.
+   * 
+   * @param type
+   *          the type to create a marshaller for.
+   * 
+   * @return the marshaller instance, never null.
+   */
+  public Marshaller<T> create(Class<T> type);
+
 }

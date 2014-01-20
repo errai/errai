@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
@@ -45,25 +44,19 @@ public class GeneratorMappingContext implements ServerMappingContext {
   private final Set<String> generatedMarshallers = new HashSet<String>();
   private final List<String> renderedMarshallers = new ArrayList<String>();
 
-  private final Context codegenContext;
-
-  private final MetaClass generatedBootstrapClass;
   private final ClassStructureBuilder<?> classStructureBuilder;
   private final ArrayMarshallerCallback arrayMarshallerCallback;
 
   private final Set<String> exposedMembers = new HashSet<String>();
 
   public GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
-                                 final Context codegenContext,
-                                 final MetaClass generatedBootstrapClass,
-                                 final ClassStructureBuilder<?> classStructureBuilder,
-                                 final ArrayMarshallerCallback callback) {
+      final ClassStructureBuilder<?> classStructureBuilder,
+
+      final ArrayMarshallerCallback callback) {
 
     this.marshallerGeneratorFactory = marshallerGeneratorFactory;
-    this.codegenContext = codegenContext;
-    this.generatedBootstrapClass = generatedBootstrapClass;
-    this.classStructureBuilder = classStructureBuilder;
     this.arrayMarshallerCallback = callback;
+    this.classStructureBuilder = classStructureBuilder;
   }
 
   public MarshallerGeneratorFactory getMarshallerGeneratorFactory() {
@@ -98,10 +91,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }
 
-  public Context getCodegenContext() {
-    return codegenContext;
-  }
-
   public void markRendered(final MetaClass metaClass) {
     renderedMarshallers.add(metaClass.asBoxed().getFullyQualifiedName());
   }
@@ -110,18 +99,10 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return renderedMarshallers.contains(metaClass.asBoxed().getFullyQualifiedName());
   }
 
-  public MetaClass getGeneratedBootstrapClass() {
-    return generatedBootstrapClass;
-  }
-
-  public ClassStructureBuilder<?> getClassStructureBuilder() {
-    return classStructureBuilder;
-  }
-
   public ArrayMarshallerCallback getArrayMarshallerCallback() {
     return arrayMarshallerCallback;
   }
-
+  
   private static String getPrivateMemberName(final MetaClassMember member) {
     if (member instanceof MetaField) {
       return PrivateAccessUtil.getPrivateFieldInjectorName((MetaField) member);
@@ -131,11 +112,15 @@ public class GeneratorMappingContext implements ServerMappingContext {
     }
   }
 
-  public void markExposed(final MetaClassMember member) {
-    exposedMembers.add(getPrivateMemberName(member));
+  public void markExposed(final MetaClassMember member, final String marshallerClass) {
+    exposedMembers.add(marshallerClass  + "." + getPrivateMemberName(member));
   }
 
-  public boolean isExposed(final MetaClassMember member) {
-    return exposedMembers.contains(getPrivateMemberName(member));
+  public boolean isExposed(final MetaClassMember member, final String marshallerClass) {
+    return exposedMembers.contains(marshallerClass  + "." + getPrivateMemberName(member));
+  }
+
+  public ClassStructureBuilder<?> getClassStructureBuilder() {
+    return classStructureBuilder;
   }
 }

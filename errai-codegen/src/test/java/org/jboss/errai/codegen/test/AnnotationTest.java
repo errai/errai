@@ -1,8 +1,7 @@
 package org.jboss.errai.codegen.test;
 
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.impl.ClassBuilder;
-import org.junit.Test;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -10,8 +9,9 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Set;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.junit.Test;
 
 /**
  * Tests the generation of annotations.
@@ -25,8 +25,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.BooleanAnnotation;\n" +
             "@BooleanAnnotation(arrayValue = false, value = false)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructBooleanAnnotation(false));
     assertEquals(expected, cls);
   }
@@ -36,8 +35,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.BooleanAnnotation;\n" +
             "@BooleanAnnotation(arrayValue = {true, false, true}, value = true)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructBooleanAnnotation(true, false, true));
     assertEquals(expected, cls);
   }
@@ -47,8 +45,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.ByteAnnotation;\n" +
             "@ByteAnnotation(arrayValue = 1, value = 1)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructByteAnnotation(new byte[]{1}));
     assertEquals(expected, cls);
   }
@@ -58,8 +55,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.ByteAnnotation;\n" +
             "@ByteAnnotation(arrayValue = {1, 2, 3}, value = 1)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructByteAnnotation(new byte[]{1, 2, 3}));
     assertEquals(expected, cls);
   }
@@ -69,8 +65,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.CharAnnotation;\n" +
             "@CharAnnotation(arrayValue = 'a', value = 'a')\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructCharAnnotation('a'));
     assertEquals(expected, cls);
   }
@@ -80,8 +75,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.CharAnnotation;\n" +
             "@CharAnnotation(arrayValue = {'a', 'b', 'c'}, value = 'a')\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructCharAnnotation('a', 'b', 'c'));
     assertEquals(expected, cls);
   }
@@ -91,8 +85,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.ShortAnnotation;\n" +
             "@ShortAnnotation(arrayValue = 1, value = 1)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructShortAnnotation(new short[]{1}));
     assertEquals(expected, cls);
   }
@@ -102,8 +95,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.ShortAnnotation;\n" +
             "@ShortAnnotation(arrayValue = {1, 2, 3}, value = 1)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructShortAnnotation(new short[]{1, 2, 3}));
     assertEquals(expected, cls);
   }
@@ -113,8 +105,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.IntAnnotation;\n" +
             "@IntAnnotation(arrayValue = 1, value = 1)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructIntAnnotation(1));
     assertEquals(expected, cls);
   }
@@ -124,8 +115,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.IntAnnotation;\n" +
             "@IntAnnotation(arrayValue = {1, 2, 3}, value = 1)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructIntAnnotation(1, 2, 3));
     assertEquals(expected, cls);
   }
@@ -135,8 +125,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.LongAnnotation;\n" +
             "@LongAnnotation(arrayValue = 1L, value = 1L)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructLongAnnotation(1l));
     assertEquals(expected, cls);
   }
@@ -146,8 +135,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.LongAnnotation;\n" +
             "@LongAnnotation(arrayValue = {1L, 2L, 3L}, value = 1L)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructLongAnnotation(1l, 2l, 3l));
     assertEquals(expected, cls);
   }
@@ -157,8 +145,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.FloatAnnotation;\n" +
             "@FloatAnnotation(arrayValue = 1.1f, value = 1.1f)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructFloatAnnotation(1.1f));
     assertEquals(expected, cls);
   }
@@ -168,8 +155,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.FloatAnnotation;\n" +
             "@FloatAnnotation(arrayValue = {1.1f, 2.22f, 3.333f}, value = 1.1f)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructFloatAnnotation(1.1f, 2.22f, 3.333f));
     assertEquals(expected, cls);
   }
@@ -179,8 +165,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.DoubleAnnotation;\n" +
             "@DoubleAnnotation(arrayValue = 1.1d, value = 1.1d)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructDoubleAnnotation(1.1));
     assertEquals(expected, cls);
   }
@@ -190,8 +175,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.DoubleAnnotation;\n" +
             "@DoubleAnnotation(arrayValue = {1.1d, 2.22d, 3.333d}, value = 1.1d)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructDoubleAnnotation(1.1, 2.22, 3.333));
     assertEquals(expected, cls);
   }
@@ -201,8 +185,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.StringAnnotation;\n" +
             "@StringAnnotation(arrayValue = \"Hello World\", value = \"Hello World\")\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructStringAnnotation("Hello World"));
     assertEquals(expected, cls);
   }
@@ -212,8 +195,7 @@ public class AnnotationTest extends AbstractCodegenTest {
     String expected = "" +
             "import org.jboss.errai.codegen.test.AnnotationTest.StringAnnotation;\n" +
             "@StringAnnotation(arrayValue = {\"Hang\", \"to\", \"your\", \"helmet\"}, value = \"Hang\")\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructStringAnnotation("Hang", "to", "your", "helmet"));
     assertEquals(expected, cls);
   }
@@ -224,8 +206,7 @@ public class AnnotationTest extends AbstractCodegenTest {
             "import java.util.Set;\n" +
             "import org.jboss.errai.codegen.test.AnnotationTest.ClassAnnotation;\n" +
             "@ClassAnnotation(arrayValue = Set.class, value = Set.class)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructClassAnnotation(Set.class));
     assertEquals(expected, cls);
   }
@@ -237,8 +218,7 @@ public class AnnotationTest extends AbstractCodegenTest {
             "import java.util.Set;\n" +
             "import org.jboss.errai.codegen.test.AnnotationTest.ClassAnnotation;\n" +
             "@ClassAnnotation(arrayValue = {Set.class, List.class}, value = Set.class)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructClassAnnotation(Set.class, List.class));
     assertEquals(expected, cls);
   }
@@ -249,8 +229,7 @@ public class AnnotationTest extends AbstractCodegenTest {
             "import org.jboss.errai.codegen.test.AnnotationTest.EnumAnnotation;\n" +
             "import org.jboss.errai.codegen.test.AnnotationTest.SimpleEnum;\n" +
             "@EnumAnnotation(arrayValue = SimpleEnum.YES, value = SimpleEnum.YES)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructEnumAnnotation(SimpleEnum.YES));
     assertEquals(expected, cls);
   }
@@ -261,8 +240,7 @@ public class AnnotationTest extends AbstractCodegenTest {
             "import org.jboss.errai.codegen.test.AnnotationTest.EnumAnnotation;\n" +
             "import org.jboss.errai.codegen.test.AnnotationTest.SimpleEnum;\n" +
             "@EnumAnnotation(arrayValue = {SimpleEnum.YES, SimpleEnum.NO, SimpleEnum.YES}, value = SimpleEnum.YES)\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructEnumAnnotation(SimpleEnum.YES, SimpleEnum.NO, SimpleEnum.YES));
     assertEquals(expected, cls);
   }
@@ -275,8 +253,7 @@ public class AnnotationTest extends AbstractCodegenTest {
             "@AnnotationAnnotation(arrayValue = \n" +
             "               @BooleanAnnotation(arrayValue = {true, false}, value = true),\n" +
             "       value = @BooleanAnnotation(arrayValue = {true, false}, value = true))\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructAnnotationAnnotation(constructBooleanAnnotation(true, false)));
     assertEquals(expected, cls);
   }
@@ -292,8 +269,7 @@ public class AnnotationTest extends AbstractCodegenTest {
             "               @BooleanAnnotation(arrayValue = { true, false }, value = true),\n" + /* XXX */
             "               @BooleanAnnotation(arrayValue = { true, true}, value = true)},\n" + /* XXX */
             "       value = @BooleanAnnotation(arrayValue = {true, false}, value = true))\n" +
-            "public class FooBar {\n" +
-            "}";
+            "public class FooBar {}";
     String cls = constructTypeWithAnnotation(constructAnnotationAnnotation(constructBooleanAnnotation(true, false), constructBooleanAnnotation(true, true)));
     assertEquals(expected, cls);
   }

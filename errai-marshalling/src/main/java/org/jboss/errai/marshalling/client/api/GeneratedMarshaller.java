@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2014 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.protocols;
-
-import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallingSession;
+package org.jboss.errai.marshalling.client.api;
 
 /**
- * @author Mike Brock
+ * Represents a marshaller that is generated at rebind time (i.e. all marshallers for custom
+ * portable types) as opposed to the built-in marshallers.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ * 
+ * @param <T>
  */
-public interface MarshallingSessionProvider {
-  public MarshallingSession getEncoding();
-  public MarshallingSession getDecoding();
-  public boolean hasMarshaller(String fqcn);
-  public Marshaller getMarshaller(String fqcn);
-  public void registerMarshaller(String fqcn, Marshaller m);
+public interface GeneratedMarshaller<T> extends Marshaller<T> {
+
 }

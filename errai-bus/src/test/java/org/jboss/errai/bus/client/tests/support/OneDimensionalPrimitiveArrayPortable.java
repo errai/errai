@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,32 +18,17 @@ package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
+/**
+ * @author Mike Brock
+ */
 @Portable
-public class Person implements Lifeform {
-
-  // this field is "shadowed by" Lifeform.getPublicSuperField().
-  // This situation is a regression test for ERRAI-439.
-  public String publicSuperField = "publicSuperField";
-  
-  private Group group;
-
-  @Override
-  public String getPublicSuperField() {
-    return publicSuperField;
-  }
-
-  public void setPublicSuperField(String publicSuperField) {
-    this.publicSuperField = publicSuperField;
-  }
-
-  public Group getGroup() {
-    return group;
-  }
-
-  public void setGroup(Group group) {
-    this.group = group;
-  }
-  
-  
-
+public class OneDimensionalPrimitiveArrayPortable {
+  private int[] intArray;
+  private long[] longArray;
+  private short[] shortArray;
+  private double[] doubleArray;
+  private boolean[] booleanArray;
+  private float[] floatArray;
+  private byte[] byteArray;
+  private char[] charArray;
 }

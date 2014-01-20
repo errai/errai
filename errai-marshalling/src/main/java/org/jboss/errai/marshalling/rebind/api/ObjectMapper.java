@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
-import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 
 /**
  * This class will actually figure out how to deconstruct and object and put it back together
@@ -25,5 +25,5 @@ import org.jboss.errai.codegen.Statement;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface ObjectMapper {
-  Statement getMarshaller();
+  ClassStructureBuilder<?> getMarshaller(String marshallerClassName);
 }

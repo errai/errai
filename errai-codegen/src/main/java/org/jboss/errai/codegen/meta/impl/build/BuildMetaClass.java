@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.ObjectArrays;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
@@ -35,10 +33,20 @@ import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
-import org.jboss.errai.codegen.meta.*;
+import org.jboss.errai.codegen.meta.AnnotationParser;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrettyPrinter;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.ObjectArrays;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -665,16 +673,16 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     superClass = (superClass != null) ? superClass : MetaClassFactory.get(Object.class);
     context.addVariable(Variable.create("super", superClass));
 
-    buf.append(" {\n");
+    buf.append(" {");
 
     if (!staticInitializer.isEmpty()) {
-      buf.append("static {\n");
+      buf.append("\nstatic {\n");
       buf.append(staticInitializer.generate(context));
-      buf.append("\n}\n");
+      buf.append("\n}");
     }
 
     if (!instanceInitializer.isEmpty()) {
-      buf.append("{\n");
+      buf.append("\n{\n");
       buf.append(instanceInitializer.generate(context));
       buf.append("\n}\n");
     }
@@ -729,6 +737,9 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     final boolean _permissiveMode = GenUtil.isPermissiveMode();
     GenUtil.setPermissiveMode(true);
     final StringBuilder fieldRenderBuffer = new StringBuilder(100);
+    if (!fields.isEmpty())
+      buf.append("\n");
+    
     do {
       initialFieldSize = fields.size();
 
