@@ -368,7 +368,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             Parameter.of(toMap, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
         marshallMethodBlock.append(Stmt.loadVariable("this").invoke("lazyInit"));
-        marshallToJSON(marshallMethodBlock, toMap, mappingDefinition, classStructureBuilder);
+        marshallToJSON(marshallMethodBlock, toMap, mappingDefinition, classStructureBuilder, initMethod);
 
         marshallMethodBlock.finish();
 
@@ -467,7 +467,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   public void marshallToJSON(final BlockBuilder<?> builder,
                              final MetaClass toType,
                              final MappingDefinition definition,
-                             final ClassStructureBuilder classStructureBuilder) {
+                             final ClassStructureBuilder classStructureBuilder,
+                             final BlockBuilder<?> initMethod) {
 
     if (!context.canMarshal(toType.getFullyQualifiedName())) {
       throw new NoAvailableMarshallerException(toType.getName());
@@ -527,6 +528,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       if (!mapping.canRead()) {
         continue;
       }
+
+      BlockBuilder<?> lazyInitMethod = (needsLazyInit(mapping.getType())) ? initMethod : null;      
+      MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, mapping.getType()
+            .asBoxed(), lazyInitMethod);
 
       if (!hasEncoded) {
         appendChain = Stmt.loadVariable("json").invoke("append", ",");
@@ -678,8 +683,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   private boolean needsLazyInit(MetaClass type) {
     MetaClass compType = type.getOuterComponentType().getErased();
-    return (!compType.asUnboxed().isPrimitive() 
-        && !compType.equals(MetaClassFactory.get(String.class))        
-    );
+    return (!compType.asUnboxed().isPrimitive() && !compType.equals(MetaClassFactory.get(String.class)));
   }
 }

@@ -2161,4 +2161,8 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  public void testInheritedBuiltInMappings() {
+    assertNotNull(Marshalling.getMarshaller(EmptyStackException.class));
+  }
 }
