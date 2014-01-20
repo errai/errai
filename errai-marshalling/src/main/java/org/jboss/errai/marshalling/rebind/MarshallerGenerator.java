@@ -47,32 +47,37 @@ public class MarshallerGenerator extends Generator {
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
     MetaClass type = MetaClassFactory.get(distillTargetTypeName(typeName));
-    
-    MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
-    final MappingStrategy strategy = MappingStrategyFactory
-          .createStrategy(true, GeneratorMappingContextFactory.getFor(target), type);
 
-    String className = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
-    String gen = null;
-    if (type.isArray()) {
-      BuildMetaClass marshallerClass = MarshallerGeneratorFactory.generateArrayMarshaller(type, packageName + "." + className, true);
-      gen = marshallerClass.toJavaString();
-    }
-    else {
-      final ClassStructureBuilder<?> marshaller =
-          strategy.getMapper().getMarshaller(packageName + "." + className);
-      gen = marshaller.toJavaString();
-    }
+    String className =
+        MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
 
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    printWriter.append(gen);
 
-    final File tmpFile =
-        new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
-    RebindUtils.writeStringToFile(tmpFile, gen);
+    if (printWriter != null) {
+      MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
+      final MappingStrategy strategy =
+          MappingStrategyFactory.createStrategy(true, GeneratorMappingContextFactory.getFor(target), type);
 
-    context.commit(logger, printWriter);
-    
+      String gen = null;
+      if (type.isArray()) {
+        BuildMetaClass marshallerClass =
+            MarshallerGeneratorFactory.generateArrayMarshaller(type, packageName + "." + className, true);
+        gen = marshallerClass.toJavaString();
+      }
+      else {
+        final ClassStructureBuilder<?> marshaller =
+            strategy.getMapper().getMarshaller(packageName + "." + className);
+        gen = marshaller.toJavaString();
+      }
+      printWriter.append(gen);
+
+      final File tmpFile =
+          new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
+      RebindUtils.writeStringToFile(tmpFile, gen);
+
+      context.commit(logger, printWriter);
+    }
+
     return packageName + "." + className;
   }
 
@@ -85,7 +90,7 @@ public class MarshallerGenerator extends Generator {
     typeName = StringUtils.replace(typeName, "_", ".");
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_DOLLARSIGN_REPLACEMENT, "$");
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_UNDERSCORE_REPLACEMENT, "_");
-    
+
     if (isArrayType) {
       int lastDot = typeName.lastIndexOf(".");
       int dimension = Integer.parseInt(typeName.substring(lastDot + 2));
