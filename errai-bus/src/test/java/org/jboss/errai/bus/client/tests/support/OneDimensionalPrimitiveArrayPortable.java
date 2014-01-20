@@ -30,5 +30,9 @@ public class OneDimensionalPrimitiveArrayPortable {
   private boolean[] booleanArray;
   private float[] floatArray;
   private byte[] byteArray;
+  
+  // Don't remove. This makes sure that we don't accidently create a second marshaller for byte[] with the same name.
+  private byte[] anotherByteArray;
+  
   private char[] charArray;
 }

@@ -180,7 +180,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 if (context.canMarshal(toMap.getFullyQualifiedName())) {
                   if (gwtTarget) {
                     BuildMetaClass arrayMarshaller = MarshallerGeneratorFactory.createArrayMarshallerClass(type);
-                    classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
+                    
+                    if (!containsInnerClass(classStructureBuilder, arrayMarshaller)) {
+                      classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
+                    }
                     Statement deferred = context.getArrayMarshallerCallback().deferred(type, arrayMarshaller);
                     MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type, lazyInitMethod,
                         deferred);
@@ -275,13 +278,15 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           context.getMarshallerGeneratorFactory().addOrMarkMarshallerUnlazy(
               memberMapping.getType().getOuterComponentType());
 
-          BlockBuilder<?> lazyInitMethod =
-              (needsLazyInit(memberMapping.getType())) ? initMethod : null;
+          BlockBuilder<?> lazyInitMethod = (needsLazyInit(memberMapping.getType())) ? initMethod : null;
           if (memberMapping.getType().isArray()) {
             if (gwtTarget) {
               BuildMetaClass arrayMarshaller =
                   MarshallerGeneratorFactory.createArrayMarshallerClass(memberMapping.getType().asBoxed());
-              classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
+
+              if (!containsInnerClass(classStructureBuilder, arrayMarshaller)) {
+                classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
+              }
               Statement deferred =
                   context.getArrayMarshallerCallback().deferred(memberMapping.getType().asBoxed(), arrayMarshaller);
               MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, memberMapping.getType()
@@ -685,5 +690,15 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     MetaClass compType = type.getOuterComponentType().getErased();
     return (!compType.asUnboxed().isPrimitive() && !compType.equals(MetaClassFactory.get(String.class)) && !context
         .getDefinitionsFactory().hasBuiltInDefinition(compType));
+  }
+  
+  private boolean containsInnerClass(ClassStructureBuilder<?> classStructureBuilder, BuildMetaClass inner) {
+    MetaClass[] innerClasses = classStructureBuilder.getClassDefinition().getDeclaredClasses();
+    for (MetaClass innerClass : innerClasses) {
+      if(innerClass.getFullyQualifiedName().equals(inner.getFullyQualifiedName())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

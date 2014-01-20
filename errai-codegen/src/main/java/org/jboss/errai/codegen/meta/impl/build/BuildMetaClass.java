@@ -50,6 +50,7 @@ import com.google.common.collect.ObjectArrays;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder {
   private Context context;
@@ -400,10 +401,6 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public MetaTypeVariable[] getTypeParameters() {
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
   }
-//
-//  public void setClassName(String className) {
-//    this.className = className;
-//  }
 
   public void setSuperClass(final MetaClass superClass) {
     this.superClass = superClass;
@@ -476,10 +473,6 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   public void addMethod(final BuildMetaMethod method) {
     _methodsCache = null;
-
-//    if (getDeclaredMethod(method.getName(), MetaClassFactory.asMetaClassArray(method.getParameters())) != null) {
-//      throw new IllegalStateException("method with same signature [" + method.toString() + "] already exists");
-//    }
 
     methods.add(method);
   }
