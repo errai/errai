@@ -563,7 +563,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     else if (isArray()) {
       try {
-        cls = Class.forName(getInternalName().replaceAll("/", "\\."), false,
+        cls = Class.forName(getInternalName().replace('/', '.'), false,
             Thread.currentThread().getContextClassLoader());
       }
       catch (ClassNotFoundException e) {
@@ -634,7 +634,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = getInternalPrimitiveNameFrom(name.trim());
     }
     else {
-      name = "L".concat(getInternalPrimitiveNameFrom(name.trim()).replaceAll("\\.", "/")).concat(";");
+      name = "L".concat(getInternalPrimitiveNameFrom(name.trim()).replace('.', '/')).concat(";");
     }
 
     return _internalNameCache = dimString + name;

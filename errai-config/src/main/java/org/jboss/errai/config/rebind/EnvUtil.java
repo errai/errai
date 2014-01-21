@@ -16,22 +16,6 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.util.QuickDeps;
-import org.jboss.errai.common.client.api.annotations.LocalEvent;
-import org.jboss.errai.common.client.api.annotations.NonPortable;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.util.ClassScanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +34,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.QuickDeps;
+import org.jboss.errai.common.client.api.annotations.LocalEvent;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.config.util.ClassScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * @author Mike Brock
@@ -521,7 +522,7 @@ public abstract class EnvUtil {
           continue;
         }
 
-        final URL resource = classLoader.getResource(fullyQualifiedName.replaceAll("\\.", "/") + ".java");
+        final URL resource = classLoader.getResource(fullyQualifiedName.replace('.', '/') + ".java");
 
         if (resource != null) {
           InputStream stream = null;

@@ -596,14 +596,14 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * Get the name of the {@link Template} class of the given {@link MetaClass} type
    */
   private String getTemplateTypeName(final MetaClass type) {
-    return type.getFullyQualifiedName().replaceAll("\\.", "_") + "TemplateResource";
+    return type.getFullyQualifiedName().replace('.', '_') + "TemplateResource";
   }
 
   /**
    * Get the name of the {@link Template} HTML file of the given {@link MetaClass} component type
    */
   public static String getTemplateFileName(final MetaClass type) {
-    String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
+    String resource = type.getFullyQualifiedName().replace('.', '/') + ".html";
 
     if (type.isAnnotationPresent(Templated.class)) {
       final String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
@@ -615,7 +615,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
             resource = resource.substring(1);
           }
           else {
-            resource = type.getPackageName().replaceAll("\\.", "/") + "/" + resource;
+            resource = type.getPackageName().replace('.', '/') + "/" + resource;
           }
         }
       }

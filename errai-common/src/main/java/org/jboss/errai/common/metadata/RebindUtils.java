@@ -1,20 +1,5 @@
 package org.jboss.errai.common.metadata;
 
-import com.google.common.io.Files;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.typeinfo.JPackage;
-import com.google.gwt.dev.cfg.ModuleDef;
-import com.google.gwt.dev.javac.StandardGeneratorContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -40,6 +25,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import com.google.common.io.Files;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.typeinfo.JPackage;
+import com.google.gwt.dev.cfg.ModuleDef;
+import com.google.gwt.dev.javac.StandardGeneratorContext;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -401,7 +403,7 @@ public class RebindUtils {
                     for (final String cpRoot : classPathRoots) {
                       if (filePath.startsWith(cpRoot)) {
                         pathRoots.add(filePath.substring(cpRoot.length())
-                            .replaceAll("/", "\\.").replaceAll("\\\\", "."));
+                            .replace('/', '.').replace('\\', '.'));
                       }
                     }
                   }
@@ -413,7 +415,7 @@ public class RebindUtils {
                 final String filePath = clientPath.getAbsolutePath();
                 for (final String cpRoot : classPathRoots) {
                   if (filePath.startsWith(cpRoot)) {
-                    pathRoots.add(filePath.substring(cpRoot.length()).replaceAll("/", "\\.").replaceAll("\\\\", "."));
+                    pathRoots.add(filePath.substring(cpRoot.length()).replace('/', '.').replace('\\', '.'));
                   }
                 }
               }
