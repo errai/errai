@@ -353,10 +353,6 @@
           <version>${jetty.version}</version>
         </dependency>
         <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-        </dependency>
-        <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet-core</artifactId>
         </dependency>
@@ -416,14 +412,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-javax-enterprise</artifactId>
-          <version>${project.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <!-- Exclude development tools -->
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
           <version>${project.version}</version>
           <scope>provided</scope>
         </dependency>

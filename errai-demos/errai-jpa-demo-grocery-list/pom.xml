@@ -219,12 +219,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-cdi-jetty</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
     <!-- CDI Development Utils -->
     <!-- This must be placed above com.google.gwt:gwt-dev to override the Jetty that is present there -->
     <dependency>
@@ -385,14 +379,6 @@
           <scope>provided</scope>
         </dependency>
 
-        <!-- Exclude development tools -->
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-          <version>${project.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet-core</artifactId>
@@ -465,12 +451,6 @@
           <artifactId>cdi-api</artifactId>
           <scope>compile</scope>
           <version>1.0-SP4</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-          <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -609,12 +589,6 @@
           <groupId>org.mvel</groupId>
           <artifactId>mvel2</artifactId>
           <version>${mvel.version}</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-          <version>${project.version}</version>
         </dependency>
 
         <!-- CDI Development Utils -->

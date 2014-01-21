@@ -267,12 +267,7 @@
           <groupId>org.hibernate</groupId>
           <artifactId>hibernate-core</artifactId>
           <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-          <scope>provided</scope>
-        </dependency>
+        </dependency>        
         <dependency>
           <groupId>org.jboss.spec.javax.transaction</groupId>
           <artifactId>jboss-transaction-api_1.1_spec</artifactId>
