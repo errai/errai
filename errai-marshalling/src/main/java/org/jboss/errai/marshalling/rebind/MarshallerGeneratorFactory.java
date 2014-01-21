@@ -87,10 +87,11 @@ public class MarshallerGeneratorFactory {
 
   private GeneratorMappingContext mappingContext;
 
-  ClassStructureBuilder<?> classStructureBuilder;
-  ConstructorBlockBuilder<?> constructor;
-  BlockBuilder<?> getMarshallerMethod;
-  Context classContext;
+  private ClassStructureBuilder<?> classStructureBuilder;
+  private BlockBuilder<?> getMarshallerMethod;
+  private BlockBuilder<ElseBlockBuilder> conditionalGenerationBlock;
+  private Context classContext;
+  private boolean done;
 
   private final Set<String> arrayMarshallers = new HashSet<String>();
   private final Set<String> unlazyMarshallers = new HashSet<String>();
@@ -170,6 +171,9 @@ public class MarshallerGeneratorFactory {
           }
 
           private String createDemarshallerIfNeeded(final MetaClass type) {
+            if (done) {
+              return getVarName(type);
+            }
             return addArrayMarshaller(type.asBoxed(), target == MarshallerOutputTarget.GWT);
           }
 
@@ -217,7 +221,7 @@ public class MarshallerGeneratorFactory {
       }
     }
 
-    constructor = classStructureBuilder.publicConstructor();
+    ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
 
     for (final MetaClass cls : mappingContext.getDefinitionsFactory().getExposedClasses()) {
       final String clsName = cls.getFullyQualifiedName();
@@ -260,8 +264,8 @@ public class MarshallerGeneratorFactory {
               .invoke("put", aliasEntry.getKey(), loadVariable(varName)));
         }
       }
-
     }
+    constructor.finish();
 
     getMarshallerMethod =
         classStructureBuilder.publicMethod(parameterizedAs(Marshaller.class, typeParametersOf(Object.class)),
@@ -279,6 +283,8 @@ public class MarshallerGeneratorFactory {
 
     generateMarshallers();
 
+    getMarshallerMethod.append(conditionalGenerationBlock.finish());
+    
     getMarshallerMethod.append(
         If.isNotNull(Stmt.loadVariable("m")).append(
             Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
@@ -301,6 +307,7 @@ public class MarshallerGeneratorFactory {
         .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("put", Stmt.loadVariable("a0"), Stmt.loadVariable("a1")))
         .finish();
 
+    done = true;
     return classStructureBuilder.toJavaString();
   }
 
@@ -332,8 +339,6 @@ public class MarshallerGeneratorFactory {
 
       addMarshaller(compType);
     }
-
-    constructor.finish();
   }
 
   public void addOrMarkMarshallerUnlazy(final MetaClass type) {
@@ -376,8 +381,7 @@ public class MarshallerGeneratorFactory {
   }
 
   private void addMarshaller(final BuildMetaClass marshaller, final MetaClass type) {
-    final BlockBuilder<ElseBlockBuilder> conditionalGenerationBlock =
-          If.objEquals(Stmt.loadVariable("a0"), Stmt.loadLiteral(type.getFullyQualifiedName()));
+    updateConditionalBlock(type);
 
     if (target == MarshallerOutputTarget.GWT) {
       if (type.isAnnotationPresent(AlwaysQualify.class)) {
@@ -412,8 +416,6 @@ public class MarshallerGeneratorFactory {
         }
       }
     }
-
-    getMarshallerMethod.append(conditionalGenerationBlock.finish());
   }
 
   private String addArrayMarshaller(final MetaClass type, boolean gwtTarget) {
@@ -424,15 +426,12 @@ public class MarshallerGeneratorFactory {
       final InnerClass arrayMarshaller = new InnerClass(generateArrayMarshaller(type, marshallerClassName, gwtTarget));
       classStructureBuilder.declaresInnerClass(arrayMarshaller);
 
-      final BlockBuilder<ElseBlockBuilder> conditionalGenerationBlock =
-            If.objEquals(Stmt.loadVariable("a0"), Stmt.loadLiteral(type.getFullyQualifiedName()));
-
+      updateConditionalBlock(type);
+      
       conditionalGenerationBlock.append(
             Stmt.loadVariable("m").assignValue(
                 Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshaller.getType()), type
                     .asClass())));
-
-      getMarshallerMethod.append(conditionalGenerationBlock.finish());
     }
     arrayMarshallers.add(varName);
 
@@ -603,5 +602,17 @@ public class MarshallerGeneratorFactory {
             .body().getClassDefinition();
 
     return arrayMarshaller;
+  }
+  
+  private void updateConditionalBlock(final MetaClass type) {
+    if (conditionalGenerationBlock == null) {
+      conditionalGenerationBlock = 
+        If.objEquals(Stmt.loadVariable("a0"), Stmt.loadLiteral(type.getFullyQualifiedName())); 
+    }
+    else {
+      conditionalGenerationBlock = conditionalGenerationBlock.finish()
+        .elseif_(Stmt.create(Context.create().addVariable("a0", String.class))
+            .loadVariable("a0").invoke("equals", Stmt.loadLiteral(type.getFullyQualifiedName())));
+    }
   }
 }
