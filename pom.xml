@@ -1394,7 +1394,7 @@
     <profile>
       <id>distro</id>
       <modules>
-        <module>reference</module>
+        <module>errai-docs</module>
         <module>dist</module>
       </modules>
       <repositories>

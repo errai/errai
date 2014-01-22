@@ -48,17 +48,10 @@ echo "Done!"
 
 echo "Uploading documentation..."
 
-(cd ../reference/target/docbook/publish/en/pdf && mv Reference_Guide.pdf Errai_${version}_Reference_Guide.pdf)
+(cd ../errai-docs/target/docbook/publish/en/pdf && mv Reference_Guide.pdf Errai_${version}_Reference_Guide.pdf)
 
-(cd ../reference/target/docbook/publish/en  && scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference)
+(cd ../errai-docs/target/docbook/publish/en  && scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference)
 
-echo "Copying images from a previous release (yecch...)"
-
-tmpdir=`mktemp -d tmp_author_downloaded`
-(cd $tmpdir && scp -rp errai@filemgmt.jboss.org:/docs_htdocs/errai/2.2.0.CR1/errai/reference/html/author .)
-(cd $tmpdir && scp -rp author errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference/html)
-(cd $tmpdir && scp -rp author errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference/html_single)
-
-rm -r $tmpdir
+(cd ../errai-docs/src/main/asciidoc && scp -rp author errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/html && scp -rp author errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference/html_single)
 
 echo "Done!"
