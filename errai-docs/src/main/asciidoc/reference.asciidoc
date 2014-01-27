@@ -3484,40 +3484,20 @@ Finally, you can take advantage of the cross-origin resource sharing (CoRS) feat
 Errai JAX-RS works by leveraging standard Java interfaces that bear JAX-RS annotations. You will also want these interfaces visible to server-side code so that your JAX-RS resource classes can implement them (and inherit the annotations). This keeps the whole setup typesafe, and reduces duplication to the bare minimum. The natural solution, then is to put the JAX-RS interfaces under the client.shared package within your GWT module:
 
 * project
-* src
-* main
-* java
-* com.mycompany.myapp
-* MyApp.gwt.xml _[the app's GWT module]_
-
-
-* com.mycompany.myapp.client.local
-* MyAppClientStuff.java _[code that @Injects Caller<MyAppRestResource>]_
-
-
-* com.mycompany.myapp.client.shared
-* CustomerService.java _[the JAX-RS interface]_
-
-
-* com.mycompany.myapp.server
-* CustomerServiceImpl.java _[the server-side JAX-RS resource implementation]_
-
-
-
-
-
-
-
-
-
-
-
+** src/main/java
+*** com.mycompany.myapp
+**** MyApp.gwt.xml _[the app's GWT module]_
+*** com.mycompany.myapp.client.local
+**** MyAppClientStuff.java _[code that @Injects Caller<MyAppRestResource>]_
+*** com.mycompany.myapp.client.shared
+**** CustomerService.java _[the JAX-RS interface]_
+*** com.mycompany.myapp.server
+**** CustomerServiceImpl.java _[the server-side JAX-RS resource implementation]_
 
 The contents of the server-side files would be as follows:
 
 .CustomerService.java
 ====
-
 
 [source, java]
 ----
@@ -3623,7 +3603,6 @@ To use caller injection, your application needs to inherit the Errai IOC GWT mod
 [source, xml]
 ----
   <inherits name="org.jboss.errai.ioc.Container"/>
-
 ----
 
 [NOTE]

@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-01-23</date>
+    <date>2014-01-27</date>
     
     
     
@@ -53,12 +53,12 @@
 <section id="sid-54493220_GettingStartedwithErrai-GoogleWebToolkit%28GWT%29">
 <title>Google Web Toolkit (GWT)</title>
 <simpara>GWT is a toolkit built around a Java-to-JavaScript compiler. It provides a JRE emulation library, abstraction of browser quirks, a development mode runtime, and tools for native JavaScript integration.</simpara>
-<simpara>Errai uses GWT to accomplish the translation of concepts such as CDI into the browser, which enables a consisted client and server programming experience.</simpara>
+<simpara>Errai uses GWT to accomplish the translation of concepts such as CDI into the browser, which enables a consistent client and server programming experience.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ContextsandDependencyInjection%28CDI%29">
 <title>Contexts and Dependency Injection (CDI)</title>
-<simpara>CDI is a standard part of the Java EE 6.0 stack, and is specified in the <ulink url="http://jcp.org/en/jsr/detail?id=299">JSR-299</ulink> specification. CDI provides the basis for the programming model that will be explored in this guide. As such, if you are unfamiliar with CDI, basic concepts will be introduced in this guide, and pre-existing knowledge of CDI is not strictly necessary.</simpara>
-<simpara>Errai&#8217;s support for CDI is two-fold: For the server-side, Errai currently has integration with Weld, which is the reference implementation (RI) of the JSR-299 specification. The client-side integration for CDI is provided by the Errai CDI extension. Errai CDI implements a subset of the JSR-299 specification to provide the CDI programming model within client code.</simpara>
+<simpara>CDI is a standard part of the Java EE 6.0 stack, and is defined in the <ulink url="http://jcp.org/en/jsr/detail?id=299">JSR-299</ulink> specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.</simpara>
+<simpara>Errai&#8217;s support for CDI is two-fold. For the server-side, Errai has integration with Weld, which is the reference implementation (RI) of the JSR-299 specification. The client-side integration for CDI is provided by the Errai CDI extension. Errai CDI implements a subset of the JSR-299 specification to provide the CDI programming model within client code.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-JavaAPIforRESTfulWebServices%28JAXRS%29">
 <title>Java API for RESTful Web Services (JAX-RS)</title>
@@ -73,51 +73,113 @@
 <title>Creating your first project</title>
 <important>
 <title>Maven Required</title>
-<simpara>The first thing you&#8217;ll need to do if you have not already, is <ulink url="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">install Maven</ulink> . If you have no already installed Maven, do so now. Otherwise read on.</simpara>
+<simpara>The first thing you&#8217;ll need to do if you have not already, is <ulink url="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">install Maven</ulink> . If you have not already installed Maven, do so now.</simpara>
 <simpara>Warning: If you use maven2, you will run into this problem: <ulink url="https://community.jboss.org/thread/177645">https://community.jboss.org/thread/177645</ulink></simpara>
 </important>
-<simpara>You have two options to set up an Errai application. You can start by copying one of our demos or start building an app with a maven archetype:</simpara>
+<simpara>You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">errai tutorial demo</ulink>) or by building an app with the Errai Forge plugin:</simpara>
 <section id="sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication">
 <title>Start from a working example application</title>
-<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">demo</ulink> . Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link> .</simpara>
+<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">demo</ulink>. Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link> .</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-Startfromaquickstartarchetype">
-<title>Start from a quickstart archetype</title>
-<simpara>Open a terminal or command prompt, and navigate to the directory where you would like to create your Errai project.</simpara>
-<simpara>Type or paste the following into the terminal:</simpara>
-<screen>
-mvn archetype:generate -DarchetypeGroupId=org.jboss.errai.archetypes -DarchetypeArtifactId=cdi-quickstart -DarchetypeVersion=2.3.2.Final
-</screen>
-<simpara>When it is finished downloading all of the dependencies, you will be prompted to specify the <literal><phrase role="code">groupId</phrase></literal> of your project. In practice, the Maven <literal><phrase role="code">groupId</phrase></literal> is usually the same as the base package of your project. For instance, if your project&#8217;s package namespace will be <literal><phrase role="code">org.company.firestorm</phrase></literal> , the Maven <literal><phrase role="code">groupId</phrase></literal> would usually be the same, or perhaps simply <literal><phrase role="code">org.company</phrase></literal> .</simpara>
-<simpara>You will next be prompted to specify an <literal><phrase role="code">artifactId</phrase></literal> , which in practice is the name of the application or the application component, in a multi-module Maven project.</simpara>
-<simpara>For instance: <literal><phrase role="code">firestorm-app</phrase></literal></simpara>
-<simpara>The next thing you&#8217;ll be asked to specify is the initial version of the artifact, which defaults to <literal><phrase role="code">1.0-SNAPSHOT</phrase></literal> . This is usually a sensible starting version if this is the first version of your app. But your milage may vary. To accept the default value, you can just hit enter.</simpara>
-<simpara>You&#8217;ll then be prompted to enter the <literal><phrase role="code">package</phrase></literal> of the application. It will default to the same thing you specified for the <literal><phrase role="code">groupId</phrase></literal> . To accept this default, just hit enter.</simpara>
-<simpara>You&#8217;ll be prompted to review all of your choices:</simpara>
-<example>
-<title>Maven Artifact creation prompt</title>
-<screen>
-Confirm properties configuration:
-groupId: org.company.firestorm
-artifactId: firestorm-app
-version: 1.0-SNAPSHOT
-package: org.company.firestorm
- Y: :
-</screen>
-</example>
-<simpara>You can type <literal><phrase role="code">N</phrase></literal> here and hit enter to correct any mistakes. Or simply hit enter to accept these values.</simpara>
-<simpara>After accepting the values you will see something like the following:</simpara>
-<screen>
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 10:09.469s
-[INFO] Finished at: Mon Sep 17 15:40:04 EDT 2012
-[INFO] Final Memory: 9M/81M
-[INFO] ------------------------------------------------------------------------
-</screen>
-<simpara>Congratulations! You&#8217;ve created an archetype for Errai. Let&#8217;s make sure that you have everything set up properly.</simpara>
-<simpara>A <emphasis>new directory</emphasis> should have been created with the name of the <literal><phrase role="code">artifactId</phrase></literal> (firestorm-app for example) which you specified.</simpara>
+<title>Starting with the Errai Forge plugin</title>
+<simpara>Another way to start a new project with Errai is to use Forge and the Errai Forge plugin. For this approach you will need:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>To download and install <ulink url="$$http://forge.jboss.org/">Forge</ulink>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>To download the Errai Forge plugin, by either cloning <ulink url="https://github.com/errai/forge-errai.git[this repo] or downloading and unzipping link:https://github.com/errai/forge-errai/archive/master.zip">this file</ulink>.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_loading_the_errai_forge_plugin">
+<title>Loading the Errai Forge plugin</title>
+<simpara>To install the plugin, start forge and then run the command, where <literal>$PATH_TO_PLUGIN</literal> is the absolute path of the Errai Forge plugin source you have previously downloaded.</simpara>
+<screen>forge source-plugin $PATH_TO_PLUGIN</screen>
+</section>
+<section id="_creating_your_new_project">
+<title>Creating your new project</title>
+<simpara>While still in Forge, run this command:</simpara>
+<screen>new-project --named $PROJECT_NAME --topLevelPackage $PROJECT_PACKAGE --projectFolder $PROJECT_PATH</screen>
+<simpara>Make sure to replace the above variables so that:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara><emphasis role="strong">$PROJECT_NAME</emphasis> is the name of your new project.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis role="strong">$PROJECT_PACKAGE</emphasis> is the Java package used by your new project.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis role="strong">$PROJECT_PATH</emphasis> is the path to the root directory of your new project (Forge will create the directory for you).</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_installing_the_errai_forge_plugin">
+<title>Installing the Errai Forge plugin</title>
+<simpara>In Forge (while in your new project&#8217;s root directory) run</simpara>
+<screen>errai setup</screen>
+<simpara>This will prompt you for:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>The logical name of the <ulink url="$$http://www.gwtproject.org/doc/latest/DevGuideOrganizingProjects.html#DevGuideModuleXml">GWT module</ulink> for your project. (So if you want a module called <emphasis>App</emphasis> in the package <literal>org.jboss.errai</literal>, the logical name would be <literal>org.jboss.errai.App</literal>)</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>An option to give your module a different name with the "rename-to" attribute (for example, you could rename a logical module <literal>org.jboss.errai.App</literal> to just <literal>app</literal> to help shorten urls).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>The version of Errai you would like to use.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<simpara>This will configure the main dependencies and plugins required to run any Errai App in GWT Development Mode and to compile for deployment. You will now also have access to all of the Errai Forge plugin commands. Since one of the proceeding sections will be describing the use of Errai CDI, you should install this feature now by running</simpara>
+<screen>errai add-feature cdi</screen>
+<simpara>In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:</simpara>
+<programlisting language="java" linenumbering="unnumbered">// Add the package declaration here
+
+import javax.annotation.PostConstruct;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import com.google.gwt.user.client.Window;
+
+@EntryPoint
+public class App {
+
+  @PostConstruct
+  public void onLoad() {
+    Window.alert("Hello World!");
+  }
+}</programlisting>
+<simpara>Create new subfolder, <emphasis>client/local</emphasis>, under the folder containing your GWT module file. Then create a file, <emphasis>App.java</emphasis>, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).</simpara>
+<tip>
+<formalpara>
+<title>Plugin Tips</title>
+<para>Keep an eye out for tips in the proceeding sections on how you can use the Errai Forge plugin to configure other Errai features for your new project.</para>
+</formalpara>
+</tip>
 </section>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode">
@@ -128,7 +190,7 @@ package: org.company.firestorm
 <simpara>This will begin the download of all the dependencies required to develop with and run Errai. It may take a few minutes to complete the download.</simpara>
 <simpara>When it is finished, you should see the GWT Development Mode runtime window appear as shown in <emphasis>Figure 1</emphasis> running on Windows.</simpara>
 <figure id="img-gwt-dev">
-<title>Figure 1: GWT Development Mode running on Windows</title>
+<title>GWT Development Mode running on Windows</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/DevModeWindows.png"/>
@@ -138,7 +200,7 @@ package: org.company.firestorm
 </figure>
 <simpara>Next, click the <emphasis>Launch Default Browser</emphasis> button. If you have have never used GWT before on your computer, you may get an error when your browser loads as shown in <emphasis>Figure 2</emphasis> .</simpara>
 <figure id="img-missing-plugin">
-<title>Figure 2: Missing plugin error</title>
+<title>Missing plugin error</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/MissingPluginWindows.png"/>
@@ -166,56 +228,32 @@ package: org.company.firestorm
 </itemizedlist>
 
 </important>
-<simpara>Once you have configured your browser for development with GWT, and after loading the app with the <emphasis>Launch Default Browser</emphasis> button, you should see the basic skeleton application load. You should see something like what is shown in <emphasis>Figure 3</emphasis> :</simpara>
-<figure id="img-blank-app">
-<title>Figure 3: The plain archetype app running in the browser</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/RunningAppBlank.png"/>
-    </imageobject>
-    <textobject><phrase>RunningAppBlank</phrase></textobject>
-  </mediaobject>
-</figure>
-<simpara>If you type something into the box and click <emphasis>Send</emphasis> , you should see the response sent back from the locally-running server in the app, as shown in <emphasis>Figure 4</emphasis> :</simpara>
-<figure id="img-testing-the-app">
-<title>Figure 4: Testing that the app is working</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/RunningAppTestData.png"/>
-    </imageobject>
-    <textobject><phrase>RunningAppTestData</phrase></textobject>
-  </mediaobject>
-</figure>
+<simpara>Once you have configured your browser for development with GWT, and after loading the app with the <emphasis>Launch Default Browser</emphasis> button, you should see the application load.</simpara>
+<simpara>If you are using errai-tutorial, you should see a page with a complaint form.</simpara>
+<simpara>If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".</simpara>
 <simpara>That&#8217;s it! You&#8217;ve got your first Errai Application up and running. In the next section we&#8217;ll setup your IDE.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">
 <title>Configuring your project for Eclipse</title>
 <note>
 <title>Read the previous section!</title>
-<simpara>This next section assumes you have followed the instructions in the previous section. As such, we assume you have created an Errai project from the Errai CDI archetype, which we&#8217;ll be importing into your IDE.</simpara>
+<simpara>This next section assumes you have followed the instructions in the previous section. As such, we assume you have created an Errai project using the Errai Forge plugin or a copy of the errai-tutorial project, which we&#8217;ll be importing into your IDE.</simpara>
 </note>
 <section id="sid-54493220_GettingStartedwithErrai-Prerequisites">
 <title>Prerequisites</title>
 
 </section>
-<section id="sid-54493220_GettingStartedwithErrai-GooglePluginforEclipse%28GPE%29">
-<title>Google Plugin for Eclipse (GPE)</title>
-<simpara>If you have not done so already, you should install the <ulink url="https://developers.google.com/eclipse/docs/install-eclipse-4.2">Google Plugin for Eclipse</ulink> (GPE). Click <ulink url="https://developers.google.com/eclipse/docs/install-eclipse-4.2">here</ulink> for instructions at the Google Plugin for Eclipse site on how to install it. <emphasis>Note:</emphasis> You must install <emphasis>at least</emphasis> the GWT SDK.</simpara>
-</section>
 <section id="sid-54493220_GettingStartedwithErrai-MavenIntegrationforEclipse%28m2e%29">
 <title>Maven Integration for Eclipse (m2e)</title>
-<simpara>The project that the archetype in the last section generated is a Maven project. Thus, we will be relying on Maven to manage our project model throughout this guide. As such, we will want to install Maven tooling in the IDE. If you have not already installed m2e in Eclipse, you will want to do so now.</simpara>
+<simpara>The project that was made in the last section is a Maven project. Thus, we will be relying on Maven to manage our project model throughout this guide. As such, we will want to install Maven tooling in the IDE. If you have not already installed m2e in Eclipse, you will want to do so now.</simpara>
 <simpara>To install the Maven tooling, use the following steps:</simpara>
 <orderedlist numeration="arabic">
   
     <listitem>
       <simpara>Go to the <emphasis>Eclipse Marketplace</emphasis> under the <emphasis>Help</emphasis> menu in Eclipse.</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Eclipse Marketplace</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/EclipseM2eStep1.PNG"/>
@@ -223,16 +261,14 @@ package: org.company.firestorm
     <textobject><phrase>EclipseM2eStep1</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>In the <emphasis>Find</emphasis> dialog enter the phrase <emphasis>Maven</emphasis> and hit enter.</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/EclipseM2eStep2.PNG"/>
@@ -240,16 +276,15 @@ package: org.company.firestorm
     <textobject><phrase>EclipseM2eStep2</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>Find the <emphasis>Maven Integration for Eclipse</emphasis> plugin and click the <emphasis>Install</emphasis> button for that entry.</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Maven Integration for Eclipse in Marketplace</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/EclipseM2eStep3.PNG"/>
@@ -257,7 +292,9 @@ package: org.company.firestorm
     <textobject><phrase>EclipseM2eStep3</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>Accept the defaults by clicking <emphasis>Next</emphasis> , and then accept the User License Agreement to begin the installation.</simpara>
@@ -268,18 +305,15 @@ package: org.company.firestorm
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-Importingyourproject">
 <title>Importing your project</title>
-<simpara>Once you have completed the installation of the prerequisites from the previous section, you will now be able to go ahead and import the Maven project you created in the first section of this guide.</simpara>
+<simpara>Once you have completed the installation of the prerequisites from the previous section, you will now be able to go ahead and import the Maven project you created in the first section of this guide. We will use the errai-tutorial project as an example.</simpara>
 <simpara>Follow these steps to get the project setup:</simpara>
 <orderedlist numeration="arabic">
   
     <listitem>
       <simpara>From the <emphasis>File</emphasis> menu, select <emphasis>Import&#8230;</emphasis></simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Import File in Eclipse</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/Import1.PNG"/>
@@ -287,16 +321,15 @@ package: org.company.firestorm
     <textobject><phrase>Import1</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>You will be presented with the Import dialog box. From here you want to select <emphasis>Maven</emphasis> &#8594; <emphasis>Existing Maven Projects</emphasis></simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Import Existing Maven Project</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/Import2.PNG"/>
@@ -304,16 +337,15 @@ package: org.company.firestorm
     <textobject><phrase>Import2</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>From the <emphasis>Import Maven Projects</emphasis> dialog, you will need to select the directory location of the project you created in the first section of this guide. In the <emphasis>Root Directory</emphasis> field of the dialog, enter the path to the project, or click <emphasis>Browse&#8230;</emphasis> to select it from the file chooser dialog.</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Select Folder</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/Import3.PNG"/>
@@ -321,7 +353,9 @@ package: org.company.firestorm
     <textobject><phrase>Import3</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>Click <emphasis>Finish</emphasis> to begin the import process.</simpara>
@@ -329,13 +363,10 @@ package: org.company.firestorm
     </listitem>
   
     <listitem>
-      <simpara>When the import process has finished, you should see your project imported within the Eclipse <emphasis>Project Explorer</emphasis> . The <literal><phrase role="code">App</phrase></literal> class generated by the archetype should be visible within the <literal><phrase role="code">client</phrase></literal> package under the package root you specified when creating the project.</simpara>
+      <simpara>When the import process has finished, you should see your project imported within the Eclipse <emphasis>Project Explorer</emphasis> . If you are using errai-tutorial, the <literal><phrase role="code">App</phrase></literal> class should be visible within the <literal><phrase role="code">client</phrase></literal> package.</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>App.java</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/Import4.PNG"/>
@@ -343,175 +374,199 @@ package: org.company.firestorm
     <textobject><phrase>Import4</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>The next step will be to configure your project as a Google Web Toolkit project in order to enable the GPE plugin features which we will rely on in this guide. You can do this by first right-clicking on the project name within the <emphasis>Project Explorer</emphasis> panel, selecting the <emphasis>Google</emphasis> &#8594; <emphasis>Web Toolkit Settings&#8230;</emphasis> options.</simpara>
-      
-    </listitem>
-  
-</orderedlist>
-<figure>
-<title>TODO InformalFigure image title empty</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import5.PNG"/>
-    </imageobject>
-    <textobject><phrase>Import5</phrase></textobject>
-  </mediaobject>
-</figure>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>To enable the GWT features of the plugin, check the <emphasis>Use Google Web Toolkit</emphasis> checkbox in the dialog that appears.</simpara>
-      
-    </listitem>
-  
-</orderedlist>
-<figure>
-<title>TODO InformalFigure image title empty</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import6.PNG"/>
-    </imageobject>
-    <textobject><phrase>Import6</phrase></textobject>
-  </mediaobject>
-</figure>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>Add the GWT module generated by our archetype to your project by clicking the <emphasis>Add&#8230;</emphasis> button in the <emphasis>Web Toolkit</emphasis> options dialog. There should only be one available module in your application, named <emphasis>App</emphasis> . Select and add this.</simpara>
-      
-    </listitem>
-  
-</orderedlist>
-<figure>
-<title>TODO InformalFigure image title empty</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import7.PNG"/>
-    </imageobject>
-    <textobject><phrase>Import7</phrase></textobject>
-  </mediaobject>
-</figure>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>On the left hand side of the <emphasis>Properties</emphasis> dialog box, you should see a <emphasis>Web Application</emphasis> section under the <emphasis>Google</emphasis> tree item. It should be the option directly above the <emphasis>Web Toolkit</emphasis> menu. Select this.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>In the <emphasis>Properties for firestorm-app</emphasis> window:</simpara>
-      
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>Check the box <emphasis>This project has a WAR directory</emphasis> .</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>In the <emphasis>WAR directory</emphasis> field, enter <literal><phrase role="code">src/main/webapp</phrase></literal> or click <emphasis>Browse&#8230;</emphasis> to navigate to the <literal><phrase role="code">webapp</phrase></literal> directory.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Check the box <emphasis>Launch and deploy from this directory</emphasis> When done, click <emphasis>OK</emphasis> .</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
 
       
     </listitem>
   
 </orderedlist>
-<figure>
-<title>TODO InformalFigure image title empty</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import8.PNG"/>
-    </imageobject>
-    <textobject><phrase>Import8</phrase></textobject>
-  </mediaobject>
-</figure>
+</section>
+<section id="_running_development_mode_with_eclipse">
+<title>Running Development Mode with Eclipse</title>
 <orderedlist numeration="arabic">
   
     <listitem>
-      <simpara>You may be presented with a dialog warning you that GWT features will require the re-opening of already open editors. Simply click <emphasis>Re-open Java editors</emphasis> .</simpara>
+      <simpara>Next you will need to setup a Maven Run Profile for Development Mode. To do so select <emphasis>Run As&#8230;</emphasis> &gt; <emphasis>Run Configurations&#8230;</emphasis> from the toolbar.</simpara>
+      
+<figure>
+<title>Run Configurations</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/RunConfigurations.PNG"/>
+    </imageobject>
+    <textobject><phrase>RunConfigurations</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Select <emphasis>Maven Build</emphasis> from the sidebar and create a new launch configuration by pressing the <emphasis>New</emphasis> button in the top left corner.</simpara>
+      
+<figure>
+<title>New Configuration</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/NewLaunchConfiguration.PNG"/>
+    </imageobject>
+    <textobject><phrase>NewLaunchConfiguration</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Give the configuration a name, then click <emphasis>Browse Workspace</emphasis> and select the root directory of your new project.</simpara>
+      
+<figure>
+<title>Select Project Root Directory</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/LaunchRootDir.PNG"/>
+    </imageobject>
+    <textobject><phrase>LaunchRootDir</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>In the <emphasis>Goals</emphasis> text box, type "clean gwt:run". Click <emphasis>Apply</emphasis> to save the configuration and then <emphasis>Close</emphasis>.</simpara>
+      
+<figure>
+<title>Run Configurations Goals</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/GwtRunGoals.PNG"/>
+    </imageobject>
+    <textobject><phrase>GwtRunGoals</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>You can add this new configuration under the <emphasis>Run As</emphasis> button in your toolbar by selecting <emphasis>Run As</emphasis> &gt; <emphasis>Organize Favorites</emphasis>, then clicking <emphasis>Add</emphasis> and selecting the run configuration.</simpara>
+      
+<figure>
+<title>Add Configuration to Favourites</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/OrganizeFavourites.PNG"/>
+    </imageobject>
+    <textobject><phrase>OrganizeFavourites</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>At this point, you should try running your new configuration to make sure everything is in working order. To run your app, find the run configuration under the <emphasis>Run As</emphasis> menu in the toolbar.</simpara>
+      
+<figure>
+<title>Run Gwt Development Mode from Eclipse</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/UseGwtRunConfiguration.PNG"/>
+    </imageobject>
+    <textobject><phrase>UseGwtRunConfiguration</phrase></textobject>
+  </mediaobject>
+</figure>
+
       
     </listitem>
   
 </orderedlist>
-<figure>
-<title>TODO InformalFigure image title empty</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import9.PNG"/>
-    </imageobject>
-    <textobject><phrase>Import9</phrase></textobject>
-  </mediaobject>
-</figure>
+<simpara>This will start the GWT Development Mode exactly as running <literal>mvn clean gwt:run</literal> from the command line.</simpara>
+</section>
+<section id="_debugging_in_development_mode_with_eclipse">
+<title>Debugging in Development Mode with Eclipse</title>
 <orderedlist numeration="arabic">
   
     <listitem>
-      <simpara>From the main workspace, click on the <emphasis>Run As&#8230;</emphasis> menu. It is indicated by a green play icon, pictured in the image below. From the menu, select <emphasis>Run As&#8230;</emphasis> &#8594; <emphasis>Web Application</emphasis> .</simpara>
+      <simpara>To setup a debug run configuration for GWT Development Mode, repeate steps (2) and (3) from the section above, but this time use the <emphasis>Goals</emphasis> "clean gwt:debug".</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Configure Maven Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import10.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/ConfigureGwtDebug.PNG"/>
     </imageobject>
-    <textobject><phrase>Import10</phrase></textobject>
+    <textobject><phrase>ConfigureGwtDebug</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>You will be presented with the <emphasis>HTML Page Selection</emphasis> dialog. This dialog is used for choosing which HTML page to load in order to start the application. Select <literal><phrase role="code">App.html</phrase></literal> , then click <emphasis>OK</emphasis> .</simpara>
+
       
     </listitem>
   
     <listitem>
-      <simpara>The application should start and you should see the startup log display the Weld and Errai bootstrapping information. When it is done bootstrapping, which may take a few moments, you should be presented with a panel with a URL link in order to launch your application. Double-click on this link.</simpara>
+      <simpara>Next we will need to setup our remote debugger configurations in Eclipse. Because the client and server code run on separate JVMs, we will need to setup two such configurations. To create a debug configuration, select <emphasis>Debug As&#8230;</emphasis> &gt; <emphasis>Debug Configurations&#8230;</emphasis> from the toolbar.</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Create Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import13.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/DebugConfigurations.PNG"/>
     </imageobject>
-    <textobject><phrase>Import13</phrase></textobject>
+    <textobject><phrase>DebugConfigurations</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+
+      
+    </listitem>
   
     <listitem>
-      <simpara>Your web browser should load and you should see the same application we launched from the command line in the previous section.</simpara>
+      <simpara>In the sidebar, select <emphasis>Remote Java Application</emphasis> and click the <emphasis>New</emphasis> button in the top right corner.</simpara>
+      
+<figure>
+<title>Create Remote Debug Configuration</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/NewDebugConfig.PNG"/>
+    </imageobject>
+    <textobject><phrase>NewDebugConfig</phrase></textobject>
+  </mediaobject>
+</figure>
+
       
     </listitem>
   
-</orderedlist>
+    <listitem>
+      <simpara>This new configuration will be for remote debugging your client-side code, so give it an appropriate name. If the name of your project is not already in the <emphasis>Project</emphasis> field, click <emphasis>Browse</emphasis> and select it. The <emphasis>Host</emphasis> and <emphasis>Port</emphasis> values should be <emphasis>localhost</emphasis> and <emphasis>8000</emphasis> respectively, such that your configuration looks like this:</simpara>
+      
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Client Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import14.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/ClientDebugConfig.PNG"/>
     </imageobject>
-    <textobject><phrase>Import14</phrase></textobject>
+    <textobject><phrase>ClientDebugConfig</phrase></textobject>
   </mediaobject>
 </figure>
-<orderedlist numeration="arabic">
+<simpara>If everything is correct, click <emphasis>Apply</emphasis>.</simpara>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Create another <emphasis>Remote Java Application</emphasis> run configuration with the steps just described for remote debugging server code. The only differences from the client configuration should be the name and the port, which is <emphasis>8001</emphasis>. Thus the server remote debug configuration should look like this:</simpara>
+      
+<figure>
+<title>Server Debug Configuration</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/54493220/ServerDebugConfig.PNG"/>
+    </imageobject>
+    <textobject><phrase>ServerDebugConfig</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
   
     <listitem>
       <simpara>That&#8217;s it! You&#8217;ve successfully imported your Errai project into Eclipse. Now, on to <link linkend="sid-54493502">coding</link> !</simpara>
@@ -533,13 +588,11 @@ package: org.company.firestorm
 <section id="sid-54493502_AGentleIntroductiontoCDI-YourFirstBean">
 <title>Your First Bean</title>
 <simpara>A bean in CDI is merely a POJO (Plain Old Java Object), for the most part. In the context of CDI, any plain, default constructable class is a member of the <emphasis>dependent scope</emphasis> . Don&#8217;t worry too much about what that means for now. Let&#8217;s just go ahead and make one:</simpara>
-<screen>
-public class Foo {
+<programlisting language="java" linenumbering="unnumbered">public class Foo {
   public String getName() {
     return "Mr. Foo";
   }
-}
-</screen>
+}</programlisting>
 <simpara>That was an easy, if uninteresting, exercise. But despite this class' worthy distinction as a dependent-scoped bean, it&#8217;s actually quite a useless dependent scope beaned. Well, maybe not so much useless as it is unused.</simpara>
 <simpara>Well, how would we use this bean? To answer that question we&#8217;re going to need to introduce the concept of scopes in more detail.</simpara>
 </section>
@@ -549,45 +602,36 @@ public class Foo {
 <simpara>It turns out that CDI includes a set of default scopes which represent these very things.</simpara>
 <simpara>We&#8217;ll start by taking a look at the <emphasis>application scope</emphasis> , which is lovingly represented by the annotation <literal><phrase role="code">@ApplicationScoped</phrase></literal> . An application-scoped bean is a bean which will live for the entire duration of the application. In this sense, it is essentially like a singleton. And it&#8217;s generally okay to think of it in that way.</simpara>
 <simpara>So let&#8217;s declare an application-scoped bean:</simpara>
-<screen>
-@ApplicationScoped
+<programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class Bar {
   public String getName() {
     return "Mr. Bar";
   }
-}
-</screen>
+}</programlisting>
 <simpara>That was <emphasis>almost</emphasis> as easy as making the last bean. The difference between this bean and the last, is <literal><phrase role="code">Bar</phrase></literal> will actually be instantiated by the container automatically, and <literal><phrase role="code">Foo</phrase></literal> will not.</simpara>
 <simpara>So what can we do with <literal><phrase role="code">Foo</phrase></literal> ? Well, let&#8217;s go ahead and get familiar with dependency injection, shall we?</simpara>
-<screen>
-@ApplicationScoped
+<programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class Bar {
   @Inject Foo foo;
 
   public String getName() {
     return "Mr. Bar";
   }
-}
-</screen>
+}</programlisting>
 <simpara>We have added a field of the type <literal><phrase role="code">Foo</phrase></literal> which we declared earlier, and we have annotated it with <literal><phrase role="code">javax.inject.Inject</phrase></literal> . This tells the container to inject an instance of <literal><phrase role="code">Foo</phrase></literal> into our bean. Since our <literal><phrase role="code">Foo</phrase></literal> bean is of the dependent scope, the bean manager will actually create a <emphasis>new</emphasis> instance of <literal><phrase role="code">Foo</phrase></literal> and pass it in.</simpara>
 <simpara>This scope of the newly instantiated <literal><phrase role="code">Foo</phrase></literal> is <emphasis>dependent</emphasis> on the scope that it was injected into. In this case, the application scope. On the other hand, if we were to turn around an inject <literal><phrase role="code">Bar</phrase></literal> into <literal><phrase role="code">Foo</phrase></literal> , the behaviour is quite different.</simpara>
-<screen>
-public class Foo {
+<programlisting language="java" linenumbering="unnumbered">public class Foo {
   @Inject Bar bar;
 
   public String getName() {
     return "Mr. Foo";
   }
-}
-</screen>
+}</programlisting>
 <simpara>Here, every time a new instance of <literal><phrase role="code">Foo</phrase></literal> is created, the <emphasis>same</emphasis> instance of <literal><phrase role="code">Bar</phrase></literal> will be injected. That is to say: this pseudo-code assertion is now always true:</simpara>
-<screen>
-assert fooInstance.bar.foo == fooInstance
-</screen>
+<screen>assert fooInstance.bar.foo == fooInstance</screen>
 <simpara><emphasis>Note</emphasis> : This identity check will not <emphasis>actually</emphasis> be true at runtime due to the need to proxy the class in this scenario. But it is true, that <literal><phrase role="code">fooInstance</phrase></literal> and <literal><phrase role="code">fooInstance.bar.foo</phrase></literal> both point to the same <emphasis>underlying</emphasis> bean instance.</simpara>
 <simpara>In the case of an Errai application, there are a bunch of application scoped beans which come built-in for common services like _ <emphasis>ErraiBus</emphasis> _. Thus, in an Errai application which uses the message bus, we can inject a handle to the <literal><phrase role="code">MessageBus</phrase></literal> service into any of our beans. Let&#8217;s go ahead and do that in our <literal><phrase role="code">Bar</phrase></literal> class:</simpara>
-<screen>
-@ApplicationScoped
+<programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class Bar {
   @Inject Foo foo;
   @Inject MessageBus bus;
@@ -595,8 +639,7 @@ public class Bar {
   public String getName() {
     return "Mr. Bar";
   }
-}
-</screen>
+}</programlisting>
 <simpara>If working with dependency injection is new to you, then this is where you&#8217;ll start seeing some practical benefit. When you need a common service in your client code, you ask the container for it, by <emphasis>injecting</emphasis> it. This frees you of worrying about the proper APIs to use in order to get access to a service; we need to use the message bus in our <literal><phrase role="code">Bar</phrase></literal> bean, and so we inject it.</simpara>
 <simpara>Now that we&#8217;re getting the gist of how dependency injection works, let&#8217;s go back to the sample project we created with the Maven archetype in the last section of this guide.</simpara>
 <simpara>In the <literal><phrase role="code">App</phrase></literal> class that was created, there may be two peculiarities sticking out to you:</simpara>
@@ -727,8 +770,7 @@ public class HelloWorldService implements MessageCallback {
       .sendNowWith(dispatcher);      // (5)
     });
   }
-}
-</programlisting>
+}</programlisting>
 <simpara>The above example shows a service which sends a message in response to receiving a message. Here&#8217;s what&#8217;s going on:</simpara>
 <orderedlist numeration="arabic">
   
@@ -1027,15 +1069,15 @@ MessageBuilder.createMessage()
 <title>Payload Structure</title>
 <simpara>All wire messages sent across are assumed to be JSON arrays at the outermost element, contained in which, there are <emphasis>0..n</emphasis> messages. An empty array is considered a no-operation, but should be counted as activity against any idle timeout limit between federated buses.</simpara>
 <example>
-<title>Figure 1 - Example J.REP Payload</title>
+<title>Example J.REP Payload</title>
 <programlisting language="java" linenumbering="unnumbered">[
   {"ToSubject" : "SomeEndpoint", "Value" : "SomeValue" },
   {"ToSubject" : "SomeOtherEndpoint", "Value" : "SomeOtherValue"}
 ]</programlisting>
 </example>
-<simpara>In <emphasis>Figure 1</emphasis> , we see an example of a J.REP payload containing two messages. One bound for an endpoint named <literal><phrase role="code">"SomeEndpoint"</phrase></literal> and the other bound for the endpoint <literal><phrase role="code">"SomeOtherEndpoint"</phrase></literal> . They both include a payload element <literal><phrase role="code">"Value"</phrase></literal> which contain strings. Let&#8217;s take a look at the anatomy of an individual message.</simpara>
+<simpara>Here we see an example of a J.REP payload containing two messages. One bound for an endpoint named <literal><phrase role="code">"SomeEndpoint"</phrase></literal> and the other bound for the endpoint <literal><phrase role="code">"SomeOtherEndpoint"</phrase></literal> . They both include a payload element <literal><phrase role="code">"Value"</phrase></literal> which contain strings. Let&#8217;s take a look at the anatomy of an individual message.</simpara>
 <example>
-<title>Figure 2 - An J.REP Message</title>
+<title>An J.REP Message</title>
 <programlisting language="java" linenumbering="unnumbered">{
   "ToSubject" : "TopicSubscriber",
   "CommandType" : "Subscribe",
@@ -1043,7 +1085,7 @@ MessageBuilder.createMessage()
   "ReplyTo" : "MyTopicSubscriberReplyTo"
 }</programlisting>
 </example>
-<simpara>The message shown in <emphasis>Figure 2</emphasis> shows a very vanilla J.REP message. The keys of the JSON Object represent individual <emphasis>message parts</emphasis> , with the values representing their corresponding values. The standard J.REP protocol encompasses a set of standard message parts and values, which for the purposes of this specification we&#8217;ll collectively refer to as the protocol verbs.</simpara>
+<simpara>The message shows a very vanilla J.REP message. The keys of the JSON Object represent individual <emphasis>message parts</emphasis> , with the values representing their corresponding values. The standard J.REP protocol encompasses a set of standard message parts and values, which for the purposes of this specification we&#8217;ll collectively refer to as the protocol verbs.</simpara>
 <simpara>The following table describes all of the message parts that a J.REP capable client is expected to understand:</simpara>
 <informaltable frame="all"
     rowsep="1" colsep="1">
@@ -1228,7 +1270,7 @@ MessageBuilder.createMessage()
 <simpara>There is no real distinction in the J.REP protocol between communication with the server, versus communication with the client. In fact, it assumed from an architectural standpoint that there is no real distinction between a client and a server. Each bus participates in a flat-namespaced federation. Therefore, it is possible that a subject may be observed on both the server and the client.</simpara>
 <simpara>One in-built assumption of a J.REP-compliant bus however, is that messages are routed within the auspices of session isolation. Consider the following diagram:</simpara>
 <figure>
-<title>Figure 3 - Topology of a J.REP Messaging Federation</title>
+<title>Topology of a J.REP Messaging Federation</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/23036473/FederationTopology.png"/>
@@ -1236,7 +1278,7 @@ MessageBuilder.createMessage()
     <textobject><phrase>FederationTopology</phrase></textobject>
   </mediaobject>
 </figure>
-<simpara>In <emphasis>Figure 3</emphasis> , is is possible for <emphasis>Client A</emphasis> to send messages to the subjects <emphasis>ServiceA</emphasis> and <emphasis>ServiceB</emphasis> . But it is not possible to address messages to <emphasis>ServiceC</emphasis> . Conversely, <emphasis>Client B</emphasis> can address messages to <emphasis>ServiceC</emphasis> and <emphasis>ServiceB</emphasis> , but not <emphasis>ServiceA</emphasis> .</simpara>
+<simpara>It is possible for <emphasis>Client A</emphasis> to send messages to the subjects <emphasis>ServiceA</emphasis> and <emphasis>ServiceB</emphasis> . But it is not possible to address messages to <emphasis>ServiceC</emphasis> . Conversely, <emphasis>Client B</emphasis> can address messages to <emphasis>ServiceC</emphasis> and <emphasis>ServiceB</emphasis> , but not <emphasis>ServiceA</emphasis> .</simpara>
 </section>
 <section id="sid-23036473_WireProtocol%28J.REP%29-BusManagementandHandshakingProtocols">
 <title>Bus Management and Handshaking Protocols</title>
@@ -2058,7 +2100,7 @@ public class MockUserManagementImpl implements UserManagement {
   }
 }</programlisting>
 <simpara>In this case, the container will replace the <literal><phrase role="code">UserManagementImpl</phrase></literal> with the <literal><phrase role="code">MockUserManagementImpl</phrase></literal> automatically when running the unit tests.</simpara>
-<simpara>The <literal><phrase role="code">@TestMock</phrase></literal> annotation can also be used to specify alternative providers during test execution. For example, it can be used to mock a <literal><phrase role="code">Caller&lt;T&gt;</phrase></literal> . <literal><phrase role="code">Callers</phrase></literal> are used to invoke RPC or JAX-RS endpoints. During tests you might want to replace theses callers with mock implementations. For details on providers see <xref linkend="sid-5931407"/> .</simpara>
+<simpara>The <literal><phrase role="code">@TestMock</phrase></literal> annotation can also be used to specify alternative providers during test execution. For example, it can be used to mock a <literal><phrase role="code">Caller&lt;T&gt;</phrase></literal> . <literal><phrase role="code">Callers</phrase></literal> are used to invoke RPC or JAX-RS endpoints. During tests you might want to replace theses callers with mock implementations. For details on providers see <link linkend="sid-5931407">Container Wiring</link> .</simpara>
 <programlisting language="java" linenumbering="unnumbered">@TestMock @IOCProvider
 public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&lt;Caller&lt;HappyService&gt;&gt; {
 
@@ -2158,7 +2200,7 @@ public class SimpleBean {
 <simpara>The Errai CDI extension implements a subset of the specification for use inside of client-side applications within Errai, as well as additional capabilities such as distributed eventing.</simpara>
 <simpara>Errai CDI does not currently implement all life cycles specified in JSR-299 or interceptors. These deficiencies may be addressed in future versions.</simpara>
 <important>
-<simpara>Errai CDI is implemented as an extension on top of the Errai IOC Framework (see <xref linkend="sid-5931402"/> ), which itself implements JSR-330. Inclusion of the CDI module your GWT project will result in the extensions automatically being loaded and made available to your application.</simpara>
+<simpara>Errai CDI is implemented as an extension on top of the Errai IOC Framework (see <link linkend="sid-5931402">Dependency Injection</link>), which itself implements JSR-330. Inclusion of the CDI module your GWT project will result in the extensions automatically being loaded and made available to your application.</simpara>
 </important>
 <note>
 <title>Classpath Scanning and ErraiApp.properties</title>
@@ -2933,7 +2975,7 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
     }
   },
   MyRemoteService.class).isEveryoneHappy();</programlisting>
-<simpara>As remote exceptions need to be serialized to be sent to the client, the <literal><phrase role="code">@Portable</phrase></literal> annotation needs to be present on the corresponding exception class (see <xref linkend="sid-5931328"/> ). Further the exception class needs to be part of the client-side code. For more details on <literal><phrase role="code">ErrorCallbacks</phrase></literal> see <xref linkend="sid-5931306"/> .</simpara>
+<simpara>As remote exceptions need to be serialized to be sent to the client, the <literal><phrase role="code">@Portable</phrase></literal> annotation needs to be present on the corresponding exception class (see <link linkend="sid-5931328&gt;">Marshalling&gt;). Further the exception class needs to be part of the client-side code. For more details on <literal><phrase role="code">ErrorCallbacks</phrase></literal> see &lt;&lt;sid-5931306, Handling Errors</link> .</simpara>
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-GlobalRPCexceptionhandler">
 <title>Global RPC exception handler</title>
 <simpara>In a scenario where many different remote calls potentially throw the same exception types (e.g. exceptions related to authentication or authorization) it can be easier to register a global exception handler instead of providing error callbacks at each RPC invocation. This global exception handler is called in case an exception occurs in the process of a remote call that has no error callback associated with it. So, it will handle an otherwise uncaught exception.</simpara>
@@ -3090,60 +3132,92 @@ image::author/images/icons/emoticons/smile.gif[]</simpara>
     <listitem>
       <simpara>project</simpara>
       
-    </listitem>
+
+<itemizedlist>
   
     <listitem>
-      <simpara>src</simpara>
+      <simpara>src/main/java</simpara>
       
-    </listitem>
-  
-    <listitem>
-      <simpara>main</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>java</simpara>
-      
-    </listitem>
+
+<itemizedlist>
   
     <listitem>
       <simpara>com.mycompany.myapp</simpara>
       
-    </listitem>
+
+<itemizedlist>
   
     <listitem>
       <simpara>MyApp.gwt.xml <emphasis>[the app&#8217;s GWT module]</emphasis></simpara>
       
     </listitem>
   
+</itemizedlist>
+
+
+      
+    </listitem>
+  
     <listitem>
       <simpara>com.mycompany.myapp.client.local</simpara>
       
-    </listitem>
+
+<itemizedlist>
   
     <listitem>
       <simpara>MyAppClientStuff.java <emphasis>[code that @Injects Caller&lt;MyAppRestResource&gt;]</emphasis></simpara>
       
     </listitem>
   
+</itemizedlist>
+
+
+      
+    </listitem>
+  
     <listitem>
       <simpara>com.mycompany.myapp.client.shared</simpara>
       
-    </listitem>
+
+<itemizedlist>
   
     <listitem>
       <simpara>CustomerService.java <emphasis>[the JAX-RS interface]</emphasis></simpara>
       
     </listitem>
   
-    <listitem>
-      <simpara>com.mycompany.myapp.server</simpara>
+</itemizedlist>
+
+
       
     </listitem>
   
     <listitem>
+      <simpara>com.mycompany.myapp.server</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
       <simpara>CustomerServiceImpl.java <emphasis>[the server-side JAX-RS resource implementation]</emphasis></simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
       
     </listitem>
   
@@ -3212,8 +3286,7 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
 <simpara>To create a request, the callback objects need to be provided to the <literal><phrase role="code">call</phrase></literal> method before the corresponding interface method is invoked.</simpara>
 <programlisting language="java" linenumbering="unnumbered">customerService.call(callback).listAllCustomers();</programlisting>
 <simpara>To use caller injection, your application needs to inherit the Errai IOC GWT module. To do this, just add this line to your application&#8217;s <literal><phrase role="code">\*.gwt.xml</phrase></literal> file and make sure it comes <literal><phrase role="code">after</phrase></literal> the Errai JAX-RS module (see <link linkend="sid-19398997_ErraiJAX-RS-GettingStarted">Getting Started</link> ):</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.ioc.Container"/&gt;
-</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.ioc.Container"/&gt;</programlisting>
 <note>
 <simpara>The JAX-RS interfaces need to be visible to the GWT compiler and must therefore reside within the client packages (e.g. client.shared).</simpara>
 </note>
@@ -3221,7 +3294,7 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-HandlingResponses">
 <title>Handling Responses</title>
-<simpara>An instance of Errai&#8217;s <literal><phrase role="code">RemoteCallback&lt;T&gt;</phrase></literal> has to be passed to the <literal><phrase role="code">RestClient.create()</phrase></literal> call, which will provide access to the JAX-RS resource method&#8217;s result. <literal><phrase role="code">T</phrase></literal> is the return type of the JAX-RS resource method. In the example below it&#8217;s just a <literal><phrase role="code">Long</phrase></literal> representing a customer ID, but it can be any serializable type (see <xref linkend="sid-5931328"/> ).</simpara>
+<simpara>An instance of Errai&#8217;s <literal><phrase role="code">RemoteCallback&lt;T&gt;</phrase></literal> has to be passed to the <literal><phrase role="code">RestClient.create()</phrase></literal> call, which will provide access to the JAX-RS resource method&#8217;s result. <literal><phrase role="code">T</phrase></literal> is the return type of the JAX-RS resource method. In the example below it&#8217;s just a <literal><phrase role="code">Long</phrase></literal> representing a customer ID, but it can be any serializable type (see <link linkend="sid-5931328">Marshalling</link>).</simpara>
 <programlisting language="java" linenumbering="unnumbered">RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
   public void callback(Long id) {
     Window.alert("Customer created with ID: " + id);
@@ -3300,7 +3373,7 @@ public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-WireFormat">
 <title>Wire Format</title>
-<simpara>Errai&#8217;s JSON format will be used to serialize/deserialize your custom types. See <xref linkend="sid-5931328"/> for details.</simpara>
+<simpara>Errai&#8217;s JSON format will be used to serialize/deserialize your custom types. See <link linkend="sid-5931328">Marshalling</link> for details.</simpara>
 <simpara>Alternatively, a Jackson compatible JSON format can be used on the wire. See <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link> for details on how to enable Jackson marshalling.</simpara>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-Configuration">
@@ -4102,7 +4175,7 @@ public class Item {
 }</programlisting>
 <simpara>To summarize: there are three entity types: <literal><phrase role="code">User</phrase></literal> , <literal><phrase role="code">GroceryList</phrase></literal> , and <literal><phrase role="code">Item</phrase></literal> . Each <literal><phrase role="code">GroceryList</phrase></literal> belongs to a <literal><phrase role="code">User</phrase></literal> and has a list of <literal><phrase role="code">Item</phrase></literal> objects.</simpara>
 <note>
-<simpara>All the entities involved in the data synchronization request must be marshallable via Errai Marshalling. This is normally accomplished by adding the <literal><phrase role="code">@Portable</phrase></literal> annotation to each JPA entity class, but it is also acceptable to list them in <literal><phrase role="code">ErraiApp.properties</phrase></literal> . See the <xref linkend="sid-5931328"/> section for more details.</simpara>
+<simpara>All the entities involved in the data synchronization request must be marshallable via Errai Marshalling. This is normally accomplished by adding the <literal><phrase role="code">@Portable</phrase></literal> annotation to each JPA entity class, but it is also acceptable to list them in <literal><phrase role="code">ErraiApp.properties</phrase></literal> . See the <link linkend="sid-5931328">Marshalling</link> section for more details.</simpara>
 </note>
 <simpara>Now let&#8217;s say we want to synchronize the data for all of a user&#8217;s grocery lists. This will make them available for offline use through Errai JPA, and at the same time it will update the server with the latest changes made on the client. Ultimately, the sync operation is accomplished in one asynchronous call, but first we have to prepare a few things on the client and the server.</simpara>
 </section>
@@ -6445,7 +6518,7 @@ bus. Set this
   
 </itemizedlist>
 
-<simpara><emphasis>Answer:</emphasis> Make sure the <xref linkend="sid-5931354"/> file is actually making it into your runtime classpath.</simpara>
+<simpara><emphasis>Answer:</emphasis> Make sure the <link linkend="sid-5931354">ErraiApp.properties</link> file is actually making it into your runtime classpath.</simpara>
 <simpara>One common cause of this problem is a &lt;resources&gt; section in pom.xml that includes src/main/java (to expose .java sources to the GWT compiler) that does not also include src/main/resources as a resource path. You must include both explicitly:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;resources&gt;
   &lt;resource&gt;
@@ -6477,7 +6550,7 @@ bus. Set this
 <itemizedlist>
   
     <listitem>
-      <simpara>@ExposedEntity became @Portable ( <literal><phrase role="code">org.jboss.errai.common.client.api.annotations.Portable</phrase></literal> ). See <xref linkend="sid-5931328"/> for details.</simpara>
+      <simpara>@ExposedEntity became @Portable ( <literal><phrase role="code">org.jboss.errai.common.client.api.annotations.Portable</phrase></literal> ). See <link linkend="sid-5931328">Marshalling</link> for details.</simpara>
       
     </listitem>
   
@@ -6487,7 +6560,7 @@ bus. Set this
     </listitem>
   
     <listitem>
-      <simpara>Errai CDI projects must now use the <literal><phrase role="code">SimpleDispatcher</phrase></literal> instead of the <literal><phrase role="code">AsynDispatcher</phrase></literal> . This has to be configured in <xref linkend="sid-5931338"/> .</simpara>
+      <simpara>Errai CDI projects must now use the <literal><phrase role="code">SimpleDispatcher</phrase></literal> instead of the <literal><phrase role="code">AsynDispatcher</phrase></literal> . This has to be configured in <link linkend="sid-5931338">Messaging (Errai Bus) Configuration</link> .</simpara>
       
     </listitem>
   
@@ -6588,7 +6661,7 @@ bus. Set this
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">IOCBeanManager</phrase></literal> was replaced by two new types <literal><phrase role="code">SyncBeanManager</phrase></literal> and <literal><phrase role="code">AsyncBeanManager</phrase></literal> that need to be used instead. See <xref linkend="sid-21627016"/> for details.</simpara>
+      <simpara><literal><phrase role="code">IOCBeanManager</phrase></literal> was replaced by two new types <literal><phrase role="code">SyncBeanManager</phrase></literal> and <literal><phrase role="code">AsyncBeanManager</phrase></literal> that need to be used instead. See <link linkend="sid-21627016">Client-side Bean Manager</link> for details.</simpara>
       
     </listitem>
   
