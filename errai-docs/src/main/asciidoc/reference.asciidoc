@@ -72,13 +72,13 @@ The first thing you'll need to do if you have not already, is link:$$http://mave
 Warning: If you use maven2, you will run into this problem: https://community.jboss.org/thread/177645
 ====
 
-You have two options to set up an Errai application. You can start by copying our errai-tutorial demo or by building an app with the Errai Forge plugin:
+You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[errai tutorial demo]) or by building an app with the Errai Forge plugin:
 
 [[sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication]]
 
 ===== Start from a working example application
 
-Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[demo] . Check out the README file and continue with running the app in <<sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode,GWT's development mode>> and importing the project into <<sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse,Eclipse>> .
+Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[demo]. Check out the README file and continue with running the app in <<sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode,GWT's development mode>> and importing the project into <<sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse,Eclipse>> .
 
 [[sid-54493220_GettingStartedwithErrai-Startfromaquickstartarchetype]]
 
@@ -585,7 +585,6 @@ He we declare an extremely simple service. The [code]+@Service+ annotation provi
 
 In the following example we extend our server side component to reply with a message when the callback method is invoked. It will create a message and address it to the subject ' [code]+HelloWorldClient+ ':
 
-
 [source, java]
 ----
 @Service
@@ -609,7 +608,6 @@ public class HelloWorldService implements MessageCallback {
     });
   }
 }
-
 ----
 
 The above example shows a service which sends a message in response to receiving a message. Here's what's going on:
