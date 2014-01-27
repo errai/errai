@@ -232,16 +232,16 @@ The project that was made in the last section is a Maven project. Thus, we will 
 To install the Maven tooling, use the following steps:
 
 1. Go to the _Eclipse Marketplace_ under the _Help_ menu in Eclipse.
-
++
 .Eclipse Marketplace
 image::author/download/attachments/54493220/EclipseM2eStep1.PNG[]
 
 2. In the _Find_ dialog enter the phrase _Maven_ and hit enter.
-
++
 image::author/download/attachments/54493220/EclipseM2eStep2.PNG[]
 
 3. Find the _Maven Integration for Eclipse_ plugin and click the _Install_ button for that entry.
-
++
 .Maven Integration for Eclipse in Marketplace
 image::author/download/attachments/54493220/EclipseM2eStep3.PNG[]
 
@@ -256,56 +256,56 @@ Once you have completed the installation of the prerequisites from the previous 
 Follow these steps to get the project setup:
 
 1. From the _File_ menu, select _Import..._
-
++
 .Import File in Eclipse
 image::author/download/attachments/54493220/Import1.PNG[]
 
 2. You will be presented with the Import dialog box. From here you want to select _Maven_ -> _Existing Maven Projects_
-
++
 .Import Existing Maven Project
 image::author/download/attachments/54493220/Import2.PNG[]
 
 3. From the _Import Maven Projects_ dialog, you will need to select the directory location of the project you created in the first section of this guide. In the _Root Directory_ field of the dialog, enter the path to the project, or click _Browse..._ to select it from the file chooser dialog.
-
++
 .Select Folder
 image::author/download/attachments/54493220/Import3.PNG[]
 
 4. Click _Finish_ to begin the import process.
 
 5. When the import process has finished, you should see your project imported within the Eclipse _Project Explorer_ . If you are using errai-tutorial, the [code]+App+ class should be visible within the [code]+client+ package.
-
++
 .App.java
 image::author/download/attachments/54493220/Import4.PNG[]
 
 ===== Running Development Mode with Eclipse
 
-6. Next you will need to setup a Maven Run Profile for Development Mode. To do so select _Run As..._ > _Run Configurations..._ from the toolbar.
-
+1. Next you will need to setup a Maven Run Profile for Development Mode. To do so select _Run As..._ > _Run Configurations..._ from the toolbar.
++
 .Run Configurations
 image::author/download/attachments/54493220/RunConfigurations.PNG[]
 
-7. Select _Maven Build_ from the sidebar and create a new launch configuration by pressing the _New_ button in the top left corner.
-
+2. Select _Maven Build_ from the sidebar and create a new launch configuration by pressing the _New_ button in the top left corner.
++
 .New Configuration
 image::author/download/attachments/54493220/NewLaunchConfiguration.PNG[]
 
-8. Give the configuration a name, then click _Browse Workspace_ and select the root directory of your new project.
-
+3. Give the configuration a name, then click _Browse Workspace_ and select the root directory of your new project.
++
 .Select Project Root Directory
 image::author/download/attachments/54493220/LaunchRootDir.PNG[]
 
-9. In the _Goals_ text box, type "clean gwt:run". Click _Apply_ to save the configuration and then _Close_.
-
+4. In the _Goals_ text box, type "clean gwt:run". Click _Apply_ to save the configuration and then _Close_.
++
 .Run Configurations Goals
 image::author/download/attachments/54493220/GwtRunGoals.PNG[]
 
-10. You can add this new configuration under the _Run As_ button in your toolbar by selecting _Run As_ > _Organize Favorites_, then clicking _Add_ and selecting the run configuration.
-
+5. You can add this new configuration under the _Run As_ button in your toolbar by selecting _Run As_ > _Organize Favorites_, then clicking _Add_ and selecting the run configuration.
++
 .Add Configuration to Favourites
 image::author/download/attachments/54493220/OrganizeFavourites.PNG[]
 
-11. At this point, you should try running your new configuration to make sure everything is in working order. To run your app, find the run configuration under the _Run As_ menu in the toolbar.
-
+6. At this point, you should try running your new configuration to make sure everything is in working order. To run your app, find the run configuration under the _Run As_ menu in the toolbar.
++
 .Run Gwt Development Mode from Eclipse
 image::author/download/attachments/54493220/UseGwtRunConfiguration.PNG[]
 
@@ -313,34 +313,34 @@ This will start the GWT Development Mode exactly as running `mvn clean gwt:run` 
 
 ===== Debugging in Development Mode with Eclipse
 
-12. To setup a debug run configuration for GWT Development Mode, repeate steps (7) and (8) above, but this time use the _Goals_ "clean gwt:debug".
-
+1. To setup a debug run configuration for GWT Development Mode, repeate steps (2) and (3) from the section above, but this time use the _Goals_ "clean gwt:debug".
++
 .Configure Maven Debug Configuration
 image::author/download/attachments/54493220/ConfigureGwtDebug.PNG[]
 
-13. Next we will need to setup our remote debugger configurations in Eclipse. Because the client and server code run on separate JVMs, we will need to setup two such configurations. To create a debug configuration, select _Debug As..._ > _Debug Configurations..._ from the toolbar.
-
+2. Next we will need to setup our remote debugger configurations in Eclipse. Because the client and server code run on separate JVMs, we will need to setup two such configurations. To create a debug configuration, select _Debug As..._ > _Debug Configurations..._ from the toolbar.
++
 .Create Debug Configuration
 image::author/download/attachments/54493220/DebugConfigurations.PNG[]
 
-14. In the sidebar, select _Remote Java Application_ and click the _New_ button in the top right corner.
-
+3. In the sidebar, select _Remote Java Application_ and click the _New_ button in the top right corner.
++
 .Create Remote Debug Configuration
 image::author/download/attachments/54493220/NewDebugConfig.PNG[]
 
-15. This new configuration will be for remote debugging your client-side code, so give it an appropriate name. If the name of your project is not already in the _Project_ field, click _Browse_ and select it. The _Host_ and _Port_ values should be _localhost_ and _8000_ respectively, such that your configuration looks like this:
-
+4. This new configuration will be for remote debugging your client-side code, so give it an appropriate name. If the name of your project is not already in the _Project_ field, click _Browse_ and select it. The _Host_ and _Port_ values should be _localhost_ and _8000_ respectively, such that your configuration looks like this:
++
 .Client Debug Configuration
 image::author/download/attachments/54493220/ClientDebugConfig.PNG[]
-
++
 If everything is correct, click _Apply_.
 
-16. Create another _Remote Java Application_ run configuration with the steps just described for remote debugging server code. The only differences from the client configuration should be the name and the port, which is _8001_. Thus the server remote debug configuration should look like this:
-
+5. Create another _Remote Java Application_ run configuration with the steps just described for remote debugging server code. The only differences from the client configuration should be the name and the port, which is _8001_. Thus the server remote debug configuration should look like this:
++
 .Server Debug Configuration
 image::author/download/attachments/54493220/ServerDebugConfig.PNG[]
 
-17. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>> !
+6. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>> !
 
 [[sid-54493502]]
 
