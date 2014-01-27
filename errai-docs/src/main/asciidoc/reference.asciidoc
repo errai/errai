@@ -72,7 +72,7 @@ The first thing you'll need to do if you have not already, is link:$$http://mave
 Warning: If you use maven2, you will run into this problem: https://community.jboss.org/thread/177645
 ====
 
-You have two options to set up an Errai application. You can start by copying one of our demos or start building an app with a maven archetype:
+You have two options to set up an Errai application. You can start by copying our errai-tutorial demo or by building an app with the Errai Forge plugin:
 
 [[sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication]]
 
@@ -82,66 +82,87 @@ Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/ar
 
 [[sid-54493220_GettingStartedwithErrai-Startfromaquickstartarchetype]]
 
-===== Start from a quickstart archetype
+===== Starting with the Errai Forge plugin
 
-Open a terminal or command prompt, and navigate to the directory where you would like to create your Errai project.
+Another way to start a new project with Errai is to use Forge and the Errai Forge plugin. For this approach you will need:
 
-Type or paste the following into the terminal:
+* To download and install link:$$http://forge.jboss.org/[Forge].
+
+* To download the Errai Forge plugin, by either cloning link:$$https://github.com/errai/forge-errai.git[this repo] or downloading and unzipping link:$$https://github.com/errai/forge-errai/archive/master.zip[this file].
+
+===== Loading the Errai Forge plugin
+
+To install the plugin, start forge and then run the command, where `$PATH_TO_PLUGIN` is the absolute path of the Errai Forge plugin source you have previously downloaded.
 
 ----
-
-mvn archetype:generate -DarchetypeGroupId=org.jboss.errai.archetypes -DarchetypeArtifactId=cdi-quickstart -DarchetypeVersion=2.3.2.Final
-
+forge source-plugin $PATH_TO_PLUGIN
 ----
 
-When it is finished downloading all of the dependencies, you will be prompted to specify the [code]+groupId+ of your project. In practice, the Maven [code]+groupId+ is usually the same as the base package of your project. For instance, if your project's package namespace will be [code]+org.company.firestorm+ , the Maven [code]+groupId+ would usually be the same, or perhaps simply [code]+org.company+ .
+===== Creating your new project
 
-You will next be prompted to specify an [code]+artifactId+ , which in practice is the name of the application or the application component, in a multi-module Maven project.
+While still in Forge, run this command:
 
-For instance: [code]+firestorm-app+
+----
+new-project --named $PROJECT_NAME --topLevelPackage $PROJECT_PACKAGE --projectFolder $PROJECT_PATH
+----
 
-The next thing you'll be asked to specify is the initial version of the artifact, which defaults to [code]+1.0-SNAPSHOT+ . This is usually a sensible starting version if this is the first version of your app. But your milage may vary. To accept the default value, you can just hit enter.
+Make sure to replace the above variables so that:
 
-You'll then be prompted to enter the [code]+package+ of the application. It will default to the same thing you specified for the [code]+groupId+ . To accept this default, just hit enter.
+* *$PROJECT_NAME* is the name of your new project.
 
-You'll be prompted to review all of your choices:
+* *$PROJECT_PACKAGE* is the Java package used by your new project.
 
-.Maven Artifact creation prompt
+* *$PROJECT_PATH* is the path to the root directory of your new project (Forge will create the directory for you).
+
+===== Installing the Errai Forge plugin
+
+In Forge (while in your new project's root directory) run
+
+----
+errai setup
+----
+
+This will prompt you for:
+
+* The logical name of the link:$$http://www.gwtproject.org/doc/latest/DevGuideOrganizingProjects.html#DevGuideModuleXml[GWT module] for your project. (So if you want a module called _App_ in the package `org.jboss.errai`, the logical name would be `org.jboss.errai.App`)
+
+* An option to give your module a different name with the "rename-to" attribute (for example, you could rename a logical module `org.jboss.errai.App` to just `app` to help shorten urls).
+
+* The version of Errai you would like to use.
+
+This will configure the main dependencies and plugins required to run any Errai App in GWT Development Mode and to compile for deployment. You will now also have access to all of the Errai Forge plugin commands. Since one of the proceeding sections will be describing the use of Errai CDI, you should install this feature now by running
+
+----
+errai add-feature cdi
+----
+
+In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:
+
+[source,java]
+----
+// Add the package declaration here
+
+import javax.annotation.PostConstruct;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import com.google.gwt.user.client.Window;
+
+@EntryPoint
+public class App {
+  
+  @PostConstruct
+  public void onLoad() {
+    Window.alert("Hello World!");
+  }
+}
+----
+
+Create new subfolder, _client/local_, under the folder containing your GWT module file. Then create a file, _App.java_, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).
+
+[TIP]
 ====
-
-----
-
-Confirm properties configuration:
-groupId: org.company.firestorm
-artifactId: firestorm-app
-version: 1.0-SNAPSHOT
-package: org.company.firestorm
- Y: :
-
-----
-
+.Plugin Tips
+Keep an eye out for tips in the proceeding sections on how you can use the Errai Forge plugin to configure other Errai features for your new project.
 ====
-
-You can type [code]+N+ here and hit enter to correct any mistakes. Or simply hit enter to accept these values.
-
-After accepting the values you will see something like the following:
-
-[listing]
-....
-
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 10:09.469s
-[INFO] Finished at: Mon Sep 17 15:40:04 EDT 2012
-[INFO] Final Memory: 9M/81M
-[INFO] ------------------------------------------------------------------------
-
-....
-
-Congratulations! You've created an archetype for Errai. Let's make sure that you have everything set up properly.
-
-A _new directory_ should have been created with the name of the [code]+artifactId+ (firestorm-app for example) which you specified.
 
 [[sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode]]
 
@@ -180,18 +201,11 @@ If you get a 404 Error for Internet Explorer when clicking the link, you can dow
 * link:$$http://google-web-toolkit.googlecode.com/svn-history/trunk/plugins/ie/prebuilt/gwt-dev-plugin-x64.msi$$[Internet Explorer 64-bit]
 ====
 
-Once you have configured your browser for development with GWT, and after loading the app with the _Launch Default Browser_ button, you should see the basic skeleton application load. You should see something like what is shown in _Figure 3_ :
+Once you have configured your browser for development with GWT, and after loading the app with the _Launch Default Browser_ button, you should see the application load.
 
-[[img-blank-app]]
-.The plain archetype app running in the browser
-image::author/download/attachments/54493220/RunningAppBlank.png[]
+If you are using errai-tutorial, you should see a page with a complaint form.
 
-If you type something into the box and click _Send_ , you should see the response sent back from the locally-running server in the app, as shown in _Figure 4_ :
-
-[[img-testing-the-app]]
-.Testing that the app is working
-image::author/download/attachments/54493220/RunningAppTestData.png[]
-
+If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".
 
 That's it! You've got your first Errai Application up and running. In the next section we'll setup your IDE.
 
@@ -202,7 +216,7 @@ That's it! You've got your first Errai Application up and running. In the next s
 [NOTE]
 .Read the previous section!
 ====
-This next section assumes you have followed the instructions in the previous section. As such, we assume you have created an Errai project from the Errai CDI archetype, which we'll be importing into your IDE.
+This next section assumes you have followed the instructions in the previous section. As such, we assume you have created an Errai project using the Errai Forge plugin or a copy of the errai-tutorial project, which we'll be importing into your IDE.
 ====
 
 [[sid-54493220_GettingStartedwithErrai-Prerequisites]]
@@ -219,7 +233,7 @@ If you have not done so already, you should install the link:$$https://developer
 
 ===== Maven Integration for Eclipse (m2e)
 
-The project that the archetype in the last section generated is a Maven project. Thus, we will be relying on Maven to manage our project model throughout this guide. As such, we will want to install Maven tooling in the IDE. If you have not already installed m2e in Eclipse, you will want to do so now.
+The project that was made in the last section is a Maven project. Thus, we will be relying on Maven to manage our project model throughout this guide. As such, we will want to install Maven tooling in the IDE. If you have not already installed m2e in Eclipse, you will want to do so now.
 
 To install the Maven tooling, use the following steps:
 
@@ -227,9 +241,6 @@ To install the Maven tooling, use the following steps:
 
 .Eclipse Marketplace
 image::author/download/attachments/54493220/EclipseM2eStep1.PNG[]
-
-
-
 
 2. In the _Find_ dialog enter the phrase _Maven_ and hit enter.
 
@@ -246,7 +257,7 @@ image::author/download/attachments/54493220/EclipseM2eStep3.PNG[]
 
 ===== Importing your project
 
-Once you have completed the installation of the prerequisites from the previous section, you will now be able to go ahead and import the Maven project you created in the first section of this guide.
+Once you have completed the installation of the prerequisites from the previous section, you will now be able to go ahead and import the Maven project you created in the first section of this guide. We will use the errai-tutorial project as an example.
 
 Follow these steps to get the project setup:
 
@@ -267,60 +278,75 @@ image::author/download/attachments/54493220/Import3.PNG[]
 
 4. Click _Finish_ to begin the import process.
 
-5. When the import process has finished, you should see your project imported within the Eclipse _Project Explorer_ . The [code]+App+ class generated by the archetype should be visible within the [code]+client+ package under the package root you specified when creating the project.
+5. When the import process has finished, you should see your project imported within the Eclipse _Project Explorer_ . If you are using errai-tutorial, the [code]+App+ class should be visible within the [code]+client+ package.
 
 .App.java
 image::author/download/attachments/54493220/Import4.PNG[]
 
-6. The next step will be to configure your project as a Google Web Toolkit project in order to enable the GPE plugin features which we will rely on in this guide. You can do this by first right-clicking on the project name within the _Project Explorer_ panel, selecting the _Google_ -> _Web Toolkit Settings..._ options.
+===== Running Development Mode with Eclipse
 
-.Open Web Toolkit Settings
-image::author/download/attachments/54493220/Import5.PNG[]
+6. Next you will need to setup a Maven Run Profile for Development Mode. To do so select _Run As..._ > _Run Configurations..._ from the toolbar.
 
-7. To enable the GWT features of the plugin, check the _Use Google Web Toolkit_ checkbox in the dialog that appears.
+.Run Configurations
+image::author/download/attachments/54493220/RunConfigurations.PNG[]
 
-..Web Toolkit Settings
-image::author/download/attachments/54493220/Import6.PNG[]
+7. Select _Maven Build_ from the sidebar and create a new launch configuration by pressing the _New_ button in the top left corner.
 
-8. Add the GWT module generated by our archetype to your project by clicking the _Add..._ button in the _Web Toolkit_ options dialog. There should only be one available module in your application, named _App_ . Select and add this.
+.New Configuration
+image::author/download/attachments/54493220/NewLaunchConfiguration.PNG[]
 
-.Add your GWT module
-image::author/download/attachments/54493220/Import7.PNG[]
+8. Give the configuration a name, then click _Browse Workspace_ and select the root directory of your new project.
 
-9. On the left hand side of the _Properties_ dialog box, you should see a _Web Application_ section under the _Google_ tree item. It should be the option directly above the _Web Toolkit_ menu. Select this.
+.Select Project Root Directory
+image::author/download/attachments/54493220/LaunchRootDir.PNG[]
 
-10. In the _Properties for firestorm-app_ window:
+9. In the _Goals_ text box, type "clean gwt:run". Click _Apply_ to save the configuration and then _Close_.
 
-* Check the box _This project has a WAR directory_ .
-* In the _WAR directory_ field, enter [code]+src/main/webapp+ or click _Browse..._ to navigate to the [code]+webapp+ directory.
-* Check the box _Launch and deploy from this directory_ When done, click _OK_ .
+.Run Configurations Goals
+image::author/download/attachments/54493220/GwtRunGoals.PNG[]
 
-.Confirm changes
-image::author/download/attachments/54493220/Import8.PNG[]
+10. You can add this new configuration under the _Run As_ button in your toolbar by selecting _Run As_ > _Organize Favorites_, then clicking _Add_ and selecting the run configuration.
 
-11. You may be presented with a dialog warning you that GWT features will require the re-opening of already open editors. Simply click _Re-open Java editors_ .
+.Add Configuration to Favourites
+image::author/download/attachments/54493220/OrganizeFavourites.PNG[]
 
-.Possible warning
-image::author/download/attachments/54493220/Import9.PNG[]
+11. At this point, you should try running your new configuration to make sure everything is in working order. To run your app, find the run configuration under the _Run As_ menu in the toolbar.
 
-12. From the main workspace, click on the _Run As..._ menu. It is indicated by a green play icon, pictured in the image below. From the menu, select _Run As..._ -> _Web Application_ .
+.Run Gwt Development Mode from Eclipse
+image::author/download/attachments/54493220/UseGwtRunConfiguration.PNG[]
 
-.Run your application
-image::author/download/attachments/54493220/Import10.PNG[]
+This will start the GWT Development Mode exactly as running `mvn clean gwt:run` from the command line.
 
-13. You will be presented with the _HTML Page Selection_ dialog. This dialog is used for choosing which HTML page to load in order to start the application. Select [code]+App.html+ , then click _OK_ .
+===== Debugging in Development Mode with Eclipse
 
-14. The application should start and you should see the startup log display the Weld and Errai bootstrapping information. When it is done bootstrapping, which may take a few moments, you should be presented with a panel with a URL link in order to launch your application. Double-click on this link.
+12. To setup a debug run configuration for GWT Development Mode, repeate steps (7) and (8) above, but this time use the _Goals_ "clean gwt:debug".
 
-.Select Development mode link
-image::author/download/attachments/54493220/Import13.PNG[]
+.Configure Maven Debug Configuration
+image::author/download/attachments/54493220/ConfigureGwtDebug.PNG[]
 
-15. Your web browser should load and you should see the same application we launched from the command line in the previous section.
+13. Next we will need to setup our remote debugger configurations in Eclipse. Because the client and server code run on separate JVMs, we will need to setup two such configurations. To create a debug configuration, select _Debug As..._ > _Debug Configurations..._ from the toolbar.
 
-.Running application
-image::author/download/attachments/54493220/Import14.PNG[]
+.Create Debug Configuration
+image::author/download/attachments/54493220/DebugConfigurations.PNG[]
 
-16. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>> !
+14. In the sidebar, select _Remote Java Application_ and click the _New_ button in the top right corner.
+
+.Create Remote Debug Configuration
+image::author/download/attachments/54493220/NewDebugConfig.PNG[]
+
+15. This new configuration will be for remote debugging your client-side code, so give it an appropriate name. If the name of your project is not already in the _Project_ field, click _Browse_ and select it. The _Host_ and _Port_ values should be _localhost_ and _8000_ respectively, such that your configuration looks like this:
+
+.Client Debug Configuration
+image::author/download/attachments/54493220/ClientDebugConfig.PNG[]
+
+If everything is correct, click _Apply_.
+
+16. Create another _Remote Java Application_ run configuration with the steps just described for remote debugging server code. The only differences from the client configuration should be the name and the port, which is _8001_. Thus the server remote debug configuration should look like this:
+
+.Server Debug Configuration
+image::author/download/attachments/54493220/ServerDebugConfig.PNG[]
+
+17. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>> !
 
 [[sid-54493502]]
 
