@@ -223,12 +223,6 @@ This next section assumes you have followed the instructions in the previous sec
 
 ===== Prerequisites
 
-[[sid-54493220_GettingStartedwithErrai-GooglePluginforEclipse%28GPE%29]]
-
-===== Google Plugin for Eclipse (GPE)
-
-If you have not done so already, you should install the link:$$https://developers.google.com/eclipse/docs/install-eclipse-4.2$$[Google Plugin for Eclipse] (GPE). Click link:$$https://developers.google.com/eclipse/docs/install-eclipse-4.2$$[here] for instructions at the Google Plugin for Eclipse site on how to install it. _Note:_ You must install _at least_ the GWT SDK.
-
 [[sid-54493220_GettingStartedwithErrai-MavenIntegrationforEclipse%28m2e%29]]
 
 ===== Maven Integration for Eclipse (m2e)
