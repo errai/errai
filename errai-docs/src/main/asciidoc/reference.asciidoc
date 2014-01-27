@@ -38,15 +38,15 @@ Since Errai is an end-to-end framework, in that, parts of the framework run and 
 
 GWT is a toolkit built around a Java-to-JavaScript compiler. It provides a JRE emulation library, abstraction of browser quirks, a development mode runtime, and tools for native JavaScript integration.
 
-Errai uses GWT to accomplish the translation of concepts such as CDI into the browser, which enables a consisted client and server programming experience.
+Errai uses GWT to accomplish the translation of concepts such as CDI into the browser, which enables a consistent client and server programming experience.
 
 [[sid-54493220_GettingStartedwithErrai-ContextsandDependencyInjection%28CDI%29]]
 
 ===== Contexts and Dependency Injection (CDI)
 
-CDI is a standard part of the Java EE 6.0 stack, and is specified in the link:$$http://jcp.org/en/jsr/detail?id=299$$[JSR-299] specification. CDI provides the basis for the programming model that will be explored in this guide. As such, if you are unfamiliar with CDI, basic concepts will be introduced in this guide, and pre-existing knowledge of CDI is not strictly necessary.
+CDI is a standard part of the Java EE 6.0 stack, and is defined in the link:$$http://jcp.org/en/jsr/detail?id=299$$[JSR-299] specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.
 
-Errai's support for CDI is two-fold: For the server-side, Errai currently has integration with Weld, which is the reference implementation (RI) of the JSR-299 specification. The client-side integration for CDI is provided by the Errai CDI extension. Errai CDI implements a subset of the JSR-299 specification to provide the CDI programming model within client code.
+Errai's support for CDI is two-fold. For the server-side, Errai has integration with Weld, which is the reference implementation (RI) of the JSR-299 specification. The client-side integration for CDI is provided by the Errai CDI extension. Errai CDI implements a subset of the JSR-299 specification to provide the CDI programming model within client code.
 
 [[sid-54493220_GettingStartedwithErrai-JavaAPIforRESTfulWebServices%28JAXRS%29]]
 
@@ -67,7 +67,7 @@ ErraiBus is an underlying transport technology which provides true, bidirectiona
 [IMPORTANT]
 .Maven Required
 ====
-The first thing you'll need to do if you have not already, is link:$$http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html$$[install Maven] . If you have no already installed Maven, do so now. Otherwise read on.
+The first thing you'll need to do if you have not already, is link:$$http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html$$[install Maven] . If you have not already installed Maven, do so now.
 
 Warning: If you use maven2, you will run into this problem: https://community.jboss.org/thread/177645
 ====
