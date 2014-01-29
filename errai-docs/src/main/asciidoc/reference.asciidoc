@@ -6955,449 +6955,449 @@ For those not using maven, here is the dependency tree of Errai project jars.
 
 ==== Errai Messaging
 * org.jboss.errai:errai-bus:jar
-  * org.jboss.errai:errai-common:jar:compile
-    * org.jboss.errai.reflections:reflections:jar:compile
-    * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-  * org.jboss.errai:errai-config:jar:compile
-  * org.jboss.errai:errai-marshalling:jar:compile
-    * org.jboss.errai:errai-codegen:jar:compile
-    * org.jboss.errai:errai-codegen-gwt:jar:compile
-    * javax.annotation:jsr250-api:jar:1.0:compile
-    * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-  * org.jboss.spec.javax.servlet:jboss-servlet-api_3.0_spec:jar:1.0.0.Final:provided
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * javax.validation:validation-api:jar:1.0.0.GA:provided
-    * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * com.google.inject:guice:jar:3.0:compile
-    * aopalliance:aopalliance:jar:1.0:compile
-  * javax.inject:javax.inject:jar:1:compile
-  * org.mvel:mvel2:jar:2.1.7.Final:compile
-  * org.slf4j:slf4j-api:jar:1.6.1:compile
-  * org.mortbay.jetty:jetty:jar:6.1.25:provided
-    * org.mortbay.jetty:jetty-util:jar:6.1.25:provided
-    * org.mortbay.jetty:servlet-api:jar:2.5-20081211:provided
-  * org.apache.tomcat:catalina:jar:6.0.20:provided
-    * org.apache.tomcat:servlet-api:jar:6.0.20:provided
-    * org.apache.tomcat:juli:jar:6.0.20:provided
-    * org.apache.tomcat:annotations-api:jar:6.0.20:provided
-  * com.sun.grizzly:grizzly-comet:jar:1.9.19-beta2:provided
-    * com.sun.grizzly:grizzly-http:jar:1.9.19-beta2:provided
-       * com.sun.grizzly:grizzly-rcm:jar:1.9.19-beta2:provided
-       * com.sun.grizzly:grizzly-portunif:jar:1.9.19-beta2:provided
-  * com.sun.grizzly:grizzly-nio-framework:jar:1.9.19-beta2:provided
-    * com.sun.grizzly:grizzly-framework:jar:1.9.19-beta2:provided
-       * com.sun.grizzly:grizzly-utils:jar:1.9.19-beta2:provided
-          * com.sun.grizzly:grizzly-lzma:jar:1.9.19-beta2:provided
-  * org.jboss:jboss-vfs:jar:3.0.1.GA:provided
-  * junit:junit:jar:4.10:compile
-    * org.hamcrest:hamcrest-core:jar:1.1:compile
-  * com.google.appengine:appengine-api-1.0-sdk:jar:1.7.6:provided
-  * com.google.appengine:appengine-api-labs:jar:1.7.6:provided
-  * org.javassist:javassist:jar:3.15.0-GA:compile
-  * org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
-  * com.google.guava:guava:jar:14.0.1:compile
-  * javax:javaee-api:jar:6.0:provided
-  * org.jgroups:jgroups:jar:3.2.0.Final:compile
+** org.jboss.errai:errai-common:jar:compile
+*** org.jboss.errai.reflections:reflections:jar:compile
+*** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+** org.jboss.errai:errai-config:jar:compile
+** org.jboss.errai:errai-marshalling:jar:compile
+*** org.jboss.errai:errai-codegen:jar:compile
+*** org.jboss.errai:errai-codegen-gwt:jar:compile
+*** javax.annotation:jsr250-api:jar:1.0:compile
+*** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+**** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+** org.jboss.spec.javax.servlet:jboss-servlet-api_3.0_spec:jar:1.0.0.Final:provided
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** javax.validation:validation-api:jar:1.0.0.GA:provided
+*** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** com.google.inject:guice:jar:3.0:compile
+*** aopalliance:aopalliance:jar:1.0:compile
+** javax.inject:javax.inject:jar:1:compile
+** org.mvel:mvel2:jar:2.1.7.Final:compile
+** org.slf4j:slf4j-api:jar:1.6.1:compile
+** org.mortbay.jetty:jetty:jar:6.1.25:provided
+*** org.mortbay.jetty:jetty-util:jar:6.1.25:provided
+*** org.mortbay.jetty:servlet-api:jar:2.5-20081211:provided
+** org.apache.tomcat:catalina:jar:6.0.20:provided
+*** org.apache.tomcat:servlet-api:jar:6.0.20:provided
+*** org.apache.tomcat:juli:jar:6.0.20:provided
+*** org.apache.tomcat:annotations-api:jar:6.0.20:provided
+** com.sun.grizzly:grizzly-comet:jar:1.9.19-beta2:provided
+*** com.sun.grizzly:grizzly-http:jar:1.9.19-beta2:provided
+**** com.sun.grizzly:grizzly-rcm:jar:1.9.19-beta2:provided
+**** com.sun.grizzly:grizzly-portunif:jar:1.9.19-beta2:provided
+** com.sun.grizzly:grizzly-nio-framework:jar:1.9.19-beta2:provided
+*** com.sun.grizzly:grizzly-framework:jar:1.9.19-beta2:provided
+**** com.sun.grizzly:grizzly-utils:jar:1.9.19-beta2:provided
+***** com.sun.grizzly:grizzly-lzma:jar:1.9.19-beta2:provided
+** org.jboss:jboss-vfs:jar:3.0.1.GA:provided
+** junit:junit:jar:4.10:compile
+*** org.hamcrest:hamcrest-core:jar:1.1:compile
+** com.google.appengine:appengine-api-1.0-sdk:jar:1.7.6:provided
+** com.google.appengine:appengine-api-labs:jar:1.7.6:provided
+** org.javassist:javassist:jar:3.15.0-GA:compile
+** org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
+** com.google.guava:guava:jar:14.0.1:compile
+** javax:javaee-api:jar:6.0:provided
+** org.jgroups:jgroups:jar:3.2.0.Final:compile
 
 
 ==== Errai CDI
 * org.jboss.errai:errai-weld-integration:jar
-  * org.jboss.errai:errai-common:jar:compile
-    * org.jboss.errai.reflections:reflections:jar:compile
-      * dom4j:dom4j:jar:1.6.1:compile
-         * xml-apis:xml-apis:jar:1.4.01:compile
-    * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-  * org.jboss.errai:errai-bus:jar:compile
-    * org.jboss.errai:errai-marshalling:jar:compile
-    * com.google.inject:guice:jar:3.0:compile
-      * aopalliance:aopalliance:jar:1.0:compile
-    * javax.inject:javax.inject:jar:1:compile
-    * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.javassist:javassist:jar:3.15.0-GA:compile
-    * org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
-    * com.google.guava:guava:jar:14.0.1:compile
-    * org.jgroups:jgroups:jar:3.2.0.Final:compile
-  * org.jboss.errai:errai-config:jar:compile
-  * org.jboss.errai:errai-ioc:jar:provided
-    * org.jboss.errai:errai-codegen:jar:compile
-    * org.jboss.errai:errai-codegen-gwt:jar:compile
-    * javax.annotation:jsr250-api:jar:1.0:compile
-  * org.jboss.errai:errai-ioc-bus-support:jar:provided
-  * javax.enterprise:cdi-api:jar:1.0-SP4:provided
-    * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided
-  * org.jboss.errai:errai-cdi-client:jar:compile
-  * org.slf4j:slf4j-api:jar:1.6.1:provided
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * javax.validation:validation-api:jar:1.0.0.GA:provided
-  * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-  * org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided
-  * org.quartz-scheduler:quartz:jar:2.1.6:provided
-    * c3p0:c3p0:jar:0.9.1.1:provided
-  * junit:junit:jar:4.10:provided
-    * org.hamcrest:hamcrest-core:jar:1.1:provided
-  * org.jboss:jboss-common-core:jar:2.2.14.GA:provided
-    * org.jboss.logging:jboss-logging-spi:jar:2.0.5.GA:provided
-  * org.jboss.errai:errai-javax-enterprise:jar:provided
-  * org.jboss.errai:errai-data-binding:jar:provided
-     * com.google.guava:guava-gwt:jar:14.0.1:provided
-        * com.google.code.findbugs:jsr305:jar:1.3.9:provided
+** org.jboss.errai:errai-common:jar:compile
+*** org.jboss.errai.reflections:reflections:jar:compile
+**** dom4j:dom4j:jar:1.6.1:compile
+***** xml-apis:xml-apis:jar:1.4.01:compile
+*** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+** org.jboss.errai:errai-bus:jar:compile
+*** org.jboss.errai:errai-marshalling:jar:compile
+*** com.google.inject:guice:jar:3.0:compile
+**** aopalliance:aopalliance:jar:1.0:compile
+*** javax.inject:javax.inject:jar:1:compile
+*** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.javassist:javassist:jar:3.15.0-GA:compile
+*** org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
+*** com.google.guava:guava:jar:14.0.1:compile
+*** org.jgroups:jgroups:jar:3.2.0.Final:compile
+** org.jboss.errai:errai-config:jar:compile
+** org.jboss.errai:errai-ioc:jar:provided
+*** org.jboss.errai:errai-codegen:jar:compile
+*** org.jboss.errai:errai-codegen-gwt:jar:compile
+*** javax.annotation:jsr250-api:jar:1.0:compile
+** org.jboss.errai:errai-ioc-bus-support:jar:provided
+** javax.enterprise:cdi-api:jar:1.0-SP4:provided
+*** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided
+** org.jboss.errai:errai-cdi-client:jar:compile
+** org.slf4j:slf4j-api:jar:1.6.1:provided
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** javax.validation:validation-api:jar:1.0.0.GA:provided
+** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+** org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided
+** org.quartz-scheduler:quartz:jar:2.1.6:provided
+*** c3p0:c3p0:jar:0.9.1.1:provided
+** junit:junit:jar:4.10:provided
+*** org.hamcrest:hamcrest-core:jar:1.1:provided
+** org.jboss:jboss-common-core:jar:2.2.14.GA:provided
+*** org.jboss.logging:jboss-logging-spi:jar:2.0.5.GA:provided
+** org.jboss.errai:errai-javax-enterprise:jar:provided
+** org.jboss.errai:errai-data-binding:jar:provided
+*** com.google.guava:guava-gwt:jar:14.0.1:provided
+***** com.google.code.findbugs:jsr305:jar:1.3.9:provided
 
 * org.jboss.errai:errai-cdi-client:jar
-  * org.jboss.errai:errai-javax-enterprise:jar:provided
-  * org.jboss.errai:errai-bus:jar:compile
-    * org.jboss.errai:errai-common:jar:compile
-      * org.jboss.errai.reflections:reflections:jar:compile
-        * dom4j:dom4j:jar:1.6.1:compile
-           * xml-apis:xml-apis:jar:1.4.01:compile
-      * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-    * org.jboss.errai:errai-config:jar:compile
-    * org.jboss.errai:errai-marshalling:jar:compile
-    * com.google.inject:guice:jar:3.0:compile
-      * aopalliance:aopalliance:jar:1.0:compile
-    * javax.inject:javax.inject:jar:1:compile
-    * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.slf4j:slf4j-api:jar:1.6.1:compile
-    * org.javassist:javassist:jar:3.15.0-GA:compile
-    * org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
-    * com.google.guava:guava:jar:14.0.1:compile
-    * org.jgroups:jgroups:jar:3.2.0.Final:compile
-  * org.jboss.errai:errai-ioc-bus-support:jar:compile
-    * org.jboss.errai:errai-codegen:jar:compile
-    * javax.annotation:jsr250-api:jar:1.0:compile
-    * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-  * org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided
-  * org.quartz-scheduler:quartz:jar:2.1.6:provided
-    * c3p0:c3p0:jar:0.9.1.1:provided
-  * org.jboss.errai:errai-ioc:jar:compile
-    * org.jboss.errai:errai-codegen-gwt:jar:compile
-  * javax:javaee-api:jar:6.0:provided
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * junit:junit:jar:4.10:provided
-    * org.hamcrest:hamcrest-core:jar:1.1:provided
-  * javax.validation:validation-api:jar:1.0.0.GA:provided
-  * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+** org.jboss.errai:errai-javax-enterprise:jar:provided
+** org.jboss.errai:errai-bus:jar:compile
+*** org.jboss.errai:errai-common:jar:compile
+**** org.jboss.errai.reflections:reflections:jar:compile
+***** dom4j:dom4j:jar:1.6.1:compile
+***** xml-apis:xml-apis:jar:1.4.01:compile
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+*** org.jboss.errai:errai-config:jar:compile
+*** org.jboss.errai:errai-marshalling:jar:compile
+*** com.google.inject:guice:jar:3.0:compile
+**** aopalliance:aopalliance:jar:1.0:compile
+*** javax.inject:javax.inject:jar:1:compile
+*** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.slf4j:slf4j-api:jar:1.6.1:compile
+*** org.javassist:javassist:jar:3.15.0-GA:compile
+*** org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
+*** com.google.guava:guava:jar:14.0.1:compile
+*** org.jgroups:jgroups:jar:3.2.0.Final:compile
+** org.jboss.errai:errai-ioc-bus-support:jar:compile
+*** org.jboss.errai:errai-codegen:jar:compile
+*** javax.annotation:jsr250-api:jar:1.0:compile
+*** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+**** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+** org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided
+** org.quartz-scheduler:quartz:jar:2.1.6:provided
+*** c3p0:c3p0:jar:0.9.1.1:provided
+** org.jboss.errai:errai-ioc:jar:compile
+*** org.jboss.errai:errai-codegen-gwt:jar:compile
+** javax:javaee-api:jar:6.0:provided
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** junit:junit:jar:4.10:provided
+*** org.hamcrest:hamcrest-core:jar:1.1:provided
+** javax.validation:validation-api:jar:1.0.0.GA:provided
+** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
 
 ==== Errai IOC
 * org.jboss.errai:errai-ioc:jar
-  * org.jboss.errai:errai-config:jar:compile
-  * org.jboss.errai:errai-codegen:jar:compile
-    * org.jboss.errai:errai-common:jar:compile
-      * org.jboss.errai.reflections:reflections:jar:compile
-        * com.google.guava:guava:jar:14.0.1:compile
-        * org.javassist:javassist:jar:3.15.0-GA:compile
-        * dom4j:dom4j:jar:1.6.1:compile
-           * xml-apis:xml-apis:jar:1.4.01:compile
-      * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-    * org.mvel:mvel2:jar:2.1.7.Final:compile
-  * org.jboss.errai:errai-codegen-gwt:jar:compile
-  * com.google.inject:guice:jar:3.0:compile
-    * aopalliance:aopalliance:jar:1.0:compile
-  * javax.inject:javax.inject:jar:1:compile
-  * org.jboss.errai:errai-javax-enterprise:jar:compile
-  * javax.annotation:jsr250-api:jar:1.0:compile
-  * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-    * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * javax.validation:validation-api:jar:1.0.0.GA:provided
-    * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * junit:junit:jar:4.10:provided
-     * org.hamcrest:hamcrest-core:jar:1.1:provided
+** org.jboss.errai:errai-config:jar:compile
+** org.jboss.errai:errai-codegen:jar:compile
+*** org.jboss.errai:errai-common:jar:compile
+**** org.jboss.errai.reflections:reflections:jar:compile
+***** com.google.guava:guava:jar:14.0.1:compile
+***** org.javassist:javassist:jar:3.15.0-GA:compile
+***** dom4j:dom4j:jar:1.6.1:compile
+***** xml-apis:xml-apis:jar:1.4.01:compile
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+*** org.mvel:mvel2:jar:2.1.7.Final:compile
+** org.jboss.errai:errai-codegen-gwt:jar:compile
+** com.google.inject:guice:jar:3.0:compile
+*** aopalliance:aopalliance:jar:1.0:compile
+** javax.inject:javax.inject:jar:1:compile
+** org.jboss.errai:errai-javax-enterprise:jar:compile
+** javax.annotation:jsr250-api:jar:1.0:compile
+** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+*** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** javax.validation:validation-api:jar:1.0.0.GA:provided
+*** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** junit:junit:jar:4.10:provided
+*** org.hamcrest:hamcrest-core:jar:1.1:provided
 
 ==== Errai UI
 * org.jboss.errai:errai-uibinder:jar
-  * org.jboss.errai:errai-bus:jar:provided
-    * org.jboss.errai:errai-common:jar:provided
-      * org.jboss.errai.reflections:reflections:jar:provided
-        * dom4j:dom4j:jar:1.6.1:provided
-           * xml-apis:xml-apis:jar:1.4.01:provided
-      * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:provided
-    * org.jboss.errai:errai-config:jar:provided
-    * org.jboss.errai:errai-marshalling:jar:provided
-    * org.mvel:mvel2:jar:2.1.7.Final:provided
-    * org.slf4j:slf4j-api:jar:1.6.1:provided
-    * org.javassist:javassist:jar:3.15.0-GA:provided
-    * org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:provided
-    * com.google.guava:guava:jar:14.0.1:provided
-    * org.jgroups:jgroups:jar:3.2.0.Final:provided
-  * org.jboss.errai:errai-ioc:jar:provided
-    * org.jboss.errai:errai-codegen:jar:provided
-    * org.jboss.errai:errai-codegen-gwt:jar:provided
-    * org.jboss.errai:errai-javax-enterprise:jar:provided
-    * javax.annotation:jsr250-api:jar:1.0:provided
-    * javax.enterprise:cdi-api:jar:1.0-SP4:provided
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided
-  * com.google.inject:guice:jar:3.0:provided
-    * aopalliance:aopalliance:jar:1.0:provided
-  * javax.inject:javax.inject:jar:1:compile
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * javax.validation:validation-api:jar:1.0.0.GA:provided
-    * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
+** org.jboss.errai:errai-bus:jar:provided
+*** org.jboss.errai:errai-common:jar:provided
+**** org.jboss.errai.reflections:reflections:jar:provided
+***** dom4j:dom4j:jar:1.6.1:provided
+***** xml-apis:xml-apis:jar:1.4.01:provided
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:provided
+*** org.jboss.errai:errai-config:jar:provided
+*** org.jboss.errai:errai-marshalling:jar:provided
+*** org.mvel:mvel2:jar:2.1.7.Final:provided
+*** org.slf4j:slf4j-api:jar:1.6.1:provided
+*** org.javassist:javassist:jar:3.15.0-GA:provided
+*** org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:provided
+*** com.google.guava:guava:jar:14.0.1:provided
+*** org.jgroups:jgroups:jar:3.2.0.Final:provided
+** org.jboss.errai:errai-ioc:jar:provided
+*** org.jboss.errai:errai-codegen:jar:provided
+*** org.jboss.errai:errai-codegen-gwt:jar:provided
+*** org.jboss.errai:errai-javax-enterprise:jar:provided
+*** javax.annotation:jsr250-api:jar:1.0:provided
+*** javax.enterprise:cdi-api:jar:1.0-SP4:provided
+**** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided
+** com.google.inject:guice:jar:3.0:provided
+*** aopalliance:aopalliance:jar:1.0:provided
+** javax.inject:javax.inject:jar:1:compile
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** javax.validation:validation-api:jar:1.0.0.GA:provided
+*** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
 
 ==== Errai Navigation
 * org.jboss.errai:errai-navigation:jar
-  * org.jboss.errai:errai-cdi-client:jar:provided
-    * org.jboss.errai:errai-bus:jar:provided
-      * org.mvel:mvel2:jar:2.1.7.Final:provided
-      * org.slf4j:slf4j-api:jar:1.6.1:provided
-      * org.javassist:javassist:jar:3.15.0-GA:provided
-      * org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:provided
-      * org.jgroups:jgroups:jar:3.2.0.Final:provided
-    * org.jboss.errai:errai-ioc-bus-support:jar:provided
-  * org.jboss.errai:errai-ioc:jar:provided
-    * org.jboss.errai:errai-config:jar:provided
-    * org.jboss.errai:errai-codegen:jar:provided
-    * org.jboss.errai:errai-codegen-gwt:jar:provided
-    * com.google.inject:guice:jar:3.0:provided
-      * aopalliance:aopalliance:jar:1.0:provided
-    * javax.inject:javax.inject:jar:1:provided
-    * javax.annotation:jsr250-api:jar:1.0:provided
-    * javax.enterprise:cdi-api:jar:1.0-SP4:provided
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided
-  * org.jboss.errai:errai-javax-enterprise:jar:provided
-  * org.jboss.errai:errai-marshalling:jar:provided
-    * org.jboss.errai:errai-common:jar:provided
-       * org.jboss.errai.reflections:reflections:jar:provided
-         * dom4j:dom4j:jar:1.6.1:provided
-            * xml-apis:xml-apis:jar:1.4.01:provided
-       * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:provided
-  * com.google.guava:guava-gwt:jar:14.0.1:compile
-    * com.google.code.findbugs:jsr305:jar:1.3.9:compile
-    * com.google.guava:guava:jar:14.0.1:compile
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * javax.validation:validation-api:jar:1.0.0.GA:provided
-    * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * org.jboss.weld.se:weld-se-core:jar:1.1.6.Final:provided
-    * org.jboss.weld:weld-spi:jar:1.1.Final:provided
-      * org.jboss.weld:weld-api:jar:1.1.Final:provided
-    * org.jboss.weld:weld-core:jar:1.1.13.Final:provided
-      * org.slf4j:slf4j-ext:jar:1.6.1:provided
-      * ch.qos.cal10n:cal10n-api:jar:0.7.4:provided
-    * javax.el:el-api:jar:2.2:provided
-  * org.jboss.errai:errai-weld-integration:jar:provided
+** org.jboss.errai:errai-cdi-client:jar:provided
+*** org.jboss.errai:errai-bus:jar:provided
+**** org.mvel:mvel2:jar:2.1.7.Final:provided
+**** org.slf4j:slf4j-api:jar:1.6.1:provided
+**** org.javassist:javassist:jar:3.15.0-GA:provided
+**** org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:provided
+**** org.jgroups:jgroups:jar:3.2.0.Final:provided
+*** org.jboss.errai:errai-ioc-bus-support:jar:provided
+** org.jboss.errai:errai-ioc:jar:provided
+*** org.jboss.errai:errai-config:jar:provided
+*** org.jboss.errai:errai-codegen:jar:provided
+*** org.jboss.errai:errai-codegen-gwt:jar:provided
+*** com.google.inject:guice:jar:3.0:provided
+**** aopalliance:aopalliance:jar:1.0:provided
+*** javax.inject:javax.inject:jar:1:provided
+*** javax.annotation:jsr250-api:jar:1.0:provided
+*** javax.enterprise:cdi-api:jar:1.0-SP4:provided
+**** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided
+** org.jboss.errai:errai-javax-enterprise:jar:provided
+** org.jboss.errai:errai-marshalling:jar:provided
+*** org.jboss.errai:errai-common:jar:provided
+**** org.jboss.errai.reflections:reflections:jar:provided
+***** dom4j:dom4j:jar:1.6.1:provided
+***** xml-apis:xml-apis:jar:1.4.01:provided
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:provided
+** com.google.guava:guava-gwt:jar:14.0.1:compile
+*** com.google.code.findbugs:jsr305:jar:1.3.9:compile
+*** com.google.guava:guava:jar:14.0.1:compile
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** javax.validation:validation-api:jar:1.0.0.GA:provided
+*** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** org.jboss.weld.se:weld-se-core:jar:1.1.6.Final:provided
+*** org.jboss.weld:weld-spi:jar:1.1.Final:provided
+**** org.jboss.weld:weld-api:jar:1.1.Final:provided
+*** org.jboss.weld:weld-core:jar:1.1.13.Final:provided
+**** org.slf4j:slf4j-ext:jar:1.6.1:provided
+**** ch.qos.cal10n:cal10n-api:jar:0.7.4:provided
+*** javax.el:el-api:jar:2.2:provided
+** org.jboss.errai:errai-weld-integration:jar:provided
 
 
 ==== Errai DataBinding
 * org.jboss.errai:errai-data-binding:jar
-  * org.jboss.errai:errai-ioc:jar:provided
-    * org.jboss.errai:errai-config:jar:compile
-    * org.jboss.errai:errai-codegen:jar:compile
-      * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.jboss.errai:errai-codegen-gwt:jar:compile
-    * com.google.inject:guice:jar:3.0:provided
-      * aopalliance:aopalliance:jar:1.0:provided
-    * javax.inject:javax.inject:jar:1:compile
-    * org.jboss.errai:errai-javax-enterprise:jar:provided
-    * javax.annotation:jsr250-api:jar:1.0:compile
-    * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-  * org.jboss.errai:errai-marshalling:jar:compile
-    * org.jboss.errai:errai-common:jar:compile
-       * org.jboss.errai.reflections:reflections:jar:compile
-         * org.javassist:javassist:jar:3.15.0-GA:compile
-         * org.slf4j:slf4j-api:jar:1.6.1:compile
-         * dom4j:dom4j:jar:1.6.1:compile
-            * xml-apis:xml-apis:jar:1.4.01:compile
-       * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * com.google.guava:guava-gwt:jar:14.0.1:compile
-    * com.google.code.findbugs:jsr305:jar:1.3.9:compile
-    * com.google.guava:guava:jar:14.0.1:compile
-  * junit:junit:jar:4.10:provided
-    * org.hamcrest:hamcrest-core:jar:1.1:provided
-  * javax.validation:validation-api:jar:1.0.0.GA:provided
-  * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+** org.jboss.errai:errai-ioc:jar:provided
+*** org.jboss.errai:errai-config:jar:compile
+*** org.jboss.errai:errai-codegen:jar:compile
+**** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.jboss.errai:errai-codegen-gwt:jar:compile
+*** com.google.inject:guice:jar:3.0:provided
+**** aopalliance:aopalliance:jar:1.0:provided
+*** javax.inject:javax.inject:jar:1:compile
+*** org.jboss.errai:errai-javax-enterprise:jar:provided
+*** javax.annotation:jsr250-api:jar:1.0:compile
+*** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+*** * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+** org.jboss.errai:errai-marshalling:jar:compile
+*** org.jboss.errai:errai-common:jar:compile
+**** org.jboss.errai.reflections:reflections:jar:compile
+***** org.javassist:javassist:jar:3.15.0-GA:compile
+***** org.slf4j:slf4j-api:jar:1.6.1:compile
+***** dom4j:dom4j:jar:1.6.1:compile
+***** xml-apis:xml-apis:jar:1.4.01:compile
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** com.google.guava:guava-gwt:jar:14.0.1:compile
+*** com.google.code.findbugs:jsr305:jar:1.3.9:compile
+*** com.google.guava:guava:jar:14.0.1:compile
+** junit:junit:jar:4.10:provided
+*** org.hamcrest:hamcrest-core:jar:1.1:provided
+** javax.validation:validation-api:jar:1.0.0.GA:provided
+** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
 
 
 ==== Errai JPA Client
 * org.jboss.errai:errai-jpa-client:jar
-  * org.hibernate:hibernate-entitymanager:jar:4.2.0.Final:compile
-    * org.jboss.logging:jboss-logging:jar:3.1.2.GA:compile
-    * org.hibernate:hibernate-core:jar:4.2.0.Final:compile
-      * antlr:antlr:jar:2.7.7:compile
-    * org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:jar:1.0.1.Final:compile
-    * dom4j:dom4j:jar:1.6.1:compile
-    * org.javassist:javassist:jar:3.15.0-GA:compile
-    * org.hibernate.common:hibernate-commons-annotations:jar:4.0.1.Final:compile
-  * org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:compile
-  * org.jboss.errai:errai-ioc:jar:compile
-    * org.jboss.errai:errai-config:jar:compile
-    * org.jboss.errai:errai-codegen:jar:compile
-      * org.jboss.errai:errai-common:jar:compile
-        * org.jboss.errai.reflections:reflections:jar:compile
-        * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-      * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.jboss.errai:errai-codegen-gwt:jar:compile
-    * com.google.inject:guice:jar:3.0:compile
-      * aopalliance:aopalliance:jar:1.0:compile
-    * javax.inject:javax.inject:jar:1:compile
-    * org.jboss.errai:errai-javax-enterprise:jar:compile
-    * javax.annotation:jsr250-api:jar:1.0:compile
-    * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-  * org.jboss.errai:errai-data-binding:jar:compile
-    * org.jboss.errai:errai-marshalling:jar:compile
-  * com.google.gwt:gwt-user:jar:2.5.1:compile
-    * javax.validation:validation-api:jar:1.0.0.GA:compile
-    * javax.validation:validation-api:jar:sources:1.0.0.GA:compile
-    * org.json:json:jar:20090211:compile
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * com.google.guava:guava-gwt:jar:14.0.1:compile
-    * com.google.code.findbugs:jsr305:jar:1.3.9:compile
-    * com.google.guava:guava:jar:14.0.1:compile
+** org.hibernate:hibernate-entitymanager:jar:4.2.0.Final:compile
+*** org.jboss.logging:jboss-logging:jar:3.1.2.GA:compile
+*** org.hibernate:hibernate-core:jar:4.2.0.Final:compile
+**** antlr:antlr:jar:2.7.7:compile
+*** org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:jar:1.0.1.Final:compile
+*** dom4j:dom4j:jar:1.6.1:compile
+*** org.javassist:javassist:jar:3.15.0-GA:compile
+*** org.hibernate.common:hibernate-commons-annotations:jar:4.0.1.Final:compile
+** org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:compile
+** org.jboss.errai:errai-ioc:jar:compile
+*** org.jboss.errai:errai-config:jar:compile
+*** org.jboss.errai:errai-codegen:jar:compile
+**** org.jboss.errai:errai-common:jar:compile
+***** org.jboss.errai.reflections:reflections:jar:compile
+***** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+**** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.jboss.errai:errai-codegen-gwt:jar:compile
+*** com.google.inject:guice:jar:3.0:compile
+**** aopalliance:aopalliance:jar:1.0:compile
+*** javax.inject:javax.inject:jar:1:compile
+*** org.jboss.errai:errai-javax-enterprise:jar:compile
+*** javax.annotation:jsr250-api:jar:1.0:compile
+*** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+**** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+** org.jboss.errai:errai-data-binding:jar:compile
+*** org.jboss.errai:errai-marshalling:jar:compile
+** com.google.gwt:gwt-user:jar:2.5.1:compile
+*** javax.validation:validation-api:jar:1.0.0.GA:compile
+*** javax.validation:validation-api:jar:sources:1.0.0.GA:compile
+*** org.json:json:jar:20090211:compile
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** com.google.guava:guava-gwt:jar:14.0.1:compile
+*** com.google.code.findbugs:jsr305:jar:1.3.9:compile
+*** com.google.guava:guava:jar:14.0.1:compile
 
 
 ==== Errai JPA Datasync
 * org.jboss.errai:errai-jpa-datasync:jar
-  * org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:provided
-  * org.jboss.errai:errai-jpa-client:jar:compile
-    * org.hibernate:hibernate-entitymanager:jar:4.2.0.Final:compile
-      * org.jboss.logging:jboss-logging:jar:3.1.2.GA:compile
-      * org.hibernate:hibernate-core:jar:4.2.0.Final:compile
-        * antlr:antlr:jar:2.7.7:compile
-      * org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:jar:1.0.1.Final:compile
-      * dom4j:dom4j:jar:1.6.1:compile
-      * org.hibernate.common:hibernate-commons-annotations:jar:4.0.1.Final:compile
-    * org.jboss.errai:errai-ioc:jar:compile
-      * org.jboss.errai:errai-codegen:jar:compile
-      * org.jboss.errai:errai-codegen-gwt:jar:compile
-      * org.jboss.errai:errai-javax-enterprise:jar:compile
-      * javax.annotation:jsr250-api:jar:1.0:compile
-      * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-         * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-    * org.jboss.errai:errai-data-binding:jar:compile
-    * com.google.gwt:gwt-user:jar:2.5.1:compile
-      * javax.validation:validation-api:jar:1.0.0.GA:compile
-      * javax.validation:validation-api:jar:sources:1.0.0.GA:compile
-    * com.google.guava:guava-gwt:jar:14.0.1:compile
-       * com.google.code.findbugs:jsr305:jar:1.3.9:compile
-  * org.jboss.errai:errai-bus:jar:compile
-    * org.jboss.errai:errai-common:jar:compile
-      * org.jboss.errai.reflections:reflections:jar:compile
-      * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-    * org.jboss.errai:errai-config:jar:compile
-    * org.jboss.errai:errai-marshalling:jar:compile
-    * com.google.inject:guice:jar:3.0:compile
-      * aopalliance:aopalliance:jar:1.0:compile
-    * javax.inject:javax.inject:jar:1:compile
-    * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.javassist:javassist:jar:3.15.0-GA:compile
-    * org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
-    * com.google.guava:guava:jar:14.0.1:compile
-    * org.jgroups:jgroups:jar:3.2.0.Final:compile
-  * org.jboss.errai:errai-cdi-client:jar:compile
-    * org.jboss.errai:errai-ioc-bus-support:jar:compile
+** org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:provided
+** org.jboss.errai:errai-jpa-client:jar:compile
+*** org.hibernate:hibernate-entitymanager:jar:4.2.0.Final:compile
+**** org.jboss.logging:jboss-logging:jar:3.1.2.GA:compile
+**** org.hibernate:hibernate-core:jar:4.2.0.Final:compile
+***** antlr:antlr:jar:2.7.7:compile
+**** org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:jar:1.0.1.Final:compile
+**** dom4j:dom4j:jar:1.6.1:compile
+**** org.hibernate.common:hibernate-commons-annotations:jar:4.0.1.Final:compile
+*** org.jboss.errai:errai-ioc:jar:compile
+**** org.jboss.errai:errai-codegen:jar:compile
+**** org.jboss.errai:errai-codegen-gwt:jar:compile
+**** org.jboss.errai:errai-javax-enterprise:jar:compile
+**** javax.annotation:jsr250-api:jar:1.0:compile
+**** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+***** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+*** org.jboss.errai:errai-data-binding:jar:compile
+*** com.google.gwt:gwt-user:jar:2.5.1:compile
+**** javax.validation:validation-api:jar:1.0.0.GA:compile
+**** javax.validation:validation-api:jar:sources:1.0.0.GA:compile
+*** com.google.guava:guava-gwt:jar:14.0.1:compile
+**** com.google.code.findbugs:jsr305:jar:1.3.9:compile
+** org.jboss.errai:errai-bus:jar:compile
+*** org.jboss.errai:errai-common:jar:compile
+**** org.jboss.errai.reflections:reflections:jar:compile
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+*** org.jboss.errai:errai-config:jar:compile
+*** org.jboss.errai:errai-marshalling:jar:compile
+*** com.google.inject:guice:jar:3.0:compile
+**** aopalliance:aopalliance:jar:1.0:compile
+*** javax.inject:javax.inject:jar:1:compile
+*** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.javassist:javassist:jar:3.15.0-GA:compile
+*** org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
+*** com.google.guava:guava:jar:14.0.1:compile
+*** org.jgroups:jgroups:jar:3.2.0.Final:compile
+** org.jboss.errai:errai-cdi-client:jar:compile
+*** org.jboss.errai:errai-ioc-bus-support:jar:compile
 
 
 ==== Errai JAXRS
 * org.jboss.errai:errai-jaxrs-client:jar
-  * org.jboss.errai:errai-marshalling:jar:compile
-    * org.jboss.errai:errai-common:jar:compile
-      * org.jboss.errai.reflections:reflections:jar:compile
-        * org.javassist:javassist:jar:3.15.0-GA:compile
-        * org.slf4j:slf4j-api:jar:1.6.1:compile
-        * dom4j:dom4j:jar:1.6.1:compile
-           * xml-apis:xml-apis:jar:1.4.01:compile
-      * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-    * org.jboss.errai:errai-config:jar:compile
-    * org.jboss.errai:errai-codegen:jar:compile
-      * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.jboss.errai:errai-codegen-gwt:jar:compile
-    * javax.inject:javax.inject:jar:1:compile
-    * javax.annotation:jsr250-api:jar:1.0:compile
-    * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * junit:junit:jar:4.10:provided
-    * org.hamcrest:hamcrest-core:jar:1.1:provided
-  * javax.validation:validation-api:jar:1.0.0.GA:provided
-  * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-  * org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile
-  * com.google.guava:guava-gwt:jar:14.0.1:compile
-    * com.google.code.findbugs:jsr305:jar:1.3.9:compile
-    * com.google.guava:guava:jar:14.0.1:compile
+** org.jboss.errai:errai-marshalling:jar:compile
+*** org.jboss.errai:errai-common:jar:compile
+**** org.jboss.errai.reflections:reflections:jar:compile
+***** org.javassist:javassist:jar:3.15.0-GA:compile
+***** org.slf4j:slf4j-api:jar:1.6.1:compile
+***** dom4j:dom4j:jar:1.6.1:compile
+***** xml-apis:xml-apis:jar:1.4.01:compile
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+*** org.jboss.errai:errai-config:jar:compile
+*** org.jboss.errai:errai-codegen:jar:compile
+**** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.jboss.errai:errai-codegen-gwt:jar:compile
+*** javax.inject:javax.inject:jar:1:compile
+*** javax.annotation:jsr250-api:jar:1.0:compile
+*** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+*** * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** junit:junit:jar:4.10:provided
+*** org.hamcrest:hamcrest-core:jar:1.1:provided
+** javax.validation:validation-api:jar:1.0.0.GA:provided
+** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+** org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile
+** com.google.guava:guava-gwt:jar:14.0.1:compile
+*** com.google.code.findbugs:jsr305:jar:1.3.9:compile
+*** com.google.guava:guava:jar:14.0.1:compile
 
 * org.jboss.errai:errai-jaxrs-provider:jar
-  * org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile
-  * org.jboss.errai:errai-marshalling:jar:compile
-    * org.jboss.errai:errai-common:jar:compile
-      * org.jboss.errai.reflections:reflections:jar:compile
-        * com.google.guava:guava:jar:14.0.1:compile
-        * org.javassist:javassist:jar:3.15.0-GA:compile
-        * org.slf4j:slf4j-api:jar:1.6.1:compile
-        * dom4j:dom4j:jar:1.6.1:compile
-           * xml-apis:xml-apis:jar:1.4.01:compile
-      * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-    * org.jboss.errai:errai-config:jar:compile
-    * org.jboss.errai:errai-codegen:jar:compile
-      * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.jboss.errai:errai-codegen-gwt:jar:compile
-    * javax.inject:javax.inject:jar:1:compile
-    * javax.annotation:jsr250-api:jar:1.0:compile
-    * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-       * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+** org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile
+** org.jboss.errai:errai-marshalling:jar:compile
+*** org.jboss.errai:errai-common:jar:compile
+**** org.jboss.errai.reflections:reflections:jar:compile
+***** com.google.guava:guava:jar:14.0.1:compile
+***** org.javassist:javassist:jar:3.15.0-GA:compile
+***** org.slf4j:slf4j-api:jar:1.6.1:compile
+***** dom4j:dom4j:jar:1.6.1:compile
+***** xml-apis:xml-apis:jar:1.4.01:compile
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+*** org.jboss.errai:errai-config:jar:compile
+*** org.jboss.errai:errai-codegen:jar:compile
+**** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.jboss.errai:errai-codegen-gwt:jar:compile
+*** javax.inject:javax.inject:jar:1:compile
+*** javax.annotation:jsr250-api:jar:1.0:compile
+*** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+**** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
 
 
 ==== Errai JAXRS
 * org.jboss.errai:errai-cordova:jar
-  * org.jboss.errai:errai-bus:jar:compile
-    * org.jboss.errai:errai-common:jar:compile
-      * de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
-    * org.jboss.errai:errai-config:jar:compile
-    * org.jboss.errai:errai-marshalling:jar:compile
-      * org.jboss.errai:errai-codegen:jar:compile
-      * org.jboss.errai:errai-codegen-gwt:jar:compile
-      * javax.annotation:jsr250-api:jar:1.0:compile
-      * javax.enterprise:cdi-api:jar:1.0-SP4:compile
-         * org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-    * com.google.inject:guice:jar:3.0:compile
-      * aopalliance:aopalliance:jar:1.0:compile
-    * javax.inject:javax.inject:jar:1:compile
-    * org.mvel:mvel2:jar:2.1.7.Final:compile
-    * org.slf4j:slf4j-api:jar:1.6.1:compile
-    * org.javassist:javassist:jar:3.15.0-GA:compile
-    * org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
-    * com.google.guava:guava:jar:14.0.1:compile
-    * org.jgroups:jgroups:jar:3.2.0.Final:compile
-  * org.jboss.errai:errai-cdi-client:jar:compile
-    * org.jboss.errai:errai-ioc-bus-support:jar:compile
-      * org.jboss.errai:errai-javax-enterprise:jar:compile
-    * org.jboss.errai:errai-ioc:jar:compile
-  * org.jboss.errai:errai-jaxrs-client:jar:compile
-    * org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile
-    * com.google.guava:guava-gwt:jar:14.0.1:compile
-       * com.google.code.findbugs:jsr305:jar:1.3.9:compile
-  * org.jboss.errai:errai-html5:jar:compile
-    * org.jboss.errai.reflections:reflections:jar:compile
-       * dom4j:dom4j:jar:1.6.1:compile
-          * xml-apis:xml-apis:jar:1.4.01:compile
-  * org.jboss.errai:errai-data-binding:jar:compile
-  * com.google.gwt:gwt-user:jar:2.5.1:provided
-    * javax.validation:validation-api:jar:1.0.0.GA:provided
-    * javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-    * org.json:json:jar:20090211:provided
-  * com.google.gwt:gwt-dev:jar:2.5.1:provided
-  * com.googlecode.gwtphonegap:gwtphonegap:jar:2.4.0.0:compile
-    * commons-io:commons-io:jar:2.4:compile
-  * junit:junit:jar:4.10:provided
-    * org.hamcrest:hamcrest-core:jar:1.1:provided
+** org.jboss.errai:errai-bus:jar:compile
+*** org.jboss.errai:errai-common:jar:compile
+**** de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile
+*** org.jboss.errai:errai-config:jar:compile
+*** org.jboss.errai:errai-marshalling:jar:compile
+**** org.jboss.errai:errai-codegen:jar:compile
+**** org.jboss.errai:errai-codegen-gwt:jar:compile
+**** javax.annotation:jsr250-api:jar:1.0:compile
+**** javax.enterprise:cdi-api:jar:1.0-SP4:compile
+***** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
+*** com.google.inject:guice:jar:3.0:compile
+**** aopalliance:aopalliance:jar:1.0:compile
+*** javax.inject:javax.inject:jar:1:compile
+*** org.mvel:mvel2:jar:2.1.7.Final:compile
+*** org.slf4j:slf4j-api:jar:1.6.1:compile
+*** org.javassist:javassist:jar:3.15.0-GA:compile
+*** org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile
+*** com.google.guava:guava:jar:14.0.1:compile
+*** org.jgroups:jgroups:jar:3.2.0.Final:compile
+** org.jboss.errai:errai-cdi-client:jar:compile
+*** org.jboss.errai:errai-ioc-bus-support:jar:compile
+**** org.jboss.errai:errai-javax-enterprise:jar:compile
+*** org.jboss.errai:errai-ioc:jar:compile
+** org.jboss.errai:errai-jaxrs-client:jar:compile
+*** org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile
+*** com.google.guava:guava-gwt:jar:14.0.1:compile
+**** com.google.code.findbugs:jsr305:jar:1.3.9:compile
+** org.jboss.errai:errai-html5:jar:compile
+*** org.jboss.errai.reflections:reflections:jar:compile
+**** dom4j:dom4j:jar:1.6.1:compile
+***** xml-apis:xml-apis:jar:1.4.01:compile
+** org.jboss.errai:errai-data-binding:jar:compile
+** com.google.gwt:gwt-user:jar:2.5.1:provided
+*** javax.validation:validation-api:jar:1.0.0.GA:provided
+*** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
+*** org.json:json:jar:20090211:provided
+** com.google.gwt:gwt-dev:jar:2.5.1:provided
+** com.googlecode.gwtphonegap:gwtphonegap:jar:2.4.0.0:compile
+*** commons-io:commons-io:jar:2.4:compile
+** junit:junit:jar:4.10:provided
+*** org.hamcrest:hamcrest-core:jar:1.1:provided
 
 
 [[sid-5931354]]
