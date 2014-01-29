@@ -24,7 +24,8 @@ import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
- * For starting a {@link JBossServletContainerAdaptor} controlling a standalone Jboss/Wildfly AS.
+ * For starting a {@link JBossServletContainerAdaptor} controlling a standalone
+ * Jboss/Wildfly AS.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -39,6 +40,7 @@ public class JBossLauncher extends ServletContainerLauncher {
   private final String JBOSS_JAVA_OPTS_PROPERTY = "errai.jboss.javaopts";
 
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
+  private static final String STANDALONE_CONFIGURATION = "standalone" + File.separator + "configuration";
 
   StackTreeLogger logger;
 
@@ -56,28 +58,15 @@ public class JBossLauncher extends ServletContainerLauncher {
     final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
     String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "");
 
-    if (JBOSS_HOME == null || JBOSS_HOME.equals("")) {
-      logger.log(
-              Type.ERROR,
-              String.format(
-                      "No value for %s was given: The root directory of your Jboss installation must be provided through the property %s in your pom.xml",
-                      JBOSS_HOME_PROPERTY, JBOSS_HOME_PROPERTY));
-      throw new UnableToCompleteException();
-    }
-    if (CLASS_HIDING_JAVA_AGENT == null) {
-      logger.log(
-              Type.ERROR,
-              String.format(
-                      "The local path to the artifact errai.org.jboss:class-local-class-hider:jar must be given as the property %s",
-                      CLASS_HIDING_JAVA_AGENT_PROPERTY));
-      throw new UnableToCompleteException();
-    }
+    validateJbossHome(JBOSS_HOME);
+    validateClassHidingJavaAgent(CLASS_HIDING_JAVA_AGENT);
 
     try {
       createTempConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, JBOSS_HOME, port);
       logger.log(Type.INFO,
               String.format("Created temporary config file %s, copied from %s.", TMP_CONFIG_FILE, TEMPLATE_CONFIG_FILE));
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       logger.log(
               Type.ERROR,
               String.format("Unable to create temporary config file %s from %s", TMP_CONFIG_FILE, TEMPLATE_CONFIG_FILE),
@@ -113,7 +102,8 @@ public class JBossLauncher extends ServletContainerLauncher {
       inheritIO(process.getErrorStream(), System.err);
 
       logger.log(Type.INFO, "Executing AS instance...");
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       logger.log(TreeLogger.Type.ERROR, "Failed to start JBoss AS process", e);
       logger.unbranch();
       throw new UnableToCompleteException();
@@ -129,15 +119,68 @@ public class JBossLauncher extends ServletContainerLauncher {
       logger.log(Type.INFO, "Controller created");
       logger.unbranch();
       return controller;
-    } catch (UnableToCompleteException e) {
+    }
+    catch (UnableToCompleteException e) {
       logger.log(Type.ERROR, "Could not start servlet container controller", e);
+      throw new UnableToCompleteException();
+    }
+  }
+
+  private void validateClassHidingJavaAgent(final String CLASS_HIDING_JAVA_AGENT) throws UnableToCompleteException {
+    if (CLASS_HIDING_JAVA_AGENT == null) {
+      logger.log(
+              Type.ERROR,
+              String.format(
+                      "The local path to the artifact errai.org.jboss:class-local-class-hider:jar must be given as the property %s",
+                      CLASS_HIDING_JAVA_AGENT_PROPERTY));
+      throw new UnableToCompleteException();
+    }
+  }
+
+  private void validateJbossHome(final String JBOSS_HOME) throws UnableToCompleteException {
+    if (JBOSS_HOME == null || JBOSS_HOME.equals("")) {
+      logger.log(
+              Type.ERROR,
+              String.format(
+                      "No value for %s was given: The root directory of your Jboss installation must be provided through the property %s in your pom.xml",
+                      JBOSS_HOME_PROPERTY, JBOSS_HOME_PROPERTY));
+      throw new UnableToCompleteException();
+    }
+    
+    /*
+     * Check that start script and configuration folder exist.
+     */
+    final File[] files = new File[] {
+            new File(JBOSS_HOME),
+            new File(getStartScriptName(JBOSS_HOME)),
+            new File(JBOSS_HOME, STANDALONE_CONFIGURATION)
+    };
+    
+    boolean isValid = true;
+    for (int i = 0; i < files.length; i++) {
+      if (!files[i].exists()) {
+        isValid = false;
+        break;
+      }
+    }
+    
+    if (!isValid) {
+      logger.branch(Type.ERROR, String.format("The errai.jboss.home directory, %s, does not appear to be home to a Jboss or Wildfly instance.", JBOSS_HOME));
+      
+      for (int i = 0; i < files.length; i++) {
+        if (!files[i].exists()) {
+          logger.log(Type.ERROR, String.format("%s not found.", files[i].getAbsolutePath()));
+        }
+      }
+      logger.unbranch();
+      
       throw new UnableToCompleteException();
     }
   }
 
   private void createTempConfigFile(String fromName, String toName, String jBossHome, int port) throws IOException,
           UnableToCompleteException {
-    File configDir = new File(jBossHome, "standalone/configuration");
+    File configDir = new File(jBossHome, STANDALONE_CONFIGURATION);
     File from = new File(configDir, fromName);
     File to = new File(configDir, toName);
 
@@ -161,12 +204,13 @@ public class JBossLauncher extends ServletContainerLauncher {
 
     InputStream inStream = new FileInputStream(from);
     OutputStream outStream = new FileOutputStream(to);
-    
+
     // Replace default http port with provided port
     SimpleTranslator trans = new SimpleTranslator();
     trans.addFilter(new Tag("socket-binding", new AttributeEntry("name", "http")));
-    trans.addNewTag("socket-binding-group", new Tag("socket-binding", new AttributeEntry("name", "http"), new AttributeEntry("port", String.valueOf(port))));
-    
+    trans.addNewTag("socket-binding-group", new Tag("socket-binding", new AttributeEntry("name", "http"),
+            new AttributeEntry("port", String.valueOf(port))));
+
     try {
       trans.translate(inStream, outStream);
     }
@@ -193,7 +237,8 @@ public class JBossLauncher extends ServletContainerLauncher {
       public void run() {
         try {
           IOUtils.copy(in, to);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
           throw new RuntimeException(e);
         }
       }
