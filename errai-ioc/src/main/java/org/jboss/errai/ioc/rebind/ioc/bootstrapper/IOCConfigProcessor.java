@@ -23,17 +23,7 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
@@ -326,7 +316,7 @@ public class IOCConfigProcessor {
 
                   for (final MetaParameter parm : instance.getMethod().getParameters()) {
                     control.notifyDependency(parm.getType());
-                    final Set<MetaClass> interfaceTypes = fillInInterface(parm.getType());
+                    final Set<MetaClass> interfaceTypes = fillInInterface(parm.getType(), context.getGeneratorContext());
                     control.notifyDependencies(interfaceTypes);
 
                     if (!producerMember.isStatic()) {
@@ -800,8 +790,8 @@ public class IOCConfigProcessor {
   }
 
   private class ProcessingEntry implements Comparable<ProcessingEntry> {
-    private Class<? extends Annotation> annotationClass;
-    private AnnotationHandler handler;
+    private final Class<? extends Annotation> annotationClass;
+    private final AnnotationHandler handler;
     private Set<RuleDef> rules;
 
     private ProcessingEntry(final Class<? extends Annotation> annotationClass,

@@ -1,17 +1,7 @@
 package org.jboss.errai.config.util;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.mvel2.util.NullType;
-
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,18 +9,29 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.mvel2.util.NullType;
+
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * @author Mike Brock
  */
 public final class ClassScanner {
   public static class CacheHolder implements CacheStore {
-    final Map<MetaClass, Collection<MetaClass>> subtypesCache
-        = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
+    final Map<MetaClass, Collection<MetaClass>> subtypesCache =
+        new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
 
     @Override
     public void clear() {
@@ -45,11 +46,10 @@ public final class ClassScanner {
     }
   };
 
-  //private static boolean reflectionsScanning = false;
+  // private static boolean reflectionsScanning = false;
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
-  private ClassScanner() {
-  }
+  private ClassScanner() {}
 
   public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
                                                                      final Set<String> packages) {
@@ -112,7 +112,8 @@ public final class ClassScanner {
     return getTypesAnnotatedWith(annotation, null, null);
   }
 
-  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation, boolean useReflectionsScanning) {
+  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
+      boolean useReflectionsScanning) {
     return getTypesAnnotatedWith(annotation, null, null, useReflectionsScanning);
   }
 
@@ -159,7 +160,7 @@ public final class ClassScanner {
     return Collections.unmodifiableCollection(result);
   }
 
-  public static Collection<MetaClass> getSubTypesOf(final MetaClass metaClass) {
+  public static Collection<MetaClass> getSubTypesOf(final MetaClass metaClass, final GeneratorContext genCtx) {
     final MetaClass root = metaClass.getErased();
 
     final CacheHolder cache = CacheUtil.getCache(CacheHolder.class);
@@ -170,50 +171,43 @@ public final class ClassScanner {
 
     final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
-      @Override
-      public void run() {
-        for (final MetaClass mc : MetaClassFactory.getAllCachedClasses()) {
-          if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
+    for (final MetaClass mc : getAllReoladableCachedClasses(genCtx)) {
+      if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
               && !root.getFullyQualifiedName().equals(mc.getFullyQualifiedName())
               && root.isAssignableFrom(mc)) {
-            result.add(mc.getErased());
-          }
-        }
-      }
-    });
-
-    if (EnvUtil.isProdMode()) {
-      final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
-        @Override
-        public void run() {
-          final Class<?> cls = root.asClass();
-          if (cls != null && !cls.equals(NullType.class)) {
-            for (final Class<?> c : ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls)) {
-              if (!c.isAnonymousClass() && !c.isSynthetic()) {
-                result.add(MetaClassFactory.get(c));
-              }
-            }
-          }
-        }
-      });
-      try {
-        reflectionsFuture.get();
-      }
-      catch (Exception ignored) {
+        result.add(mc.getErased());
       }
     }
 
-    try {
-      factoryFuture.get();
-    }
-    catch (Exception ignored) {
+    final Class<?> cls = root.asClass();
+    if (cls != null && !cls.equals(NullType.class)) {
+      for (final Class<?> c : ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls)) {
+        if (!c.isAnonymousClass() && !c.isSynthetic()) {
+          result.add(MetaClassFactory.get(c));
+        }
+      }
     }
 
     cache.subtypesCache.put(root, result);
     return result;
   }
 
+  private static Set<String> reloadablePackages = null;
+  private static Collection<MetaClass> getAllReoladableCachedClasses(final GeneratorContext context) {
+    if (reloadablePackages == null) {
+      reloadablePackages = RebindUtils.getReloadablePackageNames(context);
+    }
+    
+    Collection<MetaClass> clazzes = new ArrayList<MetaClass>();
+    for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
+      for (String reloadablePackage : reloadablePackages) {
+        if (clazz.getFullyQualifiedName().startsWith(reloadablePackage)) {
+          clazzes.add(clazz);
+        }
+      }
+    }
+    return clazzes;
+  }
 
   private static void filterResultsClass(final Collection<MetaClass> result,
                                          final Set<String> packages,
@@ -303,12 +297,10 @@ public final class ClassScanner {
     }
   }
 
-
-
   public static void setReflectionsScanning(final boolean bool) {
     reflectionScanLocal.set(bool);
 
-  //  reflectionsScanning = bool;
+    // reflectionsScanning = bool;
   }
 
   public static AtomicLong getTotalClassScanTime() {

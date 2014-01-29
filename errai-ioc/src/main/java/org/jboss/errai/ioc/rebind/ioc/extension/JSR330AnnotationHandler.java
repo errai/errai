@@ -16,6 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -30,11 +36,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.mvel2.util.NullType;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * @author Mike Brock
@@ -42,7 +44,7 @@ import java.util.Set;
 public abstract class JSR330AnnotationHandler<T extends Annotation> implements AnnotationHandler<T> {
 
   @Override
-  public void registerMetadata(InjectableInstance instance, T annotation, IOCProcessingContext context) {
+  public void registerMetadata(InjectableInstance instance, T annotation, IOCProcessingContext procCtx) {
   }
 
   @Override
@@ -59,6 +61,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
                                          final InjectionContext context) {
 
     final GraphBuilder graphBuilder = context.getGraphBuilder();
+    final GeneratorContext genCtx = context.getProcessingContext().getGeneratorContext();
     MetaClass mc = metaClass;
     do {
       for (MetaField field : mc.getDeclaredFields()) {
@@ -66,7 +69,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
         if (context.isElementType(WiringElementType.InjectionPoint, field)) {
           control.notifyDependency(field.getType());
 
-          for (MetaClass cls : fillInInterface(field.getType())) {
+          for (MetaClass cls : fillInInterface(field.getType(), genCtx)) {
             graphBuilder.addDependency(field.getType(), Dependency.on(cls));
           }
         }
@@ -77,7 +80,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
           for (MetaParameter parm : method.getParameters()) {
             control.notifyDependency(parm.getType());
 
-            for (MetaClass cls : fillInInterface(parm.getType())) {
+            for (MetaClass cls : fillInInterface(parm.getType(), genCtx)) {
               graphBuilder.addDependency(parm.getType(), Dependency.on(cls));
             }
           }
@@ -89,7 +92,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
           for (MetaParameter parm : constructor.getParameters()) {
             control.notifyDependency(parm.getType());
 
-            for (MetaClass cls : fillInInterface(parm.getType())) {
+            for (MetaClass cls : fillInInterface(parm.getType(), genCtx)) {
               graphBuilder.addDependency(parm.getType(), Dependency.on(cls));
             }
           }
@@ -99,13 +102,13 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     while ((mc = mc.getSuperClass()) != null);
   }
 
-  public static <T> Set<MetaClass> fillInInterface(final MetaClass cls) {
+  public static <T> Set<MetaClass> fillInInterface(final MetaClass cls, final GeneratorContext genCtx) {
     if (NullType.class.getName().equals(cls.getFullyQualifiedName())) {
       return Collections.emptySet();
     }
 
     if (cls.isInterface()) {
-      final Collection<MetaClass> subTypes = ClassScanner.getSubTypesOf(cls);
+      final Collection<MetaClass> subTypes = ClassScanner.getSubTypesOf(cls, genCtx);
       final Set<MetaClass> deps = new HashSet<MetaClass>();
       for (final MetaClass c : subTypes) {
         if (c.isSynthetic() || c.isAnonymousClass()) continue;

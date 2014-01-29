@@ -356,11 +356,49 @@ public class RebindUtils {
       return (Set<File>) gwtXmlFilesField.get(moduleDef);
     }
     catch (Throwable t) {
-      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition " +
+      throw new RuntimeException("could not access 'gwtXmlFiles' field from the module definition " +
+          "(you may be using an incompatible GWT version)");
+    }
+  }
+  
+  public static Set<String> getInheritedModules(final GeneratorContext context) {
+    final ModuleDef moduleDef = getModuleDef(context);
+
+    try {
+      Field inheritedModules = ModuleDef.class.getDeclaredField("inheritedModules");
+      inheritedModules.setAccessible(true);
+      return (Set<String>) inheritedModules.get(moduleDef);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException("could not access 'inheritedModules' field from the module definition " +
           "(you may be using an incompatible GWT version)");
     }
   }
 
+  public static Set<String> getReloadablePackageNames(final GeneratorContext context) {
+    Set<String> result = new HashSet<String>();
+    ModuleDef module = getModuleDef(context);
+    result.add(module.getCanonicalName());
+
+    List<String> dottedModulePaths = new ArrayList<String>(); 
+    for (File moduleXmlFile : getAllModuleXMLs(context)) {
+      String fileName = moduleXmlFile.getAbsolutePath();
+      fileName = fileName.replace(File.pathSeparatorChar, '.');
+      dottedModulePaths.add(fileName);
+    }
+    
+    for (String inheritedModule : getInheritedModules(context)) {
+      for (String dottedModulePath : dottedModulePaths) {
+        if (dottedModulePath.contains(inheritedModule)) {
+          result.add(inheritedModule);
+        }
+      }
+    }
+    
+    return result;
+  }
+  
+  
   public static Set<String> getOuterTranslatablePackages(final GeneratorContext context) {
     final Set<File> xmlRoots = getAllModuleXMLs(context);
     final Set<String> pathRoots = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());

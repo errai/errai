@@ -16,6 +16,13 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Produces;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -30,14 +37,9 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
-import java.util.HashSet;
-import java.util.Set;
-
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
+  @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
                         final IOCConfigProcessor procFactory) {
 
@@ -66,6 +68,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     }
   }
 
+  @Override
   public void afterInitialization(final IOCProcessingContext context,
                                   final InjectionContext injectionContext,
                                   final IOCConfigProcessor procFactory) {
@@ -80,7 +83,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
     final Set<MetaClass> knownTypesWithSuperTypes = new HashSet<MetaClass>(knownObserverTypes);
     for (final MetaClass cls : knownObserverTypes) {
-      for (final MetaClass subClass : ClassScanner.getSubTypesOf(cls)) {
+      for (final MetaClass subClass : ClassScanner.getSubTypesOf(cls, context.getGeneratorContext())) {
         knownTypesWithSuperTypes.add(subClass);
       }
     }
