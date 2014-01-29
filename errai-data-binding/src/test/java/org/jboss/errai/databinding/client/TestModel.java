@@ -17,6 +17,8 @@
 package org.jboss.errai.databinding.client;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -37,28 +39,32 @@ public class TestModel {
   private int id;
   private boolean active;
   private Date lastChanged;
-  
+
   // to test direct field access
   public String value;
   public TestModel child;
-  
-  // the _ is used to test proper JavaBean property discovery (based on getters/setters and not on the field name)
+
+  // the _ is used to test proper JavaBean property discovery (based on getters/setters and not on
+  // the field name)
   private String _name;
   private Integer _age;
-  
+
   // test that this variable name does not cause a duplicate local variable in the generated proxy
   private String oldValue;
-  
+
   // test for the case there's a field name collision in the generated proxy
   @SuppressWarnings("unused")
   private String agent;
-  
+
+  private BigDecimal amountDec;
+  private BigInteger amountInt;
+
   public TestModel() {}
-  
+
   public TestModel(String value) {
     this.value = value;
   }
-  
+
   public int getId() {
     return id;
   }
@@ -104,23 +110,24 @@ public class TestModel {
     return child;
   }
 
-  // this method is used to test changes to references of nested bindables using a non accessor method
+  // this method is used to test changes to references of nested bindables using a non accessor
+  // method
   public void resetChildren() {
     TestModel newChild = new TestModel();
-    
+
     TestModel curChild = child;
     while ((curChild = curChild.child) != null) {
       newChild.child = new TestModel();
       newChild = newChild.child;
     }
-    
+
     this.child = newChild;
   }
-  
+
   public void setChild(TestModel child) {
     this.child = child;
   }
-  
+
   public String getOldValue() {
     return oldValue;
   }
@@ -132,11 +139,11 @@ public class TestModel {
   public Date getLastChanged() {
     return lastChanged;
   }
-  
+
   public void setLastChanged(Date lastChanged) {
     this.lastChanged = lastChanged;
   }
-  
+
   // these methods are used to test property changes using non accessor methods
   public void activate() {
     this.active = true;
@@ -148,6 +155,43 @@ public class TestModel {
   public TestModel activate(boolean activate) {
     this.active = activate;
     return this;
+  }
+
+  public BigDecimal getAmountDec() {
+    return amountDec;
+  }
+
+  public void setAmountDec(BigDecimal amountDec) {
+    this.amountDec = amountDec;
+  }
+
+  public BigInteger getAmountInt() {
+    return amountInt;
+  }
+
+  public void setAmountInt(BigInteger amountInt) {
+    this.amountInt = amountInt;
+  }
+
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-479
+  public static void staticMethod() {};
+
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-476
+  @Bindable
+  public static class DuplicateNamedBindableType {}
+
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-512
+  public <M extends Serializable> M genericMethod(M m) {
+    return null;
+  }
+
+  public <M> M simpleGenericMethod(M m) {
+    return null;
+  }
+
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-551
+  public void methodWithParameterizedType(List<String> list) {
+
   }
 
   @Override
@@ -206,25 +250,5 @@ public class TestModel {
     return "Model [id=" + id + ", value=" + value + ", _name=" + _name + ", _age=" + _age + ", active=" + active
         + ", child=" + child + "]";
   }
-  
-  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-479
-  public static void staticMethod() {};
-  
-  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-476
-  @Bindable
-  public static class DuplicateNamedBindableType {}
-  
-  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-512
-  public <M extends Serializable> M genericMethod(M m) {
-    return null;
-  }
 
-  public <M> M simpleGenericMethod(M m) {
-    return null;
-  }
-  
-  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-551
-  public void methodWithParameterizedType(List<String> list) {
-    
-  }  
 }
