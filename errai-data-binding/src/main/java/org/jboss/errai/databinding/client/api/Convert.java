@@ -105,10 +105,12 @@ public class Convert {
         return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).parse((String) o);
       }
       else if (toType.equals(BigDecimal.class)) {
-        return new BigDecimal((String) o);
+        String val = (String) o;
+        return (val.isEmpty()) ? null : new BigDecimal((String) o);
       }
       else if (toType.equals(BigInteger.class)) {
-        return new BigInteger((String) o);
+        String val = (String) o;
+        return (val.isEmpty()) ? null : new BigInteger((String) o);
       }
     }
     return o;
