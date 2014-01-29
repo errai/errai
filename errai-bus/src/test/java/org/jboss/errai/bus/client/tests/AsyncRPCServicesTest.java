@@ -16,7 +16,7 @@ public class AsyncRPCServicesTest extends AbstractErraiTest {
   }
 
   public void testAsyncRPCCall() {
-    delayTestFinish(30000);
+    delayTestFinish(50000);
 
     runAfterInit(new Runnable() {
       @Override
