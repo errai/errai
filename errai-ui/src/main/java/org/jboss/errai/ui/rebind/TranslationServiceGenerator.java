@@ -18,6 +18,7 @@ package org.jboss.errai.ui.rebind;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,6 +47,7 @@ import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
@@ -68,6 +70,7 @@ import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -83,6 +86,10 @@ import com.google.gwt.resources.client.TextResource;
  * Generates a concrete subclass of {@link TranslationService}. This class is
  * responsible for scanning the classpath for all bundles, and then making them
  * available during template translation.
+ * 
+ * The {@link TranslationService} can also be used directly in the Errai 
+ * application by injecting it.  This allows translated strings to be used
+ * from Errai Java code, not just from templates.
  *
  * @author eric.wittmann@redhat.com
  */
@@ -110,6 +117,51 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     Set<String> processedBundles = new HashSet<String>();
     // The i18n keys found (per locale) while processing the bundles.
     Map<String, Set<String>> discoveredI18nMap = new HashMap<String, Set<String>>();
+    
+    // Find all fields annotated with @TranslationKey and generate code 
+    // in the c'tor to register each one as a translation key for the 
+    // default (null) locale.  These values may get overridden by keys
+    // found in the default bundle.  This is why we do this before we do
+    // the bundle work.
+    Map<String, String> translationKeyFieldMap = new HashMap<String, String>();
+    Collection<MetaField> translationKeyFields = ClassScanner.getFieldsAnnotatedWith(TranslationKey.class, null);
+    for (MetaField metaField : translationKeyFields) {
+        // Figure out the translation key name
+        String name = null;
+        String fieldName = metaField.getName();
+        String defaultName = metaField.getDeclaringClass().getFullyQualifiedName() + "." + fieldName;
+        if (!metaField.getType().isAssignableFrom(String.class)) {
+            throw new GenerationException("Translation key fields must be of type java.lang.String: " + defaultName);
+        }
+        try {
+            Class<?> asClass = metaField.getDeclaringClass().asClass();
+            Field field = asClass.getField(fieldName);
+            Object fieldVal = field.get(null);
+            if (fieldVal == null) {
+                throw new GenerationException("Translation key fields cannot be null: " + defaultName);
+            }
+            name = fieldVal.toString();
+        } catch (Exception e) {
+            // TODO log this
+        }
+
+        // Figure out the translation key value (for the null locale).
+        String value = null;
+        TranslationKey annotation = metaField.getAnnotation(TranslationKey.class);
+        String defaultValue = annotation.defaultValue();
+        if (defaultValue != null) {
+            value = defaultValue;
+        } else {
+            value = "!!" + defaultName + "!!";
+        }
+        
+        // Generate code to register the null locale mapping
+        if (translationKeyFieldMap.containsKey(name)) {
+            throw new GenerationException("Duplicate translation key found: " + defaultName);
+        }
+        translationKeyFieldMap.put(name, value);
+        ctor.append(Stmt.loadVariable("this").invoke("registerTranslation", name, value, null));
+    }
 
     // Scan for all @Bundle annotations.
     final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class);
@@ -160,9 +212,10 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
       processedBundles.add(bundlePath);
     }
+    // We're done generating the c'tor
     ctor.finish();
 
-    generateI18nHelperFilesInto(discoveredI18nMap, RebindUtils.getErraiCacheDir());
+    generateI18nHelperFilesInto(discoveredI18nMap, translationKeyFieldMap, RebindUtils.getErraiCacheDir());
 
     return classBuilder.toJavaString();
   }
@@ -278,16 +331,21 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * Generates all helper files that developers can use to assist with i18n
    * work.  This includes the "missing i18n keys" report(s) as well as a set of
    * JSON files that can be used as a starting-point for translations.
-   * @param discoveredI18nMap
-   * @param destDir
+   * @param discoveredI18nMap a map of keys found in all scanned bundles
+   * @param translationKeyFieldMap  a map of translation keys found in {@link TranslationKey} annotated fields
+   * @param destDir where to write the *.json files
    */
-  protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap, File destDir) {
-    final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
+  protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap, Map<String, String> translationKeyFieldMap, File destDir) {
     Map<String, String> allI18nValues = new HashMap<String, String>();
-    Map<String, Map<String, String>> indexedI18nValues = new HashMap<String, Map<String, String>>();
+    
+    // Make sure to put the *usages* of translation keys that we found by scanning the
+    // Java code for @TranslationKey annotated static fields into the all-i18n-values map
+    allI18nValues.putAll(translationKeyFieldMap);
+    
+    // Find all *usages* of translation keys by scanning and processing all templates.
+    final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
-      String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
       String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
       final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
@@ -302,12 +360,6 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         continue;
       Map<String, String> i18nValues = getTemplateI18nValues(templateRoot, i18nPrefix);
       allI18nValues.putAll(i18nValues);
-      Map<String, String> templateI18nValues = indexedI18nValues.get(templateBundleName);
-      if (templateI18nValues == null) {
-        indexedI18nValues.put(templateBundleName, i18nValues);
-      } else {
-        templateI18nValues.putAll(i18nValues);
-      }
     }
 
     // Output a JSON file containing *all* of the keys that need translation.

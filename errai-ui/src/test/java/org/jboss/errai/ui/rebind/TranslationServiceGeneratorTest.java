@@ -105,7 +105,10 @@ public class TranslationServiceGeneratorTest {
       outputDir.delete();
     outputDir.mkdirs();
     try {
-      TranslationServiceGenerator.generateI18nHelperFilesInto(i18nKeys, outputDir);
+      HashMap<String, String> translationKeyFieldMap = new HashMap<String, String>();
+      translationKeyFieldMap.put("additional-key-1", "some value 1");
+      translationKeyFieldMap.put("additional-key-2", "some value 2");
+      TranslationServiceGenerator.generateI18nHelperFilesInto(i18nKeys, translationKeyFieldMap, outputDir);
       // Should be a "errai-bundle-all.json" with *all* keys/values
       File allBundle = new File(outputDir, "errai-bundle-all.json");
       String actual = FileUtils.readFileToString(allBundle);
@@ -139,6 +142,8 @@ public class TranslationServiceGeneratorTest {
         "  \"TranslatableComponent1.value_one\" : \"value one\"," + NEWLINE +
         "  \"TranslatableComponent1.value_two\" : \"value two\"," + NEWLINE +
         "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
+        "  \"additional-key-1\" : \"some value 1\"," + NEWLINE +
+        "  \"additional-key-2\" : \"some value 2\"," + NEWLINE +
         "  \"component2.Cancel\" : \"Cancel\"," + NEWLINE +
         "  \"component2.Log_in\" : \"Log in\"," + NEWLINE +
         "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"," + NEWLINE +
@@ -156,6 +161,7 @@ public class TranslationServiceGeneratorTest {
         "{" + NEWLINE +
         "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\"," + NEWLINE +
         "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
+        "  \"additional-key-2\" : \"some value 2\"," + NEWLINE +
         "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"" + NEWLINE +
         "}";
 }
