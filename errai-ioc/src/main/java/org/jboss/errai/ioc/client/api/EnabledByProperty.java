@@ -23,12 +23,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Indicates that the target Errai IOC bean can be switched on and off at GWT rebind time
+ * by setting a Java System Property.
+ * 
  * @author Mike Brock
  */
-@Scope
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EnabledByProperty {
+
+  /**
+   * The name of the system property that enables or disables this bean.
+   */
   String value();
+  
+  /**
+   * Normally, the target bean is enabled if and only if the specified system
+   * property exists and has the value {@code "true"}. If {@code negated} is
+   * {@code true} then this sense is reversed: the bean is disabled if and only
+   * if the specified system property exists and has the value {@code "true"}.
+   */
   boolean negated() default false;
 }
