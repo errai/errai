@@ -1,11 +1,11 @@
 package org.jboss.errai.ui.shared;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Visits the dom and finds elements that need translating.
@@ -22,7 +22,6 @@ public class TemplateVisitor implements DomVisitor {
   public boolean visit(Element element) {
     // Developers can mark entire sections of the template as "do not translate"
     if ("dummy".equals(element.getAttribute("data-role"))) {
-      System.out.println("Skipping...");
       return false;
     }
     // If the element either explicitly enables i18n (via an i18n key) or is a text-only
