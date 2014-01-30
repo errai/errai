@@ -290,4 +290,14 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     textBox.setValue("", true);
     assertEquals("Failed to convert empty String to BigDecimal", null, model.getAmountDec());
   }
+  
+  @Test
+  public void testEmptyStringConversionToPrimitiveWrapper() {
+    TextBox textBox = new TextBox();
+    textBox.setText("test");
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "age").getModel();
+
+    textBox.setValue("", true);
+    assertEquals("Failed to convert empty String to primitive wrapper type", null, model.getAmountDec());
+  }
 }
