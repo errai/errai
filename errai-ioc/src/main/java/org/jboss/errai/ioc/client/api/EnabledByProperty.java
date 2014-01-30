@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * 
  * @author Mike Brock
  */
+@Scope
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EnabledByProperty {
