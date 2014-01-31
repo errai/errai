@@ -64,6 +64,7 @@ import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
@@ -490,7 +491,8 @@ public class IOCBootstrapGenerator {
           for (final Annotation a : clazz.getAnnotations()) {
             final Class<? extends Annotation> clazz1 = a.annotationType();
 
-            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)) {
+            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)
+                || clazz1.equals(EnabledByProperty.class)) {
               continue TypeScan;
             }
           }
