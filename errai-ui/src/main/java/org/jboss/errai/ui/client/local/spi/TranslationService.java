@@ -47,13 +47,12 @@ public abstract class TranslationService {
   private static final Logger logger = Logger.getLogger(TranslationService.class.getName());
   private static String currentLocale = null;
 
-  private Dictionary dictionary = new Dictionary();
-  
+  private final Dictionary dictionary = new Dictionary();
+
   /**
    * Constructor.
    */
-  public TranslationService() {
-  }
+  public TranslationService() {}
 
   /**
    * @return true if the translation service is enabled/should be used
@@ -75,9 +74,10 @@ public abstract class TranslationService {
     JSONMap data = JSONMap.create(jsonData);
     registerJSON(data, locale);
   }
-  
+
   /**
    * Registers a single translation.
+   * 
    * @param key
    * @param value
    * @param locale
@@ -125,27 +125,28 @@ public abstract class TranslationService {
   }
 
   /**
-   * Look up a message in the i18n resource message bundle by key, then format the
-   * message with the given arguments and return the result.
+   * Look up a message in the i18n resource message bundle by key, then format the message with the
+   * given arguments and return the result.
+   * 
    * @param key
    * @param args
    */
-  public String format(String key, Object ... args) {
-      String pattern = getTranslation(key);
-      if (pattern == null)
-          return "!!!" + key + "!!!"; //$NON-NLS-1$ //$NON-NLS-2$
-      if (args.length == 0)
-          return pattern;
+  public String format(String key, Object... args) {
+    String pattern = getTranslation(key);
+    if (pattern == null)
+      return "!!!" + key + "!!!"; //$NON-NLS-1$ //$NON-NLS-2$
+    if (args.length == 0)
+      return pattern;
 
-      // TODO add support for actually using { in a message
-      StringBuilder builder = new StringBuilder();
-      for (Object arg : args) {
-          String part1 = pattern.substring(0,pattern.indexOf('{'));
-          String part2 = pattern.substring(pattern.indexOf('}') + 1);
-          builder.append(part1).append(arg).append(part2);
-      }
-      return builder.toString();
-  }  
+    // TODO add support for actually using { in a message
+    StringBuilder builder = new StringBuilder();
+    for (Object arg : args) {
+      String part1 = pattern.substring(0, pattern.indexOf('{'));
+      String part2 = pattern.substring(pattern.indexOf('}') + 1);
+      builder.append(part1).append(arg).append(part2);
+    }
+    return builder.toString();
+  }
 
   public String getActiveLocale() {
     String localeName = currentLocale();

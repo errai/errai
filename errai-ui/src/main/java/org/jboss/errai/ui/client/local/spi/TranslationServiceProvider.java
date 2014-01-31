@@ -25,27 +25,26 @@ import com.google.gwt.core.shared.GWT;
 
 /**
  * Provides a way to inject the {@link TranslationService}.
- *
+ * 
  * @author eric.wittmann@redhat.com
  */
 @IOCProvider
 @Singleton
 public class TranslationServiceProvider implements Provider<TranslationService> {
-    
-    private static final TranslationService _translationService = GWT.create(TranslationService.class);
-    
-    /**
-     * Constructor.
-     */
-    public TranslationServiceProvider() {
-    }
 
-    /**
-     * @see javax.inject.Provider#get()
-     */
-    @Override
-    public TranslationService get() {
-        return _translationService;
-    }
+  private static final TranslationService _translationService = GWT.create(TranslationService.class);
+
+  /**
+   * Constructor.
+   */
+  public TranslationServiceProvider() {}
+
+  /**
+   * @see javax.inject.Provider#get()
+   */
+  @Override
+  public TranslationService get() {
+    return _translationService;
+  }
 
 }

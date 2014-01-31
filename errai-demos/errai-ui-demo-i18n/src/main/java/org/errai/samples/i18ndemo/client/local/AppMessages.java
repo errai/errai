@@ -20,15 +20,15 @@ import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 
 /**
  * Some extra translation keys for use by the app.
- *
+ * 
  * @author eric.wittmann@redhat.com
  */
 public class AppMessages {
-    
-    @TranslationKey(defaultValue="Message One Value")
-    public static final String MESSAGE_1 = "translatable.messages.message-1";
 
-    @TranslationKey(defaultValue="Message {0} Value")
-    public static final String MESSAGE_2 = "translatable.messages.message-2";
+  @TranslationKey(defaultValue = "Message One Value")
+  public static final String MESSAGE_1 = "translatable.messages.message-1";
+
+  @TranslationKey(defaultValue = "Message {0} Value")
+  public static final String MESSAGE_2 = "translatable.messages.message-2";
 
 }

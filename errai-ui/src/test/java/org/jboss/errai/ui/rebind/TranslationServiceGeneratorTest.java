@@ -31,12 +31,15 @@ import org.junit.Test;
 
 /**
  * Junit test for {@link TranslationService};
+ * 
  * @author eric.wittmann@redhat.com
  */
 public class TranslationServiceGeneratorTest {
 
   /**
-   * Test method for {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#getLocaleFromBundlePath(java.lang.String)}.
+   * Test method for
+   * {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#getLocaleFromBundlePath(java.lang.String)}
+   * .
    */
   @Test
   public void testGetLocaleFromBundleFilename() {
@@ -51,13 +54,18 @@ public class TranslationServiceGeneratorTest {
     Assert.assertEquals("fr_FR", TranslationServiceGenerator.getLocaleFromBundlePath("Some-Other-Bundle_fr_FR.json"));
     Assert.assertEquals("fr", TranslationServiceGenerator.getLocaleFromBundlePath("Some-Other-Bundle_fr.json"));
 
-    Assert.assertEquals("en_US", TranslationServiceGenerator.getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en_US.json"));
-    Assert.assertEquals("en_GB", TranslationServiceGenerator.getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en_GB.json"));
-    Assert.assertEquals("en", TranslationServiceGenerator.getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en.json"));
+    Assert.assertEquals("en_US", TranslationServiceGenerator
+        .getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en_US.json"));
+    Assert.assertEquals("en_GB", TranslationServiceGenerator
+        .getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en_GB.json"));
+    Assert.assertEquals("en", TranslationServiceGenerator
+        .getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en.json"));
   }
 
   /**
-   * Test method for {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#recordBundleKeys(java.util.Map, String, String)}.
+   * Test method for
+   * {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#recordBundleKeys(java.util.Map, String, String)}
+   * .
    */
   @Test
   public void testRecordBundleKeys() {
@@ -88,7 +96,9 @@ public class TranslationServiceGeneratorTest {
   }
 
   /**
-   * Test method for {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#generateI18nHelperFilesInto(Map, java.io.File)}.
+   * Test method for
+   * {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#generateI18nHelperFilesInto(Map, java.io.File)}
+   * .
    */
   @Test
   public void testHelperFileGeneration() throws IOException {
@@ -98,7 +108,8 @@ public class TranslationServiceGeneratorTest {
     MetaClassFactory.get(TranslatableComponent2.class);
     Map<String, Set<String>> i18nKeys = new HashMap<String, Set<String>>();
     // Record the bundle keys found in the test JSON bundles
-    TranslationServiceGenerator.recordBundleKeys(i18nKeys, null, "org/jboss/errai/ui/rebind/res/TranslationServiceGeneratorTest.json");
+    TranslationServiceGenerator.recordBundleKeys(i18nKeys, null,
+        "org/jboss/errai/ui/rebind/res/TranslationServiceGeneratorTest.json");
 
     File outputDir = File.createTempFile(getClass().getSimpleName(), "_tst");
     if (outputDir.isFile())
@@ -124,7 +135,8 @@ public class TranslationServiceGeneratorTest {
       actual = FileUtils.readFileToString(missingBundle);
       Assert.assertEquals(EXPECTED_MISSING_BUNDLE, actual);
 
-    } finally {
+    }
+    finally {
       FileUtils.deleteDirectory(outputDir);
     }
   }
@@ -133,35 +145,35 @@ public class TranslationServiceGeneratorTest {
 
   private static final String EXPECTED_ALL_BUNDLE =
         "{" + NEWLINE +
-        "  \"TranslatableComponent1.Email_\" : \"Email:\"," + NEWLINE +
-        "  \"TranslatableComponent1.Label_1_\" : \"Label 1:\"," + NEWLINE +
-        "  \"TranslatableComponent1.Label_2_\" : \"Label 2:\"," + NEWLINE +
-        "  \"TranslatableComponent1.Password_\" : \"Password:\"," + NEWLINE +
-        "  \"TranslatableComponent1.email-placeholder\" : \"Enter your email address...\"," + NEWLINE +
-        "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\"," + NEWLINE +
-        "  \"TranslatableComponent1.value_one\" : \"value one\"," + NEWLINE +
-        "  \"TranslatableComponent1.value_two\" : \"value two\"," + NEWLINE +
-        "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
-        "  \"additional-key-1\" : \"some value 1\"," + NEWLINE +
-        "  \"additional-key-2\" : \"some value 2\"," + NEWLINE +
-        "  \"component2.Cancel\" : \"Cancel\"," + NEWLINE +
-        "  \"component2.Log_in\" : \"Log in\"," + NEWLINE +
-        "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"," + NEWLINE +
-        "  \"component2.Password\" : \"Password\"," + NEWLINE +
-        "  \"component2.Remember_me\" : \"Remember me\"," + NEWLINE +
-        "  \"component2.Username\" : \"Username\"," + NEWLINE +
-        "  \"component2.password-placeholder\" : \"Password\"," + NEWLINE +
-        "  \"component2.username-placeholder\" : \"Username\"" + NEWLINE +
-        "}";
+            "  \"TranslatableComponent1.Email_\" : \"Email:\"," + NEWLINE +
+            "  \"TranslatableComponent1.Label_1_\" : \"Label 1:\"," + NEWLINE +
+            "  \"TranslatableComponent1.Label_2_\" : \"Label 2:\"," + NEWLINE +
+            "  \"TranslatableComponent1.Password_\" : \"Password:\"," + NEWLINE +
+            "  \"TranslatableComponent1.email-placeholder\" : \"Enter your email address...\"," + NEWLINE +
+            "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\"," + NEWLINE +
+            "  \"TranslatableComponent1.value_one\" : \"value one\"," + NEWLINE +
+            "  \"TranslatableComponent1.value_two\" : \"value two\"," + NEWLINE +
+            "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
+            "  \"additional-key-1\" : \"some value 1\"," + NEWLINE +
+            "  \"additional-key-2\" : \"some value 2\"," + NEWLINE +
+            "  \"component2.Cancel\" : \"Cancel\"," + NEWLINE +
+            "  \"component2.Log_in\" : \"Log in\"," + NEWLINE +
+            "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"," + NEWLINE +
+            "  \"component2.Password\" : \"Password\"," + NEWLINE +
+            "  \"component2.Remember_me\" : \"Remember me\"," + NEWLINE +
+            "  \"component2.Username\" : \"Username\"," + NEWLINE +
+            "  \"component2.password-placeholder\" : \"Password\"," + NEWLINE +
+            "  \"component2.username-placeholder\" : \"Username\"" + NEWLINE +
+            "}";
   private static final String EXPECTED_EXTRA_BUNDLE =
         "{" + NEWLINE +
-        "  \"component2.extra-key\" : \"\"" + NEWLINE +
-        "}";
+            "  \"component2.extra-key\" : \"\"" + NEWLINE +
+            "}";
   private static final String EXPECTED_MISSING_BUNDLE =
         "{" + NEWLINE +
-        "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\"," + NEWLINE +
-        "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
-        "  \"additional-key-2\" : \"some value 2\"," + NEWLINE +
-        "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"" + NEWLINE +
-        "}";
+            "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\"," + NEWLINE +
+            "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
+            "  \"additional-key-2\" : \"some value 2\"," + NEWLINE +
+            "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"" + NEWLINE +
+            "}";
 }
