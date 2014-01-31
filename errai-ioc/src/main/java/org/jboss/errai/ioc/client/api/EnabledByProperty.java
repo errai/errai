@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.client.api;
 
-import javax.inject.Scope;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,7 +24,6 @@ import java.lang.annotation.Target;
 /**
  * @author Mike Brock
  */
-@Scope
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EnabledByProperty {
