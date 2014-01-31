@@ -171,7 +171,7 @@ public final class ClassScanner {
 
     final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    for (final MetaClass mc : getAllReoladableCachedClasses(genCtx)) {
+    for (final MetaClass mc : getAllReloadableCachedClasses(genCtx)) {
       if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
               && !root.getFullyQualifiedName().equals(mc.getFullyQualifiedName())
               && root.isAssignableFrom(mc)) {
@@ -193,7 +193,7 @@ public final class ClassScanner {
   }
 
   private static Set<String> reloadablePackages = null;
-  private static Collection<MetaClass> getAllReoladableCachedClasses(final GeneratorContext context) {
+  private static Collection<MetaClass> getAllReloadableCachedClasses(final GeneratorContext context) {
     if (reloadablePackages == null) {
       reloadablePackages = RebindUtils.getReloadablePackageNames(context);
     }
