@@ -26,20 +26,19 @@ import org.jboss.errai.enterprise.shared.api.annotations.MapsFrom;
 import com.google.gwt.http.client.Response;
 
 /**
+ * Client-side exception mapper for testing purposes.
  * 
- *
  * @author eric.wittmann@redhat.com
  */
 @Provider
 @MapsFrom({ ClientExceptionMappingTestService.class })
 public class TestClientExceptionMapper implements ClientExceptionMapper {
-  
+
   /**
    * Constructor.
    */
-  public TestClientExceptionMapper() {
-  }
-  
+  public TestClientExceptionMapper() {}
+
   /**
    * @see org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper#fromResponse(com.google.gwt.http.client.Response)
    */

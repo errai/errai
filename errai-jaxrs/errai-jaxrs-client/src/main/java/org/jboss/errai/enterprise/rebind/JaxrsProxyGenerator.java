@@ -101,7 +101,8 @@ public class JaxrsProxyGenerator {
    */
   private Statement generateCtor() {
     // Try to find an ClientExceptionMapper that applies to the remote REST interface
-    Collection<MetaClass> providers = ClassScanner.getTypesAnnotatedWith(Provider.class, RebindUtils.findTranslatablePackages(context));
+    Collection<MetaClass> providers = ClassScanner.getTypesAnnotatedWith(Provider.class, 
+        RebindUtils.findTranslatablePackages(context));
     MetaClass exceptionMapperClass = null;
     for (MetaClass metaClass : providers) {
       if (!metaClass.isAbstract() && metaClass.isAssignableTo(ClientExceptionMapper.class)) {
@@ -125,7 +126,8 @@ public class JaxrsProxyGenerator {
     
     // If we found one, create it in the c'tor and assign it to the proxy's exceptionMapper field
     if (exceptionMapperClass != null) {
-      ContextualStatementBuilder setMapper = Stmt.loadVariable("this").invoke("setExceptionMapper", Stmt.newObject(exceptionMapperClass));
+      ContextualStatementBuilder setMapper = Stmt.loadVariable("this").invoke("setExceptionMapper", 
+          Stmt.newObject(exceptionMapperClass));
       return setMapper;
     } else {
       return Stmt.returnVoid();

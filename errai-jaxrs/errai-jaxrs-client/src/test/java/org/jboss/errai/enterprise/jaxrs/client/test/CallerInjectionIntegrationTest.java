@@ -75,13 +75,15 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
         }, new RestErrorCallback() {
           @Override
           public boolean error(Request message, Throwable throwable) {
-            assertEquals(throwable.getClass(), UserNotFoundException.class);
+            assertEquals(UserNotFoundException.class, throwable.getClass());
             try {
               throw throwable;
-            } catch (UserNotFoundException unfe) {
+            }
+            catch (UserNotFoundException unfe) {
               assertEquals("User not found: -1", unfe.getMessage());
               finishTest();
-            } catch (Throwable t) {
+            }
+            catch (Throwable t) {
               fail("Unexpected exception: " + t.getMessage());
             }
             return false;
@@ -118,5 +120,5 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
             }
           ).error();
   }
-  
+
 }
