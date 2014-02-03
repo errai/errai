@@ -120,6 +120,7 @@ public class TranslationServiceGeneratorTest {
       translationKeyFieldMap.put("additional-key-1", "some value 1");
       translationKeyFieldMap.put("additional-key-2", "some value 2");
       TranslationServiceGenerator.generateI18nHelperFilesInto(i18nKeys, translationKeyFieldMap, outputDir);
+      
       // Should be a "errai-bundle-all.json" with *all* keys/values
       File allBundle = new File(outputDir, "errai-bundle-all.json");
       String actual = FileUtils.readFileToString(allBundle);

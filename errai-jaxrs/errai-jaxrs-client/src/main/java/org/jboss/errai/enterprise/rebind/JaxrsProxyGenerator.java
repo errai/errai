@@ -102,7 +102,7 @@ public class JaxrsProxyGenerator {
   private Statement generateCtor() {
     // Try to find an ClientExceptionMapper that applies to the remote REST interface
     Collection<MetaClass> providers = ClassScanner.getTypesAnnotatedWith(Provider.class, 
-        RebindUtils.findTranslatablePackages(context));
+        RebindUtils.findTranslatablePackages(context), context);
     MetaClass exceptionMapperClass = null;
     for (MetaClass metaClass : providers) {
       if (!metaClass.isAbstract() && metaClass.isAssignableTo(ClientExceptionMapper.class)) {

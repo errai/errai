@@ -462,16 +462,18 @@ public class IOCConfigProcessor {
             case TYPE: {
               Collection<MetaClass> classes;
 
-              classes = ClassScanner.getTypesAnnotatedWith(annotationClass, context.getPackages());
+              classes = ClassScanner.getTypesAnnotatedWith(annotationClass, context.getPackages(), context.getGeneratorContext());
               
               // Get producer classes which are implicitly dependent
               if (annotationClass.equals(Dependent.class)) {
                 classes = new ArrayList<MetaClass>(classes);
                 final Collection<MetaClass> toCheck = new ArrayList<MetaClass>();
-                for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Produces.class, context.getPackages())) {
+                for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Produces.class, context.getPackages(), 
+                    context.getGeneratorContext())) {
                   toCheck.add(method.getDeclaringClass());
                 }
-                for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(Produces.class, context.getPackages())) {
+                for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(Produces.class, context.getPackages(), 
+                    context.getGeneratorContext())) {
                   toCheck.add(field.getDeclaringClass());
                 }
                 
@@ -546,7 +548,7 @@ public class IOCConfigProcessor {
                   if (clazz.isAnnotationPresent(Stereotype.class)) {
                     final Class<? extends Annotation> stereoType = clazz.asClass().asSubclass(Annotation.class);
                     for (final MetaClass stereoTypedClass :
-                        ClassScanner.getTypesAnnotatedWith(stereoType)) {
+                        ClassScanner.getTypesAnnotatedWith(stereoType, context.getGeneratorContext())) {
                       handleType(entry, dependencyControl, stereoTypedClass, annotationClass, context);
                     }
                   }
@@ -561,14 +563,16 @@ public class IOCConfigProcessor {
             break;
 
             case METHOD: {
-              for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(annotationClass, context.getPackages())) {
+              for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(annotationClass, context.getPackages(), 
+                  context.getGeneratorContext())) {
                 handleMethod(entry, dependencyControl, method, annotationClass, context);
               }
             }
             break;
 
             case FIELD: {
-              for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(annotationClass, context.getPackages())) {
+              for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(annotationClass, context.getPackages(), 
+                  context.getGeneratorContext())) {
                 handleField(entry, dependencyControl, field, annotationClass, context);
               }
             }

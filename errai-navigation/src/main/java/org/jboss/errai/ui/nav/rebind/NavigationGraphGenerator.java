@@ -90,7 +90,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     Multimap<Class<?>, MetaClass> pageRoles = ArrayListMultimap.create();
 
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
-    final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
+    final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class, context);
     for (MetaClass pageClass : pages) {
       if (!pageClass.isAssignableTo(IsWidget.class)) {
         throw new GenerationException(

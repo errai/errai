@@ -31,6 +31,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -397,19 +398,24 @@ public class RebindUtils {
   public static Set<String> getReloadablePackageNames(final GeneratorContext context) {
     Set<String> result = new HashSet<String>();
     ModuleDef module = getModuleDef(context);
-    result.add(module.getCanonicalName());
+    if (module == null) {
+      return result;
+    }
+    
+    String moduleName = module.getCanonicalName().replace(".JUnit", "");
+    result.add(StringUtils.substringBeforeLast(moduleName, "."));
 
     List<String> dottedModulePaths = new ArrayList<String>();
     for (File moduleXmlFile : getAllModuleXMLs(context)) {
       String fileName = moduleXmlFile.getAbsolutePath();
-      fileName = fileName.replace(File.pathSeparatorChar, '.');
+      fileName = fileName.replace(File.separatorChar, '.');
       dottedModulePaths.add(fileName);
     }
 
     for (String inheritedModule : getInheritedModules(context)) {
       for (String dottedModulePath : dottedModulePaths) {
         if (dottedModulePath.contains(inheritedModule)) {
-          result.add(inheritedModule);
+          result.add(StringUtils.substringBeforeLast(inheritedModule, "."));
         }
       }
     }

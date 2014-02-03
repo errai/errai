@@ -71,7 +71,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
 
     final Collection<MetaClass> typesAnnotatedWith = ClassScanner.getTypesAnnotatedWith(Remote.class,
-        RebindUtils.findTranslatablePackages(context));
+        RebindUtils.findTranslatablePackages(context), context);
 
     for (final MetaClass remote : typesAnnotatedWith) {
       if (remote.isInterface()) {

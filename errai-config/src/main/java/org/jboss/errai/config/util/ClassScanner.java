@@ -1,6 +1,8 @@
 package org.jboss.errai.config.util;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +19,8 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionField;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionMethod;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.CacheStore;
@@ -46,7 +50,6 @@ public final class ClassScanner {
     }
   };
 
-  // private static boolean reflectionsScanning = false;
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
   private ClassScanner() {}
@@ -75,88 +78,150 @@ public final class ClassScanner {
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                              final Set<String> packages,
-                                                              final String excludeRegEx) {
-    return getTypesAnnotatedWith(annotation, packages, excludeRegEx, false);
-  }
-
-  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
                                                             final Set<String> packages,
                                                             final String excludeRegEx,
-                                                            final boolean reflections) {
+                                                            final GeneratorContext genCtx,
+                                                            boolean reflections) {
+
     final Collection<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-      if (metaClass.isAnnotationPresent(annotation)) {
-        result.add(metaClass);
-      }
-    }
-
-    try {
-      if (reflections || reflectionScanLocal.get()) {
-        for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-          final MetaClass e = MetaClassFactory.get(cls);
-          result.add(e);
+    if (genCtx != null) {
+      for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
+        if (metaClass.isAnnotationPresent(annotation)) {
+          result.add(metaClass);
         }
       }
+      try {
+        for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
+          final MetaClass clazz = MetaClassFactory.get(cls);
+          if (!isReloadable(clazz)) {
+            result.add(clazz);
+          }
+        }
+      }
+      catch (Exception ignored) {
+      }
     }
-    catch (Exception ignored) {
-    }
+    else {
+      for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+        if (metaClass.isAnnotationPresent(annotation)) {
+          result.add(metaClass);
+        }
+      }
 
+      try {
+        if (reflections || reflectionScanLocal.get()) {
+          for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
+            final MetaClass e = MetaClassFactory.get(cls);
+            result.add(e);
+          }
+        }
+      }
+      catch (Exception ignored) {
+      }
+    }
     filterResultsClass(result, packages, excludeRegEx);
-
     return Collections.unmodifiableCollection(result);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation) {
-    return getTypesAnnotatedWith(annotation, null, null);
+    return getTypesAnnotatedWith(annotation, null, null, null, false);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-      boolean useReflectionsScanning) {
-    return getTypesAnnotatedWith(annotation, null, null, useReflectionsScanning);
+      boolean reflections) {
+    return getTypesAnnotatedWith(annotation, null, null, null, reflections);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                            final Set<String> packages) {
-    return getTypesAnnotatedWith(annotation, packages, null);
+      final GeneratorContext genCtx) {
+    return getTypesAnnotatedWith(annotation, null, null, genCtx, true);
+  }
+
+  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
+                                                            final Set<String> packages, final GeneratorContext genCtx) {
+    return getTypesAnnotatedWith(annotation, packages, null, genCtx, true);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWithExcluding(final Class<? extends Annotation> annotation,
-                                                                     final String excludeRegex) {
-    return getTypesAnnotatedWith(annotation, null, excludeRegex);
+                                                                     final String excludeRegex,
+                                                                     final GeneratorContext genCtx) {
+    return getTypesAnnotatedWith(annotation, null, excludeRegex, genCtx, true);
   }
 
   public static Collection<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                               final Set<String> packages) {
+                                                               final Set<String> packages,
+                                                               final GeneratorContext genCtx) {
     final Collection<MetaMethod> result = new HashSet<MetaMethod>(50);
-    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-      for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
-        if (metaMethod.isAnnotationPresent(annotation)) {
-          result.add(metaMethod);
+
+    if (genCtx != null) {
+      for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
+        for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
+          if (metaMethod.isAnnotationPresent(annotation)) {
+            result.add(metaMethod);
+          }
+        }
+      }
+      try {
+        for (final Method m : ScannerSingleton.getOrCreateInstance().getMethodsAnnotatedWith(annotation)) {
+          final MetaClass clazz = MetaClassFactory.get(m.getDeclaringClass());
+          if (!isReloadable(clazz)) {
+            result.add(new JavaReflectionMethod(clazz, m));
+          }
+        }
+      }
+      catch (Exception ignored) {
+      }
+    }
+    else {
+      for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+        for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
+          if (metaMethod.isAnnotationPresent(annotation)) {
+            result.add(metaMethod);
+          }
         }
       }
     }
 
     filterResultsMethod(result, packages, null);
-
     return Collections.unmodifiableCollection(result);
   }
 
   public static Collection<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                             final Set<String> packages) {
+                                                             final Set<String> packages,
+                                                             final GeneratorContext genCtx) {
     final Collection<MetaField> result = new HashSet<MetaField>(50);
 
-    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-      for (final MetaField metaField : metaClass.getDeclaredFields()) {
-        if (metaField.isAnnotationPresent(annotation)) {
-          result.add(metaField);
+    if (genCtx != null) {
+      for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
+        for (final MetaField metaField : metaClass.getDeclaredFields()) {
+          if (metaField.isAnnotationPresent(annotation)) {
+            result.add(metaField);
+          }
+        }
+      }
+      try {
+        for (final Field f : ScannerSingleton.getOrCreateInstance().getFieldsAnnotatedWith(annotation)) {
+          final MetaClass clazz = MetaClassFactory.get(f.getDeclaringClass());
+          if (!isReloadable(clazz)) {
+            result.add(new JavaReflectionField(f));
+          }
+        }
+      }
+      catch (Exception ignored) {
+      }
+    }
+    else {
+      for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+        for (final MetaField metaField : metaClass.getDeclaredFields()) {
+          if (metaField.isAnnotationPresent(annotation)) {
+            result.add(metaField);
+          }
         }
       }
     }
 
     filterResultsField(result, packages, null);
-
     return Collections.unmodifiableCollection(result);
   }
 
@@ -193,11 +258,12 @@ public final class ClassScanner {
   }
 
   private static Set<String> reloadablePackages = null;
+
   private static Collection<MetaClass> getAllReloadableCachedClasses(final GeneratorContext context) {
     if (reloadablePackages == null) {
       reloadablePackages = RebindUtils.getReloadablePackageNames(context);
     }
-    
+
     Collection<MetaClass> clazzes = new ArrayList<MetaClass>();
     for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
       for (String reloadablePackage : reloadablePackages) {
@@ -207,6 +273,15 @@ public final class ClassScanner {
       }
     }
     return clazzes;
+  }
+
+  private static boolean isReloadable(MetaClass clazz) {
+    for (String reloadablePackage : reloadablePackages) {
+      if (clazz.getFullyQualifiedName().startsWith(reloadablePackage)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void filterResultsClass(final Collection<MetaClass> result,
@@ -299,8 +374,6 @@ public final class ClassScanner {
 
   public static void setReflectionsScanning(final boolean bool) {
     reflectionScanLocal.set(bool);
-
-    // reflectionsScanning = bool;
   }
 
   public static AtomicLong getTotalClassScanTime() {

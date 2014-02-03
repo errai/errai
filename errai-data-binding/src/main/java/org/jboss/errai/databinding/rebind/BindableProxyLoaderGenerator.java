@@ -115,7 +115,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
       final GeneratorContext context) {
 
     for (MetaClass converter : ClassScanner.getTypesAnnotatedWith(DefaultConverter.class,
-        RebindUtils.findTranslatablePackages(context))) {
+        RebindUtils.findTranslatablePackages(context), context)) {
 
       Statement registerConverterStatement = null;
       for (MetaClass iface : converter.getInterfaces()) {

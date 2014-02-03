@@ -381,7 +381,7 @@ public class IOCBootstrapGenerator {
 
     computeDependentScope(context, injectionContext);
 
-    final Collection<MetaClass> bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
+    final Collection<MetaClass> bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class, context);
     for (final MetaClass clazz : bootstrapClassCollection) {
       final IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
@@ -442,7 +442,8 @@ public class IOCBootstrapGenerator {
 
     injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
 
-    for (final MetaClass mc : ClassScanner.getTypesAnnotatedWith(Stereotype.class)) {
+    final GeneratorContext genCtx = injectionContext.getProcessingContext().getGeneratorContext();
+    for (final MetaClass mc : ClassScanner.getTypesAnnotatedWith(Stereotype.class, genCtx)) {
       processStereoType(injectionContext, mc.asClass().asSubclass(Annotation.class));
     }
 
@@ -480,8 +481,8 @@ public class IOCBootstrapGenerator {
 
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
 
-    final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class));
-    knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class));
+    final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class, context));
+    knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class, context));
 
     if (context != null) {
       TypeScan:

@@ -123,7 +123,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     // found in the default bundle. This is why we do this before we do
     // the bundle work.
     Map<String, String> translationKeyFieldMap = new HashMap<String, String>();
-    Collection<MetaField> translationKeyFields = ClassScanner.getFieldsAnnotatedWith(TranslationKey.class, null);
+    Collection<MetaField> translationKeyFields = ClassScanner.getFieldsAnnotatedWith(TranslationKey.class, null, context);
     for (MetaField metaField : translationKeyFields) {
       // Figure out the translation key name
       String name = null;
@@ -165,7 +165,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     }
 
     // Scan for all @Bundle annotations.
-    final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class);
+    final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class, context);
     // For each one, generate the code to load the translation and put that generated
     // code in the c'tor of the generated class (GeneratedTranslationService)
     for (MetaClass bundleAnnotatedClass : bundleAnnotatedClasses) {
@@ -350,6 +350,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    *          a map of translation keys found in {@link TranslationKey} annotated fields
    * @param destDir
    *          where to write the *.json files
+   * @param context
+   *          the generator context          
    */
   protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap,
       Map<String, String> translationKeyFieldMap, File destDir) {
