@@ -23,16 +23,19 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
-import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
+import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
@@ -105,6 +108,27 @@ public class App {
       }
     });
 
+    Button get = new Button("Get (Simulate Error)", new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        customerService.call(new RemoteCallback<Customer>() {
+          @Override
+          public void callback(Customer response) {
+            Window.alert("A customer was returned?  What the what?!");
+          }
+        }, new RestErrorCallback() {
+          @Override
+          public boolean error(Request message, Throwable throwable) {
+            CustomerNotFoundException cnfe = (CustomerNotFoundException) throwable;
+            Window.alert("As expected, an error of type '"
+                    + cnfe.getClass().getName() + "' was received for ID '"
+                    + cnfe.getCustomerId() + "'.");
+            return true;
+          }
+        }).retrieveCustomerById(17);
+      }
+    });
+
     FlexTable newCustomerTable = new FlexTable();
     newCustomerTable.setWidget(0, 1, custFirstName);
     newCustomerTable.setWidget(0, 2, custLastName);
@@ -116,6 +140,8 @@ public class App {
     vPanel.add(customersTable);
     vPanel.add(new HTML("<hr>"));
     vPanel.add(newCustomerTable);
+    vPanel.add(new HTML("<hr>"));
+    vPanel.add(get);
     vPanel.addStyleName("whole-customer-table");
     RootPanel.get().add(vPanel);
 

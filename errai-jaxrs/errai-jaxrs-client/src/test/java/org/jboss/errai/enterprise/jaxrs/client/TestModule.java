@@ -19,10 +19,11 @@ package org.jboss.errai.enterprise.jaxrs.client;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.enterprise.jaxrs.client.shared.ClientExceptionMappingTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ErrorHandlingTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
-import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
@@ -43,6 +44,9 @@ public class TestModule {
   
   @Inject
   private Caller<ErrorHandlingTestService> errorHandlingTestService;
+  
+  @Inject
+  private Caller<ClientExceptionMappingTestService> clientExceptionMappingTestService;
 
   @PostConstruct
   public void doPostConstruct() {
@@ -63,5 +67,9 @@ public class TestModule {
   
   public Caller<ErrorHandlingTestService> getErrorHandlingTestService() {
     return errorHandlingTestService;
+  }
+  
+  public Caller<ClientExceptionMappingTestService> getClientExceptionMappingTestService() {
+    return clientExceptionMappingTestService;
   }
 }

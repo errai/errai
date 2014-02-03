@@ -44,6 +44,7 @@ import com.google.gwt.http.client.Response;
 public abstract class AbstractJaxrsProxy implements RpcStub {
   private String baseUrl;
   private List<Integer> successCodes;
+  private ClientExceptionMapper exceptionMapper;
 
   /**
    * Returns the remote callback used by this proxy.
@@ -130,7 +131,13 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
             }
           }
           else {
-            ResponseException throwable = new ResponseException(response.getStatusText(), response);
+            Throwable throwable = null;
+            ErrorCallback<?> errorCallback = getErrorCallback();
+            if (errorCallback instanceof RestErrorCallback && hasExceptionMapper()) {
+              throwable = unmarshallException(response);
+            } else {
+              throwable = new ResponseException(response.getStatusText(), response);
+            }
             handleError(throwable, request, response);
           }
         }
@@ -140,6 +147,15 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
       handleError(throwable, null, null);
     }
   } 
+
+  /**
+   * Uses the configured {@link ClientExceptionMapper} to unmarshal the {@link Response} into
+   * a {@link Throwable}.
+   * @param response
+   */
+  protected Throwable unmarshallException(Response response) {
+    return getExceptionMapper().fromResponse(response);
+  }
 
   protected void handleError(Throwable throwable, Request request, Response response) {
     ErrorCallback<?> errorCallback = getErrorCallback();
@@ -167,5 +183,26 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   @Override
   public void setBatch(@SuppressWarnings("rawtypes") RpcBatch batch) {
     throw new UnsupportedOperationException("Batching of remote calls is not supported in errai jax-rs!");
+  }
+
+  /**
+   * @return true if this proxy has a configured exception mapper
+   */
+  public boolean hasExceptionMapper() {
+    return getExceptionMapper() != null;
+  }
+  
+  /**
+   * @return the exceptionMapper
+   */
+  public ClientExceptionMapper getExceptionMapper() {
+    return exceptionMapper;
+  }
+
+  /**
+   * @param exceptionMapper the exceptionMapper to set
+   */
+  public void setExceptionMapper(ClientExceptionMapper exceptionMapper) {
+    this.exceptionMapper = exceptionMapper;
   }
 }
