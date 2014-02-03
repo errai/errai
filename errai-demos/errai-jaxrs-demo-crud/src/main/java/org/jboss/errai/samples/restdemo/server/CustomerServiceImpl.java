@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.ws.rs.core.Response;
 
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
+import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
 /**
@@ -66,7 +67,10 @@ public class CustomerServiceImpl implements CustomerService {
   }
 
   @Override
-  public Customer retrieveCustomerById(long id) {
+  public Customer retrieveCustomerById(long id) throws CustomerNotFoundException {
+    if (!customers.containsKey(id)) {
+      throw new CustomerNotFoundException(id);
+    }
     return customers.get(id);
   }
 

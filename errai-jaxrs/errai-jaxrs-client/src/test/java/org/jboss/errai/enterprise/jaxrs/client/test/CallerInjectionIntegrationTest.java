@@ -17,15 +17,19 @@
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.TestModule;
+import org.jboss.errai.enterprise.jaxrs.client.shared.UserNotFoundException;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.junit.Test;
 
+import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 
 /**
@@ -60,6 +64,32 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
+  public void testInjectedClientExceptionMappingService() {
+    delayTestFinish(5000);
+    TestModule.getInstance().getClientExceptionMappingTestService()
+        .call(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            fail("Callback should not be invoked");
+          }
+        }, new RestErrorCallback() {
+          @Override
+          public boolean error(Request message, Throwable throwable) {
+            assertEquals(throwable.getClass(), UserNotFoundException.class);
+            try {
+              throw throwable;
+            } catch (UserNotFoundException unfe) {
+              assertEquals("User not found: -1", unfe.getMessage());
+              finishTest();
+            } catch (Throwable t) {
+              fail("Unexpected exception: " + t.getMessage());
+            }
+            return false;
+          }
+        }).getUsernameWithError(17l);
+  }
+
+  @Test
   public void testInjectedErrorHandlingTestService() {
     delayTestFinish(5000);
     TestModule.getInstance().getErrorHandlingTestService()
@@ -88,4 +118,5 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
             }
           ).error();
   }
+  
 }

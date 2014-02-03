@@ -64,7 +64,7 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
         .findTranslatablePackages(context))) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
-        ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
+        ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote, context).generate();
         loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         // create the proxy provider
