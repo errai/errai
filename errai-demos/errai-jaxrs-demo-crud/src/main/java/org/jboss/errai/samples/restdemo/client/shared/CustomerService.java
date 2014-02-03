@@ -57,5 +57,5 @@ public interface CustomerService {
   @GET
   @Path("/{id}")
   @Produces("application/json")
-  public Customer retrieveCustomerById(@PathParam("id") long id);
+  public Customer retrieveCustomerById(@PathParam("id") long id) throws CustomerNotFoundException;
 }
