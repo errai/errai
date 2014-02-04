@@ -556,7 +556,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     this.mappingAliases.clear();
     this.mappingDefinitions.clear();
     this.typesWithBuiltInMarshallers.clear();
-    loadCustomMappings();
+    loadCustomMappings(); 
   }
 
   @Override

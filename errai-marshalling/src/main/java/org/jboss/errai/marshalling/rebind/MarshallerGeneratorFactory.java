@@ -97,6 +97,7 @@ public class MarshallerGeneratorFactory {
   private final Set<String> unlazyMarshallers = new HashSet<String>();
 
   private static final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
+  private static boolean refresh = false;
 
   long startTime;
 
@@ -146,6 +147,9 @@ public class MarshallerGeneratorFactory {
     final String gen;
     log.info("generating marshaller factory class for " + ((target == MarshallerOutputTarget.GWT) ? "client" : "server" + "..."));
     final long time = System.currentTimeMillis();
+    if (target == MarshallerOutputTarget.GWT && refresh) {
+      DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
+    }
     gen = _generate(packageName, clazzName);
     log.info("generated marshaller factory class in " + (System.currentTimeMillis() - time) + "ms.");
     return gen;
@@ -308,6 +312,9 @@ public class MarshallerGeneratorFactory {
         .finish();
 
     done = true;
+    if (target == MarshallerOutputTarget.GWT) {
+      refresh = true;
+    }
     return classStructureBuilder.toJavaString();
   }
 
