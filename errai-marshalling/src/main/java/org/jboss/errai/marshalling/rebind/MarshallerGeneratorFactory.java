@@ -87,6 +87,7 @@ public class MarshallerGeneratorFactory {
   private final Set<String> unlazyMarshallers = new HashSet<String>();
 
   private static final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
+  private static boolean refresh = false;
 
   long startTime;
 
@@ -140,6 +141,9 @@ public class MarshallerGeneratorFactory {
 
     log.info("generating marshalling class...");
     final long time = System.currentTimeMillis();
+    if (target == MarshallerOutputTarget.GWT && refresh) {
+      DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
+    }
     gen = _generate(packageName, clazzName);
     log.info("generated marshalling class in " + (System.currentTimeMillis() - time) + "ms.");
 
@@ -271,7 +275,10 @@ public class MarshallerGeneratorFactory {
     for (final MetaClass metaClass : mappingContext.getDefinitionsFactory().getArraySignatures()) {
       addArrayMarshaller(metaClass);
     }
-
+    
+    if (target == MarshallerOutputTarget.GWT) {
+      refresh = true;
+    }
     return classStructureBuilder.toJavaString();
   }
 
