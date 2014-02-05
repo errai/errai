@@ -76,7 +76,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
    *     the stuff to run once the bus is online.
    */
   protected void runAfterInit(final Runnable r) {
-    delayTestFinish(30000);
+    delayTestFinish(45000);
     InitVotes.registerOneTimeInitCallback(r);
   }
 }
