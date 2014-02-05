@@ -93,9 +93,8 @@ public final class ClassScanner {
       }
       try {
         for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-          final MetaClass clazz = MetaClassFactory.get(cls);
-          if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getFullyQualifiedName())) {
-            result.add(clazz);
+          if (!isReloadable(cls) && MetaClassFactory.isKnownType(cls.getName())) {
+            result.add(MetaClassFactory.get(cls));
           }
         }
       }
@@ -164,9 +163,10 @@ public final class ClassScanner {
       }
       try {
         for (final Method m : ScannerSingleton.getOrCreateInstance().getMethodsAnnotatedWith(annotation)) {
-          final MetaClass clazz = MetaClassFactory.get(m.getDeclaringClass());
-          if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getFullyQualifiedName())) {
-            result.add(new JavaReflectionMethod(clazz, m));
+          Class<?> clazz = m.getDeclaringClass();
+          if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getName())) {
+            final MetaClass metaClass = MetaClassFactory.get(clazz);
+            result.add(new JavaReflectionMethod(metaClass, m));
           }
         }
       }
@@ -202,8 +202,8 @@ public final class ClassScanner {
       }
       try {
         for (final Field f : ScannerSingleton.getOrCreateInstance().getFieldsAnnotatedWith(annotation)) {
-          final MetaClass clazz = MetaClassFactory.get(f.getDeclaringClass());
-          if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getFullyQualifiedName())) {
+          Class<?> clazz = f.getDeclaringClass();
+          if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getName())) {
             result.add(new JavaReflectionField(f));
           }
         }
@@ -275,9 +275,9 @@ public final class ClassScanner {
     return clazzes;
   }
 
-  private static boolean isReloadable(MetaClass clazz) {
+  private static boolean isReloadable(Class<?> clazz) {
     for (String reloadablePackage : reloadablePackages) {
-      if (clazz.getFullyQualifiedName().startsWith(reloadablePackage)) {
+      if (clazz.getName().startsWith(reloadablePackage)) {
         return true;
       }
     }
