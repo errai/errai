@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Image;
 
@@ -28,9 +29,10 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
 
   private void testInsertAndReplace(BasicTemplateTestApp app) {
     assertNotNull(app.getComponent());
-    assertTrue(app.getComponent().getElement().getInnerHTML().contains("<h1>This will be rendered</h1>"));
-    assertTrue(app.getComponent().getElement().getInnerHTML().contains("<div>This will be rendered</div>"));
-    assertTrue(app.getComponent().getElement().getInnerHTML().contains("This will be rendered inside button"));
+    String innerHtml = app.getComponent().getElement().getInnerHTML();
+    assertTrue(RegExp.compile("<h1(.)*>This will be rendered</h1>").test(innerHtml));
+    assertTrue(RegExp.compile("<div(.)*>This will be rendered</div>").test(innerHtml));
+    assertTrue(innerHtml.contains("This will be rendered inside button"));
 
     Element c1 = Document.get().getElementById("c1");
     assertNotNull(c1);
@@ -72,7 +74,10 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
 
   private void testHasHTMLPreservesInnerHTML(BasicTemplateTestApp app) throws Exception {
     Anchor c4comp = app.getComponent().getC4();
-    assertEquals("Inner HTML should be preserved when component implements ", "<span>LinkHTML</span>", c4comp.getHTML());
+    String c4compHtml = c4comp.getHTML();
+    assertTrue("Inner HTML should be preserved when component implements ", 
+        RegExp.compile("<span(.)*>LinkHTML</span>").test(c4compHtml));
+    
     Element c4 = c4comp.getElement();
     assertEquals("blah", c4.getAttribute("href"));
     assertEquals("SPAN", c4.getFirstChildElement().getTagName());

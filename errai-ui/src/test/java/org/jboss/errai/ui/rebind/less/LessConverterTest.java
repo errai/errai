@@ -1,11 +1,14 @@
 package org.jboss.errai.ui.rebind.less;
 
-import com.google.gwt.core.ext.BadPropertyValueException;
-import com.google.gwt.core.ext.PropertyOracle;
-import com.google.gwt.core.ext.SelectionProperty;
-import com.google.gwt.core.ext.TreeLogger;
-import org.junit.Test;
-import org.mockito.Matchers;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.mockito.AdditionalMatchers.not;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,13 +17,13 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Scanner;
 
-import static junit.framework.Assert.*;
-import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Test;
+import org.mockito.Matchers;
+
+import com.google.gwt.core.ext.BadPropertyValueException;
+import com.google.gwt.core.ext.PropertyOracle;
+import com.google.gwt.core.ext.SelectionProperty;
+import com.google.gwt.core.ext.TreeLogger;
 
 /**
  * @author edewit@redhat.com

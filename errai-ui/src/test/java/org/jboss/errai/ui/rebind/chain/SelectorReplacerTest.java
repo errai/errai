@@ -1,15 +1,15 @@
 package org.jboss.errai.ui.rebind.chain;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.HashMap;
+
+import javax.xml.transform.TransformerException;
+
 import org.apache.xpath.XPathAPI;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.transform.TransformerException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author edewit@redhat.com
