@@ -544,4 +544,8 @@ public final class MetaClassFactory {
   public static Collection<MetaClass> getAllCachedClasses() {
     return getMetaClassCache().getAllCached();
   }
+  
+  public static boolean isKnownType(String fqcn) {
+    return getMetaClassCache().isKnownType(fqcn);
+  }
 }
