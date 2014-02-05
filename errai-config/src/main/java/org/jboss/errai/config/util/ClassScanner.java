@@ -92,9 +92,10 @@ public final class ClassScanner {
         }
       }
       try {
+        Collection<MetaClass> allTypesKnowToGwt = MetaClassFactory.getAllCachedClasses();
         for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
           final MetaClass clazz = MetaClassFactory.get(cls);
-          if (!isReloadable(clazz)) {
+          if (!isReloadable(clazz) && allTypesKnowToGwt.contains(clazz)) {
             result.add(clazz);
           }
         }
@@ -163,9 +164,10 @@ public final class ClassScanner {
         }
       }
       try {
+        Collection<MetaClass> allTypesKnowToGwt = MetaClassFactory.getAllCachedClasses();
         for (final Method m : ScannerSingleton.getOrCreateInstance().getMethodsAnnotatedWith(annotation)) {
           final MetaClass clazz = MetaClassFactory.get(m.getDeclaringClass());
-          if (!isReloadable(clazz)) {
+          if (!isReloadable(clazz) && allTypesKnowToGwt.contains(clazz)) {
             result.add(new JavaReflectionMethod(clazz, m));
           }
         }
@@ -201,9 +203,10 @@ public final class ClassScanner {
         }
       }
       try {
+        Collection<MetaClass> allTypesKnowToGwt = MetaClassFactory.getAllCachedClasses();
         for (final Field f : ScannerSingleton.getOrCreateInstance().getFieldsAnnotatedWith(annotation)) {
           final MetaClass clazz = MetaClassFactory.get(f.getDeclaringClass());
-          if (!isReloadable(clazz)) {
+          if (!isReloadable(clazz) && allTypesKnowToGwt.contains(clazz)) {
             result.add(new JavaReflectionField(f));
           }
         }
