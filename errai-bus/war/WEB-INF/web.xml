@@ -21,6 +21,16 @@
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
+    <filter>
+        <filter-name>ServerSideErrorSimulationFilter</filter-name>
+        <filter-class>org.jboss.errai.bus.server.ServerSideErrorSimulationFilter</filter-class>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>ServerSideErrorSimulationFilter</filter-name>
+        <url-pattern>*.erraiBus</url-pattern>
+    </filter-mapping>
+    
     <servlet>
         <servlet-name>ErraiServlet</servlet-name>
         <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>

@@ -47,4 +47,11 @@ public final class RetryInfo {
   public int getRetryCount() {
     return retryCount;
   }
+
+  @Override
+  public String toString() {
+    return "RetryInfo [delayUntilNextRetry=" + delayUntilNextRetry
+            + ", retryCount=" + retryCount + "]";
+  }
+  
 }

@@ -98,12 +98,23 @@ public interface ClientMessageBus extends MessageBus {
 
   /**
    * Adds a global transport error handler to deal with any errors which arise
-   * from communication between the bus and the server
+   * from communication between the bus and the server.
    *
    * @param errorHandler
    *          the error handler to add.
    */
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
+
+  /**
+   * Removes the given global transport error handler from this bus. Once
+   * removed, the given handler does not receive transport error notifications
+   * anymore.
+   * 
+   * @param errorHandler
+   *          the error handler to remove. This method has no effect if the
+   *          given handler is {@code null} or it was not already registered.
+   */
+  public void removeTransportErrorHandler(TransportErrorHandler errorHandler);
 
   /**
    * Sets a property on the bus.

@@ -122,6 +122,10 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
+        public void removeTransportErrorHandler(TransportErrorHandler errorHandler) {
+        }
+
+        @Override
         public void addLifecycleListener(BusLifecycleListener l) {
         }
 
