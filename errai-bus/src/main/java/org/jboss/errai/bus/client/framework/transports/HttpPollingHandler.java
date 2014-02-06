@@ -252,7 +252,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       receiveCommCallback.onError(null, e);
     }
     catch (Throwable t) {
-      if (messageBus.handleTransportError(new BusTransportError(request, t, -1, RetryInfo.NO_RETRY))) {
+      if (messageBus.handleTransportError(new BusTransportError(this, request, t, -1, RetryInfo.NO_RETRY))) {
         return;
       }
 
@@ -335,7 +335,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       final int retryDelay = Math.min((rxRetries * 1000) + 1, 10000);
 
       final RetryInfo retryInfo = new RetryInfo(retryDelay, rxRetries);
-      final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);
+      final BusTransportError transportError =
+              new BusTransportError(HttpPollingHandler.this, request, throwable, statusCode, retryInfo);
 
       notifyDisconnected();
 
@@ -707,7 +708,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         {
           final int retryDelay = Math.min((txRetries * 1000) + 1, 10000);
           final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
-          final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
+          final BusTransportError transportError =
+                  new BusTransportError(HttpPollingHandler.this, request, null, statusCode, retryInfo);
 
           notifyDisconnected();
 
@@ -735,7 +737,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
           break;
 
         default: {
-          final BusTransportError transportError = new BusTransportError(request, null, statusCode, RetryInfo.NO_RETRY);
+          final BusTransportError transportError =
+                  new BusTransportError(HttpPollingHandler.this, request, null, statusCode, RetryInfo.NO_RETRY);
 
           if (messageBus.handleTransportError(transportError)) {
             return;
@@ -756,7 +759,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       txActive = false;
       notifyDisconnected();
 
-      messageBus.handleTransportError(new BusTransportError(request, exception, statusCode, RetryInfo.NO_RETRY));
+      messageBus.handleTransportError(
+              new BusTransportError(HttpPollingHandler.this, request, exception, statusCode, RetryInfo.NO_RETRY));
 
       for (final Message txM : txMessages) {
         if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
