@@ -72,7 +72,7 @@ The first thing you'll need to do if you have not already, is link:$$http://mave
 Warning: If you use maven2, you will run into this problem: https://community.jboss.org/thread/177645
 ====
 
-You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[errai tutorial demo]) or by building an app with the Errai Forge plugin:
+You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[errai tutorial demo]) or by building an app with the Errai Forge Addon:
 
 [[sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication]]
 
@@ -84,57 +84,8 @@ Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/ar
 
 ===== Starting with the Errai Forge plugin
 
-Another way to start a new project with Errai is to use Forge and the Errai Forge plugin. For this approach you will need:
+Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/forge-errai/blob/master/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
 
-* To download and install link:$$http://forge.jboss.org/[Forge].
-
-* To download the Errai Forge plugin, by either cloning link:$$https://github.com/errai/forge-errai.git[this repo] or downloading and unzipping link:$$https://github.com/errai/forge-errai/archive/master.zip[this file].
-
-===== Loading the Errai Forge plugin
-
-To install the plugin, start forge and then run the command, where `$PATH_TO_PLUGIN` is the absolute path of the Errai Forge plugin source you have previously downloaded.
-
-----
-forge source-plugin $PATH_TO_PLUGIN
-----
-
-===== Creating your new project
-
-While still in Forge, run this command:
-
-----
-new-project --named $PROJECT_NAME --topLevelPackage $PROJECT_PACKAGE --projectFolder $PROJECT_PATH
-----
-
-Make sure to replace the above variables so that:
-
-* *$PROJECT_NAME* is the name of your new project.
-
-* *$PROJECT_PACKAGE* is the Java package used by your new project.
-
-* *$PROJECT_PATH* is the path to the root directory of your new project (Forge will create the directory for you).
-
-===== Installing the Errai Forge plugin
-
-In Forge (while in your new project's root directory) run
-
-----
-errai setup
-----
-
-This will prompt you for:
-
-* The logical name of the link:$$http://www.gwtproject.org/doc/latest/DevGuideOrganizingProjects.html#DevGuideModuleXml[GWT module] for your project. (So if you want a module called _App_ in the package `org.jboss.errai`, the logical name would be `org.jboss.errai.App`)
-
-* An option to give your module a different name with the "rename-to" attribute (for example, you could rename a logical module `org.jboss.errai.App` to just `app` to help shorten urls).
-
-* The version of Errai you would like to use.
-
-This will configure the main dependencies and plugins required to run any Errai App in GWT Development Mode and to compile for deployment. You will now also have access to all of the Errai Forge plugin commands. Since one of the proceeding sections will be describing the use of Errai CDI, you should install this feature now by running
-
-----
-errai add-feature cdi
-----
 
 In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:
 
@@ -155,6 +106,8 @@ public class App {
   }
 }
 ----
+
+For this code to run properly, you must use the the Errai Forge Addon _Add Errai Features_ command to install _Errai IOC_.
 
 Create new subfolder, _client/local_, under the folder containing your GWT module file. Then create a file, _App.java_, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).
 
