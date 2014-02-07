@@ -3587,6 +3587,10 @@ ResponseCallback callback = new ResponseCallback() {
 };
 ----
 
+[[sid-19398997_ErraiJAX-RS-HandlingErrors]]
+
+==== Handling Errors
+
 For handling errors, Errai's error callback mechanism can be reused and an instance of [code]+ErrorCallback+ can optionally be passed to the [code]+RestClient.create()+ call. In case of an HTTP error, the [code]+ResponseException+ provides access to the [code]+Response+ object. All other [code]+Throwables+ indicate a communication problem.
 
 
@@ -3608,6 +3612,51 @@ ErrorCallback errorCallback = new RestErrorCallback() {
     return false;
   }
 };
+----
+
+To provide more customized error handling, Errai also defines client side exception handling via the [code]+ClientExceptionMapper+ interface.  The client exception mapper allows developers to process a REST [code]+Response+ into a [code]+Throwable+ prior to the error being delivered to the [code]+ErrorCallback+ described above.  The exception mapper class must be annotated with [code]+javax.ws.rs.ext.Provider+ as well as implement the [code]+ClientExceptionMapper+ interface.
+
+----
+@Provider
+public class MyAppExceptionMapper implements ClientExceptionMapper {
+  
+  /**
+   * @see org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper#fromResponse(com.google.gwt.http.client.Response)
+   */
+  @Override
+  public Throwable fromResponse(Response response) {
+    if (response.getStatusCode() == 404)
+      return new MyAppNotFoundException();
+    else
+      return new MyAppServerError(response.getStatusText());
+  }
+
+}
+
+----
+
+[IMPORTANT]
+.Must be used in conjunction with [code]+RestErrorCallback+
+====
+It is important to note that the [code]+ClientExceptionMapper+ will only be invoked when the callback passed to the [code]+Caller+ is an instance of [code]+RestErrorCallback+.
+====
+
+The [code]+ClientExceptionMapper+ will, by default, be invoked for every error response.  However, Errai also provides the [code]+org.jboss.errai.enterprise.shared.api.annotations.MapsFrom+ annotation which provides for additional granularity.  An exception mapper can be annotated so that it is only invoked for methods on specific REST interfaces.
+
+----
+@Provider
+@MapsFrom({ SomeRestInterface.class })
+public class SpecificClientExceptionMapper implements ClientExceptionMapper {
+
+  /**
+   * @see org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper#fromResponse(com.google.gwt.http.client.Response)
+   */
+  @Override
+  public Throwable fromResponse(Response response) {
+     ... // Do something specific here
+  }
+
+}
 ----
 
 [[sid-19398997_ErraiJAX-RS-ClientsideInterceptors]]
