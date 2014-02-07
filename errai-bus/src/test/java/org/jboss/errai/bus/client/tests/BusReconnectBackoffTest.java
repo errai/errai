@@ -57,10 +57,10 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
             double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
             
             System.out.println(transportErrorCounter);
-            System.out.println("Retries per second is now " + retriesPerSecond);
+            System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
             assertTrue(retriesPerSecond < 3);
             
-            if (elapsedClockTime > 20000) finishTest();
+            if (elapsedClockTime > 16000) finishTest();
           }
         }.scheduleRepeating(2000);
       }
@@ -95,12 +95,18 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
             double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
             
             System.out.println(transportErrorCounter);
-            System.out.println("Retries per second is now " + retriesPerSecond);
-            assertTrue("Retries per second is now " + retriesPerSecond, retriesPerSecond < 3);
-            // Suspected cause of failure: previous transport handlers have not been shut down
-            // properly, and they are still retrying when the next test runs!
+            System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
             
-            if (elapsedClockTime > 20000) finishTest();
+            // NOTE TO MAINTAINERS: Hi! If this assertion fails, it could be
+            // because throttling is broken, but it might also be because
+            // transport handlers left over from the previous test have not been
+            // shut down properly, when the bus was reset between tests. Or they
+            // have been shut down but their stop() method isn't entirely
+            // effective. Especially suspect would be pending timers that don't
+            // get canceled when you call stop().
+            assertTrue("Retries per second is now " + retriesPerSecond, retriesPerSecond < 3);
+            
+            if (elapsedClockTime > 16000) finishTest();
           }
         }.scheduleRepeating(2000);
       }

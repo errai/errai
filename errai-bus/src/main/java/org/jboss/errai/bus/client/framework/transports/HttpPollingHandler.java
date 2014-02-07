@@ -266,6 +266,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   @Override
   public Collection<Message> stop(final boolean stopAllCurrentRequests) {
     receiveCommCallback.cancel();
+    throttleTimer.cancel();
+    
     try {
       if (stopAllCurrentRequests) {
         // Now stop all the in-flight XHRs
@@ -365,7 +367,9 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
           new Timer() {
             @Override
             public void run() {
-              performPoll();
+              if (!canceled) {
+                performPoll();
+              }
             }
           }.schedule(retryDelay);
 
@@ -420,7 +424,9 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       new Timer() {
         @Override
         public void run() {
-          performPoll();
+          if (!canceled) {
+            performPoll();
+          }
         }
       }.schedule(1);
     }
