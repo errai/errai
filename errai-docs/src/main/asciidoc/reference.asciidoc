@@ -78,11 +78,11 @@ You have two options to set up an Errai application. You can start by copying an
 
 ===== Start from a working example application
 
-Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[demo]. Check out the README file and continue with running the app in <<sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode,GWT's development mode>> and importing the project into <<sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse,Eclipse>> .
+Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[demo]. Check out the README file and continue with running the app in <<sid-54493220_GettingStartedwithErrai-RunningtheappinGWT,GWT's development mode>> and importing the project into <<sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse,Eclipse>> .
 
-[[sid-54493220_GettingStartedwithErrai-Startfromaquickstartarchetype]]
+[[sid-54493220_GettingStartedwithErrai-ErraiForgeAddon]]
 
-===== Starting with the Errai Forge plugin
+===== Starting with the Errai Forge Addon
 
 Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/forge-errai/blob/v2.0.0.Beta1/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
 
@@ -117,7 +117,7 @@ Create new subfolder, _client/local_, under the folder containing your GWT modul
 Keep an eye out for tips in the proceeding sections on how you can use the Errai Forge plugin to configure other Errai features for your new project.
 ====
 
-[[sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode]]
+[[sid-54493220_GettingStartedwithErrai-RunningtheappinGWT]]
 
 ==== Running the app in GWT's development mode
 
@@ -305,6 +305,12 @@ image::author/download/attachments/54493220/ServerDebugConfig.PNG[width=650]
 The project you created and setup in the previous two sections (ERRAI:Create your Project and ERRAI:Configuring your project for Eclipse) will be used as the basis for this section. So if you have not read them, do so now.
 ====
 
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai CDI_ to follow along with this section.
+====
+
 Errai CDI as its namesake implies is based on, and is in fact, a partial implementation of the CDI (Contexts and Dependency Injection) specification. Errai CDI covers _most_ of the programming model but omits the CDI SPI, instead replacing it with it a custom set of APIs which are more appropriate for the client programming model of Errai.
 
 These differences aside, using Errai CDI in conjunction with CDI on the server will provide you with a uniform programming model across the client and server code of your application.
@@ -389,9 +395,13 @@ Here, every time a new instance of [code]+Foo+ is created, the _same_ instance o
 assert fooInstance.bar.foo == fooInstance
 ----
 
-_Note_ : This identity check will not _actually_ be true at runtime due to the need to proxy the class in this scenario. But it is true, that [code]+fooInstance+ and [code]+fooInstance.bar.foo+ both point to the same _underlying_ bean instance.
+[IMPORTANT]
+.Note
+====
+This identity check will not _actually_ be true at runtime due to the need to proxy the class in this scenario. But it is true, that [code]+fooInstance+ and [code]+fooInstance.bar.foo+ both point to the same _underlying_ bean instance.
+====
 
-In the case of an Errai application, there are a bunch of application scoped beans which come built-in for common services like _ _ErraiBus_ _. Thus, in an Errai application which uses the message bus, we can inject a handle to the [code]+MessageBus+ service into any of our beans. Let's go ahead and do that in our [code]+Bar+ class:
+In the case of an Errai application, there are a bunch of application scoped beans which come built-in for common services like _ErraiBus_. Thus, in an Errai application which uses the message bus, we can inject a handle to the [code]+MessageBus+ service into any of our beans. Let's go ahead and do that in our [code]+Bar+ class:
 
 [source, java]
 ----
@@ -406,23 +416,19 @@ public class Bar {
 }
 ----
 
-If working with dependency injection is new to you, then this is where you'll start seeing some practical benefit. When you need a common service in your client code, you ask the container for it, by _injecting_ it. This frees you of worrying about the proper APIs to use in order to get access to a service; we need to use the message bus in our [code]+Bar+ bean, and so we inject it.
+If working with dependency injection is new to you, then this is where you'll start seeing some practical benefit. When you need a common service in your client code, you ask the container for it by _injecting_ it. This frees you from worrying about the proper APIs to use in order to access a service; we need to use the message bus in our [code]+Bar+ bean, and so we inject it.
 
-Now that we're getting the gist of how dependency injection works, let's go back to the sample project we created with the Maven archetype in the last section of this guide.
+===== EntryPoints
 
-In the [code]+App+ class that was created, there may be two peculiarities sticking out to you:
+Now that we're getting the gist of how dependency injection works, let's go back to our sample project.
 
-1. The bean's scope is [code]+@EntryPoint+ ; and 2. we're injecting the type [code]+Event<HelloMessage>+ into our bean.
+In the [code]+App+ class that was created you may have noticed that the bean's scope is [code]+@EntryPoint+.
 
 The [code]+@EntryPoint+ annotation is an annotation which provides a an analogue to the GWT EntryPoint concept within the context of CDI in Errai. Basically you want to think of [code]+@EntryPoint+ beans as the Errai CDI-equalivalent of [code]+main()+ methods. But as of Errai 2.2., that might actually be going a little far. In fact, you might be asking what is the real difference between [code]+@ApplicationScoped+ and [code]+@EntryPoint+ in practice. The short answer is: nothing.
 
-When Errai IOC, the technology which powers Errai's client-side CDI, was first built, it lacked the concept of scopes. To create entry point objects into the application which would automatically run, this annotation was added. The reason it hasn't been deprecated is for two reasons: we still support plain old Errai IOC, and further, we intend to add more useful semantics to [code]+@EntryPoint+ in Errai 3.0.
+When Errai IOC, the technology which powers Errai's client-side CDI, was first built, it lacked the concept of scopes. To create entry point objects into the application which would automatically run, this annotation was added.
 
-The second item brings us to the next concept: CDI Events.
-
-[[sid-54493502_AGentleIntroductiontoCDI-CDIEventing]]
-
-===== CDI Eventing
+If you're not convinced, try running this example with the `mvn clean gwt:run` command (described <<sid-54493220_GettingStartedwithErrai-RunningtheappinGWT,above>>).
 
 [NOTE]
 .Launching maven the first time
@@ -436,27 +442,41 @@ Please note, that when launching maven the first time on your machine, it will f
 
 This section covers the core messaging concepts of the ErraiBus messaging framework.
 
-ErraiBus provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios from building instant messaging clients, stock tickers, to monitoring instruments. There's no more messing with RPC APIs, or unweildy AJAX or COMET frameworks. We've built it all in to one, consice messaging framework. It's single-paradigm, and it's fun to work with.
+ErraiBus provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios such as building instant messaging clients, stock tickers, to monitoring instruments. There's no more messing with RPC APIs, or unwieldy AJAX or COMET frameworks. We've built it all in to one concise messaging framework. It's single-paradigm, and it's fun to work with.
 
 [[sid-5931265]]
 
 === Messaging Overview
 
-It's important to understand the concept of how messaging works in ErraiBus. Service endpoints are given string-based names that are referenced by message senders. There is no difference between sending a message to a client-based service, or sending a message to a server-based service. In fact, a service of the same name may co-exist on both the client and the server and both will receive all messages bound for that service name, whether they are sent from the client or from the server.
+It's important to understand the concept of how messaging works in ErraiBus. Here are some important facts you'll need to know:
 
-Services are lightweight in ErraiBus, and can be declared liberally and extensively within your application to provide a message-based infrastructure for your web application. It can be tempting to think of ErraiBus simply as a client-server communication platform, but there is a plethora of possibilities for using ErraiBus purely with the GWT client context, such as a way to advertise and expose components dynamically, to get around the lack of reflection in GWT.
+* Service endpoints are given string-based names that are referenced by message senders.
 
-In fact, ErraiBus was originally designed to run completely within the client but quickly evolved into having the capabilities it now has today. So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.
+* There is no difference between sending a message to a client-based service, or sending a message to a server-based service.
+
+* Furthermore, a service of the same name may co-exist on both the client and the server and both will receive all messages bound for that service name, whether they are sent from the client or from the server.
+
+* Services are lightweight in ErraiBus, and can be declared liberally and extensively within your application to provide a message-based infrastructure for your web application.
+
+It can be tempting to think of ErraiBus simply as a client-server communication platform, but there is a plethora of possibilities for using ErraiBus purely within the GWT client context, such as a way to advertise and expose components dynamically, to get around the lack of reflection in GWT.
+
+So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.
 
 [[sid-5931280]]
 
 === Messaging API Basics
 
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Messaging_ to follow along with this section.
+====
+
 The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the [code]+MessageBuilder+ .
 
 Components that want to receive messages need to implement the [code]+MessageCallback+ interface.
 
-But before we dive into the details, let's look at some use cases first.
+But before we dive into the details, let's look at some use cases.
 
 [[sid-5931280_MessagingAPIBasics-SendingMessageswiththeClientBus]]
 
@@ -496,7 +516,7 @@ In the above example we build and send a message every time the button is clicke
 . We specify the subject we wish to send a message to. In this case, " [code]+HelloWorldService+ ".
 
 
-. We indicate that we wish to only signal the service, meaning, that we're not sending a qualifying command to the service. For information on this, read the section on _Protocols_ .
+. We indicate that we wish to only signal the service, meaning, that we're not sending a qualifying command to the service. For information on this, read the section on <<sid-23036473_WireProtocol%28J.REP%29-BusManagementandHandshakingProtocols,Protocols>>.
 
 
 . We indicate that we do not want to provide an [code]+ErrorCallback+ to deal with errors for this message.
@@ -507,7 +527,7 @@ In the above example we build and send a message every time the button is clicke
 
 [IMPORTANT]
 ====
-An astute observer will note that access to the [code]+RequestDispatcher+ differs within client code and server code. Because the client code does not run within a container, access to the [code]+RequestDispatcher+ and [code]+MessageBus+ is statically accessed using the [code]+ErraiBus.get()+ and [code]+ErraiBus.getDispatcher()+ methods. The server-side code, conversely, runs inside a dependency container for managing components. See the section on Errai IOC and Errai CDI for using ErraiBus from a client-side container.
+An astute observer will note that access to the [code]+RequestDispatcher+ differs within client code and server code. Because this client code does not run within a container, access to the [code]+RequestDispatcher+ and [code]+MessageBus+ is provided statically using the [code]+ErraiBus.get()+ and [code]+ErraiBus.getDispatcher()+ methods. See the section on Errai IOC and Errai CDI for using ErraiBus from a client-side container.
 
 When using Errai IOC or CDI, you can also use the Sender<T> interface to send messages.
 ====
@@ -530,7 +550,7 @@ Every message has a sender and at least one receiver. A receiver is as it sounds
 
 ----
 
-He we declare an extremely simple service. The [code]+@Service+ annotation provides a convenient, meta-data based way of having the bus auto-discover and deploy the service.
+Here we declare an extremely simple service. The [code]+@Service+ annotation provides a convenient, meta-data based way of having the bus auto-discover and deploy the service.
 
 [[sid-5931280_MessagingAPIBasics-SendingMessageswiththeServerBus]]
 
@@ -1223,7 +1243,7 @@ This will tell the bus to enable web sockets support. The [code]+websocket-path-
 </servlet-mapping>
 ----
 
-[NOTE]
+[IMPORTANT]
 .Do not remove the regular ErraiBus servlet mappings!
 ====
 When configuring ErraiBus to use WebSockets on JBoss AS, you _do not_ remove the existing servlet mappings for the bus. The WebSocket servlet is in _addition to_ your current bus servlet. This is because ErraiBus _always_ negotiates WebSocket sessions over the COMET channel.
@@ -1349,11 +1369,17 @@ The monitor allows you select individual messages, an view their individual part
 
 == Dependency Injection
 
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai IOC_ to follow along with this section.
+====
+
 The core Errai IOC module implements the _JSR-330 Dependency Injection_ specification for in-client component wiring.
 
 Dependency injection (DI) allows for cleaner and more modular code, by permitting the implementation of decoupled and type-safe components. By using DI, components do not need to be aware of the implementation of provided services. Instead, they merely declare a contract with the container, which in turn provides instances of the services that component depends on.
 
-[NOTE]
+[IMPORTANT]
 .Classpath Scanning and ErraiApp.properties
 ====
 Errai only scans the contents of classpath locations (JARs and directories) that have <<sid-5931354,
@@ -1408,7 +1434,7 @@ public class TimeService {
 [TIP]
 .Best Practices
 ====
-Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no argument constructor, and then iterate through its injection tasks, which leaves the potential – albeit remote – that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.
+Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential – albeit remote – that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.
 ====
 
 [[sid-5931407]]
@@ -2137,7 +2163,6 @@ For instance:
 
 .Destroying bean with disposer
 ====
-
 [source, java]
 ----
 public MyManagedBean {
@@ -2149,12 +2174,17 @@ public MyManagedBean {
   }
 }
 ----
-
 ====
 
 [[sid-19398999]]
 
 == Errai CDI
+
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai CDI_ to follow along with this section.
+====
 
 CDI (Contexts and Dependency Injection) is the Jave EE standard (JSR-299) for handling dependency injection. In addition to dependency injection, the standard encompasses component lifecycle, application configuration, call-interception and a decoupled, type-safe eventing specification.
 
@@ -2534,7 +2564,7 @@ For more information on CDI producers, see the link:$$http://docs.jboss.org/cdi/
 
 [[sid-53118110]]
 
-=== safe dynamic lookup
+=== Safe dynamic lookup
 
 As an alternative to using the bean manager to dynamically create beans, this can be accomplished in a type-safe way by injecting a [code]+javax.enterprise.inject.Instance<T>+ .
 
@@ -2560,7 +2590,7 @@ In this example, calling [code]+barInstance.get()+ returns a new instance of the
 
 If you do not care about the deployment details for now and just want to get started take a look at the ERRAI:Quickstart Guide.
 
-The CDI integration is a plugin to the Errai core framework and represents a CDI portable extension. Which means it is discovered automatically by both Errai and the CDI container. In order to use it, you first need to understand the different runtime models involved when working GWT, Errai and CDI.
+The CDI integration is a plugin to the Errai core framework and represents a CDI portable extension. Which means it is discovered automatically by both Errai and the CDI container. In order to use it, you first need to understand the different runtime models involved when working GWT, Errai, and CDI.
 
 Typically a GWT application lifecycle begins in link:$$http://code.google.com/webtoolkit/doc/latest/DevGuideCompilingAndDebugging.html$$[Development Mode] and finally a web application containing the GWT client code will be deployed to a target container (Servlet Engine, Application Server). This is no way different when working with CDI components to back your application.
 
@@ -2568,79 +2598,60 @@ What's different however is availability of the CDI container across the differe
 
 [[sid-5931501_DeployingErraiCDI-DeploymentinDevelopmentMode]]
 
-==== Deployment in Development Mode
+==== Deployment in Development Mode (JBossLauncher)
 
-In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). Since GWT uses Jetty, that only supports read only JNDI, we need to replace the default Jetty launcher with a custom one that will setup the JNDI bindings:
+In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). GWT by default uses Jetty, that only supports read only JNDI. The current solution for this is to use a custom launcher to control a JBoss AS 7 or Wildfly 8 instance instead of GWT's built-in Jetty.
 
+To do this, requires the following configurations in the gwt-maven-plugin configuration:
 
 [source, xml]
 ----
 <plugin>
   <groupId>org.codehaus.mojo</groupId>
-  <artifactId>gwt-maven plugin</artifactId>
-  <version>${gwt.maven}</version>
+  <artifactId>gwt-maven-plugin</artifactId>
+  <version>${gwt.version}</version>
 
   <configuration>
   ...
-    <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
+    <extraJvmArgs>-Derrai.jboss.home=$JBOSS_HOME -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/$ERRAI_VERSION/errai-client-local-class-hider-$ERRAI_VERSION.jar</extraJvmArgs>
+    <noServer>false</noServer>
+    <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
   </configuration>
   <executions>
   ...
-  </executions>
+  </executions> 
 </plugin>
 ----
 
-[NOTE]
-.Starting Development Mode from within your IDE
-====
-Consequently, when starting Development Mode from within your IDE the following program argument has to be provided: -server org.jboss.errai.cdi.server.gwt.JettyLauncher
-====
+What does all this mean?
 
-[[sid-5931501_DeployingErraiCDI-SpecialcaseClassloading]]
+* `<noServer>false</noServer>`: Tells GWT to lauch a server for us.
 
-===== Special-case Classloading
+* `<server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>`: Tells GWT to use a custom launcher instead of it's default JettyLauncher.
 
-JettyLauncher uses different class loaders to load classes that belongs to the web application, the Jetty server, and the Java standard library itself. In the majority of cases, you can simply put all dependencies into your web application's [code]+WEB-INF/lib+ folder. However, there are cases where putting a dependency in [code]+WEB-INF/lib+ will cause troubles such as [code]+ClassCastException+ when same class is also loaded by a different classloader. To mitigate this problem, JettyLauncher can be instructed that certain classes (or packages) shall be loaded only by the system class loader. To do so, set the Java system property [code]+jetty.custom.sys.classes+ when launching Dev Mode.
+* `<extraJvmArgs>...</extraJvmArgs>`
 
-For example, when using gwt-maven-plugin:
+** `-Derrai.jboss.home=$JBOSS_HOME`: Tells the JBossLauncher the location of the JBoss or Wildfly instance to use. Note that `$JBOSS_HOME` should be replaced with a literal path (or pom property) to a JBoss or Wildfly instance you have installed.
 
+** `-Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${ERRAI_VERSION}/errai-client-local-class-hider-${ERRAI_VERSION}.jar`: This scary looking line is necessary so that the JBoss instance does not see client-only dependencies. Note that `$ERRAI_VERSION` should be replaced with the literal version of Errai (or a pom property).
 
-[source, xml]
-----
-<extraJvmArgs>-Djetty.custom.sys.classes=bitronix;javax.transaction</extraJvmArgs>
-----
+===== Additional JBossLauncher Arguments
 
-Once this is set up correctly, we can bootstrap the CDI container through a servlet listener:
+Here are some additional JVM arguments that can be passed to the JBossLauncher:
 
+* `errai.dev.context`: Sets the context under which your app will be deployed (defaults to "webapp").
 
-[source, xml]
-----
-<web-app>
-  ...
-  <listener>
-    <listener-class>org.jboss.errai.container.CDIServletStateListener</listener-class>
-  </listener>
+* `errai.jboss.debug.port`: Sets the port for debugging server-side code (defaults to 8001).
 
-  <resource-env-ref>
-    <description>Object factory for the CDI Bean Manager</description>
-    <resource-env-ref-name>BeanManager</resource-env-ref-name>
-    <resource-env-ref-type>javax.enterprise.inject.spi.BeanManager</resource-env-ref-type>
-  </resource-env-ref>
-  ...
-</web-app>
-----
+* `errai.jboss.config.file`: Sets the configuration file (in `$JBOSS_HOME/configuration`) used by the JBoss/Wildfly instance (defaults to standalone-full.xml).
 
-[[sid-5931501_DeployingErraiCDI-DeploymenttoaServletEngine]]
-
-==== Deployment to a Servlet Engine
-
-Deployment to servlet engine has basically the same requirements as running in development mode. You need to include the servlet listener that bootstraps the CDI container and make sure both Errai and CDI are accessible through JNDI. For Jetty you can re-use the artefacts we ship with the archetype. In case you want to run on tomcat, please consult the link:$$http://tomcat.apache.org/tomcat-5.5-doc/jndi-resources-howto.html$$[Apache Tomcat Documentation] .
+* `errai.jboss.javaopts`: Sets additional java opts used by the JVM running JBoss/Wildfly.
 
 [[sid-5931501_DeployingErraiCDI-DeploymenttoanApplicationServer]]
 
 ==== Deployment to an Application Server
 
-We provide integration with the link:$$http://jboss.org/jbossas$$[JBoss Application Server] , but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ( [code]+java:/BeanManager+ ).
+We provide integration with the link:$$http://jboss.org/jbossas$$[JBoss Application Server], but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ([code]+java:/BeanManager+).
 
 [[sid-5931328]]
 
