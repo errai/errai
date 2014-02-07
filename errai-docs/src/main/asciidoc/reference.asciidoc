@@ -3638,9 +3638,26 @@ public class MyAppExceptionMapper implements ClientExceptionMapper {
 [IMPORTANT]
 .Must be used in conjunction with [code]+RestErrorCallback+
 ====
-It is important to note that the [code]+ClientExceptionMapper+ will only be invoked when the callback passed to the Caller is an instance of RestErrorCallback.
+It is important to note that the [code]+ClientExceptionMapper+ will only be invoked when the callback passed to the [code]+Caller+ is an instance of [code]+RestErrorCallback+.
 ====
 
+The [code]+ClientExceptionMapper+ will, by default, be invoked for every error response.  However, Errai also provides the [code]+org.jboss.errai.enterprise.shared.api.annotations.MapsFrom+ annotation which provides for additional granularity.  An exception mapper can be annotated so that it is only invoked for methods on specific REST interfaces.
+
+----
+@Provider
+@MapsFrom({ SomeRestInterface.class })
+public class SpecificClientExceptionMapper implements ClientExceptionMapper {
+
+  /**
+   * @see org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper#fromResponse(com.google.gwt.http.client.Response)
+   */
+  @Override
+  public Throwable fromResponse(Response response) {
+     ... // Do something specific here
+  }
+
+}
+----
 
 [[sid-19398997_ErraiJAX-RS-ClientsideInterceptors]]
 
