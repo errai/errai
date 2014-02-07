@@ -84,7 +84,7 @@ Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/ar
 
 ===== Starting with the Errai Forge plugin
 
-Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/forge-errai/blob/master/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
+Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/forge-errai/blob/v2.0.0.Beta1/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
 
 
 In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:
