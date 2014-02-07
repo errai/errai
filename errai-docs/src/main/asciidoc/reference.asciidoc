@@ -3587,6 +3587,10 @@ ResponseCallback callback = new ResponseCallback() {
 };
 ----
 
+[[sid-19398997_ErraiJAX-RS-HandlingErrors]]
+
+==== Handling Errors
+
 For handling errors, Errai's error callback mechanism can be reused and an instance of [code]+ErrorCallback+ can optionally be passed to the [code]+RestClient.create()+ call. In case of an HTTP error, the [code]+ResponseException+ provides access to the [code]+Response+ object. All other [code]+Throwables+ indicate a communication problem.
 
 
@@ -3608,6 +3612,34 @@ ErrorCallback errorCallback = new RestErrorCallback() {
     return false;
   }
 };
+----
+
+To provide more customized error handling, Errai also defines client side exception handling via the *ClientExceptionMapper* interface.  The client exception mapper allows developers to process a REST Response into a Throwable prior to the error being delivered to the ErrorCallback described above.  The exception mapper class must be annotated with *javax.ws.rs.ext.Provider* as well as implement the *ClientExceptionMapper* interface.
+
+----
+@Provider
+public class MyAppExceptionMapper implements ClientExceptionMapper {
+  
+  /**
+   * @see org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper#fromResponse(com.google.gwt.http.client.Response)
+   */
+  @Override
+  public Throwable fromResponse(Response response) {
+    if (response.getStatusCode() == 404)
+      return new MyAppNotFoundException();
+    else
+      return new MyAppServerError(response.getStatusText());
+  }
+
+}
+
+[IMPORTANT]
+.Must be used in conjunction with *RestErrorCallback*
+====
+It is important to note that the *ClientExceptionMapper* will only be invoked when the callback passed to the Caller is an instance of RestErrorCallback.
+====
+
+
 ----
 
 [[sid-19398997_ErraiJAX-RS-ClientsideInterceptors]]
