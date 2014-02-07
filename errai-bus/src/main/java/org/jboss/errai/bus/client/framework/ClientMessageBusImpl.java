@@ -266,11 +266,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private Timer initialConnectTimer;
   
-  /**
-   * The amount of time (in seconds) {@link #init()} will wait before the next reconnect attempt.
-   */
-  private double nextReconnectDelay = 0;
-  
   private static final Logger logger = LoggerFactory.getLogger(ClientMessageBusImpl.class);
 
   public ClientMessageBusImpl() {
@@ -334,30 +329,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void init() {
-    if (nextReconnectDelay > 0) {
-      new Timer() {
-        
-        @Override
-        public void run() {
-          initImmediately();
-        }
-      }.schedule((int) (nextReconnectDelay * 1000));
-      System.out.println("Waiting " + nextReconnectDelay + " before reconnecting");
-      
-      nextReconnectDelay += (Math.random() * (nextReconnectDelay + 1.0));
-    }
-    else {
-      initImmediately();
-      nextReconnectDelay = Math.random() * 1.0;
-    }
-  }
-
-  /**
-   * Called by init() after ensuring that reconnect attempts are not too
-   * frequent. You should always call {@link #init()}, never this method
-   * directly.
-   */
-  private void initImmediately() {
     if (getState() == BusState.CONNECTED) {
 
       /**
@@ -1208,10 +1179,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (newState == BusState.CONNECTION_INTERRUPTED) {
       LogUtil.log("the connection to the server has been interrupted ...");
-    }
-    
-    if (newState == BusState.CONNECTED) {
-      nextReconnectDelay = 0.0;
     }
 
     /*
