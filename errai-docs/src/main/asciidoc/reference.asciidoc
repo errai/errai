@@ -3614,7 +3614,7 @@ ErrorCallback errorCallback = new RestErrorCallback() {
 };
 ----
 
-To provide more customized error handling, Errai also defines client side exception handling via the *ClientExceptionMapper* interface.  The client exception mapper allows developers to process a REST Response into a Throwable prior to the error being delivered to the ErrorCallback described above.  The exception mapper class must be annotated with *javax.ws.rs.ext.Provider* as well as implement the *ClientExceptionMapper* interface.
+To provide more customized error handling, Errai also defines client side exception handling via the [code]+ClientExceptionMapper+ interface.  The client exception mapper allows developers to process a REST [code]+Response+ into a [code]+Throwable+ prior to the error being delivered to the [code]+ErrorCallback+ described above.  The exception mapper class must be annotated with [code]+javax.ws.rs.ext.Provider+ as well as implement the [code]+ClientExceptionMapper+ interface.
 
 ----
 @Provider
@@ -3633,14 +3633,14 @@ public class MyAppExceptionMapper implements ClientExceptionMapper {
 
 }
 
-[IMPORTANT]
-.Must be used in conjunction with *RestErrorCallback*
-====
-It is important to note that the *ClientExceptionMapper* will only be invoked when the callback passed to the Caller is an instance of RestErrorCallback.
-====
-
-
 ----
+
+[IMPORTANT]
+.Must be used in conjunction with [code]+RestErrorCallback+
+====
+It is important to note that the [code]+ClientExceptionMapper+ will only be invoked when the callback passed to the Caller is an instance of RestErrorCallback.
+====
+
 
 [[sid-19398997_ErraiJAX-RS-ClientsideInterceptors]]
 
