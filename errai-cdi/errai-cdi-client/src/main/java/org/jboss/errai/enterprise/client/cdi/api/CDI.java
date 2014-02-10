@@ -16,16 +16,7 @@
 package org.jboss.errai.enterprise.client.cdi.api;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
@@ -67,7 +58,7 @@ public class CDI {
   private static boolean active = false;
 
   private static Map<String, List<AbstractCDIEventCallback<?>>> eventObservers = new HashMap<String, List<AbstractCDIEventCallback<?>>>();
-  private static Set<String> localObserverTypes = new HashSet<String>();
+  private static Set<String> localOnlyObserverTypes = new HashSet<String>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
   private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<String, List<MessageFireDeferral>>();
 
@@ -98,7 +89,7 @@ public class CDI {
     active = false;
     fireOnSubscribe.clear();
     eventObservers.clear();
-    localObserverTypes.clear();
+    localOnlyObserverTypes.clear();
     lookupTable = Collections.emptyMap();
   }
 
@@ -172,14 +163,14 @@ public class CDI {
   }
 
   private static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback,
-          boolean isLocal) {
+          boolean isLocalOnly) {
     if (!eventObservers.containsKey(eventType)) {
       eventObservers.put(eventType, new ArrayList<AbstractCDIEventCallback<?>>());
     }
     eventObservers.get(eventType).add(callback);
     
-    if (isLocal) {
-      localObserverTypes.add(eventType);
+    if (isLocalOnly) {
+      localOnlyObserverTypes.add(eventType);
     }
 
     return new Subscription() {
@@ -209,7 +200,7 @@ public class CDI {
     if (eventObservers.containsKey(eventType)) {
       eventObservers.get(eventType).remove(callback);
       
-      if (!localObserverTypes.contains(eventType)) {
+      if (!localOnlyObserverTypes.contains(eventType)) {
         boolean shouldUnsubscribe = true;
         for (AbstractCDIEventCallback<?> cb : eventObservers.get(eventType)) {
           if (cb.getQualifiers().equals(callback.getQualifiers())) {
@@ -251,7 +242,7 @@ public class CDI {
       int remoteEventCount = 0;
       for (Map.Entry<String, List<AbstractCDIEventCallback<?>>> mapEntry : eventObservers.entrySet()) {
         String eventType = mapEntry.getKey();
-        if (MarshallerFramework.canMarshall(eventType) && !localObserverTypes.contains(eventType)) {
+        if (!localOnlyObserverTypes.contains(eventType)) {
           for (AbstractCDIEventCallback<?> callback : mapEntry.getValue()) {
             remoteEventCount++;
             MessageBuilder.createMessage()
