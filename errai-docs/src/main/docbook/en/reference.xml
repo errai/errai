@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-01-27</date>
+    <date>2014-02-10</date>
     
     
     
@@ -76,88 +76,14 @@
 <simpara>The first thing you&#8217;ll need to do if you have not already, is <ulink url="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">install Maven</ulink> . If you have not already installed Maven, do so now.</simpara>
 <simpara>Warning: If you use maven2, you will run into this problem: <ulink url="https://community.jboss.org/thread/177645">https://community.jboss.org/thread/177645</ulink></simpara>
 </important>
-<simpara>You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">errai tutorial demo</ulink>) or by building an app with the Errai Forge plugin:</simpara>
+<simpara>You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">errai tutorial demo</ulink>) or by building an app with the Errai Forge Addon:</simpara>
 <section id="sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication">
 <title>Start from a working example application</title>
-<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">demo</ulink>. Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link> .</simpara>
+<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">demo</ulink>. Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link> .</simpara>
 </section>
-<section id="sid-54493220_GettingStartedwithErrai-Startfromaquickstartarchetype">
-<title>Starting with the Errai Forge plugin</title>
-<simpara>Another way to start a new project with Errai is to use Forge and the Errai Forge plugin. For this approach you will need:</simpara>
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>To download and install <ulink url="$$http://forge.jboss.org/">Forge</ulink>.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>To download the Errai Forge plugin, by either cloning <ulink url="https://github.com/errai/forge-errai.git[this repo] or downloading and unzipping link:https://github.com/errai/forge-errai/archive/master.zip">this file</ulink>.</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-</section>
-<section id="_loading_the_errai_forge_plugin">
-<title>Loading the Errai Forge plugin</title>
-<simpara>To install the plugin, start forge and then run the command, where <literal>$PATH_TO_PLUGIN</literal> is the absolute path of the Errai Forge plugin source you have previously downloaded.</simpara>
-<screen>forge source-plugin $PATH_TO_PLUGIN</screen>
-</section>
-<section id="_creating_your_new_project">
-<title>Creating your new project</title>
-<simpara>While still in Forge, run this command:</simpara>
-<screen>new-project --named $PROJECT_NAME --topLevelPackage $PROJECT_PACKAGE --projectFolder $PROJECT_PATH</screen>
-<simpara>Make sure to replace the above variables so that:</simpara>
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara><emphasis role="strong">$PROJECT_NAME</emphasis> is the name of your new project.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara><emphasis role="strong">$PROJECT_PACKAGE</emphasis> is the Java package used by your new project.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara><emphasis role="strong">$PROJECT_PATH</emphasis> is the path to the root directory of your new project (Forge will create the directory for you).</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-</section>
-<section id="_installing_the_errai_forge_plugin">
-<title>Installing the Errai Forge plugin</title>
-<simpara>In Forge (while in your new project&#8217;s root directory) run</simpara>
-<screen>errai setup</screen>
-<simpara>This will prompt you for:</simpara>
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>The logical name of the <ulink url="$$http://www.gwtproject.org/doc/latest/DevGuideOrganizingProjects.html#DevGuideModuleXml">GWT module</ulink> for your project. (So if you want a module called <emphasis>App</emphasis> in the package <literal>org.jboss.errai</literal>, the logical name would be <literal>org.jboss.errai.App</literal>)</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>An option to give your module a different name with the "rename-to" attribute (for example, you could rename a logical module <literal>org.jboss.errai.App</literal> to just <literal>app</literal> to help shorten urls).</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>The version of Errai you would like to use.</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-<simpara>This will configure the main dependencies and plugins required to run any Errai App in GWT Development Mode and to compile for deployment. You will now also have access to all of the Errai Forge plugin commands. Since one of the proceeding sections will be describing the use of Errai CDI, you should install this feature now by running</simpara>
-<screen>errai add-feature cdi</screen>
+<section id="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">
+<title>Starting with the Errai Forge Addon</title>
+<simpara>Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions <ulink url="https://github.com/errai/forge-errai/blob/v2.0.0.Beta1/README.asciidoc">here</ulink> to install the Errai Forge Addon and create a new project.</simpara>
 <simpara>In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:</simpara>
 <programlisting language="java" linenumbering="unnumbered">// Add the package declaration here
 
@@ -173,6 +99,7 @@ public class App {
     Window.alert("Hello World!");
   }
 }</programlisting>
+<simpara>For this code to run properly, you must use the the Errai Forge Addon <emphasis>Add Errai Features</emphasis> command to install <emphasis>Errai IOC</emphasis>.</simpara>
 <simpara>Create new subfolder, <emphasis>client/local</emphasis>, under the folder containing your GWT module file. Then create a file, <emphasis>App.java</emphasis>, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).</simpara>
 <tip>
 <formalpara>
@@ -182,7 +109,7 @@ public class App {
 </tip>
 </section>
 </section>
-<section id="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT%27sdevelopmentmode">
+<section id="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">
 <title>Running the app in GWT&#8217;s development mode</title>
 <simpara><ulink url="http://www.gwtproject.org/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode">GWT&#8217;s development mode</ulink> allows for code-refresh development cycles. Simply change a client-side class and refresh the browser to see your changes. You can also debug client and server side code in your IDE of choice.</simpara>
 <simpara>Change into the newly created project directory and type the following:</simpara>
@@ -316,7 +243,7 @@ public class App {
 <title>Import File in Eclipse</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import1.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/Import1.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>Import1</phrase></textobject>
   </mediaobject>
@@ -332,7 +259,7 @@ public class App {
 <title>Import Existing Maven Project</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import2.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/Import2.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>Import2</phrase></textobject>
   </mediaobject>
@@ -348,7 +275,7 @@ public class App {
 <title>Select Folder</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import3.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/Import3.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>Import3</phrase></textobject>
   </mediaobject>
@@ -369,7 +296,7 @@ public class App {
 <title>App.java</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/Import4.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/Import4.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>Import4</phrase></textobject>
   </mediaobject>
@@ -391,7 +318,7 @@ public class App {
 <title>Run Configurations</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/RunConfigurations.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/RunConfigurations.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>RunConfigurations</phrase></textobject>
   </mediaobject>
@@ -407,7 +334,7 @@ public class App {
 <title>New Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/NewLaunchConfiguration.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/NewLaunchConfiguration.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>NewLaunchConfiguration</phrase></textobject>
   </mediaobject>
@@ -423,7 +350,7 @@ public class App {
 <title>Select Project Root Directory</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/LaunchRootDir.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/LaunchRootDir.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>LaunchRootDir</phrase></textobject>
   </mediaobject>
@@ -439,7 +366,7 @@ public class App {
 <title>Run Configurations Goals</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/GwtRunGoals.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/GwtRunGoals.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>GwtRunGoals</phrase></textobject>
   </mediaobject>
@@ -455,7 +382,7 @@ public class App {
 <title>Add Configuration to Favourites</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/OrganizeFavourites.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/OrganizeFavourites.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>OrganizeFavourites</phrase></textobject>
   </mediaobject>
@@ -471,7 +398,7 @@ public class App {
 <title>Run Gwt Development Mode from Eclipse</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/UseGwtRunConfiguration.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/UseGwtRunConfiguration.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>UseGwtRunConfiguration</phrase></textobject>
   </mediaobject>
@@ -494,7 +421,7 @@ public class App {
 <title>Configure Maven Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/ConfigureGwtDebug.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/ConfigureGwtDebug.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>ConfigureGwtDebug</phrase></textobject>
   </mediaobject>
@@ -510,7 +437,7 @@ public class App {
 <title>Create Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/DebugConfigurations.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/DebugConfigurations.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>DebugConfigurations</phrase></textobject>
   </mediaobject>
@@ -526,7 +453,7 @@ public class App {
 <title>Create Remote Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/NewDebugConfig.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/NewDebugConfig.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>NewDebugConfig</phrase></textobject>
   </mediaobject>
@@ -542,7 +469,7 @@ public class App {
 <title>Client Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/ClientDebugConfig.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/ClientDebugConfig.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>ClientDebugConfig</phrase></textobject>
   </mediaobject>
@@ -559,7 +486,7 @@ public class App {
 <title>Server Debug Configuration</title>
   <mediaobject>
     <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/ServerDebugConfig.PNG"/>
+      <imagedata fileref="author/download/attachments/54493220/ServerDebugConfig.PNG" contentwidth="650"/>
     </imageobject>
     <textobject><phrase>ServerDebugConfig</phrase></textobject>
   </mediaobject>
@@ -582,6 +509,10 @@ public class App {
 <title>This section is based on the previous guide sections</title>
 <simpara>The project you created and setup in the previous two sections (ERRAI:Create your Project and ERRAI:Configuring your project for Eclipse) will be used as the basis for this section. So if you have not read them, do so now.</simpara>
 </important>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai CDI</emphasis> to follow along with this section.</simpara>
+</tip>
 <simpara>Errai CDI as its namesake implies is based on, and is in fact, a partial implementation of the CDI (Contexts and Dependency Injection) specification. Errai CDI covers <emphasis>most</emphasis> of the programming model but omits the CDI SPI, instead replacing it with it a custom set of APIs which are more appropriate for the client programming model of Errai.</simpara>
 <simpara>These differences aside, using Errai CDI in conjunction with CDI on the server will provide you with a uniform programming model across the client and server code of your application.</simpara>
 <simpara>This guide does not assume any past experience with CDI. However, you may wish to consider reading the the <ulink url="http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/">Weld Documentation</ulink> in addition to this guide.</simpara>
@@ -629,8 +560,11 @@ public class Bar {
 }</programlisting>
 <simpara>Here, every time a new instance of <literal><phrase role="code">Foo</phrase></literal> is created, the <emphasis>same</emphasis> instance of <literal><phrase role="code">Bar</phrase></literal> will be injected. That is to say: this pseudo-code assertion is now always true:</simpara>
 <screen>assert fooInstance.bar.foo == fooInstance</screen>
-<simpara><emphasis>Note</emphasis> : This identity check will not <emphasis>actually</emphasis> be true at runtime due to the need to proxy the class in this scenario. But it is true, that <literal><phrase role="code">fooInstance</phrase></literal> and <literal><phrase role="code">fooInstance.bar.foo</phrase></literal> both point to the same <emphasis>underlying</emphasis> bean instance.</simpara>
-<simpara>In the case of an Errai application, there are a bunch of application scoped beans which come built-in for common services like _ <emphasis>ErraiBus</emphasis> _. Thus, in an Errai application which uses the message bus, we can inject a handle to the <literal><phrase role="code">MessageBus</phrase></literal> service into any of our beans. Let&#8217;s go ahead and do that in our <literal><phrase role="code">Bar</phrase></literal> class:</simpara>
+<important>
+<title>Note</title>
+<simpara>This identity check will not <emphasis>actually</emphasis> be true at runtime due to the need to proxy the class in this scenario. But it is true, that <literal><phrase role="code">fooInstance</phrase></literal> and <literal><phrase role="code">fooInstance.bar.foo</phrase></literal> both point to the same <emphasis>underlying</emphasis> bean instance.</simpara>
+</important>
+<simpara>In the case of an Errai application, there are a bunch of application scoped beans which come built-in for common services like <emphasis>ErraiBus</emphasis>. Thus, in an Errai application which uses the message bus, we can inject a handle to the <literal><phrase role="code">MessageBus</phrase></literal> service into any of our beans. Let&#8217;s go ahead and do that in our <literal><phrase role="code">Bar</phrase></literal> class:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class Bar {
   @Inject Foo foo;
@@ -640,23 +574,15 @@ public class Bar {
     return "Mr. Bar";
   }
 }</programlisting>
-<simpara>If working with dependency injection is new to you, then this is where you&#8217;ll start seeing some practical benefit. When you need a common service in your client code, you ask the container for it, by <emphasis>injecting</emphasis> it. This frees you of worrying about the proper APIs to use in order to get access to a service; we need to use the message bus in our <literal><phrase role="code">Bar</phrase></literal> bean, and so we inject it.</simpara>
-<simpara>Now that we&#8217;re getting the gist of how dependency injection works, let&#8217;s go back to the sample project we created with the Maven archetype in the last section of this guide.</simpara>
-<simpara>In the <literal><phrase role="code">App</phrase></literal> class that was created, there may be two peculiarities sticking out to you:</simpara>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>The bean&#8217;s scope is <literal><phrase role="code">@EntryPoint</phrase></literal> ; and 2. we&#8217;re injecting the type <literal><phrase role="code">Event&lt;HelloMessage&gt;</phrase></literal> into our bean.</simpara>
-      
-    </listitem>
-  
-</orderedlist>
-<simpara>The <literal><phrase role="code">@EntryPoint</phrase></literal> annotation is an annotation which provides a an analogue to the GWT EntryPoint concept within the context of CDI in Errai. Basically you want to think of <literal><phrase role="code">@EntryPoint</phrase></literal> beans as the Errai CDI-equalivalent of <literal><phrase role="code">main()</phrase></literal> methods. But as of Errai 2.2., that might actually be going a little far. In fact, you might be asking what is the real difference between <literal><phrase role="code">@ApplicationScoped</phrase></literal> and <literal><phrase role="code">@EntryPoint</phrase></literal> in practice. The short answer is: nothing.</simpara>
-<simpara>When Errai IOC, the technology which powers Errai&#8217;s client-side CDI, was first built, it lacked the concept of scopes. To create entry point objects into the application which would automatically run, this annotation was added. The reason it hasn&#8217;t been deprecated is for two reasons: we still support plain old Errai IOC, and further, we intend to add more useful semantics to <literal><phrase role="code">@EntryPoint</phrase></literal> in Errai 3.0.</simpara>
-<simpara>The second item brings us to the next concept: CDI Events.</simpara>
+<simpara>If working with dependency injection is new to you, then this is where you&#8217;ll start seeing some practical benefit. When you need a common service in your client code, you ask the container for it by <emphasis>injecting</emphasis> it. This frees you from worrying about the proper APIs to use in order to access a service; we need to use the message bus in our <literal><phrase role="code">Bar</phrase></literal> bean, and so we inject it.</simpara>
 </section>
-<section id="sid-54493502_AGentleIntroductiontoCDI-CDIEventing">
-<title>CDI Eventing</title>
+<section id="_entrypoints">
+<title>EntryPoints</title>
+<simpara>Now that we&#8217;re getting the gist of how dependency injection works, let&#8217;s go back to our sample project.</simpara>
+<simpara>In the <literal><phrase role="code">App</phrase></literal> class that was created you may have noticed that the bean&#8217;s scope is <literal><phrase role="code">@EntryPoint</phrase></literal>.</simpara>
+<simpara>The <literal><phrase role="code">@EntryPoint</phrase></literal> annotation is an annotation which provides a an analogue to the GWT EntryPoint concept within the context of CDI in Errai. Basically you want to think of <literal><phrase role="code">@EntryPoint</phrase></literal> beans as the Errai CDI-equalivalent of <literal><phrase role="code">main()</phrase></literal> methods. But as of Errai 2.2., that might actually be going a little far. In fact, you might be asking what is the real difference between <literal><phrase role="code">@ApplicationScoped</phrase></literal> and <literal><phrase role="code">@EntryPoint</phrase></literal> in practice. The short answer is: nothing.</simpara>
+<simpara>When Errai IOC, the technology which powers Errai&#8217;s client-side CDI, was first built, it lacked the concept of scopes. To create entry point objects into the application which would automatically run, this annotation was added.</simpara>
+<simpara>If you&#8217;re not convinced, try running this example with the <literal>mvn clean gwt:run</literal> command (described <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">above</link>).</simpara>
 <note>
 <title>Launching maven the first time</title>
 <simpara>Please note, that when launching maven the first time on your machine, it will fetch all dependencies from a central repository. This may take a while, because it includes downloading large binaries like GWT SDK. However, subsequent builds are not required to go through this step and will be much faster.</simpara>
@@ -668,18 +594,51 @@ public class Bar {
 <chapter id="sid-5931263">
 <title>Messaging</title>
 <simpara>This section covers the core messaging concepts of the ErraiBus messaging framework.</simpara>
-<simpara>ErraiBus provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios from building instant messaging clients, stock tickers, to monitoring instruments. There&#8217;s no more messing with RPC APIs, or unweildy AJAX or COMET frameworks. We&#8217;ve built it all in to one, consice messaging framework. It&#8217;s single-paradigm, and it&#8217;s fun to work with.</simpara>
+<simpara>ErraiBus provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios such as building instant messaging clients, stock tickers, to monitoring instruments. There&#8217;s no more messing with RPC APIs, or unwieldy AJAX or COMET frameworks. We&#8217;ve built it all in to one concise messaging framework. It&#8217;s single-paradigm, and it&#8217;s fun to work with.</simpara>
 <section id="sid-5931265">
 <title>Messaging Overview</title>
-<simpara>It&#8217;s important to understand the concept of how messaging works in ErraiBus. Service endpoints are given string-based names that are referenced by message senders. There is no difference between sending a message to a client-based service, or sending a message to a server-based service. In fact, a service of the same name may co-exist on both the client and the server and both will receive all messages bound for that service name, whether they are sent from the client or from the server.</simpara>
-<simpara>Services are lightweight in ErraiBus, and can be declared liberally and extensively within your application to provide a message-based infrastructure for your web application. It can be tempting to think of ErraiBus simply as a client-server communication platform, but there is a plethora of possibilities for using ErraiBus purely with the GWT client context, such as a way to advertise and expose components dynamically, to get around the lack of reflection in GWT.</simpara>
-<simpara>In fact, ErraiBus was originally designed to run completely within the client but quickly evolved into having the capabilities it now has today. So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.</simpara>
+<simpara>It&#8217;s important to understand the concept of how messaging works in ErraiBus. Here are some important facts you&#8217;ll need to know:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Service endpoints are given string-based names that are referenced by message senders.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>There is no difference between sending a message to a client-based service, or sending a message to a server-based service.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Furthermore, a service of the same name may co-exist on both the client and the server and both will receive all messages bound for that service name, whether they are sent from the client or from the server.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Services are lightweight in ErraiBus, and can be declared liberally and extensively within your application to provide a message-based infrastructure for your web application.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<simpara>It can be tempting to think of ErraiBus simply as a client-server communication platform, but there is a plethora of possibilities for using ErraiBus purely within the GWT client context, such as a way to advertise and expose components dynamically, to get around the lack of reflection in GWT.</simpara>
+<simpara>So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.</simpara>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai Messaging</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add messaging to your project.</simpara>
+</note>
 </section>
 <section id="sid-5931280">
 <title>Messaging API Basics</title>
 <simpara>The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the <literal><phrase role="code">MessageBuilder</phrase></literal> .</simpara>
 <simpara>Components that want to receive messages need to implement the <literal><phrase role="code">MessageCallback</phrase></literal> interface.</simpara>
-<simpara>But before we dive into the details, let&#8217;s look at some use cases first.</simpara>
+<simpara>But before we dive into the details, let&#8217;s look at some use cases.</simpara>
 <section id="sid-5931280_MessagingAPIBasics-SendingMessageswiththeClientBus">
 <title>Sending Messages with the Client Bus</title>
 <simpara>In order to send a message from a client you need to create a <literal><phrase role="code">Message</phrase></literal> and send it through an instance of <literal><phrase role="code">MessageBus</phrase></literal> . In this simple example we send it to the subject <emphasis>HelloWorldService</emphasis>.</simpara>
@@ -715,7 +674,7 @@ public class Bar {
     </listitem>
   
     <listitem>
-      <simpara>We indicate that we wish to only signal the service, meaning, that we&#8217;re not sending a qualifying command to the service. For information on this, read the section on <emphasis>Protocols</emphasis> .</simpara>
+      <simpara>We indicate that we wish to only signal the service, meaning, that we&#8217;re not sending a qualifying command to the service. For information on this, read the section on <link linkend="sid-23036473_WireProtocol%28J.REP%29-BusManagementandHandshakingProtocols">Protocols</link>.</simpara>
       
     </listitem>
   
@@ -731,7 +690,7 @@ public class Bar {
   
 </orderedlist>
 <important>
-<simpara>An astute observer will note that access to the <literal><phrase role="code">RequestDispatcher</phrase></literal> differs within client code and server code. Because the client code does not run within a container, access to the <literal><phrase role="code">RequestDispatcher</phrase></literal> and <literal><phrase role="code">MessageBus</phrase></literal> is statically accessed using the <literal><phrase role="code">ErraiBus.get()</phrase></literal> and <literal><phrase role="code">ErraiBus.getDispatcher()</phrase></literal> methods. The server-side code, conversely, runs inside a dependency container for managing components. See the section on Errai IOC and Errai CDI for using ErraiBus from a client-side container.</simpara>
+<simpara>An astute observer will note that access to the <literal><phrase role="code">RequestDispatcher</phrase></literal> differs within client code and server code. Because this client code does not run within a container, access to the <literal><phrase role="code">RequestDispatcher</phrase></literal> and <literal><phrase role="code">MessageBus</phrase></literal> is provided statically using the <literal><phrase role="code">ErraiBus.get()</phrase></literal> and <literal><phrase role="code">ErraiBus.getDispatcher()</phrase></literal> methods. See the section on Errai IOC and Errai CDI for using ErraiBus from a client-side container.</simpara>
 <simpara>When using Errai IOC or CDI, you can also use the Sender&lt;T&gt; interface to send messages.</simpara>
 </important>
 </section>
@@ -745,7 +704,7 @@ public class Bar {
     }
   }
 </programlisting>
-<simpara>He we declare an extremely simple service. The <literal><phrase role="code">@Service</phrase></literal> annotation provides a convenient, meta-data based way of having the bus auto-discover and deploy the service.</simpara>
+<simpara>Here we declare an extremely simple service. The <literal><phrase role="code">@Service</phrase></literal> annotation provides a convenient, meta-data based way of having the bus auto-discover and deploy the service.</simpara>
 </section>
 <section id="sid-5931280_MessagingAPIBasics-SendingMessageswiththeServerBus">
 <title>Sending Messages with the Server Bus</title>
@@ -1524,10 +1483,6 @@ public class HelloWorldService implements MessageCallback {
 <programlisting language="xml" linenumbering="unnumbered">&lt;servlet&gt;
   &lt;servlet-name&gt;ErraiWSServlet&lt;/servlet-name&gt;
   &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.JBossAS7WebSocketServlet&lt;/servlet-class&gt;
-  &lt;init-param&gt;
-    &lt;param-name&gt;service-locator&lt;/param-name&gt;
-    &lt;param-value&gt;org.jboss.errai.cdi.server.CDIServiceLocator&lt;/param-value&gt;
-  &lt;/init-param&gt;
   &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
 &lt;/servlet&gt;
 
@@ -1535,10 +1490,10 @@ public class HelloWorldService implements MessageCallback {
   &lt;servlet-name&gt;ErraiWSServlet&lt;/servlet-name&gt;
   &lt;url-pattern&gt;*.erraiBusWS&lt;/url-pattern&gt;
 &lt;/servlet-mapping&gt;</programlisting>
-<note>
+<important>
 <title>Do not remove the regular ErraiBus servlet mappings!</title>
 <simpara>When configuring ErraiBus to use WebSockets on JBoss AS, you <emphasis>do not</emphasis> remove the existing servlet mappings for the bus. The WebSocket servlet is in <emphasis>addition to</emphasis> your current bus servlet. This is because ErraiBus <emphasis>always</emphasis> negotiates WebSocket sessions over the COMET channel.</simpara>
-</note>
+</important>
 </section>
 </section>
 <section id="sid-59146643">
@@ -1641,13 +1596,21 @@ public class SignupServiceShadow implements SignupService {
 </chapter>
 <chapter id="sid-5931402">
 <title>Dependency Injection</title>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai IOC</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai IOC to your project.</simpara>
+</note>
 <simpara>The core Errai IOC module implements the <emphasis>JSR-330 Dependency Injection</emphasis> specification for in-client component wiring.</simpara>
 <simpara>Dependency injection (DI) allows for cleaner and more modular code, by permitting the implementation of decoupled and type-safe components. By using DI, components do not need to be aware of the implementation of provided services. Instead, they merely declare a contract with the container, which in turn provides instances of the services that component depends on.</simpara>
-<note>
+<important>
 <title>Classpath Scanning and ErraiApp.properties</title>
 <simpara>Errai only scans the contents of classpath locations (JARs and directories) that have <link linkend="sid-5931354">a file called
           ErraiApp.properties</link> at their root. If dependency injection is not working for you, double-check that you have an <literal><phrase role="code">ErraiApp.properties</phrase></literal> in every JAR and directory that contains classes Errai should know about.</simpara>
-</note>
+</important>
 <simpara>A simple example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class MyLittleClass {
   private final TimeService timeService;
@@ -1676,7 +1639,7 @@ public class TimeService {
 }</programlisting>
 <tip>
 <title>Best Practices</title>
-<simpara>Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no argument constructor, and then iterate through its injection tasks, which leaves the potential – albeit remote – that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.</simpara>
+<simpara>Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential – albeit remote – that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.</simpara>
 </tip>
 <section id="sid-5931407">
 <title>Container Wiring</title>
@@ -2196,6 +2159,14 @@ public class SimpleBean {
 </chapter>
 <chapter id="sid-19398999">
 <title>Errai CDI</title>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai CDI</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai CDI to your project.</simpara>
+</note>
 <simpara>CDI (Contexts and Dependency Injection) is the Jave EE standard (JSR-299) for handling dependency injection. In addition to dependency injection, the standard encompasses component lifecycle, application configuration, call-interception and a decoupled, type-safe eventing specification.</simpara>
 <simpara>The Errai CDI extension implements a subset of the specification for use inside of client-side applications within Errai, as well as additional capabilities such as distributed eventing.</simpara>
 <simpara>Errai CDI does not currently implement all life cycles specified in JSR-299 or interceptors. These deficiencies may be addressed in future versions.</simpara>
@@ -2487,7 +2458,7 @@ public class MyComposite extends Composite {
 <simpara>For more information on CDI producers, see the <ulink url="http://docs.jboss.org/cdi/spec/1.0/html/">CDI specification</ulink> and the <ulink url="http://seamframework.org/Weld/WeldDocumentation">WELD reference documentation</ulink> .</simpara>
 </section>
 <section id="sid-53118110">
-<title>safe dynamic lookup</title>
+<title>Safe dynamic lookup</title>
 <simpara>As an alternative to using the bean manager to dynamically create beans, this can be accomplished in a type-safe way by injecting a <literal><phrase role="code">javax.enterprise.inject.Instance&lt;T&gt;</phrase></literal> .</simpara>
 <simpara>For instance, assume you have a dependent-scoped bean <literal><phrase role="code">Bar</phrase></literal> and consider the following:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class Foo {
@@ -2502,64 +2473,26 @@ public class MyComposite extends Composite {
 </section>
 <section id="sid-5931501">
 <title>Deploying Errai CDI</title>
-<simpara>If you do not care about the deployment details for now and just want to get started take a look at the ERRAI:Quickstart Guide.</simpara>
-<simpara>The CDI integration is a plugin to the Errai core framework and represents a CDI portable extension. Which means it is discovered automatically by both Errai and the CDI container. In order to use it, you first need to understand the different runtime models involved when working GWT, Errai and CDI.</simpara>
+<simpara>The CDI integration is a plugin to the Errai core framework and represents a CDI portable extension. Which means it is discovered automatically by both Errai and the CDI container. In order to use it, you first need to understand the different runtime models involved when working GWT, Errai, and CDI.</simpara>
 <simpara>Typically a GWT application lifecycle begins in <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideCompilingAndDebugging.html">Development Mode</ulink> and finally a web application containing the GWT client code will be deployed to a target container (Servlet Engine, Application Server). This is no way different when working with CDI components to back your application.</simpara>
 <simpara>What&#8217;s different however is availability of the CDI container across the different runtimes. In GWT development mode and in a pure servlet environment you need to provide and bootstrap the CDI environment on your own. While any Java EE 6 Application Server already provides a preconfigured CDI container. To accomodate these differences, we need to do a little trickery when executing the GWT Development Mode and packaging our application for deployment.</simpara>
-<section id="sid-5931501_DeployingErraiCDI-DeploymentinDevelopmentMode">
-<title>Deployment in Development Mode</title>
-<simpara>In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). Since GWT uses Jetty, that only supports read only JNDI, we need to replace the default Jetty launcher with a custom one that will setup the JNDI bindings:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;plugin&gt;
-  &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
-  &lt;artifactId&gt;gwt-maven plugin&lt;/artifactId&gt;
-  &lt;version&gt;${gwt.maven}&lt;/version&gt;
-
-  &lt;configuration&gt;
-  ...
-    &lt;server&gt;org.jboss.errai.cdi.server.gwt.JettyLauncher&lt;/server&gt;
-  &lt;/configuration&gt;
-  &lt;executions&gt;
-  ...
-  &lt;/executions&gt;
-&lt;/plugin&gt;</programlisting>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai in Project</emphasis> command to setup development mode, usable for any Errai application, including one with Errai CDI.</simpara>
+</tip>
 <note>
-<title>Starting Development Mode from within your IDE</title>
-<simpara>Consequently, when starting Development Mode from within your IDE the following program argument has to be provided: -server org.jboss.errai.cdi.server.gwt.JettyLauncher</simpara>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually setup Errai CDI in Development Mode.</simpara>
 </note>
-<section id="sid-5931501_DeployingErraiCDI-SpecialcaseClassloading">
-<title>Special-case Classloading</title>
-<simpara>JettyLauncher uses different class loaders to load classes that belongs to the web application, the Jetty server, and the Java standard library itself. In the majority of cases, you can simply put all dependencies into your web application&#8217;s <literal><phrase role="code">WEB-INF/lib</phrase></literal> folder. However, there are cases where putting a dependency in <literal><phrase role="code">WEB-INF/lib</phrase></literal> will cause troubles such as <literal><phrase role="code">ClassCastException</phrase></literal> when same class is also loaded by a different classloader. To mitigate this problem, JettyLauncher can be instructed that certain classes (or packages) shall be loaded only by the system class loader. To do so, set the Java system property <literal><phrase role="code">jetty.custom.sys.classes</phrase></literal> when launching Dev Mode.</simpara>
-<simpara>For example, when using gwt-maven-plugin:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;extraJvmArgs&gt;-Djetty.custom.sys.classes=bitronix;javax.transaction&lt;/extraJvmArgs&gt;</programlisting>
-<simpara>Once this is set up correctly, we can bootstrap the CDI container through a servlet listener:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;web-app&gt;
-  ...
-  &lt;listener&gt;
-    &lt;listener-class&gt;org.jboss.errai.container.CDIServletStateListener&lt;/listener-class&gt;
-  &lt;/listener&gt;
-
-  &lt;resource-env-ref&gt;
-    &lt;description&gt;Object factory for the CDI Bean Manager&lt;/description&gt;
-    &lt;resource-env-ref-name&gt;BeanManager&lt;/resource-env-ref-name&gt;
-    &lt;resource-env-ref-type&gt;javax.enterprise.inject.spi.BeanManager&lt;/resource-env-ref-type&gt;
-  &lt;/resource-env-ref&gt;
-  ...
-&lt;/web-app&gt;</programlisting>
-</section>
-</section>
-<section id="sid-5931501_DeployingErraiCDI-DeploymenttoaServletEngine">
-<title>Deployment to a Servlet Engine</title>
-<simpara>Deployment to servlet engine has basically the same requirements as running in development mode. You need to include the servlet listener that bootstraps the CDI container and make sure both Errai and CDI are accessible through JNDI. For Jetty you can re-use the artefacts we ship with the archetype. In case you want to run on tomcat, please consult the <ulink url="http://tomcat.apache.org/tomcat-5.5-doc/jndi-resources-howto.html">Apache Tomcat Documentation</ulink> .</simpara>
-</section>
-<section id="sid-5931501_DeployingErraiCDI-DeploymenttoanApplicationServer">
-<title>Deployment to an Application Server</title>
-<simpara>We provide integration with the <ulink url="http://jboss.org/jbossas">JBoss Application Server</ulink> , but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ( <literal><phrase role="code">java:/BeanManager</phrase></literal> ).</simpara>
-</section>
 </section>
 </chapter>
 <chapter id="sid-5931328">
 <title>Marshalling</title>
 <simpara>Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You are be able to map both application-specific domain model, as well as preexisting model, including model from third-party libraries using the custom definitions API.</simpara>
+<tip>
+<title>Plugin Tip</title>
+<simpara>If you used the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command to add <emphasis>Errai Messaging</emphasis> or <emphasis>Errai CDI</emphasis> then Marshalling is already available to you.</simpara>
+</tip>
 <section id="sid-5931328_Marshalling-MappingYourDomain">
 <title>Mapping Your Domain</title>
 <simpara>All classes that you intend to be marshalled between the client and the server must be exposed to the marshalling framework. There are several ways you can do it and this section will take you through the different approaches you can take to fit your needs.</simpara>
@@ -2763,8 +2696,8 @@ public MyListImpl extends ArrayList {
 <simpara>The example above shows the equivalent mapping for the <literal><phrase role="code">MyListImpl</phrase></literal> class from the previous example, as well as a mapping of a class to the <literal><phrase role="code">java.util.Map</phrase></literal> marshaller.</simpara>
 <simpara>The syntax of the mapping is as follows: <literal><phrase role="code">&lt;class_to_map&gt;</phrase></literal><emphasis>&#8594;</emphasis>[code]<literal>&lt;contract_to_map_to&gt;</literal> .</simpara>
 <important>
-<title>Aliases do not inherit functionality!</title>
-<simpara>When you alias a class to another marshalling contract, extended functionality of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.</simpara>
+<title>Aliases do not inherit fields!</title>
+<simpara>When you alias a class to another marshalling contract, extended fields of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.</simpara>
 </important>
 </section>
 </section>
@@ -2901,6 +2834,16 @@ public class DateMarshaller extends AbstractNullableMarshaller&lt;Date&gt; {
 <title>Remote Procedure Calls (RPC)</title>
 <simpara>ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach for exposing services to the clients.</simpara>
 <simpara>Please note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</simpara>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Using the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command, Errai RPC can be used if <emphasis>Errai Messaging</emphasis> or <emphasis>Errai CDI</emphasis> have been installed.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai Messaging or Errai CDI to a project.</simpara>
+</note>
+<section id="_creating_an_rpc_interface">
+<title>Creating an RPC Interface</title>
 <simpara>Creating a service is straight forward. It requires the definition of a remote interface, and a service class which implements it. See the following:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Remote
 public interface MyRemoteService {
@@ -2928,6 +2871,7 @@ public class MyRemoteServiceImpl implements MyRemoteService {
     &lt;/init-param&gt;
     &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
   &lt;/servlet&gt;</programlisting>
+</section>
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Makingcalls">
 <title>Making calls</title>
 <simpara>Calling a remote service involves use of the <literal><phrase role="code">MessageBuilder</phrase></literal> API. Since all messages are asynchronous, the actual code for calling the remote service involves the use of a callback, which we use to receive the response from the remote method. Let&#8217;s see how it works:</simpara>
@@ -3088,35 +3032,14 @@ public class MyBean {
   
 </itemizedlist>
 
-<simpara>To get started with a working demo that makes use of Errai JAX-RS you can either download and unzip the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">Errai tutorial project</ulink> or check out the CRUD demo part of our <ulink url="https://github.com/errai/errai/tree/master/errai-demos">demo collection</ulink> . If you prefer getting started from scratch keep reading .TODO Gliffy image title empty
-image::author/images/icons/emoticons/smile.gif[]</simpara>
-<simpara>.</simpara>
-<section id="sid-19398997_ErraiJAX-RS-GettingStarted">
-<title>Getting Started</title>
-<section id="sid-19398997_ErraiJAX-RS-Dependencies">
-<title>Dependencies</title>
-<simpara>To use Errai JAX-RS, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-jaxrs-client&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;</programlisting>
-<simpara>or if you are not using Maven for dependency management, add <literal><phrase role="code">errai-jaxrs-client-version.jar</phrase></literal> to your classpath.</simpara>
-<simpara>If you intend to use Errai&#8217;s JSON format on the wire you will need to add Errai&#8217;s JAX-RS JSON provider to your classpath and make sure it gets deployed to the server.</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-jaxrs-provider&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-    &lt;/dependency&gt;
-</programlisting>
-<simpara>or manually add <literal><phrase role="code">errai-jaxrs-provider-version.jar</phrase></literal> in case you&#8217;re not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link> ) .</simpara>
-</section>
-<section id="sid-19398997_ErraiJAX-RS-GWTModule">
-<title>GWT Module</title>
-<simpara>Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">\*.gwt.xml</phrase></literal> file:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.enterprise.Jaxrs"/&gt;</programlisting>
-</section>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai JAXRS</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add JAX-RS to your project. You can also go to the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">Errai tutorial project</ulink> or the <ulink url="https://github.com/errai/errai/tree/master/errai-demos">demo collection</ulink> for an example of JAX-RS.</simpara>
+</note>
 <section id="sid-19398997_ErraiJAX-RS-ServerSideJAXRSImplementation">
 <title>Server-Side JAX-RS Implementation</title>
 <simpara>Errai&#8217;s JAX-RS support consists mostly of features that make the client side easier and more reliable to maintain. You will need to use an existing third-party JAX-RS implementation on the server side. All Java EE 6 application servers include such a module out-of-the-box. If you are developing an application that you intend to deploy on a plain servlet container, you will have to choose a JAX-RS implementation (for example, RestEasy) and configure it properly in your web.xml.</simpara>
@@ -3261,7 +3184,6 @@ public interface CustomerService {
 <simpara>Note that all JAX-RS annotations ( <literal><phrase role="code">@Path</phrase></literal> , <literal><phrase role="code">@GET</phrase></literal> , <literal><phrase role="code">@Consumes</phrase></literal> , and so on) can be inherited from the interface. You do not need to repeat these annotations in your resource implementation classes.</simpara>
 </important>
 </section>
-</section>
 <section id="sid-19398997_ErraiJAX-RS-CreatingRequests">
 <title>Creating Requests</title>
 <simpara>This section assumes you have already set up the CustomerService JAX-RS endpoint as described in the previous section.</simpara>
@@ -3307,6 +3229,8 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
     Window.alert("HTTP response body: " + response.getText());
   }
 };</programlisting>
+<section id="sid-19398997_ErraiJAX-RS-HandlingErrors">
+<title>Handling Errors</title>
 <simpara>For handling errors, Errai&#8217;s error callback mechanism can be reused and an instance of <literal><phrase role="code">ErrorCallback</phrase></literal> can optionally be passed to the <literal><phrase role="code">RestClient.create()</phrase></literal> call. In case of an HTTP error, the <literal><phrase role="code">ResponseException</phrase></literal> provides access to the <literal><phrase role="code">Response</phrase></literal> object. All other <literal><phrase role="code">Throwables</phrase></literal> indicate a communication problem.</simpara>
 <programlisting language="java" linenumbering="unnumbered">ErrorCallback errorCallback = new RestErrorCallback() {
   public boolean error(Request request, Throwable throwable) {
@@ -3324,6 +3248,42 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
     return false;
   }
 };</programlisting>
+<simpara>To provide more customized error handling, Errai also defines client side exception handling via the <literal><phrase role="code">ClientExceptionMapper</phrase></literal> interface.  The client exception mapper allows developers to process a REST <literal><phrase role="code">Response</phrase></literal> into a <literal><phrase role="code">Throwable</phrase></literal> prior to the error being delivered to the <literal><phrase role="code">ErrorCallback</phrase></literal> described above.  The exception mapper class must be annotated with <literal><phrase role="code">javax.ws.rs.ext.Provider</phrase></literal> as well as implement the <literal><phrase role="code">ClientExceptionMapper</phrase></literal> interface.</simpara>
+<screen>@Provider
+public class MyAppExceptionMapper implements ClientExceptionMapper {
+
+  /**
+   * @see org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper#fromResponse(com.google.gwt.http.client.Response)
+   */
+  @Override
+  public Throwable fromResponse(Response response) {
+    if (response.getStatusCode() == 404)
+      return new MyAppNotFoundException();
+    else
+      return new MyAppServerError(response.getStatusText());
+  }
+
+}
+</screen>
+<important>
+<title>Must be used in conjunction with <literal><phrase role="code">RestErrorCallback</phrase></literal></title>
+<simpara>It is important to note that the <literal><phrase role="code">ClientExceptionMapper</phrase></literal> will only be invoked when the callback passed to the <literal><phrase role="code">Caller</phrase></literal> is an instance of <literal><phrase role="code">RestErrorCallback</phrase></literal>.</simpara>
+</important>
+<simpara>The <literal><phrase role="code">ClientExceptionMapper</phrase></literal> will, by default, be invoked for every error response.  However, Errai also provides the <literal><phrase role="code">org.jboss.errai.enterprise.shared.api.annotations.MapsFrom</phrase></literal> annotation which provides for additional granularity.  An exception mapper can be annotated so that it is only invoked for methods on specific REST interfaces.</simpara>
+<screen>@Provider
+@MapsFrom({ SomeRestInterface.class })
+public class SpecificClientExceptionMapper implements ClientExceptionMapper {
+
+  /**
+   * @see org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper#fromResponse(com.google.gwt.http.client.Response)
+   */
+  @Override
+  public Throwable fromResponse(Response response) {
+     ... // Do something specific here
+  }
+
+}</screen>
+</section>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-ClientsideInterceptors">
 <title>Client-side Interceptors</title>
@@ -3376,37 +3336,13 @@ public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
 <simpara>Errai&#8217;s JSON format will be used to serialize/deserialize your custom types. See <link linkend="sid-5931328">Marshalling</link> for details.</simpara>
 <simpara>Alternatively, a Jackson compatible JSON format can be used on the wire. See <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link> for details on how to enable Jackson marshalling.</simpara>
 </section>
-<section id="sid-19398997_ErraiJAX-RS-Configuration">
-<title>Configuration</title>
-<section id="sid-19398997_ErraiJAX-RS-ConfiguringthedefaultrootpathofJAXRSendpoints">
-<title>Configuring the default root path of JAX-RS endpoints</title>
+<section id="_path">
+<title>Path</title>
 <simpara>All paths specified using the <literal><phrase role="code">@Path</phrase></literal> annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application&#8217;s context path.</simpara>
-<simpara>To configure a relative or absolute root path, the following JavaScript variable can be set in either</simpara>
-<simpara>the host HTML page</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
-  erraiJaxRsApplicationRoot = "/MyJaxRsEndpointPath";
-&lt;/script&gt;</programlisting>
-<simpara>or by using a JSNI method:</simpara>
-<programlisting language="java" linenumbering="unnumbered">private native void setMyJaxRsAppRoot(String path) /*-{
-  $wnd.erraiJaxRsApplicationRoot = path;
-}-*/;</programlisting>
-<simpara>or by simply invoking:</simpara>
-<programlisting language="java" linenumbering="unnumbered">RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
-<simpara>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</simpara>
-</section>
-<section id="sid-19398997_ErraiJAX-RS-EnablingJacksonmarshalling">
-<title>Enabling Jackson marshalling</title>
-<simpara>The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The <literal><phrase role="code">errai-jaxrs-provider.jar</phrase></literal> does not have to be deployed on the server in this case!</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
-  erraiJaxRsJacksonMarshallingActive = true;
-&lt;/script&gt;</programlisting>
-<simpara>or by using a JSNI method:</simpara>
-<programlisting language="java" linenumbering="unnumbered">private native void setJacksonMarshallingActive(boolean active) /*-{
-  $wnd.erraiJaxRsJacksonMarshallingActive = active;
-}-*/;</programlisting>
-<simpara>or by simply invoking:</simpara>
-<programlisting language="java" linenumbering="unnumbered">RestClient.setJacksonMarshallingActive(true);</programlisting>
-</section>
+<important>
+<title>Configuring the Path</title>
+<simpara>To learn more about configuring the path, checkout <link linkend="sid-19398997_ErraiJAX-RS-Configuration">the JAX-RS Configuration Section</link>.</simpara>
+</important>
 </section>
 </chapter>
 <chapter id="sid-54493688">
@@ -3519,22 +3455,15 @@ public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
 </important>
 <section id="sid-54493688_ErraiJPA-GettingStarted">
 <title>Getting Started</title>
-<section id="sid-54493688_ErraiJPA-Compiletimedependency">
-<title>Compile-time dependency</title>
-<simpara>To use Errai JPA, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-jpa-client&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-    &lt;/dependency&gt;</programlisting>
-<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-jpa-client-version.jar</phrase></literal> , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.</simpara>
-</section>
-<section id="sid-54493688_ErraiJPA-GWTModuleDescriptor">
-<title>GWT Module Descriptor</title>
-<simpara>Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">\*.gwt.xml</phrase></literal> file:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">   &lt;inherits name="org.jboss.errai.jpa.JPA"/&gt;</programlisting>
-</section>
-<section id="sid-54493688_ErraiJPA-METAINF%2Fpersistence.xml">
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai JPA</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai JPA to your project.</simpara>
+</note>
+<section id="_inf_persistence_xml">
 <title>INF/persistence.xml</title>
 <simpara>Errai ignores META-INF/persistence.xml for purposes of client-side JPA. Instead, Errai scans all Java packages that are part of your GWT modules for classes annotated with <literal><phrase role="code">@Entity</phrase></literal> . This allows you the freedom of defining a persistence.xml that includes both shared entity classes that you use on the client and the server, plus server-only entities that are defined in a server-only package.</simpara>
 </section>
@@ -4110,17 +4039,14 @@ public class StandaloneLifecycleListener {
 <simpara>This is where Errai JPA Data Sync comes in: it provides an easy mechanism for two-way synchronization of data sets between the client and the server.</simpara>
 <section id="sid-71467090_ErraiJPADataSync-HowToUseIt">
 <title>How To Use It</title>
-<section id="sid-71467090_ErraiJPADataSync-Dependencies">
-<title>Dependencies</title>
-<simpara>First, ensure your <literal><phrase role="code">pom.xml</phrase></literal> includes a dependency on the Data Sync module. This module must be packaged in your application&#8217;s WAR file, so include it with the default scope (compile):</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
-    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-    &lt;artifactId&gt;errai-jpa-datasync&lt;/artifactId&gt;
-    &lt;version&gt;${errai.version}&lt;/version&gt;
-  &lt;/dependency&gt;</programlisting>
-<simpara>Then, ensure your project&#8217;s <literal><phrase role="code">gwt.xml</phrase></literal> module descriptor includes a dependency on the Data Sync GWT module:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.jpa.sync.DataSync"/&gt;</programlisting>
-</section>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai JPA Datasync</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai JPA Datasync to your project.</simpara>
+</note>
 <section id="sid-71467090_ErraiJPADataSync-ARunningExample">
 <title>A Running Example</title>
 <simpara>For the rest of this chapter, we will refer to the following Entity classes, which are defined in a <literal><phrase role="code">shared</phrase></literal> package that&#8217;s visible to client and server code:</simpara>
@@ -4304,24 +4230,14 @@ public class DataSyncServiceImpl implements DataSyncService {
 <section id="sid-51282340_DataBinding-GettingStarted">
 <title>Getting Started</title>
 <simpara>The data binding module is directly integrated with <link linkend="sid-51806600">Errai UI</link> and <link linkend="sid-54493688">Errai JPA</link> but can also be used as a standalone project in any GWT client application:</simpara>
-<section id="sid-51282340_DataBinding-Compiletimedependency">
-<title>Compile-time dependency</title>
-<simpara>To use Errai&#8217;s data binding module, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-data-binding&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-    &lt;/dependency&gt;</programlisting>
-<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-data-binding-</phrase></literal>[code]<literal>version</literal>[code]<literal>.jar</literal> to your classpath.</simpara>
-</section>
-<section id="sid-51282340_DataBinding-GWTmoduledescriptor">
-<title>GWT module descriptor</title>
-<simpara>You must also inherit the Errai data binding module by adding the following line to your GWT module descriptor (gwt.xml).</simpara>
-<example>
-<title>App.gwt.xml</title>
-<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.databinding.DataBinding" /&gt;</programlisting>
-</example>
-</section>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai Data Binding</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai Data Binding to your project.</simpara>
+</note>
 <section id="sid-51282340_DataBinding-BindableObjects">
 <title>Bindable Objects</title>
 <simpara>Objects that should participate in data bindings have to be marked as <literal><phrase role="code">@Bindable</phrase></literal> and must follow Java bean conventions. All editable properties of these objects are then bindable to UI widgets.</simpara>
@@ -4596,60 +4512,18 @@ errai.validation.blacklist = some.fully.qualified.ClassName \
 </chapter>
 <chapter id="sid-51806600">
 <title>Errai UI</title>
-<informaltable frame="all"
-    rowsep="1" colsep="1">
-  
-  <tgroup cols="2">
-    
-    <colspec colname="col_1" colwidth="50*"/>
-    
-    <colspec colname="col_2" colwidth="50*"/>
-    
-    
-    <tbody>
-      
-      <row>
-        
-        <entry align="left" valign="top"><simpara>One of the primary complaints of GWT to date has been that it is difficult to use "pure HTML" when building and skinning widgets. Inevitably one must turn to Java-based configuration in order to finish the job. Errai, however, strives to remove the need for Java styling. HTML template files are placed in the project source tree, and referenced from custom "Composite components" (Errai UI Widgets) in Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency injection is supported in all custom components. Errai UI provides rapid prototyping and HTML5 templating for GWT.</simpara></entry>
-        
-        <entry align="left" valign="top"><simpara><ulink url="http://get.adobe.com/flashplayer/">.TODO Gliffy image title empty
-image::http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif[</ulink>
-</simpara><simpara></simpara><simpara>]</simpara></entry>
-        
-      </row>
-      
-    </tbody>
-    
-  </tgroup>
-</informaltable>
+<simpara>One of the primary complaints of GWT to date has been that it is difficult to use "pure HTML" when building and skinning widgets. Inevitably one must turn to Java-based configuration in order to finish the job. Errai, however, strives to remove the need for Java styling. HTML template files are placed in the project source tree, and referenced from custom "Composite components" (Errai UI Widgets) in Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency injection is supported in all custom components. Errai UI provides rapid prototyping and HTML5 templating for GWT.</simpara>
 <section id="sid-51806600_ErraiUI-Getstarted">
 <title>Get started</title>
 <simpara>The Errai UI module is directly integrated with <link linkend="sid-51282340">Data Binding</link> and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using <link linkend="sid-19398999">Errai CDI&#8217;s @Inject</link> to instantiate your widgets:</simpara>
-<section id="sid-51806600_ErraiUI-App.gwt.xml">
-<title>App.gwt.xml</title>
-<programlisting language="xml" linenumbering="unnumbered">
-&lt;inherits name="org.jboss.errai.ui.UI" /&gt;
-</programlisting>
-</section>
-<section id="sid-51806600_ErraiUI-pom.xml">
-<title>pom.xml</title>
-<simpara>The easiest way to get Errai UI on your classpath is to depend on the special <literal><phrase role="code">errai-javaee-all</phrase></literal> artifact, which brings in most Errai modules:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
-  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-  &lt;artifactId&gt;errai-javaee-all&lt;/artifactId&gt;
-  &lt;version&gt;${errai.version}&lt;/version&gt;
-&lt;/dependency&gt;</programlisting>
-<simpara>Or if you prefer to manage your project&#8217;s dependency in a finer-grained way, you can depend on <literal><phrase role="code">errai-ui</phrase></literal> directly:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
-  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-  &lt;artifactId&gt;errai-ui&lt;/artifactId&gt;
-  &lt;version&gt;${errai.version}&lt;/version&gt;
-&lt;/dependency&gt;</programlisting>
-</section>
-<section id="sid-51806600_ErraiUI-WorkingDemo">
-<title>Working Demo</title>
-<simpara>If you work better by playing with a finished product, you can see a simple client-server project <ulink url="https://github.com/errai/summit-demo-2013">implemented using Errai UI here</ulink> .</simpara>
-</section>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai UI</emphasis> to follow along with this section.</simpara>
+</tip>
+<note id="sid-51806600_ErraiUI-WorkingDemo">
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai UI to your project. If you work better by playing with a finished product, you can see a simple client-server project <ulink url="https://github.com/errai/summit-demo-2013">implemented using Errai UI here</ulink> .</simpara>
+</note>
 </section>
 <section id="sid-51806600_ErraiUI-UseErraiUICompositecomponents">
 <title>Use Errai UI Composite components</title>
@@ -5412,28 +5286,14 @@ public class NavBar extends Composite {
 
 <section id="sid-54493676_ErraiUINavigation-GettingStarted">
 <title>Getting Started</title>
-<section id="sid-54493676_ErraiUINavigation-Compiletimedependency">
-<title>Compile-time dependency</title>
-<simpara>To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add these dependencies:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-navigation&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-cdi-client&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;</programlisting>
-<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-navigation-</phrase></literal>[code]<literal>version</literal>[code]<literal>.jar</literal> to the compile-time classpath of a project that&#8217;s already set up for Errai UI templating.</simpara>
-</section>
-<section id="sid-54493676_ErraiUINavigation-GWTModuleDescriptor">
-<title>GWT Module Descriptor</title>
-<simpara>Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">\*.gwt.xml</phrase></literal> file:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">   &lt;inherits name="org.jboss.errai.ui.nav.Navigation"/&gt;</programlisting>
-</section>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai Navigation</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai Navigation to your project.</simpara>
+</note>
 </section>
 <section id="sid-54493676_ErraiUINavigation-HowitWorks">
 <title>How it Works</title>
@@ -5684,7 +5544,7 @@ public class OverallPageStrucutre extends Composite {
 <simpara>One popular open source tool that can display GraphViz/DOT files is <ulink url="http://www.graphviz.org/">GraphViz</ulink> . Free downloads are available for all major operating systems.</simpara>
 <simpara>When rendered, a navigation graph looks like this:</simpara>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>Navigation Graph</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493676/example_errai_nav_graph.png"/>
@@ -5699,14 +5559,14 @@ public class OverallPageStrucutre extends Composite {
 <chapter id="sid-65274252">
 <title>Errai Cordova (Mobile Support)</title>
 <simpara>Starting with version 2.4.0, Errai now supports mobile development. One of the modules that makes this feasible is the Cordova module. It offers a way to integrate with native hardware in an Errai way.</simpara>
-<section id="sid-65274252_ErraiCordova%28MobileSupport%29-Getstarted">
-<title>Get started</title>
-<simpara>Add the following to your application&#8217;s .gwt.xml module file:</simpara>
-<section id="sid-65274252_ErraiCordova%28MobileSupport%29-App.gwt.xml">
-<title>App.gwt.xml</title>
-<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.ui.Cordova"/&gt;</programlisting>
-</section>
-</section>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai Cordova</emphasis> to follow along with this section.</simpara>
+</tip>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai Cordova to your project.</simpara>
+</note>
 <section id="sid-65274252_ErraiCordova%28MobileSupport%29-Integratewithnativehardware">
 <title>Integrate with native hardware</title>
 <simpara>When the Cordova module is included you can integrate with native hardware by injecting the native components into your code:</simpara>
@@ -5870,44 +5730,6 @@ public class KitchenSinkClient extends Composite {
 <programlisting language="java" linenumbering="unnumbered">  private void batteryIsLow(@Observes BatteryLowEvent event) {
     //mission accomplished. we can stop the infinite loop now.
   }</programlisting>
-</section>
-<section id="sid-65274252_ErraiCordova%28MobileSupport%29-Mavenbuild">
-<title>Maven build</title>
-<simpara>All that is left to do is build this and put it on a actual device. In order to make this as easy as possible we have a maven plugin that will create a native binary that you can install on a device. It will put the html and javascript of you application in a <ulink url="http://cordova.apache.org/">cordova</ulink> application, because by doing so the client is no longer servered by the server the client will need to know how it can reach the server to do that place the following in your gwt.xml:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;replace-with class="com.company.application.Config"&gt;
-   &lt;when-type-is class="org.jboss.errai.bus.client.framework.Configuration" /&gt;
-&lt;/replace-with&gt;</programlisting>
-<simpara>This class must implement org.jboss.errai.bus.client.framework.Configuration and return the url where the server is configured.</simpara>
-<programlisting language="java" linenumbering="unnumbered">import org.jboss.errai.bus.client.framework.Configuration;
-
-public class Config implements Configuration {
-    @Override
-    public String getRemoteLocation() {
-        // you probably want to do something environment specify here instead of something like this:
-        return "https://grocery-edewit.rhcloud.com/errai-jpa-demo-grocery-list";
-    }
-}</programlisting>
-<simpara>Now all that is left is to add the plugin to the pom.xml like so:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;build&gt;
- ...
-    &lt;plugins&gt;
-      &lt;plugin&gt;
-        &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-        &lt;artifactId&gt;cordova-maven-plugin&lt;/artifactId&gt;
-        &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;/plugin&gt;</programlisting>
-<simpara>Now you can execute a native build with the following maven command:</simpara>
-<programlisting language="ini" linenumbering="unnumbered">#will build all supported platforms for now only ios and android
-mvn cordova:build-project
-
-#only build android
-mvn cordova:build-project -Dplatform=android
-
-#start the ios emulator with the deployed application
-mvn cordova:emulator -Dplatform=ios</programlisting>
-<important>
-<simpara>For these to work you&#8217;ll need to have the SDK&#8217;s installed and on your path! In case of android you will additionally have to have ANDROID_HOME environment variable set.</simpara>
-</important>
 </section>
 <section id="sid-65274252_ErraiCordova%28MobileSupport%29-AeroGearWrappers">
 <title>AeroGear Wrappers</title>
@@ -6160,9 +5982,103 @@ public class NamedLogExample {
 </example>
 </section>
 </chapter>
-<chapter id="sid-5931334">
+<chapter id="Manual-Setup-Section">
 <title>Configuration</title>
-<simpara>This section contains information on configuring Errai.</simpara>
+<simpara>This section contains information on manually setting up Errai and describes additional configurations and settings which may be adjusted.</simpara>
+<section id="_errai_development_mode_configuration">
+<title>Errai Development Mode Configuration</title>
+<section id="sid-5931501_DeployingErraiCDI-DeploymentinDevelopmentMode">
+<title>Deployment in Development Mode (JBossLauncher)</title>
+<simpara>In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). GWT by default uses Jetty, that only supports read only JNDI. The current solution for this is to use a custom launcher to control a JBoss AS 7 or Wildfly 8 instance instead of GWT&#8217;s built-in Jetty.</simpara>
+<simpara>To do this, requires the following configurations in the gwt-maven-plugin configuration:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;plugin&gt;
+  &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+  &lt;artifactId&gt;gwt-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;${gwt.version}&lt;/version&gt;
+
+  &lt;configuration&gt;
+  ...
+    &lt;extraJvmArgs&gt;-Derrai.jboss.home=$JBOSS_HOME -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/$ERRAI_VERSION/errai-client-local-class-hider-$ERRAI_VERSION.jar&lt;/extraJvmArgs&gt;
+    &lt;noServer&gt;false&lt;/noServer&gt;
+    &lt;server&gt;org.jboss.errai.cdi.server.gwt.JBossLauncher&lt;/server&gt;
+  &lt;/configuration&gt;
+  &lt;executions&gt;
+  ...
+  &lt;/executions&gt;
+&lt;/plugin&gt;</programlisting>
+<simpara>What does all this mean?</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara><literal>&lt;noServer&gt;false&lt;/noServer&gt;</literal>: Tells GWT to lauch a server for us.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><literal>&lt;server&gt;org.jboss.errai.cdi.server.gwt.JBossLauncher&lt;/server&gt;</literal>: Tells GWT to use a custom launcher instead of it&#8217;s default JettyLauncher.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><literal>&lt;extraJvmArgs&gt;...&lt;/extraJvmArgs&gt;</literal></simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara><literal>-Derrai.jboss.home=$JBOSS_HOME</literal>: Tells the JBossLauncher the location of the JBoss or Wildfly instance to use. Note that <literal>$JBOSS_HOME</literal> should be replaced with a literal path (or pom property) to a JBoss or Wildfly instance you have installed.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><literal>-Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${ERRAI_VERSION}/errai-client-local-class-hider-${ERRAI_VERSION}.jar</literal>: This scary looking line is necessary so that the JBoss instance does not see client-only dependencies. Note that <literal>$ERRAI_VERSION</literal> should be replaced with the literal version of Errai (or a pom property).</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_additional_jbosslauncher_arguments">
+<title>Additional JBossLauncher Arguments</title>
+<simpara>Here are some additional JVM arguments that can be passed to the JBossLauncher:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara><literal>errai.dev.context</literal>: Sets the context under which your app will be deployed (defaults to "webapp").</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><literal>errai.jboss.debug.port</literal>: Sets the port for debugging server-side code (defaults to 8001).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><literal>errai.jboss.config.file</literal>: Sets the configuration file (in <literal>$JBOSS_HOME/configuration</literal>) used by the JBoss/Wildfly instance (defaults to standalone-full.xml).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><literal>errai.jboss.javaopts</literal>: Sets additional java opts used by the JVM running JBoss/Wildfly.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="sid-5931501_DeployingErraiCDI-DeploymenttoanApplicationServer">
+<title>Deployment to an Application Server</title>
+<simpara>We provide integration with the <ulink url="http://jboss.org/jbossas">JBoss Application Server</ulink>, but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI (<literal><phrase role="code">java:/BeanManager</phrase></literal>).</simpara>
+</section>
+</section>
 <section id="sid-5931354">
 <title>ErraiApp.properties</title>
 <simpara>ErraiApp.properties acts both as a marker file for JARs that contain Errai-enabled GWT modules, and as a place to put configuration settings for those modules in the rare case that non-default configuration is necessary.</simpara>
@@ -6230,6 +6146,23 @@ public class NamedLogExample {
 </section>
 <section id="sid-5931338">
 <title>Messaging (Errai Bus) Configuration</title>
+<section id="_compile_time_dependencies">
+<title>Compile-time Dependencies</title>
+<simpara>The following compile-time dependency is required for Errai Messaging:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
+    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+    &lt;artifactId&gt;errai-bus&lt;/artifactId&gt;
+    &lt;version&gt;${errai.version}&lt;/version&gt;
+  &lt;/dependency&gt;</programlisting>
+<simpara>Or if you are not using Maven, have <literal><phrase role="code">errai-bus-${errai.version}.jar</phrase></literal> on the classpath.</simpara>
+<simpara>If you are also using Errai IOC or Errai CDI and wish to use inject Errai Messaging dependencies, you will also want this dependency:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
+    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+    &lt;artifactId&gt;erria-ioc-bus-support&lt;/artifactId&gt;
+    &lt;version&gt;${errai.version}&lt;/version&gt;
+  &lt;/dependency&gt;</programlisting>
+<simpara>Or if you are not using Maven, have <literal><phrase role="code">errai-ioc-bus-support-${errai.version}.jar</phrase></literal> on the classpath.</simpara>
+</section>
 <section id="sid-5931338_Messaging%28ErraiBus%29Configuration-Disablingremotecommunication">
 <title>Disabling remote communication</title>
 <simpara>In some cases it might be desirable to prevent the client bus from communicating with the server. One use case for this is when all communication with the server is handled using JAX-RS and the constant long polling requests for message exchange are not needed.</simpara>
@@ -6497,6 +6430,3384 @@ bus. Set this
   &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
 &lt;/servlet-mapping&gt;</programlisting>
 </section>
+<section id="_automatic_service_discovery">
+<title>Automatic Service Discovery</title>
+<simpara>By default Errai relies on a provided CDI container to do server-side service discovery. But if you intend to use Errai Messaging without a CDI container, Errai can scan for services on its own if the following initialization parameter is added to the servlet configuration:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">    &lt;init-param&gt;
+      &lt;param-name&gt;auto-discover-services&lt;/param-name&gt;
+      &lt;param-value&gt;true&lt;/param-value&gt;
+    &lt;/init-param&gt;</programlisting>
+<warning>
+<simpara>This configuration will cause issues (such as duplicate services) if it is set to true <emphasis>and</emphasis> a server-side CDI container is available.</simpara>
+</warning>
+</section>
+</section>
+</section>
+<section id="sid-19398997_ErraiJAX-RS-GettingStarted">
+<title>Errai JAX-RS Setup</title>
+<section id="sid-19398997_ErraiJAX-RS-Dependencies">
+<title>Compile-time dependency</title>
+<simpara>To use Errai JAX-RS, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-jaxrs-client&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;</programlisting>
+<simpara>Or if you are not using Maven for dependency management, add <literal><phrase role="code">errai-jaxrs-client-${errai.version}.jar</phrase></literal> to your classpath.</simpara>
+<simpara>If you intend to use Errai&#8217;s JSON format on the wire you will need to add Errai&#8217;s JAX-RS JSON provider to your classpath and make sure it gets deployed to the server.</simpara>
+<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-jaxrs-provider&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+</programlisting>
+<simpara>Or manually add <literal><phrase role="code">errai-jaxrs-provider-${errai.version}.jar</phrase></literal> in case you&#8217;re not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link> ) .</simpara>
+</section>
+<section id="sid-19398997_ErraiJAX-RS-GWTModule">
+<title>GWT Module</title>
+<simpara>Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.enterprise.Jaxrs"/&gt;</programlisting>
+</section>
+<section id="sid-19398997_ErraiJAX-RS-Configuration">
+<title>Configuration</title>
+<section id="sid-19398997_ErraiJAX-RS-ConfiguringthedefaultrootpathofJAXRSendpoints">
+<title>Configuring the default root path of JAX-RS endpoints</title>
+<simpara>All paths specified using the <literal><phrase role="code">@Path</phrase></literal> annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application&#8217;s context path.</simpara>
+<simpara>To configure a relative or absolute root path, the following JavaScript variable can be set in either:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>The host HTML page;</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
+  erraiJaxRsApplicationRoot = "/MyJaxRsEndpointPath";
+&lt;/script&gt;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>By using a JSNI method;</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">private native void setMyJaxRsAppRoot(String path) /*-{
+  $wnd.erraiJaxRsApplicationRoot = path;
+}-*/;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Or by simply invoking.</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+<simpara>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</simpara>
+</section>
+<section id="sid-19398997_ErraiJAX-RS-EnablingJacksonmarshalling">
+<title>Enabling Jackson marshalling</title>
+<simpara>The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The <literal><phrase role="code">errai-jaxrs-provider-${errai.version}.jar</phrase></literal> does not have to be deployed on the server in this case!</simpara>
+<simpara>To use the Jackson marshaller add on of these configurations:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Set a Javascript variable in the GWT Host Page;</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
+  erraiJaxRsJacksonMarshallingActive = true;
+&lt;/script&gt;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Use a JSNI method;</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">private native void setJacksonMarshallingActive(boolean active) /*-{
+  $wnd.erraiJaxRsJacksonMarshallingActive = active;
+}-*/;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Or invoke a method in RestClient.</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">RestClient.setJacksonMarshallingActive(true);</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+</section>
+</section>
+<section id="_errai_jpa">
+<title>Errai JPA</title>
+<section id="sid-54493688_ErraiJPA-Compiletimedependency">
+<title>Compile-time Dependencies</title>
+<simpara>To use Errai JPA, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-jpa-client&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+    &lt;/dependency&gt;</programlisting>
+<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-jpa-client-${errai.version}.jar</phrase></literal> , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.</simpara>
+</section>
+<section id="sid-54493688_ErraiJPA-GWTModuleDescriptor">
+<title>GWT Module Descriptor</title>
+<simpara>Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">   &lt;inherits name="org.jboss.errai.jpa.JPA"/&gt;</programlisting>
+</section>
+</section>
+<section id="sid-54493688_ErraiJPA-METAINF%2Fpersistence.xml">
+<title>Errai JPA Data Sync</title>
+<section id="sid-71467090_ErraiJPADataSync-Dependencies">
+<title>Compile-time Dependencies</title>
+<simpara>First, ensure your <literal><phrase role="code">pom.xml</phrase></literal> includes a dependency on the Data Sync module. This module must be packaged in your application&#8217;s WAR file, so include it with the default scope (compile):</simpara>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
+    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+    &lt;artifactId&gt;errai-jpa-datasync&lt;/artifactId&gt;
+    &lt;version&gt;${errai.version}&lt;/version&gt;
+  &lt;/dependency&gt;</programlisting>
+</section>
+<section id="_gwt_module_descriptor">
+<title>GWT Module Descriptor</title>
+<simpara>Then, ensure your project&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> module descriptor includes a dependency on the Data Sync GWT module:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.jpa.sync.DataSync"/&gt;</programlisting>
+</section>
+</section>
+<section id="_errai_data_binding">
+<title>Errai Data Binding</title>
+<section id="sid-51282340_DataBinding-Compiletimedependency">
+<title>Compile-time Dependencies</title>
+<simpara>To use Errai&#8217;s data binding module, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-data-binding&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+    &lt;/dependency&gt;</programlisting>
+<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-data-binding-${errai.version}.jar</phrase></literal> to your classpath.</simpara>
+</section>
+<section id="sid-51282340_DataBinding-GWTmoduledescriptor">
+<title>GWT module descriptor</title>
+<simpara>You must also inherit the Errai data binding module by adding the following line to your GWT module descriptor (gwt.xml).</simpara>
+<example>
+<title>App.gwt.xml</title>
+<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.databinding.DataBinding" /&gt;</programlisting>
+</example>
+</section>
+</section>
+<section id="_errai_ui">
+<title>Errai UI</title>
+<section id="sid-51806600_ErraiUI-pom.xml">
+<title>Compile-time dependency</title>
+<simpara>The easiest way to get Errai UI on your classpath is to depend on the special <literal><phrase role="code">errai-javaee-all</phrase></literal> artifact, which brings in most Errai modules:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-javaee-all&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+<simpara>Or if you prefer to manage your project&#8217;s dependency in a finer-grained way, you can depend on <literal><phrase role="code">errai-ui</phrase></literal> directly:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-ui&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+</section>
+<section id="sid-51806600_ErraiUI-App.gwt.xml">
+<title>GWT Module Descriptor</title>
+<simpara>Once you have Errai UI on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.ui.UI" /&gt;</programlisting>
+</section>
+</section>
+<section id="_errai_ui_navigation">
+<title>Errai UI Navigation</title>
+<section id="sid-54493676_ErraiUINavigation-Compiletimedependency">
+<title>Compile-time Dependencies</title>
+<simpara>To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add these dependencies:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-navigation&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-cdi-client&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;</programlisting>
+<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-navigation-${errai.version}.jar</phrase></literal> to the compile-time classpath of a project that&#8217;s already set up for Errai UI templating.</simpara>
+</section>
+<section id="sid-54493676_ErraiUINavigation-GWTModuleDescriptor">
+<title>GWT Module Descriptor</title>
+<simpara>Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">   &lt;inherits name="org.jboss.errai.ui.nav.Navigation"/&gt;</programlisting>
+</section>
+</section>
+<section id="_errai_cordova_mobile_support">
+<title>Errai Cordova (Mobile Support)</title>
+<section id="sid-65274252_ErraiCordova%28MobileSupport%29-Mavenbuild">
+<title>Compile-time Dependencies</title>
+<simpara>Using Errai Cordova requires the following compile-time dependency:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
+    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+    &lt;artifactId&gt;errai-cordova&lt;/artifactId&gt;
+    &lt;version&gt;${errai.verison}&lt;/version&gt;
+  &lt;/dependency&gt;</programlisting>
+</section>
+<section id="_cordova_maven_plugin">
+<title>Cordova Maven Plugin</title>
+<simpara>Errai Cordova allows you build an Errai app to natively run on a device. In order to make this as easy as possible we have a maven plugin that will create a native binary that you can install on a device. It will put the html and javascript of you application in a <ulink url="http://cordova.apache.org/">cordova</ulink> application.</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;build&gt;
+ ...
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+        &lt;artifactId&gt;cordova-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;/plugin&gt;</programlisting>
+</section>
+<section id="sid-65274252_ErraiCordova%28MobileSupport%29-App.gwt.xml">
+<title>GWT Module Descriptor</title>
+<simpara>Add the following to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> module file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.ui.Cordova"/&gt;</programlisting>
+<simpara>Because the client is no longer served by the server the client will need to know how it can reach the server to do that place the following in your gwt.xml:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;replace-with class="com.company.application.Config"&gt;
+   &lt;when-type-is class="org.jboss.errai.bus.client.framework.Configuration" /&gt;
+&lt;/replace-with&gt;</programlisting>
+<simpara>This class must implement <literal><phrase role="code">org.jboss.errai.bus.client.framework.Configuration</phrase></literal> and return the url where the server is configured.</simpara>
+<programlisting language="java" linenumbering="unnumbered">import org.jboss.errai.bus.client.framework.Configuration;
+
+public class Config implements Configuration {
+    @Override
+    public String getRemoteLocation() {
+        // you probably want to do something environment specify here instead of something like this:
+        return "https://grocery-edewit.rhcloud.com/errai-jpa-demo-grocery-list";
+    }
+}</programlisting>
+</section>
+<section id="_building_with_errai_cordova">
+<title>Building with Errai Cordova</title>
+<simpara>Now you can execute a native build with the following maven command:</simpara>
+<programlisting language="ini" linenumbering="unnumbered">#will build all supported platforms for now only ios and android
+mvn cordova:build-project
+
+#only build android
+mvn cordova:build-project -Dplatform=android
+
+#start the ios emulator with the deployed application
+mvn cordova:emulator -Dplatform=ios</programlisting>
+<important>
+<simpara>For these to work you&#8217;ll need to have the SDK&#8217;s installed and on your path! In case of android you will additionally have to have ANDROID_HOME environment variable set.</simpara>
+</important>
+</section>
+</section>
+<section id="_errai_project_dependencies">
+<title>Errai Project Dependencies</title>
+<simpara>For those not using maven, here is the dependency tree of Errai project jars.</simpara>
+<section id="_errai_messaging">
+<title>Errai Messaging</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.servlet:jboss-servlet-api_3.0_spec:jar:1.0.0.Final:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mortbay.jetty:jetty:jar:6.1.25:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.mortbay.jetty:jetty-util:jar:6.1.25:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mortbay.jetty:servlet-api:jar:2.5-20081211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.tomcat:catalina:jar:6.0.20:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.apache.tomcat:servlet-api:jar:6.0.20:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.tomcat:juli:jar:6.0.20:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.tomcat:annotations-api:jar:6.0.20:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-comet:jar:1.9.19-beta2:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-http:jar:1.9.19-beta2:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-rcm:jar:1.9.19-beta2:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-portunif:jar:1.9.19-beta2:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-nio-framework:jar:1.9.19-beta2:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-framework:jar:1.9.19-beta2:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-utils:jar:1.9.19-beta2:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.sun.grizzly:grizzly-lzma:jar:1.9.19-beta2:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss:jboss-vfs:jar:3.0.1.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>junit:junit:jar:4.10:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hamcrest:hamcrest-core:jar:1.1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.appengine:appengine-api-1.0-sdk:jar:1.7.6:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.appengine:appengine-api-labs:jar:1.7.6:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax:javaee-api:jar:6.0:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_cdi">
+<title>Errai CDI</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-weld-integration:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc-bus-support:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-cdi-client:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.quartz-scheduler:quartz:jar:2.1.6:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>c3p0:c3p0:jar:0.9.1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>junit:junit:jar:4.10:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hamcrest:hamcrest-core:jar:1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss:jboss-common-core:jar:2.2.14.GA:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.logging:jboss-logging-spi:jar:2.0.5.GA:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-data-binding:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-cdi-client:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc-bus-support:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.quartz-scheduler:quartz:jar:2.1.6:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>c3p0:c3p0:jar:0.9.1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax:javaee-api:jar:6.0:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>junit:junit:jar:4.10:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hamcrest:hamcrest-core:jar:1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_ioc">
+<title>Errai IOC</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>junit:junit:jar:4.10:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hamcrest:hamcrest-core:jar:1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_ui_2">
+<title>Errai UI</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-uibinder:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_navigation">
+<title>Errai Navigation</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-navigation:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-cdi-client:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc-bus-support:jar:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.weld.se:weld-se-core:jar:1.1.6.Final:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.weld:weld-spi:jar:1.1.Final:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.weld:weld-api:jar:1.1.Final:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.weld:weld-core:jar:1.1.13.Final:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-ext:jar:1.6.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>ch.qos.cal10n:cal10n-api:jar:0.7.4:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.el:el-api:jar:2.2:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-weld-integration:jar:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_databinding">
+<title>Errai DataBinding</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-data-binding:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>* org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>junit:junit:jar:4.10:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hamcrest:hamcrest-core:jar:1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_jpa_client">
+<title>Errai JPA Client</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-jpa-client:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hibernate:hibernate-entitymanager:jar:4.2.0.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.logging:jboss-logging:jar:3.1.2.GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.hibernate:hibernate-core:jar:4.2.0.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>antlr:antlr:jar:2.7.7:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:jar:1.0.1.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.hibernate.common:hibernate-commons-annotations:jar:4.0.1.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-data-binding:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_jpa_datasync">
+<title>Errai JPA Datasync</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-jpa-datasync:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-jpa-client:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hibernate:hibernate-entitymanager:jar:4.2.0.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.logging:jboss-logging:jar:3.1.2.GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.hibernate:hibernate-core:jar:4.2.0.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>antlr:antlr:jar:2.7.7:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:jar:1.0.1.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.hibernate.common:hibernate-commons-annotations:jar:4.0.1.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-data-binding:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-cdi-client:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc-bus-support:jar:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_jaxrs">
+<title>Errai JAXRS</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-jaxrs-client:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>* org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>junit:junit:jar:4.10:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hamcrest:hamcrest-core:jar:1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-jaxrs-provider:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_errai_jaxrs_2">
+<title>Errai JAXRS</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-cordova:jar</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-cdi-client:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc-bus-support:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-jaxrs-client:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.resteasy:jaxrs-api:jar:2.3.6.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-html5:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-data-binding:jar:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.googlecode.gwtphonegap:gwtphonegap:jar:2.4.0.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>commons-io:commons-io:jar:2.4:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>junit:junit:jar:4.10:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.hamcrest:hamcrest-core:jar:1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
 </section>
 </section>
 </chapter>
