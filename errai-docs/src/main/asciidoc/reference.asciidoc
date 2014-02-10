@@ -6652,19 +6652,17 @@ public class NamedLogExample {
 
 [[sid-5931334]]
 
-== Configuration
-
-This section contains information on manually setting up and configuring Errai.
-
 [[Manual-Setup-Section]]
 
-=== Manual Setup
+== Configuration
 
-==== Errai Development Mode Configuration
+This section contains information on manually setting up Errai and describes additional configurations and settings which may be adjusted.
+
+=== Errai Development Mode Configuration
 
 [[sid-5931501_DeployingErraiCDI-DeploymentinDevelopmentMode]]
 
-===== Deployment in Development Mode (JBossLauncher)
+==== Deployment in Development Mode (JBossLauncher)
 
 In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). GWT by default uses Jetty, that only supports read only JNDI. The current solution for this is to use a custom launcher to control a JBoss AS 7 or Wildfly 8 instance instead of GWT's built-in Jetty.
 
@@ -6701,7 +6699,7 @@ What does all this mean?
 
 ** `-Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${ERRAI_VERSION}/errai-client-local-class-hider-${ERRAI_VERSION}.jar`: This scary looking line is necessary so that the JBoss instance does not see client-only dependencies. Note that `$ERRAI_VERSION` should be replaced with the literal version of Errai (or a pom property).
 
-===== Additional JBossLauncher Arguments
+==== Additional JBossLauncher Arguments
 
 Here are some additional JVM arguments that can be passed to the JBossLauncher:
 
@@ -6715,7 +6713,7 @@ Here are some additional JVM arguments that can be passed to the JBossLauncher:
 
 [[sid-5931501_DeployingErraiCDI-DeploymenttoanApplicationServer]]
 
-===== Deployment to an Application Server
+==== Deployment to an Application Server
 
 We provide integration with the link:$$http://jboss.org/jbossas$$[JBoss Application Server], but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ([code]+java:/BeanManager+).
 
@@ -6772,6 +6770,34 @@ Errai also supports configuring portable types in [code]+ErraiApp.properties+ as
 [[sid-5931338]]
 
 === Messaging (Errai Bus) Configuration
+
+==== Compile-time Dependencies
+
+The following compile-time dependency is required for Errai Messaging:
+
+[source, xml]
+----
+  <dependency>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-bus</artifactId>
+    <version>${errai.version}</version>
+  </dependency>
+----
+
+Or if you are not using Maven, have [code]+errai-bus-${errai.version}.jar+ on the classpath.
+
+If you are also using Errai IOC or Errai CDI and wish to use inject Errai Messaging dependencies, you will also want this dependency:
+
+[source, xml]
+----
+  <dependency>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>erria-ioc-bus-support</artifactId>
+    <version>${errai.version}</version>
+  </dependency>
+----
+
+Or if you are not using Maven, have [code]+errai-ioc-bus-support-${errai.version}.jar+ on the classpath.
 
 [[sid-5931338_Messaging%28ErraiBus%29Configuration-Disablingremotecommunication]]
 
@@ -7040,13 +7066,30 @@ This implementation leverages asynchronous support in Servlet 3.0 to allow for t
 </servlet-mapping>
 ----
 
+===== Automatic Service Discovery
+
+By default Errai relies on a provided CDI container to do server-side service discovery. But if you intend to use Errai Messaging without a CDI container, Errai can scan for services on its own if the following initialization parameter is added to the servlet configuration:
+
+[source, xml]
+----
+    <init-param>
+      <param-name>auto-discover-services</param-name>
+      <param-value>true</param-value>
+    </init-param>
+----
+
+[WARNING]
+====
+This configuration will cause issues (such as duplicate services) if it is set to true _and_ a server-side CDI container is available.
+====
+
 [[sid-19398997_ErraiJAX-RS-GettingStarted]]
 
 === Errai JAX-RS Setup
 
 [[sid-19398997_ErraiJAX-RS-Dependencies]]
 
-==== Dependencies
+==== Compile-time dependency
 
 To use Errai JAX-RS, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
 
@@ -7060,7 +7103,7 @@ To use Errai JAX-RS, you must include it on the compile-time classpath. If you a
     </dependency>
 ----
 
-or if you are not using Maven for dependency management, add [code]+errai-jaxrs-client-version.jar+ to your classpath.
+Or if you are not using Maven for dependency management, add [code]+errai-jaxrs-client-${errai.version}.jar+ to your classpath.
 
 If you intend to use Errai's JSON format on the wire you will need to add Errai's JAX-RS JSON provider to your classpath and make sure it gets deployed to the server.
 
@@ -7075,14 +7118,13 @@ If you intend to use Errai's JSON format on the wire you will need to add Errai'
 
 ----
 
-or manually add [code]+errai-jaxrs-provider-version.jar+ in case you're not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <<sid-19398997_ErraiJAX-RS-Configuration,Configuration>> ) .
+Or manually add [code]+errai-jaxrs-provider-${errai.version}.jar+ in case you're not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <<sid-19398997_ErraiJAX-RS-Configuration,Configuration>> ) .
 
 [[sid-19398997_ErraiJAX-RS-GWTModule]]
 
 ==== GWT Module
 
-Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
-
+Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+*.gwt.xml+ file:
 
 [source, xml]
 ----
@@ -7099,11 +7141,10 @@ Once you have Errai JAX-RS on your classpath, ensure your application inherits t
 
 All paths specified using the [code]+@Path+ annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application's context path.
 
-To configure a relative or absolute root path, the following JavaScript variable can be set in either
+To configure a relative or absolute root path, the following JavaScript variable can be set in either:
 
-the host HTML page
-
-
+* The host HTML page;
++
 [source, xml]
 ----
 <script type="text/javascript">
@@ -7111,9 +7152,8 @@ the host HTML page
 </script>
 ----
 
-or by using a JSNI method:
-
-
+* By using a JSNI method;
++
 [source, java]
 ----
 private native void setMyJaxRsAppRoot(String path) /*-{
@@ -7121,9 +7161,8 @@ private native void setMyJaxRsAppRoot(String path) /*-{
 }-*/;
 ----
 
-or by simply invoking:
-
-
+* Or by simply invoking.
++
 [source, java]
 ----
 RestClient.setApplicationRoot("/MyJaxRsEndpointPath");
@@ -7135,9 +7174,12 @@ The root path will be prepended to all paths specified on the JAX-RS interfaces.
 
 ===== Enabling Jackson marshalling
 
-The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The [code]+errai-jaxrs-provider.jar+ does not have to be deployed on the server in this case!
+The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The [code]+errai-jaxrs-provider-${errai.version}.jar+ does not have to be deployed on the server in this case!
 
+To use the Jackson marshaller add on of these configurations:
 
+* Set a Javascript variable in the GWT Host Page;
++
 [source, xml]
 ----
 <script type="text/javascript">
@@ -7145,9 +7187,8 @@ The following options are available for activating Jackson marshalling on the cl
 </script>
 ----
 
-or by using a JSNI method:
-
-
+* Use a JSNI method;
++
 [source, java]
 ----
 private native void setJacksonMarshallingActive(boolean active) /*-{
@@ -7155,9 +7196,8 @@ private native void setJacksonMarshallingActive(boolean active) /*-{
 }-*/;
 ----
 
-or by simply invoking:
-
-
+* Or invoke a method in RestClient.
++
 [source, java]
 ----
 RestClient.setJacksonMarshallingActive(true);
@@ -7167,7 +7207,7 @@ RestClient.setJacksonMarshallingActive(true);
 
 [[sid-54493688_ErraiJPA-Compiletimedependency]]
 
-==== Compile-time dependency
+==== Compile-time Dependencies
 
 To use Errai JPA, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
 
@@ -7181,14 +7221,13 @@ To use Errai JPA, you must include it on the compile-time classpath. If you are 
     </dependency>
 ----
 
-If you are not using Maven for dependency management, add [code]+errai-jpa-client-version.jar+ , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.
+If you are not using Maven for dependency management, add [code]+errai-jpa-client-${errai.version}.jar+ , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.
 
 [[sid-54493688_ErraiJPA-GWTModuleDescriptor]]
 
 ==== GWT Module Descriptor
 
-Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
-
+Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+*.gwt.xml+ file:
 
 [source, xml]
 ----
@@ -7201,10 +7240,9 @@ Once you have Errai JPA on your classpath, ensure your application inherits the 
 
 [[sid-71467090_ErraiJPADataSync-Dependencies]]
 
-==== Dependencies
+==== Compile-time Dependencies
 
 First, ensure your [code]+pom.xml+ includes a dependency on the Data Sync module. This module must be packaged in your application's WAR file, so include it with the default scope (compile):
-
 
 [source, xml]
 ----
@@ -7217,8 +7255,7 @@ First, ensure your [code]+pom.xml+ includes a dependency on the Data Sync module
 
 ==== GWT Module Descriptor
 
-Then, ensure your project's [code]+gwt.xml+ module descriptor includes a dependency on the Data Sync GWT module:
-
+Then, ensure your project's [code]+*.gwt.xml+ module descriptor includes a dependency on the Data Sync GWT module:
 
 [source, xml]
 ----
@@ -7229,7 +7266,7 @@ Then, ensure your project's [code]+gwt.xml+ module descriptor includes a depende
 
 [[sid-51282340_DataBinding-Compiletimedependency]]
 
-==== Compile-time dependency
+==== Compile-time Dependencies
 
 To use Errai's data binding module, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
 
@@ -7243,7 +7280,7 @@ To use Errai's data binding module, you must include it on the compile-time clas
     </dependency>
 ----
 
-If you are not using Maven for dependency management, add [code]+errai-data-binding-+[code]+version+[code]+.jar+ to your classpath.
+If you are not using Maven for dependency management, add [code]+errai-data-binding-${errai.version}.jar+ to your classpath.
 
 [[sid-51282340_DataBinding-GWTmoduledescriptor]]
 
@@ -7297,6 +7334,8 @@ Or if you prefer to manage your project's dependency in a finer-grained way, you
 
 ==== GWT Module Descriptor
 
+Once you have Errai UI on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+*.gwt.xml+ file:
+
 [source, xml]
 ----
 <inherits name="org.jboss.errai.ui.UI" />
@@ -7305,10 +7344,9 @@ Or if you prefer to manage your project's dependency in a finer-grained way, you
 
 [[sid-54493676_ErraiUINavigation-Compiletimedependency]]
 
-==== Compile-time dependency
+==== Compile-time Dependencies
 
 To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add these dependencies:
-
 
 [source, xml]
 ----
@@ -7326,14 +7364,13 @@ To use Errai UI Navigation, you must include it on the compile-time classpath. I
     </dependency>
 ----
 
-If you are not using Maven for dependency management, add [code]+errai-navigation-+[code]+version+[code]+.jar+ to the compile-time classpath of a project that's already set up for Errai UI templating.
+If you are not using Maven for dependency management, add [code]+errai-navigation-${errai.version}.jar+ to the compile-time classpath of a project that's already set up for Errai UI templating.
 
 [[sid-54493676_ErraiUINavigation-GWTModuleDescriptor]]
 
 ==== GWT Module Descriptor
 
-Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
-
+Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+*.gwt.xml+ file:
 
 [source, xml]
 ----
@@ -7344,8 +7381,7 @@ Once you have Errai UI Navigation on your classpath, ensure your application inh
 
 [[sid-65274252_ErraiCordova%28MobileSupport%29-Mavenbuild]]
 
-==== Maven Dependencies
-
+==== Compile-time Dependencies
 Using Errai Cordova requires the following compile-time dependency:
 
 [source, xml]
@@ -7356,6 +7392,8 @@ Using Errai Cordova requires the following compile-time dependency:
     <version>${errai.verison}</version>
   </dependency>
 ----
+
+==== Cordova Maven Plugin
 
 Errai Cordova allows you build an Errai app to natively run on a device. In order to make this as easy as possible we have a maven plugin that will create a native binary that you can install on a device. It will put the html and javascript of you application in a link:$$http://cordova.apache.org/$$[cordova] application.
 
@@ -7373,9 +7411,9 @@ Errai Cordova allows you build an Errai app to natively run on a device. In orde
 
 [[sid-65274252_ErraiCordova%28MobileSupport%29-App.gwt.xml]]
 
-==== App.gwt.xml
+==== GWT Module Descriptor
 
-Add the following to your application's .gwt.xml module file:
+Add the following to your application's [code]+*.gwt.xml+ module file:
 
 [source, xml]
 ----
@@ -7391,7 +7429,7 @@ Because the client is no longer served by the server the client will need to kno
 </replace-with>
 ----
 
-This class must implement org.jboss.errai.bus.client.framework.Configuration and return the url where the server is configured.
+This class must implement [code]+org.jboss.errai.bus.client.framework.Configuration+ and return the url where the server is configured.
 
 [source, java]
 ----
