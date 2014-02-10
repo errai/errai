@@ -462,15 +462,21 @@ It can be tempting to think of ErraiBus simply as a client-server communication 
 
 So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.
 
-[[sid-5931280]]
-
-=== Messaging API Basics
-
 [TIP]
 .Plugin Tip
 ====
 Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Messaging_ to follow along with this section.
 ====
+
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add messaging to your project.
+====
+
+[[sid-5931280]]
+
+=== Messaging API Basics
 
 The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the [code]+MessageBuilder+ .
 
@@ -1375,6 +1381,12 @@ The monitor allows you select individual messages, an view their individual part
 Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai IOC_ to follow along with this section.
 ====
 
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai IOC to your project.
+====
+
 The core Errai IOC module implements the _JSR-330 Dependency Injection_ specification for in-client component wiring.
 
 Dependency injection (DI) allows for cleaner and more modular code, by permitting the implementation of decoupled and type-safe components. By using DI, components do not need to be aware of the implementation of provided services. Instead, they merely declare a contract with the container, which in turn provides instances of the services that component depends on.
@@ -2186,6 +2198,12 @@ public MyManagedBean {
 Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai CDI_ to follow along with this section.
 ====
 
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai CDI to your project.
+====
+
 CDI (Contexts and Dependency Injection) is the Jave EE standard (JSR-299) for handling dependency injection. In addition to dependency injection, the standard encompasses component lifecycle, application configuration, call-interception and a decoupled, type-safe eventing specification.
 
 The Errai CDI extension implements a subset of the specification for use inside of client-side applications within Errai, as well as additional capabilities such as distributed eventing.
@@ -2588,76 +2606,35 @@ In this example, calling [code]+barInstance.get()+ returns a new instance of the
 
 === Deploying Errai CDI
 
-If you do not care about the deployment details for now and just want to get started take a look at the ERRAI:Quickstart Guide.
-
 The CDI integration is a plugin to the Errai core framework and represents a CDI portable extension. Which means it is discovered automatically by both Errai and the CDI container. In order to use it, you first need to understand the different runtime models involved when working GWT, Errai, and CDI.
 
 Typically a GWT application lifecycle begins in link:$$http://code.google.com/webtoolkit/doc/latest/DevGuideCompilingAndDebugging.html$$[Development Mode] and finally a web application containing the GWT client code will be deployed to a target container (Servlet Engine, Application Server). This is no way different when working with CDI components to back your application.
 
 What's different however is availability of the CDI container across the different runtimes. In GWT development mode and in a pure servlet environment you need to provide and bootstrap the CDI environment on your own. While any Java EE 6 Application Server already provides a preconfigured CDI container. To accomodate these differences, we need to do a little trickery when executing the GWT Development Mode and packaging our application for deployment.
 
-[[sid-5931501_DeployingErraiCDI-DeploymentinDevelopmentMode]]
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai in Project_ command to setup development mode, usable for any Errai application, including one with Errai CDI.
+====
 
-==== Deployment in Development Mode (JBossLauncher)
-
-In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). GWT by default uses Jetty, that only supports read only JNDI. The current solution for this is to use a custom launcher to control a JBoss AS 7 or Wildfly 8 instance instead of GWT's built-in Jetty.
-
-To do this, requires the following configurations in the gwt-maven-plugin configuration:
-
-[source, xml]
-----
-<plugin>
-  <groupId>org.codehaus.mojo</groupId>
-  <artifactId>gwt-maven-plugin</artifactId>
-  <version>${gwt.version}</version>
-
-  <configuration>
-  ...
-    <extraJvmArgs>-Derrai.jboss.home=$JBOSS_HOME -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/$ERRAI_VERSION/errai-client-local-class-hider-$ERRAI_VERSION.jar</extraJvmArgs>
-    <noServer>false</noServer>
-    <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
-  </configuration>
-  <executions>
-  ...
-  </executions> 
-</plugin>
-----
-
-What does all this mean?
-
-* `<noServer>false</noServer>`: Tells GWT to lauch a server for us.
-
-* `<server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>`: Tells GWT to use a custom launcher instead of it's default JettyLauncher.
-
-* `<extraJvmArgs>...</extraJvmArgs>`
-
-** `-Derrai.jboss.home=$JBOSS_HOME`: Tells the JBossLauncher the location of the JBoss or Wildfly instance to use. Note that `$JBOSS_HOME` should be replaced with a literal path (or pom property) to a JBoss or Wildfly instance you have installed.
-
-** `-Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${ERRAI_VERSION}/errai-client-local-class-hider-${ERRAI_VERSION}.jar`: This scary looking line is necessary so that the JBoss instance does not see client-only dependencies. Note that `$ERRAI_VERSION` should be replaced with the literal version of Errai (or a pom property).
-
-===== Additional JBossLauncher Arguments
-
-Here are some additional JVM arguments that can be passed to the JBossLauncher:
-
-* `errai.dev.context`: Sets the context under which your app will be deployed (defaults to "webapp").
-
-* `errai.jboss.debug.port`: Sets the port for debugging server-side code (defaults to 8001).
-
-* `errai.jboss.config.file`: Sets the configuration file (in `$JBOSS_HOME/configuration`) used by the JBoss/Wildfly instance (defaults to standalone-full.xml).
-
-* `errai.jboss.javaopts`: Sets additional java opts used by the JVM running JBoss/Wildfly.
-
-[[sid-5931501_DeployingErraiCDI-DeploymenttoanApplicationServer]]
-
-==== Deployment to an Application Server
-
-We provide integration with the link:$$http://jboss.org/jbossas$$[JBoss Application Server], but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ([code]+java:/BeanManager+).
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually setup Errai CDI in Development Mode.
+====
 
 [[sid-5931328]]
 
 == Marshalling
 
 Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You are be able to map both application-specific domain model, as well as preexisting model, including model from third-party libraries using the custom definitions API.
+
+[TIP]
+.Plugin Tip
+====
+If you used the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command to add _Errai Messaging_ or _Errai CDI_ then Marshalling is already available to you.
+====
 
 [[sid-5931328_Marshalling-MappingYourDomain]]
 
@@ -2927,9 +2904,9 @@ The example above shows the equivalent mapping for the [code]+MyListImpl+ class 
 The syntax of the mapping is as follows: [code]++<class_to_map>++_->_[code]+<contract_to_map_to>+ .
 
 [IMPORTANT]
-.Aliases do not inherit functionality!
+.Aliases do not inherit fields!
 ====
-When you alias a class to another marshalling contract, extended functionality of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.
+When you alias a class to another marshalling contract, extended fields of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.
 ====
 
 [[sid-5931328_Marshalling-ManualClassMapping]]
@@ -3092,6 +3069,20 @@ The [code]+doNotNullMarshall()+ method does roughly the inverse: it converts the
 ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach for exposing services to the clients.
 
 Please note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.
+
+[TIP]
+.Plugin Tip
+====
+Using the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command, Errai RPC can be used if _Errai Messaging_ or _Errai CDI_ have been installed.
+====
+
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai Messaging or Errai CDI to a project.
+====
+
+=== Creating an RPC Interface
 
 Creating a service is straight forward. It requires the definition of a remote interface, and a service class which implements it. See the following:
 
@@ -3371,61 +3362,17 @@ Errai's JAX-RS support consists of the following:
 * Errai IoC and CDI providers that allow you to [code]+@Inject+ instances of {{Caller<T>} (the same API used in Errai RPC)}
 * Integration with either Errai Marshalling or Jackson to translate request and response data between Java object and a string-based wire format
 
-To get started with a working demo that makes use of Errai JAX-RS you can either download and unzip the link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[Errai tutorial project] or check out the CRUD demo part of our link:$$https://github.com/errai/errai/tree/master/errai-demos$$[demo collection] . If you prefer getting started from scratch keep reading .TODO Gliffy image title empty
-image::author/images/icons/emoticons/smile.gif[]
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai JAXRS_ to follow along with this section.
+====
 
-
-.
-
-[[sid-19398997_ErraiJAX-RS-GettingStarted]]
-
-=== Getting Started
-
-[[sid-19398997_ErraiJAX-RS-Dependencies]]
-
-==== Dependencies
-
-To use Errai JAX-RS, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
-
-
-[source, xml]
-----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jaxrs-client</artifactId>
-      <version>${errai.version}</version>
-      <scope>provided</scope>
-    </dependency>
-----
-
-or if you are not using Maven for dependency management, add [code]+errai-jaxrs-client-version.jar+ to your classpath.
-
-If you intend to use Errai's JSON format on the wire you will need to add Errai's JAX-RS JSON provider to your classpath and make sure it gets deployed to the server.
-
-
-[source, xml]
-----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jaxrs-provider</artifactId>
-      <version>${errai.version}</version>
-    </dependency>
-
-----
-
-or manually add [code]+errai-jaxrs-provider-version.jar+ in case you're not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <<sid-19398997_ErraiJAX-RS-Configuration,Configuration>> ) .
-
-[[sid-19398997_ErraiJAX-RS-GWTModule]]
-
-==== GWT Module
-
-Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
-
-
-[source, xml]
-----
-  <inherits name="org.jboss.errai.enterprise.Jaxrs"/>
-----
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add JAX-RS to your project. You can also go to the link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[Errai tutorial project] or the link:$$https://github.com/errai/errai/tree/master/errai-demos$$[demo collection] for an example of JAX-RS.
+====
 
 [[sid-19398997_ErraiJAX-RS-ServerSideJAXRSImplementation]]
 
@@ -3737,79 +3684,15 @@ Errai's JSON format will be used to serialize/deserialize your custom types. See
 
 Alternatively, a Jackson compatible JSON format can be used on the wire. See <<sid-19398997_ErraiJAX-RS-Configuration,Configuration>> for details on how to enable Jackson marshalling.
 
-[[sid-19398997_ErraiJAX-RS-Configuration]]
-
-=== Configuration
-
-[[sid-19398997_ErraiJAX-RS-ConfiguringthedefaultrootpathofJAXRSendpoints]]
-
-==== Configuring the default root path of JAX-RS endpoints
+=== Path
 
 All paths specified using the [code]+@Path+ annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application's context path.
 
-To configure a relative or absolute root path, the following JavaScript variable can be set in either
-
-the host HTML page
-
-
-[source, xml]
-----
-<script type="text/javascript">
-  erraiJaxRsApplicationRoot = "/MyJaxRsEndpointPath";
-</script>
-----
-
-or by using a JSNI method:
-
-
-[source, java]
-----
-private native void setMyJaxRsAppRoot(String path) /*-{
-  $wnd.erraiJaxRsApplicationRoot = path;
-}-*/;
-----
-
-or by simply invoking:
-
-
-[source, java]
-----
-RestClient.setApplicationRoot("/MyJaxRsEndpointPath");
-----
-
-The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.
-
-[[sid-19398997_ErraiJAX-RS-EnablingJacksonmarshalling]]
-
-==== Enabling Jackson marshalling
-
-The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The [code]+errai-jaxrs-provider.jar+ does not have to be deployed on the server in this case!
-
-
-[source, xml]
-----
-<script type="text/javascript">
-  erraiJaxRsJacksonMarshallingActive = true;
-</script>
-----
-
-or by using a JSNI method:
-
-
-[source, java]
-----
-private native void setJacksonMarshallingActive(boolean active) /*-{
-  $wnd.erraiJaxRsJacksonMarshallingActive = active;
-}-*/;
-----
-
-or by simply invoking:
-
-
-[source, java]
-----
-RestClient.setJacksonMarshallingActive(true);
-----
+[IMPORTANT]
+.Configuring the Path
+====
+To learn more about configuring the path, checkout <<sid-19398997_ErraiJAX-RS-Configuration,the JAX-RS Configuration Section>>.
+====
 
 [[sid-54493688]]
 
@@ -3860,37 +3743,17 @@ Errai JPA is a declarative, typesafe interface to the web browser's [code]+local
 
 === Getting Started
 
-[[sid-54493688_ErraiJPA-Compiletimedependency]]
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai JPA_ to follow along with this section.
+====
 
-==== Compile-time dependency
-
-To use Errai JPA, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
-
-
-[source, xml]
-----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jpa-client</artifactId>
-      <version>${errai.version}</version>
-    </dependency>
-----
-
-If you are not using Maven for dependency management, add [code]+errai-jpa-client-version.jar+ , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.
-
-[[sid-54493688_ErraiJPA-GWTModuleDescriptor]]
-
-==== GWT Module Descriptor
-
-Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
-
-
-[source, xml]
-----
-   <inherits name="org.jboss.errai.jpa.JPA"/>
-----
-
-[[sid-54493688_ErraiJPA-METAINF%2Fpersistence.xml]]
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai JPA to your project.
+====
 
 ==== INF/persistence.xml
 
@@ -4378,29 +4241,17 @@ This is where Errai JPA Data Sync comes in: it provides an easy mechanism for tw
 
 ==== How To Use It
 
-[[sid-71467090_ErraiJPADataSync-Dependencies]]
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai JPA Datasync_ to follow along with this section.
+====
 
-===== Dependencies
-
-First, ensure your [code]+pom.xml+ includes a dependency on the Data Sync module. This module must be packaged in your application's WAR file, so include it with the default scope (compile):
-
-
-[source, xml]
-----
-  <dependency>
-    <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-jpa-datasync</artifactId>
-    <version>${errai.version}</version>
-  </dependency>
-----
-
-Then, ensure your project's [code]+gwt.xml+ module descriptor includes a dependency on the Data Sync GWT module:
-
-
-[source, xml]
-----
-  <inherits name="org.jboss.errai.jpa.sync.DataSync"/>
-----
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai JPA Datasync to your project.
+====
 
 [[sid-71467090_ErraiJPADataSync-ARunningExample]]
 
@@ -4629,39 +4480,16 @@ Errai's data binding module provides the ability to bind model objects to UI fie
 
 The data binding module is directly integrated with <<sid-51806600, Errai UI>> and <<sid-54493688, Errai JPA>> but can also be used as a standalone project in any GWT client application:
 
-[[sid-51282340_DataBinding-Compiletimedependency]]
-
-==== Compile-time dependency
-
-To use Errai's data binding module, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
-
-
-[source, xml]
-----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-data-binding</artifactId>
-      <version>${errai.version}</version>
-    </dependency>
-----
-
-If you are not using Maven for dependency management, add [code]+errai-data-binding-+[code]+version+[code]+.jar+ to your classpath.
-
-[[sid-51282340_DataBinding-GWTmoduledescriptor]]
-
-==== GWT module descriptor
-
-You must also inherit the Errai data binding module by adding the following line to your GWT module descriptor (gwt.xml).
-
-.App.gwt.xml
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Data Binding_ to follow along with this section.
 ====
 
-
-[source, xml]
-----
-<inherits name="org.jboss.errai.databinding.DataBinding" />
-----
-
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai Data Binding to your project.
 ====
 
 [[sid-51282340_DataBinding-BindableObjects]]
@@ -5090,13 +4918,7 @@ errai.validation.blacklist = some.fully.qualified.ClassName \
 
 == Errai UI
 
-|===============
-|One of the primary complaints of GWT to date has been that it is difficult to use "pure HTML" when building and skinning widgets. Inevitably one must turn to Java-based configuration in order to finish the job. Errai, however, strives to remove the need for Java styling. HTML template files are placed in the project source tree, and referenced from custom "Composite components" (Errai UI Widgets) in Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency injection is supported in all custom components. Errai UI provides rapid prototyping and HTML5 templating for GWT.|link:$$http://get.adobe.com/flashplayer/$$[.TODO Gliffy image title empty
-image::http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif[]
-
-
-]
-|===============
+One of the primary complaints of GWT to date has been that it is difficult to use "pure HTML" when building and skinning widgets. Inevitably one must turn to Java-based configuration in order to finish the job. Errai, however, strives to remove the need for Java styling. HTML template files are placed in the project source tree, and referenced from custom "Composite components" (Errai UI Widgets) in Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency injection is supported in all custom components. Errai UI provides rapid prototyping and HTML5 templating for GWT.
 
 [[sid-51806600_ErraiUI-Getstarted]]
 
@@ -5104,51 +4926,19 @@ image::http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif[
 
 The Errai UI module is directly integrated with <<sid-51282340, Data Binding>> and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using <<sid-19398999,Errai CDI's @Inject>> to instantiate your widgets:
 
-[[sid-51806600_ErraiUI-App.gwt.xml]]
-
-==== App.gwt.xml
-
-
-[source, xml]
-----
-
-<inherits name="org.jboss.errai.ui.UI" />
-
-----
-
-[[sid-51806600_ErraiUI-pom.xml]]
-
-==== pom.xml
-
-The easiest way to get Errai UI on your classpath is to depend on the special [code]+errai-javaee-all+ artifact, which brings in most Errai modules:
-
-
-[source, xml]
-----
-<dependency>
-  <groupId>org.jboss.errai</groupId>
-  <artifactId>errai-javaee-all</artifactId>
-  <version>${errai.version}</version>
-</dependency>
-----
-
-Or if you prefer to manage your project's dependency in a finer-grained way, you can depend on [code]+errai-ui+ directly:
-
-
-[source, xml]
-----
-<dependency>
-  <groupId>org.jboss.errai</groupId>
-  <artifactId>errai-ui</artifactId>
-  <version>${errai.version}</version>
-</dependency>
-----
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai UI_ to follow along with this section.
+====
 
 [[sid-51806600_ErraiUI-WorkingDemo]]
 
-==== Working Demo
-
-If you work better by playing with a finished product, you can see a simple client-server project link:$$https://github.com/errai/summit-demo-2013$$[implemented using Errai UI here] .
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai UI to your project. If you work better by playing with a finished product, you can see a simple client-server project link:$$https://github.com/errai/summit-demo-2013$$[implemented using Errai UI here] .
+====
 
 [[sid-51806600_ErraiUI-UseErraiUICompositecomponents]]
 
@@ -6956,7 +6746,654 @@ public class NamedLogExample {
 
 == Configuration
 
-This section contains information on configuring Errai.
+This section contains information on manually setting up and configuring Errai.
+
+[[Manual-Setup-Section]]
+
+=== Manual Setup
+
+==== Errai Development Mode Configuration
+
+[[sid-5931501_DeployingErraiCDI-DeploymentinDevelopmentMode]]
+
+===== Deployment in Development Mode (JBossLauncher)
+
+In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). GWT by default uses Jetty, that only supports read only JNDI. The current solution for this is to use a custom launcher to control a JBoss AS 7 or Wildfly 8 instance instead of GWT's built-in Jetty.
+
+To do this, requires the following configurations in the gwt-maven-plugin configuration:
+
+[source, xml]
+----
+<plugin>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>gwt-maven-plugin</artifactId>
+  <version>${gwt.version}</version>
+
+  <configuration>
+  ...
+    <extraJvmArgs>-Derrai.jboss.home=$JBOSS_HOME -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/$ERRAI_VERSION/errai-client-local-class-hider-$ERRAI_VERSION.jar</extraJvmArgs>
+    <noServer>false</noServer>
+    <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
+  </configuration>
+  <executions>
+  ...
+  </executions> 
+</plugin>
+----
+
+What does all this mean?
+
+* `<noServer>false</noServer>`: Tells GWT to lauch a server for us.
+
+* `<server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>`: Tells GWT to use a custom launcher instead of it's default JettyLauncher.
+
+* `<extraJvmArgs>...</extraJvmArgs>`
+
+** `-Derrai.jboss.home=$JBOSS_HOME`: Tells the JBossLauncher the location of the JBoss or Wildfly instance to use. Note that `$JBOSS_HOME` should be replaced with a literal path (or pom property) to a JBoss or Wildfly instance you have installed.
+
+** `-Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${ERRAI_VERSION}/errai-client-local-class-hider-${ERRAI_VERSION}.jar`: This scary looking line is necessary so that the JBoss instance does not see client-only dependencies. Note that `$ERRAI_VERSION` should be replaced with the literal version of Errai (or a pom property).
+
+===== Additional JBossLauncher Arguments
+
+Here are some additional JVM arguments that can be passed to the JBossLauncher:
+
+* `errai.dev.context`: Sets the context under which your app will be deployed (defaults to "webapp").
+
+* `errai.jboss.debug.port`: Sets the port for debugging server-side code (defaults to 8001).
+
+* `errai.jboss.config.file`: Sets the configuration file (in `$JBOSS_HOME/configuration`) used by the JBoss/Wildfly instance (defaults to standalone-full.xml).
+
+* `errai.jboss.javaopts`: Sets additional java opts used by the JVM running JBoss/Wildfly.
+
+[[sid-5931501_DeployingErraiCDI-DeploymenttoanApplicationServer]]
+
+===== Deployment to an Application Server
+
+We provide integration with the link:$$http://jboss.org/jbossas$$[JBoss Application Server], but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ([code]+java:/BeanManager+).
+
+[[sid-5931354]]
+
+=== ErraiApp.properties
+
+ErraiApp.properties acts both as a marker file for JARs that contain Errai-enabled GWT modules, and as a place to put configuration settings for those modules in the rare case that non-default configuration is necessary.
+
+[[sid-5931354_ErraiApp.properties-AsaMarkerFile]]
+
+==== As a Marker File
+
+_An_ [code]++ErraiApp.properties++_file must appear at the root of each classpath location that contains an Errai module._ The contents of JAR and directory classpath entries that do not contain an [code]+ErraiApp.properties+ are effectively invisible to Errai's classpath scanner.
+
+[[sid-5931354_ErraiApp.properties-AsaConfigurationFile]]
+
+==== As a Configuration File
+
+ErraiApp.properties is usually left empty, but it can contain configuration settings for both the core of Errai and any of its extensions. Configuration properties defined and used by Errai components have keys that start with " [code]+errai.+ ". Third party extensions should each choose their own prefix for keys in ErraiApp.properties.
+
+[[sid-5931354_ErraiApp.properties-ConfigurationMerging]]
+
+===== Configuration Merging
+
+In a non-trivial application, there will be several instances of ErraiApp.properties on the classpath (one per JAR file that contains Errai modules, beans, or portable classes).
+
+Before using the configuration information from ErraiApp.properties, Errai reads the contents of every ErraiApp.properties on the classpath. The configuration information in all these files is merged together to form one set of key=value pairs.
+
+If the same key appears in more than one ErraiApp.properties file, only one of the values will be associated with that key. The other values will be ignored. In future versions of Errai, this condition may be made into an error. It's best to avoid specifying the same configuration key in multiple ErraiApp.properties files.
+
+[[sid-5931354_ErraiApp.properties-ErraiMarshallingConfiguration]]
+
+===== Errai Marshalling Configuration
+
+* _$$errai.marshalling.use_static_marshallers$$_ when set to [code]+false+ , Errai will not use the precompiled server-side marshallers even if the generated [code]+ServerMarshallingFactoryImpl+ class is found on the classpath. This is useful when using Dev Mode in conjunction with an external server such as JBoss AS 7 or EAP 6.
+* _$$errai.marshalling.force_static_marshallers$$_ when set to [code]+true+ , Errai will not use dynamic marshallers. If the generated [code]+ServerMarshallingFactoryImpl+ cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.
+
+
+Errai also supports configuring portable types in [code]+ErraiApp.properties+ as an alternative to the [code]+@Portable+ annotation. See <<sid-5931328_Marshalling-ManualMapping,the Errai Marshalling section on Manual Mapping>> for details.
+
+[[sid-5931354_ErraiApp.properties-ErraiIoCConfiguration]]
+
+===== Errai IoC Configuration
+
+* _errai.ioc.QualifyingMetaDataFactory_ specifies the fully-qualified class name of the QualifyingMetadataFactory implementation to use with Errai IoC.
+
+* _errai.ioc.enabled.alternatives_ specifies a whitespace-separated list of fully-qualified class names for _alternative beans_ . See <<sid-22872133, Alternatives and Mocks>> for details.
+
+* _errai.ioc.blacklist_ specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).
+
+* _errai.ioc.whitelist_ when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).
+
+[[sid-5931338]]
+
+=== Messaging (Errai Bus) Configuration
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-Disablingremotecommunication]]
+
+==== Disabling remote communication
+
+In some cases it might be desirable to prevent the client bus from communicating with the server. One use case for this is when all communication with the server is handled using JAX-RS and the constant long polling requests for message exchange are not needed.
+
+To turn off remote communication in the client bus the following JavaScript variable can be set in the HTML host page:
+
+
+[source, xml]
+----
+<script type="text/javascript">
+  erraiBusRemoteCommunicationEnabled = false;
+</script>
+----
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-Configuringanalternativeremoteremotebusendpoint]]
+
+==== Configuring an alternative remote remote bus endpoint
+
+By default the remote bus is expected at the GWT web application's context path. In case the remote bus is part of a different web application or deployed on a different server, the following configuration can be used in the HTML host page to configure the remote bus endpoint used on the client.
+
+[source, xml]
+----
+<script type="text/javascript">
+  erraiBusApplicationRoot = "/MyRemoteMessageBusEnpoint";
+</script>
+----
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-ErraiService.properties]]
+
+==== ErraiService.properties
+
+The ErraiService.properties file contains basic configuration for the bus itself. Unlike ErraiApp.properties, there should be at most one ErraiService.properties file on the classpath of a deployed application. If you do not need to set any properties to their non-default values, this file can be omitted from the deployment entirely.
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-MessageDispatching]]
+
+===== Message Dispatching
+
+Dispatchers encapsulate the strategy for taking messages that need to be delivered somewhere and seeing that they are delivered to where they need to go. There are two primary implementations that are provided with Errai, depending on your needs.
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-SimpleDispatcher]]
+
+SimpleDispatcher:
+
+SimpleDispatcher is basic implementation that provides no asychronous delivery mechanism. Rather, when you configure the Errai to use this implementation, messages are delivered to their endpoints synchronously. The incoming HTTP thread will be held open until the messages are delivered.
+
+While this sounds like it has almost no advantages, especially in terms of scalablity. Using the SimpleDispatcher can be far preferable when you're developing your application, as any errors and stack traces will be far more easily traced and some cloud services may not permit the use of threads in any case.
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-AsyncDispatcher]]
+
+AsyncDispatcher:
+
+The AsyncDispatcher provides full asynchronous delivery of messages. When this dispatcher is used, HTTP threads will have control immediately returned upon dispatch of the message. This dispatcher provides far more efficient use of resources in high-load applications, and will significantly decrease memory and thread usage overall.
+
+* _errai.dispatcher.implementation_ specifies the dispatcher implementation to be used by the bus. There are two implementations which come with Errai out of the box: the [code]+SimpleDispatcher+ and the [code]+AsyncDispatcher+ . See ERRAI:Dispatcher Implementations for more information about the differences between the two.
+
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-Threading]]
+
+===== Threading
+
+* _$$errai.async_thread_pool_size$$_ specifies the total number of worker threads in the worker pool for handling and delivering messages. Adjusting this value does not have any effect if you are using the SimpleDispatcher.
+
+
+* _$$errai.async.worker_timeout$$_ specifies the total amount of time (in seconds) that a service is given to finish processing an incoming message before the pool interrupts the thread and returns an error. Adjusting this value has no effect if you are using the SimpleDispatcher.
+
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-Buffering]]
+
+===== Buffering
+
+* _$$errai.bus.buffer_size$$_ The total size of the transmission buffer, in megabytes. If this attribute is specified along with [code]+errai.bus.buffer_segment_count+ , then the segment count is inferred by the calculation [code]+buffer_segment_count / buffer_size}. If {{errai.bus.buffer_segment_count+ is also defined, it will be ignored in the presence of this property. Default value: 32.
+
+
+* _$$errai.bus.buffer_segment_size$$_ The transmission buffer segment size in bytes. This is the minimum amount of memory each message will consume while stored within the buffer. Defualt value: 8.
+
+
+* _$$errai.bus.buffer_segment_count$$_ The number of segments in absolute terms. If this attribute is specified in the absence of [code]+errai.bus.buffer_size+ , the buffer size is inferred by the calculation [code]+buffer_segment_size / buffer_segment_count+ .
+
+
+* _$$errai.bus.buffer_allocation_mode$$_ Buffer allocation mode. Allowed values are [code]+direct+ and [code]+heap+ . Direct allocation puts buffer memory outside of the JVM heap, while heap allocation uses buffer memory inside the Java heap. For most situations, heap allocation is preferable. However, if the application is data intensive and requires a substantially large buffer, it is preferable to use a direct buffer. From a throughput perspective, current JVM implementations pay about a 20% performance penalty for direct-allocated memory access. However, your application may show better scaling characteristics with direct buffers. Benchmarking under real load conditions is the only way to know the optimal setting for your use case and expected load. Default value: [code]+direct+ .
+
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-Security]]
+
+===== Security
+
+* _$$errai.authentication_adapter$$_ specifies the authentication modelAdapter the bus should use for determining whether calls should be serviced based on authentication and security principals.
+
+
+* _$$errai.require_authentication_for_all$$_ indicates whether or not the bus should always require the use of authentication for all requests inbound for the bus. If this is turned on, an authentication model adapter must be defined, and any user must be authenticated before the bus will deliver any messages from the client to any service.
+
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-Clustering]]
+
+===== Clustering
+
+* _$$errai.bus.enable_clustering$$_ A boolean indicating whether or not Errai's server side bus should attempt to orchestrate with its peers. The orchestration mechanism is dependent on the configured clustering provider (e.g. UDP based multicast discovery in case of the default JGroups provider). The default value is [code]+false+ .
+
+
+* _$$errai.bus.clustering_provider$$_ The fully qualified class name of the clustering provider implementation. A class that implements [code]+org.jboss.errai.bus.server.cluster.ClusteringProvider+ . Currently the only build-in provider is the [code]+org.jboss.errai.bus.server.cluster.jgroups.JGroupsClusteringProvider+ .
+
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-StartupConfiguration]]
+
+===== Startup Configuration
+
+* _$$errai.auto_discover_services$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. _This property must be set to true if and only if Errai CDI is not on the classpath_ . The default value is [code]+false+ .
+
+* _$$errai.auto_load_extensions$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for extensions. The default value is [code]+true+ .
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-ExampleConfiguration]]
+
+===== Example Configuration
+
+[source, ini]
+----
+##
+## Request dispatcher implementation (default is SimpleDispatcher)
+##
+#errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
+errai.dispatcher_implementation=org.jboss.errai.bus.server.AsyncDispatcher
+
+#
+## Worker pool size. This is the number of threads the asynchronous worker pool should provide for
+processing
+## incoming messages. This option is only valid when using the AsyncDispatcher implementation.
+##
+errai.async.thread_pool_size=5
+
+##
+## Worker timeout (in seconds). This defines the time that a single asychronous process may run,
+before the worker pool
+## terminates it and reclaims the thread. This option is only valid when using the AsyncDispatcher
+implementation.
+##
+errai.async.worker.timeout=5
+
+##
+## Specify the Authentication/Authorization Adapter to use
+##
+#errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
+#errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
+
+##
+## This property indicates whether or not authentication is required for all communication with the
+bus. Set this
+## to 'true' if all access to your application should be secure.
+##
+#errai.require_authentication_for_all=true
+----
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-ServletConfiguration]]
+
+==== Servlet Configuration
+
+Errai has several different implementations for HTTP traffic to and from the bus. We provide a universally-compatible blocking implementation that provides fully synchronous communication to/from the server-side bus. Where this introduces scalability problems, we have implemented many webserver-specific implementations that take advantage of the various proprietary APIs to provide true asynchrony.
+
+These included implementations are packaged at: [code]+org.jboss.errai.bus.server.servlet+ .
+
+[IMPORTANT]
+.One is Enough!
+====
+You should use just one of the options below. Configuring multiple ErraiServlet implementations in the same application will lead to unpredictable behaviour!
+
+Remember that all Errai demos and archetypes are preconfigured with DefaultBlockingServlet as a servlet. You will need to remove this default setup if you choose to use a different ErraiServlet implementation in your app.
+====
+
+[NOTE]
+.Rolling your own security? Beware!
+====
+All of the following examples use a wildcard mapping for [code]+\*.erraiBus+ with no path prefix. This allows Errai Bus to communicate from any point in your application's URI hierarchy, which allows bus communication to work properly no matter where you choose to put your GWT host page.
+
+For example, all of the following are equivalent from Errai's point of view:
+
+* /in.erraiBus
+* /foo/bar/in.erraiBus
+* /long/path/to/get/to.erraiBus
+
+If you rely on your own security rules or a custom security filter to control access to Errai Bus (rather than the security framework within Errai Bus,) ensure you use the same mapping pattern for that [code]+filter-mapping+ or [code]+security-constraint+ as you do for the Errai Servlet itself.
+====
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-DefaultBlockingServlet]]
+
+===== DefaultBlockingServlet
+
+This ErraiServlet implementation should work in virtually any servlet container that supports Java Servlets 2.0 or higher. It provides purely synchronous request handling. The one scenario where this servlet will not work is in servers that put restrictions on putting threads into sleep states.
+
+The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
+
+As its name suggests, DefaultBlockingServlet is normally configured as an HTTP Servlet in the [code]+web.xml+ file:
+
+[source, xml]
+----
+<servlet>
+  <servlet-name>ErraiServlet</servlet-name>
+  <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
+  <load-on-startup>1</load-on-startup>
+</servlet>
+                                                                                                     
+<servlet-mapping>
+  <servlet-name>ErraiServlet</servlet-name>
+  <url-pattern>*.erraiBus</url-pattern>
+</servlet-mapping>
+----
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-DefaultBlockingServletconfiguredasFilter]]
+
+===== DefaultBlockingServlet configured as Filter
+
+Alternatively, the DefaultBlockingServlet can be deployed as a Servlet Filter. This may be necessary in cases where an existing filter is configured in the web application, and that filter interferes with the Errai Bus requests. In this case, configuring DefaultBlockingServlet to handle [code]+\*.erraiBus+ requests ahead of other filters in web.xml will solve the problem:
+
+[source, xml]
+----
+<filter>
+  <filter-name>ErraiServlet</filter-name>
+  <filter-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</filter-class>
+</filter>
+
+<filter-mapping>
+  <filter-name>ErraiServlet</filter-name>
+  <url-pattern>*.erraiBus</url-pattern>
+</filter-mapping>
+----
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-JettyContinuationsServlet]]
+
+===== JettyContinuationsServlet
+
+The Jetty implementation leverages Jetty's continuations support, which allows for threadless pausing of port connections. This servlet implementation should work without any special configuration of Jetty.
+
+[source, xml]
+----
+<servlet>
+  <servlet-name>ErraiServlet</servlet-name>
+  <servlet-class>org.jboss.errai.bus.server.servlet.JettyContinuationsServlet</servlet-class>
+  <load-on-startup>1</load-on-startup>
+</servlet>
+                                                                                                     
+<servlet-mapping>
+  <servlet-name>ErraiServlet</servlet-name>
+  <url-pattern>*.erraiBus</url-pattern>
+</servlet-mapping>
+----
+
+[[sid-5931338_Messaging%28ErraiBus%29Configuration-StandardAsyncServlet]]
+
+===== StandardAsyncServlet
+
+This implementation leverages asynchronous support in Servlet 3.0 to allow for threadless pausing of port connections. Note that [code]+<async-supported>true</async-supported>+ has to be added to the servlet definition in [code]+web.xml+ .
+
+[source, xml]
+----
+<servlet>
+  <servlet-name>ErraiServlet</servlet-name>
+  <servlet-class>org.jboss.errai.bus.server.servlet.StandardAsyncServlet</servlet-class>
+  <load-on-startup>1</load-on-startup>
+  <async-supported>true</async-supported>
+</servlet>
+                                                                                                     
+<servlet-mapping>
+  <servlet-name>ErraiServlet</servlet-name>
+  <url-pattern>*.erraiBus</url-pattern>
+</servlet-mapping>
+----
+
+[[sid-19398997_ErraiJAX-RS-GettingStarted]]
+
+=== Errai JAX-RS Setup
+
+[[sid-19398997_ErraiJAX-RS-Dependencies]]
+
+==== Dependencies
+
+To use Errai JAX-RS, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
+
+[source, xml]
+----
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jaxrs-client</artifactId>
+      <version>${errai.version}</version>
+      <scope>provided</scope>
+    </dependency>
+----
+
+or if you are not using Maven for dependency management, add [code]+errai-jaxrs-client-version.jar+ to your classpath.
+
+If you intend to use Errai's JSON format on the wire you will need to add Errai's JAX-RS JSON provider to your classpath and make sure it gets deployed to the server.
+
+
+[source, xml]
+----
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jaxrs-provider</artifactId>
+      <version>${errai.version}</version>
+    </dependency>
+
+----
+
+or manually add [code]+errai-jaxrs-provider-version.jar+ in case you're not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <<sid-19398997_ErraiJAX-RS-Configuration,Configuration>> ) .
+
+[[sid-19398997_ErraiJAX-RS-GWTModule]]
+
+==== GWT Module
+
+Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
+
+
+[source, xml]
+----
+  <inherits name="org.jboss.errai.enterprise.Jaxrs"/>
+----
+
+[[sid-19398997_ErraiJAX-RS-Configuration]]
+
+==== Configuration
+
+[[sid-19398997_ErraiJAX-RS-ConfiguringthedefaultrootpathofJAXRSendpoints]]
+
+===== Configuring the default root path of JAX-RS endpoints
+
+All paths specified using the [code]+@Path+ annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application's context path.
+
+To configure a relative or absolute root path, the following JavaScript variable can be set in either
+
+the host HTML page
+
+
+[source, xml]
+----
+<script type="text/javascript">
+  erraiJaxRsApplicationRoot = "/MyJaxRsEndpointPath";
+</script>
+----
+
+or by using a JSNI method:
+
+
+[source, java]
+----
+private native void setMyJaxRsAppRoot(String path) /*-{
+  $wnd.erraiJaxRsApplicationRoot = path;
+}-*/;
+----
+
+or by simply invoking:
+
+
+[source, java]
+----
+RestClient.setApplicationRoot("/MyJaxRsEndpointPath");
+----
+
+The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.
+
+[[sid-19398997_ErraiJAX-RS-EnablingJacksonmarshalling]]
+
+===== Enabling Jackson marshalling
+
+The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The [code]+errai-jaxrs-provider.jar+ does not have to be deployed on the server in this case!
+
+
+[source, xml]
+----
+<script type="text/javascript">
+  erraiJaxRsJacksonMarshallingActive = true;
+</script>
+----
+
+or by using a JSNI method:
+
+
+[source, java]
+----
+private native void setJacksonMarshallingActive(boolean active) /*-{
+  $wnd.erraiJaxRsJacksonMarshallingActive = active;
+}-*/;
+----
+
+or by simply invoking:
+
+
+[source, java]
+----
+RestClient.setJacksonMarshallingActive(true);
+----
+
+=== Errai JPA
+
+[[sid-54493688_ErraiJPA-Compiletimedependency]]
+
+==== Compile-time dependency
+
+To use Errai JPA, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
+
+
+[source, xml]
+----
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jpa-client</artifactId>
+      <version>${errai.version}</version>
+    </dependency>
+----
+
+If you are not using Maven for dependency management, add [code]+errai-jpa-client-version.jar+ , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.
+
+[[sid-54493688_ErraiJPA-GWTModuleDescriptor]]
+
+==== GWT Module Descriptor
+
+Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
+
+
+[source, xml]
+----
+   <inherits name="org.jboss.errai.jpa.JPA"/>
+----
+
+[[sid-54493688_ErraiJPA-METAINF%2Fpersistence.xml]]
+
+=== Errai JPA Data Sync
+
+[[sid-71467090_ErraiJPADataSync-Dependencies]]
+
+==== Dependencies
+
+First, ensure your [code]+pom.xml+ includes a dependency on the Data Sync module. This module must be packaged in your application's WAR file, so include it with the default scope (compile):
+
+
+[source, xml]
+----
+  <dependency>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-jpa-datasync</artifactId>
+    <version>${errai.version}</version>
+  </dependency>
+----
+
+==== GWT Module Descriptor
+
+Then, ensure your project's [code]+gwt.xml+ module descriptor includes a dependency on the Data Sync GWT module:
+
+
+[source, xml]
+----
+  <inherits name="org.jboss.errai.jpa.sync.DataSync"/>
+----
+
+=== Errai Data Binding
+
+[[sid-51282340_DataBinding-Compiletimedependency]]
+
+==== Compile-time dependency
+
+To use Errai's data binding module, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:
+
+
+[source, xml]
+----
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-data-binding</artifactId>
+      <version>${errai.version}</version>
+    </dependency>
+----
+
+If you are not using Maven for dependency management, add [code]+errai-data-binding-+[code]+version+[code]+.jar+ to your classpath.
+
+[[sid-51282340_DataBinding-GWTmoduledescriptor]]
+
+==== GWT module descriptor
+
+You must also inherit the Errai data binding module by adding the following line to your GWT module descriptor (gwt.xml).
+
+.App.gwt.xml
+====
+
+
+[source, xml]
+----
+<inherits name="org.jboss.errai.databinding.DataBinding" />
+----
+
+====
+
+=== Errai UI
+
+[[sid-51806600_ErraiUI-pom.xml]]
+
+==== Dependencies
+
+The easiest way to get Errai UI on your classpath is to depend on the special [code]+errai-javaee-all+ artifact, which brings in most Errai modules:
+
+
+[source, xml]
+----
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-javaee-all</artifactId>
+  <version>${errai.version}</version>
+</dependency>
+----
+
+Or if you prefer to manage your project's dependency in a finer-grained way, you can depend on [code]+errai-ui+ directly:
+
+
+[source, xml]
+----
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-ui</artifactId>
+  <version>${errai.version}</version>
+</dependency>
+----
+
+
+[[sid-51806600_ErraiUI-App.gwt.xml]]
+
+==== GWT Module
+
+
+[source, xml]
+----
+<inherits name="org.jboss.errai.ui.UI" />
+----
 
 === Errai Project Dependencies
 
@@ -7408,327 +7845,6 @@ For those not using maven, here is the dependency tree of Errai project jars.
 ** junit:junit:jar:4.10:provided
 *** org.hamcrest:hamcrest-core:jar:1.1:provided
 
-
-[[sid-5931354]]
-
-=== ErraiApp.properties
-
-ErraiApp.properties acts both as a marker file for JARs that contain Errai-enabled GWT modules, and as a place to put configuration settings for those modules in the rare case that non-default configuration is necessary.
-
-[[sid-5931354_ErraiApp.properties-AsaMarkerFile]]
-
-==== As a Marker File
-
-_An_ [code]++ErraiApp.properties++_file must appear at the root of each classpath location that contains an Errai module._ The contents of JAR and directory classpath entries that do not contain an [code]+ErraiApp.properties+ are effectively invisible to Errai's classpath scanner.
-
-[[sid-5931354_ErraiApp.properties-AsaConfigurationFile]]
-
-==== As a Configuration File
-
-ErraiApp.properties is usually left empty, but it can contain configuration settings for both the core of Errai and any of its extensions. Configuration properties defined and used by Errai components have keys that start with " [code]+errai.+ ". Third party extensions should each choose their own prefix for keys in ErraiApp.properties.
-
-[[sid-5931354_ErraiApp.properties-ConfigurationMerging]]
-
-===== Configuration Merging
-
-In a non-trivial application, there will be several instances of ErraiApp.properties on the classpath (one per JAR file that contains Errai modules, beans, or portable classes).
-
-Before using the configuration information from ErraiApp.properties, Errai reads the contents of every ErraiApp.properties on the classpath. The configuration information in all these files is merged together to form one set of key=value pairs.
-
-If the same key appears in more than one ErraiApp.properties file, only one of the values will be associated with that key. The other values will be ignored. In future versions of Errai, this condition may be made into an error. It's best to avoid specifying the same configuration key in multiple ErraiApp.properties files.
-
-[[sid-5931354_ErraiApp.properties-ErraiMarshallingConfiguration]]
-
-===== Errai Marshalling Configuration
-
-* _$$errai.marshalling.use_static_marshallers$$_ when set to [code]+false+ , Errai will not use the precompiled server-side marshallers even if the generated [code]+ServerMarshallingFactoryImpl+ class is found on the classpath. This is useful when using Dev Mode in conjunction with an external server such as JBoss AS 7 or EAP 6.
-* _$$errai.marshalling.force_static_marshallers$$_ when set to [code]+true+ , Errai will not use dynamic marshallers. If the generated [code]+ServerMarshallingFactoryImpl+ cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.
-
-
-Errai also supports configuring portable types in [code]+ErraiApp.properties+ as an alternative to the [code]+@Portable+ annotation. See <<sid-5931328_Marshalling-ManualMapping,the Errai Marshalling section on Manual Mapping>> for details.
-
-[[sid-5931354_ErraiApp.properties-ErraiIoCConfiguration]]
-
-===== Errai IoC Configuration
-
-* _errai.ioc.QualifyingMetaDataFactory_ specifies the fully-qualified class name of the QualifyingMetadataFactory implementation to use with Errai IoC.
-
-* _errai.ioc.enabled.alternatives_ specifies a whitespace-separated list of fully-qualified class names for _alternative beans_ . See <<sid-22872133, Alternatives and Mocks>> for details.
-
-* _errai.ioc.blacklist_ specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).
-
-* _errai.ioc.whitelist_ when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).
-
-[[sid-5931338]]
-
-=== Messaging (Errai Bus) Configuration
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-Disablingremotecommunication]]
-
-==== Disabling remote communication
-
-In some cases it might be desirable to prevent the client bus from communicating with the server. One use case for this is when all communication with the server is handled using JAX-RS and the constant long polling requests for message exchange are not needed.
-
-To turn off remote communication in the client bus the following JavaScript variable can be set in the HTML host page:
-
-
-[source, xml]
-----
-<script type="text/javascript">
-  erraiBusRemoteCommunicationEnabled = false;
-</script>
-----
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-Configuringanalternativeremoteremotebusendpoint]]
-
-==== Configuring an alternative remote remote bus endpoint
-
-By default the remote bus is expected at the GWT web application's context path. In case the remote bus is part of a different web application or deployed on a different server, the following configuration can be used in the HTML host page to configure the remote bus endpoint used on the client.
-
-[source, xml]
-----
-<script type="text/javascript">
-  erraiBusApplicationRoot = "/MyRemoteMessageBusEnpoint";
-</script>
-----
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-ErraiService.properties]]
-
-==== ErraiService.properties
-
-The ErraiService.properties file contains basic configuration for the bus itself. Unlike ErraiApp.properties, there should be at most one ErraiService.properties file on the classpath of a deployed application. If you do not need to set any properties to their non-default values, this file can be omitted from the deployment entirely.
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-MessageDispatching]]
-
-===== Message Dispatching
-
-Dispatchers encapsulate the strategy for taking messages that need to be delivered somewhere and seeing that they are delivered to where they need to go. There are two primary implementations that are provided with Errai, depending on your needs.
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-SimpleDispatcher]]
-
-SimpleDispatcher:
-
-SimpleDispatcher is basic implementation that provides no asychronous delivery mechanism. Rather, when you configure the Errai to use this implementation, messages are delivered to their endpoints synchronously. The incoming HTTP thread will be held open until the messages are delivered.
-
-While this sounds like it has almost no advantages, especially in terms of scalablity. Using the SimpleDispatcher can be far preferable when you're developing your application, as any errors and stack traces will be far more easily traced and some cloud services may not permit the use of threads in any case.
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-AsyncDispatcher]]
-
-AsyncDispatcher:
-
-The AsyncDispatcher provides full asynchronous delivery of messages. When this dispatcher is used, HTTP threads will have control immediately returned upon dispatch of the message. This dispatcher provides far more efficient use of resources in high-load applications, and will significantly decrease memory and thread usage overall.
-
-* _errai.dispatcher.implementation_ specifies the dispatcher implementation to be used by the bus. There are two implementations which come with Errai out of the box: the [code]+SimpleDispatcher+ and the [code]+AsyncDispatcher+ . See ERRAI:Dispatcher Implementations for more information about the differences between the two.
-
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-Threading]]
-
-===== Threading
-
-* _$$errai.async_thread_pool_size$$_ specifies the total number of worker threads in the worker pool for handling and delivering messages. Adjusting this value does not have any effect if you are using the SimpleDispatcher.
-
-
-* _$$errai.async.worker_timeout$$_ specifies the total amount of time (in seconds) that a service is given to finish processing an incoming message before the pool interrupts the thread and returns an error. Adjusting this value has no effect if you are using the SimpleDispatcher.
-
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-Buffering]]
-
-===== Buffering
-
-* _$$errai.bus.buffer_size$$_ The total size of the transmission buffer, in megabytes. If this attribute is specified along with [code]+errai.bus.buffer_segment_count+ , then the segment count is inferred by the calculation [code]+buffer_segment_count / buffer_size}. If {{errai.bus.buffer_segment_count+ is also defined, it will be ignored in the presence of this property. Default value: 32.
-
-
-* _$$errai.bus.buffer_segment_size$$_ The transmission buffer segment size in bytes. This is the minimum amount of memory each message will consume while stored within the buffer. Defualt value: 8.
-
-
-* _$$errai.bus.buffer_segment_count$$_ The number of segments in absolute terms. If this attribute is specified in the absence of [code]+errai.bus.buffer_size+ , the buffer size is inferred by the calculation [code]+buffer_segment_size / buffer_segment_count+ .
-
-
-* _$$errai.bus.buffer_allocation_mode$$_ Buffer allocation mode. Allowed values are [code]+direct+ and [code]+heap+ . Direct allocation puts buffer memory outside of the JVM heap, while heap allocation uses buffer memory inside the Java heap. For most situations, heap allocation is preferable. However, if the application is data intensive and requires a substantially large buffer, it is preferable to use a direct buffer. From a throughput perspective, current JVM implementations pay about a 20% performance penalty for direct-allocated memory access. However, your application may show better scaling characteristics with direct buffers. Benchmarking under real load conditions is the only way to know the optimal setting for your use case and expected load. Default value: [code]+direct+ .
-
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-Security]]
-
-===== Security
-
-* _$$errai.authentication_adapter$$_ specifies the authentication modelAdapter the bus should use for determining whether calls should be serviced based on authentication and security principals.
-
-
-* _$$errai.require_authentication_for_all$$_ indicates whether or not the bus should always require the use of authentication for all requests inbound for the bus. If this is turned on, an authentication model adapter must be defined, and any user must be authenticated before the bus will deliver any messages from the client to any service.
-
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-Clustering]]
-
-===== Clustering
-
-* _$$errai.bus.enable_clustering$$_ A boolean indicating whether or not Errai's server side bus should attempt to orchestrate with its peers. The orchestration mechanism is dependent on the configured clustering provider (e.g. UDP based multicast discovery in case of the default JGroups provider). The default value is [code]+false+ .
-
-
-* _$$errai.bus.clustering_provider$$_ The fully qualified class name of the clustering provider implementation. A class that implements [code]+org.jboss.errai.bus.server.cluster.ClusteringProvider+ . Currently the only build-in provider is the [code]+org.jboss.errai.bus.server.cluster.jgroups.JGroupsClusteringProvider+ .
-
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-StartupConfiguration]]
-
-===== Startup Configuration
-
-* _$$errai.auto_discover_services$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. _This property must be set to true if and only if Errai CDI is not on the classpath_ . The default value is [code]+false+ .
-
-* _$$errai.auto_load_extensions$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for extensions. The default value is [code]+true+ .
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-ExampleConfiguration]]
-
-===== Example Configuration
-
-[source, ini]
-----
-##
-## Request dispatcher implementation (default is SimpleDispatcher)
-##
-#errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
-errai.dispatcher_implementation=org.jboss.errai.bus.server.AsyncDispatcher
-
-#
-## Worker pool size. This is the number of threads the asynchronous worker pool should provide for
-processing
-## incoming messages. This option is only valid when using the AsyncDispatcher implementation.
-##
-errai.async.thread_pool_size=5
-
-##
-## Worker timeout (in seconds). This defines the time that a single asychronous process may run,
-before the worker pool
-## terminates it and reclaims the thread. This option is only valid when using the AsyncDispatcher
-implementation.
-##
-errai.async.worker.timeout=5
-
-##
-## Specify the Authentication/Authorization Adapter to use
-##
-#errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
-#errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
-
-##
-## This property indicates whether or not authentication is required for all communication with the
-bus. Set this
-## to 'true' if all access to your application should be secure.
-##
-#errai.require_authentication_for_all=true
-----
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-ServletConfiguration]]
-
-==== Servlet Configuration
-
-Errai has several different implementations for HTTP traffic to and from the bus. We provide a universally-compatible blocking implementation that provides fully synchronous communication to/from the server-side bus. Where this introduces scalability problems, we have implemented many webserver-specific implementations that take advantage of the various proprietary APIs to provide true asynchrony.
-
-These included implementations are packaged at: [code]+org.jboss.errai.bus.server.servlet+ .
-
-[IMPORTANT]
-.One is Enough!
-====
-You should use just one of the options below. Configuring multiple ErraiServlet implementations in the same application will lead to unpredictable behaviour!
-
-Remember that all Errai demos and archetypes are preconfigured with DefaultBlockingServlet as a servlet. You will need to remove this default setup if you choose to use a different ErraiServlet implementation in your app.
-====
-
-[NOTE]
-.Rolling your own security? Beware!
-====
-All of the following examples use a wildcard mapping for [code]+\*.erraiBus+ with no path prefix. This allows Errai Bus to communicate from any point in your application's URI hierarchy, which allows bus communication to work properly no matter where you choose to put your GWT host page.
-
-For example, all of the following are equivalent from Errai's point of view:
-
-* /in.erraiBus
-* /foo/bar/in.erraiBus
-* /long/path/to/get/to.erraiBus
-
-If you rely on your own security rules or a custom security filter to control access to Errai Bus (rather than the security framework within Errai Bus,) ensure you use the same mapping pattern for that [code]+filter-mapping+ or [code]+security-constraint+ as you do for the Errai Servlet itself.
-====
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-DefaultBlockingServlet]]
-
-===== DefaultBlockingServlet
-
-This ErraiServlet implementation should work in virtually any servlet container that supports Java Servlets 2.0 or higher. It provides purely synchronous request handling. The one scenario where this servlet will not work is in servers that put restrictions on putting threads into sleep states.
-
-The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
-
-As its name suggests, DefaultBlockingServlet is normally configured as an HTTP Servlet in the [code]+web.xml+ file:
-
-[source, xml]
-----
-<servlet>
-  <servlet-name>ErraiServlet</servlet-name>
-  <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
-  <load-on-startup>1</load-on-startup>
-</servlet>
-                                                                                                     
-<servlet-mapping>
-  <servlet-name>ErraiServlet</servlet-name>
-  <url-pattern>*.erraiBus</url-pattern>
-</servlet-mapping>
-----
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-DefaultBlockingServletconfiguredasFilter]]
-
-===== DefaultBlockingServlet configured as Filter
-
-Alternatively, the DefaultBlockingServlet can be deployed as a Servlet Filter. This may be necessary in cases where an existing filter is configured in the web application, and that filter interferes with the Errai Bus requests. In this case, configuring DefaultBlockingServlet to handle [code]+\*.erraiBus+ requests ahead of other filters in web.xml will solve the problem:
-
-[source, xml]
-----
-<filter>
-  <filter-name>ErraiServlet</filter-name>
-  <filter-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</filter-class>
-</filter>
-
-<filter-mapping>
-  <filter-name>ErraiServlet</filter-name>
-  <url-pattern>*.erraiBus</url-pattern>
-</filter-mapping>
-----
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-JettyContinuationsServlet]]
-
-===== JettyContinuationsServlet
-
-The Jetty implementation leverages Jetty's continuations support, which allows for threadless pausing of port connections. This servlet implementation should work without any special configuration of Jetty.
-
-[source, xml]
-----
-<servlet>
-  <servlet-name>ErraiServlet</servlet-name>
-  <servlet-class>org.jboss.errai.bus.server.servlet.JettyContinuationsServlet</servlet-class>
-  <load-on-startup>1</load-on-startup>
-</servlet>
-                                                                                                     
-<servlet-mapping>
-  <servlet-name>ErraiServlet</servlet-name>
-  <url-pattern>*.erraiBus</url-pattern>
-</servlet-mapping>
-----
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-StandardAsyncServlet]]
-
-===== StandardAsyncServlet
-
-This implementation leverages asynchronous support in Servlet 3.0 to allow for threadless pausing of port connections. Note that [code]+<async-supported>true</async-supported>+ has to be added to the servlet definition in [code]+web.xml+ .
-
-[source, xml]
-----
-<servlet>
-  <servlet-name>ErraiServlet</servlet-name>
-  <servlet-class>org.jboss.errai.bus.server.servlet.StandardAsyncServlet</servlet-class>
-  <load-on-startup>1</load-on-startup>
-  <async-supported>true</async-supported>
-</servlet>
-                                                                                                     
-<servlet-mapping>
-  <servlet-name>ErraiServlet</servlet-name>
-  <url-pattern>*.erraiBus</url-pattern>
-</servlet-mapping>
-----
 
 [[sid-32473113]]
 
