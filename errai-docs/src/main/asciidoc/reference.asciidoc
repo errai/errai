@@ -5945,42 +5945,17 @@ Starting in version 2.1, Errai offers a system for creating applications that ha
 
 === Getting Started
 
-[[sid-54493676_ErraiUINavigation-Compiletimedependency]]
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Navigation_ to follow along with this section.
+====
 
-==== Compile-time dependency
-
-To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add these dependencies:
-
-
-[source, xml]
-----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-navigation</artifactId>
-      <version>${errai.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-cdi-client</artifactId>
-      <version>${errai.version}</version>
-      <scope>provided</scope>
-    </dependency>
-----
-
-If you are not using Maven for dependency management, add [code]+errai-navigation-+[code]+version+[code]+.jar+ to the compile-time classpath of a project that's already set up for Errai UI templating.
-
-[[sid-54493676_ErraiUINavigation-GWTModuleDescriptor]]
-
-==== GWT Module Descriptor
-
-Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
-
-
-[source, xml]
-----
-   <inherits name="org.jboss.errai.ui.nav.Navigation"/>
-----
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai Navigation to your project.
+====
 
 [[sid-54493676_ErraiUINavigation-HowitWorks]]
 
@@ -6324,7 +6299,7 @@ One popular open source tool that can display GraphViz/DOT files is link:$$http:
 
 When rendered, a navigation graph looks like this:
 
-.TODO InformalFigure image title empty
+.Navigation Graph
 image::author/download/attachments/54493676/example_errai_nav_graph.png[]
 
 
@@ -6336,20 +6311,17 @@ In the rendered graph, the pages are nodes (text surrounded by an ellipse). The 
 
 Starting with version 2.4.0, Errai now supports mobile development. One of the modules that makes this feasible is the Cordova module. It offers a way to integrate with native hardware in an Errai way.
 
-[[sid-65274252_ErraiCordova%28MobileSupport%29-Getstarted]]
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Cordova_ to follow along with this section.
+====
 
-=== Get started
-
-Add the following to your application's .gwt.xml module file:
-
-[[sid-65274252_ErraiCordova%28MobileSupport%29-App.gwt.xml]]
-
-==== App.gwt.xml
-
-[source, xml]
-----
-<inherits name="org.jboss.errai.ui.Cordova"/>
-----
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai Cordova to your project.
+====
 
 [[sid-65274252_ErraiCordova%28MobileSupport%29-Integratewithnativehardware]]
 
@@ -6432,70 +6404,6 @@ Example of how to use these events:
     //mission accomplished. we can stop the infinite loop now.
   }
 ----
-
-[[sid-65274252_ErraiCordova%28MobileSupport%29-Mavenbuild]]
-
-=== Maven build
-
-All that is left to do is build this and put it on a actual device. In order to make this as easy as possible we have a maven plugin that will create a native binary that you can install on a device. It will put the html and javascript of you application in a link:$$http://cordova.apache.org/$$[cordova] application, because by doing so the client is no longer servered by the server the client will need to know how it can reach the server to do that place the following in your gwt.xml:
-
-
-[source, xml]
-----
-<replace-with class="com.company.application.Config">
-   <when-type-is class="org.jboss.errai.bus.client.framework.Configuration" />
-</replace-with>
-----
-
-This class must implement org.jboss.errai.bus.client.framework.Configuration and return the url where the server is configured.
-
-
-[source, java]
-----
-import org.jboss.errai.bus.client.framework.Configuration;
-
-public class Config implements Configuration {
-    @Override
-    public String getRemoteLocation() {
-        // you probably want to do something environment specify here instead of something like this:
-        return "https://grocery-edewit.rhcloud.com/errai-jpa-demo-grocery-list";
-    }
-}
-----
-
-Now all that is left is to add the plugin to the pom.xml like so:
-
-
-[source, xml]
-----
-<build>
- ...
-    <plugins>
-      <plugin>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>cordova-maven-plugin</artifactId>
-        <version>${errai.version}</version>
-      </plugin>
-----
-
-Now you can execute a native build with the following maven command:
-
-[source, ini]
-----
-#will build all supported platforms for now only ios and android
-mvn cordova:build-project
-
-#only build android
-mvn cordova:build-project -Dplatform=android
-
-#start the ios emulator with the deployed application
-mvn cordova:emulator -Dplatform=ios
-----
-
-[IMPORTANT]
-====
-For these to work you'll need to have the SDK's installed and on your path! In case of android you will additionally have to have ANDROID_HOME environment variable set.
-====
 
 [[sid-65274252_ErraiCordova%28MobileSupport%29-AeroGearWrappers]]
 
@@ -7358,7 +7266,7 @@ You must also inherit the Errai data binding module by adding the following line
 
 [[sid-51806600_ErraiUI-pom.xml]]
 
-==== Dependencies
+==== Compile-time dependency
 
 The easiest way to get Errai UI on your classpath is to depend on the special [code]+errai-javaee-all+ artifact, which brings in most Errai modules:
 
@@ -7387,13 +7295,138 @@ Or if you prefer to manage your project's dependency in a finer-grained way, you
 
 [[sid-51806600_ErraiUI-App.gwt.xml]]
 
-==== GWT Module
-
+==== GWT Module Descriptor
 
 [source, xml]
 ----
 <inherits name="org.jboss.errai.ui.UI" />
 ----
+=== Errai UI Navigation
+
+[[sid-54493676_ErraiUINavigation-Compiletimedependency]]
+
+==== Compile-time dependency
+
+To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add these dependencies:
+
+
+[source, xml]
+----
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-navigation</artifactId>
+      <version>${errai.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-cdi-client</artifactId>
+      <version>${errai.version}</version>
+      <scope>provided</scope>
+    </dependency>
+----
+
+If you are not using Maven for dependency management, add [code]+errai-navigation-+[code]+version+[code]+.jar+ to the compile-time classpath of a project that's already set up for Errai UI templating.
+
+[[sid-54493676_ErraiUINavigation-GWTModuleDescriptor]]
+
+==== GWT Module Descriptor
+
+Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+\*.gwt.xml+ file:
+
+
+[source, xml]
+----
+   <inherits name="org.jboss.errai.ui.nav.Navigation"/>
+----
+
+=== Errai Cordova (Mobile Support)
+
+[[sid-65274252_ErraiCordova%28MobileSupport%29-Mavenbuild]]
+
+==== Maven Dependencies
+
+Using Errai Cordova requires the following compile-time dependency:
+
+[source, xml]
+----
+  <dependency>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-cordova</artifactId>
+    <version>${errai.verison}</version>
+  </dependency>
+----
+
+Errai Cordova allows you build an Errai app to natively run on a device. In order to make this as easy as possible we have a maven plugin that will create a native binary that you can install on a device. It will put the html and javascript of you application in a link:$$http://cordova.apache.org/$$[cordova] application.
+
+[source, xml]
+----
+<build>
+ ...
+    <plugins>
+      <plugin>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>cordova-maven-plugin</artifactId>
+        <version>${errai.version}</version>
+      </plugin>
+----
+
+[[sid-65274252_ErraiCordova%28MobileSupport%29-App.gwt.xml]]
+
+==== App.gwt.xml
+
+Add the following to your application's .gwt.xml module file:
+
+[source, xml]
+----
+<inherits name="org.jboss.errai.ui.Cordova"/>
+----
+
+Because the client is no longer served by the server the client will need to know how it can reach the server to do that place the following in your gwt.xml:
+
+[source, xml]
+----
+<replace-with class="com.company.application.Config">
+   <when-type-is class="org.jboss.errai.bus.client.framework.Configuration" />
+</replace-with>
+----
+
+This class must implement org.jboss.errai.bus.client.framework.Configuration and return the url where the server is configured.
+
+[source, java]
+----
+import org.jboss.errai.bus.client.framework.Configuration;
+
+public class Config implements Configuration {
+    @Override
+    public String getRemoteLocation() {
+        // you probably want to do something environment specify here instead of something like this:
+        return "https://grocery-edewit.rhcloud.com/errai-jpa-demo-grocery-list";
+    }
+}
+----
+
+==== Building with Errai Cordova
+
+Now you can execute a native build with the following maven command:
+
+[source, ini]
+----
+#will build all supported platforms for now only ios and android
+mvn cordova:build-project
+
+#only build android
+mvn cordova:build-project -Dplatform=android
+
+#start the ios emulator with the deployed application
+mvn cordova:emulator -Dplatform=ios
+----
+
+[IMPORTANT]
+====
+For these to work you'll need to have the SDK's installed and on your path! In case of android you will additionally have to have ANDROID_HOME environment variable set.
+====
+
 
 === Errai Project Dependencies
 
