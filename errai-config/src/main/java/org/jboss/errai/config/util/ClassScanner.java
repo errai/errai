@@ -236,11 +236,13 @@ public final class ClassScanner {
 
     final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    for (final MetaClass mc : getAllReloadableCachedClasses(genCtx)) {
-      if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
-              && !root.getFullyQualifiedName().equals(mc.getFullyQualifiedName())
-              && root.isAssignableFrom(mc)) {
-        result.add(mc.getErased());
+    if(!Boolean.getBoolean("org.jboss.errai.skip.reloadable.subtypes")) {
+      for (final MetaClass mc : getAllReloadableCachedClasses(genCtx)) {
+        if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
+                && !root.getFullyQualifiedName().equals(mc.getFullyQualifiedName())
+                && root.isAssignableFrom(mc)) {
+          result.add(mc.getErased());
+        }
       }
     }
 
