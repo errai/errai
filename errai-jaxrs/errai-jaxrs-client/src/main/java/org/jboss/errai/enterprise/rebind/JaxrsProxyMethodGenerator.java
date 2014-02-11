@@ -20,6 +20,7 @@ import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -47,12 +48,16 @@ import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.framework.CallContextStatus;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.rebind.TypeMarshaller.PrimitiveTypeMarshaller;
 
+import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
@@ -66,14 +71,18 @@ import com.google.gwt.user.client.Cookies;
 public class JaxrsProxyMethodGenerator {
   private static final String APPEND = "append";
 
+  private final GeneratorContext context;
   private final MetaClass declaringClass;
   private final JaxrsResourceMethod resourceMethod;
   private final BlockBuilder<?> methodBlock;
   private final List<Statement> parameters;
 
-  public JaxrsProxyMethodGenerator(final ClassStructureBuilder<?> classBuilder, final JaxrsResourceMethod resourceMethod) {
+  public JaxrsProxyMethodGenerator(final ClassStructureBuilder<?> classBuilder,
+          final JaxrsResourceMethod resourceMethod,
+          final GeneratorContext context) {
     this.declaringClass = classBuilder.getClassDefinition();
     this.resourceMethod = resourceMethod;
+    this.context = context;
 
     Parameter[] parms = DefParameters.from(resourceMethod.getMethod()).getParameters().toArray(new Parameter[0]);
     Parameter[] finalParms = new Parameter[parms.length];
@@ -93,15 +102,57 @@ public class JaxrsProxyMethodGenerator {
       methodBlock.append(generateRequestBuilder());
       methodBlock.append(generateHeaders(jaxrsParams));
 
-      if (resourceMethod.getMethod().isAnnotationPresent(InterceptedCall.class) ||
-          resourceMethod.getMethod().getDeclaringClass().isAnnotationPresent(InterceptedCall.class)) {
-        methodBlock.append(generateInterceptorLogic());
+      List<Class<?>> interceptors = new ArrayList<Class<?>>();
+      InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
+      if (interceptedCall == null) {
+        interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
+      }
+      if (interceptedCall == null) {
+        Collection<MetaClass> interceptorClasses = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class, 
+                RebindUtils.findTranslatablePackages(context), context);
+        for (MetaClass interceptorClass : interceptorClasses) {
+          InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
+          if (interceptsDeclaringClass(interceptor)) {
+            interceptors.add(interceptorClass.asClass());
+          }
+        }
+      } else {
+        for (Class<?> clazz : interceptedCall.value()) {
+          interceptors.add(clazz);
+        }
+      }
+
+      if (interceptors.size() > 0) {
+        methodBlock.append(generateInterceptorLogic(interceptors));
       }
       else {
         methodBlock.append(generateRequest());
       }
     }
     generateReturnStatement();
+  }
+
+  /**
+   * Returns true if the given interceptor is configured to intercept the
+   * remote interface currenty being generated.
+   * @param interceptor
+   */
+  private boolean interceptsDeclaringClass(InterceptsRemoteCall interceptor) {
+    Class<?>[] intercepts = interceptor.value();
+    for (Class<?> iclass : intercepts) {
+      if (declaringClass.asClass().equals(iclass)) {
+        return true;
+      }
+      MetaClass[] dinterfaces = declaringClass.getInterfaces();
+      if (dinterfaces != null) {
+        for (MetaClass dinterface : dinterfaces) {
+          if (dinterface.asClass().equals(iclass)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   /**
@@ -293,21 +344,15 @@ public class JaxrsProxyMethodGenerator {
 
   /**
    * Generates the logic required to make this proxy method interceptable.
-   * 
+   * @param interceptors 
    * @return statement representing the interceptor logic.
    */
-  private Statement generateInterceptorLogic() {
+  private Statement generateInterceptorLogic(List<Class<?>> interceptors) {
     JaxrsResourceMethodParameters jaxrsParams =
         JaxrsResourceMethodParameters.fromMethod(resourceMethod.getMethod(), "parameters");
-
-    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
-    if (interceptedCall == null) {
-      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
-    }
-
     Statement callContext =
         ProxyUtil.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
-            resourceMethod.getMethod(), generateInterceptedRequest(), interceptedCall)
+            resourceMethod.getMethod(), generateInterceptedRequest(), interceptors)
             .publicOverridesMethod("proceed", Parameter.of(ResponseCallback.class, "interceptorCallback", true))
               .append(Stmt.declareVariable(RemoteCallback.class).asFinal().named("providedCallback").initializeWith(
                   Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback")))
@@ -338,7 +383,7 @@ public class JaxrsProxyMethodGenerator {
     return Stmt.try_()
             .append(
                 Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
-                    Stmt.newObject(CallContextStatus.class).withParameters((Object[]) interceptedCall.value())))
+                    Stmt.newObject(CallContextStatus.class).withParameters(interceptors.toArray())))
             .append(
                 Stmt.declareVariable(RestCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))

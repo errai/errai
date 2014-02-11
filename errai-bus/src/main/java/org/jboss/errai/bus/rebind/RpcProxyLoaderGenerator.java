@@ -76,7 +76,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     for (final MetaClass remote : typesAnnotatedWith) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
-        final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
+        final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote, context).generate();
         loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         // create the proxy provider

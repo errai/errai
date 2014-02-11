@@ -26,7 +26,7 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.BindableListChangeHandler;
 import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdpater;
+import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdapter;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -246,7 +246,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   }
 
   /**
-   * A callback invoked by the {@link AsyncBeanManager} or {@link SyncToAsyncBeanManagerAdpater}
+   * A callback invoked by the {@link AsyncBeanManager} or {@link SyncToAsyncBeanManagerAdapter}
    * when the widget instance was created. It will associate the corresponding model instance with
    * the widget and add the widget to the panel.
    */

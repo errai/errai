@@ -17,11 +17,13 @@
 package org.jboss.errai.bus.rebind;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
+import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -38,8 +40,13 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.CallContextStatus;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.util.ClassScanner;
+
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Generates an Errai RPC remote proxy.
@@ -48,9 +55,11 @@ import org.jboss.errai.common.client.framework.CallContextStatus;
  */
 public class RpcProxyGenerator {
   private final MetaClass remote;
+  private final GeneratorContext context;
 
-  public RpcProxyGenerator(MetaClass remote) {
+  public RpcProxyGenerator(MetaClass remote, GeneratorContext context) {
     this.remote = remote;
+    this.context = context;
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -71,8 +80,27 @@ public class RpcProxyGenerator {
   }
 
   private void generateMethod(ClassStructureBuilder<?> classBuilder, MetaMethod method) {
-    boolean intercepted =
-        method.isAnnotationPresent(InterceptedCall.class) || remote.isAnnotationPresent(InterceptedCall.class);
+    List<Class<?>> interceptors = new ArrayList<Class<?>>();
+    InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
+    if (interceptedCall == null) {
+      interceptedCall = remote.getAnnotation(InterceptedCall.class);
+    }
+    if (interceptedCall == null) {
+      Collection<MetaClass> interceptorClasses = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class, 
+              RebindUtils.findTranslatablePackages(context), context);
+      for (MetaClass interceptorClass : interceptorClasses) {
+        InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
+        if (interceptsRemote(interceptor)) {
+          interceptors.add(interceptorClass.asClass());
+        }
+      }
+    } else {
+      for (Class<?> clazz : interceptedCall.value()) {
+        interceptors.add(clazz);
+      }
+    }
+
+    boolean intercepted = interceptors.size() > 0;
 
     Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
     Parameter[] finalParms = new Parameter[parms.length];
@@ -91,7 +119,7 @@ public class RpcProxyGenerator {
 
     if (intercepted) {
       methodBlock.append(generateInterceptorLogic(classBuilder, method,
-          generateRequest(classBuilder, method, parameters, true), parmVars));
+          generateRequest(classBuilder, method, parameters, true), parmVars, interceptors));
     }
     else {
       methodBlock.append(generateRequest(classBuilder, method, parameters, false));
@@ -105,21 +133,30 @@ public class RpcProxyGenerator {
     methodBlock.finish();
   }
 
-  private Statement generateInterceptorLogic(ClassStructureBuilder<?> classBuilder,
-      MetaMethod method, Statement requestLogic, List<Statement> parmVars) {
-
-    InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
-    if (interceptedCall == null) {
-      interceptedCall = remote.getAnnotation(InterceptedCall.class);
+  /**
+   * Returns true if the given {@link InterceptsRemoteCall} is configured to intercept
+   * the {@link Remote} that we're currently generating proxy code for.
+   * @param interceptor
+   */
+  private boolean interceptsRemote(InterceptsRemoteCall interceptor) {
+    Class<?>[] intercepts = interceptor.value();
+    for (Class<?> iclass : intercepts) {
+      if (remote.asClass().equals(iclass)) {
+        return true;
+      }
     }
+    return false;
+  }
 
+  private Statement generateInterceptorLogic(ClassStructureBuilder<?> classBuilder,
+      MetaMethod method, Statement requestLogic, List<Statement> parmVars, List<Class<?>> interceptors) {
     Statement callContext = ProxyUtil.generateProxyMethodCallContext(RemoteCallContext.class,
-        classBuilder.getClassDefinition(), method, requestLogic, interceptedCall).finish();
+        classBuilder.getClassDefinition(), method, requestLogic, interceptors).finish();
 
     return Stmt.try_()
             .append(
                 Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
-                    Stmt.newObject(CallContextStatus.class).withParameters((Object[]) interceptedCall.value())))
+                    Stmt.newObject(CallContextStatus.class).withParameters(interceptors.toArray())))
             .append(
                 Stmt.declareVariable(RemoteCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))

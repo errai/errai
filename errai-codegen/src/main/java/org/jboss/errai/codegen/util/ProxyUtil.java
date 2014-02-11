@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Parameter;
@@ -27,13 +28,13 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 
 import com.google.common.reflect.TypeToken;
@@ -59,15 +60,14 @@ public abstract class ProxyUtil {
    * @param proceed
    *          the logic that should be invoked if
    *          {@link org.jboss.errai.common.client.api.interceptor.CallContext#proceed()} is called.
-   * @param interceptedCall
-   *          a reference to the {@link org.jboss.errai.common.client.api.interceptor.InterceptedCall} annotation on the
-   *          remote interface or method
+   * @param interceptors
+   *          a list of interceptors to use
    * @return statement representing an anonymous implementation of the provided
    *         {@link org.jboss.errai.common.client.api.interceptor.CallContext}
    */
   public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
         final Class<? extends RemoteCallContext> callContextType,
-        final MetaClass proxyClass, final MetaMethod method, final Statement proceed, final InterceptedCall interceptedCall) {
+        final MetaClass proxyClass, final MetaMethod method, final Statement proceed, final List<Class<?>> interceptors) {
 
     return Stmt.newObject(callContextType).extend()
               .publicOverridesMethod("getMethodName")
@@ -77,7 +77,7 @@ public abstract class ProxyUtil {
               .append(Stmt.load(method.getAnnotations()).returnValue())
               .finish()
               .publicOverridesMethod("proceed")
-              .append(generateInterceptorStackProceedMethod(proceed, interceptedCall))
+              .append(generateInterceptorStackProceedMethod(proceed, interceptors))
               .append(Stmt.load(null).returnValue())
               .finish()
               .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback", true))
@@ -122,18 +122,19 @@ public abstract class ProxyUtil {
               .finish();
   }
 
-  private static Statement generateInterceptorStackProceedMethod(final Statement proceed, final InterceptedCall interceptedCall) {
+  private static Statement generateInterceptorStackProceedMethod(final Statement proceed, final List<Class<?>> interceptors) {
     final BlockStatement proceedLogic = new BlockStatement();
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
     final BlockBuilder<ElseBlockBuilder> interceptorStack =
               If.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor"));
 
-    for (final Class<?> interceptor : interceptedCall.value()) {
+    for (final Class<?> interceptor : interceptors) {
       interceptorStack.append(If.cond(Bool.equals(
               Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
               .append(Stmt.loadVariable("status").invoke("setProceeding", false))
               .append(
+                      // TODO if IOC, try to get a managed instance.  If not IOC or if no managed instance is available, new up the interceptor
                   Stmt.nestedCall(Stmt.newObject(interceptor))
                       .invoke("aroundInvoke", Variable.get("this")))
               .append(
