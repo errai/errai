@@ -90,7 +90,7 @@ public class JaxrsProxyGenerator {
     for (MetaMethod method : remote.getMethods()) {
       if (ProxyUtil.shouldProxyMethod(method)) {
         JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
-        new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
+        new JaxrsProxyMethodGenerator(classBuilder, resourceMethod, context).generate();
       }
     }
     return classBuilder;

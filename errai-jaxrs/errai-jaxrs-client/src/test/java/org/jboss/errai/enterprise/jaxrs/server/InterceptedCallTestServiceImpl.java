@@ -18,14 +18,14 @@ package org.jboss.errai.enterprise.jaxrs.server;
 
 import java.util.List;
 
-import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedCallTestService;
 
 /**
- * Implementation of {@link InterceptedTestService} returning test data.
+ * Implementation of {@link InterceptedCallTestService} returning test data.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InterceptedTestServiceImpl implements InterceptedTestService {
+public class InterceptedCallTestServiceImpl implements InterceptedCallTestService {
 
   @Override
   public String interceptedGetWithEndpointBypassing() {

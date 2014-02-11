@@ -74,7 +74,7 @@ public final class IOC {
 
   public static AsyncBeanManager getAsyncBeanManager() {
     if (inst.beanManager instanceof SyncBeanManager) {
-      return new SyncToAsyncBeanManagerAdpater((SyncBeanManager) inst.beanManager);
+      return new SyncToAsyncBeanManagerAdapter((SyncBeanManager) inst.beanManager);
     }
 
     return (AsyncBeanManager) inst.beanManager;

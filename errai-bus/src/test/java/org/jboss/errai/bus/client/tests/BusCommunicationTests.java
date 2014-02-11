@@ -34,6 +34,7 @@ import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.client.tests.support.SpecificEntity;
 import org.jboss.errai.bus.client.tests.support.SubService;
 import org.jboss.errai.bus.client.tests.support.TestException;
+import org.jboss.errai.bus.client.tests.support.TestInterceptorRPCService;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -670,6 +671,38 @@ public class BusCommunicationTests extends AbstractErraiTest {
             finishTest();
           }
         }, TestRPCService.class).interceptedRpcWithParameterManipulation("value");
+      }
+    });
+  }
+
+  public void testInterceptedRpc1() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(final String response) {
+            assertEquals("Request was not intercepted", "intercepted", response);
+            finishTest();
+          }
+        }, TestInterceptorRPCService.class)
+            .interceptedRpc1();
+      }
+    });
+  }
+
+  public void testInterceptedRpc2() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(final String response) {
+            assertEquals("Request was not intercepted", "intercepted", response);
+            finishTest();
+          }
+        }, TestInterceptorRPCService.class)
+            .interceptedRpc2();
       }
     });
   }
