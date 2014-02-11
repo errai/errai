@@ -37,8 +37,8 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallResult
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Path("/test/interceptor")
-public interface InterceptedTestService {
+@Path("/test/interceptedcall")
+public interface InterceptedCallTestService {
 
   @GET 
   @Path("/0/{result}")

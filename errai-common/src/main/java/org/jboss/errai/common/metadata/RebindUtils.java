@@ -394,6 +394,10 @@ public class RebindUtils {
           "(you may be using an incompatible GWT version)");
     }
   }
+  
+  public static boolean isModuleInherited(final GeneratorContext context, String moduleName) {
+    return getInheritedModules(context).contains(moduleName);
+  }
 
   public static Set<String> getReloadablePackageNames(final GeneratorContext context) {
     Set<String> result = new HashSet<String>();

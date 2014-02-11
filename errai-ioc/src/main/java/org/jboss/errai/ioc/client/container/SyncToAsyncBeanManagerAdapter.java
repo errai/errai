@@ -32,11 +32,11 @@ import java.util.Set;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class SyncToAsyncBeanManagerAdpater implements AsyncBeanManager {
+public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
 
   private final SyncBeanManager bm;
 
-  public SyncToAsyncBeanManagerAdpater(SyncBeanManager bm) {
+  public SyncToAsyncBeanManagerAdapter(SyncBeanManager bm) {
     this.bm = bm;
   }
 
