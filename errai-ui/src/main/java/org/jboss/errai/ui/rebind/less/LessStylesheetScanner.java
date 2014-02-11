@@ -1,12 +1,12 @@
 package org.jboss.errai.ui.rebind.less;
 
+import java.util.Collection;
+
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.scanners.ResourcesScanner;
-import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
-
-import java.util.Collection;
 
 /**
  * Find all less stylesheets on the classpath.
@@ -29,7 +29,7 @@ public class LessStylesheetScanner {
       super(new ConfigurationBuilder()
               .filterInputsBy(new FilterBuilder().include(".*\\.less"))
               .setScanners(new LessResourceScanner())
-              .setUrls(ClasspathHelper.forClassLoader()));
+              .setUrls(MetaDataScanner.getConfigUrls()));
       scan();
     }
   }
