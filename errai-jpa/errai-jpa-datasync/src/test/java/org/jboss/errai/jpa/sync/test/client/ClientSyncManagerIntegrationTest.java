@@ -393,6 +393,25 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNull(dsem.find(SimpleEntity.class, originalId));
   }
 
+  
+//  public void testDeclarativeSync() {
+//    delayTestFinish(45000);
+//    // TODO replace caller in CSM
+//    
+//    final DependentScopedSyncBean syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
+//    assertNull(syncBean.getResponses());
+//    
+//    new Timer() {
+//
+//      @Override
+//      public void run() {
+//        assertNotNull(syncBean.getResponses());
+//        // TODO assert correct result
+//      }
+//      
+//    }.schedule(7000);
+//  }
+  
   /**
    * Calls ClientSyncManager.coldSync() in a way that no actual server
    * communication happens. The given "fake" server response is returned

@@ -10,9 +10,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Version;
 
 @Entity
-@NamedQueries(
-  @NamedQuery(name="allSimpleEntities", query="SELECT se FROM SimpleEntity se")
-)
+@NamedQueries({
+  @NamedQuery(name="allSimpleEntities", query="SELECT se FROM SimpleEntity se"),
+  @NamedQuery(name="simpleEntitiesByIdAndString", query="SELECT se FROM SimpleEntity se WHERE se.id = :id AND se.string = :string")
+})
 public class SimpleEntity implements Cloneable {
 
   @Id @GeneratedValue
