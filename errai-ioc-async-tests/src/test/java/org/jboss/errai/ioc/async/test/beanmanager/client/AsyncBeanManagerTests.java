@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.async.test.beanmanager.client;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.ADependent;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.AirDependentBean;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
@@ -10,9 +11,7 @@ import org.jboss.errai.ioc.async.test.beanmanager.client.res.TestInterface;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 import java.util.Collection;
 

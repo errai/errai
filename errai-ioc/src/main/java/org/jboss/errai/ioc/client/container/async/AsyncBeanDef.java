@@ -3,6 +3,8 @@ package org.jboss.errai.ioc.client.container.async;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
+
 /**
  * @author Mike Brock
  */

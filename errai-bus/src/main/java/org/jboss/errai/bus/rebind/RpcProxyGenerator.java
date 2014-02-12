@@ -150,7 +150,7 @@ public class RpcProxyGenerator {
 
   private Statement generateInterceptorLogic(ClassStructureBuilder<?> classBuilder,
       MetaMethod method, Statement requestLogic, List<Statement> parmVars, List<Class<?>> interceptors) {
-    Statement callContext = ProxyUtil.generateProxyMethodCallContext(RemoteCallContext.class,
+    Statement callContext = ProxyUtil.generateProxyMethodCallContext(context, RemoteCallContext.class,
         classBuilder.getClassDefinition(), method, requestLogic, interceptors).finish();
 
     return Stmt.try_()

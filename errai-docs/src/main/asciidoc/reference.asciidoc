@@ -3250,6 +3250,8 @@ private void onUncaughtException(Throwable t) {
 
 Client-side remote call interceptors provide the ability to manipulate or bypass the remote call before it's being sent. This is useful for implementing crosscutting concerns like caching, for example when the remote call should be avoided if the data is already cached locally.
 
+==== Annotating the Remote Interface
+
 To have a remote call intercepted, either an interface method or the remote interface type has to be annotated with [code]+@InterceptedCall+ . If the type is annotated, all interface methods will be intercepted.
 
 
@@ -3272,6 +3274,8 @@ Note that an ordered list of interceptors can be used for specifying an intercep
 public Customer retrieveCustomerById(long id);
 
 ----
+
+==== Implementing an Interceptor
 
 Implementing an interceptor is easy:
 
@@ -3296,6 +3300,31 @@ Calling [code]+proceed+ executes the next interceptor in the chain or the actual
 The result of the remote call can be manipulated by calling [code]+RemoteCallContext.setResult()+ .
 
 Not calling [code]+proceed+ in the interceptor bypasses the actual remote call, passing [code]+RestCallContext.getResult()+ to the [code]+RemoteCallBack+ provided at the call site.
+
+
+==== Annotating the Interceptor (alternative)
+
+If you cannot (or do not wish to) annotate the remote interface you may instead define remote call interceptors by annotating the interceptor class itself with [code]+@InterceptsRemoteCall+.  This annotation requires the developer to specify the remote interface that should be intercepted.  The interceptor will then be applied to all methods in that interface.  If the interface method is annotated with [code]+InterceptedCall+, that annotation will win out.
+
+[source, java]
+----
+@InterceptsRemoteCall({ MyRemoteInterface.class, MyOtherRemoteInterface.class })
+public class CustomRpcInterceptor implements RpcInterceptor {
+
+  @Override
+  public void aroundInvoke(final RemoteCallContext context) {
+    // interceptor logic goes here
+  }
+}
+----
+
+This approach sacrifices granularity (you cannot intercept individual methods on the remote interface).  However, it does allow method interception without modification to the remote interface (which is particularly useful when the developer is not in control of the remote interface).
+
+
+==== Interceptors and IOC
+
+It is worth noting that interceptors *may* be defined as managed beans using the [code]+@Dependent+, [code]+@Singleton+, or [code]+@ApplicationScoped+ annotations.  If the Errai application is using IOC (i.e. imports the IOC Errai module) *and* the interceptor is annotated as a managed bean, then the IOC container will be used to get/create the interceptor instance.  This allows developers to [code]+@Inject+ dependencies into interceptors.  If IOC is not being used, or else the interceptor is not properly annotated, then the interceptor class will simply be instantiated via *new*.
+
 
 [[sid-5931313_RemoteProcedureCalls%28RPC%29-SessionandrequestobjectsinRPCendpoints]]
 
@@ -3626,8 +3655,9 @@ Client-side remote call interceptors provide the ability to manipulate or bypass
 * avoiding the request when the data is cached locally
 * adding special HTTP headers or parameters to the request
 
+==== Annotating the JAX-RS Interface
 
-To have a JAX-RS remote call intercepted, either an interface method or the remote interface type has to be annotated with [code]+@InterceptedCall+ . If the type is annotated, all interface methods will be intercepted.
+To have a JAX-RS remote call intercepted, either an interface method or the JAX-RS implementation class method has to be annotated with [code]+@InterceptedCall+ . If the type is annotated, all interface methods will be intercepted.
 
 
 [source, java]
@@ -3652,6 +3682,8 @@ Note that an ordered list of interceptors can be used for specifying an intercep
 public Customer retrieveCustomerById(@PathParam("id") long id);
 ----
 
+==== Implementing an Interceptor
+
 Implementing an interceptor is easy:
 
 
@@ -3675,6 +3707,32 @@ Calling [code]+proceed+ executes the next interceptor in the chain or the actual
 The result of the remote call can be manipulated by calling [code]+RestCallContext.setResult()+ .
 
 Not calling [code]+proceed+ in the interceptor bypasses the actual remote call, passing [code]+RestCallContext.getResult()+ to the [code]+RemoteCallBack+ provided at the call site.
+
+
+==== Annotating the Interceptor (alternative)
+
+If you cannot (or do not wish to) annotate the JAX-RS interface you may instead define remote call interceptors by annotating the interceptor class itself with [code]+@InterceptsRemoteCall+.  This annotation requires the developer to specify the JAX-RS interface that should be intercepted.  The interceptor will then be applied to all methods in that interface.  If the interface method is annotated with [code]+InterceptedCall+, that annotation will win out.
+
+[source, java]
+----
+@InterceptsRemoteCall({ MyJaxrsInterface.class, MyOtherJaxrsInterface.class })
+public class MyCacheInterceptor implements RestClientInterceptor {
+
+  @Override
+  public void aroundInvoke(final RestCallContext context) {
+    // Do interceptor logic here
+    context.proceed();
+  }
+}
+----
+
+This approach sacrifices granularity (you cannot intercept individual methods on the JAX-RS interface).  However, it does allow method interception without modification to the JAX-RS interface (which is particularly useful when the developer is not in control of the JAX-RS interface).
+
+
+==== Interceptors and IOC
+
+It is worth noting that interceptors *may* be defined as managed beans using the [code]+@Dependent+, [code]+@Singleton+, or [code]+@ApplicationScoped+ annotations.  If the Errai application is using IOC (i.e. imports the IOC Errai module) *and* the interceptor is annotated as a managed bean, then the IOC container will be used to get/create the interceptor instance.  This allows developers to [code]+@Inject+ dependencies into interceptors.  If IOC is not being used, or else the interceptor is not properly annotated, then the interceptor class will simply be instantiated via *new*.
+
 
 [[sid-19398997_ErraiJAX-RS-WireFormat]]
 

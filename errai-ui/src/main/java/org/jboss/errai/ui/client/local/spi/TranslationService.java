@@ -23,9 +23,9 @@ import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.shared.DomVisit;
 import org.jboss.errai.ui.shared.JSONMap;
 import org.jboss.errai.ui.shared.TranslationDomRevisitor;

@@ -1,6 +1,9 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import javax.enterprise.context.ApplicationScoped;
+
+import org.jboss.errai.common.client.util.CreationalCallback;
+
 import java.lang.annotation.Annotation;
 
 /**
