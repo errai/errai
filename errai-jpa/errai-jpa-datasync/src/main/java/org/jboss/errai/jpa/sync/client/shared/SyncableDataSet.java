@@ -77,4 +77,12 @@ public class SyncableDataSet<E> {
   public Map<String, Object> getParameters() {
     return params;
   }
+
+  @Override
+  public String toString() {
+    return "SyncableDataSet [queryName=" + queryName + ", params=" + params + ", resultType=" + resultTypeFqcn
+            + "]";
+  }
+
+
 }

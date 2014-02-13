@@ -26,17 +26,18 @@ import org.jboss.errai.jpa.sync.test.client.entity.SimpleEntity;
 
 @Dependent
 public class DependentScopedSyncBean {
-  
-  private long id;  
+
+  private long id;
   private String name;
   private SyncResponses<SimpleEntity> responses;
 
   @Sync(query = "simpleEntitiesByIdAndString",
       params = { @SyncParam(name = "id", val = "{id}"), @SyncParam(name = "string", val = "{name}") })
   private void onSyncResponse(SyncResponses<SimpleEntity> responses) {
+    System.out.println("DependentScopedSyncBean.onSyncResponse() got " + responses);
     this.responses = responses;
   }
-  
+
   @PostConstruct
   private void init() {
     id = 1;

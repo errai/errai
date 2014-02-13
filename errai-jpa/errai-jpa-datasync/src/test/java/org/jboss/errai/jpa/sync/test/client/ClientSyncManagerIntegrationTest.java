@@ -27,8 +27,10 @@ import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
 import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 import org.jboss.errai.jpa.sync.test.client.entity.SimpleEntity;
+import org.jboss.errai.jpa.sync.test.client.ioc.DependentScopedSyncBean;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
 
 public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
@@ -393,25 +395,61 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNull(dsem.find(SimpleEntity.class, originalId));
   }
 
-  
-//  public void testDeclarativeSync() {
-//    delayTestFinish(45000);
-//    // TODO replace caller in CSM
-//    
-//    final DependentScopedSyncBean syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
-//    assertNull(syncBean.getResponses());
-//    
-//    new Timer() {
-//
-//      @Override
-//      public void run() {
-//        assertNotNull(syncBean.getResponses());
-//        // TODO assert correct result
-//      }
-//      
-//    }.schedule(7000);
-//  }
-  
+  public void testDeclarativeSync() {
+    delayTestFinish(45000);
+
+    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+
+    // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
+    csm.dataSyncService = new Caller<DataSyncService>() {
+
+      @Override
+      public DataSyncService call(final RemoteCallback<?> callback) {
+        return new DataSyncService() {
+
+          @SuppressWarnings({"unchecked", "rawtypes"})
+          @Override
+          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> actualClientRequests) {
+            System.out.println("Short-circuiting DataSyncService call:");
+            System.out.println("   dataSet = " + dataSet);
+            System.out.println("   actualClientRequests = " + actualClientRequests);
+
+            RemoteCallback rawRemoteCallback = callback;
+            rawRemoteCallback.callback(expectedSyncResponses);
+
+            return null; // this is the Caller stub. it doesn't return the value directly.
+          }
+        };
+      }
+
+      @Override
+      public DataSyncService call(final RemoteCallback<?> callback, final ErrorCallback<?> errorCallback) {
+        return call(callback);
+      }
+
+      @Override
+      public DataSyncService call() {
+        fail("Unexpected use of callback");
+        return null; // NOTREACHED
+      }
+    };
+
+    final DependentScopedSyncBean syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
+    assertNull(syncBean.getResponses());
+
+    new Timer() {
+
+      @Override
+      public void run() {
+        // should get back the exact list of sync responses that we returned from our fake Caller<DataSyncService> above
+        assertNotNull(syncBean.getResponses());
+        assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
+        finishTest();
+      }
+
+    }.schedule(7000);
+  }
+
   /**
    * Calls ClientSyncManager.coldSync() in a way that no actual server
    * communication happens. The given "fake" server response is returned

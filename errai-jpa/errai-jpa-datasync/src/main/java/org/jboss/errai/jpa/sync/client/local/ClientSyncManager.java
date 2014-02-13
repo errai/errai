@@ -9,14 +9,21 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.persistence.NamedQuery;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.RefHolder;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
-import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
+import org.jboss.errai.jpa.client.local.ErraiIdentifiableType;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
 import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
@@ -33,6 +40,8 @@ import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
 import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main contact point for applications that want to initiate data sync
@@ -42,6 +51,22 @@ import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
  */
 @ApplicationScoped
 public class ClientSyncManager {
+
+  private static final Logger logger = LoggerFactory.getLogger(ClientSyncManager.class);
+
+  protected static final ErrorCallback<?> DEFAULT_ERROR_CALLBACK = new BusErrorCallback() {
+
+    @Override
+    public boolean error(Message message, Throwable throwable) {
+      logger.error("Encountered error during data sync. The application did not provide its own error handler.", throwable);
+      return true;
+    }
+  };
+
+  /**
+   * Three puppies were maimed in the creation of this field.
+   */
+  private static ClientSyncManager INSTANCE;
 
   /**
    * Temporarily public so we can override the caller from within the tests. Will find a better way in the future!
@@ -83,6 +108,27 @@ public class ClientSyncManager {
    * If true, there is a pending sync request sent to the server.
    */
   private boolean syncInProgress;
+
+  /**
+   * Returns the global instance of ClientSyncManager.
+   */
+  public static ClientSyncManager getInstance() {
+    if (INSTANCE == null) {
+      final RefHolder<ClientSyncManager> manager = new RefHolder<ClientSyncManager>();
+      IOC.getAsyncBeanManager().lookupBean(ClientSyncManager.class).getInstance(
+              new CreationalCallback<ClientSyncManager>() {
+                @Override
+                public void callback(ClientSyncManager beanInstance) {
+                  manager.set(beanInstance);
+                }
+              });
+
+      // The assumption here is that the ClientSyncManager will never be declared as an async bean
+      Assert.notNull("Failed to lookup instance of ClientSyncManager synchronously!", manager.get());
+      INSTANCE = manager.get();
+    }
+    return INSTANCE;
+  }
 
   @PostConstruct
   private void setup() {
@@ -189,7 +235,7 @@ public class ClientSyncManager {
       @Override
       public boolean error(Object message, Throwable throwable) {
         syncInProgress = false;
-        ErrorCallback rawOnError = onError;
+        ErrorCallback rawOnError = onError == null ? DEFAULT_ERROR_CALLBACK : onError;
         return rawOnError.error(message, throwable);
       }
     };
