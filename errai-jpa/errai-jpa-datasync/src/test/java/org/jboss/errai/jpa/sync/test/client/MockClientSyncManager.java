@@ -16,6 +16,7 @@
 
 package org.jboss.errai.jpa.sync.test.client;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
@@ -34,12 +35,12 @@ import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 @SuppressWarnings("rawtypes")
 public class MockClientSyncManager extends ClientSyncManager {
   private int coldSyncCallCount;
-  private RemoteCallback onCompletion;
 
+  @SuppressWarnings("unchecked")
   @Override
   public void coldSync(String queryName, Class queryResultType, Map queryParams, RemoteCallback onCompletion,  ErrorCallback onError) {
-    this.onCompletion = onCompletion;
     coldSyncCallCount++;
+    onCompletion.callback(Collections.emptyList());
   }
 
   public int getColdSyncCallCount() {

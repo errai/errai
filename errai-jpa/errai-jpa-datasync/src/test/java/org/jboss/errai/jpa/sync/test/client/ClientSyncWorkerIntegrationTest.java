@@ -104,6 +104,7 @@ public class ClientSyncWorkerIntegrationTest extends GWTTestCase {
       @Override
       public void run() {
         assertTrue(mockManager.getColdSyncCallCount() >= 1);
+        assertEquals(countingSyncCallback.getCallbackCount(), mockManager.getColdSyncCallCount());
         finishTest();
       }
     }.schedule(7000);
@@ -120,6 +121,7 @@ public class ClientSyncWorkerIntegrationTest extends GWTTestCase {
       @Override
       public void run() {
         assertEquals(0, mockManager.getColdSyncCallCount());
+        assertEquals(countingSyncCallback.getCallbackCount(), mockManager.getColdSyncCallCount());
         finishTest();
       }
     }.schedule(7000);
