@@ -2,15 +2,18 @@ package org.jboss.errai.security.client.local;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.RequireAuthentication;
 
 /**
  * SecurityUserInterceptor will intercept calls annotated with {@link org.jboss.errai.security.shared.RequireAuthentication}
  * and 'redirect' users to the '{@link org.jboss.errai.ui.nav.client.local.api.LoginPage}' if not logged-in
  * @author edewit@redhat.com
  */
+@FeatureInterceptor(RequireAuthentication.class)
 public class SecurityUserInterceptor extends ClientSecurityInterceptor implements RemoteCallInterceptor<RemoteCallContext> {
 
   @Override

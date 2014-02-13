@@ -139,6 +139,7 @@
     <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-navigation</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-tools</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-ui</artifactId><scope>provided</scope></dependency>
+    <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-security-client</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.logging</groupId><artifactId>jboss-logging</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.resteasy</groupId><artifactId>jaxrs-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.spec.javax.interceptor</groupId><artifactId>jboss-interceptors-api_1.1_spec</artifactId><scope>provided</scope></dependency>
@@ -158,21 +159,9 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-navigation</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-ui</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <artifactId>errai-security-server</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-security</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
-    
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-idm-schema</artifactId>

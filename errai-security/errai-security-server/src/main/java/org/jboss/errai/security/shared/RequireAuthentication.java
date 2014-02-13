@@ -37,6 +37,5 @@ import org.jboss.errai.common.client.api.annotations.Alias;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @InterceptorBinding
-//@InterceptedCall(SecurityUserInterceptor.class)
 public @interface RequireAuthentication {
 }

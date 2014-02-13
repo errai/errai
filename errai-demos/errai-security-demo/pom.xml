@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai</groupId>
   <artifactId>errai-security-demo</artifactId>
@@ -64,8 +65,12 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-security</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-security-client</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-server</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -79,7 +84,6 @@
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
-      <version>${gwt.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -267,7 +271,7 @@
           <groupId>org.hibernate</groupId>
           <artifactId>hibernate-core</artifactId>
           <scope>provided</scope>
-        </dependency>        
+        </dependency>
         <dependency>
           <groupId>org.jboss.spec.javax.transaction</groupId>
           <artifactId>jboss-transaction-api_1.1_spec</artifactId>
