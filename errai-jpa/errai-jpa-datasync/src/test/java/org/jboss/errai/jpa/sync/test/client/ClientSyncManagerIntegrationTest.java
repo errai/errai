@@ -3,7 +3,9 @@ package org.jboss.errai.jpa.sync.test.client;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.AssertionFailedError;
 
@@ -35,6 +37,7 @@ import com.google.gwt.user.client.Timer;
 public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
   private ClientSyncManager csm;
+  private DependentScopedSyncBean syncBean;
 
   public native void setRemoteCommunicationEnabled(boolean enabled) /*-{
     $wnd.erraiBusRemoteCommunicationEnabled = enabled;
@@ -50,6 +53,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     setRemoteCommunicationEnabled(false);
     InitVotes.setTimeoutMillis(60000);
 
+    ClientSyncManager.resetInstance();
+    
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
     new IOCBeanManagerLifecycle().resetBeanManager();
@@ -71,6 +76,10 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   protected void gwtTearDown() throws Exception {
     assertFalse("ClientSyncManager 'sync in progress' flag got stuck on true", csm.isSyncInProgress());
 
+    if (syncBean != null) {
+      IOC.getBeanManager().destroyBean(syncBean);
+    }
+    
     InitVotes.reset();
     setRemoteCommunicationEnabled(true);
     super.gwtTearDown();
@@ -400,6 +409,75 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
     final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
 
+    final Map<String, Object> parameters = new HashMap<String, Object>();
+    
+    // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
+    csm.dataSyncService = new Caller<DataSyncService>() {
+
+      @Override
+      public DataSyncService call(final RemoteCallback<?> callback) {
+        return new DataSyncService() {
+
+          @SuppressWarnings({"unchecked", "rawtypes"})
+          @Override
+          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> actualClientRequests) {
+            System.out.println("Short-circuiting DataSyncService call:");
+            System.out.println("   dataSet = " + dataSet);
+            System.out.println("   actualClientRequests = " + actualClientRequests);
+
+            // Don't assert anything here! The timer we start later on will still fire if the test fails at this point!
+            parameters.putAll(dataSet.getParameters());
+            
+            RemoteCallback rawRemoteCallback = callback;
+            rawRemoteCallback.callback(expectedSyncResponses);
+
+            return null; // this is the Caller stub. it doesn't return the value directly.
+          }
+        };
+      }
+
+      @Override
+      public DataSyncService call(final RemoteCallback<?> callback, final ErrorCallback<?> errorCallback) {
+        return call(callback);
+      }
+
+      @Override
+      public DataSyncService call() {
+        fail("Unexpected use of callback");
+        return null; // NOTREACHED
+      }
+    };
+
+    syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
+
+    // the initial sync will have already happened since we stubbed out the caller
+    assertNotNull(syncBean.getResponses());
+    assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
+    assertEquals(1, syncBean.getCallbackCount());
+    
+    new Timer() {
+
+      @Override
+      public void run() {
+        assertEquals(1l, parameters.get("id"));
+        assertEquals("test", parameters.get("string"));
+        assertEquals("literalValue", parameters.get("literal"));
+        
+        // should get back the exact list of sync responses that we returned from our fake Caller<DataSyncService> above
+        assertNotNull(syncBean.getResponses());
+        assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
+        assertEquals(2, syncBean.getCallbackCount());
+        finishTest();
+      }
+
+    }.schedule(7000);
+  }
+  
+  public void testDestructionCallbackStopSyncWorker() {
+    delayTestFinish(45000);
+
+    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+
     // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
     csm.dataSyncService = new Caller<DataSyncService>() {
 
@@ -434,16 +512,18 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
       }
     };
 
-    final DependentScopedSyncBean syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
-    assertNull(syncBean.getResponses());
+    syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
+    IOC.getBeanManager().destroyBean(syncBean);
 
+    assertNotNull(syncBean.getResponses());
+    assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
+    assertEquals(1, syncBean.getCallbackCount());
+    
     new Timer() {
-
       @Override
       public void run() {
-        // should get back the exact list of sync responses that we returned from our fake Caller<DataSyncService> above
-        assertNotNull(syncBean.getResponses());
-        assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
+        assertEquals(1, syncBean.getCallbackCount());
+        syncBean = null;
         finishTest();
       }
 

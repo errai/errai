@@ -40,14 +40,14 @@ import com.google.gwt.user.client.Timer;
  * <li>Running - data sync operations happen automatically
  * <li>Stopped - no sync happens
  * </ol>
- *
+ * 
  * New instances are in the "not yet started" state. You start them with a call to {@link #start()},
  * and stop them with a call to {@link #stop()}. Once started, a sync worker instance can be stopped
  * but not restarted. Once stopped, a sync worker cannot be restarted.
- *
+ * 
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
- *
+ * 
  * @param <E>
  *          The entity type this worker's named query returns.
  */
@@ -60,10 +60,39 @@ public class ClientSyncWorker<E> {
   private boolean started;
   private boolean stopped;
 
+  private Map<String, Object> queryParams;
+
+  /**
+   * The callback that gets notified by ClientSyncManager when a sync operation has completed.
+   * Notifies this worker's callbacks.
+   */
+  private final RemoteCallback<List<SyncResponse<E>>> onCompletion = new RemoteCallback<List<SyncResponse<E>>>() {
+    @Override
+    public void callback(List<SyncResponse<E>> response) {
+      SyncResponses<E> responses = new SyncResponses<E>(response);
+      for (DataSyncCallback<E> callback : callbacks) {
+        try {
+          callback.onSync(responses);
+        }
+        catch (Throwable t) {
+          logger.error("Ignoring Exception from DataSyncCallback:", t);
+        }
+      }
+    }
+  };
+
+  private final ClientSyncManager manager;
+
+  private final String queryName;
+
+  private final Class<E> queryResultType;
+
+  private final ErrorCallback<?> onError;
+
   /**
    * Creates a new ClientSyncWorker which takes responsibility for syncing the results of the named
    * JPA query.
-   *
+   * 
    * @param <E>
    *          The entity type the named query returns.
    * @param queryName
@@ -71,16 +100,16 @@ public class ClientSyncWorker<E> {
    *          parameters, they must be named (not positional) parameters.
    * @param queryResultType
    *          The result type returned by the named query.
-   * @param queryParams
-   *          Name-value pairs for all named parameters in the named query. Never null.
    * @param onError
    *          Error callback that should be invoked if any sync request encounters a data
-   *          transmission error on the bus.
+   *          transmission error on the bus. If null, transmission errors are logged to the slf4j
+   *          logger for the {@link ClientSyncWorker} class.
    * @return a new ClientSyncWorker instance in the "not yet started" state.
    */
   public static <E> ClientSyncWorker<E> create(final String queryName, final Class<E> queryResultType,
-      final Map<String, Object> queryParams, final ErrorCallback<?> onError) {
-    return new ClientSyncWorker<E>(ClientSyncManager.getInstance(), queryName, queryResultType, queryParams, onError);
+       final ErrorCallback<?> onError) {
+    
+    return new ClientSyncWorker<E>(ClientSyncManager.getInstance(), queryName, queryResultType, onError);
   }
 
   /**
@@ -90,7 +119,7 @@ public class ClientSyncWorker<E> {
    * This constructor is primarily intended for testing. Consider using
    * {@link #create(String, Class, Map, ErrorCallback)} instead, which obtains an instance of
    * ClientSyncManager from the IOC Bean Manager.
-   *
+   * 
    * @param manager
    *          The instance of ClientSyncManager that should be used for all data sync operations.
    * @param queryName
@@ -98,35 +127,25 @@ public class ClientSyncWorker<E> {
    *          parameters, they must be named (not positional) parameters.
    * @param queryResultType
    *          The result type returned by the named query.
-   * @param queryParams
-   *          Name-value pairs for all named parameters in the named query. Never null.
    * @param onError
    *          Error callback that should be invoked if any sync request encounters a data
-   *          transmission error on the bus.
+   *          transmission error on the bus. If null, transmission errors are logged to the slf4j
+   *          logger for the {@link ClientSyncWorker} class.
    * @return a new ClientSyncWorker instance in the "not yet started" state.
    */
   public ClientSyncWorker(final ClientSyncManager manager, final String queryName, final Class<E> queryResultType,
-      final Map<String, Object> queryParams, final ErrorCallback<?> onError) {
+      final ErrorCallback<?> onError) {
 
+    this.manager = Assert.notNull(manager);
+    this.queryName = Assert.notNull(queryName);
+    this.queryResultType = Assert.notNull(queryResultType);
+    this.onError = onError;
+    
     timer = new Timer() {
       @Override
       public void run() {
-        RemoteCallback<List<SyncResponse<E>>> onCompletion = new RemoteCallback<List<SyncResponse<E>>>() {
-          @Override
-          public void callback(List<SyncResponse<E>> response) {
-            SyncResponses<E> responses = new SyncResponses<E>(response);
-            for (DataSyncCallback<E> callback : callbacks) {
-              try {
-                callback.onSync(responses);
-              }
-              catch (Throwable t) {
-                logger.error("Ignoring Exception from DataSyncCallback:", t);
-              }
-            }
-          }
-        };
-
-        manager.coldSync(queryName, queryResultType, queryParams, onCompletion, onError);
+        manager.coldSync(ClientSyncWorker.this.queryName, ClientSyncWorker.this.queryResultType, queryParams,
+            onCompletion, ClientSyncWorker.this.onError);
       }
     };
   }
@@ -134,7 +153,7 @@ public class ClientSyncWorker<E> {
   /**
    * Registers the given callback to receive notifications each time a sync operation has been
    * performed.
-   *
+   * 
    * @param onCompletion
    *          the callback to notify of completed sync operations. Must not be null.
    */
@@ -145,21 +164,28 @@ public class ClientSyncWorker<E> {
 
   /**
    * Starts this sync worker if it has not already been started or stopped.
-   *
+   * 
+   * @param queryParams
+   *          Name-value pairs for all named parameters in the named query. Never null.
+   * 
    * @throws IllegalStateException
    *           if this sync worker has been stopped.
    */
-  public void start() {
+  public void start(Map<String, Object> queryParams) {
     if (stopped)
       throw new IllegalStateException("This worker was already stopped");
 
+    this.queryParams = Assert.notNull(queryParams);
     started = true;
+    
+    // let's sync immediately so we don't have to wait 5 seconds before the first sync
+    manager.coldSync(queryName, queryResultType, queryParams, onCompletion, onError);
     timer.scheduleRepeating(5000);
   }
 
   /**
    * Stops this sync worker if it is running.
-   *
+   * 
    * @throws IllegalStateException
    *           if this sync worker has not yet been started.
    */

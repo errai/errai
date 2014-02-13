@@ -20,12 +20,27 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * Represents a parameter of a named query used in a data sync operation (see {@link Sync}).
+ * 
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SyncParam {
 
+  /**
+   * The name of the query parameter.
+   */
   String name();
 
+  /**
+   * The value to assign to the query parameter. This is either a literal value or a field reference
+   * of the enclosing class or super class.
+   * <p>
+   * Example literal value: {@code @SyncParam(name = "literal", val = "literalValue")}<br>
+   * Example field reference: {@code @SyncParam(name = "id", val = "{id}")}
+   */
   String val();
-
 }

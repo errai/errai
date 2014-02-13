@@ -29,17 +29,7 @@ import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.StorageBackendFactory;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
-import org.jboss.errai.jpa.sync.client.shared.ConflictResponse;
-import org.jboss.errai.jpa.sync.client.shared.DataSyncService;
-import org.jboss.errai.jpa.sync.client.shared.DeleteResponse;
-import org.jboss.errai.jpa.sync.client.shared.EntityComparator;
-import org.jboss.errai.jpa.sync.client.shared.IdChangeResponse;
-import org.jboss.errai.jpa.sync.client.shared.JpaAttributeAccessor;
-import org.jboss.errai.jpa.sync.client.shared.NewRemoteEntityResponse;
-import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
-import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
-import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
-import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
+import org.jboss.errai.jpa.sync.client.shared.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,6 +120,13 @@ public class ClientSyncManager {
     return INSTANCE;
   }
 
+  /**
+   * Resets the global instance of ClientSyncManager.
+   */
+  public static void resetInstance() {
+    INSTANCE = null;
+  }
+  
   @PostConstruct
   private void setup() {
     expectedStateEm = new ErraiEntityManager(desiredStateEm, new StorageBackendFactory() {
@@ -142,33 +139,30 @@ public class ClientSyncManager {
   }
 
   /**
-   * Performs a "cold" synchronization on the results of the given query with
-   * the given parameters. After a successful synchronization, both the expected
-   * state and desired state entity managers will yield the same results as the
-   * server-side entity manager does for the given query with the given set of
-   * parameters.
-   *
+   * Performs a "cold" synchronization on the results of the given query with the given parameters.
+   * After a successful synchronization, both the expected state and desired state entity managers
+   * will yield the same results as the server-side entity manager does for the given query with the
+   * given set of parameters.
+   * 
    * @param queryName
-   *          The name of a JPA named query. This query must be defined in a
-   *          {@link NamedQuery} annotation that is visible to both the client
-   *          and server applications. This usually means it is defined on an
-   *          entity in the <code>shared</code> package.
+   *          The name of a JPA named query. This query must be defined in a {@link NamedQuery}
+   *          annotation that is visible to both the client and server applications. This usually
+   *          means it is defined on an entity in the <code>shared</code> package.
    * @param queryResultType
-   *          The result type returned by the query. Must be a JPA entity type
-   *          known to both the client and server applications.
+   *          The result type returned by the query. Must be a JPA entity type known to both the
+   *          client and server applications.
    * @param queryParams
-   *          The name-value pairs to use for filling in the named parameters in
-   *          the query.
+   *          The name-value pairs to use for filling in the named parameters in the query.
    * @param onCompletion
-   *          Called when the data sync response has been received from the
-   *          server, and the sync response operations have been applied to the
-   *          expected state and desired state entity managers. Must not be
-   *          null.
+   *          Called when the data sync response has been received from the server, and the sync
+   *          response operations have been applied to the expected state and desired state entity
+   *          managers. Must not be null. In case of conflicts, the original client values are
+   *          available in the list of SyncResponse objects, which gives you a chance to implement a
+   *          different conflict resolution policy.
    * @param onError
-   *          Called when the data sync fails: either because the remote service
-   *          threw an exception, or because of a communication error. Can be
-   *          null, in which case the default error handling for the
-   *          {@code Caller<DataSyncService>} will apply.
+   *          Called when the data sync fails: either because the remote service threw an exception,
+   *          or because of a communication error. Can be null, in which case the default error
+   *          handling for the {@code Caller<DataSyncService>} will apply.
    */
   public <E> void coldSync(
           String queryName, Class<E> queryResultType, Map<String, Object> queryParams,
@@ -239,6 +233,7 @@ public class ClientSyncManager {
         return rawOnError.error(message, throwable);
       }
     };
+    
     dataSyncService.call(onSuccess, errorCallback).coldSync(syncSet, syncRequests);
   }
 

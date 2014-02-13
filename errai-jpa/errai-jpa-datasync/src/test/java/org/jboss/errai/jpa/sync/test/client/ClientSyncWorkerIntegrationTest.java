@@ -56,35 +56,34 @@ public class ClientSyncWorkerIntegrationTest extends GWTTestCase {
       errorCount++;
       return true;
     }
-    
+
     public int getErrorCount() {
       return errorCount;
     }
   }
-  
+
   private ClientSyncWorker<SimpleEntity> syncWorker;
   private final CountingErrorCallback countingErrorCallback = new CountingErrorCallback();
   private MockClientSyncManager mockManager;
-  
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.jpa.sync.test.DataSyncTests";
   }
-  
+
   @Override
   protected void gwtSetUp() throws Exception {
     mockManager = new MockClientSyncManager();
-    
+
     syncWorker =
-        new ClientSyncWorker<SimpleEntity>(mockManager, "allSimpleEntities", SimpleEntity.class,
-            Collections.<String, Object> emptyMap(), countingErrorCallback);
+        new ClientSyncWorker<SimpleEntity>(mockManager, "allSimpleEntities", SimpleEntity.class, countingErrorCallback);
 
   }
 
   @Test
   public void testStartCausesColdSync() {
     delayTestFinish(25000);
-    syncWorker.start();
+    syncWorker.start(Collections.<String, Object> emptyMap());
     new Timer() {
       @Override
       public void run() {
@@ -93,13 +92,13 @@ public class ClientSyncWorkerIntegrationTest extends GWTTestCase {
       }
     }.schedule(12000);
   }
-  
+
   @Test
   public void testDataSyncCallbackInvoked() {
     delayTestFinish(25000);
     final CountingDataSyncCallback countingSyncCallback = new CountingDataSyncCallback();
     syncWorker.addSyncCallback(countingSyncCallback);
-    syncWorker.start();
+    syncWorker.start(Collections.<String, Object> emptyMap());
     new Timer() {
       @Override
       public void run() {
@@ -108,19 +107,20 @@ public class ClientSyncWorkerIntegrationTest extends GWTTestCase {
         finishTest();
       }
     }.schedule(7000);
-    
+
   }
-  
+
   @Test
   public void testStop() {
     delayTestFinish(25000);
     final CountingDataSyncCallback countingSyncCallback = new CountingDataSyncCallback();
     syncWorker.addSyncCallback(countingSyncCallback);
-    syncWorker.start();
+    syncWorker.start(Collections.<String, Object> emptyMap());
     new Timer() {
       @Override
       public void run() {
-        assertEquals(0, mockManager.getColdSyncCallCount());
+        // first sync is started immediately in start. no subsequent syncs should happen.
+        assertEquals(1, mockManager.getColdSyncCallCount());
         assertEquals(countingSyncCallback.getCallbackCount(), mockManager.getColdSyncCallCount());
         finishTest();
       }

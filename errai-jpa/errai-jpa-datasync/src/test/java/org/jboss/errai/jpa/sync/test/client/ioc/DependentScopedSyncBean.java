@@ -30,38 +30,33 @@ public class DependentScopedSyncBean {
   private long id;
   private String name;
   private SyncResponses<SimpleEntity> responses;
+  private int callbackCount;
 
   @Sync(query = "simpleEntitiesByIdAndString",
-      params = { @SyncParam(name = "id", val = "{id}"), @SyncParam(name = "string", val = "{name}") })
+      params = { @SyncParam(name = "id", val = "{id}"), @SyncParam(name = "string", val = "{name}"),
+          @SyncParam(name = "literal", val = "literalValue") })
   private void onSyncResponse(SyncResponses<SimpleEntity> responses) {
-    System.out.println("DependentScopedSyncBean.onSyncResponse() got " + responses);
     this.responses = responses;
+    callbackCount++;
   }
-
+  
   @PostConstruct
   private void init() {
     id = 1;
     name = "test";
   }
 
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public SyncResponses<SimpleEntity> getResponses() {
     return responses;
+  }
+
+  @Override
+  public String toString() {
+    return "DependentScopedSyncBean [id=" + id + ", name=" + name + ", responses=" + responses + "]";
+  }
+
+  public int getCallbackCount() {
+    return callbackCount;
   }
 
 }
