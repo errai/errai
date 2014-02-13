@@ -19,6 +19,7 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.framework.CallContextStatus;
@@ -119,6 +121,18 @@ public class JaxrsProxyMethodGenerator {
       } else {
         for (Class<?> clazz : interceptedCall.value()) {
           interceptors.add(clazz);
+        }
+      }
+      final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
+              RebindUtils.findTranslatablePackages(context), context);
+      for (final MetaClass featureInterceptor : featureInterceptors) {
+        final Class<? extends Annotation>[] annotations = featureInterceptor.getAnnotation(FeatureInterceptor.class)
+                .value();
+        for (int i = 0; i < annotations.length; i++) {
+          if (declaringClass.isAnnotationPresent(annotations[i])
+                  || resourceMethod.getMethod().isAnnotationPresent(annotations[i])) {
+            interceptors.add(featureInterceptor.asClass());
+          }
         }
       }
 
