@@ -22,6 +22,15 @@ import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 
+/**
+ * A subclass of the real ClientSyncManager that overrides
+ * {@link #coldSync(String, Class, Map, RemoteCallback, ErrorCallback)} so it
+ * just captures its arguments and does not attempt to communicate with the
+ * server.
+ * <p>
+ * Note that this bean is blacklisted in ErraiApp.properties so that it does not
+ * get injected in place of the real ClientSyncManager.
+ */
 @SuppressWarnings("rawtypes")
 public class MockClientSyncManager extends ClientSyncManager {
   private int coldSyncCallCount;
@@ -32,7 +41,7 @@ public class MockClientSyncManager extends ClientSyncManager {
     this.onCompletion = onCompletion;
     coldSyncCallCount++;
   }
-  
+
   public int getColdSyncCallCount() {
     return coldSyncCallCount;
   }
