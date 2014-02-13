@@ -1,5 +1,6 @@
 package org.jboss.errai.security.client.local;
 
+
 import java.util.List;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -9,7 +10,6 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.SecurityInterceptor;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
 /**
@@ -20,7 +20,7 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
  * @see org.jboss.errai.ui.nav.client.local.api.LoginPage
  * @author edewit@redhat.com
  */
-public class ClientSecurityRoleInterceptor extends SecurityInterceptor implements RemoteCallInterceptor<RemoteCallContext> {
+public class ClientSecurityRoleInterceptor extends ClientSecurityInterceptor implements RemoteCallInterceptor<RemoteCallContext> {
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
     securityCheck(getRequiredRoleAnnotation(context.getAnnotations()).value(), new Command() {

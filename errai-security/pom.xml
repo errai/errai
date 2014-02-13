@@ -16,6 +16,7 @@
   <modules>
     <module>errai-security-client</module>
     <module>errai-security-server</module>
+    <module>errai-security-shared</module>
   </modules>
 
   <properties>

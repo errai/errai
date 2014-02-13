@@ -1,18 +1,10 @@
 package org.jboss.errai.security.shared;
 
-import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COOKIE;
-
 import java.lang.annotation.Annotation;
 import java.util.List;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
-import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ui.nav.client.local.Navigation;
-import org.jboss.errai.ui.nav.client.local.UniquePageRole;
-import org.jboss.errai.ui.nav.client.local.api.LoginPage;
-
-import com.google.gwt.user.client.Cookies;
 
 /**
  * Base class for the client side security interceptors
@@ -27,16 +19,6 @@ public abstract class SecurityInterceptor {
         context.setResult(response);
       }
     });
-  }
-
-  protected void navigateToLoginPage() {
-    navigateToPage(LoginPage.class);
-  }
-
-  protected void navigateToPage(Class<? extends UniquePageRole> roleClass) {
-    Navigation navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
-    Cookies.setCookie(CURRENT_PAGE_COOKIE, navigation.getCurrentPage().name());
-    navigation.goToWithRole(roleClass);
   }
 
   protected boolean hasAllRoles(List<Role> roles, String[] roleNames) {

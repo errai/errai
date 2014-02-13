@@ -16,14 +16,15 @@
 
 package org.jboss.errai.security.shared;
 
-import java.lang.annotation.*;
-
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.common.client.api.annotations.Alias;
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.security.client.local.SecurityUserInterceptor;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import javax.interceptor.InterceptorBinding;
+
+import org.jboss.errai.common.client.api.annotations.Alias;
 
 /**
  * Indicates that the service can only be accessed by logged-in users. No
@@ -36,6 +37,6 @@ import javax.interceptor.InterceptorBinding;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @InterceptorBinding
-@InterceptedCall(SecurityUserInterceptor.class)
+//@InterceptedCall(SecurityUserInterceptor.class)
 public @interface RequireAuthentication {
 }

@@ -12,13 +12,17 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-security-client</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-bus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-data-binding</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-bus</artifactId>
+      <artifactId>errai-ui</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

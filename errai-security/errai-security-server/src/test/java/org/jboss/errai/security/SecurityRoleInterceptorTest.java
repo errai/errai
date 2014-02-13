@@ -1,26 +1,26 @@
 package org.jboss.errai.security;
 
-import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
-import org.jboss.errai.common.client.PageRequest;
-import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
-import org.jboss.errai.common.client.framework.ProxyProvider;
-import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.security.server.ServerSecurityRoleInterceptor;
-import org.jboss.errai.security.shared.*;
-import org.jboss.errai.ui.nav.client.local.UniquePageRole;
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.interceptor.InvocationContext;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import javax.interceptor.InvocationContext;
+
+import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
+import org.jboss.errai.common.client.PageRequest;
+import org.jboss.errai.security.server.ServerSecurityRoleInterceptor;
+import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.Role;
+import org.jboss.errai.security.shared.User;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author edewit@redhat.com
@@ -95,34 +95,34 @@ public class SecurityRoleInterceptorTest {
     // then
     fail("security exception should have been thrown");
   }
-
-  @Test
-  public void shouldVerifyUserInRoleClientSide() throws Exception {
-    //given
-    RemoteCallContext context = mock(RemoteCallContext.class);
-    RemoteServiceProxyFactory.addRemoteProxy(AuthenticationService.class, new ProxyProvider() {
-      @Override
-      public Object getProxy() {
-        return new MockAuthenticationService(Arrays.asList(new Role("user")));
-      }
-    });
-
-    final Boolean[] redirectToLoginPage = {Boolean.FALSE};
-    final org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor interceptor =
-            new org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor() {
-      @Override
-      protected void navigateToPage(Class<? extends UniquePageRole> roleClass) {
-        redirectToLoginPage[0] = Boolean.TRUE;
-      }
-    };
-
-    //when
-    when(context.getAnnotations()).thenReturn(getAnnotatedServiceMethod().getAnnotations());
-    interceptor.aroundInvoke(context);
-
-    //then
-    assertTrue(redirectToLoginPage[0]);
-  }
+//
+//  @Test
+//  public void shouldVerifyUserInRoleClientSide() throws Exception {
+//    //given
+//    RemoteCallContext context = mock(RemoteCallContext.class);
+//    RemoteServiceProxyFactory.addRemoteProxy(AuthenticationService.class, new ProxyProvider() {
+//      @Override
+//      public Object getProxy() {
+//        return new MockAuthenticationService(Arrays.asList(new Role("user")));
+//      }
+//    });
+//
+//    final Boolean[] redirectToLoginPage = {Boolean.FALSE};
+//    final org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor interceptor =
+//            new org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor() {
+//      @Override
+//      protected void navigateToPage(Class<? extends UniquePageRole> roleClass) {
+//        redirectToLoginPage[0] = Boolean.TRUE;
+//      }
+//    };
+//
+//    //when
+//    when(context.getAnnotations()).thenReturn(getAnnotatedServiceMethod().getAnnotations());
+//    interceptor.aroundInvoke(context);
+//
+//    //then
+//    assertTrue(redirectToLoginPage[0]);
+//  }
 
   private Method getAnnotatedServiceMethod() throws NoSuchMethodException {
     return ServiceInterface.class.getMethod("annotatedServiceMethod");
