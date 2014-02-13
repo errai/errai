@@ -17,13 +17,9 @@
 package org.jboss.errai.jpa.sync.test.client;
 
 import java.util.Collections;
-import java.util.Map;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncWorker;
 import org.jboss.errai.jpa.sync.client.local.DataSyncCallback;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponses;
@@ -48,22 +44,6 @@ public class ClientSyncWorkerIntegrationTest extends GWTTestCase {
 
     public int getCallbackCount() {
       return callbacksInvoked;
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  private final class MockClientSyncManager extends ClientSyncManager {
-    private int coldSyncCallCount;
-    private RemoteCallback onCompletion;
-
-    @Override
-    public void coldSync(String queryName, Class queryResultType, Map queryParams, RemoteCallback onCompletion,  ErrorCallback onError) {
-      this.onCompletion = onCompletion;
-      coldSyncCallCount++;
-    }
-    
-    public int getColdSyncCallCount() {
-      return coldSyncCallCount;
     }
   }
 
