@@ -22,21 +22,19 @@ Release Steps
 -------------
 
 1. Run the test suite. Ensure all tests pass.
-
+        
         % mvn -Pintegration-test test
-   
+        
 1. Update reference guide with latest content and check in generated docbook.
-
+        
         % cd errai-docs
-         % mvn clean package   # this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
-         % git add src
-
-  * Don't upload to JBoss FTP server! The release upload script will do this later.
-
+        % mvn clean package   # this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
+        % git add src
+        
 1. Ask Maven to update the version number in all the pom.xml files:
    
         % cd $errai_root_dir
-         % ./updateVersions.sh a.b.c.Final x.y.z.Final
+        % ./updateVersions.sh a.b.c.Final x.y.z.Final
    
    Afterward, verify that all subprojects reference the new parent pom's version:
    
@@ -56,24 +54,24 @@ Release Steps
 1. Deploy the Errai Cordova project template
 
         % cd errai-cordova-maven-plugin/src/main/bash
-         % sudo ./cordova-bundle a.b.c.Final
+        % sudo ./cordova-bundle a.b.c.Final
 
 1. Upload the docs and the distro zipfile
 
         % cd dist
-         % scripts/upload_binaries.sh ${version}
+        % scripts/upload_binaries.sh ${version}
 
 1. Tag and push the release to github
 
         % git commit a -m "Updated to new version x.y.z"
-         % git tag x.y.z.Final
+        % git tag x.y.z.Final
     
   reset all versions to x.y.z+1-SNAPSHOT and commit
-
+  
         % git push origin /branch/
-         % git push origin --tags
-         % git push upstream /branch/
-         % git push upstream --tags
+        % git push origin --tags
+        % git push upstream /branch/
+        % git push upstream --tags
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
   * Find the corresponding staging repository (Sort by repository name)
