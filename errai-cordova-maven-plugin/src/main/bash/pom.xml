@@ -22,6 +22,12 @@
   <packaging>pom</packaging>
   <name>Errai Cordova Template for Cordova CLI</name>
 
+  <url>http://jboss.org/errai/errai</url>
+
+  <description>
+    Errai Cordova Project Template
+  </description>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
