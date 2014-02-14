@@ -148,7 +148,7 @@ public class MarshallerGeneratorFactory {
 
   public String generate(final String packageName, final String clazzName) {
     final String gen;
-    log.info("generating marshaller factory class for " + ((target == MarshallerOutputTarget.GWT) ? "client" : "server" + "..."));
+    log.info("generating marshaller factory class for " + (((target == MarshallerOutputTarget.GWT) ? "client" : "server") + "..."));
     final long time = System.currentTimeMillis();
     if (target == MarshallerOutputTarget.GWT && refresh) {
       DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
