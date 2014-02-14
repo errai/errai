@@ -1446,7 +1446,7 @@ public class TimeService {
 [TIP]
 .Best Practices
 ====
-Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential – albeit remote – that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.
+Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential ��� albeit remote ��� that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.
 ====
 
 [[sid-5931407]]
@@ -1520,7 +1520,7 @@ The classpath will be searched for all annotated providers at compile time.
 
 [IMPORTANT]
 ====
-Top-level providers are regular beans, so they can inject dependencies–particularly from other top-level providers–as necessary.
+Top-level providers are regular beans, so they can inject dependencies���particularly from other top-level providers���as necessary.
 ====
 
 [[sid-5931332]]
@@ -2377,7 +2377,7 @@ public class Document {
 
 ====
 
-As such, when [code]+Document+ events are fired, they will be limited in scope to the initiating conversational contents – which are implicitly inferred by the caller. So only the client which fired the [code]+Subscription+ event will receive the fired [code]+Document+ event.
+As such, when [code]+Document+ events are fired, they will be limited in scope to the initiating conversational contents ��� which are implicitly inferred by the caller. So only the client which fired the [code]+Subscription+ event will receive the fired [code]+Document+ event.
 
 [[sid-21758054_Events-ClientServerEventExample]]
 
@@ -2732,7 +2732,7 @@ public class Person {
 
 Here we have set both of the class fields final. By doing so, we had to remove our default constructor. But that's okay, because we have annotated the remaining constructor's parameters using the [code]+org.jboss.errai.marshalling.client.api.annotations.MapsTo+ annotation.
 
-By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property [code]+name+ . Which in this case, defaults to the name of the corresponding field. This may not always be the case – as will be explored in the section on custom definitions. But for now that's a safe assumption.
+By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property [code]+name+ . Which in this case, defaults to the name of the corresponding field. This may not always be the case ��� as will be explored in the section on custom definitions. But for now that's a safe assumption.
 
 [[sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaFactoryMethod]]
 
@@ -2990,7 +2990,7 @@ Paying attention to our annotating comments, let's describe what we've done here
 . Call the constructor in [code]+MappingDefinition+ passing our reference to the class we are mapping.
 
 
-. Using the [code]+SimpleConstructorMapping+ class, we have indicated that a custom constructor will be needed to instantiate this class. We have called the [code]+mapParmToIndex+ method with three parameters. The first, [code]+"mySupername"+ describes the class field that we are targeting. The second parameter, the integer [code]+0+ indicates the parameter index of the constructor arguments that we'll be providing the value for the aforementioned field – in this case the first and only, and the final parameter [code]+String.class+ tells the marshalling framework which marshalling contract to use in order to de-marshall the value.
+. Using the [code]+SimpleConstructorMapping+ class, we have indicated that a custom constructor will be needed to instantiate this class. We have called the [code]+mapParmToIndex+ method with three parameters. The first, [code]+"mySupername"+ describes the class field that we are targeting. The second parameter, the integer [code]+0+ indicates the parameter index of the constructor arguments that we'll be providing the value for the aforementioned field ��� in this case the first and only, and the final parameter [code]+String.class+ tells the marshalling framework which marshalling contract to use in order to de-marshall the value.
 
 
 . Using the [code]+WriteMapping+ class, we have indicated to the marshaller framework how to write the [code]+"mySuperNickname"+ field, using the [code]+String.class+ marshaller, and using the setter method [code]+setMySuperNickname+ .
@@ -4328,62 +4328,18 @@ To summarize: there are three entity types: [code]+User+ , [code]+GroceryList+ ,
 All the entities involved in the data synchronization request must be marshallable via Errai Marshalling. This is normally accomplished by adding the [code]+@Portable+ annotation to each JPA entity class, but it is also acceptable to list them in [code]+ErraiApp.properties+ . See the <<sid-5931328, Marshalling>> section for more details.
 ====
 
-Now let's say we want to synchronize the data for all of a user's grocery lists. This will make them available for offline use through Errai JPA, and at the same time it will update the server with the latest changes made on the client. Ultimately, the sync operation is accomplished in one asynchronous call, but first we have to prepare a few things on the client and the server.
-
-[[sid-71467090_ErraiJPADataSync-ClientSide]]
-
-===== Client Side
-
-[source, java]
-----
-  @Inject private ClientSyncManager syncManager;
-  @Inject private EntityManager em;
-
-  public void syncGroceryLists(User forUser) {
-    RemoteCallback<List<SyncResponse<GroceryList>>> onCompletion = new RemoteCallback<List<SyncResponse<GroceryList>>>() {
-      @Override
-      public void callback(List<SyncResponse<GroceryList>> response) {
-        Window.alert("Data Sync Complete!");
-      }
-    };
-
-    ErrorCallback<?> onError = new BusErrorCallback() {
-
-      @Override
-      public boolean error(Message message, Throwable throwable) {
-        Window.alert("Data Sync failed!");
-        return false;
-      }
-    };
-
-    Map<String, Object> queryParams = new HashMap<String, Object>();
-    queryParams.put("user", forUser);
-
-    syncManager.coldSync("groceryListsForUser", GroceryList.class, queryParams, onCompletion, onError);
-  }
-----
-
-[IMPORTANT]
-====
-The [code]+onCompletion+ and [code]+onError+ callbacks are optional. In the unlikely case that your application doesn't care if a data sync request completed successfully, you can pass [code]+null+ for either callback.
-====
-
-Once your [code]+onCompletion+ callback has been notified, the server and client will have the same entities stored in their respective databases for all entities reachable from the given query result.
+Now let's say we want to synchronize the data for all of a user's grocery lists. This will make them available for offline use through Errai JPA, and at the same time it will update the server with the latest changes made on the client. Ultimately, the sync operation is accomplished via an annotated method or an asynchronous call into `ClientSyncManager`, but first we have to prepare a few things on the client and the server.
 
 [[sid-71467090_ErraiJPADataSync-ServerSide%E2%80%93DataSyncServiceImpl]]
 
-===== Server Side – DataSyncServiceImpl
+===== Server Side ��� DataSyncServiceImpl
 
-During the [code]+coldSync()+ call, the client-side sync manager sends an <<sid-5931313,Errai RPC>> request to the server. Although a server-side implementation of the remote interface is provided, you are responsible for implementing a thin wrapper around it. This wrapper serves two purposes:
+A data sync operation begins when the client-side sync manager sends an <<sid-5931313,Errai RPC>> request to the server. Although a server-side implementation of the remote interface is provided, you are responsible for implementing a thin wrapper around it. This wrapper serves two purposes:
 
 . It allows you to determine how to obtain a reference to the JPA EntityManager (and to choose which persistence context the server-side data sync will operate on)
-
-
 . It allows you to inspect the contents of each sync request and make security decisions about access to particular entities
 
-
 If you are deploying to a container that supports CDI and EJB 3, you can use this DataSyncServiceImpl as a template for your own:
-
 
 [source, java]
 ----
@@ -4424,6 +4380,106 @@ public class DataSyncServiceImpl implements DataSyncService {
 ----
 
 If you are not using EJB 3, you will not be able to use the [code]+@PersistenceContext+ annotation. In this case, obtain a reference to your EntityManager the same way you would anywhere else in your application.
+
+[[ErraiJPADataSync-ClientSide-Declarative]]
+
+===== Client Side -- Declarative
+
+Like many Errai features, Errai JPA DataSync provides an annotation-driven programming model and a programmatic API.
+You can choose which to use based on your needs and preferences.
+
+The declarative data sync API is driven by the `@Sync` annotation. Consider the following example client-side class:
+
+[source, java]
+----
+  // This injected User object could have been set up in a @PostConstruct method instead of being injected.
+  @Inject
+  private User syncThisUser;
+
+  @Sync(query = "groceryListsForUser", params = { @SyncParam(name = "user", val = "{syncThisUser}") })
+  private void onDataSyncComplete(SyncResponses<GroceryList> responses) {
+    Window.alert("Data Sync Complete!");
+  }
+----
+
+By placing the above code snippet in a client-side bean, you tell Errai JPA Data Sync that, as long as a managed
+instance of the bean containing the `@Sync` method exists, the Data Sync system should keep all grocery lists
+belonging to the `syncThisUser` user in sync between the client-side JPA EntityManager and the server-side EntityManager.
+Right now, the data sets are kept in sync using a sync request every 5 seconds. In the future, this may be optimised
+to an incremental approach that pushes changes as they occur.
+
+The annotated method needs to have exactly one parameter of type `SyncResponses` and will
+be called each time a data sync operation has completed. All sync operations passed to the
+method will have already been applied to the local EntityManager, with conflicts resolved in
+favour of the server's version of the data. The original client values are available in the
+`SyncResponses` object, which gives you a chance to implement a different conflict
+resolution policy.
+
+The `query` attribute on the `@Sync` annotation must refer to an existing JPA Named Query that is defined on a shared
+JPA entity class.
+
+The `params` attribute is an array of `@SyncParam` annotations. There must be exactly one `@SyncParam` for each named
+parameter in the JPA query (positional parameters are not supported). If the `val` argument is surrounded with brace
+brackets (as it is in the example aboce) then it is interpreted as a reference to a declared or inherited field in
+the containing class. Otherwise, it is interpreted as a literal String value.
+
+[NOTE]
+====
+Field-reference sync params are captured just after the bean's `@PostConstruct` method is invoked. This means that
+values of referenced fields can be provided using `@Inject` (which in turn could come from a CDI Producer method)
+or by code in the `@PostConstruct` method.
+
+Unfortunately, Errai Navigation's writes page parameter values _after_ Errai Data Sync reads them, so Data Sync cannot
+refer to page parameter fields directly. Your application is responsible for setting fields before the `@PostConstruct`
+method returns. We hope to remedy this issue in a future release (community participation welcome!) 
+====
+
+Transport (network) errors are logged to the slf4j logger channel `org.jboss.errai.jpa.sync.client.local.ClientSyncWorker`.
+As of Errai 3.0.0.M4, it is not possible to specify a custom error handler using the declarative API. See the next
+section for information about the programmatic API.
+
+
+[[ErraiJPADataSync-ClientSide-Programmatic]]
+
+===== Client Side -- Programmatic
+
+[source, java]
+----
+  @Inject private ClientSyncManager syncManager;
+  @Inject private EntityManager em;
+
+  public void syncGroceryLists(User forUser) {
+    RemoteCallback<List<SyncResponse<GroceryList>>> onCompletion = new RemoteCallback<List<SyncResponse<GroceryList>>>() {
+      @Override
+      public void callback(List<SyncResponse<GroceryList>> response) {
+        Window.alert("Data Sync Complete!");
+      }
+    };
+
+    ErrorCallback<?> onError = new BusErrorCallback() {
+
+      @Override
+      public boolean error(Message message, Throwable throwable) {
+        Window.alert("Data Sync failed!");
+        return false;
+      }
+    };
+
+    Map<String, Object> queryParams = new HashMap<String, Object>();
+    queryParams.put("user", forUser);
+
+    syncManager.coldSync("groceryListsForUser", GroceryList.class, queryParams, onCompletion, onError);
+  }
+----
+
+[IMPORTANT]
+====
+The [code]+onCompletion+ and [code]+onError+ callbacks are optional. In the unlikely case that your application doesn't
+care if a data sync request completed successfully, you can pass [code]+null+ for either callback.
+====
+
+Once your [code]+onCompletion+ callback has been notified, the server and client will have the same entities stored in
+their respective databases for all entities reachable from the given query result.
 
 [[sid-71467090_ErraiJPADataSync-DealingWithConflicts]]
 
@@ -5737,7 +5793,7 @@ public class LoginLayout extends PageLayout {
 
 === Stylesheet binding
 
-When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part – which is an important usability consideration – is communicating that state to the user.
+When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part ��� which is an important usability consideration ��� is communicating that state to the user.
 
 Let's start with the example case I just described. We have a control that we only want to be visible if the user is an admin. So the first thing we do is create a style binding annotation.
 
@@ -6245,7 +6301,7 @@ public class OverallPageStrucutre extends Composite {
 
 ==== Overriding the default Nagivating Panel type
 
-By default Errai uses [code]+com.​google.​gwt.​user.​client.​ui.SimplePanel+ as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a [code]+com.google.gwt.user.client.ui.SimpleLayoutPanel+ that manages child size state.
+By default Errai uses [code]+com.���google.���gwt.���user.���client.���ui.SimplePanel+ as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a [code]+com.google.gwt.user.client.ui.SimpleLayoutPanel+ that manages child size state.
 
 To provide your own implementation of the navigation panel you must implement [code]+org.jboss.errai.ui.nav.client.local.NavigatingContainer+ . For example:
 
@@ -6495,7 +6551,7 @@ sl4j is logging abstraction. Using the slf4j api, you can add log statements to 
 
 === Client-Side Setup
 
-The client-side slf4j code uses the ﻿ link:$$http://www.gwtproject.org/doc/latest/DevGuideLogging.html$$[GWT Logging] as the back-end. Using slf4j in client-side code has two steps:
+The client-side slf4j code uses the ��� link:$$http://www.gwtproject.org/doc/latest/DevGuideLogging.html$$[GWT Logging] as the back-end. Using slf4j in client-side code has two steps:
 
 . Add the errai-common artifact as a maven dependency to your project
 
@@ -7961,7 +8017,7 @@ _Answer:_ This error message means that your project has a (direct or indirect) 
 
 === I'm getting "java.lang.RuntimeException: There are no proxy providers registered yet." in my @PostConstruct method!
 
-_Answer:_ You can't invoke RPC methods via [code]+Caller<?>+ or by other means until after the Errai Bus has finished its initial handshake. Try changing your [code]+@PostConstruct+ annotation to [code]+@AfterInitialization+ . This will cause your method to be invoked later—after the bus handshake has completed.
+_Answer:_ You can't invoke RPC methods via [code]+Caller<?>+ or by other means until after the Errai Bus has finished its initial handshake. Try changing your [code]+@PostConstruct+ annotation to [code]+@AfterInitialization+ . This will cause your method to be invoked later���after the bus handshake has completed.
 
 If this doesn't help, it is also possible that the proxies were never generated in the first place. Check in [code]+.errai/RpcProxyLoaderImpl.java+ to see if proxy code exists for the [code]+@Remote+ and/or [code]+@Path+ interface in question. If not, your [code]+@Remote+ interfaces were not present on the GWT compiler's classpath when your application module was compiled. Double-check your GWT compilation classpath: all [code]+@Remote+ interfaces must be visible to (in or inherited by) the GWT module that contains the [code]+Caller<?>+ types. Pay special attention that your [code]+@Remote+ and [code]+@Path+ interfaces are not in a package excluded from the GWT module (by default, every subpackage other than [code]+client+ and [code]+shared+ is invisible to the GWT compiler).
 
@@ -8094,4 +8150,4 @@ If you run into trouble don't hesitate to get in touch with us:
 
 == Errai License
 
-Errai is distributed under the terms of the Apache License, Version 2.0. See link:$$http://www.apache.org/licenses/LICENSE-2.0$$[﻿﻿the full Apache license text].
+Errai is distributed under the terms of the Apache License, Version 2.0. See link:$$http://www.apache.org/licenses/LICENSE-2.0$$[������the full Apache license text].
