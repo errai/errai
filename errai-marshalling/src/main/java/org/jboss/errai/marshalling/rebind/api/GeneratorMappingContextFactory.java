@@ -24,33 +24,54 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerOutputTarget;
 
+import com.google.gwt.core.ext.GeneratorContext;
+
 /**
+ * Creates and holds references to {@link GeneratorMappingContext}s for different
+ * {@link MarshallerOutputTarget}s.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GeneratorMappingContextFactory {
-  private static final Map<MarshallerOutputTarget, GeneratorMappingContext> contexts =
-      new HashMap<MarshallerOutputTarget, GeneratorMappingContext>();
+  private static final Map<GeneratorContext, GeneratorMappingContext> gwtContexts =
+      new HashMap<GeneratorContext, GeneratorMappingContext>();
 
-  public static GeneratorMappingContext getFor(MarshallerOutputTarget target) {
-    GeneratorMappingContext context = contexts.get(target);
-    if (context == null) {
+  private static GeneratorMappingContext javaContext = null;
+
+  public static GeneratorMappingContext getFor(GeneratorContext context, MarshallerOutputTarget target) {
+
+    GeneratorMappingContext mappingContext = null;
+    if (target == MarshallerOutputTarget.GWT) {
+      mappingContext = gwtContexts.get(context);
+    }
+    else if (target == MarshallerOutputTarget.Java) {
+      mappingContext = javaContext;
+    }
+
+    if (mappingContext == null) {
       throw new GenerationException("Generation context for output target " + target + " was not created!");
     }
-    
-    return context;
+
+    return mappingContext;
   }
 
-  public static GeneratorMappingContext create(final MarshallerOutputTarget target,
+  public static GeneratorMappingContext create(
+      final GeneratorContext context,
+      final MarshallerOutputTarget target,
       final MarshallerGeneratorFactory marshallerGeneratorFactory,
       final ClassStructureBuilder<?> classStructureBuilder,
       final ArrayMarshallerCallback arrayMarshallerCallback) {
 
-    GeneratorMappingContext context =
+    GeneratorMappingContext mappingContext =
         new GeneratorMappingContext(marshallerGeneratorFactory, classStructureBuilder, arrayMarshallerCallback);
 
-    contexts.put(target, context);
+    if (target == MarshallerOutputTarget.GWT) {
+      gwtContexts.put(context, mappingContext);
+    }
+    else if (target == MarshallerOutputTarget.Java) {
+      javaContext = mappingContext;
+    }
 
-    return context;
+    return mappingContext;
   }
 }

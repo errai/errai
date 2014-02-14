@@ -73,6 +73,7 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.shared.GWT;
 
 /**
@@ -86,6 +87,7 @@ public class MarshallerGeneratorFactory {
   private final ReachableTypes reachableTypes;
 
   private GeneratorMappingContext mappingContext;
+  private final GeneratorContext context;
 
   private ClassStructureBuilder<?> classStructureBuilder;
   private BlockBuilder<?> getMarshallerMethod;
@@ -101,7 +103,8 @@ public class MarshallerGeneratorFactory {
 
   long startTime;
 
-  private MarshallerGeneratorFactory(final MarshallerOutputTarget target, final ReachableTypes reachableTypes) {
+  private MarshallerGeneratorFactory(final GeneratorContext context, final MarshallerOutputTarget target, final ReachableTypes reachableTypes) {
+    this.context = context;
     this.target = target;
 
     this.reachableTypes = reachableTypes;
@@ -134,13 +137,13 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  public static MarshallerGeneratorFactory getFor(final MarshallerOutputTarget target) {
-    return new MarshallerGeneratorFactory(target, ReachableTypes.EVERYTHING_REACHABLE_INSTANCE);
+  public static MarshallerGeneratorFactory getFor(final GeneratorContext context, final MarshallerOutputTarget target) {
+    return new MarshallerGeneratorFactory(context, target, ReachableTypes.EVERYTHING_REACHABLE_INSTANCE);
   }
 
-  public static MarshallerGeneratorFactory getFor(final MarshallerOutputTarget target,
+  public static MarshallerGeneratorFactory getFor(final GeneratorContext context, final MarshallerOutputTarget target,
       final ReachableTypes reachableTypes) {
-    return new MarshallerGeneratorFactory(target, reachableTypes);
+    return new MarshallerGeneratorFactory(context, target, reachableTypes);
   }
 
   public String generate(final String packageName, final String clazzName) {
@@ -160,7 +163,7 @@ public class MarshallerGeneratorFactory {
 
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
     classContext = classStructureBuilder.getClassDefinition().getContext();
-    mappingContext = GeneratorMappingContextFactory.create(target, this, classStructureBuilder,
+    mappingContext = GeneratorMappingContextFactory.create(context, target, this, classStructureBuilder,
         new ArrayMarshallerCallback() {
           @Override
           public Statement marshal(final MetaClass type, final Statement value) {
@@ -374,7 +377,7 @@ public class MarshallerGeneratorFactory {
       }
       else {
         final MappingStrategy strategy = MappingStrategyFactory
-            .createStrategy(false, GeneratorMappingContextFactory.getFor(target), type);
+            .createStrategy(false, GeneratorMappingContextFactory.getFor(context, target), type);
 
         String marshallerClassName =
             MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "Impl";

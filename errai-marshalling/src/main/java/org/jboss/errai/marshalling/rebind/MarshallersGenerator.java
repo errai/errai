@@ -239,7 +239,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
           serverSideClass = _serverMarshallerCache;
         }
         else {
-          serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.Java)
+          serverSideClass = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.Java)
               .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
           _serverMarshallerCache = serverSideClass;
         }
@@ -328,7 +328,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
       }
 
       return _clientMarshallerCache
-          = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.GWT, EnvUtil.getAllReachableClasses(context))
+          = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT, EnvUtil.getAllReachableClasses(context))
           .generate(packageName, className);
     }
   }

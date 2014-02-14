@@ -111,7 +111,7 @@ public abstract class ServerMarshallUtil {
       log.warn("could not read marshaller classes: " + e);
     }
 
-    final String classStr = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.Java)
+    final String classStr = MarshallerGeneratorFactory.getFor(null, MarshallerOutputTarget.Java)
             .generate(packageName, className);
 
     final File directory =

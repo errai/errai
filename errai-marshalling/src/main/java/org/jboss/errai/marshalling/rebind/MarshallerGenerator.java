@@ -56,7 +56,7 @@ public class MarshallerGenerator extends Generator {
     if (printWriter != null) {
       MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
       final MappingStrategy strategy =
-          MappingStrategyFactory.createStrategy(true, GeneratorMappingContextFactory.getFor(target), type);
+          MappingStrategyFactory.createStrategy(true, GeneratorMappingContextFactory.getFor(context, target), type);
 
       String gen = null;
       if (type.isArray()) {
