@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 
 import java.lang.annotation.Annotation;

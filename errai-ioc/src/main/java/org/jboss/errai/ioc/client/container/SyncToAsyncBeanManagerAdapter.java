@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

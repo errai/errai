@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.container.IOC;
 

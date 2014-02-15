@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
+
 /**
  * @author Mike Brock
  */

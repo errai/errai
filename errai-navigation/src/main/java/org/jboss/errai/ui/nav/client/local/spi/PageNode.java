@@ -1,6 +1,6 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 

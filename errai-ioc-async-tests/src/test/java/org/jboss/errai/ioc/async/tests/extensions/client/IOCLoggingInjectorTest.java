@@ -1,9 +1,9 @@
 package org.jboss.errai.ioc.async.tests.extensions.client;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.tests.extensions.client.res.ClassWithLoggerField;
 import org.jboss.errai.ioc.async.tests.extensions.client.res.ClassWithNamedLoggerField;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
 public class IOCLoggingInjectorTest extends AbstractErraiIOCTest {
