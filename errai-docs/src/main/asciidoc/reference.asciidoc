@@ -1446,7 +1446,7 @@ public class TimeService {
 [TIP]
 .Best Practices
 ====
-Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential ��� albeit remote ��� that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.
+Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential albeit remote that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.
 ====
 
 [[sid-5931407]]
@@ -1520,7 +1520,7 @@ The classpath will be searched for all annotated providers at compile time.
 
 [IMPORTANT]
 ====
-Top-level providers are regular beans, so they can inject dependencies���particularly from other top-level providers���as necessary.
+Top-level providers are regular beans, so they can inject dependencies particularly from other top-level providers as necessary.
 ====
 
 [[sid-5931332]]
@@ -2377,7 +2377,7 @@ public class Document {
 
 ====
 
-As such, when [code]+Document+ events are fired, they will be limited in scope to the initiating conversational contents ��� which are implicitly inferred by the caller. So only the client which fired the [code]+Subscription+ event will receive the fired [code]+Document+ event.
+As such, when [code]+Document+ events are fired, they will be limited in scope to the initiating conversational contents which are implicitly inferred by the caller. So only the client which fired the [code]+Subscription+ event will receive the fired [code]+Document+ event.
 
 [[sid-21758054_Events-ClientServerEventExample]]
 
@@ -2732,7 +2732,7 @@ public class Person {
 
 Here we have set both of the class fields final. By doing so, we had to remove our default constructor. But that's okay, because we have annotated the remaining constructor's parameters using the [code]+org.jboss.errai.marshalling.client.api.annotations.MapsTo+ annotation.
 
-By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property [code]+name+ . Which in this case, defaults to the name of the corresponding field. This may not always be the case ��� as will be explored in the section on custom definitions. But for now that's a safe assumption.
+By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property [code]+name+ . Which in this case, defaults to the name of the corresponding field. This may not always be the case as will be explored in the section on custom definitions. But for now that's a safe assumption.
 
 [[sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaFactoryMethod]]
 
@@ -2990,7 +2990,7 @@ Paying attention to our annotating comments, let's describe what we've done here
 . Call the constructor in [code]+MappingDefinition+ passing our reference to the class we are mapping.
 
 
-. Using the [code]+SimpleConstructorMapping+ class, we have indicated that a custom constructor will be needed to instantiate this class. We have called the [code]+mapParmToIndex+ method with three parameters. The first, [code]+"mySupername"+ describes the class field that we are targeting. The second parameter, the integer [code]+0+ indicates the parameter index of the constructor arguments that we'll be providing the value for the aforementioned field ��� in this case the first and only, and the final parameter [code]+String.class+ tells the marshalling framework which marshalling contract to use in order to de-marshall the value.
+. Using the [code]+SimpleConstructorMapping+ class, we have indicated that a custom constructor will be needed to instantiate this class. We have called the [code]+mapParmToIndex+ method with three parameters. The first, [code]+"mySupername"+ describes the class field that we are targeting. The second parameter, the integer [code]+0+ indicates the parameter index of the constructor arguments that we'll be providing the value for the aforementioned field in this case the first and only, and the final parameter [code]+String.class+ tells the marshalling framework which marshalling contract to use in order to de-marshall the value.
 
 
 . Using the [code]+WriteMapping+ class, we have indicated to the marshaller framework how to write the [code]+"mySuperNickname"+ field, using the [code]+String.class+ marshaller, and using the setter method [code]+setMySuperNickname+ .
@@ -4392,7 +4392,7 @@ Now let's say we want to synchronize the data for all of a user's grocery lists.
 
 [[sid-71467090_ErraiJPADataSync-ServerSide%E2%80%93DataSyncServiceImpl]]
 
-===== Server Side ��� DataSyncServiceImpl
+===== Server Side DataSyncServiceImpl
 
 A data sync operation begins when the client-side sync manager sends an <<sid-5931313,Errai RPC>> request to the server. Although a server-side implementation of the remote interface is provided, you are responsible for implementing a thin wrapper around it. This wrapper serves two purposes:
 
@@ -5853,7 +5853,7 @@ public class LoginLayout extends PageLayout {
 
 === Stylesheet binding
 
-When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part ��� which is an important usability consideration ��� is communicating that state to the user.
+When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part which is an important usability consideration is communicating that state to the user.
 
 Let's start with the example case I just described. We have a control that we only want to be visible if the user is an admin. So the first thing we do is create a style binding annotation.
 
@@ -6361,7 +6361,7 @@ public class OverallPageStrucutre extends Composite {
 
 ==== Overriding the default Nagivating Panel type
 
-By default Errai uses [code]+com.���google.���gwt.���user.���client.���ui.SimplePanel+ as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a [code]+com.google.gwt.user.client.ui.SimpleLayoutPanel+ that manages child size state.
+By default Errai uses [code]+com.google.gwt.user.client.ui.SimplePanel+ as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a [code]+com.google.gwt.user.client.ui.SimpleLayoutPanel+ that manages child size state.
 
 To provide your own implementation of the navigation panel you must implement [code]+org.jboss.errai.ui.nav.client.local.NavigatingContainer+ . For example:
 
@@ -6611,7 +6611,7 @@ sl4j is logging abstraction. Using the slf4j api, you can add log statements to 
 
 === Client-Side Setup
 
-The client-side slf4j code uses the ��� link:$$http://www.gwtproject.org/doc/latest/DevGuideLogging.html$$[GWT Logging] as the back-end. Using slf4j in client-side code has two steps:
+The client-side slf4j code uses the link:$$http://www.gwtproject.org/doc/latest/DevGuideLogging.html$$[GWT Logging] as the back-end. Using slf4j in client-side code has two steps:
 
 . Add the errai-common artifact as a maven dependency to your project
 
@@ -8077,7 +8077,7 @@ _Answer:_ This error message means that your project has a (direct or indirect) 
 
 === I'm getting "java.lang.RuntimeException: There are no proxy providers registered yet." in my @PostConstruct method!
 
-_Answer:_ You can't invoke RPC methods via [code]+Caller<?>+ or by other means until after the Errai Bus has finished its initial handshake. Try changing your [code]+@PostConstruct+ annotation to [code]+@AfterInitialization+ . This will cause your method to be invoked later���after the bus handshake has completed.
+_Answer:_ You can't invoke RPC methods via [code]+Caller<?>+ or by other means until after the Errai Bus has finished its initial handshake. Try changing your [code]+@PostConstruct+ annotation to [code]+@AfterInitialization+ . This will cause your method to be invoked later after the bus handshake has completed.
 
 If this doesn't help, it is also possible that the proxies were never generated in the first place. Check in [code]+.errai/RpcProxyLoaderImpl.java+ to see if proxy code exists for the [code]+@Remote+ and/or [code]+@Path+ interface in question. If not, your [code]+@Remote+ interfaces were not present on the GWT compiler's classpath when your application module was compiled. Double-check your GWT compilation classpath: all [code]+@Remote+ interfaces must be visible to (in or inherited by) the GWT module that contains the [code]+Caller<?>+ types. Pay special attention that your [code]+@Remote+ and [code]+@Path+ interfaces are not in a package excluded from the GWT module (by default, every subpackage other than [code]+client+ and [code]+shared+ is invisible to the GWT compiler).
 
@@ -8210,4 +8210,4 @@ If you run into trouble don't hesitate to get in touch with us:
 
 == Errai License
 
-Errai is distributed under the terms of the Apache License, Version 2.0. See link:$$http://www.apache.org/licenses/LICENSE-2.0$$[������the full Apache license text].
+Errai is distributed under the terms of the Apache License, Version 2.0. See link:$$http://www.apache.org/licenses/LICENSE-2.0$$[the full Apache license text].
