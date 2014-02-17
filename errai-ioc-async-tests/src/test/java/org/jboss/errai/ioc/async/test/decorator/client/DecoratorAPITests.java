@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.async.test.decorator.client;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.test.decorator.client.res.MyDecoratedBean;
 import org.jboss.errai.ioc.async.test.decorator.client.res.TestDataCollector;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
 import java.util.HashMap;

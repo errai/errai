@@ -1,10 +1,10 @@
 package org.jboss.errai.cdi.async.databinding.test.client;
 
 import org.jboss.errai.cdi.async.databinding.test.client.res.MyBean;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 /**
  * @author Mike Brock

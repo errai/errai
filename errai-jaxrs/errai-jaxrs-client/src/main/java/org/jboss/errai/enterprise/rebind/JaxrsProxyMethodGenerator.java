@@ -351,7 +351,7 @@ public class JaxrsProxyMethodGenerator {
     JaxrsResourceMethodParameters jaxrsParams =
         JaxrsResourceMethodParameters.fromMethod(resourceMethod.getMethod(), "parameters");
     Statement callContext =
-        ProxyUtil.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
+        ProxyUtil.generateProxyMethodCallContext(context, RestCallContext.class, declaringClass,
             resourceMethod.getMethod(), generateInterceptedRequest(), interceptors)
             .publicOverridesMethod("proceed", Parameter.of(ResponseCallback.class, "interceptorCallback", true))
               .append(Stmt.declareVariable(RemoteCallback.class).asFinal().named("providedCallback").initializeWith(

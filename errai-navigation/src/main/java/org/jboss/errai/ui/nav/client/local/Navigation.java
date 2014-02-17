@@ -9,14 +9,17 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 

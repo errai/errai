@@ -1,11 +1,12 @@
 package org.jboss.errai.ioc.async.test.constructor.client;
 
 import com.google.gwt.user.client.Timer;
+
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.test.constructor.client.res.ConstrInjBean;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 /**
  * @author Mike Brock

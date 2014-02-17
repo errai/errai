@@ -1,8 +1,8 @@
 package org.jboss.errai.cdi.async.test.postconstruct.client.res;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;

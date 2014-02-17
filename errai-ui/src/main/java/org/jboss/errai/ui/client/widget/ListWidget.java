@@ -23,13 +23,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.databinding.client.BindableListChangeHandler;
 import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdapter;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
