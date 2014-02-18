@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import java.util.Date;
+
 import javax.ws.rs.core.PathSegment;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.PathSegmentImpl;
@@ -68,6 +70,14 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
     call(PathParamTestService.class,
         new AssertionCallback<String>("@GET with @PathParam failed", "nameValue/authorValue"))
         .getWithPathSegmentPathParam(ps);
+  }
+  @Test
+  public void testGetWithDatePathParam() {
+    Date d = new Date();
+    String expected = d.toString();
+    call(PathParamTestService.class,
+        new AssertionCallback<String>("@GET with @PathParams using java.util.Date failed", 
+            expected)).getWithDatePathParam(d);
   }
 
   @Test

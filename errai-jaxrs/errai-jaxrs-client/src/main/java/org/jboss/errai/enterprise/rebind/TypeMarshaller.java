@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.util.Date;
 import java.util.Map;
 
 import org.jboss.errai.codegen.Parameter;
@@ -98,7 +99,7 @@ public class TypeMarshaller {
     public static boolean canHandle(MetaClass type, String mimeType) {
       boolean canHandle = false;
       if (("text/plain".equals(mimeType) && type.asUnboxed().isPrimitive())
-          || type.equals(MetaClassFactory.get(String.class))) {
+          || type.equals(MetaClassFactory.get(String.class)) || type.equals(MetaClassFactory.get(Date.class))) {
         canHandle = true;
       }
       return canHandle;
@@ -126,6 +127,10 @@ public class TypeMarshaller {
 
       if (MetaClassFactory.get(void.class).equals(type)) {
         return Stmt.load(null);
+      }
+      
+      if (MetaClassFactory.get(Date.class).equals(type)) {
+        return Stmt.newObject(Date.class, statement);
       }
 
       return Stmt.invokeStatic(type.asBoxed(), "valueOf", statement);
