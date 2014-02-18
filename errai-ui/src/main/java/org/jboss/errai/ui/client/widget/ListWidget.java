@@ -282,8 +282,12 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemAddedAt(List<M> oldList, int index, M item) {
-    for (int i = index; i < items.size(); i++) {
-      addAndReplaceWidget(index, i);
+    if (panel instanceof IndexedPanel.ForIsWidget) {
+      insertWidgetAt(index, items.get(index));
+    } else {
+      for (int i = index; i < items.size(); i++) {
+        addAndReplaceWidget(index, i);
+      }
     }
   }
 
@@ -296,8 +300,14 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemsAddedAt(List<M> oldList, int index, Collection<? extends M> item) {
-    for (int i = index; i < items.size(); i++) {
-      addAndReplaceWidget(index, i);
+    if (panel instanceof IndexedPanel.ForIsWidget) {
+      for (int i = index; i < index + item.size(); i++ ) {
+        insertWidgetAt(index, items.get(index));
+      }
+    } else {
+      for (int i = index; i < items.size(); i++) {
+        addAndReplaceWidget(index, i);
+      }
     }
   }
 
@@ -342,6 +352,31 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       public void callback(W widget) {
         widget.setModel(m);
         panel.add(widget);
+      }
+    });
+  }
+
+  /**
+   * When the panel implements {@link InsertPanel.ForIsWidget} (i.e. the default {@link FlowPanel})
+   * insertion performance can be improved in comparison to {@link #addAndReplaceWidget} by using
+   * this method.
+   * @precondition
+   *          this.panel must implement {@link InsertPanel.ForIsWidget}
+   * @param index
+   *          the index at which the item has been added.
+   * @param m
+   *          the widgets Model to insert
+   */
+  private void insertWidgetAt(final int index, final M m) {
+    // This call is always synchronous, since the list can only be manipulated after
+    // onItemsRendered was called. At that point the code of a potential split point must have
+    // already been downloaded.
+    AsyncBeanDef<W> itemBeanDef = IOC.getAsyncBeanManager().lookupBean(getItemWidgetType());
+    itemBeanDef.getInstance(new CreationalCallback<W>() {
+      @Override
+      public void callback(W widget) {
+        widget.setModel(m);
+        ((InsertPanel.ForIsWidget)panel).insert(widget, index);
       }
     });
   }
