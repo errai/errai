@@ -1,7 +1,7 @@
 package org.jboss.errai.security.server;
 
 import org.jboss.errai.security.shared.*;
-import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.SecurityException;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;

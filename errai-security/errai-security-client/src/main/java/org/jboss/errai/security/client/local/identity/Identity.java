@@ -1,4 +1,4 @@
-package org.jboss.errai.security.client.local;
+package org.jboss.errai.security.client.local.identity;
 
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.rpc.AsyncCallback;

@@ -1,4 +1,4 @@
-package org.jboss.errai.security.client.local;
+package org.jboss.errai.security.client.local.interceptors;
 
 import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COOKIE;
 

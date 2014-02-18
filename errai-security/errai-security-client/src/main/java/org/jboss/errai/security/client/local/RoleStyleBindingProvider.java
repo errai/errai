@@ -3,13 +3,16 @@ package org.jboss.errai.security.client.local;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
 import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.ui.shared.api.style.AnnotationStyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import java.lang.annotation.Annotation;
 
 /**

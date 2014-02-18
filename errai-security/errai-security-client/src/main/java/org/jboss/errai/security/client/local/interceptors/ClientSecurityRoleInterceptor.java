@@ -1,4 +1,4 @@
-package org.jboss.errai.security.client.local;
+package org.jboss.errai.security.client.local.interceptors;
 
 
 import java.util.List;
@@ -34,6 +34,7 @@ public class ClientSecurityRoleInterceptor extends ClientSecurityInterceptor imp
   }
 
   public void securityCheck(final String[] values, final Command command) {
+
     MessageBuilder.createCall(new RemoteCallback<Boolean>() {
       @Override
       public void callback(final Boolean loggedIn) {

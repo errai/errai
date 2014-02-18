@@ -10,9 +10,9 @@
   <inherits name="org.jboss.errai.enterprise.CDI" />
   <inherits name="org.jboss.errai.ui.nav.Navigation"/>
   <inherits name="org.jboss.errai.ui.UI"/>
-  <inherits name="org.jboss.errai.security.SecurityShared"/>
 
   <inherits name="javax.interceptor.Support"/>
+  <inherits name="org.jboss.errai.security.SecurityShared"/>
 
   <source path="client"/>
   <source path="shared"/>

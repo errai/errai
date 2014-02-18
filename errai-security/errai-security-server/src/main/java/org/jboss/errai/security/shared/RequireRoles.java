@@ -41,7 +41,6 @@ import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 @Alias
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-//@InterceptedCall(ClientSecurityRoleInterceptor.class)
 @StyleBinding
 @InterceptorBinding
 public @interface RequireRoles {

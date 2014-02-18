@@ -1,22 +1,25 @@
 package org.jboss.errai.security.server;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.PageRequest;
-import org.jboss.errai.security.shared.*;
+import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.LoggedInEvent;
+import org.jboss.errai.security.shared.LoggedOutEvent;
 import org.jboss.errai.security.shared.Role;
+import org.jboss.errai.security.shared.SecurityException;
 import org.jboss.errai.security.shared.User;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.credential.Password;
-import org.picketlink.idm.model.*;
 import org.picketlink.idm.query.IdentityQuery;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * PicketLink version of the AuthenticationService and default implementation.
