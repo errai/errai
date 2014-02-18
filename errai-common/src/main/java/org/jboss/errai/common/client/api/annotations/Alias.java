@@ -22,6 +22,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author edewit@redhat.com
  */
+@Deprecated
 @Target(TYPE)
 @Retention(RUNTIME)
 public @interface Alias {

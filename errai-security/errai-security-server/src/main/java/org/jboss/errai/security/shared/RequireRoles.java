@@ -25,7 +25,6 @@ import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.common.client.api.annotations.Alias;
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 
 /**
@@ -38,7 +37,6 @@ import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
  * @see Service
  * @see org.jboss.errai.ui.shared.api.annotations.DataField
  */
-@Alias
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @StyleBinding

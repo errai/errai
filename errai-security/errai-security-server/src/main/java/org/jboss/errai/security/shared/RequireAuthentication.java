@@ -24,15 +24,12 @@ import java.lang.annotation.Target;
 
 import javax.interceptor.InterceptorBinding;
 
-import org.jboss.errai.common.client.api.annotations.Alias;
-
 /**
  * Indicates that the service can only be accessed by logged-in users. No
  * additional security permissions are required.
  * <p>
  * This annotation can be on a method or an entire class
  */
-@Alias
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
