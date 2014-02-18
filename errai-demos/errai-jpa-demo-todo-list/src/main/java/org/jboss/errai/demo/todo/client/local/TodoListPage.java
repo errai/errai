@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
@@ -15,7 +16,7 @@ import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
-import org.jboss.errai.security.client.local.Identity;
+import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.client.widget.ListWidget;
@@ -31,6 +32,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
