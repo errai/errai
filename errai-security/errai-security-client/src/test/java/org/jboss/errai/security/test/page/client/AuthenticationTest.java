@@ -65,11 +65,11 @@ public class AuthenticationTest extends AbstractErraiCDITest {
   }
 
 
-  public void testShouldCallSecurityInterceptorOnRequireAuthentication() {
-    // when
-    IOC.getBeanManager().lookupBean(RequireAuthenticationPage.class).getInstance();
-
-    // then
-    assertEquals(new Integer(1), spy.getCallCount("isLoggedIn"));
-  }
+//  public void testShouldCallSecurityInterceptorOnRequireAuthentication() {
+//    // when
+//    IOC.getBeanManager().lookupBean(RequireAuthenticationPage.class).getInstance();
+//
+//    // then
+//    assertEquals(new Integer(1), spy.getCallCount("isLoggedIn"));
+//  }
 }
