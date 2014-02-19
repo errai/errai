@@ -39,6 +39,17 @@ public class LoginInterceptor implements RemoteCallInterceptor<RemoteCallContext
         }
       });
     }
+    else if (context.getMethodName().equals("logout")) {
+      IOC.getAsyncBeanManager().lookupBean(ActiveUserProvider.class)
+              .getInstance(new CreationalCallback<ActiveUserProvider>() {
+
+                @Override
+                public void callback(final ActiveUserProvider provider) {
+                  provider.setActiveUser(null);
+                }
+              });
+      context.proceed();
+    }
     else {
       context.proceed();
     }
