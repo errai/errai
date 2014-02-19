@@ -62,6 +62,13 @@ abstract class CallContext {
    * @return the annotations of the method of which the interceptor was invoked.
    */
   public abstract Annotation[] getAnnotations();
+  
+  /**
+   * Get the annotations of the intercepted type.
+   * 
+   * @return the annotations of the type on which the interceptor was invoked.
+   */
+  public abstract Annotation[] getTypeAnnotations();
 
   /**
    * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all

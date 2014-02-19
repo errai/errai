@@ -16,9 +16,11 @@
 
 package org.jboss.errai.codegen.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -80,13 +82,18 @@ public abstract class ProxyUtil {
           final Class<? extends RemoteCallContext> callContextType,
           final MetaClass proxyClass, final MetaMethod method,
           final Statement proceed, final List<Class<?>> interceptors) {
+    
+    final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
 
     return Stmt.newObject(callContextType).extend()
               .publicOverridesMethod("getMethodName")
               .append(Stmt.load(method.getName()).returnValue())
               .finish()
               .publicOverridesMethod("getAnnotations")
-              .append(Stmt.load(method.getAnnotations()).returnValue())
+              .append(Stmt.load(filter(method.getAnnotations(), translatablePackages)).returnValue())
+              .finish()
+              .publicOverridesMethod("getTypeAnnotations")
+              .append(Stmt.load(filter(method.getDeclaringClass().getAnnotations(), translatablePackages)).returnValue())
               .finish()
               .publicOverridesMethod("proceed")
               .append(generateInterceptorStackProceedMethod(context, callContextType, proceed, interceptors))
@@ -286,5 +293,22 @@ public abstract class ProxyUtil {
       }
     }
     return returnStatement;
+  }
+  
+  private static Annotation[] filter(final Annotation[] raw, Set<String> packages) {
+    final Annotation[] firstPass = new Annotation[raw.length];
+    int j = 0;
+    for (int i = 0; i < raw.length; i++) {
+      if (packages.contains(raw[i].annotationType().getPackage().getName())) {
+        firstPass[j++] = raw[i];
+      }
+    }
+    
+    final Annotation[] retVal = new Annotation[j];
+    for (int i = 0; i < j; i++) {
+      retVal[i] = firstPass[i];
+    }
+    
+    return retVal;
   }
 }
