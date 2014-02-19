@@ -4,6 +4,9 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.security.shared.User;
 
+/**
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 @ApplicationScoped
 public class ActiveUserProviderImpl implements ActiveUserProvider {
   

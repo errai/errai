@@ -10,6 +10,12 @@ import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
 
+/**
+ * Intercepts RPC logins through {@link AuthenticationService} for populating
+ * and removing the current logged in user via {@link ActiveUserProvider}.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 @InterceptsRemoteCall({ AuthenticationService.class })
 public class LoginInterceptor implements RemoteCallInterceptor<RemoteCallContext> {
 

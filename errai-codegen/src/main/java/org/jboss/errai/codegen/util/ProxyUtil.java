@@ -62,6 +62,7 @@ public abstract class ProxyUtil {
 
   /**
    * Generates the {@link org.jboss.errai.common.client.api.interceptor.CallContext} for method interception.
+   * Ignores annotations in non-translatable packages.
    * 
    * @param callContextType
    *          the type of {@link org.jboss.errai.common.client.api.interceptor.RemoteCallContext} to use.

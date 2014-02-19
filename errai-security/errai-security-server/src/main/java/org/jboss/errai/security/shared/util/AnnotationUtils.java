@@ -27,6 +27,13 @@ public class AnnotationUtils {
     return retMap.values().toArray(new Annotation[retMap.size()]);
   }
   
+  /**
+   * Merge roles from multiple {@link RequireRoles}.
+   * 
+   * @param requireRoles {@link RequireRoles} annotations with roles to be merged.
+   * 
+   * @return An array of unique role names.
+   */
   public static String[] mergeRoles(final RequireRoles... requireRoles) {
     final Set<String> roles = new HashSet<String>();
     

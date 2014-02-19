@@ -10,12 +10,12 @@ import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 
 /**
- * SecurityUserInterceptor will intercept calls annotated with
- * {@link org.jboss.errai.security.shared.RequireAuthentication} and check
- * cached credentials to see if the user is authenticated. If not, this
- * interceptor throws an error.
+ * Intercepts RPC calls to resources marked with {@link RequireAuthentication}.
+ * This interceptor throws an {@link UnauthenticatedException} if the user is
+ * not logged in.
  * 
  * @author edewit@redhat.com
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @FeatureInterceptor(RequireAuthentication.class)
 public class SecurityUserInterceptor extends ClientSecurityInterceptor implements

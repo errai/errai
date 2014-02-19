@@ -12,15 +12,13 @@ import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
 
 /**
- * Will 'redirect' users that try to make use of services annotated with
- * {@link RequireRoles} that are not logged in to the
- * {@link org.jboss.errai.ui.nav.client.local.api.LoginPage} or do not have
- * specified role go to the
- * {@link org.jboss.errai.ui.nav.client.local.api.SecurityError}. In other cases
- * the service call will proceed
+ * Intercepts RPC calls to resources marked with {@link RequireRoles}. This
+ * interceptor throws an {@link UnauthenticatedException} if the user is not
+ * logged in, and a {@link UnauthorizedException} if the user does not have the
+ * required roles.
  * 
- * @see org.jboss.errai.ui.nav.client.local.api.LoginPage
  * @author edewit@redhat.com
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @FeatureInterceptor(RequireRoles.class)
 public class ClientSecurityRoleInterceptor extends ClientSecurityInterceptor implements
@@ -32,11 +30,11 @@ public class ClientSecurityRoleInterceptor extends ClientSecurityInterceptor imp
                     getRequiredRoleAnnotation(context.getTypeAnnotations()),
                     getRequiredRoleAnnotation(context.getAnnotations())),
             new Command() {
-      @Override
-      public void action() {
-        proceed(context);
-      }
-    });
+              @Override
+              public void action() {
+                proceed(context);
+              }
+            });
   }
 
   public void securityCheck(final String[] values, final Command command) {
