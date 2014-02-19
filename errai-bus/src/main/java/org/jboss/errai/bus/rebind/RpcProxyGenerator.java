@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.BlockStatement;
+import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -33,6 +35,7 @@ import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -181,7 +184,14 @@ public class RpcProxyGenerator {
                 Stmt.loadVariable("callContext").invoke("proceed"))
             .finish()
             .catch_(Throwable.class, "throwable")
-            .append(Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable")))
+            .append(
+                    Stmt.if_(BooleanExpressionBuilder
+                            .create(Stmt.loadVariable("errorCallback"), BooleanOperator.NotEquals, Stmt.loadLiteral(null)))
+                    .append(Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable")))
+                    .finish()
+                    .else_()
+                    .append(Stmt.loadVariable("this").invoke("invokeDefaultErrorHandlers", Variable.get("throwable")))
+                    .finish())
             .finish();
   }
 
