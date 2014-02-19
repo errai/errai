@@ -16,8 +16,8 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -34,7 +34,7 @@ import com.google.gwt.core.ext.GeneratorContext;
  */
 public class GeneratorMappingContextFactory {
   private static final Map<GeneratorContext, GeneratorMappingContext> gwtContexts =
-      new HashMap<GeneratorContext, GeneratorMappingContext>();
+      new WeakHashMap<GeneratorContext, GeneratorMappingContext>();
 
   private static GeneratorMappingContext javaContext = null;
 
