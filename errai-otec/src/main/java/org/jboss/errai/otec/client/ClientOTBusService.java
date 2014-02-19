@@ -1,15 +1,19 @@
 package org.jboss.errai.otec.client;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.common.client.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock
  */
 public class ClientOTBusService {
+  
+  private static final Logger logger = LoggerFactory.getLogger(ClientOTBusService.class);
 
   public static void startOTService(final MessageBus messageBus, final OTEngine engine) {
     messageBus.subscribe("ClientOTEngineSyncService", new MessageCallback() {
@@ -38,7 +42,7 @@ public class ClientOTBusService {
           final Integer purgeHint = message.get(Integer.class, "PurgeHint");
           final int i = engine.getEntityStateSpace().getEntity(entityId).getTransactionLog().purgeTo(purgeHint - 100);
 
-          LogUtil.log("purged " + i + " old entries from log.");
+          logger.info("purged " + i + " old entries from log.");
         }
         else {
           final OTPeer peer = engine.getPeerState().getPeer("<ServerEngine>");
@@ -60,7 +64,7 @@ public class ClientOTBusService {
     new Timer() {
       @Override
       public void run() {
-        LogUtil.log("PURGE EVENT");
+        logger.info("PURGE EVENT");
         for (final OTEntity otEntity : engine.getEntityStateSpace().getEntities()) {
           engine.getPeerState().getPeer("<ServerEngine>").sendPurgeHint(otEntity.getId(), otEntity.getRevision());
         }

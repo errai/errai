@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -24,6 +23,8 @@ import org.jboss.errai.common.client.api.tasks.ClientTaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
+
+import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Base test class for testing ErraiBus-based code. Located in the main distribution so it can be extended
@@ -47,7 +48,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
     if (!(TaskManagerFactory.get() instanceof ClientTaskManager)) {
       TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
-        private ClientTaskManager clientTaskManager = new ClientTaskManager();
+        private final ClientTaskManager clientTaskManager = new ClientTaskManager();
 
         @Override
         public TaskManager get() {
@@ -60,7 +61,6 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    System.out.println("tearing down test ...");
     bus.stop(true);
     InitVotes.reset();
   }
@@ -76,7 +76,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
    *     the stuff to run once the bus is online.
    */
   protected void runAfterInit(final Runnable r) {
-    delayTestFinish(30000);
+    delayTestFinish(45000);
     InitVotes.registerOneTimeInitCallback(r);
   }
 }

@@ -18,14 +18,26 @@ package org.jboss.errai.marshalling.client.api;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface MarshallerFactory {
   /**
    * Returns a {@link Marshaller} capable of handling the specified encodedType
-   * @param formatType A format type of the serialized object.
-   * @param encodedType The fully-qualified Java class name of the encoded type
+   * 
+   * @param encodedType
+   *          The fully-qualified Java class name of the encoded type
+   * 
    * @return a marshaller instance.
    */
-  Marshaller<Object> getMarshaller(String formatType, String encodedType);
-}
+  Marshaller<Object> getMarshaller(String encodedType);
 
+  /**
+   * Registers a {@link Marshaller} for the type with the provided fully qualified class name.
+   * 
+   * @param fqcn
+   *          the fully qualified type name of the marshallable type.
+   * @param marshaller
+   *          the marshaller instance
+   */
+  void registerMarshaller(String fqcn, Marshaller<Object> marshaller);
+}

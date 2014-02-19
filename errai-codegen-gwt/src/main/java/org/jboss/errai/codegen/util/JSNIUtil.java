@@ -27,11 +27,11 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 public class JSNIUtil {
   public static String fieldAccess(final MetaField field) {
     if (field.isStatic()) {
-      return "@" + field.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
+      return "@" + field.getDeclaringClass().getFullyQualifiedName().replace('$', '.') + "::"
               + field.getName();
     }
     else {
-      return "instance.@" + field.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
+      return "instance.@" + field.getDeclaringClass().getFullyQualifiedName().replace('$', '.') + "::"
               + field.getName();
     }
   }
@@ -47,7 +47,7 @@ public class JSNIUtil {
       buf.append("instance.");
     }
 
-    buf.append('@').append(method.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\."))
+    buf.append('@').append(method.getDeclaringClass().getFullyQualifiedName().replace('$', '.'))
             .append("::").append(method instanceof MetaConstructor ? "new" : method.getName()).append('(');
 
     for (final MetaParameter parm : method.getParameters()) {

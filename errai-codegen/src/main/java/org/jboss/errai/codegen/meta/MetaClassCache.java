@@ -16,11 +16,11 @@
 
 package org.jboss.errai.codegen.meta;
 
-import org.jboss.errai.common.rebind.CacheStore;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.jboss.errai.common.rebind.CacheStore;
 
 /**
  * @author Mike Brock
@@ -60,5 +60,9 @@ public class MetaClassCache implements CacheStore {
 
   public int size() {
     return PRIMARY_CLASS_CACHE.size();
+  }
+  
+  public boolean isKnownType(String fqcn) {
+    return PRIMARY_CLASS_CACHE.containsKey(fqcn);
   }
 }

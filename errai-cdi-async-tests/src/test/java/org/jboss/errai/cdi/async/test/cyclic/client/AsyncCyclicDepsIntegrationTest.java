@@ -26,11 +26,11 @@ import org.jboss.errai.cdi.async.test.cyclic.client.res.DependentBeanInjectSelf;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.EquHashCheckCycleA;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.EquHashCheckCycleB;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.Petrol;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanQuery;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 /**
  * @author Mike Brock

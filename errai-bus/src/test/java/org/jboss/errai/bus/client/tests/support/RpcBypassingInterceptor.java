@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.bus.client.api.interceptor.RpcInterceptor;
+import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 
 /**
@@ -24,6 +25,7 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@InterceptsRemoteCall({ TestInterceptorRPCService.class })
 public class RpcBypassingInterceptor implements RpcInterceptor {
 
   @Override

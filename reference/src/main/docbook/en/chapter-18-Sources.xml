@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<chapter id="sid-5833088">
-   <title>Sources</title>
-   <para>
-      Errai is currently managed using Github. You can clone our repositories from
-      <ulink url="http://github.com/errai"/>
-      .
-    </para>
-</chapter>

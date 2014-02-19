@@ -16,20 +16,20 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.AnnotationParser;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.jboss.errai.codegen.meta.AnnotationParser;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaType;
+
 public class JavaReflectionField extends MetaField {
   private final Field field;
 
-  JavaReflectionField(final Field field) {
+  public JavaReflectionField(final Field field) {
     this.field = field;
   }
 

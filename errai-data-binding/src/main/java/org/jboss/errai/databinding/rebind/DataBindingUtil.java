@@ -271,7 +271,7 @@ public class DataBindingUtil {
    */
   public static Set<MetaClass> getAllBindableTypes(final GeneratorContext context) {
     Collection<MetaClass> annotatedBindableTypes =
-        ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context));
+        ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context), context);
 
     Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
     bindableTypes.addAll(DataBindingUtil.getConfiguredBindableTypes());

@@ -38,12 +38,12 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.PageRequest;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.ui.nav.client.local.*;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
@@ -90,7 +90,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     Multimap<Class<?>, MetaClass> pageRoles = ArrayListMultimap.create();
 
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
-    final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
+    final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class, context);
     for (MetaClass pageClass : pages) {
       if (!pageClass.isAssignableTo(IsWidget.class)) {
         throw new GenerationException(

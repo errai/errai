@@ -16,11 +16,12 @@
 
 package org.jboss.errai.ui.shared.api.style;
 
+import org.slf4j.LoggerFactory;
+
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import org.jboss.errai.common.client.util.LogUtil;
 
 /**
  * @author Mike Brock
@@ -56,7 +57,8 @@ public class ElementBinding {
   public void clean() {
     if (originalEventListener != null) {
       if (DOM.getEventListener(element) != newListener) {
-        LogUtil.log("warning: cannot unwrap element binding for: " + element + "; found unexpected listener.");
+        LoggerFactory.getLogger(getClass())
+          .warn("cannot unwrap element binding for: " + element + "; found unexpected listener.");
       }
       else {
         DOM.setEventListener(element, originalEventListener);

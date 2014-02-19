@@ -18,6 +18,7 @@ package org.jboss.errai.ui.rebind;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,6 +47,7 @@ import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
@@ -68,6 +70,7 @@ import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -80,10 +83,13 @@ import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
 
 /**
- * Generates a concrete subclass of {@link TranslationService}. This class is
- * responsible for scanning the classpath for all bundles, and then making them
- * available during template translation.
- *
+ * Generates a concrete subclass of {@link TranslationService}. This class is responsible for
+ * scanning the classpath for all bundles, and then making them available during template
+ * translation.
+ * 
+ * The {@link TranslationService} can also be used directly in the Errai application by injecting
+ * it. This allows translated strings to be used from Errai Java code, not just from templates.
+ * 
  * @author eric.wittmann@redhat.com
  */
 @GenerateAsync(TranslationService.class)
@@ -111,8 +117,55 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     // The i18n keys found (per locale) while processing the bundles.
     Map<String, Set<String>> discoveredI18nMap = new HashMap<String, Set<String>>();
 
+    // Find all fields annotated with @TranslationKey and generate code
+    // in the c'tor to register each one as a translation key for the
+    // default (null) locale. These values may get overridden by keys
+    // found in the default bundle. This is why we do this before we do
+    // the bundle work.
+    Map<String, String> translationKeyFieldMap = new HashMap<String, String>();
+    Collection<MetaField> translationKeyFields = ClassScanner.getFieldsAnnotatedWith(TranslationKey.class, null, context);
+    for (MetaField metaField : translationKeyFields) {
+      // Figure out the translation key name
+      String name = null;
+      String fieldName = metaField.getName();
+      String defaultName = metaField.getDeclaringClass().getFullyQualifiedName() + "." + fieldName;
+      if (!metaField.getType().isAssignableFrom(String.class)) {
+        throw new GenerationException("Translation key fields must be of type java.lang.String: " + defaultName);
+      }
+      try {
+        Class<?> asClass = metaField.getDeclaringClass().asClass();
+        Field field = asClass.getField(fieldName);
+        Object fieldVal = field.get(null);
+        if (fieldVal == null) {
+          throw new GenerationException("Translation key fields cannot be null: " + defaultName);
+        }
+        name = fieldVal.toString();
+      }
+      catch (Exception e) {
+        // TODO log this
+      }
+
+      // Figure out the translation key value (for the null locale).
+      String value = null;
+      TranslationKey annotation = metaField.getAnnotation(TranslationKey.class);
+      String defaultValue = annotation.defaultValue();
+      if (defaultValue != null) {
+        value = defaultValue;
+      }
+      else {
+        value = "!!" + defaultName + "!!";
+      }
+
+      // Generate code to register the null locale mapping
+      if (translationKeyFieldMap.containsKey(name)) {
+        throw new GenerationException("Duplicate translation key found: " + defaultName);
+      }
+      translationKeyFieldMap.put(name, value);
+      ctor.append(Stmt.loadVariable("this").invoke("registerTranslation", name, value, null));
+    }
+
     // Scan for all @Bundle annotations.
-    final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class);
+    final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class, context);
     // For each one, generate the code to load the translation and put that generated
     // code in the c'tor of the generated class (GeneratedTranslationService)
     for (MetaClass bundleAnnotatedClass : bundleAnnotatedClasses) {
@@ -127,9 +180,9 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       // TODO optimize this - scan the classpath once and then pull out just the resources we need
       MessageBundleScanner scanner = new MessageBundleScanner(
               new ConfigurationBuilder()
-              .filterInputsBy(new FilterBuilder().include(".*json"))
-              .setUrls(ClasspathHelper.forClassLoader())
-              .setScanners(new MessageBundleResourceScanner(bundlePath)));
+                  .filterInputsBy(new FilterBuilder().include(".*json"))
+                  .setUrls(ClasspathHelper.forClassLoader())
+                  .setScanners(new MessageBundleResourceScanner(bundlePath)));
       Collection<String> resources = scanner.getStore().get(MessageBundleResourceScanner.class).values();
       // If we didn't find at least the specified root bundle file, that's a problem.
       if (!resources.contains(bundlePath)) {
@@ -160,15 +213,17 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
       processedBundles.add(bundlePath);
     }
+    // We're done generating the c'tor
     ctor.finish();
 
-    generateI18nHelperFilesInto(discoveredI18nMap, RebindUtils.getErraiCacheDir());
+    generateI18nHelperFilesInto(discoveredI18nMap, translationKeyFieldMap, RebindUtils.getErraiCacheDir());
 
     return classBuilder.toJavaString();
   }
 
   /**
    * Records all of the i18n keys found in the given bundle.
+   * 
    * @param discoveredI18nMap
    * @param locale
    * @param bundlePath
@@ -192,15 +247,18 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
           keys.add(name);
         }
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException(e);
-    } finally {
+    }
+    finally {
       IOUtils.closeQuietly(is);
     }
   }
 
   /**
    * Gets the bundle name from the @Bundle annotation.
+   * 
    * @param bundleAnnotatedClass
    */
   private String getMessageBundlePath(MetaClass bundleAnnotatedClass) {
@@ -212,7 +270,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     // Absolute path vs. relative path.
     if (name.startsWith("/")) {
       return name.substring(1);
-    } else {
+    }
+    else {
       String packageName = bundleAnnotatedClass.getPackageName();
       return packageName.replace('.', '/') + "/" + name;
     }
@@ -220,17 +279,21 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Gets the name of the {@link MessageBundle} class.
+   * 
    * @param bundlePath
    */
   private String getMessageBundleTypeName(final String bundlePath) {
-    String typeName = bundlePath.replace(".json", "MessageBundleResource").replace('/', '.').replace('-', '_').replace('.', '_');
+    String typeName =
+        bundlePath.replace(".json", "MessageBundleResource").replace('/', '.').replace('-', '_').replace('.', '_');
     return typeName;
   }
 
   /**
-   * Create an inner interface for the given {@link MessageBundle} class and its
-   * corresponding JSON resource.
-   * @param bundlePath path to the message bundle
+   * Create an inner interface for the given {@link MessageBundle} class and its corresponding JSON
+   * resource.
+   * 
+   * @param bundlePath
+   *          path to the message bundle
    */
   private BuildMetaClass generateMessageBundleResourceInterface(final String bundlePath) {
     final ClassStructureBuilder<?> componentMessageBundleResource = ClassBuilder
@@ -246,17 +309,18 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
               @Override
               public String[] value() {
-                return new String[]{bundlePath};
+                return new String[] { bundlePath };
               }
             }).finish();
     return componentMessageBundleResource.getClassDefinition();
   }
 
   /**
-   * Gets the locale information from the given bundle path.  For example,
-   * if the bundle path is "org/example/myBundle_en_US.json" then this method will
-   * return "en_US".
-   * @param bundlePath path to the message bundle
+   * Gets the locale information from the given bundle path. For example, if the bundle path is
+   * "org/example/myBundle_en_US.json" then this method will return "en_US".
+   * 
+   * @param bundlePath
+   *          path to the message bundle
    */
   public static String getLocaleFromBundlePath(String bundlePath) {
     Matcher matcher = LOCALE_IN_FILENAME_PATTERN.matcher(bundlePath);
@@ -269,30 +333,44 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       if (region != null)
         locale.append("_").append(region.substring(1));
       return locale.toString();
-    } else {
+    }
+    else {
       return null;
     }
   }
 
   /**
-   * Generates all helper files that developers can use to assist with i18n
-   * work.  This includes the "missing i18n keys" report(s) as well as a set of
-   * JSON files that can be used as a starting-point for translations.
+   * Generates all helper files that developers can use to assist with i18n work. This includes the
+   * "missing i18n keys" report(s) as well as a set of JSON files that can be used as a
+   * starting-point for translations.
+   * 
    * @param discoveredI18nMap
+   *          a map of keys found in all scanned bundles
+   * @param translationKeyFieldMap
+   *          a map of translation keys found in {@link TranslationKey} annotated fields
    * @param destDir
+   *          where to write the *.json files
+   * @param context
+   *          the generator context          
    */
-  protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap, File destDir) {
-    final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
+  protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap,
+      Map<String, String> translationKeyFieldMap, File destDir) {
     Map<String, String> allI18nValues = new HashMap<String, String>();
-    Map<String, Map<String, String>> indexedI18nValues = new HashMap<String, Map<String, String>>();
+
+    // Make sure to put the *usages* of translation keys that we found by scanning the
+    // Java code for @TranslationKey annotated static fields into the all-i18n-values map
+    allI18nValues.putAll(translationKeyFieldMap);
+
+    // Find all *usages* of translation keys by scanning and processing all templates.
+    final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
-      String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
       String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
       final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
       if (resource == null) {
-        throw new IllegalArgumentException("Could not find template " + templateFileName + " for @Templated class " + templatedAnnotatedClass.getName());
+        throw new IllegalArgumentException("Could not find template " + templateFileName + " for @Templated class "
+            + templatedAnnotatedClass.getName());
       }
       Document templateNode = new TemplateCatalog().parseTemplate(resource);
       if (templateNode == null) // TODO log that the template failed to parse
@@ -302,12 +380,6 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         continue;
       Map<String, String> i18nValues = getTemplateI18nValues(templateRoot, i18nPrefix);
       allI18nValues.putAll(i18nValues);
-      Map<String, String> templateI18nValues = indexedI18nValues.get(templateBundleName);
-      if (templateI18nValues == null) {
-        indexedI18nValues.put(templateBundleName, i18nValues);
-      } else {
-        templateI18nValues.putAll(i18nValues);
-      }
     }
 
     // Output a JSON file containing *all* of the keys that need translation.
@@ -317,7 +389,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     outputBundleFile(allI18nValues, allI18nValuesFile, null);
 
     // Only bother with the missing/extra files if we discovered *something*
-    // while processing.  If zero bundles were found, then they aren't currently
+    // while processing. If zero bundles were found, then they aren't currently
     // using i18n in any way.
     if (!discoveredI18nMap.isEmpty()) {
       // Output a JSON file containing only the keys that were found in existing JSON
@@ -350,6 +422,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Gets the root node of the template (within a potentially larger template HTML file).
+   * 
    * @param templateNode
    * @param templateFragment
    */
@@ -359,17 +432,21 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       Element documentElement = templateNode.getDocumentElement();
       if (templateFragment == null || templateFragment.trim().length() == 0) {
         return (Element) xpath.evaluate("//body", documentElement, XPathConstants.NODE);
-      } else {
-        return (Element) xpath.evaluate("//*[@data-field='"+templateFragment+"']", documentElement, XPathConstants.NODE);
       }
-    } catch (XPathExpressionException e) {
+      else {
+        return (Element) xpath.evaluate("//*[@data-field='" + templateFragment + "']", documentElement,
+            XPathConstants.NODE);
+      }
+    }
+    catch (XPathExpressionException e) {
       return null;
     }
   }
 
   /**
-   * Gets all of the i18n key/value pairs from the given template root.  In
-   * other words, returns everything that needs to be translated.
+   * Gets all of the i18n key/value pairs from the given template root. In other words, returns
+   * everything that needs to be translated.
+   * 
    * @param templateRoot
    * @param i18nPrefix
    */
@@ -381,6 +458,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Writes out a bundle (JSON) file to the given location.
+   * 
    * @param i18nValues
    * @param bundleFile
    * @param onlyTheseKeys
@@ -402,20 +480,24 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       }
       g.writeEndObject();
       g.close();
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
   /**
    * A scanner that finds i18n message bundles.
+   * 
    * @author eric.wittmann@redhat.com
    */
   private static class MessageBundleResourceScanner extends ResourcesScanner {
     private final String bundlePrefix;
     private final String bundleSuffix = ".json";
+
     /**
      * Constructor.
+     * 
      * @param bundlePath
      */
     public MessageBundleResourceScanner(String bundlePath) {
@@ -433,13 +515,14 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Scanner used to find i18n message bundles on the classpath.
-   *
+   * 
    * @author eric.wittmann@redhat.com
    */
   private static class MessageBundleScanner extends Reflections {
 
     /**
      * Constructor.
+     * 
      * @param config
      */
     public MessageBundleScanner(Configuration config) {

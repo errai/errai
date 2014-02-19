@@ -108,11 +108,6 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-data-binding</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc-bus-support</artifactId>
     </dependency>
 
@@ -152,12 +147,6 @@
       <groupId>javax.enterprise</groupId>
       <artifactId>cdi-api</artifactId>
       <scope>${cdi-api.scope}</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-cdi-jetty</artifactId>
-      <scope>${errai-cdi-jetty.scope}</scope>
     </dependency>
 
     <dependency>
@@ -231,8 +220,7 @@
       </activation>
       <properties>
         <webDescriptor>jetty</webDescriptor>
-        <cdi-api.scope>provided</cdi-api.scope>
-        <errai-cdi-jetty.scope>provided</errai-cdi-jetty.scope>
+        <cdi-api.scope>provided</cdi-api.scope>        
         <errai-jboss-as-support.scope>provided</errai-jboss-as-support.scope>
         <jetty.scope>provided</jetty.scope>
         <jetty-plus.scope>provided</jetty-plus.scope>
@@ -246,8 +234,7 @@
       <id>jboss7</id>
       <properties>
         <webDescriptor>jboss7</webDescriptor>
-        <cdi-api.scope>provided</cdi-api.scope>
-        <errai-cdi-jetty.scope>provided</errai-cdi-jetty.scope>
+        <cdi-api.scope>provided</cdi-api.scope>        
         <errai-jboss-as-support.scope>compile</errai-jboss-as-support.scope>
         <jetty.scope>provided</jetty.scope>
         <jetty-plus.scope>provided</jetty-plus.scope>
@@ -261,8 +248,7 @@
       <id>tomcat</id>
       <properties>
         <webDescriptor>tomcat</webDescriptor>
-        <cdi-api.scope>compile</cdi-api.scope>
-        <errai-cdi-jetty.scope>compile</errai-cdi-jetty.scope>
+        <cdi-api.scope>compile</cdi-api.scope>        
         <errai-jboss-as-support.scope>provided</errai-jboss-as-support.scope>
         <jetty.scope>provided</jetty.scope>
         <jetty-plus.scope>provided</jetty-plus.scope>
@@ -294,8 +280,7 @@
           <runTarget>Contacts.html</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g</extraJvmArgs>
           <disableCastChecking>true</disableCastChecking>
-          <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
+          <hostedWebapp>src/main/webapp/</hostedWebapp>          
           <strict>true</strict>
         </configuration>
         <executions>

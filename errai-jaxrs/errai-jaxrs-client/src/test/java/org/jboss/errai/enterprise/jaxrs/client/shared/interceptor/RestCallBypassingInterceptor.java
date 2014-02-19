@@ -16,14 +16,17 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared.interceptor;
 
+import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestClientInterceptor;
+import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptsRemoteCallTestService;
 
 /**
  * Rest client interceptor for testing purposes. Prevents the actual remote request and sets the result directly.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@InterceptsRemoteCall({ InterceptsRemoteCallTestService.class })
 public class RestCallBypassingInterceptor implements RestClientInterceptor {
 
   @Override

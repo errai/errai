@@ -142,8 +142,7 @@
           <runTarget>TagCloudDemo.html</runTarget>
           <extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
           <soyc>false</soyc>
-          <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
+          <hostedWebapp>src/main/webapp/</hostedWebapp>          
           <strict>true</strict>
         </configuration>
         <executions>
@@ -285,10 +284,6 @@
           <version>${jetty.version}</version>
         </dependency>
         <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-        </dependency>
-        <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet-core</artifactId>
         </dependency>
@@ -352,14 +347,6 @@
           <scope>provided</scope>
         </dependency>
 
-        <!-- Exclude development tools -->
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-          <version>${project.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet-core</artifactId>
@@ -407,12 +394,6 @@
           <artifactId>cdi-api</artifactId>
           <scope>compile</scope>
           <version>1.0-SP4</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-          <version>${project.version}</version>
         </dependency>
 
         <dependency>

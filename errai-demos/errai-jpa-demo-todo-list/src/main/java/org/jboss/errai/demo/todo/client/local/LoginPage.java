@@ -3,22 +3,23 @@ package org.jboss.errai.demo.todo.client.local;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
+
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.security.client.local.Identity;
-import org.jboss.errai.security.shared.SecurityError;
+import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
 import javax.inject.Inject;
 
 @Templated("#main")
-@Page(path="login", role = {org.jboss.errai.security.shared.LoginPage.class, SecurityError.class})
+@Page(path="login", role = {org.jboss.errai.ui.nav.client.local.api.LoginPage.class, SecurityError.class})
 public class LoginPage extends Composite {
 
   @Inject private @Model Identity identity;

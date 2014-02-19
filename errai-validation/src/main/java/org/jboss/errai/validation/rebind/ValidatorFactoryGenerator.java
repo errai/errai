@@ -16,6 +16,9 @@
 
 package org.jboss.errai.validation.rebind;
 
+import java.io.File;
+import java.io.PrintWriter;
+
 import javax.validation.ValidatorFactory;
 
 import org.jboss.errai.codegen.Cast;
@@ -23,11 +26,11 @@ import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
-import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.validation.client.BeanValidator;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
@@ -41,21 +44,18 @@ import com.google.gwt.validation.client.impl.AbstractGwtValidator;
  * @author Johannes Barop <jb@barop.de>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@GenerateAsync(ValidatorFactory.class)
-public class ValidatorFactoryGenerator extends AbstractAsyncGenerator {
+public class ValidatorFactoryGenerator extends Generator {
 
   private final String packageName = "org.jboss.errai.validation.client";
   private final String className = ValidatorFactory.class.getSimpleName() + "Impl";
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
-    return startAsyncGeneratorsAndWaitFor(ValidatorFactory.class, context, logger, packageName, className);
-  }
+    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
 
-  @Override
-  protected String generate(TreeLogger logger, GeneratorContext context) {
-    ClassStructureBuilder<?> validatorInterface = new GwtValidatorGenerator().generate();
-    ClassStructureBuilder<?> builder = ClassBuilder
+    if (printWriter != null) {
+      ClassStructureBuilder<?> validatorInterface = new GwtValidatorGenerator().generate();
+      ClassStructureBuilder<?> builder = ClassBuilder
             .define(packageName + "." + className, AbstractGwtValidatorFactory.class)
             .publicScope()
             .body()
@@ -64,14 +64,23 @@ public class ValidatorFactoryGenerator extends AbstractAsyncGenerator {
                 Stmt.nestedCall(
                     Stmt.newObject(BeanValidator.class, Cast.to(AbstractGwtValidator.class,
                         Stmt.invokeStatic(GWT.class, "create", validatorInterface.getClassDefinition()))
+                        )
                     )
-                )
-                .returnValue()
+                    .returnValue()
             )
             .finish();
-    builder.getClassDefinition().addInnerClass(new InnerClass(validatorInterface.getClassDefinition()));
+      builder.getClassDefinition().addInnerClass(new InnerClass(validatorInterface.getClassDefinition()));
 
-    return builder.toJavaString();
+      String gen = builder.toJavaString();
+      printWriter.append(gen);
+      
+      final File tmpFile =
+          new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
+      RebindUtils.writeStringToFile(tmpFile, gen);
+
+      context.commit(logger, printWriter);
+    }
+
+    return packageName + "." + className;
   }
-
 }

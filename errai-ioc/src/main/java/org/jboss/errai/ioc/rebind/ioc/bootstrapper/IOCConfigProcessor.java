@@ -23,17 +23,7 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
@@ -326,7 +316,7 @@ public class IOCConfigProcessor {
 
                   for (final MetaParameter parm : instance.getMethod().getParameters()) {
                     control.notifyDependency(parm.getType());
-                    final Set<MetaClass> interfaceTypes = fillInInterface(parm.getType());
+                    final Set<MetaClass> interfaceTypes = fillInInterface(parm.getType(), context.getGeneratorContext());
                     control.notifyDependencies(interfaceTypes);
 
                     if (!producerMember.isStatic()) {
@@ -472,16 +462,18 @@ public class IOCConfigProcessor {
             case TYPE: {
               Collection<MetaClass> classes;
 
-              classes = ClassScanner.getTypesAnnotatedWith(annotationClass, context.getPackages());
+              classes = ClassScanner.getTypesAnnotatedWith(annotationClass, context.getPackages(), context.getGeneratorContext());
               
               // Get producer classes which are implicitly dependent
               if (annotationClass.equals(Dependent.class)) {
                 classes = new ArrayList<MetaClass>(classes);
                 final Collection<MetaClass> toCheck = new ArrayList<MetaClass>();
-                for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Produces.class, context.getPackages())) {
+                for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Produces.class, context.getPackages(), 
+                    context.getGeneratorContext())) {
                   toCheck.add(method.getDeclaringClass());
                 }
-                for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(Produces.class, context.getPackages())) {
+                for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(Produces.class, context.getPackages(), 
+                    context.getGeneratorContext())) {
                   toCheck.add(field.getDeclaringClass());
                 }
                 
@@ -556,7 +548,7 @@ public class IOCConfigProcessor {
                   if (clazz.isAnnotationPresent(Stereotype.class)) {
                     final Class<? extends Annotation> stereoType = clazz.asClass().asSubclass(Annotation.class);
                     for (final MetaClass stereoTypedClass :
-                        ClassScanner.getTypesAnnotatedWith(stereoType)) {
+                        ClassScanner.getTypesAnnotatedWith(stereoType, context.getGeneratorContext())) {
                       handleType(entry, dependencyControl, stereoTypedClass, annotationClass, context);
                     }
                   }
@@ -571,14 +563,16 @@ public class IOCConfigProcessor {
             break;
 
             case METHOD: {
-              for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(annotationClass, context.getPackages())) {
+              for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(annotationClass, context.getPackages(), 
+                  context.getGeneratorContext())) {
                 handleMethod(entry, dependencyControl, method, annotationClass, context);
               }
             }
             break;
 
             case FIELD: {
-              for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(annotationClass, context.getPackages())) {
+              for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(annotationClass, context.getPackages(), 
+                  context.getGeneratorContext())) {
                 handleField(entry, dependencyControl, field, annotationClass, context);
               }
             }
@@ -800,8 +794,8 @@ public class IOCConfigProcessor {
   }
 
   private class ProcessingEntry implements Comparable<ProcessingEntry> {
-    private Class<? extends Annotation> annotationClass;
-    private AnnotationHandler handler;
+    private final Class<? extends Annotation> annotationClass;
+    private final AnnotationHandler handler;
     private Set<RuleDef> rules;
 
     private ProcessingEntry(final Class<? extends Annotation> annotationClass,

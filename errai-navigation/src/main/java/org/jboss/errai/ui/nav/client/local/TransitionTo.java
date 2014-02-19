@@ -1,8 +1,8 @@
 package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.ImmutableMultimap;

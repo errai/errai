@@ -64,6 +64,7 @@ import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
@@ -380,7 +381,7 @@ public class IOCBootstrapGenerator {
 
     computeDependentScope(context, injectionContext);
 
-    final Collection<MetaClass> bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
+    final Collection<MetaClass> bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class, context);
     for (final MetaClass clazz : bootstrapClassCollection) {
       final IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
@@ -441,7 +442,8 @@ public class IOCBootstrapGenerator {
 
     injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
 
-    for (final MetaClass mc : ClassScanner.getTypesAnnotatedWith(Stereotype.class)) {
+    final GeneratorContext genCtx = injectionContext.getProcessingContext().getGeneratorContext();
+    for (final MetaClass mc : ClassScanner.getTypesAnnotatedWith(Stereotype.class, genCtx)) {
       processStereoType(injectionContext, mc.asClass().asSubclass(Annotation.class));
     }
 
@@ -479,8 +481,8 @@ public class IOCBootstrapGenerator {
 
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
 
-    final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class));
-    knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class));
+    final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class, context));
+    knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class, context));
 
     if (context != null) {
       TypeScan:
@@ -490,7 +492,8 @@ public class IOCBootstrapGenerator {
           for (final Annotation a : clazz.getAnnotations()) {
             final Class<? extends Annotation> clazz1 = a.annotationType();
 
-            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)) {
+            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)
+                || clazz1.equals(EnabledByProperty.class)) {
               continue TypeScan;
             }
           }

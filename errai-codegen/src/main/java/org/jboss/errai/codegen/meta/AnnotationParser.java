@@ -1,10 +1,9 @@
 package org.jboss.errai.codegen.meta;
 
-import org.jboss.errai.common.client.api.annotations.Alias;
-
 import java.lang.annotation.Annotation;
-import java.util.HashSet;
 import java.util.Set;
+
+import org.jboss.errai.common.client.api.annotations.Alias;
 
 /**
  * @author edewit@redhat.com
@@ -12,12 +11,20 @@ import java.util.Set;
 public class AnnotationParser {
 
   public static Annotation[] parseAnnotations(Annotation[] annotations) {
-    Set<Annotation> result = new HashSet<Annotation>();
-    for (Annotation annotation : annotations) {
-      unwrap(result, annotation, annotation.annotationType().getAnnotations());
-    }
+    // Set<Annotation> result = new HashSet<Annotation>();
+    // for (Annotation annotation : annotations) {
+    // unwrap(result, annotation, annotation.annotationType().getAnnotations());
+    // }
+    //
+    // return result.toArray(new Annotation[result.size()]);
 
-    return result.toArray(new Annotation[result.size()]);
+    /*
+     * TODO: Decide the fate of this @Alias feature. It is currently unused so
+     * we have commented it out for the time being to improve performance of the
+     * Bootstrapper genorater.
+     */
+
+    return annotations;
   }
 
   private static void unwrap(Set<Annotation> result, Annotation parent, Annotation[] annotations) {

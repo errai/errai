@@ -126,6 +126,11 @@ public class MarshallUtil {
     if (m == null && obj instanceof Throwable) {
       m = new FallbackExceptionMarshaller();
     }
+    // Attempt to marshal weld/hibernate javassist created objects.
+    if (m == null && obj.getClass().getName().contains("_$$_javassist_")) {
+      className = obj.getClass().getSuperclass().getName();
+      m = session.getMarshallerInstance(className);
+    }
     if (m == null) {
       throw new RuntimeException("no marshalling definition available for type:" + className);
     }

@@ -22,21 +22,15 @@ Release Steps
 -------------
 
 1. Run the test suite. Ensure all tests pass.
-
+        
         % mvn -Pintegration-test test
-   
-1. Update reference guide with latest content in confluence
-   (Note that this automatically downloads the latest docs and adds `language` attributes to all the `programlisting` elements.
-   You need to have a file `jboss-credentials.properties` in the `reference` directory with your JBoss Community username and
-   password under the keys `jboss.username` and `jboss.password` respectively.)
-      ```
-         % cd reference
-         % mvn package   # this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
-         % git add src
-      ```
-  * Edit the version numbers in Book_Info.xml to reflect release version
-  * Don't upload to JBoss FTP server! The release upload script will do this later.
-
+        
+1. Update reference guide with latest content and check in generated docbook.
+        
+        % cd errai-docs
+        % mvn clean package   # this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
+        % git add src
+        
 1. Ask Maven to update the version number in all the pom.xml files:
    
         % cd $errai_root_dir

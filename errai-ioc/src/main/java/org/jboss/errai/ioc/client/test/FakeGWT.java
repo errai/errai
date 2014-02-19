@@ -1,9 +1,11 @@
 package org.jboss.errai.ioc.client.test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.common.client.util.LogUtil;
 
 /**
  * This class is designed to create a randomized delay in the callback to simulate network latency.
@@ -12,6 +14,7 @@ import org.jboss.errai.common.client.util.LogUtil;
  */
 public class FakeGWT {
   public static Throwable trace;
+  private static final Logger logger = LoggerFactory.getLogger(FakeGWT.class);
 
   public static void runAsync(final RunAsyncCallback callback) {
     final int delay = Random.nextInt(50) + 1;
@@ -25,7 +28,7 @@ public class FakeGWT {
       }
     }.schedule(delay);
 
-    LogUtil.log("simulating async load with " + delay + "ms delay.");
+    logger.info("simulating async load with " + delay + "ms delay.");
   }
 }
 

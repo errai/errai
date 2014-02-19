@@ -57,6 +57,27 @@
   </build>
 
   <dependencies>
+    <!-- It is important that the Hibernate dependencies come before the GWT dependencies
+         (or Errai dependencies that transitively include GWT). Otherwise, you get
+         NoSuchMethodError on JPA2 calls like EntityManagerFactory.getMetamodel(). -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.0-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-common</artifactId>

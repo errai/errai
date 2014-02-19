@@ -6,6 +6,7 @@
   "TranslatableComponent1.email-placeholder" : "Enter your email address...",
   "TranslatableComponent1.value_one" : "value one",
   "TranslatableComponent1.value_two" : "value two",
+  "additional-key-1" : "some value 1",
   "component2.Cancel" : "Cancel",
   "component2.Log_in" : "Log in",
   "component2.Password" : "Password",

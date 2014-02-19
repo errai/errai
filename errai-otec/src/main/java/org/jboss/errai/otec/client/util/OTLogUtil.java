@@ -16,17 +16,23 @@
 
 package org.jboss.errai.otec.client.util;
 
-import org.jboss.errai.common.client.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock
  */
 public class OTLogUtil {
+  private static final Logger logger = LoggerFactory.getLogger(OTLogUtil.class);
+  
   private static OTLogAdapter logAdapter = new OTLogAdapter() {
     @Override
     public void printLogTitle() {
     }
 
+    /**
+     * Logs an OT information to slf4j at the debug level.
+     */
     @Override
     public boolean log(final String type,
                        final String mutations,
@@ -35,12 +41,16 @@ public class OTLogUtil {
                        final int rev,
                        final String state) {
 
-      LogUtil.log(type + ":" + mutations + ";rev=" + rev +";state=\"" + state + "\"");
+      logger.debug(type + ":" + mutations + ";rev=" + rev +";state=\"" + state + "\"");
       return true;
     }
 
+    /**
+     * Use {@link Logger} instead.
+     */
+    @Deprecated
     public boolean log(final String message) {
-      LogUtil.log(message);
+      logger.info(message);
       return true;
     }
   };

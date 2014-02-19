@@ -23,9 +23,9 @@ import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.shared.DomVisit;
 import org.jboss.errai.ui.shared.JSONMap;
 import org.jboss.errai.ui.shared.TranslationDomRevisitor;
@@ -47,7 +47,12 @@ public abstract class TranslationService {
   private static final Logger logger = Logger.getLogger(TranslationService.class.getName());
   private static String currentLocale = null;
 
-  private Dictionary dictionary = new Dictionary();
+  private final Dictionary dictionary = new Dictionary();
+
+  /**
+   * Constructor.
+   */
+  public TranslationService() {}
 
   /**
    * @return true if the translation service is enabled/should be used
@@ -67,7 +72,21 @@ public abstract class TranslationService {
    */
   protected void registerBundle(String jsonData, String locale) {
     JSONMap data = JSONMap.create(jsonData);
-    register(data, locale);
+    registerJSON(data, locale);
+  }
+
+  /**
+   * Registers a single translation.
+   * 
+   * @param key
+   * @param value
+   * @param locale
+   */
+  protected void registerTranslation(String key, String value, String locale) {
+    if (locale != null) {
+      locale = locale.toLowerCase();
+    }
+    dictionary.put(locale, key, value);
   }
 
   /**
@@ -77,15 +96,12 @@ public abstract class TranslationService {
    * @param data
    * @param locale
    */
-  protected void register(JSONMap data, String locale) {
-    if (locale != null) {
-      locale = locale.toLowerCase();
-    }
+  protected void registerJSON(JSONMap data, String locale) {
     logger.fine("Registering translation data for locale: " + locale);
     Set<String> keys = data.keys();
     for (String key : keys) {
       String value = data.get(key);
-      dictionary.put(locale, key, value);
+      registerTranslation(key, value, locale);
     }
     logger.fine("Registered " + keys.size() + " translation keys.");
   }
@@ -106,6 +122,30 @@ public abstract class TranslationService {
     // Nothing? Then return null.
     logger.fine("Translation not found in any locale map, leaving unchanged.");
     return null;
+  }
+
+  /**
+   * Look up a message in the i18n resource message bundle by key, then format the message with the
+   * given arguments and return the result.
+   * 
+   * @param key
+   * @param args
+   */
+  public String format(String key, Object... args) {
+    String pattern = getTranslation(key);
+    if (pattern == null)
+      return "!!!" + key + "!!!"; //$NON-NLS-1$ //$NON-NLS-2$
+    if (args.length == 0)
+      return pattern;
+
+    // TODO add support for actually using { in a message
+    StringBuilder builder = new StringBuilder();
+    for (Object arg : args) {
+      String part1 = pattern.substring(0, pattern.indexOf('{'));
+      String part2 = pattern.substring(pattern.indexOf('}') + 1);
+      builder.append(part1).append(arg).append(part2);
+    }
+    return builder.toString();
   }
 
   public String getActiveLocale() {

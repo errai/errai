@@ -16,11 +16,16 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.util.Collection;
+
 import javax.ws.rs.Path;
+import javax.ws.rs.ext.Provider;
 
 import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -28,7 +33,13 @@ import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
+import org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper;
+import org.jboss.errai.enterprise.shared.api.annotations.MapsFrom;
+
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Generates a JAX-RS remote proxy.
@@ -40,9 +51,11 @@ public class JaxrsProxyGenerator {
 
   private final JaxrsHeaders headers;
   private final String rootResourcePath;
+  private final GeneratorContext context;
 
-  public JaxrsProxyGenerator(MetaClass remote) {
+  public JaxrsProxyGenerator(MetaClass remote, final GeneratorContext context) {
     this.remote = remote;
+    this.context = context;
     this.rootResourcePath = remote.getAnnotation(Path.class).value();
     this.headers = JaxrsHeaders.fromClass(remote);
   }
@@ -57,6 +70,9 @@ public class JaxrsProxyGenerator {
             .privateField("remoteCallback", RemoteCallback.class)
             .finish()
             .privateField("errorCallback", ErrorCallback.class)
+            .finish()
+            .publicConstructor()
+            .append(generateCtor())
             .finish()
             .publicMethod(RemoteCallback.class, "getRemoteCallback")
             .append(Stmt.loadClassMember("remoteCallback").returnValue())
@@ -74,9 +90,47 @@ public class JaxrsProxyGenerator {
     for (MetaMethod method : remote.getMethods()) {
       if (ProxyUtil.shouldProxyMethod(method)) {
         JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
-        new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
+        new JaxrsProxyMethodGenerator(classBuilder, resourceMethod, context).generate();
       }
     }
     return classBuilder;
+  }
+
+  /**
+   * @return the generated body of the proxy's constructor
+   */
+  private Statement generateCtor() {
+    // Try to find an ClientExceptionMapper that applies to the remote REST interface
+    Collection<MetaClass> providers = ClassScanner.getTypesAnnotatedWith(Provider.class, 
+        RebindUtils.findTranslatablePackages(context), context);
+    MetaClass exceptionMapperClass = null;
+    for (MetaClass metaClass : providers) {
+      if (!metaClass.isAbstract() && metaClass.isAssignableTo(ClientExceptionMapper.class)) {
+        MapsFrom mapsFrom = metaClass.getAnnotation(MapsFrom.class);
+        if (mapsFrom == null && exceptionMapperClass == null) {
+          // Default mapper
+          exceptionMapperClass = metaClass;
+        } else {
+          Class<?>[] classes = mapsFrom.value();
+          if (classes != null) {
+            for (Class<?> class1 : classes) {
+              if (class1.getName().equals(this.remote.getFullyQualifiedName())) {
+                exceptionMapperClass = metaClass;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // If we found one, create it in the c'tor and assign it to the proxy's exceptionMapper field
+    if (exceptionMapperClass != null) {
+      ContextualStatementBuilder setMapper = Stmt.loadVariable("this").invoke("setExceptionMapper", 
+          Stmt.newObject(exceptionMapperClass));
+      return setMapper;
+    } else {
+      return Stmt.returnVoid();
+    }
   }
 }

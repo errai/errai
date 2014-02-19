@@ -70,12 +70,17 @@ public class MarshallerFramework implements EntryPoint {
 
         @Override
         public boolean hasMarshaller(final String fqcn) {
-          return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn) != null;
+          return MarshallerFramework.getMarshallerFactory().getMarshaller(fqcn) != null;
         }
 
         @Override
         public Marshaller getMarshaller(final String fqcn) {
-          return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn);
+          return MarshallerFramework.getMarshallerFactory().getMarshaller(fqcn);
+        }
+
+        @Override
+        public void registerMarshaller(String fqcn, Marshaller m) {
+          MarshallerFramework.getMarshallerFactory().registerMarshaller(fqcn, m);
         }
       });
     }
@@ -86,17 +91,17 @@ public class MarshallerFramework implements EntryPoint {
       super(new MappingContext() {
         @Override
         public Marshaller<Object> getMarshaller(final String clazz) {
-          return marshallerFactory.getMarshaller("json", clazz);
+          return marshallerFactory.getMarshaller(clazz);
         }
 
         @Override
         public boolean hasMarshaller(final String clazzName) {
-          return marshallerFactory.getMarshaller(clazzName, "json") != null;
+          return marshallerFactory.getMarshaller(clazzName) != null;
         }
 
         @Override
         public boolean canMarshal(final String cls) {
-          return marshallerFactory.getMarshaller("json", cls) != null;
+          return marshallerFactory.getMarshaller(cls) != null;
         }
       });
     }
@@ -132,7 +137,7 @@ public class MarshallerFramework implements EntryPoint {
   }
 
   public static boolean canMarshall(final String type) {
-    return marshallerFactory.getMarshaller("json", type) != null;
+    return marshallerFactory.getMarshaller(type) != null;
   }
 
   public static MarshallerFactory getMarshallerFactory() {

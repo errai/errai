@@ -68,7 +68,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
   }
-
+  
   @Test
   public void testBindingSpecificConverterAndNullValues() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
@@ -269,5 +269,35 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name", converter);
     assertEquals("Model not initialized based on widget's state", "customConverter", textBox.getValue());
+  }
+  
+  @Test
+  public void testEmptyStringConversionToBigInteger() {
+    TextBox textBox = new TextBox();
+    textBox.setText("test");
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "amountInt").getModel();
+
+    textBox.setValue("", true);
+    assertEquals("Failed to convert empty String to BigInteger", null, model.getAmountInt());
+  }
+  
+  @Test
+  public void testEmptyStringConversionToBigDecimal() {
+    TextBox textBox = new TextBox();
+    textBox.setText("test");
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "amountDec").getModel();
+
+    textBox.setValue("", true);
+    assertEquals("Failed to convert empty String to BigDecimal", null, model.getAmountDec());
+  }
+  
+  @Test
+  public void testEmptyStringConversionToPrimitiveWrapper() {
+    TextBox textBox = new TextBox();
+    textBox.setText("test");
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "age").getModel();
+
+    textBox.setValue("", true);
+    assertEquals("Failed to convert empty String to primitive wrapper type", null, model.getAmountDec());
   }
 }

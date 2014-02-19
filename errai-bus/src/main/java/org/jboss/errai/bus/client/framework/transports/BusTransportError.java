@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.framework.transports;
 
 import com.google.gwt.http.client.Request;
+
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.TransportError;
 import org.jboss.errai.common.client.api.Assert;
@@ -27,22 +28,31 @@ import org.jboss.errai.common.client.api.Assert;
 public final class BusTransportError implements TransportError {
   boolean stopDefaultErrorHandler = false;
 
+  private final TransportHandler source;
   private final Request request;
   private final Throwable throwable;
   private final int statusCode;
   private final RetryInfo retryInfo;
 
-  public BusTransportError(final Request request,
+
+  public BusTransportError(final TransportHandler source,
+                           final Request request,
                            final Throwable throwable,
                            final int statusCode,
                            final RetryInfo retryInfo) {
 
+    this.source = Assert.notNull(source);
     this.request = request;
     this.throwable = throwable;
     this.statusCode = statusCode;
     this.retryInfo = Assert.notNull(retryInfo);
   }
 
+  @Override
+  public TransportHandler getSource() {
+    return source;
+  }
+  
   @Override
   public Request getRequest() {
     return request;

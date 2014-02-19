@@ -24,6 +24,8 @@ public class Person implements Lifeform {
   // this field is "shadowed by" Lifeform.getPublicSuperField().
   // This situation is a regression test for ERRAI-439.
   public String publicSuperField = "publicSuperField";
+  
+  private Group group;
 
   @Override
   public String getPublicSuperField() {
@@ -33,5 +35,15 @@ public class Person implements Lifeform {
   public void setPublicSuperField(String publicSuperField) {
     this.publicSuperField = publicSuperField;
   }
+
+  public Group getGroup() {
+    return group;
+  }
+
+  public void setGroup(Group group) {
+    this.group = group;
+  }
+  
+  
 
 }

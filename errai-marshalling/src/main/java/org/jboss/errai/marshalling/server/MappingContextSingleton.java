@@ -121,12 +121,17 @@ public class MappingContextSingleton {
 
           @Override
           public boolean hasMarshaller(final String fqcn) {
-            return marshallerFactory.getMarshaller(null, fqcn) != null;
+            return marshallerFactory.getMarshaller(fqcn) != null;
           }
 
           @Override
           public Marshaller getMarshaller(final String fqcn) {
-            return marshallerFactory.getMarshaller(null, fqcn);
+            return marshallerFactory.getMarshaller(fqcn);
+          }
+
+          @Override
+          public void registerMarshaller(String fqcn, Marshaller m) {
+            marshallerFactory.registerMarshaller(fqcn, m);
           }
 
         });
@@ -139,12 +144,12 @@ public class MappingContextSingleton {
 
       @Override
       public Marshaller<Object> getMarshaller(final String clazz) {
-        return marshallerFactory.getMarshaller(null, clazz);
+        return marshallerFactory.getMarshaller(clazz);
       }
 
       @Override
       public boolean hasMarshaller(final String clazzName) {
-        return marshallerFactory.getMarshaller(null, clazzName) != null;
+        return marshallerFactory.getMarshaller(clazzName) != null;
       }
 
       @Override
@@ -199,6 +204,11 @@ public class MappingContextSingleton {
           @Override
           public Marshaller getMarshaller(final String fqcn) {
             return factory.getDefinition(fqcn).getMarshallerInstance();
+          }
+
+          @Override
+          public void registerMarshaller(String fqcn, Marshaller m) {
+            throw new UnsupportedOperationException("Not implemented for dynamic marshalling");
           }
         });
 

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import java.util.Date;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -51,6 +53,10 @@ public interface PathParamTestService {
   @GET 
   @Path("/t3/{id}")
   public String getWithPathSegmentPathParam(@PathParam("id") PathSegment id);
+  
+  @GET 
+  @Path("/t4/{date}")
+  public String getWithDatePathParam(@PathParam("date") Date date);
   
   @GET 
   @Path("/{id1}/{id2}")

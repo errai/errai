@@ -19,21 +19,6 @@ package org.jboss.errai.codegen.meta.impl;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
-import org.jboss.errai.codegen.meta.BeanDescriptor;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.MetaWildcardType;
-import org.jboss.errai.codegen.util.GenUtil;
-import org.mvel2.util.NullType;
-import org.mvel2.util.ReflectionUtil;
-
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -43,6 +28,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.errai.codegen.meta.*;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.mvel2.util.NullType;
+import org.mvel2.util.ReflectionUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -573,7 +563,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     else if (isArray()) {
       try {
-        cls = Class.forName(getInternalName().replaceAll("/", "\\."), false,
+        cls = Class.forName(getInternalName().replace('/', '.'), false,
             Thread.currentThread().getContextClassLoader());
       }
       catch (ClassNotFoundException e) {
@@ -644,13 +634,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = getInternalPrimitiveNameFrom(name.trim());
     }
     else {
-      name = "L".concat(getInternalPrimitiveNameFrom(name.trim()).replaceAll("\\.", "/")).concat(";");
+      name = "L".concat(getInternalPrimitiveNameFrom(name.trim()).replace('.', '/')).concat(";");
     }
 
     return _internalNameCache = dimString + name;
   }
 
-  private static String getInternalPrimitiveNameFrom(final String name) {
+  public static String getInternalPrimitiveNameFrom(final String name) {
     if ("int".equals(name)) {
       return "I";
     }
@@ -680,38 +670,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     return name;
   }
-
-  private static Class<?> getPrimitiveRefFrom(final String name) {
-    if ("int".equals(name)) {
-      return int.class;
-    }
-    else if ("boolean".equals(name)) {
-      return boolean.class;
-    }
-    else if ("byte".equals(name)) {
-      return byte.class;
-    }
-    else if ("char".equals(name)) {
-      return char.class;
-    }
-    else if ("short".equals(name)) {
-      return short.class;
-    }
-    else if ("long".equals(name)) {
-      return long.class;
-    }
-    else if ("float".equals(name)) {
-      return float.class;
-    }
-    else if ("double".equals(name)) {
-      return double.class;
-    }
-    else if ("void".equals(name)) {
-      return void.class;
-    }
-    return null;
-  }
-
 
   @Override
   public BeanDescriptor getBeanDescriptor() {

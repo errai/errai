@@ -55,8 +55,7 @@
         <url>http://www.jboss.org</url>
     </organization>
 
-    <modules>
-        <module>jetty</module>
+    <modules>        
         <module>jboss</module>
         <module>errai-cdi-client</module>
         <module>weld-integration</module>        

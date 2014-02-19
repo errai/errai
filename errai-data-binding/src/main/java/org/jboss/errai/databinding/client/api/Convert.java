@@ -86,29 +86,33 @@ public class Convert {
       return o.toString();
     }
     else if (o.getClass().equals(String.class)) {
-      if (toType.equals(Integer.class)) {
-        return Integer.parseInt((String) o);
+      String val = (String) o;
+      if (toType.equals(Boolean.class)) {
+        return Boolean.parseBoolean(val);
+      }
+      if (val.isEmpty()) {
+        return null;
+      }
+      else if (toType.equals(Integer.class)) {
+        return Integer.parseInt(val);
       }
       else if (toType.equals(Long.class)) {
-        return Long.parseLong((String) o);
+        return Long.parseLong(val);
       }
       else if (toType.equals(Float.class)) {
-        return Float.parseFloat((String) o);
+        return Float.parseFloat(val);
       }
       else if (toType.equals(Double.class)) {
-        return Double.parseDouble((String) o);
-      }
-      else if (toType.equals(Boolean.class)) {
-        return Boolean.parseBoolean((String) o);
+        return Double.parseDouble(val);
       }
       else if (toType.equals(Date.class)) {
-        return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).parse((String) o);
+        return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).parse(val);
       }
       else if (toType.equals(BigDecimal.class)) {
-        return new BigDecimal((String) o);
+        return new BigDecimal(val);
       }
       else if (toType.equals(BigInteger.class)) {
-        return new BigInteger((String) o);
+        return new BigInteger(val);
       }
     }
     return o;

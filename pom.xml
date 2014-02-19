@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.jboss.integration-platform</groupId>
     <artifactId>jboss-integration-platform-parent</artifactId>
-    <version>6.0.0.CR3</version>
+    <version>6.0.0.CR6</version>
   </parent>
 
   <developers>
@@ -146,11 +146,6 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-cdi-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-cdi-jetty</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -277,6 +272,16 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-weld-integration</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-security-server</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-security-client</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -1399,7 +1404,7 @@
     <profile>
       <id>distro</id>
       <modules>
-        <module>reference</module>
+        <module>errai-docs</module>
         <module>dist</module>
       </modules>
       <repositories>

@@ -16,14 +16,17 @@
 
 package org.jboss.errai.otec.client;
 
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.operation.OTOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class OTClientEngine extends AbstractOTEngine {
+  
+  private static final Logger logger = LoggerFactory.getLogger(OTClientEngine.class);
 
   protected OTClientEngine(final PeerState peerState, final String name) {
     super(name, peerState);
@@ -43,12 +46,12 @@ public class OTClientEngine extends AbstractOTEngine {
   @Override
   public boolean receive(final String peerId, final OTOperation remoteOp) {
     try {
-      LogUtil.log("RECEIVE fromPeer=" + peerId + "; op=" + remoteOp  + "; rev=" + remoteOp.getRevision()
+      logger.debug("RECEIVE fromPeer=" + peerId + "; op=" + remoteOp  + "; rev=" + remoteOp.getRevision()
           + "; state=\"" + getEntityStateSpace().getEntity(remoteOp.getEntityId()).getState().get() + "\"");
       return applyFromRemote(remoteOp) != null;
     }
     catch (OTException e) {
-      LogUtil.log("warning. unrecoverable path divergence. will resync.");
+      logger.warn("warning. unrecoverable path divergence. will resync.");
       return false;
     }
     catch (BadSync badSync) {

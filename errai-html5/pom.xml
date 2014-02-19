@@ -188,12 +188,6 @@
           <artifactId>mvel2</artifactId>
         </dependency>
 
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-jetty</artifactId>
-          <version>${project.version}</version>
-        </dependency>
-
         <!-- CDI Development Utils -->
         <!-- This must be placed above com.google.gwt:gwt-dev to override the Jetty that is present there -->
         <dependency>

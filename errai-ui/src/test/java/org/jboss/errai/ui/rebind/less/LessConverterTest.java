@@ -1,11 +1,14 @@
 package org.jboss.errai.ui.rebind.less;
 
-import com.google.gwt.core.ext.BadPropertyValueException;
-import com.google.gwt.core.ext.PropertyOracle;
-import com.google.gwt.core.ext.SelectionProperty;
-import com.google.gwt.core.ext.TreeLogger;
-import org.junit.Test;
-import org.mockito.Matchers;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.mockito.AdditionalMatchers.not;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,13 +17,13 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Scanner;
 
-import static junit.framework.Assert.*;
-import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Test;
+import org.mockito.Matchers;
+
+import com.google.gwt.core.ext.BadPropertyValueException;
+import com.google.gwt.core.ext.PropertyOracle;
+import com.google.gwt.core.ext.SelectionProperty;
+import com.google.gwt.core.ext.TreeLogger;
 
 /**
  * @author edewit@redhat.com
@@ -103,6 +106,27 @@ public class LessConverterTest {
     assertEquals(".class1 {  background-color: black;}", readFile(css));
   }
 
+  @Test
+  public void shouldImportLessFiles() throws Exception {
+    // given
+    final URL resource = getClass().getResource("/import.less");
+    final PropertyOracle oracle = mock(PropertyOracle.class);
+    final SelectionProperty property = mock(SelectionProperty.class);
+
+    // when
+    when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), eq("user.agent"))).thenReturn(property);
+    when(property.getCurrentValue()).thenReturn("mozilla");
+
+    when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), not(eq("user.agent"))))
+            .thenThrow(new BadPropertyValueException(""));
+    when(oracle.getConfigurationProperty(anyString())).thenThrow(new BadPropertyValueException(""));
+
+    final File css = new LessConverter(TreeLogger.NULL, oracle).convert(resource);
+
+    // then
+    assertEquals(".class1 {  background-color: white;}.theclass {  color: #808080;}", readFile(css));
+  }
+
   private PropertyOracle noVariablesFoundOracle() throws BadPropertyValueException {
     final PropertyOracle oracle = mock(PropertyOracle.class);
     when(oracle.getSelectionProperty(Matchers.<TreeLogger>any(), anyString()))
@@ -113,9 +137,9 @@ public class LessConverterTest {
 
   private String readFile(File css) throws FileNotFoundException {
     StringBuilder buffer = new StringBuilder();
-    final Scanner scanner = new Scanner(css).useDelimiter("\n");
-    while (scanner.hasNext()) {
-      buffer.append(scanner.next());
+    final Scanner scanner = new Scanner(css);
+    while (scanner.hasNextLine()) {
+      buffer.append(scanner.nextLine());
     }
     scanner.close();
     return buffer.toString();

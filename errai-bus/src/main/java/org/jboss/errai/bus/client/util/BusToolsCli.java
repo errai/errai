@@ -32,12 +32,12 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.common.client.api.ResourceProvider;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
@@ -109,7 +109,7 @@ public class BusToolsCli {
       return ErraiProtocol.decodePayload(value);
     }
     else {
-      LogUtil.log("using no-auto envelope demarshaller");
+      LoggerFactory.getLogger(BusToolsCli.class).info("using no-auto envelope demarshaller");
       return ErraiProtocolEnvelopeNoAutoMarshaller.INSTANCE.demarshall(value, MarshallingSessionProviderFactory.getEncoding());
     }
   }

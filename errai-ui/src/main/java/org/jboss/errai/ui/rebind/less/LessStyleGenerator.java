@@ -1,10 +1,8 @@
 package org.jboss.errai.ui.rebind.less;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.PropertyOracle;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.dom.client.StyleInjector;
+import java.util.Collection;
+import java.util.Map;
+
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -20,8 +18,11 @@ import org.jboss.errai.ui.rebind.chain.SelectorReplacer;
 import org.jboss.errai.ui.rebind.chain.TemplateChain;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import java.util.Collection;
-import java.util.Map;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.PropertyOracle;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dom.client.StyleInjector;
 
 /**
  * This generator will create the LessStyleMapping that contains the mapping between the original selector name and
@@ -52,7 +53,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     }
 
     if (!styleMapping.isEmpty()) {
-      final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class);
+      final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class, context);
 
       for (MetaClass metaClass : templated) {
         String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);

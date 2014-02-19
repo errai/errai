@@ -22,7 +22,7 @@ public class LessStylesheetScannerTest {
     // then
     assertNotNull(resources);
     assertFalse(resources.isEmpty());
-    assertEquals(4, resources.size());
+    assertEquals(5, resources.size());
     assertTrue(resources.contains("find.less"));
 
     for (String resource : resources) {

@@ -16,22 +16,32 @@
 
 package org.jboss.errai.ui.client.widget;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.databinding.client.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.BindableListWrapper;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdapter;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.databinding.client.BindableListChangeHandler;
-import org.jboss.errai.databinding.client.BindableListWrapper;
-import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdpater;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
-
-import java.util.*;
+import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A type of widget that displays and manages a child widget for each item in a list of model
@@ -116,12 +126,17 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    */
   public void setItems(List<M> items) {
     boolean changed = this.items != items;
-    
+
     if (items instanceof BindableListWrapper) {
       this.items = (BindableListWrapper<M>) items;
     }
     else {
-      this.items = new BindableListWrapper<M>(items);
+      if (items != null) {
+        this.items = new BindableListWrapper<M>(items);
+      }
+      else {
+        this.items = new BindableListWrapper<M>(new ArrayList<M>());
+      }
     }
 
     if (changed) {
@@ -185,13 +200,14 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    * @param model
    *          the model displayed by the widget
    * 
-   * @return the widget displaying the provided model instance, null if no widget was found for the model.
+   * @return the widget displaying the provided model instance, null if no widget was found for the
+   *         model.
    */
   public W getWidget(M model) {
     int index = items.indexOf(model);
     return getWidget(index);
   }
-  
+
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<M>> handler) {
     if (!valueChangeHandlerInitialized) {
@@ -209,7 +225,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   @Override
   public List<M> getValue() {
     if (items == null) {
-      items = new BindableListWrapper<M>(new ArrayList<M>()); 
+      items = new BindableListWrapper<M>(new ArrayList<M>());
       items.addChangeHandler(this);
     }
     return items;
@@ -230,7 +246,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   }
 
   /**
-   * A callback invoked by the {@link AsyncBeanManager} or {@link SyncToAsyncBeanManagerAdpater}
+   * A callback invoked by the {@link AsyncBeanManager} or {@link SyncToAsyncBeanManagerAdapter}
    * when the widget instance was created. It will associate the corresponding model instance with
    * the widget and add the widget to the panel.
    */
@@ -266,8 +282,12 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemAddedAt(List<M> oldList, int index, M item) {
-    for (int i = index; i < items.size(); i++) {
-      addAndReplaceWidget(index, i);
+    if (panel instanceof IndexedPanel.ForIsWidget) {
+      insertWidgetAt(index, items.get(index));
+    } else {
+      for (int i = index; i < items.size(); i++) {
+        addAndReplaceWidget(index, i);
+      }
     }
   }
 
@@ -280,8 +300,14 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemsAddedAt(List<M> oldList, int index, Collection<? extends M> item) {
-    for (int i = index; i < items.size(); i++) {
-      addAndReplaceWidget(index, i);
+    if (panel instanceof IndexedPanel.ForIsWidget) {
+      for (int i = index; i < index + item.size(); i++ ) {
+        insertWidgetAt(index, items.get(index));
+      }
+    } else {
+      for (int i = index; i < items.size(); i++) {
+        addAndReplaceWidget(index, i);
+      }
     }
   }
 
@@ -326,6 +352,31 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       public void callback(W widget) {
         widget.setModel(m);
         panel.add(widget);
+      }
+    });
+  }
+
+  /**
+   * When the panel implements {@link InsertPanel.ForIsWidget} (i.e. the default {@link FlowPanel})
+   * insertion performance can be improved in comparison to {@link #addAndReplaceWidget} by using
+   * this method.
+   * @precondition
+   *          this.panel must implement {@link InsertPanel.ForIsWidget}
+   * @param index
+   *          the index at which the item has been added.
+   * @param m
+   *          the widgets Model to insert
+   */
+  private void insertWidgetAt(final int index, final M m) {
+    // This call is always synchronous, since the list can only be manipulated after
+    // onItemsRendered was called. At that point the code of a potential split point must have
+    // already been downloaded.
+    AsyncBeanDef<W> itemBeanDef = IOC.getAsyncBeanManager().lookupBean(getItemWidgetType());
+    itemBeanDef.getInstance(new CreationalCallback<W>() {
+      @Override
+      public void callback(W widget) {
+        widget.setModel(m);
+        ((InsertPanel.ForIsWidget)panel).insert(widget, index);
       }
     });
   }

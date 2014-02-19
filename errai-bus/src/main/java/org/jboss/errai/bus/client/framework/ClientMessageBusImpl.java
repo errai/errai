@@ -23,9 +23,27 @@ import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProce
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.BusLifecycleEvent;
+import org.jboss.errai.bus.client.api.BusLifecycleListener;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.TransportError;
+import org.jboss.errai.bus.client.api.TransportErrorHandler;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -44,8 +62,9 @@ import org.jboss.errai.bus.client.util.ManagementConsole;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -134,6 +153,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     @Override
     @SuppressWarnings({"unchecked"})
     public void callback(final Message message) {
+      final Logger logger = LoggerFactory.getLogger(getClass());
       BusCommand busCommand;
       if (message.getCommandType() == null) {
         busCommand = BusCommand.Unknown;
@@ -148,7 +168,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       switch (busCommand) {
         case RemoteSubscribe:
           if (message.hasPart(MessageParts.SubjectsList)) {
-            LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
+            logger.info("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
 
             for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
               remoteSubscribe(subject);
@@ -165,7 +185,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         case FinishAssociation:
           sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
-          LogUtil.log("my queue session id: " + sessionId);
+          logger.info("my queue session id: " + sessionId);
 
           loadRpcProxies();
           processCapabilities(message);
@@ -195,11 +215,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           setState(BusState.CONNECTED);
           sendAllDeferred();
           InitVotes.voteFor(ClientMessageBus.class);
-          LogUtil.log("bus federated and running.");
+          logger.info("bus federated and running.");
           break;
 
         case SessionExpired:
-          LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
+          logger.info("session expired while in state " + getState() + ": attempting to reset ...");
 
           // try to reconnect
           InitVotes.reset();
@@ -261,6 +281,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final Map<String, String> properties = new HashMap<String, String>();
 
   private Timer initialConnectTimer;
+  
+  private static final Logger logger = LoggerFactory.getLogger(ClientMessageBusImpl.class);
 
   public ClientMessageBusImpl() {
     setBusToInitializableState();
@@ -333,7 +355,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-    LogUtil.log("bus initialization started ...");
+    logger.info("bus initialization started ...");
     setBusToInitializableState();
 
     InitVotes.waitFor(ClientMessageBus.class);
@@ -370,20 +392,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void sendInitialMessage() {
     if (!isRemoteCommunicationEnabled()) {
-      LogUtil.log("initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)");
+      logger.info("initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)");
       InitVotes.voteFor(ClientMessageBus.class);
       setState(BusState.LOCAL_ONLY);
       return;
     }
 
     if (!getState().isStartableState()) {
-      LogUtil.log("aborting startup. bus is not in correct state. (current state: " + getState() + ")");
+      logger.warn("aborting startup. bus is not in correct state. (current state: " + getState() + ")");
       return;
     }
 
     setState(BusState.CONNECTING);
 
-    LogUtil.log("sending handshake message to remote bus");
+    logger.info("sending handshake message to remote bus");
 
     for (final Runnable deferredSubscription : deferredSubscriptions) {
       deferredSubscription.run();
@@ -423,7 +445,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     for (final String capability : message.get(String.class, MessageParts.CapabilitiesFlags).split(",")) {
       final TransportHandler handler = availableHandlers.get(capability);
       if (handler == null) {
-        LogUtil.log("warning: could not find handler for capability type: " + capability);
+        logger.warn("could not find handler for capability type: " + capability);
         continue;
       }
 
@@ -477,7 +499,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void stop(final boolean sendDisconnect, final TransportError reason) {
-    LogUtil.log("stopping bus ...");
+    logger.info("stopping bus ...");
     if (initialConnectTimer != null) {
       initialConnectTimer.cancel();
     }
@@ -910,7 +932,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void sendAllDeferred() {
     if (!deferredMessages.isEmpty())
-      LogUtil.log("transmitting deferred messages now ...");
+      logger.info("transmitting deferred messages now ...");
 
     final List<Message> highPriority = new ArrayList<Message>();
     for (final Message message : new ArrayList<Message>(deferredMessages)) {
@@ -946,7 +968,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         setState(BusState.CONNECTION_INTERRUPTED, transportError);
       }
       else if (state != BusState.CONNECTING && state != BusState.CONNECTION_INTERRUPTED) {
-        LogUtil.log("got a transport error while in the " + state + " state");
+        logger.error("got a transport error while in the " + state + " state");
       }
     }
 
@@ -1012,11 +1034,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     if (newHandler == null) {
-      LogUtil.log("no available transports! stopping bus!");
+      logger.error("no available transports! stopping bus!");
       stop(false);
     }
     else if (newHandler != transportHandler) {
-      LogUtil.log("transitioning to new handler: " + newHandler);
+      logger.info("transitioning to new handler: " + newHandler);
 
       transportHandler.stop(false);
       transportHandler = newHandler;
@@ -1038,6 +1060,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void addTransportErrorHandler(final TransportErrorHandler errorHandler) {
     transportErrorHandlers.add(errorHandler);
+  }
+
+  @Override
+  public void removeTransportErrorHandler(final TransportErrorHandler errorHandler) {
+    transportErrorHandlers.remove(errorHandler);
   }
 
   public BusState getState() {
@@ -1120,7 +1147,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void setState(final BusState newState, final TransportError reason) {
     if (state == newState) {
-      GWT.log("bus tried to transition from " + state + " ");
+      GWT.log("bus tried to transition to " + state + ", but it already is");
       return;
     }
 
@@ -1140,7 +1167,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       case CONNECTION_INTERRUPTED:
         if (newState == BusState.CONNECTED) {
-          LogUtil.log("the connection has resumed.");
+          logger.info("the connection has resumed.");
         }
 
       case CONNECTING:
@@ -1169,10 +1196,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     state = newState;
 
     if (newState == BusState.CONNECTION_INTERRUPTED) {
-      LogUtil.log("the connection to the server has been interrupted ...");
+      logger.warn("the connection to the server has been interrupted ...");
     }
 
-    /**
+    /*
      * If the new state is a state we deliver to shadow subscriptions, we send any deferred messages to
      * the shadow subscriptions now.
      */
@@ -1187,7 +1214,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           et.deliverTo(lifecycleListeners.get(i), e);
         }
         catch (Throwable t) {
-          LogUtil.log("listener threw exception: " + t);
+          logger.error("listener threw exception: " + t);
           t.printStackTrace();
         }
       }

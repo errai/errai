@@ -23,16 +23,6 @@
 	<properties>
         <weld.version>1.1.6.Final</weld.version>
 	</properties>
-   <!-- build>
-      <testResources>
-         <testResource>
-            <directory>src/main/java</directory>
-         </testResource>
-         <testResource>
-            <directory>src/main/resources</directory>
-         </testResource>
-      </testResources>
-   </build-->
 
    <dependencies>
       <dependency>
@@ -79,13 +69,6 @@
       <dependency>
          <groupId>org.jboss.weld.se</groupId>
          <artifactId>weld-se-core</artifactId>
-         <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-         <groupId>org.jboss.errai</groupId>
-         <artifactId>errai-cdi-jetty</artifactId>
-         <version>${project.version}</version>
          <scope>provided</scope>
       </dependency>
 

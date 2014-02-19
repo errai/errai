@@ -27,4 +27,5 @@ public interface MarshallingSessionProvider {
   public MarshallingSession getDecoding();
   public boolean hasMarshaller(String fqcn);
   public Marshaller getMarshaller(String fqcn);
+  public void registerMarshaller(String fqcn, Marshaller m);
 }

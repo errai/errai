@@ -53,6 +53,7 @@ import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanOranges;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualV;
 import org.jboss.errai.cdi.async.test.bm.client.res.Visa;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -61,7 +62,6 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanQuery;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 /**
  * @author Mike Brock

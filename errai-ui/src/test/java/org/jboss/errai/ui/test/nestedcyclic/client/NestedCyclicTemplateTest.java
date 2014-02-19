@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.regexp.shared.RegExp;
 
 public class NestedCyclicTemplateTest extends AbstractErraiCDITest {
 
@@ -18,11 +19,10 @@ public class NestedCyclicTemplateTest extends AbstractErraiCDITest {
   public void testInsertAndReplaceNested() {
     NestedTemplateTestApp app = IOC.getBeanManager().lookupBean(NestedTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
-    System.out.println(app.getComponent().getElement().getInnerHTML());
-    assertTrue(app.getComponent().getElement().getInnerHTML().contains("<h1>This will be rendered</h1>"));
-    assertTrue(app.getComponent().getElement().getInnerHTML().contains("<div>This will be rendered</div>"));
-    assertTrue(app.getComponent().getButton().getElement().getInnerHTML()
-            .contains("This will be rendered inside button"));
+    String innerHtml = app.getComponent().getElement().getInnerHTML();
+    assertTrue(RegExp.compile("<h1(.)*>This will be rendered</h1>").test(innerHtml));
+    assertTrue(RegExp.compile("<div(.)*>This will be rendered</div>").test(innerHtml));
+    assertTrue(innerHtml.contains("This will be rendered inside button"));
 
     Element lbl = Document.get().getElementById("c1a");
     assertNotNull(lbl);

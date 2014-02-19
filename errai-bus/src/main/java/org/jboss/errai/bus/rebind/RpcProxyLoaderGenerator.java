@@ -36,6 +36,8 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -48,6 +50,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  */
 @GenerateAsync(RpcProxyLoader.class)
 public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
+  private static final Logger log = LoggerFactory.getLogger(RpcProxyLoaderGenerator.class);
   private final String packageName = RpcProxyLoader.class.getPackage().getName();
   private final String className = RpcProxyLoader.class.getSimpleName() + "Impl";
 
@@ -62,16 +65,18 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
 
+    log.info("generating RPC proxy loader class...");
+    final long time = System.currentTimeMillis();
     final MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
 
     final Collection<MetaClass> typesAnnotatedWith = ClassScanner.getTypesAnnotatedWith(Remote.class,
-        RebindUtils.findTranslatablePackages(context));
+        RebindUtils.findTranslatablePackages(context), context);
 
     for (final MetaClass remote : typesAnnotatedWith) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
-        final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
+        final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote, context).generate();
         loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         // create the proxy provider
@@ -87,6 +92,9 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     }
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    return classBuilder.toJavaString();
+    
+    String gen =  classBuilder.toJavaString();
+    log.info("generated RPC proxy loader class in " + (System.currentTimeMillis() - time) + "ms.");
+    return gen;
   }
 }

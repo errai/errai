@@ -17,6 +17,17 @@
 package org.jboss.errai.otec.client.atomizer;
 
 
+import java.util.Collection;
+
+import org.jboss.errai.otec.client.EntityStreamRegistration;
+import org.jboss.errai.otec.client.ListenerRegistration;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.StateChangeListener;
+import org.jboss.errai.otec.client.util.DiffUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -32,28 +43,22 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ValueBoxBase;
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.otec.client.EntityStreamRegistration;
-import org.jboss.errai.otec.client.ListenerRegistration;
-import org.jboss.errai.otec.client.OTEngine;
-import org.jboss.errai.otec.client.OTEntity;
-import org.jboss.errai.otec.client.StateChangeListener;
-import org.jboss.errai.otec.client.util.DiffUtil;
-
-import java.util.Collection;
 
 /**
  * @author Mike Brock
  * @author Christian Sadilek
  */
 public abstract class Atomizer {
+  
+  private static final Logger logger = LoggerFactory.getLogger(Atomizer.class);
+  
   private Atomizer() {
   }
 
   private static boolean NO_PROPAGATE_STATE_CHANGE = false;
 
   public static AtomizerSession syncWidgetWith(final OTEngine engine, final OTEntity entity, final ValueBoxBase widget) {
-    LogUtil.log("NEW ATOMIZER SESSION (engine:" + engine.getId() + ", widget=" + widget + ")");
+    logger.info("NEW ATOMIZER SESSION (engine:" + engine.getId() + ", widget=" + widget + ")");
 
     final Multimap<Object, HandlerRegistration> HANDLER_REGISTRATION_MAP
         = HashMultimap.create();
@@ -193,7 +198,7 @@ public abstract class Atomizer {
         entityChangeStream.close();
         timer.cancel();
 
-        LogUtil.log("END ATOMIZER SESSION");
+        logger.info("END ATOMIZER SESSION");
         entityStreamRegistration.remove();
         listenerRegistration.remove();
         final Collection<HandlerRegistration> values = HANDLER_REGISTRATION_MAP.values();

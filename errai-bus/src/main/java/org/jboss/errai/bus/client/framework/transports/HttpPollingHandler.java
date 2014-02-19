@@ -34,7 +34,8 @@ import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -51,6 +52,8 @@ import com.google.gwt.user.client.Timer;
 public class HttpPollingHandler implements TransportHandler, TransportStatistics {
   public static int THROTTLE_TIME_MS = 175;
   public static int POLL_FREQUENCY_MS = 500;
+  
+  private static final Logger logger = LoggerFactory.getLogger(HttpPollingHandler.class);
 
   private boolean configured;
 
@@ -176,7 +179,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       return;
     }
 
-    //LogUtil.log("[bus] HttpPollingHandler.transmit(" + txMessages + ")");
+    logger.trace("[bus] HttpPollingHandler.transmit(" + txMessages + ")");
 
     final List<Message> toSend = new ArrayList<Message>();
 
@@ -198,7 +201,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       }
 
       if (canDefer && throttleMessages(txMessages)) {
-        //LogUtil.log("[bus] *DEFERRED* :: " + txMessages);
+        logger.trace("[bus] *DEFERRED* :: " + txMessages);
         return;
       }
       else {
@@ -212,7 +215,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     undeliveredMessages.addAll(toSend);
 
     final String message = BusToolsCli.encodeMessages(toSend);
-    //LogUtil.log("[bus] toSend=" + toSend);
+    logger.trace("[bus] toSend=" + toSend);
 
     try {
       txActive = true;
@@ -226,7 +229,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         for (final Message txM : txMessages) {
           messageBus.callErrorHandler(txM, e);
         }
-        LogUtil.log("exception: " + e.getMessage());
+        logger.error("exception: " + e.getMessage(), e);
       }
     }
     finally {
@@ -252,7 +255,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       receiveCommCallback.onError(null, e);
     }
     catch (Throwable t) {
-      if (messageBus.handleTransportError(new BusTransportError(request, t, -1, RetryInfo.NO_RETRY))) {
+      if (messageBus.handleTransportError(new BusTransportError(this, request, t, -1, RetryInfo.NO_RETRY))) {
         return;
       }
 
@@ -263,6 +266,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   @Override
   public Collection<Message> stop(final boolean stopAllCurrentRequests) {
     receiveCommCallback.cancel();
+    throttleTimer.cancel();
+    
     try {
       if (stopAllCurrentRequests) {
         // Now stop all the in-flight XHRs
@@ -335,7 +340,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       final int retryDelay = Math.min((rxRetries * 1000) + 1, 10000);
 
       final RetryInfo retryInfo = new RetryInfo(retryDelay, rxRetries);
-      final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);
+      final BusTransportError transportError =
+              new BusTransportError(HttpPollingHandler.this, request, throwable, statusCode, retryInfo);
 
       notifyDisconnected();
 
@@ -355,13 +361,15 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         case 502: // bad gateway--could happen if long poll request was proxied to a down server
         case 503: // temporary overload (probably on a proxy)
         case 504: // gateway timeout--same possibilities as 502
-          LogUtil.log("attempting Rx reconnection -- attempt: " + (rxRetries + 1));
+          logger.info("attempting Rx reconnection -- attempt: " + (rxRetries + 1));
           rxRetries++;
 
           new Timer() {
             @Override
             public void run() {
-              performPoll();
+              if (!canceled) {
+                performPoll();
+              }
             }
           }.schedule(retryDelay);
 
@@ -416,7 +424,9 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       new Timer() {
         @Override
         public void run() {
-          performPoll();
+          if (!canceled) {
+            performPoll();
+          }
         }
       }.schedule(1);
     }
@@ -451,7 +461,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       final Map<String, String> extraParameters,
       final RequestCallback callback) throws RequestException {
 
-   // LogUtil.log("[bus] sendPollingRequest(" + payload + ")");
+    logger.trace("[bus] sendPollingRequest(" + payload + ")");
 
     final String serviceEntryPoint;
     final Map<String, String> parmsMap;
@@ -505,7 +515,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     final RxInfo rxInfo = new RxInfo(System.currentTimeMillis(), waitChannel);
 
     try {
-      // LogUtil.log("[bus] TX: " + payload);
+       logger.trace("[bus] TX: " + payload);
       final Request request = builder.sendRequest(payload, new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {
@@ -707,7 +717,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         {
           final int retryDelay = Math.min((txRetries * 1000) + 1, 10000);
           final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
-          final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
+          final BusTransportError transportError =
+                  new BusTransportError(HttpPollingHandler.this, request, null, statusCode, retryInfo);
 
           notifyDisconnected();
 
@@ -715,7 +726,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
             return;
           }
 
-          LogUtil.log("attempting Tx reconnection -- attempt: " + (txRetries + 1));
+          logger.info("attempting Tx reconnection -- attempt: " + (txRetries + 1));
           txRetries++;
 
           new Timer() {
@@ -735,7 +746,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
           break;
 
         default: {
-          final BusTransportError transportError = new BusTransportError(request, null, statusCode, RetryInfo.NO_RETRY);
+          final BusTransportError transportError =
+                  new BusTransportError(HttpPollingHandler.this, request, null, statusCode, RetryInfo.NO_RETRY);
 
           if (messageBus.handleTransportError(transportError)) {
             return;
@@ -756,11 +768,12 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       txActive = false;
       notifyDisconnected();
 
-      messageBus.handleTransportError(new BusTransportError(request, exception, statusCode, RetryInfo.NO_RETRY));
+      messageBus.handleTransportError(
+              new BusTransportError(HttpPollingHandler.this, request, exception, statusCode, RetryInfo.NO_RETRY));
 
       for (final Message txM : txMessages) {
         if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
-          LogUtil.log("failed to communicate with remote bus: " + exception);
+          logger.error("failed to communicate with remote bus.", exception);
         }
       }
       schedulePolling();

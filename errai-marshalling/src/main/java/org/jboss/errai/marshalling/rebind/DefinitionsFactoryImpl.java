@@ -18,17 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -67,6 +57,7 @@ import com.google.common.collect.Multimap;
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Set<MetaClass> exposedClasses = Collections.newSetFromMap(new LinkedHashMap<MetaClass, Boolean>());
+  private final Set<MetaClass> typesWithBuiltInMarshallers = new HashSet<MetaClass>();
 
   /**
    * Map of aliases to the mapped marshalling type.
@@ -178,7 +169,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         if (!envExposedClasses.contains(definition.getMappingClass())) {
           definition.setLazy(true);
         }
-
         exposedClasses.add(definition.getMappingClass());
 
         if (log.isDebugEnabled())
@@ -228,6 +218,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           addDefinition(marshallMappingDef);
 
           exposedClasses.add(MetaClassFactory.get(type).asBoxed());
+          typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
             for (final Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
@@ -236,6 +227,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               addDefinition(aliasMappingDef);
 
               exposedClasses.add(MetaClassFactory.get(aliasCls).asBoxed());
+              typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
               mappingAliases.put(aliasCls.getName(), type.getName());
             }
           }
@@ -268,6 +260,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             addDefinition(definition);
 
             exposedClasses.add(MetaClassFactory.get(type).asBoxed());
+            typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
           }
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
@@ -281,6 +274,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
                 addDefinition(aliasMappingDef);
 
                 exposedClasses.add(MetaClassFactory.get(aliasCls));
+                typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
                 mappingAliases.put(aliasCls.getName(), type.getName());
               }
             }
@@ -561,6 +555,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     this.exposedClasses.clear();
     this.mappingAliases.clear();
     this.mappingDefinitions.clear();
-    loadCustomMappings();
+    this.typesWithBuiltInMarshallers.clear();
+    loadCustomMappings(); 
+  }
+
+  @Override
+  public boolean hasBuiltInDefinition(MetaClass type) {
+    return typesWithBuiltInMarshallers.contains(type.asBoxed());
   }
 }

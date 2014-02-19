@@ -8,6 +8,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -18,6 +19,7 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
@@ -25,7 +27,6 @@ import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanContext;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.client.test.FakeGWT;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
@@ -41,6 +42,7 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
+
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;

@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
@@ -28,8 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectorRegistrationListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.google.gwt.core.ext.GeneratorContext;
 
 public class ProviderInjector extends TypeInjector {
   private final AbstractInjector providerInjector;
@@ -39,7 +41,6 @@ public class ProviderInjector extends TypeInjector {
                           final MetaClass providerType,
                           final InjectionContext context) {
     super(type, context);
-
     if (EnvUtil.isProdMode()) {
       setEnabled(context.isReachable(type) || context.isReachable(providerType));
     }
@@ -54,7 +55,8 @@ public class ProviderInjector extends TypeInjector {
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
-    final Collection<MetaClass> toDisable = new ArrayList<MetaClass>(ClassScanner.getSubTypesOf(type));
+    GeneratorContext genCtx = context.getProcessingContext().getGeneratorContext();
+    final Collection<MetaClass> toDisable = new ArrayList<MetaClass>(ClassScanner.getSubTypesOf(type, genCtx));
     toDisable.add(type);
 
     setRendered(true);

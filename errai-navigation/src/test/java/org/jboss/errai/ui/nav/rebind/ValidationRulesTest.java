@@ -1,6 +1,14 @@
 package org.jboss.errai.ui.nav.rebind;
 
-import com.google.gwt.user.client.ui.SimplePanel;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
@@ -13,14 +21,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
  * @author edewit@redhat.com
@@ -28,7 +29,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClassScanner.class)
 public class ValidationRulesTest {
-  private NavigationGraphGenerator generator = new NavigationGraphGenerator();
+  private final NavigationGraphGenerator generator = new NavigationGraphGenerator();
 
 
   @Test
@@ -36,7 +37,7 @@ public class ValidationRulesTest {
     // given
     mockStatic(ClassScanner.class);
     List<MetaClass> result = createMetaClassList(StartPage1.class, StartPage2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class)).thenReturn(result);
+    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
 
     // when
     try {
@@ -65,7 +66,7 @@ public class ValidationRulesTest {
     // given
     mockStatic(ClassScanner.class);
     List<MetaClass> result = createMetaClassList(Page1.class, Page2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class)).thenReturn(result);
+    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
 
     // when
     try {
@@ -84,7 +85,7 @@ public class ValidationRulesTest {
     // given
     mockStatic(ClassScanner.class);
     List<MetaClass> result = createMetaClassList(Page2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class)).thenReturn(result);
+    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
 
     // when
     try {

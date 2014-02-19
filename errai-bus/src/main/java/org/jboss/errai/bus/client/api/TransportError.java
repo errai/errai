@@ -1,5 +1,7 @@
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.framework.transports.TransportHandler;
+
 import com.google.gwt.http.client.Request;
 
 /**
@@ -10,6 +12,11 @@ import com.google.gwt.http.client.Request;
 // TODO move this to the api package and make this a class in Errai 3.0
 public interface TransportError {
 
+  /**
+   * The {@link TransportHandler} where this error came from. Never null.
+   */
+  public TransportHandler getSource();
+  
   /**
    * The {@link Request} associated with the error.
    *

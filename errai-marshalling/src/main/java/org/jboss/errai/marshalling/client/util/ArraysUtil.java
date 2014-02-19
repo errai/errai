@@ -16,21 +16,26 @@
 
 package org.jboss.errai.marshalling.client.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gwt.core.client.JavaScriptObject;
-import org.jboss.errai.common.client.util.LogUtil;
 
 /**
  * @author Mike Brock
  */
 public class ArraysUtil {
+  
+  private static final Logger logger = LoggerFactory.getLogger(ArraysUtil.class);
+  
   static class GeorgeBurns {
   }
 
   public static void testSomeShit(Class<?> shit) {
     final JavaScriptObject castableTypeMap = getCastableTypeMap(new GeorgeBurns());
-    LogUtil.log("castableTypeMap: " + castableTypeMap);
+    logger.debug("castableTypeMap: " + castableTypeMap);
     final int seedId = -getSeedId(GeorgeBurns.class);
-    LogUtil.log("seedId: " + seedId);
+    logger.debug("seedId: " + seedId);
 
 //    final String[][] array = initDims(
 //        new Class[]{String.class, String.class},
@@ -41,7 +46,7 @@ public class ArraysUtil {
 //        0
 //    );
 
-    LogUtil.log("XxXxXxXxX");
+    logger.debug("XxXxXxXxX");
 
     GeorgeBurns[][] array = initDims(
         new Class[]{
@@ -63,17 +68,17 @@ public class ArraysUtil {
     array[0][0] = new GeorgeBurns();
     array[0][1] = new GeorgeBurns();
 
-    LogUtil.log("the thing we made is a " + array.getClass());
-    LogUtil.log("is String[] a String: " + (((Object) new String[0]) instanceof String));
-    LogUtil.log("is Object: " + (array instanceof Object));
-    LogUtil.log("is Object[]: " + (array instanceof Object[]));
-    LogUtil.log("is Object[][]: " + (array instanceof Object[][]));
-    LogUtil.log("is GeorgeBurns: " + (((Object)array) instanceof GeorgeBurns));
-    LogUtil.log("is GeorgeBurns[]: " + (((Object)array) instanceof GeorgeBurns[]));
-    LogUtil.log("is GeorgeBurns[][]: " + (array instanceof GeorgeBurns[][]));
-    LogUtil.log("element readback [0][0]: " + ((Object[][]) array)[0][0]);
-    LogUtil.log("element readback [0][1]: " + ((Object[][]) array)[0][1]);
-//    LogUtil.log("array length: " + array.length);
+    logger.debug("the thing we made is a " + array.getClass());
+    logger.debug("is String[] a String: " + (((Object) new String[0]) instanceof String));
+    logger.debug("is Object: " + (array instanceof Object));
+    logger.debug("is Object[]: " + (array instanceof Object[]));
+    logger.debug("is Object[][]: " + (array instanceof Object[][]));
+    logger.debug("is GeorgeBurns: " + (((Object)array) instanceof GeorgeBurns));
+    logger.debug("is GeorgeBurns[]: " + (((Object)array) instanceof GeorgeBurns[]));
+    logger.debug("is GeorgeBurns[][]: " + (array instanceof GeorgeBurns[][]));
+    logger.debug("element readback [0][0]: " + ((Object[][]) array)[0][0]);
+    logger.debug("element readback [0][1]: " + ((Object[][]) array)[0][1]);
+//    logger.debug("array length: " + array.length);
   }
 
   private static native Object createArray() /*-{

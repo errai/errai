@@ -18,6 +18,11 @@ package org.jboss.errai.codegen.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.inject.Singleton;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Parameter;
@@ -33,10 +38,13 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.common.client.util.AsyncBeanFactory;
+import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.common.metadata.RebindUtils;
 
 import com.google.common.reflect.TypeToken;
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Utilities to avoid redundant code for proxy generation.
@@ -45,6 +53,9 @@ import com.google.common.reflect.TypeToken;
  * @author Mike Brock
  */
 public abstract class ProxyUtil {
+  
+  private static final String IOC_MODULE_NAME = "org.jboss.errai.ioc.Container";
+  
   private ProxyUtil() {}
 
   /**
@@ -59,15 +70,16 @@ public abstract class ProxyUtil {
    * @param proceed
    *          the logic that should be invoked if
    *          {@link org.jboss.errai.common.client.api.interceptor.CallContext#proceed()} is called.
-   * @param interceptedCall
-   *          a reference to the {@link org.jboss.errai.common.client.api.interceptor.InterceptedCall} annotation on the
-   *          remote interface or method
+   * @param interceptors
+   *          a list of interceptors to use
    * @return statement representing an anonymous implementation of the provided
    *         {@link org.jboss.errai.common.client.api.interceptor.CallContext}
    */
   public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
-        final Class<? extends RemoteCallContext> callContextType,
-        final MetaClass proxyClass, final MetaMethod method, final Statement proceed, final InterceptedCall interceptedCall) {
+          final GeneratorContext context,
+          final Class<? extends RemoteCallContext> callContextType,
+          final MetaClass proxyClass, final MetaMethod method,
+          final Statement proceed, final List<Class<?>> interceptors) {
 
     return Stmt.newObject(callContextType).extend()
               .publicOverridesMethod("getMethodName")
@@ -77,7 +89,7 @@ public abstract class ProxyUtil {
               .append(Stmt.load(method.getAnnotations()).returnValue())
               .finish()
               .publicOverridesMethod("proceed")
-              .append(generateInterceptorStackProceedMethod(proceed, interceptedCall))
+              .append(generateInterceptorStackProceedMethod(context, callContextType, proceed, interceptors))
               .append(Stmt.load(null).returnValue())
               .finish()
               .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback", true))
@@ -122,31 +134,82 @@ public abstract class ProxyUtil {
               .finish();
   }
 
-  private static Statement generateInterceptorStackProceedMethod(final Statement proceed, final InterceptedCall interceptedCall) {
+  private static Statement generateInterceptorStackProceedMethod(
+          final GeneratorContext context,
+          final Class<? extends RemoteCallContext> callContextType,
+          final Statement proceed, final List<Class<?>> interceptors) {
     final BlockStatement proceedLogic = new BlockStatement();
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
     final BlockBuilder<ElseBlockBuilder> interceptorStack =
               If.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor"));
 
-    for (final Class<?> interceptor : interceptedCall.value()) {
+    for (final Class<?> interceptor : interceptors) {
       interceptorStack.append(If.cond(Bool.equals(
               Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
               .append(Stmt.loadVariable("status").invoke("setProceeding", false))
+              .append(Stmt.declareFinalVariable("ctx", callContextType, Stmt.loadVariable("this")))
               .append(
-                  Stmt.nestedCall(Stmt.newObject(interceptor))
-                      .invoke("aroundInvoke", Variable.get("this")))
-              .append(
-                  If.not(Stmt.loadVariable("status").invoke("isProceeding"))
+                  Stmt.declareVariable(CreationalCallback.class).asFinal().named("icc")
+                  .initializeWith(
+                    Stmt.newObject(CreationalCallback.class).extend()
+                      .publicOverridesMethod("callback", Parameter.of(Object.class, "beanInstance", true))
+                      .append(Stmt.castTo(interceptor, Stmt.loadVariable("beanInstance")).invoke("aroundInvoke", Variable.get("ctx")))
                       .append(
-                          Stmt.loadVariable("remoteCallback").invoke("callback",
-                              Stmt.loadVariable("this").invoke("getResult")))
-                      .finish())
+                          If.not(Stmt.loadVariable("status").invoke("isProceeding"))
+                          .append(
+                              Stmt.loadVariable("remoteCallback").invoke("callback",
+                                  Stmt.loadVariable("ctx").invoke("getResult")))
+                          .finish())
+                      .finish() // finish the method override body
+                      .finish() // finish the anonymous CreationalCallback class body
+                  ))
+              .append(generateAsyncInterceptorCreation(context, interceptor))
               .finish()
           );
     }
     proceedLogic.addStatement(interceptorStack.finish().else_().append(proceed).finish());
     return proceedLogic;
+  }
+
+  /**
+   * Generates the code that will create the interceptor and then invoke the
+   * callback when done.  If IOC is available *and* the interceptor is a managed
+   * bean, then the IOC bean manager will be used to load the interceptor.
+   * @param context
+   * @param interceptor
+   */
+  private static Statement generateAsyncInterceptorCreation(final GeneratorContext context, 
+          final Class<?> interceptor) {
+    if (RebindUtils.isModuleInherited(context, IOC_MODULE_NAME) && isManagedBean(interceptor)) {
+      // Note: for the IOC path, generate the code via StringStatement because we
+      // need to make sure that IOC is an optional dependency.  This should probably
+      // be replaced with some sort of pluggable model instead (where a Statement can
+      // be provided by some Provider in the IOC module itself maybe).
+      StringBuilder builder = new StringBuilder();
+      builder.append("org.jboss.errai.ioc.client.container.IOC.getAsyncBeanManager().lookupBeans(")
+              .append(interceptor.getSimpleName())
+              .append(".class).iterator().next().getInstance(icc)");
+      return new StringStatement(builder.toString());
+    } else {
+      return Stmt.invokeStatic(AsyncBeanFactory.class, "createBean",
+              Stmt.newObject(interceptor), Variable.get("icc"));
+    }
+  }
+
+  /**
+   * Returns true if the given bean is an explicitely managed bean (meaning it is
+   * annotated in some way).
+   * @param interceptor
+   */
+  private static boolean isManagedBean(Class<?> interceptor) {
+    if (interceptor.getAnnotation(ApplicationScoped.class) != null)
+      return true;
+    if (interceptor.getAnnotation(Singleton.class) != null)
+      return true;
+    if (interceptor.getAnnotation(Dependent.class) != null)
+      return true;
+    return false;
   }
 
   public static boolean shouldProxyMethod(final MetaMethod method) {

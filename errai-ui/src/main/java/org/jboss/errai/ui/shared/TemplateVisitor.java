@@ -1,15 +1,15 @@
 package org.jboss.errai.ui.shared;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Visits the dom and finds elements that need translating.
-*/
+ */
 public class TemplateVisitor implements DomVisitor {
   private String i18nPrefix;
   private final Map<String, String> i18nValues = new HashMap<String, String>();
@@ -22,7 +22,6 @@ public class TemplateVisitor implements DomVisitor {
   public boolean visit(Element element) {
     // Developers can mark entire sections of the template as "do not translate"
     if ("dummy".equals(element.getAttribute("data-role"))) {
-      System.out.println("Skipping...");
       return false;
     }
     // If the element either explicitly enables i18n (via an i18n key) or is a text-only
@@ -43,6 +42,7 @@ public class TemplateVisitor implements DomVisitor {
 
   /**
    * Records the translation key/value for an element.
+   * 
    * @param i18nKeyPrefix
    * @param element
    */
@@ -54,6 +54,7 @@ public class TemplateVisitor implements DomVisitor {
 
   /**
    * Records the translation key/value for an attribute.
+   * 
    * @param i18nKeyPrefix
    * @param element
    * @param attributeName
@@ -74,11 +75,14 @@ public class TemplateVisitor implements DomVisitor {
     String elementKey;
     if (hasAttribute(element, "data-field")) {
       elementKey = element.getAttribute("data-field");
-    } else if (hasAttribute(element, "id")) {
+    }
+    else if (hasAttribute(element, "id")) {
       elementKey = element.getAttribute("id");
-    } else if (hasAttribute(element, "name")) {
+    }
+    else if (hasAttribute(element, "name")) {
       elementKey = element.getAttribute("name");
-    } else {
+    }
+    else {
       elementKey = getOrGenerateTranslationKey(element);
     }
     return elementKey;
@@ -95,7 +99,8 @@ public class TemplateVisitor implements DomVisitor {
     String currentText = getTextContent(element);
     if (hasAttribute(element, "data-i18n-key")) {
       translationKey = element.getAttribute("data-i18n-key");
-    } else {
+    }
+    else {
       translationKey = currentText.replaceAll("[:\\s'\"]+", "_");
       if (translationKey.length() > 128) {
         translationKey = translationKey.substring(0, 128) + translationKey.hashCode();
@@ -107,6 +112,7 @@ public class TemplateVisitor implements DomVisitor {
 
   /**
    * Returns true if the given element has some text and no element children.
+   * 
    * @param element
    */
   public boolean isTextOnly(Element element) {
@@ -124,6 +130,7 @@ public class TemplateVisitor implements DomVisitor {
 
   /**
    * Called to determine if an element has an attribute defined.
+   * 
    * @param element
    * @param attributeName
    */
@@ -134,6 +141,7 @@ public class TemplateVisitor implements DomVisitor {
 
   /**
    * Gets the text content for the given element.
+   * 
    * @param element
    */
   private String getTextContent(Element element) {
@@ -145,7 +153,8 @@ public class TemplateVisitor implements DomVisitor {
       if (item.getNodeType() == Node.TEXT_NODE) {
         if (first) {
           first = false;
-        } else {
+        }
+        else {
           text.append(" ");
         }
         text.append(item.getNodeValue());

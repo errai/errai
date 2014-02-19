@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import java.util.Date;
+
 import javax.ws.rs.core.PathSegment;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
@@ -74,5 +76,10 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   @Override
   public String getWithPathSegmentPathParam(PathSegment id) {
     return id.getMatrixParameters().getFirst("name")+"/"+id.getMatrixParameters().getFirst("author");
+  }
+
+  @Override
+  public String getWithDatePathParam(Date date) {
+    return date.toString();
   }
 }
