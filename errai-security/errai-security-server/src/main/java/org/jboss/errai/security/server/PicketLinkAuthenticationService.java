@@ -13,8 +13,8 @@ import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.LoggedInEvent;
 import org.jboss.errai.security.shared.LoggedOutEvent;
 import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.SecurityException;
 import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.exception.SecurityException;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.IdentityManager;
@@ -71,6 +71,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     user.setLoginName(picketLinkUser.getLoginName());
     user.setFullName(picketLinkUser.getFirstName() + " " + picketLinkUser.getLastName());
     user.setShortName(picketLinkUser.getLastName());
+    user.setRoles(getRoles());
     return user;
   }
 

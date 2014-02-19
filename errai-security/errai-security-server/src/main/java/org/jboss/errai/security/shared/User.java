@@ -4,6 +4,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * A user.
@@ -17,6 +18,7 @@ public class User implements Serializable {
   private String fullName;
   private String shortName;
   private String email;
+  private List<Role> roles;
 
   public User() {}
 
@@ -84,5 +86,13 @@ public class User implements Serializable {
             ", shortName='" + shortName + '\'' +
             ", email='" + email + '\'' +
             '}';
+  }
+
+  public List<Role> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(List<Role> roles) {
+    this.roles = roles;
   }
 }

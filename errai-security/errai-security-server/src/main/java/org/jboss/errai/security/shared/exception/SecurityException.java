@@ -1,4 +1,4 @@
-package org.jboss.errai.security.shared;
+package org.jboss.errai.security.shared.exception;
 
 public class SecurityException extends RuntimeException {
 
