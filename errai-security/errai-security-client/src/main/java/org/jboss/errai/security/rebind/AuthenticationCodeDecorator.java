@@ -31,20 +31,20 @@ public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
   @Override
   public List<? extends Statement> generateDecorator(InjectableInstance<Page> ctx) {
     final List<Statement> stmts = new ArrayList<Statement>();
-    if (ctx.getTaskType() == TaskType.Type) {
-      final Annotation[] annotations = ctx.getElementType().getAnnotations();
-      if (isRequireRoleAnnotated(annotations)) {
-        createInterceptor(stmts, ClientSecurityRoleInterceptor.class);
-        stmts.add(Stmt.loadVariable("interceptor").invoke(
-                "securityCheck", getAnnotation(annotations, RequireRoles.class).value(), null)
-        );
-      }
-      if (isRequireAuthentication(annotations)) {
-        createInterceptor(stmts, SecurityUserInterceptor.class);
-        stmts.add(Stmt.loadVariable("interceptor").invoke("securityCheck")
-        );
-      }
-    }
+//    if (ctx.getTaskType() == TaskType.Type) {
+//      final Annotation[] annotations = ctx.getElementType().getAnnotations();
+//      if (isRequireRoleAnnotated(annotations)) {
+//        createInterceptor(stmts, ClientSecurityRoleInterceptor.class);
+//        stmts.add(Stmt.loadVariable("interceptor").invoke(
+//                "securityCheck", getAnnotation(annotations, RequireRoles.class).value(), null)
+//        );
+//      }
+//      if (isRequireAuthentication(annotations)) {
+//        createInterceptor(stmts, SecurityUserInterceptor.class);
+//        stmts.add(Stmt.loadVariable("interceptor").invoke("securityCheck")
+//        );
+//      }
+//    }
 
     return stmts;
   }

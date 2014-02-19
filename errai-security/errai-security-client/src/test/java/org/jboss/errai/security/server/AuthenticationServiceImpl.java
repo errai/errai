@@ -26,6 +26,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     this.username = username;
     this.password = password;
     user = new User(username);
+    user.setRoles(getRoles());
 
     return user;
   }

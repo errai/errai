@@ -7,7 +7,7 @@ import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.shared.RequireAuthentication;
-import org.jboss.errai.security.shared.SecurityException;
+import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 
 /**
  * SecurityUserInterceptor will intercept calls annotated with
@@ -41,7 +41,7 @@ public class SecurityUserInterceptor extends ClientSecurityInterceptor implement
                     command.action();
                 }
                 else {
-                  throw new SecurityException();
+                  throw new UnauthenticatedException();
                 }
               }
             });
