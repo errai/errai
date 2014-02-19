@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.InsertPanel;
 
 /**
  * A type of widget that displays and manages a child widget for each item in a list of model
@@ -282,7 +283,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemAddedAt(List<M> oldList, int index, M item) {
-    if (panel instanceof IndexedPanel.ForIsWidget) {
+    if (panel instanceof InsertPanel.ForIsWidget) {
       insertWidgetAt(index, items.get(index));
     } else {
       for (int i = index; i < items.size(); i++) {
@@ -300,9 +301,9 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemsAddedAt(List<M> oldList, int index, Collection<? extends M> item) {
-    if (panel instanceof IndexedPanel.ForIsWidget) {
+    if (panel instanceof InsertPanel.ForIsWidget) {
       for (int i = index; i < index + item.size(); i++ ) {
-        insertWidgetAt(index, items.get(index));
+        insertWidgetAt(i, items.get(i));
       }
     } else {
       for (int i = index; i < items.size(); i++) {
