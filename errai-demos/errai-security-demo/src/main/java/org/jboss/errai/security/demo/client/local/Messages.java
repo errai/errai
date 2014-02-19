@@ -1,13 +1,9 @@
 package org.jboss.errai.security.demo.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.demo.client.shared.MessageService;
@@ -17,8 +13,11 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 
 @Dependent
 @Templated("#main")
@@ -52,12 +51,6 @@ public class Messages extends Composite {
                                     @Override
                                     public void callback(String o) {
                                       label.setText(o);
-                                    }
-                                  }, new ErrorCallback<Object>() {
-                                    @Override
-                                    public boolean error(Object o, Throwable throwable) {
-                                      throwable.printStackTrace();
-                                      return false;
                                     }
                                   }
         ).hello();
