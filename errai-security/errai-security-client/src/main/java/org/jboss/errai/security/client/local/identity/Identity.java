@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.shared.AuthenticationService;
@@ -22,8 +23,9 @@ import java.util.List;
 import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COOKIE;
 
 /**
- * Identity holds the username and password and performs the authentication tasks.
- *
+ * Identity holds the username and password and performs the authentication
+ * tasks.
+ * 
  * @author edewit@redhat.com
  */
 @Bindable
@@ -38,10 +40,19 @@ public class Identity implements Serializable {
       public void callback(User user) {
         StyleBindingsRegistry.get().updateStyles();
         final String page = Cookies.getCookie(CURRENT_PAGE_COOKIE);
-        if (page != null) {
-          Cookies.removeCookie(CURRENT_PAGE_COOKIE);
-          IOC.getBeanManager().lookupBean(Navigation.class).getInstance().goTo(page);
-        }
+        IOC.getAsyncBeanManager().lookupBean(Navigation.class).getInstance(new CreationalCallback<Navigation>() {
+
+          @Override
+          public void callback(Navigation navigation) {
+            if (page != null) {
+              Cookies.removeCookie(CURRENT_PAGE_COOKIE);
+              navigation.goTo(page);
+            }
+            else {
+              navigation.goTo(navigation.getCurrentPage().name());
+            }
+          }
+        });
         if (callback != null) {
           callback.callback(user);
         }
