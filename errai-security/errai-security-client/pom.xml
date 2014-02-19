@@ -36,6 +36,10 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-ioc-bus-support</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cdi-client</artifactId>
     </dependency>
     <dependency>

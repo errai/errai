@@ -16,12 +16,14 @@ import org.jboss.errai.security.client.shared.DiverseService;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.security.shared.exception.SecurityException;
+import org.jboss.errai.security.shared.exception.UnauthenticatedException;
+import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.junit.Test;
 
 import com.google.gwt.user.client.Timer;
 
 public class SecurityInterceptorTest extends AbstractErraiCDITest {
-  
+
   public static long TIME_LIMIT = 30000;
 
   private static class Counter {
@@ -38,14 +40,16 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
 
   private class ErrorCountingCallback extends BusErrorCallback {
     private final Counter counter;
+    private final Class<? extends SecurityException> throwType;
 
-    public ErrorCountingCallback(final Counter counter) {
+    public ErrorCountingCallback(final Counter counter, final Class<? extends SecurityException> throwType) {
       this.counter = counter;
+      this.throwType = throwType;
     }
 
     @Override
     public boolean error(Message message, Throwable throwable) {
-      if (throwable instanceof SecurityException) {
+      if (throwable.getClass().equals(throwType)) {
         counter.increment();
         return false;
       }
@@ -74,7 +78,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
           public void callback(Void response) {
             fail();
           }
-        }, new ErrorCountingCallback(errorCounter), AuthenticatedService.class).userStuff();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AuthenticatedService.class)
+                .userStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -100,7 +105,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
           public void callback(Void response) {
             fail();
           }
-        }, new ErrorCountingCallback(errorCounter), DiverseService.class).needsAuthentication();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class)
+                .needsAuthentication();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -129,7 +135,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter), DiverseService.class).needsAuthentication();
+            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class)
+                    .needsAuthentication();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
               public void run() {
@@ -160,7 +167,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter), AuthenticatedService.class).userStuff();
+            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AuthenticatedService.class)
+                    .userStuff();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
               public void run() {
@@ -189,7 +197,7 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
           public void callback(Void response) {
             counter.increment();
           }
-        }, new ErrorCountingCallback(errorCounter), AdminService.class).adminStuff();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AdminService.class).adminStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -216,7 +224,7 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
           public void callback(Void response) {
             counter.increment();
           }
-        }, new ErrorCountingCallback(errorCounter), DiverseService.class).adminOnly();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class).adminOnly();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -246,7 +254,7 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter), DiverseService.class).adminOnly();
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), DiverseService.class).adminOnly();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
               public void run() {
@@ -256,6 +264,102 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
             });
           }
         }, AuthenticationService.class).login("john", "123");
+      }
+    });
+  }
+
+  @Test
+  public void testRoleInterceptorLoggedInUnprivelegedHomogenous() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(User response) {
+            assertEquals(0, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+            createCall(new RemoteCallback<Void>() {
+              @Override
+              public void callback(Void response) {
+                counter.increment();
+              }
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), AdminService.class).adminStuff();
+            testUntil(TIME_LIMIT, new Runnable() {
+              @Override
+              public void run() {
+                assertEquals(0, counter.getCount());
+                assertEquals(1, errorCounter.getCount());
+              }
+            });
+          }
+        }, AuthenticationService.class).login("john", "123");
+      }
+    });
+  }
+
+  @Test
+  public void testRoleInterceptorLoggedInPrivelegedHomogenous() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(User response) {
+            assertEquals(0, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+            createCall(new RemoteCallback<Void>() {
+              @Override
+              public void callback(Void response) {
+                counter.increment();
+              }
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), AdminService.class).adminStuff();
+            testUntil(TIME_LIMIT, new Runnable() {
+              @Override
+              public void run() {
+                assertEquals(1, counter.getCount());
+                assertEquals(0, errorCounter.getCount());
+              }
+            });
+          }
+        }, AuthenticationService.class).login("admin", "123");
+      }
+    });
+  }
+
+  @Test
+  public void testRoleInterceptorLoggedInPrivelegedHeterogenous() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(User response) {
+            assertEquals(0, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+            createCall(new RemoteCallback<Void>() {
+              @Override
+              public void callback(Void response) {
+                counter.increment();
+              }
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), DiverseService.class).adminOnly();
+            testUntil(TIME_LIMIT, new Runnable() {
+              @Override
+              public void run() {
+                assertEquals(1, counter.getCount());
+                assertEquals(0, errorCounter.getCount());
+              }
+            });
+          }
+        }, AuthenticationService.class).login("admin", "123");
       }
     });
   }
