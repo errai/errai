@@ -13,6 +13,8 @@ import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
+import com.google.gwt.user.client.Cookies;
+
 /**
  * Catches {@link SecurityException SecurityExceptions}. If an
  * {@link UnauthenticatedException} is caught, Errai Navigation is directed to
@@ -35,14 +37,19 @@ public class DefaultSecurityErrorCallback {
         pageRole = SecurityError.class;
       }
 
-      IOC.getAsyncBeanManager().lookupBean(Navigation.class).getInstance(new CreationalCallback<Navigation>() {
-
-        @Override
-        public void callback(final Navigation nav) {
-          nav.goToWithRole(pageRole);
-        }
-      });
+      navigateToPage(pageRole);
     }
+  }
+
+  private void navigateToPage(final Class<? extends UniquePageRole> roleClass) {
+    IOC.getAsyncBeanManager().lookupBean(Navigation.class).getInstance(new CreationalCallback<Navigation>() {
+
+      @Override
+      public void callback(Navigation navigation) {
+        Cookies.setCookie(LoginPage.CURRENT_PAGE_COOKIE, navigation.getCurrentPage().name());
+        navigation.goToWithRole(roleClass);
+      }
+    });
   }
 
 }

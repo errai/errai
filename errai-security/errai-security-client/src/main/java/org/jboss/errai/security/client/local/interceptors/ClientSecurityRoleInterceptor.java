@@ -7,6 +7,7 @@ import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.SecurityInterceptor;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
@@ -21,7 +22,7 @@ import org.jboss.errai.security.shared.util.AnnotationUtils;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @FeatureInterceptor(RequireRoles.class)
-public class ClientSecurityRoleInterceptor extends ClientSecurityInterceptor implements
+public class ClientSecurityRoleInterceptor extends SecurityInterceptor implements
         RemoteCallInterceptor<RemoteCallContext> {
   @Override
   public void aroundInvoke(final RemoteCallContext context) {

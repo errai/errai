@@ -7,6 +7,7 @@ import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.shared.RequireAuthentication;
+import org.jboss.errai.security.shared.SecurityInterceptor;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 
 /**
@@ -18,7 +19,7 @@ import org.jboss.errai.security.shared.exception.UnauthenticatedException;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @FeatureInterceptor(RequireAuthentication.class)
-public class SecurityUserInterceptor extends ClientSecurityInterceptor implements
+public class SecurityUserInterceptor extends SecurityInterceptor implements
         RemoteCallInterceptor<RemoteCallContext> {
 
   @Override
