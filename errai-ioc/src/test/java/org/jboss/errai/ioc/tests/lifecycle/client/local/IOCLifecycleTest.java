@@ -51,9 +51,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     event.setInstance(instance);
 
     // Register listener
-    final LifecycleListenerRegistrar registrar = IOC.getBeanManager()
-            .lookupBean(LifecycleListenerRegistrar.class).getInstance();
-    registrar.registerListener(Integer.class, generator);
+    IOC.registerIOCLifecycleListener(Integer.class, generator);
 
     // Precondition
     assertEquals(0, listenerCounter.getValue());

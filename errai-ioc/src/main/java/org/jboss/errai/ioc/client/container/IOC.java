@@ -16,12 +16,16 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListenerGenerator;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListenerRegistrar;
 
 import com.google.gwt.core.client.GWT;
 
 /**
- * A simple utility class which provides a static reference in the client to the bean manager.
+ * A simple utility class which provides a static reference in the client to the
+ * bean manager.
  * 
  * @author Mike Brock
  */
@@ -36,22 +40,22 @@ public final class IOC {
       iocEnvironment = GWT.create(IOCEnvironment.class);
     }
     catch (UnsupportedOperationException e) {
-        iocEnvironment = new IOCEnvironment() {
-          @Override
-          public boolean isAsync() {
-            return false;
-          }
+      iocEnvironment = new IOCEnvironment() {
+        @Override
+        public boolean isAsync() {
+          return false;
+        }
 
-          @Override
-          public ClientBeanManager getNewBeanManager() {
-            if (!GWT.isClient()) {
-              return new SyncBeanManagerImpl();
-            }
-            else {
-              return null;
-            }
+        @Override
+        public ClientBeanManager getNewBeanManager() {
+          if (!GWT.isClient()) {
+            return new SyncBeanManagerImpl();
           }
-        };
+          else {
+            return null;
+          }
+        }
+      };
     }
 
     beanManager = iocEnvironment.getNewBeanManager();
@@ -67,7 +71,7 @@ public final class IOC {
   public static SyncBeanManager getBeanManager() {
     if (inst.beanManager instanceof AsyncBeanManager) {
       throw new RuntimeException("the bean manager has been initialized in async mode. " +
-          "You must use getAsyncBeanManager()");
+              "You must use getAsyncBeanManager()");
     }
     return (SyncBeanManagerImpl) inst.beanManager;
   }
@@ -79,4 +83,17 @@ public final class IOC {
 
     return (AsyncBeanManager) inst.beanManager;
   }
+
+  public static <T> void registerIOCLifecycleListener(final Class<T> beanType,
+          final LifecycleListenerGenerator<T> listenerGenerator) {
+    getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
+            new CreationalCallback<LifecycleListenerRegistrar>() {
+
+              @Override
+              public void callback(final LifecycleListenerRegistrar registrar) {
+                registrar.registerListener(beanType, listenerGenerator);
+              }
+            });
+  }
+  
 }
