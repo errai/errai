@@ -48,8 +48,10 @@ public class SelectorMinifyVisitor extends CssModVisitor {
         sb.append(prefix);
         final String[] selectors = descendant.substring(index + 1).split("\\.");
         for (String className : selectors) {
+          String rest = " ";
           final int j = className.indexOf(":");
           if (j != -1) {
+            rest = className.substring(j);
             className = className.substring(0, j);
           }
           final String minified;
@@ -59,7 +61,7 @@ public class SelectorMinifyVisitor extends CssModVisitor {
             minified = minify(className);
             convertedSelectors.put(className, minified);
           }
-          sb.append(".").append(minified).append(" ");
+          sb.append(".").append(minified).append(rest);
         }
       } else {
         sb.append(descendant).append(" ");

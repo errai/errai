@@ -53,7 +53,7 @@ public class StylesheetOptimizerTest {
                     "div h1 {\n" +
                     "  border-left : 1px;\n" +
                     "}\n" +
-                    ".E17l0oxJ  {\n" +
+                    ".E17l0oxJ:hover:after {\n" +
                     "  display : block;\n" +
                     "}\n"
             , stylesheetOptimizer.output());
