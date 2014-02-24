@@ -219,7 +219,7 @@ public class ClientSyncWorker<E> {
     this.queryParams = queryParamCallback.getQueryParams();
     started = true;
 
-    IOC.registerInstanceListener(beanInstance, new LifecycleListener<Object>() {
+    IOC.registerLifecycleListener(beanInstance, new LifecycleListener<Object>() {
       @Override
       public void observeEvent(LifecycleEvent<Object> event) {
         ClientSyncWorker.this.queryParams = queryParamCallback.getQueryParams();
