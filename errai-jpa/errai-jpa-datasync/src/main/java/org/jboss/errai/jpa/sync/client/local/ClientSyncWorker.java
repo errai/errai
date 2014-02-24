@@ -25,6 +25,10 @@ import javax.persistence.NamedQuery;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
+import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponses;
 import org.slf4j.Logger;
@@ -90,6 +94,17 @@ public class ClientSyncWorker<E> {
   private final ErrorCallback<?> onError;
 
   /**
+   * A callback that provides parameters for the query used by a {@link ClientSyncWorker}.
+   */
+  public static interface QueryParamInitCallback {
+    /**
+     * Returns a map from query parameter name to its value. Never null. In case a query has no
+     * parameters, an empty map is returned.
+     */
+    public Map<String, Object> getQueryParams();
+  }
+
+  /**
    * Creates a new ClientSyncWorker which takes responsibility for syncing the results of the named
    * JPA query.
    * 
@@ -108,7 +123,7 @@ public class ClientSyncWorker<E> {
    */
   public static <E> ClientSyncWorker<E> create(final String queryName, final Class<E> queryResultType,
        final ErrorCallback<?> onError) {
-    
+
     return new ClientSyncWorker<E>(ClientSyncManager.getInstance(), queryName, queryResultType, onError);
   }
 
@@ -140,7 +155,7 @@ public class ClientSyncWorker<E> {
     this.queryName = Assert.notNull(queryName);
     this.queryResultType = Assert.notNull(queryResultType);
     this.onError = onError;
-    
+
     timer = new Timer() {
       @Override
       public void run() {
@@ -177,9 +192,54 @@ public class ClientSyncWorker<E> {
 
     this.queryParams = Assert.notNull(queryParams);
     started = true;
-    
+
     // let's sync immediately so we don't have to wait 5 seconds before the first sync
     manager.coldSync(queryName, queryResultType, queryParams, onCompletion, onError);
+    timer.scheduleRepeating(5000);
+  }
+
+  /**
+   * Starts this sync worker if it has not already been started or stopped.
+   * 
+   * @param beanInstance
+   *          The managed bean instance the observes the sync results and defines the query
+   *          parameters.
+   * 
+   * @param queryParamCallback
+   *          A {@link QueryParamInitCallback} that provides the query parameters for this
+   *          {@link ClientSyncWorker}'s query.
+   * 
+   * @throws IllegalStateException
+   *           if this sync worker has been stopped.
+   */
+  public void start(final Object beanInstance, final QueryParamInitCallback queryParamCallback) {
+    if (stopped)
+      throw new IllegalStateException("This worker was already stopped");
+
+    this.queryParams = queryParamCallback.getQueryParams();
+    started = true;
+
+    IOC.registerInstanceListener(beanInstance, new LifecycleListener() {
+      @Override
+      public void observeEvent(LifecycleEvent event) {
+        ClientSyncWorker.this.queryParams = queryParamCallback.getQueryParams();
+      }
+
+      @Override
+      public boolean isObserveableEventType(Class eventType) {
+        return eventType.equals(StateChange.class);
+      }
+    });
+    
+    // let's give control back so that other parts of the framework have a chance to update fields
+    // of the managed bean; 
+    new Timer() {
+      @Override
+      public void run() {
+        manager.coldSync(queryName, queryResultType, queryParams, onCompletion, onError);
+      }
+    }.schedule(500);
+    
     timer.scheduleRepeating(5000);
   }
 
