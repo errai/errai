@@ -1,15 +1,5 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.web.bindery.event.shared.HandlerRegistration;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -20,8 +10,21 @@ import javax.annotation.PreDestroy;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
+import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEvent;
+import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEventImpl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Central control point for navigating between pages of the application.
@@ -205,10 +208,9 @@ public class Navigation {
 
     locked = true;
     try {
-      maybeAttachContentPanel();
-      hideCurrentPage();
-      showPage(request.pageNode, request.state);
-    } finally {
+      maybeShowPage(request.pageNode, request.state);
+    }
+    finally {
       locked = false;
     }
 
@@ -264,19 +266,30 @@ public class Navigation {
   /**
    * Show the given page and call the associated lifecycle methods.
    */
-  private <W extends IsWidget> void showPage(final PageNode<W> toPage, final HistoryToken state) {
+  private <W extends IsWidget> void maybeShowPage(final PageNode<W> toPage, final HistoryToken state) {
     toPage.produceContent(new CreationalCallback<W>() {
       @Override
-      public void callback(W widget) {
+      public void callback(final W widget) {
         if (widget == null) {
           throw new NullPointerException("Target page " + toPage + " returned a null content widget");
         }
+        maybeAttachContentPanel();
 
-        toPage.pageShowing(widget, state);
-        setCurrentPage(toPage);
-        currentWidget = widget;
-        navigatingContainer.setWidget(widget);
-        toPage.pageShown(widget, state);
+        final TransitionEvent<W> transitionEvent = new TransitionEventImpl<W>();
+        transitionEvent.fireAsync(widget, new LifecycleCallback() {
+
+          @Override
+          public void callback(boolean success) {
+            if (success) {
+              hideCurrentPage();
+              toPage.pageShowing(widget, state);
+              setCurrentPage(toPage);
+              currentWidget = widget;
+              navigatingContainer.setWidget(widget);
+              toPage.pageShown(widget, state);
+            }
+          }
+        });
       }
     });
   }

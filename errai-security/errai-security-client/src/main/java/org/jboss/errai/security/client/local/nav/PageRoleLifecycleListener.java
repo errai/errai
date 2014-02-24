@@ -1,0 +1,39 @@
+package org.jboss.errai.security.client.local.nav;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
+import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
+import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
+import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEvent;
+
+import com.google.gwt.user.client.ui.IsWidget;
+
+public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleListener<W> {
+  
+  private final Set<String> roles;
+  
+  public PageRoleLifecycleListener(final String... roles) {
+    this.roles = new HashSet<String>();
+    
+    for (int i = 0; i < roles.length; i++) {
+      this.roles.add(roles[i]);
+    }
+  }
+
+  @Override
+  public void observeEvent(final LifecycleEvent<W> event) {
+    final ActiveUserProvider activeUserProvider = ActiveUserProviderImpl.getInstance();
+    if (!activeUserProvider.hasActiveUser() || !activeUserProvider.getActiveUser().getRoles().containsAll(roles)) {
+      event.veto();
+    }
+  }
+
+  @Override
+  public boolean isObserveableEventType(final Class<? extends LifecycleEvent<W>> eventType) {
+    return eventType.equals(TransitionEvent.class);
+  }
+
+}

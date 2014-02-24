@@ -1,25 +1,28 @@
 package org.jboss.errai.security.rebind;
 
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
-import org.jboss.errai.security.client.local.interceptors.ClientSecurityRoleInterceptor;
-import org.jboss.errai.security.client.local.interceptors.SecurityUserInterceptor;
-import org.jboss.errai.security.shared.RequireAuthentication;
-import org.jboss.errai.security.shared.RequireRoles;
-import org.jboss.errai.security.shared.SecurityInterceptor;
-import org.jboss.errai.ui.nav.client.local.Page;
-
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.InitializationCallback;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.security.client.local.nav.PageAuthenticationLifecycleListenerGenerator;
+import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListenerGenerator;
+import org.jboss.errai.security.shared.RequireAuthentication;
+import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.ui.nav.client.local.Page;
+
 /**
- * @author edewit@redhat.com
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @CodeDecorator
 public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
@@ -31,44 +34,51 @@ public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
   @Override
   public List<? extends Statement> generateDecorator(InjectableInstance<Page> ctx) {
     final List<Statement> stmts = new ArrayList<Statement>();
-//    if (ctx.getTaskType() == TaskType.Type) {
-//      final Annotation[] annotations = ctx.getElementType().getAnnotations();
-//      if (isRequireRoleAnnotated(annotations)) {
-//        createInterceptor(stmts, ClientSecurityRoleInterceptor.class);
-//        stmts.add(Stmt.loadVariable("interceptor").invoke(
-//                "securityCheck", getAnnotation(annotations, RequireRoles.class).value(), null)
-//        );
-//      }
-//      if (isRequireAuthentication(annotations)) {
-//        createInterceptor(stmts, SecurityUserInterceptor.class);
-//        stmts.add(Stmt.loadVariable("interceptor").invoke("securityCheck")
-//        );
-//      }
-//    }
+
+    if (ctx.getInjector().getInjectedType().isAnnotationPresent(RequireAuthentication.class)) {
+      ctx.getTargetInjector().addStatementToEndOfInjector(
+              Stmt.loadVariable("context").invoke("addInitializationCallback",
+                      Refs.get(ctx.getInjector().getInstanceVarName()),
+                      createInitializationCallback(
+                              ctx,
+                              Stmt.invokeStatic(IOC.class, "registerIOCLifecycleListener",
+                                      Stmt.loadLiteral(ctx.getInjector().getInjectedType()),
+                                      Stmt.create().newObject(PageAuthenticationLifecycleListenerGenerator.class)))));
+    }
+    if (ctx.getInjector().getInjectedType().isAnnotationPresent(RequireRoles.class)) {
+      final RequireRoles annotation = ctx.getAnnotation(RequireRoles.class);
+      ctx.getTargetInjector().addStatementToEndOfInjector(
+              Stmt.loadVariable("context")
+                      .invoke("addInitializationCallback",
+                              Refs.get(ctx.getInjector().getInstanceVarName()),
+                              createInitializationCallback(
+                                      ctx,
+                                      Stmt.invokeStatic(
+                                              IOC.class,
+                                              "registerIOCLifecycleListener",
+                                              Stmt.loadLiteral(ctx.getInjector().getInjectedType()),
+                                              Stmt.newObject(PageRoleLifecycleListenerGenerator.class,
+                                                      (Object[]) annotation.value())))));
+
+    }
 
     return stmts;
   }
 
-  private void createInterceptor(List<Statement> stmts, Class<? extends SecurityInterceptor> interceptorClass) {
-    final ObjectBuilder builder = ObjectBuilder.newInstanceOf(interceptorClass);
-    stmts.add(Stmt.declareFinalVariable("interceptor", interceptorClass, builder));
-  }
+  private Statement createInitializationCallback(final InjectableInstance<Page> ctx, final Statement... statements) {
+    BlockBuilder<AnonymousClassStructureBuilder> callbackMethod =
+            Stmt.newObject(
+                    MetaClassFactory.parameterizedAs(InitializationCallback.class,
+                            MetaClassFactory.typeParametersOf(ctx.getInjector().getInjectedType())))
+                    .extend()
+                    .publicOverridesMethod(
+                            "init",
+                            Parameter.finalOf(ctx.getInjector().getInjectedType(), "obj"));
 
-  private boolean isRequireAuthentication(Annotation[] annotations) {
-    return getAnnotation(annotations, RequireAuthentication.class) != null;
-  }
-
-  private boolean isRequireRoleAnnotated(Annotation[] annotations) {
-    return getAnnotation(annotations, RequireRoles.class) != null;
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> T getAnnotation(Annotation[] annotations, Class<T> toSearchFor) {
-    for (Annotation annotation : annotations) {
-      if (annotation.annotationType().equals(toSearchFor)) {
-        return (T) annotation;
-      }
+    for (int i = 0; i < statements.length; i++) {
+      callbackMethod = callbackMethod.append(statements[i]);
     }
-    return null;
+
+    return callbackMethod.finish().finish();
   }
 }

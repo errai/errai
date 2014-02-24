@@ -10,6 +10,16 @@ import org.jboss.errai.security.shared.User;
 @ApplicationScoped
 public class ActiveUserProviderImpl implements ActiveUserProvider {
   
+  private static ActiveUserProvider instance;
+  
+  public static ActiveUserProvider getInstance() {
+    return instance;
+  }
+  
+  public ActiveUserProviderImpl() {
+    instance = this;
+  }
+  
   private User activeUser;
 
   @Override

@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.client.lifecycle.impl;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.Destruction;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
@@ -50,6 +51,10 @@ public abstract class LifecycleEventImpl<T> implements LifecycleEvent<T> {
     isVetoed = true;
   }
 
+  /**
+   * This must return the interface of the event it represents (i.e.
+   * {@link Access} rather than {@link AccessImpl}).
+   */
   public abstract Class<?> getEventType();
 
 }

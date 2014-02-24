@@ -83,7 +83,8 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
       generators = new ArrayList<LifecycleListenerGenerator<?>>();
       generatorMap.put(lifecycleType, generators);
     }
-    generators.add(generator);
+    if (!generators.contains(generator))
+      generators.add(generator);
   }
 
   @Override
