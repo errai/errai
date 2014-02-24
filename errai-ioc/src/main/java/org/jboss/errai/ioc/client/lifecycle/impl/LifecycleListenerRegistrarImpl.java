@@ -118,4 +118,38 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
     return activeListenerMap.remove(instance) != null;
   }
 
+  @Override
+  public <T> void registerInstanceListener(final T instance, final LifecycleListener<T> listener) {
+    Collection<AuditableLifecycleListener<T>> activeListeners = (Collection<AuditableLifecycleListener<T>>) activeListenerMap
+            .get(instance);
+    if (activeListeners == null) {
+      activeListeners = generateNewLifecycleListeners(instance);
+      activeListenerMap.put(instance, activeListeners);
+    }
+    
+    activeListeners.add(new AuditableLifecycleListener<T>() {
+      @Override
+      public void observeEvent(LifecycleEvent<T> event) {
+        listener.observeEvent(event);
+      }
+
+      @Override
+      public boolean isObserveableEventType(Class<? extends LifecycleEvent<T>> eventType) {
+        return listener.isObserveableEventType(eventType);
+      }
+
+      @Override
+      public LifecycleListenerGenerator<T> getGenerator() {
+        // Return a dummy generator to avoid needing logic elsewhere to check for NPEs.
+        return new LifecycleListenerGenerator<T>() {
+          @Override
+          public LifecycleListener<T> newInstance() {
+            // This method should never be called.
+            return null;
+          }
+        };
+      }
+    });
+  }
+
 }

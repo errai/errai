@@ -130,5 +130,16 @@ public final class IOC {
               }
             });
   }
+  
+  public static <T> void registerInstanceListener(final T instance, final LifecycleListener<T> listener) {
+    getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
+            new CreationalCallback<LifecycleListenerRegistrar>() {
+
+              @Override
+              public void callback(final LifecycleListenerRegistrar registrar) {
+                registrar.registerInstanceListener(instance, listener);
+              }
+            });
+  }
 
 }

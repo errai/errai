@@ -224,6 +224,35 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, firstCounter.getValue());
     assertEquals(1, secondCounter.getValue());
   }
+  
+  @Test
+  public void testRegisterSingleInstanceListener() throws Exception {
+    final Counter listenerCounter = new Counter();
+    final Counter callbackCounter = new Counter();
+    final LifecycleListener<Integer> listener = new CountingListener(listenerCounter);
+    
+    final Integer instance = 1337;
+    
+    final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
+    final LifecycleCallback callback = new LifecycleCallback() {
+      @Override
+      public void callback(boolean success) {
+        assertTrue(success);
+        callbackCounter.add(1);
+      }
+    };
+    
+    IOC.registerInstanceListener(instance, listener);
+    
+    // Precondition
+    assertEquals(0, callbackCounter.getValue());
+    assertEquals(0, listenerCounter.getValue());
+    
+    event.fireAsync(instance, callback);
+    
+    assertEquals(1, callbackCounter.getValue());
+    assertEquals(1, listenerCounter.getValue());
+  }
 
   @Override
   public String getModuleName() {
