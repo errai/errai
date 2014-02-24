@@ -18,6 +18,8 @@ package org.jboss.errai.ioc.client.container;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListenerGenerator;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListenerRegistrar;
 
@@ -84,6 +86,17 @@ public final class IOC {
     return (AsyncBeanManager) inst.beanManager;
   }
 
+  /**
+   * Register a {@link LifecycleListenerGenerator} for
+   * {@linkplain LifecycleEvent IOC Lifecycle Events}.
+   * 
+   * @param beanType
+   *          The type of bean for which {@link LifecycleListener
+   *          LifecycleListeners} created by this generator observe.
+   * @param listenerGenerator
+   *          A generator creating {@link LifecycleListener LifecycleListeners}
+   *          which observe events from the specified bean type.
+   */
   public static <T> void registerIOCLifecycleListener(final Class<T> beanType,
           final LifecycleListenerGenerator<T> listenerGenerator) {
     getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
@@ -96,6 +109,16 @@ public final class IOC {
             });
   }
 
+  /**
+   * Unregister a {@link LifecycleListenerGenerator} and all the
+   * {@link LifecycleListener LifecycleListeners} created by this generator.
+   * 
+   * @param beanType
+   *          The bean type for which this generator created listeners.
+   * @param generator
+   *          The generator to be unregistered (must be the same instance as was
+   *          registered).
+   */
   public static <T> void unregisterIOCLifecycleListener(final Class<T> beanType,
           final LifecycleListenerGenerator<T> generator) {
     getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
