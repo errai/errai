@@ -6,7 +6,7 @@ public interface LifecycleListenerRegistrar {
   
   public <T> void registerListener(Class<T> lifecycleType, LifecycleListenerGenerator<T> generator);
   
-  public <T> boolean unregisterListener(Class<T> lifecycleType, LifecycleListenerGenerator<T> generator);
+  public <T> void unregisterListener(Class<T> lifecycleType, LifecycleListenerGenerator<T> generator);
   
   public <T> boolean endInstanceLifecycle(T instance);
 
