@@ -52,6 +52,9 @@ public class StylesheetOptimizerTest {
                     "}\n" +
                     "div h1 {\n" +
                     "  border-left : 1px;\n" +
+                    "}\n" +
+                    ".E17l0oxJ  {\n" +
+                    "  display : block;\n" +
                     "}\n"
             , stylesheetOptimizer.output());
   }
