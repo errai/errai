@@ -219,14 +219,14 @@ public class ClientSyncWorker<E> {
     this.queryParams = queryParamCallback.getQueryParams();
     started = true;
 
-    IOC.registerInstanceListener(beanInstance, new LifecycleListener() {
+    IOC.registerInstanceListener(beanInstance, new LifecycleListener<Object>() {
       @Override
-      public void observeEvent(LifecycleEvent event) {
+      public void observeEvent(LifecycleEvent<Object> event) {
         ClientSyncWorker.this.queryParams = queryParamCallback.getQueryParams();
       }
 
       @Override
-      public boolean isObserveableEventType(Class eventType) {
+      public boolean isObserveableEventType(Class<? extends LifecycleEvent<Object>> eventType) {
         return eventType.equals(StateChange.class);
       }
     });
