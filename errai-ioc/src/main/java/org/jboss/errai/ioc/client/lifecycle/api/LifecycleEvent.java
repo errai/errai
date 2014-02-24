@@ -32,6 +32,12 @@ public interface LifecycleEvent<T> {
   /**
    * Fire this event, notifying any listeners for this event type by calling the
    * respective {@link LifecycleListener#observeEvent(LifecycleEvent)} methods.
+   */
+  public void fireAsync();
+  
+  /**
+   * Fire this event, notifying any listeners for this event type by calling the
+   * respective {@link LifecycleListener#observeEvent(LifecycleEvent)} methods.
    * 
    * @param callback
    *          A callback for receiving the result of a fired event (whether or
