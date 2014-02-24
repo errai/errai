@@ -14,12 +14,13 @@ public abstract class LifecycleEventImpl<T> implements LifecycleEvent<T> {
   private boolean isVetoed = false;
 
   @Override
-  public void fireAsync() {
-    fireAsync(null);
+  public void fireAsync(final T instance) {
+    fireAsync(instance, null);
   }
 
   @Override
-  public void fireAsync(final LifecycleCallback callback) {
+  public void fireAsync(final T instance, final LifecycleCallback callback) {
+    this.instance = instance;
     IOC.getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class)
             .getInstance(new CreationalCallback<LifecycleListenerRegistrar>() {
 
@@ -27,7 +28,7 @@ public abstract class LifecycleEventImpl<T> implements LifecycleEvent<T> {
               public void callback(LifecycleListenerRegistrar registrar) {
                 isVetoed = false;
                 final Iterable<LifecycleListener<T>> listeners = registrar
-                        .getListeners((Class<? extends LifecycleEvent<T>>) getEventType(), getInstance());
+                        .getListeners((Class<? extends LifecycleEvent<T>>) getEventType(), instance);
                 for (final LifecycleListener<T> listener : listeners) {
                   if (isVetoed)
                     break;
@@ -35,23 +36,13 @@ public abstract class LifecycleEventImpl<T> implements LifecycleEvent<T> {
                 }
                 final boolean outcome = !isVetoed;
                 if (outcome && getEventType().equals(Destruction.class)) {
-                  registrar.endInstanceLifecycle(getInstance());
+                  registrar.endInstanceLifecycle(instance);
                 }
                 if (callback != null) {
                   callback.callback(outcome);
                 }
               }
             });
-  }
-
-  @Override
-  public T getInstance() {
-    return instance;
-  }
-
-  @Override
-  public void setInstance(final T instance) {
-    this.instance = instance;
   }
 
   @Override
