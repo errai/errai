@@ -104,38 +104,7 @@ public class JaxrsProxyMethodGenerator {
       methodBlock.append(generateRequestBuilder());
       methodBlock.append(generateHeaders(jaxrsParams));
 
-      List<Class<?>> interceptors = new ArrayList<Class<?>>();
-      InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
-      if (interceptedCall == null) {
-        interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
-      }
-      if (interceptedCall == null) {
-        Collection<MetaClass> interceptorClasses = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class, 
-                RebindUtils.findTranslatablePackages(context), context);
-        for (MetaClass interceptorClass : interceptorClasses) {
-          InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
-          if (interceptsDeclaringClass(interceptor)) {
-            interceptors.add(interceptorClass.asClass());
-          }
-        }
-      } else {
-        for (Class<?> clazz : interceptedCall.value()) {
-          interceptors.add(clazz);
-        }
-      }
-      final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
-              RebindUtils.findTranslatablePackages(context), context);
-      for (final MetaClass featureInterceptor : featureInterceptors) {
-        final Class<? extends Annotation>[] annotations = featureInterceptor.getAnnotation(FeatureInterceptor.class)
-                .value();
-        for (int i = 0; i < annotations.length; i++) {
-          if (declaringClass.isAnnotationPresent(annotations[i])
-                  || resourceMethod.getMethod().isAnnotationPresent(annotations[i])) {
-            interceptors.add(featureInterceptor.asClass());
-          }
-        }
-      }
-
+      List<Class<?>> interceptors = getInterceptors();
       if (interceptors.size() > 0) {
         methodBlock.append(generateInterceptorLogic(interceptors));
       }
@@ -145,11 +114,52 @@ public class JaxrsProxyMethodGenerator {
     }
     generateReturnStatement();
   }
+  
+  private List<Class<?>> getInterceptors() {
+    final List<Class<?>> interceptors = new ArrayList<Class<?>>();
+    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
+    if (interceptedCall == null) {
+      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
+    }
+    
+    if (interceptedCall == null) {
+      Collection<MetaClass> interceptorClasses = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class, 
+              RebindUtils.findTranslatablePackages(context), context);
+      
+      for (MetaClass interceptorClass : interceptorClasses) {
+        InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
+        if (interceptsDeclaringClass(interceptor)) {
+          interceptors.add(interceptorClass.asClass());
+        }
+      }
+    } 
+    else {
+      for (Class<?> clazz : interceptedCall.value()) {
+        interceptors.add(clazz);
+      }
+    }
+    
+    final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
+            RebindUtils.findTranslatablePackages(context), context);
+    
+    for (final MetaClass featureInterceptor : featureInterceptors) {
+      final Class<? extends Annotation>[] annotations = 
+        featureInterceptor.getAnnotation(FeatureInterceptor.class).value();
+      
+      for (int i = 0; i < annotations.length; i++) {
+        if (declaringClass.isAnnotationPresent(annotations[i])
+                || resourceMethod.getMethod().isAnnotationPresent(annotations[i])) {
+          interceptors.add(featureInterceptor.asClass());
+        }
+      }
+    }
+    
+    return interceptors;
+  }
 
   /**
    * Returns true if the given interceptor is configured to intercept the
-   * remote interface currenty being generated.
-   * @param interceptor
+   * remote interface currently being generated.
    */
   private boolean interceptsDeclaringClass(InterceptsRemoteCall interceptor) {
     Class<?>[] intercepts = interceptor.value();
