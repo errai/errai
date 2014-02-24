@@ -48,6 +48,10 @@ public class SelectorMinifyVisitor extends CssModVisitor {
         sb.append(prefix);
         final String[] selectors = descendant.substring(index + 1).split("\\.");
         for (String className : selectors) {
+          final int j = className.indexOf(":");
+          if (j != -1) {
+            className = className.substring(0, j);
+          }
           final String minified;
           if (convertedSelectors.containsKey(className)) {
             minified = convertedSelectors.get(className);

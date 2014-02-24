@@ -33,3 +33,7 @@ div.item .name, div.store .name {
 div h1 {
     border-left: 1px;
 }
+
+.dummy:hover:after {
+    display: block;
+}
