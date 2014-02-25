@@ -31,14 +31,15 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * <p>
  * Configuration is decentralized: it is based on fields and annotations present
  * in other application classes. This configuration is gathered at compile time.
- *
+ * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @EntryPoint
 public class Navigation {
 
   /**
-   * Maximum number of successive redirects until Errai suspects an endless loop.
+   * Maximum number of successive redirects until Errai suspects an endless
+   * loop.
    */
   final static int MAXIMUM_REDIRECTS = 99;
 
@@ -53,16 +54,17 @@ public class Navigation {
 
     /**
      * Construct a new {@link Request}.
-     *
+     * 
      * @param pageNode
-     *          The page node to display. Normally, the implementation of PageNode
-     *          is generated at compile time based on a Widget subclass that has
-     *          been annotated with {@code @Page}. Anything calling this method
-     *          must ensure that the given PageNode has been entered into the
-     *          navigation graph, or later navigation back to {@code toPage} will
-     *          fail.
+     *          The page node to display. Normally, the implementation of
+     *          PageNode is generated at compile time based on a Widget subclass
+     *          that has been annotated with {@code @Page}. Anything calling
+     *          this method must ensure that the given PageNode has been entered
+     *          into the navigation graph, or later navigation back to
+     *          {@code toPage} will fail.
      * @param state
-     *          The state information to pass to the page node before showing it.
+     *          The state information to pass to the page node before showing
+     *          it.
      */
     private Request(PageNode<W> pageNode, HistoryToken state) {
       this.pageNode = pageNode;
@@ -95,7 +97,8 @@ public class Navigation {
 
   @PostConstruct
   private void init() {
-    if (navGraph.isEmpty()) return;
+    if (navGraph.isEmpty())
+      return;
 
     historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
@@ -103,14 +106,16 @@ public class Navigation {
         HistoryToken token = HistoryToken.parse(event.getValue());
         PageNode<IsWidget> toPage = navGraph.getPage(token.getPageName());
         if (toPage == null) {
-          GWT.log("Got invalid page name \"" + token.getPageName() + "\" in URL history token. Falling back to default page.");
+          GWT.log("Got invalid page name \"" + token.getPageName()
+                  + "\" in URL history token. Falling back to default page.");
           toPage = navGraph.getPage(""); // guaranteed at compile time to exist
         }
         navigate(new Request<IsWidget>(toPage, token));
       }
     });
 
-    // finally, we bootstrap the navigation system (this invokes the callback above)
+    // finally, we bootstrap the navigation system (this invokes the callback
+    // above)
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
@@ -132,7 +137,7 @@ public class Navigation {
    * Looks up the PageNode instance that provides content for the given widget
    * type, sets the state on that page, then makes the widget visible in the
    * content area.
-   *
+   * 
    * @param toPage
    *          The content type of the page node to look up and display.
    *          Normally, this is a Widget subclass that has been annotated with
@@ -143,15 +148,17 @@ public class Navigation {
    *          annotated with {@code @PageState} in the widget class, but this is
    *          not required.
    */
-  public <W extends IsWidget> void goTo(Class<W> toPage, Multimap<String,String> state) {
+  public <W extends IsWidget> void goTo(Class<W> toPage, Multimap<String, String> state) {
     PageNode<W> toPageInstance = navGraph.getPage(toPage);
     navigate(toPageInstance, state);
   }
 
   /**
-   * Same as {@link #goTo(Class, com.google.common.collect.Multimap)} but then with the page name.
-   *
-   * @param toPage the name of the page node to lookup and display.
+   * Same as {@link #goTo(Class, com.google.common.collect.Multimap)} but then
+   * with the page name.
+   * 
+   * @param toPage
+   *          the name of the page node to lookup and display.
    */
   public void goTo(String toPage) {
     PageNode<? extends IsWidget> toPageInstance = navGraph.getPage(toPage);
@@ -161,8 +168,9 @@ public class Navigation {
   /**
    * Looks up the PageNode instance of the page that has the unique role set and
    * makes the widget visible in the content area.
-   *
-   * @param role The unique role of the page that needs to be displayed.
+   * 
+   * @param role
+   *          The unique role of the page that needs to be displayed.
    */
   public void goToWithRole(Class<? extends UniquePageRole> role) {
     PageNode<?> toPageInstance = navGraph.getPageByRole(role);
@@ -171,8 +179,9 @@ public class Navigation {
 
   /**
    * Return all PageNode instances that have specified pageRole.
-   *
-   * @param pageRole the role to find PageNodes by
+   * 
+   * @param pageRole
+   *          the role to find PageNodes by
    * @return All the pageNodes of the pages that have the specific pageRole.
    */
   public Collection<PageNode<? extends IsWidget>> getPagesByRole(Class<? extends PageRole> pageRole) {
@@ -180,7 +189,7 @@ public class Navigation {
   }
 
   private <W extends IsWidget> void navigate(PageNode<W> toPageInstance) {
-    navigate(toPageInstance, ImmutableListMultimap.<String, String>of());
+    navigate(toPageInstance, ImmutableListMultimap.<String, String> of());
   }
 
   private <W extends IsWidget> void navigate(PageNode<W> toPageInstance, Multimap<String, String> state) {
@@ -216,10 +225,12 @@ public class Navigation {
 
     if (queuedRequests.isEmpty()) {
       // No new navigation requests were recorded in the lifecycle methods.
-      // This is the page which has to be displayed and the browser's history can be updated.
+      // This is the page which has to be displayed and the browser's history
+      // can be updated.
       redirectDepth = 0;
       History.newItem(request.state.toString(), false);
-    } else {
+    }
+    else {
       // Process all navigation requests captured in the lifecycle methods.
       while (queuedRequests.size() != 0) {
         navigate(queuedRequests.poll());
@@ -229,7 +240,8 @@ public class Navigation {
   }
 
   /**
-   * Attach the content panel to the RootPanel if does not already have a parent.
+   * Attach the content panel to the RootPanel if does not already have a
+   * parent.
    */
   private void maybeAttachContentPanel() {
     if (getContentPanel().asWidget().getParent() == null) {
@@ -238,7 +250,8 @@ public class Navigation {
   }
 
   /**
-   * Hide the page currently displayed and call the associated lifecycle methods.
+   * Hide the page currently displayed and call the associated lifecycle
+   * methods.
    */
   private void hideCurrentPage() {
     IsWidget currentContent = navigatingContainer.getWidget();
@@ -264,7 +277,8 @@ public class Navigation {
   }
 
   /**
-   * Show the given page and call the associated lifecycle methods.
+   * Call navigation and page related lifecycle methods. If the
+   * {@link TransitionEvent} is fired successfully, load the new page.
    */
   private <W extends IsWidget> void maybeShowPage(final PageNode<W> toPage, final HistoryToken state) {
     toPage.produceContent(new CreationalCallback<W>() {
@@ -296,6 +310,7 @@ public class Navigation {
 
   /**
    * Return the current page that is being displayed.
+   * 
    * @return the current page
    */
   public PageNode<IsWidget> getCurrentPage() {
@@ -306,7 +321,7 @@ public class Navigation {
    * Returns the panel that this Navigation object manages. The contents of this
    * panel will be updated by the navigation system in response to
    * PageTransition requests, as well as changes to the GWT navigation system.
-   *
+   * 
    * @return The content panel of this Navigation instance. It is not
    *         recommended that client code modifies the contents of this panel,
    *         because this Navigation instance may replace its contents at any
@@ -317,7 +332,8 @@ public class Navigation {
   }
 
   /**
-   * Returns the navigation graph that provides PageNode instances to this Navigation instance.
+   * Returns the navigation graph that provides PageNode instances to this
+   * Navigation instance.
    */
   // should this method be public? should we expose a way to set the nav graph?
   NavigationGraph getNavGraph() {
@@ -327,10 +343,11 @@ public class Navigation {
   /**
    * Just sets the currentPage field. This method exists primarily to get around
    * a generics Catch-22.
-   *
-   * @param currentPage the new value for currentPage.
+   * 
+   * @param currentPage
+   *          the new value for currentPage.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private void setCurrentPage(PageNode currentPage) {
     this.currentPage = currentPage;
   }
