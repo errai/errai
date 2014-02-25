@@ -257,6 +257,43 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
   }
   
   @Test
+  public void testUnregisterSingleInstanceListener() throws Exception {
+    final Counter listenerCounter = new Counter();
+    final Counter callbackCounter = new Counter();
+    final LifecycleListener<Integer> listener = new CountingListener(listenerCounter);
+    
+    final Integer instance = 1337;
+    
+    final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
+    final LifecycleCallback callback = new LifecycleCallback() {
+      @Override
+      public void callback(boolean success) {
+        assertTrue(success);
+        callbackCounter.add(1);
+      }
+    };
+    
+    IOC.registerInstanceListener(instance, listener);
+    
+    // Precondition
+    assertEquals(0, callbackCounter.getValue());
+    assertEquals(0, listenerCounter.getValue());
+    
+    event.fireAsync(instance, callback);
+    
+    // Still precondition
+    assertEquals(1, callbackCounter.getValue());
+    assertEquals(1, listenerCounter.getValue());
+    
+    // Actual test
+    IOC.unregisterInstanceListener(instance, listener);
+    
+    event.fireAsync(instance, callback);
+    assertEquals(2, callbackCounter.getValue());
+    assertEquals(1, listenerCounter.getValue());
+  }
+  
+  @Test
   public void testVeto() throws Exception {
     final Counter listenerCounter = new Counter();
     final Counter callbackCounter = new Counter();

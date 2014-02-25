@@ -69,6 +69,11 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
           public LifecycleListenerGenerator<T> getGenerator() {
             return (LifecycleListenerGenerator<T>) generator;
           }
+
+          @Override
+          public LifecycleListener<T> unwrap() {
+            return listener;
+          }
         });
       }
     }
@@ -77,7 +82,7 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
   }
 
   @Override
-  public <T> void registerListener(Class<T> lifecycleType, LifecycleListenerGenerator<T> generator) {
+  public <T> void registerGenerator(Class<T> lifecycleType, LifecycleListenerGenerator<T> generator) {
     Collection<LifecycleListenerGenerator<?>> generators = generatorMap.get(lifecycleType);
     if (generators == null) {
       generators = new ArrayList<LifecycleListenerGenerator<?>>();
@@ -88,7 +93,7 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
   }
 
   @Override
-  public <T> void unregisterListener(final Class<T> lifecycleType, final LifecycleListenerGenerator<T> generator) {
+  public <T> void unregisterGenerator(final Class<T> lifecycleType, final LifecycleListenerGenerator<T> generator) {
     unregisterGenerators(lifecycleType, generator);
     unregisterActiveListeners(lifecycleType, generator);
   }
@@ -98,12 +103,12 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
       if (entry.getKey().getClass().equals(lifecycleType)) {
         final Iterator<AuditableLifecycleListener<T>> iterator = (Iterator<AuditableLifecycleListener<T>>) entry
                 .getValue().iterator();
-          AuditableLifecycleListener<T> listener;
-          while (iterator.hasNext()) {
-            listener = iterator.next();
-            if (listener.getGenerator() == generator)
-              iterator.remove();
-          }
+        AuditableLifecycleListener<T> listener;
+        while (iterator.hasNext()) {
+          listener = iterator.next();
+          if (listener.getGenerator() == generator)
+            iterator.remove();
+        }
       }
     }
   }
@@ -120,14 +125,14 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
   }
 
   @Override
-  public <T> void registerInstanceListener(final T instance, final LifecycleListener<T> listener) {
+  public <T> void registerListener(final T instance, final LifecycleListener<T> listener) {
     Collection<AuditableLifecycleListener<T>> activeListeners = (Collection<AuditableLifecycleListener<T>>) activeListenerMap
             .get(instance);
     if (activeListeners == null) {
       activeListeners = generateNewLifecycleListeners(instance);
       activeListenerMap.put(instance, activeListeners);
     }
-    
+
     activeListeners.add(new AuditableLifecycleListener<T>() {
       @Override
       public void observeEvent(LifecycleEvent<T> event) {
@@ -141,7 +146,8 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
 
       @Override
       public LifecycleListenerGenerator<T> getGenerator() {
-        // Return a dummy generator to avoid needing logic elsewhere to check for NPEs.
+        // Return a dummy generator to avoid needing logic elsewhere to check
+        // for NPEs.
         return new LifecycleListenerGenerator<T>() {
           @Override
           public LifecycleListener<T> newInstance() {
@@ -150,7 +156,26 @@ public class LifecycleListenerRegistrarImpl implements LifecycleListenerRegistra
           }
         };
       }
+
+      @Override
+      public LifecycleListener<T> unwrap() {
+        return listener;
+      }
     });
+  }
+
+  @Override
+  public <T> void unregisterListener(final T instance, final LifecycleListener<T> listener) {
+    final Collection<AuditableLifecycleListener<T>> instanceListeners = (Collection<AuditableLifecycleListener<T>>) activeListenerMap
+            .get(instance);
+    if (instanceListeners != null) {
+      final Iterator<AuditableLifecycleListener<T>> iterator = instanceListeners.iterator();
+      while (iterator.hasNext())
+        if (iterator.next().unwrap() == listener) {
+          iterator.remove();
+          break;
+        }
+    }
   }
 
 }

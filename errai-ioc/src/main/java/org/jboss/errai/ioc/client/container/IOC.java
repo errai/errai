@@ -104,7 +104,7 @@ public final class IOC {
 
               @Override
               public void callback(final LifecycleListenerRegistrar registrar) {
-                registrar.registerListener(beanType, listenerGenerator);
+                registrar.registerGenerator(beanType, listenerGenerator);
               }
             });
   }
@@ -126,18 +126,43 @@ public final class IOC {
 
               @Override
               public void callback(final LifecycleListenerRegistrar registrar) {
-                registrar.unregisterListener(beanType, generator);
+                registrar.unregisterGenerator(beanType, generator);
               }
             });
   }
-  
+
+  /**
+   * Register a single {@link LifecycleListener} for {@link LifecycleEvent
+   * LifecycleEvents} from a single instance.
+   * 
+   * @param instance The instance to be observed.
+   * @param listener The listener to be registered.
+   */
   public static <T> void registerInstanceListener(final T instance, final LifecycleListener<T> listener) {
     getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
             new CreationalCallback<LifecycleListenerRegistrar>() {
 
               @Override
               public void callback(final LifecycleListenerRegistrar registrar) {
-                registrar.registerInstanceListener(instance, listener);
+                registrar.registerListener(instance, listener);
+              }
+            });
+  }
+
+  /**
+   * Unregister a single {@link LifecycleListener} for {@link LifecycleEvent
+   * LifecycleEvents} from a single instance.
+   * 
+   * @param instance The instance that was observed.
+   * @param listener The listener that was registered.
+   */
+  public static <T> void unregisterInstanceListener(final T instance, final LifecycleListener<T> listener) {
+    getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
+            new CreationalCallback<LifecycleListenerRegistrar>() {
+
+              @Override
+              public void callback(final LifecycleListenerRegistrar registrar) {
+                registrar.unregisterListener(instance, listener);
               }
             });
   }
