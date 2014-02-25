@@ -41,7 +41,7 @@ public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
                       Refs.get(ctx.getInjector().getInstanceVarName()),
                       createInitializationCallback(
                               ctx,
-                              Stmt.invokeStatic(IOC.class, "registerIOCLifecycleListener",
+                              Stmt.invokeStatic(IOC.class, "registerLifecycleListener",
                                       Stmt.loadLiteral(ctx.getInjector().getInjectedType()),
                                       Stmt.create().newObject(PageAuthenticationLifecycleListenerGenerator.class)))));
     }
@@ -55,7 +55,7 @@ public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
                                       ctx,
                                       Stmt.invokeStatic(
                                               IOC.class,
-                                              "registerIOCLifecycleListener",
+                                              "registerLifecycleListener",
                                               Stmt.loadLiteral(ctx.getInjector().getInjectedType()),
                                               Stmt.newObject(PageRoleLifecycleListenerGenerator.class,
                                                       (Object[]) annotation.value())))));

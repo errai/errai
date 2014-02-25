@@ -97,14 +97,33 @@ public final class IOC {
    *          A generator creating {@link LifecycleListener LifecycleListeners}
    *          which observe events from the specified bean type.
    */
-  public static <T> void registerIOCLifecycleListener(final Class<T> beanType,
+  public static <T> void registerLifecycleListener(final Class<T> beanType,
           final LifecycleListenerGenerator<T> listenerGenerator) {
+    
     getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
             new CreationalCallback<LifecycleListenerRegistrar>() {
 
               @Override
               public void callback(final LifecycleListenerRegistrar registrar) {
                 registrar.registerGenerator(beanType, listenerGenerator);
+              }
+            });
+  }
+  
+  /**
+   * Register a single {@link LifecycleListener} for {@link LifecycleEvent
+   * LifecycleEvents} from a single instance.
+   * 
+   * @param instance The instance to be observed.
+   * @param listener The listener to be registered.
+   */
+  public static <T> void registerLifecycleListener(final T instance, final LifecycleListener<T> listener) {
+    getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
+            new CreationalCallback<LifecycleListenerRegistrar>() {
+
+              @Override
+              public void callback(final LifecycleListenerRegistrar registrar) {
+                registrar.registerListener(instance, listener);
               }
             });
   }
@@ -119,7 +138,7 @@ public final class IOC {
    *          The generator to be unregistered (must be the same instance as was
    *          registered).
    */
-  public static <T> void unregisterIOCLifecycleListener(final Class<T> beanType,
+  public static <T> void unregisterLifecycleListener(final Class<T> beanType,
           final LifecycleListenerGenerator<T> generator) {
     getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
             new CreationalCallback<LifecycleListenerRegistrar>() {
@@ -132,31 +151,13 @@ public final class IOC {
   }
 
   /**
-   * Register a single {@link LifecycleListener} for {@link LifecycleEvent
-   * LifecycleEvents} from a single instance.
-   * 
-   * @param instance The instance to be observed.
-   * @param listener The listener to be registered.
-   */
-  public static <T> void registerInstanceListener(final T instance, final LifecycleListener<T> listener) {
-    getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
-            new CreationalCallback<LifecycleListenerRegistrar>() {
-
-              @Override
-              public void callback(final LifecycleListenerRegistrar registrar) {
-                registrar.registerListener(instance, listener);
-              }
-            });
-  }
-
-  /**
    * Unregister a single {@link LifecycleListener} for {@link LifecycleEvent
    * LifecycleEvents} from a single instance.
    * 
    * @param instance The instance that was observed.
    * @param listener The listener that was registered.
    */
-  public static <T> void unregisterInstanceListener(final T instance, final LifecycleListener<T> listener) {
+  public static <T> void unregisterLifecycleListener(final T instance, final LifecycleListener<T> listener) {
     getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
             new CreationalCallback<LifecycleListenerRegistrar>() {
 
@@ -166,5 +167,4 @@ public final class IOC {
               }
             });
   }
-
 }

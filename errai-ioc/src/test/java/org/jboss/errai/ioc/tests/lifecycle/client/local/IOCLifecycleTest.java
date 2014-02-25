@@ -60,7 +60,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
 
     // Register listener
-    IOC.registerIOCLifecycleListener(Integer.class, generator);
+    IOC.registerLifecycleListener(Integer.class, generator);
 
     // Precondition
     assertEquals(0, listenerCounter.getValue());
@@ -96,7 +96,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
 
     // Register listener
-    IOC.registerIOCLifecycleListener(Integer.class, generator);
+    IOC.registerLifecycleListener(Integer.class, generator);
 
     // Precondition
     assertEquals(0, listenerCounter.getValue());
@@ -116,7 +116,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, callbackCounter.getValue());
 
     // Unregister
-    IOC.unregisterIOCLifecycleListener(Integer.class, generator);
+    IOC.unregisterLifecycleListener(Integer.class, generator);
 
     event.fireAsync(instance, callback);
 
@@ -140,7 +140,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
 
     // Register listener
-    IOC.registerIOCLifecycleListener(Integer.class, generator);
+    IOC.registerLifecycleListener(Integer.class, generator);
 
     // Precondition
     assertEquals(0, listenerCounter.getValue());
@@ -160,7 +160,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, callbackCounter.getValue());
 
     // Unregister
-    IOC.unregisterIOCLifecycleListener(Integer.class, generator);
+    IOC.unregisterLifecycleListener(Integer.class, generator);
 
     final Integer newInstance = 649;
     event.fireAsync(newInstance, callback);
@@ -205,7 +205,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     };
     
     // Register generator
-    IOC.registerIOCLifecycleListener(Integer.class, generator);
+    IOC.registerLifecycleListener(Integer.class, generator);
     
     // Precondition
     assertEquals(0, firstCounter.getValue());
@@ -244,7 +244,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
       }
     };
     
-    IOC.registerInstanceListener(instance, listener);
+    IOC.registerLifecycleListener(instance, listener);
     
     // Precondition
     assertEquals(0, callbackCounter.getValue());
@@ -273,7 +273,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
       }
     };
     
-    IOC.registerInstanceListener(instance, listener);
+    IOC.registerLifecycleListener(instance, listener);
     
     // Precondition
     assertEquals(0, callbackCounter.getValue());
@@ -286,7 +286,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, listenerCounter.getValue());
     
     // Actual test
-    IOC.unregisterInstanceListener(instance, listener);
+    IOC.unregisterLifecycleListener(instance, listener);
     
     event.fireAsync(instance, callback);
     assertEquals(2, callbackCounter.getValue());
@@ -304,7 +304,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
         event.veto();
       }
     };
-    IOC.registerIOCLifecycleListener(Integer.class, new LifecycleListenerGenerator<Integer>() {
+    IOC.registerLifecycleListener(Integer.class, new LifecycleListenerGenerator<Integer>() {
 
       @Override
       public LifecycleListener<Integer> newInstance() {

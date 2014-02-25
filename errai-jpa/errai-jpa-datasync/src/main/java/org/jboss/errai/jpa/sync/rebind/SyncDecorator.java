@@ -28,6 +28,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncWorker;
+import org.jboss.errai.jpa.sync.client.local.ClientSyncWorker.QueryParamInitCallback;
 import org.jboss.errai.jpa.sync.client.local.DataSyncCallback;
 import org.jboss.errai.jpa.sync.client.local.Sync;
 import org.jboss.errai.jpa.sync.client.local.SyncParam;
@@ -54,10 +55,11 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
     if (params.length != 1 || !params[0].getType().getErased().equals(MetaClassFactory.get(SyncResponses.class))) {
       throw new GenerationException("Methods annotated with @" + Sync.class.getName()
           + " need to have exactly one parameter of type: "
-          + SyncResponses.class.getName() + 
-          ". Check method: "  + GenUtil.getMethodString(method) + " in class " + method.getDeclaringClass().getFullyQualifiedName());
+          + SyncResponses.class.getName() +
+          ". Check method: " + GenUtil.getMethodString(method) + " in class "
+          + method.getDeclaringClass().getFullyQualifiedName());
     }
-    
+
     final List<Statement> statements = new ArrayList<Statement>();
 
     Sync syncAnnotation = ctx.getAnnotation();
@@ -112,7 +114,10 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
             .extend()
             .publicOverridesMethod("init", Parameter.of(type, initVar, true));
 
-    method.append(Stmt.declareFinalVariable("paramsMap", Map.class, Stmt.newObject(HashMap.class)));
+    BlockBuilder<AnonymousClassStructureBuilder> queryParamCallback =
+        Stmt.newObject(QueryParamInitCallback.class).extend().publicOverridesMethod("getQueryParams");
+
+    queryParamCallback.append(Stmt.declareFinalVariable("paramsMap", Map.class, Stmt.newObject(HashMap.class)));
 
     for (SyncParam param : syncAnnotation.params()) {
       Statement fieldValueStmt;
@@ -127,11 +132,17 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
       else {
         fieldValueStmt = Stmt.loadLiteral(val);
       }
-      method.append(Stmt.loadVariable("paramsMap").invoke("put", param.name(), fieldValueStmt));
+      queryParamCallback.append(Stmt.loadVariable("paramsMap").invoke("put", param.name(), fieldValueStmt));
     }
+    queryParamCallback.append(Stmt.loadVariable("paramsMap").returnValue());
 
+    method.append(Stmt.declareFinalVariable("paramsCallback", 
+        QueryParamInitCallback.class, queryParamCallback.finish().finish()));
+    
     return method
-        .append(Stmt.loadVariable("syncWorker").invoke("start", Stmt.loadVariable("paramsMap")))
+        .append(Stmt.loadVariable("syncWorker").invoke("start", 
+            Refs.get(ctx.getInjector().getInstanceVarName()), 
+            Stmt.loadVariable("paramsCallback")))
         .finish()
         .finish();
   }

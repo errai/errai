@@ -18,6 +18,7 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.DataSyncService;
@@ -40,8 +41,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   private DependentScopedSyncBean syncBean;
 
   public native void setRemoteCommunicationEnabled(boolean enabled) /*-{
-    $wnd.erraiBusRemoteCommunicationEnabled = enabled;
-  }-*/;
+                                                                    $wnd.erraiBusRemoteCommunicationEnabled = enabled;
+                                                                    }-*/;
 
   @Override
   public String getModuleName() {
@@ -54,7 +55,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     InitVotes.setTimeoutMillis(60000);
 
     ClientSyncManager.resetInstance();
-    
+
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
     new IOCBeanManagerLifecycle().resetBeanManager();
@@ -79,7 +80,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     if (syncBean != null) {
       IOC.getBeanManager().destroyBean(syncBean);
     }
-    
+
     InitVotes.reset();
     setRemoteCommunicationEnabled(true);
     super.gwtTearDown();
@@ -92,7 +93,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     newEntity.setInteger(9999);
     SimpleEntity.setId(newEntity, 88L);
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
     // in this case, the client should make an empty request (both persistence contexts are empty)
 
     List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
@@ -130,7 +132,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     long newId = originalLocalState.getId() + 100;
     SimpleEntity.setId(entity, newId);
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
     expectedClientRequests.add(SyncRequestOperation.created(originalLocalState));
 
     List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
@@ -173,8 +176,12 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNull(esem.find(SimpleEntity.class, existingLocal.getId()));
     assertEquals(dsem.find(SimpleEntity.class, existingLocal.getId()).toString(), existingLocal.toString());
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
-    expectedClientRequests.add(SyncRequestOperation.created(existingLocal)); // note that the mock server will ignore this for the purpose of this test
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    expectedClientRequests.add(SyncRequestOperation.created(existingLocal)); // note that the mock
+                                                                             // server will ignore
+                                                                             // this for the purpose
+                                                                             // of this test
 
     List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
     fakeServerResponses.add(new NewRemoteEntityResponse<SimpleEntity>(newRemote));
@@ -182,7 +189,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
     // now the ID of existingLocal (still managed by dsem) should not be 100 anymore
 
-    assertFalse("Existing id " + existingLocal.getId() + " should not be the same as new object's ID " + newRemote.getId(),
+    assertFalse("Existing id " + existingLocal.getId() + " should not be the same as new object's ID "
+        + newRemote.getId(),
             existingLocal.getId() == newRemote.getId());
     assertSame(existingLocal, dsem.find(SimpleEntity.class, existingLocal.getId()));
 
@@ -199,7 +207,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     ErraiEntityManager esem = csm.getExpectedStateEm();
     ErraiEntityManager dsem = csm.getDesiredStateEm();
 
-    // persist this as both the "expected state" from the server and the "desired state" on the client
+    // persist this as both the "expected state" from the server and the "desired state" on the
+    // client
     SimpleEntity originalEntityState = esem.merge(newEntity);
     esem.flush();
     esem.clear();
@@ -208,7 +217,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     dsem.flush();
     dsem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
     expectedClientRequests.add(SyncRequestOperation.unchanged(originalEntityState));
 
     // now cook up a server response that says something changed
@@ -235,7 +245,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     ErraiEntityManager esem = csm.getExpectedStateEm();
     ErraiEntityManager dsem = csm.getDesiredStateEm();
 
-    // persist this as both the "expected state" from the server and the "desired state" on the client
+    // persist this as both the "expected state" from the server and the "desired state" on the
+    // client
     SimpleEntity originalEntityState = esem.merge(newEntity);
     esem.flush();
     esem.clear();
@@ -244,7 +255,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     dsem.flush();
     dsem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
     expectedClientRequests.add(SyncRequestOperation.unchanged(originalEntityState));
 
     // now cook up a server response that says it got deleted
@@ -294,7 +306,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     dsem.flush();
     dsem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
     expectedClientRequests.add(SyncRequestOperation.updated(entity, originalEntityState));
 
     // the server will respond with confirmation of the update
@@ -323,7 +336,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     esem.flush();
     esem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
     expectedClientRequests.add(SyncRequestOperation.deleted(entity));
 
     // assuming no conflict, the server deletes the entity and generates the appropriate response
@@ -350,7 +364,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     dsem.clear();
 
     Long originalId = clientEntity.getId();
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<SyncRequestOperation<SimpleEntity>>();
     expectedClientRequests.add(SyncRequestOperation.created(clientEntity));
 
     // the server creates the entity with a different ID and notifies us of the change
@@ -369,26 +384,28 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
         }
         alreadyRunning = true;
 
-        // at this point, ClientSyncManager is in the middle of a coldSync call. for safety, it is required to fail.
+        // at this point, ClientSyncManager is in the middle of a coldSync call. for safety, it is
+        // required to fail.
         try {
-          csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String, Object>emptyMap(),
+          csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String, Object> emptyMap(),
                   new RemoteCallback<List<SyncResponse<SimpleEntity>>>() {
-            @Override
-            public void callback(List<SyncResponse<SimpleEntity>> response) {
-              fail("this recursive call to coldSync must not succeed");
-            }
-          },
-          new ErrorCallback<List<SyncResponse<SimpleEntity>>>() {
-            @Override
-            public boolean error(List<SyncResponse<SimpleEntity>> message, Throwable throwable) {
-              fail("this recursive call to coldSync should have failed synchronously");
-              throw new AssertionError();
-            }
-          });
+                    @Override
+                    public void callback(List<SyncResponse<SimpleEntity>> response) {
+                      fail("this recursive call to coldSync must not succeed");
+                    }
+                  },
+              new ErrorCallback<List<SyncResponse<SimpleEntity>>>() {
+                @Override
+                public boolean error(List<SyncResponse<SimpleEntity>> message, Throwable throwable) {
+                  fail("this recursive call to coldSync should have failed synchronously");
+                  throw new AssertionError();
+                }
+              });
           fail("recursive call to coldSync() failed to throw an exception");
         }
         catch (IllegalStateException ex) {
-          System.out.println("Got expected IllegalStateException. Returning normally so client state assertions can run.");
+          System.out
+              .println("Got expected IllegalStateException. Returning normally so client state assertions can run.");
           // expected
         }
       }
@@ -410,7 +427,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
 
     final Map<String, Object> parameters = new HashMap<String, Object>();
-    
+
     // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
     csm.dataSyncService = new Caller<DataSyncService>() {
 
@@ -418,16 +435,18 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
       public DataSyncService call(final RemoteCallback<?> callback) {
         return new DataSyncService() {
 
-          @SuppressWarnings({"unchecked", "rawtypes"})
+          @SuppressWarnings({ "unchecked", "rawtypes" })
           @Override
-          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> actualClientRequests) {
+          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
+              List<SyncRequestOperation<X>> actualClientRequests) {
             System.out.println("Short-circuiting DataSyncService call:");
             System.out.println("   dataSet = " + dataSet);
             System.out.println("   actualClientRequests = " + actualClientRequests);
 
-            // Don't assert anything here! The timer we start later on will still fire if the test fails at this point!
+            // Don't assert anything here! The timer we start later on will still fire if the test
+            // fails at this point!
             parameters.putAll(dataSet.getParameters());
-            
+
             RemoteCallback rawRemoteCallback = callback;
             rawRemoteCallback.callback(expectedSyncResponses);
 
@@ -450,29 +469,103 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
     syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
 
-    // the initial sync will have already happened since we stubbed out the caller
-    assertNotNull(syncBean.getResponses());
-    assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
-    assertEquals(1, syncBean.getCallbackCount());
-    
     new Timer() {
-
       @Override
       public void run() {
         assertEquals(1l, parameters.get("id"));
         assertEquals("test", parameters.get("string"));
         assertEquals("literalValue", parameters.get("literal"));
-        
-        // should get back the exact list of sync responses that we returned from our fake Caller<DataSyncService> above
+
+        // should get back the exact list of sync responses that we returned from our fake
+        // Caller<DataSyncService> above
         assertNotNull(syncBean.getResponses());
         assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
+
+        // we expect 2 sync tasks to have happened (one after a short delay in start() and the first
+        // repeating one after 5s)
         assertEquals(2, syncBean.getCallbackCount());
         finishTest();
       }
 
     }.schedule(7000);
   }
-  
+
+  @SuppressWarnings("unchecked")
+  public void testDeclarativeSyncAndFieldValueChanges() {
+    delayTestFinish(45000);
+
+    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+
+    final Map<String, Object> parameters = new HashMap<String, Object>();
+
+    // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
+    csm.dataSyncService = new Caller<DataSyncService>() {
+
+      @Override
+      public DataSyncService call(final RemoteCallback<?> callback) {
+        return new DataSyncService() {
+
+          @SuppressWarnings({ "unchecked", "rawtypes" })
+          @Override
+          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
+              List<SyncRequestOperation<X>> actualClientRequests) {
+            System.out.println("Short-circuiting DataSyncService call:");
+            System.out.println("   dataSet = " + dataSet);
+            System.out.println("   actualClientRequests = " + actualClientRequests);
+
+            // Don't assert anything here! The timer we start later on will still fire if the test
+            // fails at this point!
+            parameters.putAll(dataSet.getParameters());
+
+            RemoteCallback rawRemoteCallback = callback;
+            rawRemoteCallback.callback(expectedSyncResponses);
+
+            return null; // this is the Caller stub. it doesn't return the value directly.
+          }
+        };
+      }
+
+      @Override
+      public DataSyncService call(final RemoteCallback<?> callback, final ErrorCallback<?> errorCallback) {
+        return call(callback);
+      }
+
+      @Override
+      public DataSyncService call() {
+        fail("Unexpected use of callback");
+        return null; // NOTREACHED
+      }
+    };
+
+    // Change the field values and fire IOC state change event so the sync worker can update its
+    // query parameters
+    syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
+    syncBean.setId(1337);
+    syncBean.setName("changed");
+    StateChange<DependentScopedSyncBean> changeEvent = IOC.getBeanManager().lookupBean(StateChange.class).getInstance();
+    changeEvent.fireAsync(syncBean);
+
+    new Timer() {
+
+      @Override
+      public void run() {
+        assertEquals(1337l, parameters.get("id"));
+        assertEquals("changed", parameters.get("string"));
+        assertEquals("literalValue", parameters.get("literal"));
+
+        // should get back the exact list of sync responses that we returned from our fake
+        // Caller<DataSyncService> above
+        assertNotNull(syncBean.getResponses());
+        assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
+        // we expect 2 sync tasks to have happened (one after a short delay in start() and the first
+        // repeating one after 5s)
+        assertEquals(2, syncBean.getCallbackCount());
+        finishTest();
+      }
+
+    }.schedule(7000);
+  }
+
   public void testDestructionCallbackStopSyncWorker() {
     delayTestFinish(45000);
 
@@ -485,9 +578,10 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
       public DataSyncService call(final RemoteCallback<?> callback) {
         return new DataSyncService() {
 
-          @SuppressWarnings({"unchecked", "rawtypes"})
+          @SuppressWarnings({ "unchecked", "rawtypes" })
           @Override
-          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> actualClientRequests) {
+          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
+              List<SyncRequestOperation<X>> actualClientRequests) {
             System.out.println("Short-circuiting DataSyncService call:");
             System.out.println("   dataSet = " + dataSet);
             System.out.println("   actualClientRequests = " + actualClientRequests);
@@ -515,14 +609,10 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
     IOC.getBeanManager().destroyBean(syncBean);
 
-    assertNotNull(syncBean.getResponses());
-    assertSame(expectedSyncResponses, syncBean.getResponses().getResponses());
-    assertEquals(1, syncBean.getCallbackCount());
-    
     new Timer() {
       @Override
       public void run() {
-        assertEquals(1, syncBean.getCallbackCount());
+        assertEquals(0, syncBean.getCallbackCount());
         syncBean = null;
         finishTest();
       }
@@ -531,21 +621,18 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   }
 
   /**
-   * Calls ClientSyncManager.coldSync() in a way that no actual server
-   * communication happens. The given "fake" server response is returned
-   * immediately to the ClientSyncManager's callback function.
-   *
+   * Calls ClientSyncManager.coldSync() in a way that no actual server communication happens. The
+   * given "fake" server response is returned immediately to the ClientSyncManager's callback
+   * function.
+   * 
    * @param expectedClientRequests
-   *          The list of requests that the ClientSyncManager is expected to
-   *          produce, based on the current state of its Expected State
-   *          EntityManager and its Desired State EntityManager. If the contents
-   *          of this list do not match the list produced by the
-   *          ClientSyncManager, this method will throw an
-   *          {@link AssertionFailedError}.
+   *          The list of requests that the ClientSyncManager is expected to produce, based on the
+   *          current state of its Expected State EntityManager and its Desired State EntityManager.
+   *          If the contents of this list do not match the list produced by the ClientSyncManager,
+   *          this method will throw an {@link AssertionFailedError}.
    * @param fakeServerResponses
-   *          The list of SyncResponse operations to feed back to
-   *          ClientSyncManager. The ClientSyncManager will process this list as
-   *          if it was returned by the server.
+   *          The list of SyncResponse operations to feed back to ClientSyncManager. The
+   *          ClientSyncManager will process this list as if it was returned by the server.
    */
   private <Y> void performColdSync(
           final List<SyncRequestOperation<Y>> expectedClientRequests,
@@ -553,28 +640,25 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     performColdSync(expectedClientRequests, fakeServerResponses, null);
   }
 
-    /**
-   * Calls ClientSyncManager.coldSync() in a way that no actual server
-   * communication happens. The given "fake" server response is returned
-   * immediately to the ClientSyncManager's callback function.
-   *
+  /**
+   * Calls ClientSyncManager.coldSync() in a way that no actual server communication happens. The
+   * given "fake" server response is returned immediately to the ClientSyncManager's callback
+   * function.
+   * 
    * @param expectedClientRequests
-   *          The list of requests that the ClientSyncManager is expected to
-   *          produce, based on the current state of its Expected State
-   *          EntityManager and its Desired State EntityManager. If the contents
-   *          of this list do not match the list produced by the
-   *          ClientSyncManager, this method will throw an
-   *          {@link AssertionFailedError}.
+   *          The list of requests that the ClientSyncManager is expected to produce, based on the
+   *          current state of its Expected State EntityManager and its Desired State EntityManager.
+   *          If the contents of this list do not match the list produced by the ClientSyncManager,
+   *          this method will throw an {@link AssertionFailedError}.
    * @param fakeServerResponses
-   *          The list of SyncResponse operations to feed back to
-   *          ClientSyncManager. The ClientSyncManager will process this list as
-   *          if it was returned by the server.
+   *          The list of SyncResponse operations to feed back to ClientSyncManager. The
+   *          ClientSyncManager will process this list as if it was returned by the server.
    * @param doDuringSync
-   *          If non-null, this runnable is executed after the sync request ops
-   *          are checked against the expected ones, but before the fake
-   *          responses are delivered to the client sync manager.
+   *          If non-null, this runnable is executed after the sync request ops are checked against
+   *          the expected ones, but before the fake responses are delivered to the client sync
+   *          manager.
    */
-    private <Y> void performColdSync(
+  private <Y> void performColdSync(
             final List<SyncRequestOperation<Y>> expectedClientRequests,
             final List<SyncResponse<Y>> fakeServerResponses,
             final Runnable doDuringSync) {
@@ -585,9 +669,10 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
       public DataSyncService call(final RemoteCallback<?> callback) {
         return new DataSyncService() {
 
-          @SuppressWarnings({"unchecked", "rawtypes"})
+          @SuppressWarnings({ "unchecked", "rawtypes" })
           @Override
-          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> actualClientRequests) {
+          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
+              List<SyncRequestOperation<X>> actualClientRequests) {
             List erasedExpectedClientRequests = expectedClientRequests;
             assertSyncRequestsEqual(erasedExpectedClientRequests, actualClientRequests);
 
@@ -615,13 +700,13 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     };
     System.out.println("Overrode DataSyncService in ClientSyncManager");
 
-    csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String,Object>emptyMap(),
+    csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String, Object> emptyMap(),
             new RemoteCallback<List<SyncResponse<SimpleEntity>>>() {
               @Override
               public void callback(List<SyncResponse<SimpleEntity>> response) {
                 System.out.println("Got sync callback");
               }
-    }, null);
+            }, null);
   }
 
   private static <X> void assertSyncRequestsEqual(
