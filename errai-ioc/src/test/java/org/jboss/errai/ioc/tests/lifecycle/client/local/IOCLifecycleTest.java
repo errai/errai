@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.tests.lifecycle.client.local;
 
+import static org.junit.Assert.*;
+
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
@@ -249,6 +251,43 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(0, listenerCounter.getValue());
     
     event.fireAsync(instance, callback);
+    
+    assertEquals(1, callbackCounter.getValue());
+    assertEquals(1, listenerCounter.getValue());
+  }
+  
+  @Test
+  public void testVeto() throws Exception {
+    final Counter listenerCounter = new Counter();
+    final Counter callbackCounter = new Counter();
+    final LifecycleListener<Integer> listener = new CountingListener(listenerCounter) {
+      @Override
+      public void observeEvent(final LifecycleEvent<Integer> event) {
+        super.observeEvent(event);
+        event.veto();
+      }
+    };
+    IOC.registerIOCLifecycleListener(Integer.class, new LifecycleListenerGenerator<Integer>() {
+
+      @Override
+      public LifecycleListener<Integer> newInstance() {
+        return listener;
+      }
+    });
+    
+    final Integer instance = 1337;
+    final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
+
+    assertEquals(0, callbackCounter.getValue());
+    assertEquals(0, listenerCounter.getValue());
+
+    event.fireAsync(instance, new LifecycleCallback() {
+      @Override
+      public void callback(boolean success) {
+        assertFalse(success);
+        callbackCounter.add(1);
+      }
+    });
     
     assertEquals(1, callbackCounter.getValue());
     assertEquals(1, listenerCounter.getValue());
