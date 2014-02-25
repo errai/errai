@@ -3,7 +3,6 @@ package org.jboss.errai.security.res;
 import java.util.List;
 
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
-import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.User;
@@ -37,16 +36,5 @@ public class MockAuthenticationService extends AbstractRpcProxy implements Authe
   @Override
   public User getUser() {
     return null;
-  }
-
-  @Override
-  public List<Role> getRoles() {
-    remoteCallback.callback(roleList);
-    return roleList;
-  }
-
-  @Override
-  public boolean hasPermission(PageRequest pageRequest) {
-    return false;
   }
 }

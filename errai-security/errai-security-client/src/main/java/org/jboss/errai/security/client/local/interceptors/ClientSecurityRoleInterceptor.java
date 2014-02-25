@@ -1,5 +1,7 @@
 package org.jboss.errai.security.client.local.interceptors;
 
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
@@ -8,6 +10,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.SecurityInterceptor;
+import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
@@ -30,31 +33,46 @@ public class ClientSecurityRoleInterceptor extends SecurityInterceptor implement
             AnnotationUtils.mergeRoles(
                     getRequiredRoleAnnotation(context.getTypeAnnotations()),
                     getRequiredRoleAnnotation(context.getAnnotations())),
-            new Command() {
-              @Override
-              public void action() {
-                proceed(context);
-              }
-            });
+            context);
   }
 
-  public void securityCheck(final String[] values, final Command command) {
+  private void securityCheck(final String[] values, final RemoteCallContext context) {
     IOC.getAsyncBeanManager().lookupBean(ActiveUserProvider.class)
             .getInstance(new CreationalCallback<ActiveUserProvider>() {
 
               @Override
               public void callback(final ActiveUserProvider provider) {
-                if (provider.hasActiveUser()) {
-                  if (hasAllRoles(provider.getActiveUser().getRoles(), values)) {
-                    if (command != null)
-                      command.action();
+                if (provider.isCacheValid()) {
+                  if (provider.hasActiveUser()) {
+                    if (hasAllRoles(provider.getActiveUser().getRoles(), values)) {
+                      context.proceed(new RemoteCallback<Object>() {
+
+                        @Override
+                        public void callback(final Object response) {
+                          context.setResult(response);
+                        }
+                      }, new ErrorCallback<Object>() {
+
+                        @Override
+                        public boolean error(Object message, Throwable throwable) {
+                          if (throwable instanceof SecurityException) {
+                            provider.invalidateCache();
+                          }
+                          
+                          return true;
+                        }
+                      });
+                    }
+                    else {
+                      throw new UnauthorizedException();
+                    }
                   }
                   else {
-                    throw new UnauthorizedException();
+                    throw new UnauthenticatedException();
                   }
                 }
                 else {
-                  throw new UnauthenticatedException();
+                  context.proceed();
                 }
               }
             });

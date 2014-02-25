@@ -10,6 +10,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.shared.AdminService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
 import org.jboss.errai.security.client.shared.DiverseService;
@@ -71,6 +72,11 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
+        // Explicitly set active user to null to validate cache.
+        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        provider.setActiveUser(null);
+        assertTrue(provider.isCacheValid());
+
         final TestLoginPage page = IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
         assertEquals(0, page.getPageLoadCounter());
         createCall(new RemoteCallback<Void>() {
@@ -98,6 +104,11 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
+        // Explicitly set active user to null to validate cache.
+        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        provider.setActiveUser(null);
+        assertTrue(provider.isCacheValid());
+
         final TestLoginPage page = IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
         assertEquals(0, page.getPageLoadCounter());
         createCall(new RemoteCallback<Void>() {
@@ -190,6 +201,11 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
+        // Explicitly set active user to null to validate cache.
+        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        provider.setActiveUser(null);
+        assertTrue(provider.isCacheValid());
+
         assertEquals(0, counter.getCount());
         assertEquals(0, errorCounter.getCount());
         createCall(new RemoteCallback<Void>() {
@@ -217,6 +233,11 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
+        // Explicitly set active user to null to validate cache.
+        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        provider.setActiveUser(null);
+        assertTrue(provider.isCacheValid());
+
         assertEquals(0, counter.getCount());
         assertEquals(0, errorCounter.getCount());
         createCall(new RemoteCallback<Void>() {

@@ -1,9 +1,6 @@
 package org.jboss.errai.security.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.jboss.errai.common.client.PageRequest;
-
-import java.util.List;
 
 /**
  * AuthenticationService service for authenticating users and get there roles.
@@ -13,15 +10,11 @@ import java.util.List;
 @Remote
 public interface AuthenticationService {
 
-  User login(String username, String password);
+  public User login(String username, String password);
 
-  boolean isLoggedIn();
+  public boolean isLoggedIn();
 
-  void logout();
+  public void logout();
 
-  User getUser();
-
-  List<Role> getRoles();
-
-  boolean hasPermission(PageRequest pageRequest);
+  public User getUser();
 }

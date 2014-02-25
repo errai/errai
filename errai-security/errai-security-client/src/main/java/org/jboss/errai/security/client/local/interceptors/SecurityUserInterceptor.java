@@ -1,5 +1,7 @@
 package org.jboss.errai.security.client.local.interceptors;
 
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
@@ -24,31 +26,38 @@ public class SecurityUserInterceptor extends SecurityInterceptor implements
 
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
-    securityCheck(new Command() {
-      @Override
-      public void action() {
-        proceed(context);
-      }
-    });
-  }
-
-  private void securityCheck(final Command command) {
     IOC.getAsyncBeanManager().lookupBean(ActiveUserProvider.class)
             .getInstance(new CreationalCallback<ActiveUserProvider>() {
               @Override
-              public void callback(ActiveUserProvider provider) {
-                if (provider.hasActiveUser()) {
-                  if (command != null)
-                    command.action();
+              public void callback(final ActiveUserProvider provider) {
+                if (provider.isCacheValid()) {
+                  if (provider.hasActiveUser()) {
+                    context.proceed(new RemoteCallback<Object>() {
+
+                      @Override
+                      public void callback(final Object response) {
+                        context.setResult(response);
+                      }
+                    }, new ErrorCallback<Object>() {
+
+                      @Override
+                      public boolean error(Object message, Throwable throwable) {
+                        if (throwable instanceof UnauthenticatedException) {
+                          // Clearly we are not actually logged in.
+                          provider.invalidateCache();
+                        }
+                        return true;
+                      }
+                    });
+                  }
+                  else {
+                    throw new UnauthenticatedException();
+                  }
                 }
                 else {
-                  throw new UnauthenticatedException();
+                  context.proceed();
                 }
               }
             });
-  }
-
-  public void securityCheck() {
-    securityCheck(null);
   }
 }

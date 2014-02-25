@@ -27,5 +27,15 @@ public interface ActiveUserProvider {
    * @param user The {@link User} currently logged in.
    */
   public void setActiveUser(User user);
+  
+  /**
+   * @return False if the cached {@link User} has been invalidated.
+   */
+  public boolean isCacheValid();
+  
+  /**
+   * Invalidate the cached {@link User}.
+   */
+  public void invalidateCache();
 
 }

@@ -1,7 +1,10 @@
 package org.jboss.errai.security.client.local.identity;
 
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COOKIE;
+
+import java.io.Serializable;
+
+import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -15,12 +18,8 @@ import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
-import javax.enterprise.context.SessionScoped;
-
-import java.io.Serializable;
-import java.util.List;
-
-import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COOKIE;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Identity holds the username and password and performs the authentication
@@ -29,8 +28,9 @@ import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COO
  * @author edewit@redhat.com
  */
 @Bindable
-@SessionScoped
+@Singleton
 public class Identity implements Serializable {
+  private static final long serialVersionUID = 1L;
   private String username;
   private String password;
 
@@ -75,19 +75,23 @@ public class Identity implements Serializable {
   }
 
   public void hasPermission(final AsyncCallback<Boolean> callback, final String... roleNames) {
-    MessageBuilder.createCall(new RemoteCallback<List<Role>>() {
+    MessageBuilder.createCall(new RemoteCallback<User>() {
       @Override
-      public void callback(List<Role> roles) {
+      public void callback(final User user) {
+        if (user == null) {
+          callback.onSuccess(false);
+          return;
+        }
         for (String roleName : roleNames) {
           final Role role = new Role(roleName);
-          if (!roles.contains(role)) {
+          if (!user.getRoles().contains(role)) {
             callback.onSuccess(false);
             return;
           }
         }
         callback.onSuccess(true);
       }
-    }, AuthenticationService.class).getRoles();
+    }, AuthenticationService.class).getUser();
   }
 
   public String getUsername() {

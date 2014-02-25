@@ -99,6 +99,6 @@ public class SecurityTest extends AbstractErraiCDITest {
     }, "role1", "role2");
 
     // then
-    assertEquals(new Integer(1), spy.getCallCount("getRoles"));
+    assertEquals(new Integer(1), spy.getCallCount("getUser"));
   }
 }

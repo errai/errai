@@ -30,30 +30,4 @@ public class SecurityUserInterceptorTest {
     // then
     verify(context).proceed();
   }
-//
-//  @Test
-//  public void shouldValidateIfUserIsLoggedInClientSide() {
-//    //given
-//    final Boolean[] redirectToLoginPage = {Boolean.FALSE};
-//    org.jboss.errai.security.client.local.SecurityUserInterceptor interceptor
-//            = new org.jboss.errai.security.client.local.SecurityUserInterceptor() {
-//      @Override
-//      protected void navigateToLoginPage() {
-//        redirectToLoginPage[0] = Boolean.TRUE;
-//      }
-//    };
-//    RemoteServiceProxyFactory.addRemoteProxy(AuthenticationService.class, new ProxyProvider() {
-//      @Override
-//      public Object getProxy() {
-//        return new SecurityRoleInterceptorTest.MockAuthenticationService();
-//      }
-//    });
-//
-//
-//    //when
-//    interceptor.aroundInvoke(null);
-//
-//    //then
-//    assertTrue(redirectToLoginPage[0]);
-//  }
 }

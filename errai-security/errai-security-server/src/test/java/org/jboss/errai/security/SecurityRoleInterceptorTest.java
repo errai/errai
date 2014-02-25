@@ -40,7 +40,7 @@ public class SecurityRoleInterceptorTest {
     // when
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
-    when(authenticationService.getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
+    when(authenticationService.getUser().getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
     interceptor.aroundInvoke(context);
 
     // then
@@ -74,7 +74,7 @@ public class SecurityRoleInterceptorTest {
   private void invokeTest(InvocationContext context, Object service) throws Exception {
     when(context.getTarget()).thenReturn(service);
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
-    when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
+    when(authenticationService.getUser().getRoles()).thenReturn(new ArrayList<Role>());
     interceptor.aroundInvoke(context);
   }
 
@@ -86,40 +86,12 @@ public class SecurityRoleInterceptorTest {
     // when
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(Service.class.getMethod("annotatedServiceMethod"));
-    when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
+    when(authenticationService.getUser().getRoles()).thenReturn(new ArrayList<Role>());
     interceptor.aroundInvoke(context);
 
     // then
     fail("security exception should have been thrown");
   }
-//
-//  @Test
-//  public void shouldVerifyUserInRoleClientSide() throws Exception {
-//    //given
-//    RemoteCallContext context = mock(RemoteCallContext.class);
-//    RemoteServiceProxyFactory.addRemoteProxy(AuthenticationService.class, new ProxyProvider() {
-//      @Override
-//      public Object getProxy() {
-//        return new MockAuthenticationService(Arrays.asList(new Role("user")));
-//      }
-//    });
-//
-//    final Boolean[] redirectToLoginPage = {Boolean.FALSE};
-//    final org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor interceptor =
-//            new org.jboss.errai.security.client.local.ClientSecurityRoleInterceptor() {
-//      @Override
-//      protected void navigateToPage(Class<? extends UniquePageRole> roleClass) {
-//        redirectToLoginPage[0] = Boolean.TRUE;
-//      }
-//    };
-//
-//    //when
-//    when(context.getAnnotations()).thenReturn(getAnnotatedServiceMethod().getAnnotations());
-//    interceptor.aroundInvoke(context);
-//
-//    //then
-//    assertTrue(redirectToLoginPage[0]);
-//  }
 
   private Method getAnnotatedServiceMethod() throws NoSuchMethodException {
     return ServiceInterface.class.getMethod("annotatedServiceMethod");

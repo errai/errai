@@ -33,7 +33,7 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
 
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
-    final List<Role> roles = authenticationService.getRoles();
+    final List<Role> roles = authenticationService.getUser().getRoles();
     final RequireRoles annotation = getRequiredRoleAnnotation(context.getTarget().getClass(), context.getMethod());
     if (hasAllRoles(roles, annotation.value())) {
       return context.proceed();

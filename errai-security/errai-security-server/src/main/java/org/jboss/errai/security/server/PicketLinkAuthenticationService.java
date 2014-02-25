@@ -8,7 +8,6 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.LoggedInEvent;
 import org.jboss.errai.security.shared.LoggedOutEvent;
@@ -94,7 +93,6 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     return null;
   }
 
-  @Override
   public List<Role> getRoles() {
     List<Role> roles = new ArrayList<Role>();
 
@@ -108,10 +106,5 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     }
 
     return roles;
-  }
-
-  @Override
-  public boolean hasPermission(PageRequest pageRequest) {
-    return identity.hasPermission(pageRequest, "show");
   }
 }
