@@ -24,7 +24,7 @@ import com.google.gwt.user.client.Timer;
 
 public class SecurityInterceptorTest extends AbstractErraiCDITest {
 
-  public static long TIME_LIMIT = 30000;
+  public static long TIME_LIMIT = 60000;
 
   private static class Counter {
     private int count = 0;
