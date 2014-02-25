@@ -1,6 +1,7 @@
 package org.jboss.errai.security.client.local.nav;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
@@ -9,6 +10,7 @@ import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
+import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEvent;
@@ -30,7 +32,7 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
   @Override
   public void observeEvent(final LifecycleEvent<W> event) {
     final ActiveUserProvider activeUserProvider = ActiveUserProviderImpl.getInstance();
-    if (!activeUserProvider.hasActiveUser() || !activeUserProvider.getActiveUser().getRoles().containsAll(roles)) {
+    if (!activeUserProvider.hasActiveUser() || !containsRoles(activeUserProvider.getActiveUser().getRoles(), roles)) {
       event.veto();
       IOC.getAsyncBeanManager().lookupBean(Navigation.class).getInstance(new CreationalCallback<Navigation>() {
         
@@ -45,6 +47,19 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
   @Override
   public boolean isObserveableEventType(final Class<? extends LifecycleEvent<W>> eventType) {
     return eventType.equals(TransitionEvent.class);
+  }
+  
+  private boolean containsRoles(final List<Role> userRoles, final Set<String> requiredRoles) {
+    final Set<String> userRolesByName = new HashSet<String>();
+    for (final Role role : userRoles)
+      userRolesByName.add(role.getName());
+    
+    for (final String role : requiredRoles) {
+      if (!userRolesByName.contains(role))
+        return false;
+    }
+    
+    return true;
   }
 
 }
