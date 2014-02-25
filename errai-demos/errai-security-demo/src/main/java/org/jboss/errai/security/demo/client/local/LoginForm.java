@@ -1,5 +1,22 @@
 package org.jboss.errai.security.demo.client.local;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.security.client.local.identity.Identity;
+import org.jboss.errai.security.shared.User;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.api.LoginPage;
+import org.jboss.errai.ui.shared.api.annotations.Bound;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.Model;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
+
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
@@ -9,19 +26,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
-
-import org.jboss.errai.bus.client.api.BusErrorCallback;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.security.client.local.identity.Identity;
-import org.jboss.errai.security.shared.User;
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageShown;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.errai.ui.nav.client.local.api.LoginPage;
-import org.jboss.errai.ui.shared.api.annotations.*;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 
 @Page(role = LoginPage.class)
 @Templated("#root")
@@ -76,7 +80,7 @@ public class LoginForm extends Composite {
     welcomePage.go();
   }
 
-  @PageShown
+  @PageShowing
   private void isLoggedIn() {
     identity.getUser(new AsyncCallback<User>() {
       @Override
