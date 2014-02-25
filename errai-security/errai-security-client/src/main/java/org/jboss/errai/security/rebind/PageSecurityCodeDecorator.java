@@ -15,8 +15,8 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.security.client.local.nav.PageAuthenticationLifecycleListenerGenerator;
-import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListenerGenerator;
+import org.jboss.errai.security.client.local.nav.PageAuthenticationLifecycleListener;
+import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListener;
 import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.ui.nav.client.local.Page;
@@ -25,9 +25,9 @@ import org.jboss.errai.ui.nav.client.local.Page;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @CodeDecorator
-public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
+public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
 
-  public AuthenticationCodeDecorator(Class<Page> decoratesWith) {
+  public PageSecurityCodeDecorator(Class<Page> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -42,8 +42,8 @@ public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
                       createInitializationCallback(
                               ctx,
                               Stmt.invokeStatic(IOC.class, "registerLifecycleListener",
-                                      Stmt.loadLiteral(ctx.getInjector().getInjectedType()),
-                                      Stmt.create().newObject(PageAuthenticationLifecycleListenerGenerator.class)))));
+                                      Refs.get(ctx.getInjector().getInstanceVarName()),
+                                      Stmt.create().newObject(PageAuthenticationLifecycleListener.class)))));
     }
     if (ctx.getInjector().getInjectedType().isAnnotationPresent(RequireRoles.class)) {
       final RequireRoles annotation = ctx.getAnnotation(RequireRoles.class);
@@ -56,8 +56,8 @@ public class AuthenticationCodeDecorator extends IOCDecoratorExtension<Page> {
                                       Stmt.invokeStatic(
                                               IOC.class,
                                               "registerLifecycleListener",
-                                              Stmt.loadLiteral(ctx.getInjector().getInjectedType()),
-                                              Stmt.newObject(PageRoleLifecycleListenerGenerator.class,
+                                              Refs.get(ctx.getInjector().getInstanceVarName()),
+                                              Stmt.newObject(PageRoleLifecycleListener.class,
                                                       (Object[]) annotation.value())))));
 
     }
