@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.LoggedInEvent;
-import org.jboss.errai.security.shared.LoggedOutEvent;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.security.shared.exception.SecurityException;
@@ -37,12 +34,6 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   private IdentityManager identityManager;
 
   @Inject
-  private Event<LoggedInEvent> loggedInEventSource;
-
-  @Inject
-  private Event<LoggedOutEvent> loggedOutEventSource;
-
-  @Inject
   private DefaultLoginCredentials credentials;
 
   @Override
@@ -55,7 +46,6 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     }
 
     final User user = createUser((org.picketlink.idm.model.User) identity.getAgent());
-    loggedInEventSource.fire(new LoggedInEvent(user));
     return user;
   }
 
@@ -82,7 +72,6 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   @Override
   public void logout() {
     identity.logout();
-    loggedOutEventSource.fire(new LoggedOutEvent());
   }
 
   @Override
@@ -107,4 +96,5 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
 
     return roles;
   }
+
 }
