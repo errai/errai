@@ -12,6 +12,8 @@ import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.ui.nav.client.local.Navigation;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEvent;
 
@@ -34,11 +36,18 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
     final ActiveUserProvider activeUserProvider = ActiveUserProviderImpl.getInstance();
     if (!activeUserProvider.hasActiveUser() || !containsRoles(activeUserProvider.getActiveUser().getRoles(), roles)) {
       event.veto();
+
+      final Class<? extends UniquePageRole> destination;
+      if (!activeUserProvider.hasActiveUser())
+        destination = LoginPage.class;
+      else
+        destination = SecurityError.class;
+      
       IOC.getAsyncBeanManager().lookupBean(Navigation.class).getInstance(new CreationalCallback<Navigation>() {
         
         @Override
         public void callback(final Navigation nav) {
-          nav.goToWithRole(SecurityError.class);
+          nav.goToWithRole(destination);
         }
       });
     }

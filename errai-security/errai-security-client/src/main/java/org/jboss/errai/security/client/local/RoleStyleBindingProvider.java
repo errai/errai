@@ -43,7 +43,7 @@ public class RoleStyleBindingProvider {
       @Override
       public void invokeBinding(final Element element, final Annotation annotation) {
         final User user = userProvider.getActiveUser();
-        if (user == null || !hasRoles(user.getRoles(), ((RequireRoles) annotation).value()))
+        if (user == null || user.getRoles() == null || !hasRoles(user.getRoles(), ((RequireRoles) annotation).value()))
           element.getStyle().setVisibility(Style.Visibility.HIDDEN);
         else
           element.getStyle().setVisibility(Style.Visibility.VISIBLE);
