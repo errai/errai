@@ -137,9 +137,11 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
       for (Class<? extends PageRole> annotatedPageRole : annotatedPageRoles) {
         pageRoles.put(annotatedPageRole, pageClass);
-        ctor.append(
-          Stmt.nestedCall(Refs.get("pagesByRole"))
-              .invoke("put", annotatedPageRole, Refs.get(fieldName)));
+        // DefaultPage is already added above.
+        if (!annotatedPageRole.equals(DefaultPage.class))
+          ctor.append(
+              Stmt.nestedCall(Refs.get("pagesByRole"))
+                .invoke("put", annotatedPageRole, Refs.get(fieldName)));
       }
     }
     ctor.finish();
