@@ -16,6 +16,7 @@ import org.jboss.errai.security.res.Service;
 import org.jboss.errai.security.server.ServerSecurityRoleInterceptor;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.Role;
+import org.jboss.errai.security.shared.User;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +41,9 @@ public class SecurityRoleInterceptorTest {
     // when
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
-    when(authenticationService.getUser().getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
+    final User user = new User();
+    user.setRoles(Arrays.asList(new Role("admin"), new Role("user")));
+    when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
 
     // then
@@ -74,7 +77,9 @@ public class SecurityRoleInterceptorTest {
   private void invokeTest(InvocationContext context, Object service) throws Exception {
     when(context.getTarget()).thenReturn(service);
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
-    when(authenticationService.getUser().getRoles()).thenReturn(new ArrayList<Role>());
+    final User user = new User();
+    user.setRoles(new ArrayList<Role>());
+    when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
   }
 
@@ -86,7 +91,9 @@ public class SecurityRoleInterceptorTest {
     // when
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(Service.class.getMethod("annotatedServiceMethod"));
-    when(authenticationService.getUser().getRoles()).thenReturn(new ArrayList<Role>());
+    final User user = new User();
+    user.setRoles(new ArrayList<Role>());
+    when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
 
     // then
