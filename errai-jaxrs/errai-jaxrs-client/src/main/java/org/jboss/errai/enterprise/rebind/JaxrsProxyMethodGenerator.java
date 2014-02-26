@@ -105,7 +105,7 @@ public class JaxrsProxyMethodGenerator {
       methodBlock.append(generateHeaders(jaxrsParams));
 
       List<Class<?>> interceptors = getInterceptors();
-      if (interceptors.size() > 0) {
+      if (!interceptors.isEmpty()) {
         methodBlock.append(generateInterceptorLogic(interceptors));
       }
       else {
@@ -115,6 +115,11 @@ public class JaxrsProxyMethodGenerator {
     generateReturnStatement();
   }
   
+  /**
+   * Scans for interceptors for this proxy method.
+   *  
+   * @return the list of interceptors that should be triggered when invoking this proxy method.
+   */
   private List<Class<?>> getInterceptors() {
     final List<Class<?>> interceptors = new ArrayList<Class<?>>();
     InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);

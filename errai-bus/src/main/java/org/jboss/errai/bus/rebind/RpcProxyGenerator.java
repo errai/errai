@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
@@ -85,39 +84,8 @@ public class RpcProxyGenerator {
   }
 
   private void generateMethod(ClassStructureBuilder<?> classBuilder, MetaMethod method) {
-    List<Class<?>> interceptors = new ArrayList<Class<?>>();
-    InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
-    if (interceptedCall == null) {
-      interceptedCall = remote.getAnnotation(InterceptedCall.class);
-    }
-    if (interceptedCall == null) {
-      Collection<MetaClass> interceptorClasses = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class, 
-              RebindUtils.findTranslatablePackages(context), context);
-      for (MetaClass interceptorClass : interceptorClasses) {
-        InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
-        if (interceptsRemote(interceptor)) {
-          interceptors.add(interceptorClass.asClass());
-        }
-      }
-    }
-    else {
-      for (Class<?> clazz : interceptedCall.value()) {
-        interceptors.add(clazz);
-      }
-    }
-    final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
-            RebindUtils.findTranslatablePackages(context), context);
-    for (final MetaClass featureInterceptor : featureInterceptors) {
-      final Class<? extends Annotation>[] annotations = featureInterceptor.getAnnotation(FeatureInterceptor.class)
-              .value();
-      for (int i = 0; i < annotations.length; i++) {
-        if (remote.isAnnotationPresent(annotations[i]) || method.isAnnotationPresent(annotations[i])) {
-          interceptors.add(featureInterceptor.asClass());
-        }
-      }
-    }
-
-    boolean intercepted = interceptors.size() > 0;
+    List<Class<?>> interceptors = getInterceptors(method);
+    boolean intercepted = !interceptors.isEmpty();
 
     Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
     Parameter[] finalParms = new Parameter[parms.length];
@@ -150,6 +118,55 @@ public class RpcProxyGenerator {
     methodBlock.finish();
   }
 
+  /**
+   * Scans for interceptors for the provided proxy method.
+   * 
+   * @param method
+   *          the remote method
+   * 
+   * @return the list of interceptors that should be triggered when invoking this proxy method.
+   */
+  private List<Class<?>> getInterceptors(MetaMethod method) {
+    List<Class<?>> interceptors = new ArrayList<Class<?>>();
+
+    InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
+    if (interceptedCall == null) {
+      interceptedCall = remote.getAnnotation(InterceptedCall.class);
+    }
+
+    if (interceptedCall == null) {
+      Collection<MetaClass> interceptorClasses = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class,
+              RebindUtils.findTranslatablePackages(context), context);
+      for (MetaClass interceptorClass : interceptorClasses) {
+        InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
+        if (interceptsRemote(interceptor)) {
+          interceptors.add(interceptorClass.asClass());
+        }
+      }
+    }
+    else {
+      for (Class<?> clazz : interceptedCall.value()) {
+        interceptors.add(clazz);
+      }
+    }
+
+    final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
+            RebindUtils.findTranslatablePackages(context), context);
+
+    for (final MetaClass featureInterceptor : featureInterceptors) {
+      final Class<? extends Annotation>[] annotations =
+          featureInterceptor.getAnnotation(FeatureInterceptor.class).value();
+
+      for (int i = 0; i < annotations.length; i++) {
+        if (remote.isAnnotationPresent(annotations[i]) || method.isAnnotationPresent(annotations[i])) {
+          interceptors.add(featureInterceptor.asClass());
+        }
+      }
+    }
+
+    return interceptors;
+  }
+  
   /**
    * Returns true if the given {@link InterceptsRemoteCall} is configured to intercept
    * the {@link Remote} that we're currently generating proxy code for.
