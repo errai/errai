@@ -41,8 +41,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   private DependentScopedSyncBean syncBean;
 
   public native void setRemoteCommunicationEnabled(boolean enabled) /*-{
-                                                                    $wnd.erraiBusRemoteCommunicationEnabled = enabled;
-                                                                    }-*/;
+    $wnd.erraiBusRemoteCommunicationEnabled = enabled;
+  }-*/;
 
   @Override
   public String getModuleName() {

@@ -60,6 +60,10 @@ public class ClientSyncWorker<E> {
   private static final Logger logger = LoggerFactory.getLogger(ClientSyncWorker.class);
 
   private final List<DataSyncCallback<E>> callbacks = new ArrayList<DataSyncCallback<E>>();
+  
+  private LifecycleListener<Object> beanlifecycleListener;
+  private Object managedBeanInstance;
+  
   private final Timer timer;
   private boolean started;
   private boolean stopped;
@@ -216,10 +220,13 @@ public class ClientSyncWorker<E> {
     if (stopped)
       throw new IllegalStateException("This worker was already stopped");
 
-    this.queryParams = queryParamCallback.getQueryParams();
     started = true;
+    this.managedBeanInstance = beanInstance;
+    this.queryParams = queryParamCallback.getQueryParams();
 
-    IOC.registerLifecycleListener(beanInstance, new LifecycleListener<Object>() {
+    // Register a lifecycle listener for the managed bean so we can update the query params
+    // when the bean's state changes (i.e. when errai navigation updates the @PageState fields.)
+    beanlifecycleListener = new LifecycleListener<Object>() {
       @Override
       public void observeEvent(LifecycleEvent<Object> event) {
         ClientSyncWorker.this.queryParams = queryParamCallback.getQueryParams();
@@ -229,10 +236,11 @@ public class ClientSyncWorker<E> {
       public boolean isObserveableEventType(Class<? extends LifecycleEvent<Object>> eventType) {
         return eventType.equals(StateChange.class);
       }
-    });
-    
-    // let's give control back so that other parts of the framework have a chance to update fields
-    // of the managed bean; 
+    };
+    IOC.registerLifecycleListener(beanInstance, beanlifecycleListener);
+
+    // Let's give control back so that other parts of the framework have a chance to update fields
+    // of the managed bean before we start the first synchronization
     new Timer() {
       @Override
       public void run() {
@@ -255,6 +263,10 @@ public class ClientSyncWorker<E> {
 
     stopped = true;
     callbacks.clear();
+    
+    if (beanlifecycleListener != null && managedBeanInstance != null) {
+      IOC.unregisterLifecycleListener(managedBeanInstance, beanlifecycleListener);
+    }
     timer.cancel();
   }
 }
