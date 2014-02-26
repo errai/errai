@@ -3,10 +3,13 @@ package org.jboss.errai.security.client.local;
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createCall;
 import junit.framework.AssertionFailedError;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -19,8 +22,12 @@ import org.jboss.errai.security.shared.User;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
+import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.junit.Test;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.user.client.Timer;
 
 public class SecurityInterceptorTest extends AbstractErraiCDITest {
@@ -61,8 +68,39 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
   }
 
   @Override
+  protected void gwtSetUp() throws Exception {
+    final UncaughtExceptionHandler oldHandler = GWT.getUncaughtExceptionHandler();
+    GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+      @Override
+      public void onUncaughtException(Throwable t) {
+        if (!(t instanceof SecurityException)) {
+          // let's not swallow assertion errors
+          oldHandler.onUncaughtException(t);
+        }
+      }
+    });
+
+    super.gwtSetUp();
+
+    CDI.addPostInitTask(new Runnable() {
+
+      @Override
+      public void run() {
+        final Navigation nav = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
+        nav.goToWithRole(DefaultPage.class);
+      }
+    });
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    ((ClientMessageBusImpl) ErraiBus.get()).removeAllUncaughtExceptionHandlers();
+    super.gwtTearDown();
+  }
+
+  @Override
   public String getModuleName() {
-    return "org.jboss.errai.security.SecurityTest";
+    return "org.jboss.errai.security.SecurityInterceptorTest";
   }
 
   @Test
@@ -73,24 +111,55 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         // Explicitly set active user to null to validate cache.
-        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        final ActiveUserProvider provider =
+                IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
         provider.setActiveUser(null);
         assertTrue(provider.isCacheValid());
-
-        final TestLoginPage page = IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
-        assertEquals(0, page.getPageLoadCounter());
         createCall(new RemoteCallback<Void>() {
           @Override
           public void callback(Void response) {
             fail();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AuthenticatedService.class)
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
+                AuthenticatedService.class)
                 .userStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
-            // assertEquals(1, page.getPageLoadCounter());
             assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  @Test
+  public void testAuthInterceptorRedirectsWithNoErrorHandler() throws
+          Exception {
+    asyncTest();
+    runNavTest(new Runnable() {
+      @Override
+      public void run() {
+        final TestLoginPage page =
+                IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
+        assertEquals(0, page.getPageLoadCounter());
+
+        // Explicitly set active user to null to validate cache.
+        final ActiveUserProvider provider =
+                IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        provider.setActiveUser(null);
+        assertTrue(provider.isCacheValid());
+        createCall(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void response) {
+            fail();
+          }
+        }, AuthenticatedService.class)
+                .userStuff();
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, page.getPageLoadCounter());
           }
         });
       }
@@ -105,23 +174,22 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         // Explicitly set active user to null to validate cache.
-        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        final ActiveUserProvider provider =
+                IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
         provider.setActiveUser(null);
         assertTrue(provider.isCacheValid());
 
-        final TestLoginPage page = IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
-        assertEquals(0, page.getPageLoadCounter());
         createCall(new RemoteCallback<Void>() {
           @Override
           public void callback(Void response) {
             fail();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class)
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
+                DiverseService.class)
                 .needsAuthentication();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
-            // assertEquals(1, page.getPageLoadCounter());
             assertEquals(1, errorCounter.getCount());
           }
         });
@@ -146,7 +214,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class)
+            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
+                    DiverseService.class)
                     .needsAuthentication();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
@@ -178,7 +247,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AuthenticatedService.class)
+            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
+                    AuthenticatedService.class)
                     .userStuff();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
@@ -202,7 +272,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         // Explicitly set active user to null to validate cache.
-        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        final ActiveUserProvider provider =
+                IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
         provider.setActiveUser(null);
         assertTrue(provider.isCacheValid());
 
@@ -213,12 +284,50 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
           public void callback(Void response) {
             counter.increment();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AdminService.class).adminStuff();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
+                AdminService.class).adminStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
             assertEquals(0, counter.getCount());
             assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  @Test
+  public void
+          testRoleInterceptorRedirectsToLoginWhenNotLoggedInAndNoErrorHandler()
+                  throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    runNavTest(new Runnable() {
+      @Override
+      public void run() {
+        final TestLoginPage page =
+                IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
+        assertEquals(0, page.getPageLoadCounter());
+
+        // Explicitly set active user to null to validate cache.
+        final ActiveUserProvider provider =
+                IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        provider.setActiveUser(null);
+        assertTrue(provider.isCacheValid());
+
+        assertEquals(0, counter.getCount());
+        createCall(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void response) {
+            counter.increment();
+          }
+        }, AdminService.class).adminStuff();
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(0, counter.getCount());
+            assertEquals(1, page.getPageLoadCounter());
           }
         });
       }
@@ -234,7 +343,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         // Explicitly set active user to null to validate cache.
-        final ActiveUserProvider provider = IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
+        final ActiveUserProvider provider =
+                IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance();
         provider.setActiveUser(null);
         assertTrue(provider.isCacheValid());
 
@@ -245,7 +355,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
           public void callback(Void response) {
             counter.increment();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class).adminOnly();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
+                DiverseService.class).adminOnly();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -258,7 +369,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testRoleInterceptorLoggedInUnprivelegedHeterogenous() throws Exception {
+  public void testRoleInterceptorLoggedInUnprivelegedHeterogenous() throws
+          Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
@@ -275,7 +387,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), DiverseService.class).adminOnly();
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                    DiverseService.class).adminOnly();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
               public void run() {
@@ -290,7 +403,42 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testRoleInterceptorLoggedInUnprivelegedHomogenous() throws Exception {
+  public void testRoleInterceptorLoggedInUnprivelegedRedirectsToSecurityErrorWithNoErrorCallback() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    runNavTest(new Runnable() {
+      @Override
+      public void run() {
+        final TestSecurityErrorPage page = IOC.getBeanManager().lookupBean(TestSecurityErrorPage.class)
+                .getInstance();
+        assertEquals(0, page.getPageLoadCounter());
+
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(User response) {
+            assertEquals(0, counter.getCount());
+            createCall(new RemoteCallback<Void>() {
+              @Override
+              public void callback(Void response) {
+                counter.increment();
+              }
+            }, DiverseService.class).adminOnly();
+            testUntil(TIME_LIMIT, new Runnable() {
+              @Override
+              public void run() {
+                assertEquals(0, counter.getCount());
+                assertEquals(1, page.getPageLoadCounter());
+              }
+            });
+          }
+        }, AuthenticationService.class).login("john", "123");
+      }
+    });
+  }
+
+  @Test
+  public void testRoleInterceptorLoggedInUnprivelegedHomogenous() throws
+          Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
@@ -307,7 +455,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), AdminService.class).adminStuff();
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                    AdminService.class).adminStuff();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
               public void run() {
@@ -322,7 +471,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testRoleInterceptorLoggedInPrivelegedHomogenous() throws Exception {
+  public void testRoleInterceptorLoggedInPrivelegedHomogenous() throws
+          Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
@@ -339,7 +489,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), AdminService.class).adminStuff();
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                    AdminService.class).adminStuff();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
               public void run() {
@@ -354,7 +505,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testRoleInterceptorLoggedInPrivelegedHeterogenous() throws Exception {
+  public void testRoleInterceptorLoggedInPrivelegedHeterogenous() throws
+          Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
@@ -371,7 +523,8 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
               public void callback(Void response) {
                 counter.increment();
               }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), DiverseService.class).adminOnly();
+            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                    DiverseService.class).adminOnly();
             testUntil(TIME_LIMIT, new Runnable() {
               @Override
               public void run() {
@@ -381,6 +534,16 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
             });
           }
         }, AuthenticationService.class).login("admin", "123");
+      }
+    });
+  }
+
+  private void runNavTest(final Runnable runnable) {
+    CDI.addPostInitTask(new Runnable() {
+
+      @Override
+      public void run() {
+        InitVotes.registerOneTimeInitCallback(runnable);
       }
     });
   }

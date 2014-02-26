@@ -1,6 +1,6 @@
 package org.jboss.errai.security.client.local.callback;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.api.UncaughtException;
 import org.jboss.errai.common.client.util.CreationalCallback;
@@ -23,7 +23,7 @@ import com.google.gwt.user.client.Cookies;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@ApplicationScoped
+@Singleton
 public class DefaultSecurityErrorCallback {
 
   @UncaughtException

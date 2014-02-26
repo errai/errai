@@ -1230,4 +1230,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     Assert.notNull(handler);
     uncaughtExceptionHandlers.remove(handler);
   }
+  
+  public void removeAllUncaughtExceptionHandlers() {
+    uncaughtExceptionHandlers.clear();
+  }
 }
