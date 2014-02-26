@@ -1,14 +1,14 @@
 package org.jboss.errai.security.shared;
 
+import org.jboss.errai.common.client.api.annotations.LocalEvent;
 import org.jboss.errai.common.client.api.annotations.MapsTo;
-import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * LoggedInEvent fired when a user logs-in.
  *
  * @author edewit@redhat.com
  */
-@Portable
+@LocalEvent
 public class LoggedInEvent {
   private final User user;
 

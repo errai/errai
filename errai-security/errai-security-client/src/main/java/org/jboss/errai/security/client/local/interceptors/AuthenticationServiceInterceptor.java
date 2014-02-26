@@ -8,6 +8,7 @@ import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
+import org.jboss.errai.security.client.local.identity.UserEventModule;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
 
@@ -61,6 +62,14 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
                     @Override
                     public void callback(final ActiveUserProvider provider) {
                       provider.setActiveUser(response);
+                      IOC.getAsyncBeanManager().lookupBean(UserEventModule.class)
+                              .getInstance(new CreationalCallback<UserEventModule>() {
+
+                                @Override
+                                public void callback(final UserEventModule module) {
+                                  module.fireLoggedInEvent(response);
+                                }
+                              });
                     }
                   });
         }
@@ -75,6 +84,14 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
               @Override
               public void callback(final ActiveUserProvider provider) {
                 provider.setActiveUser(null);
+                IOC.getAsyncBeanManager().lookupBean(UserEventModule.class)
+                        .getInstance(new CreationalCallback<UserEventModule>() {
+
+                          @Override
+                          public void callback(final UserEventModule module) {
+                            module.fireLoggedOutEvent();
+                          }
+                        });
               }
             });
     context.proceed();
