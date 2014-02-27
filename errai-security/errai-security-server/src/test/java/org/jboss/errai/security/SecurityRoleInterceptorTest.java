@@ -17,6 +17,8 @@ import org.jboss.errai.security.server.ServerSecurityRoleInterceptor;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.exception.UnauthenticatedException;
+import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,7 +52,7 @@ public class SecurityRoleInterceptorTest {
     verify(context).proceed();
   }
 
-  @Test(expected = SecurityException.class)
+  @Test(expected = UnauthorizedException.class)
   public void shouldThrowExceptionWhenUserNotInRole() throws Exception {
     // given
     InvocationContext context = mock(InvocationContext.class);
@@ -62,7 +64,21 @@ public class SecurityRoleInterceptorTest {
     fail("security exception should have been thrown");
   }
 
-  @Test(expected = SecurityException.class)
+  @Test(expected = UnauthenticatedException.class)
+  public void shouldThrowExceptionWhenNotLoggedIn() throws Exception {
+    // given
+    InvocationContext context = mock(InvocationContext.class);
+
+    // when
+    when(context.getTarget()).thenReturn(new Service());
+    when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
+    when(authenticationService.getUser()).thenReturn(null);
+    interceptor.aroundInvoke(context);
+
+    fail("exception shoudl have been thrown");
+  }
+
+  @Test(expected = UnauthorizedException.class)
   public void shouldFindMethodWhenNoInterface() throws Exception {
     // given
     InvocationContext context = mock(InvocationContext.class);
@@ -83,7 +99,7 @@ public class SecurityRoleInterceptorTest {
     interceptor.aroundInvoke(context);
   }
 
-  @Test(expected = SecurityException.class)
+  @Test(expected = UnauthorizedException.class)
   public void shouldFindMethodWhenOnInterface() throws Exception {
     // given
     InvocationContext context = mock(InvocationContext.class);

@@ -2,7 +2,6 @@ package org.jboss.errai.security.server;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -11,8 +10,10 @@ import javax.interceptor.InvocationContext;
 
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.RequireRoles;
-import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.SecurityInterceptor;
+import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.exception.UnauthenticatedException;
+import org.jboss.errai.security.shared.exception.UnauthorizedException;
 
 /**
  * SecurityRoleInterceptor server side implementation of the SecurityRoleInterceptor does the same,
@@ -20,7 +21,7 @@ import org.jboss.errai.security.shared.SecurityInterceptor;
  *
  * @author edewit@redhat.com
  */
-@RequireRoles("")
+@RequireRoles({})
 @Interceptor
 public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
 
@@ -33,12 +34,15 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
 
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
-    final List<Role> roles = authenticationService.getUser().getRoles();
+    final User user = authenticationService.getUser();
     final RequireRoles annotation = getRequiredRoleAnnotation(context.getTarget().getClass(), context.getMethod());
-    if (hasAllRoles(roles, annotation.value())) {
-      return context.proceed();
+    if (user == null) {
+      throw new UnauthenticatedException();
+    }
+    else if (!hasAllRoles(user.getRoles(), annotation.value())) {
+      throw new UnauthorizedException();
     } else {
-      throw new SecurityException("unauthorised access");
+      return context.proceed();
     }
   }
 

@@ -1,12 +1,13 @@
 package org.jboss.errai.security.server;
 
-import org.jboss.errai.security.shared.*;
-import org.jboss.errai.security.shared.exception.SecurityException;
-
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
+
+import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.RequireAuthentication;
+import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 
 /**
  * SecurityUserInterceptor server side implementation of the
@@ -31,7 +32,7 @@ public class SecurityUserInterceptor {
     if (authenticationService.isLoggedIn()) {
       return context.proceed();
     } else {
-      throw new SecurityException("unauthorised access");
+      throw new UnauthenticatedException();
     }
   }
 }
