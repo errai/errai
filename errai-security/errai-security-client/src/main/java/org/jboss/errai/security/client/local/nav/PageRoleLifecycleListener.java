@@ -34,7 +34,8 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
   @Override
   public void observeEvent(final LifecycleEvent<W> event) {
     final ActiveUserProvider activeUserProvider = ActiveUserProviderImpl.getInstance();
-    if (!activeUserProvider.hasActiveUser() || !containsRoles(activeUserProvider.getActiveUser().getRoles(), roles)) {
+    if (!activeUserProvider.isCacheValid() || !activeUserProvider.hasActiveUser()
+            || !containsRoles(activeUserProvider.getActiveUser().getRoles(), roles)) {
       event.veto();
 
       final Class<? extends UniquePageRole> destination;
