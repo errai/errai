@@ -5,8 +5,10 @@ import com.google.gwt.user.client.Element;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -17,18 +19,16 @@ public class StyleBindingsRegistry {
   private StyleBindingsRegistry() {
   }
 
-  private final Map<Object, List<Object>> houseKeepingMap
-      = new HashMap<Object, List<Object>>();
+  private final Map<Object, List<Object>> houseKeepingMap = new HashMap<Object, List<Object>>();
 
-  private final Map<Class<? extends Annotation>, List<StyleBindingExecutor>> styleBindings
-      = new HashMap<Class<? extends Annotation>, List<StyleBindingExecutor>>();
+  private final Map<Class<? extends Annotation>, List<StyleBindingExecutor>> styleBindings = new HashMap<Class<? extends Annotation>, List<StyleBindingExecutor>>();
 
   private final Map<Annotation, List<ElementBinding>> elementBindings = new HashMap<Annotation, List<ElementBinding>>();
 
-  private final Map<Class<? extends Annotation>, Annotation> mapping
-          = new HashMap<Class<? extends Annotation>, Annotation>();
+  private final Map<Class<? extends Annotation>, Set<Annotation>> mapping = new HashMap<Class<? extends Annotation>, Set<Annotation>>();
 
-  public void addStyleBinding(final Object beanInst, final Class<? extends Annotation> annotation, final StyleBindingExecutor binding) {
+  public void addStyleBinding(final Object beanInst, final Class<? extends Annotation> annotation,
+          final StyleBindingExecutor binding) {
     List<StyleBindingExecutor> styleBindingList = styleBindings.get(annotation);
     if (styleBindingList == null) {
       styleBindings.put(annotation, styleBindingList = new ArrayList<StyleBindingExecutor>());
@@ -49,7 +49,11 @@ public class StyleBindingsRegistry {
       elementBindings.put(annotation, elementsList = new ArrayList<ElementBinding>());
     }
     elementsList.add(element);
-    mapping.put(annotation.annotationType(), annotation);
+    Set<Annotation> mappedAnnotations = mapping.get(annotation.annotationType());
+    if (mappedAnnotations == null) {
+      mapping.put(annotation.annotationType(), mappedAnnotations = new HashSet<Annotation>());
+    }
+    mappedAnnotations.add(annotation);
     recordHouskeepingData(beanInst, element);
   }
 
@@ -79,14 +83,19 @@ public class StyleBindingsRegistry {
 
   public void updateStyles() {
     for (final Map.Entry<Class<? extends Annotation>, List<StyleBindingExecutor>> entry : styleBindings.entrySet()) {
-      final List<ElementBinding> elementList = elementBindings.get(mapping.get(entry.getKey()));
-      if (elementList != null) {
-        for (final ElementBinding element : elementList) {
-          for (final StyleBindingExecutor executor : entry.getValue()) {
-            if (executor instanceof AnnotationStyleBindingExecutor) {
-              ((AnnotationStyleBindingExecutor) executor).invokeBinding(element.getElement(), mapping.get(entry.getKey()));
-            } else {
-              executor.invokeBinding(element.getElement());
+      if (mapping.containsKey(entry.getKey())) {
+        for (final Annotation mappedAnnotation : mapping.get(entry.getKey())) {
+          final List<ElementBinding> elementList = elementBindings.get(mappedAnnotation);
+          if (elementList != null) {
+            for (final ElementBinding element : elementList) {
+              for (final StyleBindingExecutor executor : entry.getValue()) {
+                if (executor instanceof AnnotationStyleBindingExecutor) {
+                  ((AnnotationStyleBindingExecutor) executor).invokeBinding(element.getElement(), mappedAnnotation);
+                }
+                else {
+                  executor.invokeBinding(element.getElement());
+                }
+              }
             }
           }
         }

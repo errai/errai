@@ -16,7 +16,7 @@ import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.shared.api.style.AnnotationStyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.Element;
 
 /**
@@ -44,9 +44,9 @@ public class RoleStyleBindingProvider {
       public void invokeBinding(final Element element, final Annotation annotation) {
         final User user = userProvider.getActiveUser();
         if (user == null || user.getRoles() == null || !hasRoles(user.getRoles(), ((RequireRoles) annotation).value()))
-          element.getStyle().setVisibility(Style.Visibility.HIDDEN);
+          element.getStyle().setDisplay(Display.NONE);
         else
-          element.getStyle().setVisibility(Style.Visibility.VISIBLE);
+          element.getStyle().clearDisplay();
       }
     });
   }
