@@ -3,17 +3,13 @@ package org.jboss.errai.security.client.local.callback;
 import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.api.UncaughtException;
-import org.jboss.errai.common.client.util.CreationalCallback;
-import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.security.client.local.nav.SecurityNavigationUtil;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
-import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
-
-import com.google.gwt.user.client.Cookies;
 
 /**
  * Catches {@link SecurityException SecurityExceptions}. If an
@@ -37,19 +33,8 @@ public class DefaultSecurityErrorCallback {
         pageRole = SecurityError.class;
       }
 
-      navigateToPage(pageRole);
+      SecurityNavigationUtil.navigateToPage(pageRole);
     }
-  }
-
-  private void navigateToPage(final Class<? extends UniquePageRole> roleClass) {
-    IOC.getAsyncBeanManager().lookupBean(Navigation.class).getInstance(new CreationalCallback<Navigation>() {
-
-      @Override
-      public void callback(Navigation navigation) {
-        Cookies.setCookie(LoginPage.CURRENT_PAGE_COOKIE, navigation.getCurrentPage().name());
-        navigation.goToWithRole(roleClass);
-      }
-    });
   }
 
 }
