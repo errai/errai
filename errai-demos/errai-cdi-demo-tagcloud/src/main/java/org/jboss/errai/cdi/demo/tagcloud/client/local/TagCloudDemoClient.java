@@ -31,6 +31,7 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Tag;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloud;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloudSubscription;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.user.client.ui.Anchor;
@@ -71,6 +72,7 @@ public class TagCloudDemoClient {
   }
 
   public void onTagCloudReceived(@Observes TagCloud tagCloud) {
+    LogUtil.log("Received tagcloud event");
     if (tags == null) {
       tags = new HashMap<String, Anchor>();
     }

@@ -5,7 +5,7 @@
   <groupId>org.jboss.errai.demos</groupId>
   <name>Errai::JPA::Demos::Basic</name>
   <artifactId>errai-jpa-demo-basic</artifactId>
-  <version>2.4.4-SNAPSHOT</version>
+  <version>2.4.4.Final</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
