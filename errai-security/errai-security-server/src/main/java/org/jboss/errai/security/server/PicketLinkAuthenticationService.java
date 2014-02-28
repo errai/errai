@@ -13,9 +13,10 @@ import org.jboss.errai.security.shared.User;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
-import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.RelationshipManager;
 import org.picketlink.idm.credential.Password;
-import org.picketlink.idm.query.IdentityQuery;
+import org.picketlink.idm.model.basic.Grant;
+import org.picketlink.idm.query.RelationshipQuery;
 
 /**
  * PicketLink version of the AuthenticationService and default implementation.
@@ -29,9 +30,9 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
 
   @Inject
   private Identity identity;
-
+  
   @Inject
-  private IdentityManager identityManager;
+  private RelationshipManager relationshipManager;
 
   @Inject
   private DefaultLoginCredentials credentials;
@@ -45,7 +46,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
       throw new SecurityException();
     }
 
-    final User user = createUser((org.picketlink.idm.model.User) identity.getAgent());
+    final User user = createUser((org.picketlink.idm.model.basic.User) identity.getAccount());
     return user;
   }
 
@@ -55,7 +56,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
    * @param picketLinkUser the user returned by picketLink
    * @return our user
    */
-  private User createUser(org.picketlink.idm.model.User picketLinkUser) {
+  private User createUser(org.picketlink.idm.model.basic.User picketLinkUser) {
     User user = new User();
     user.setLoginName(picketLinkUser.getLoginName());
     user.setFullName(picketLinkUser.getFirstName() + " " + picketLinkUser.getLastName());
@@ -77,7 +78,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   @Override
   public User getUser() {
     if (identity.isLoggedIn()) {
-      return createUser((org.picketlink.idm.model.User) identity.getAgent());
+      return createUser((org.picketlink.idm.model.basic.User) identity.getAccount());
     }
     return null;
   }
@@ -86,11 +87,11 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     List<Role> roles = new ArrayList<Role>();
 
     if (identity.isLoggedIn()) {
-      IdentityQuery<org.picketlink.idm.model.Role> query =
-              identityManager.createIdentityQuery(org.picketlink.idm.model.Role.class);
-      query.setParameter(org.picketlink.idm.model.Role.ROLE_OF, identity.getAgent());
-      for (org.picketlink.idm.model.Role role : query.getResultList()) {
-        roles.add(new Role(role.getName()));
+      RelationshipQuery<Grant> query =
+              relationshipManager.createRelationshipQuery(Grant.class);
+      query.setParameter(Grant.ASSIGNEE, identity.getAccount());
+      for (final Grant grant : query.getResultList()) {
+        roles.add(new Role(grant.getRole().getName()));
       }
     }
 

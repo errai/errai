@@ -1,10 +1,13 @@
 package org.jboss.errai.demo.todo.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
@@ -13,7 +16,6 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.demo.todo.shared.TodoListService;
-import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.security.client.local.identity.Identity;
@@ -28,14 +30,16 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 
 @RequireAuthentication
 @Templated("#main")
@@ -43,7 +47,6 @@ import java.util.Map;
 public class TodoListPage extends Composite {
 
   @Inject private EntityManager em;
-  @Inject private ClientBeanManager bm;
   @Inject private ClientSyncManager syncManager;
   @Inject private Caller<TodoListService> todoListService;
 
