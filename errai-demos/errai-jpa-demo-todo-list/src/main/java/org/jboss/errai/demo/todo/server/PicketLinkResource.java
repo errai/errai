@@ -9,7 +9,6 @@ import javax.persistence.PersistenceContext;
 /**
  * @author edewit@redhat.com
  */
-@SuppressWarnings("unused")
 public class PicketLinkResource {
     @Produces
     @PicketLink

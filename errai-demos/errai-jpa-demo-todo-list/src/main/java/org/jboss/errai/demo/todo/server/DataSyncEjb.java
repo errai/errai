@@ -26,7 +26,7 @@ public class DataSyncEjb {
   private final JpaAttributeAccessor attributeAccessor = new JavaReflectionAttributeAccessor();
 
   public <E> List<SyncResponse<E>> coldSync(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> remoteResults) {
-    System.out.println("Doing a cold sync!");
+    log.debug("Doing a cold sync!");
     DataSyncService dss = new org.jboss.errai.jpa.sync.server.DataSyncServiceImpl(em, attributeAccessor);
     return dss.coldSync(dataSet, remoteResults);
   }

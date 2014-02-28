@@ -11,6 +11,7 @@ import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.shared.LoggedInEvent;
 import org.jboss.errai.security.shared.LoggedOutEvent;
 import org.jboss.errai.security.shared.User;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -23,7 +24,7 @@ import javax.inject.Inject;
 
 @ApplicationScoped
 @Templated("#root")
-@Page(startingPage = true)
+@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
 
   static final String ANONYMOUS = "anonymous";
@@ -63,10 +64,12 @@ public class WelcomePage extends Composite {
     });
   }
 
+  @SuppressWarnings("unused")
   private void onLoggedIn(@Observes LoggedInEvent loggedInEvent) {
     userLabel.setText(loggedInEvent.getUser().getFullName());
   }
 
+  @SuppressWarnings("unused")
   private void onLoggedOut(@Observes LoggedOutEvent loggedOutEvent) {
     userLabel.setText(ANONYMOUS);
   }

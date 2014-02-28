@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 /**
  * @author edewit@redhat.com
  */
-public class SecurityAnnotationExtendsion implements Extension {
+public class SecurityAnnotationExtension implements Extension {
 
   /**
    */

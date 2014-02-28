@@ -18,6 +18,8 @@ import java.io.Serializable;
 @NamedQuery(name="userByEmail", query="SELECT u FROM User u WHERE u.email = :email")
 public class User implements Serializable {
 
+  private static final long serialVersionUID = 1L;
+
   @Id
   private String loginName;
 

@@ -1,12 +1,10 @@
 package org.jboss.errai.security.demo.server;
 
+import javax.inject.Inject;
+
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.demo.client.shared.MessageService;
-import org.jboss.errai.security.shared.RequireAuthentication;
-import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.AuthenticationService;
-
-import javax.inject.Inject;
 
 /**
  * @author edewit@redhat.com

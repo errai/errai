@@ -14,6 +14,7 @@ import java.util.List;
 @Portable
 @Bindable
 public class User implements Serializable {
+  private static final long serialVersionUID = 1L;
   private String loginName;
   private String fullName;
   private String shortName;

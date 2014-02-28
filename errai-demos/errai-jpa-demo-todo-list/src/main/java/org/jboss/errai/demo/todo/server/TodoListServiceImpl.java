@@ -1,8 +1,15 @@
 package org.jboss.errai.demo.todo.server;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
@@ -10,14 +17,8 @@ import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.security.shared.AuthenticationService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 /**
  * @author edewit@redhat.com

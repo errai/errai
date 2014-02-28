@@ -43,9 +43,9 @@ public class SharePage extends Composite {
   private void doShare(ClickEvent e) {
     try {
       shareService.call(
-              new RemoteCallback() {
+              new RemoteCallback<Void>() {
                 @Override
-                public void callback(Object response) {
+                public void callback(Void response) {
                   todoListPageLink.go();
                 }
               },

@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
- * Base class for the client side security interceptors
+ * Base class for the security interceptors
  * @author edewit@redhat.com
  */
 public abstract class SecurityInterceptor {
@@ -27,10 +27,5 @@ public abstract class SecurityInterceptor {
       }
     }
     return null;
-  }
-  
-  /* Poor mans closures */
-  public static interface Command {
-    void action();
   }
 }
