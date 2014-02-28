@@ -6,11 +6,13 @@ import java.util.Queue;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
+import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEvent;
 import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEventImpl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
@@ -91,9 +93,12 @@ public class Navigation {
   /**
    * Queued navigation requests which could not handled immediately.
    */
-  private Queue<Request> queuedRequests = new LinkedList<Request>();
+  private final Queue<Request> queuedRequests = new LinkedList<Request>();
 
   private int redirectDepth = 0;
+  
+  @Inject
+  private StateChange<Object> stateChangeEvent;
 
   @PostConstruct
   private void init() {
@@ -297,6 +302,11 @@ public class Navigation {
             if (success) {
               hideCurrentPage();
               toPage.pageShowing(widget, state);
+              
+              // Fire IOC lifecycle event to indicate that the state of the bean has changed
+              // TODO make this smarter and only fire state change event when fields actually changed
+              stateChangeEvent.fireAsync(widget);
+              
               setCurrentPage(toPage);
               currentWidget = widget;
               navigatingContainer.setWidget(widget);

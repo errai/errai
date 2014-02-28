@@ -1,11 +1,16 @@
 package org.jboss.errai.ui.nav.client.local;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
+import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRenamedStateFields;
@@ -14,7 +19,7 @@ import com.google.common.collect.ImmutableMultimap;
 
 public class PageStateTest extends AbstractErraiCDITest {
 
-  private SyncBeanManager beanManager = IOC.getBeanManager();
+  private final SyncBeanManager beanManager = IOC.getBeanManager();
   private Navigation navigation;
 
   @Override
@@ -168,6 +173,37 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(Arrays.asList("0", "1", "0"), page.getStringCollection());
     assertEquals(new HashSet<String>(Arrays.asList("0", "1", "0")), page.getStringSet());
     assertEquals(Arrays.asList(0, 1, 0), page.getIntList());
+  }
+  
+  public void testSettingPageStateTriggersIOCLifecycleEvent() throws Exception {
+    final PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+    // force fields back to defaults before we start
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>of());
+    assertAllFieldsHaveDefaultValues(page);
+
+    // register an IOC lifecycle listener that should be invoked when the state of the managed bean changes
+    final List<LifecycleEvent<PageWithExtraState>> observedEvents = new ArrayList<LifecycleEvent<PageWithExtraState>>();
+    LifecycleListener<PageWithExtraState> lifecycleListener = new LifecycleListener<PageWithExtraState>() {
+      @Override
+      public void observeEvent(LifecycleEvent<PageWithExtraState> event) {
+        assertEquals("string", page.getStringThing());
+        observedEvents.add(event);
+      }
+
+      @Override
+      public boolean isObserveableEventType(Class<? extends LifecycleEvent<PageWithExtraState>> eventType) {
+        return eventType.equals(StateChange.class);
+      }
+    };
+    IOC.registerLifecycleListener(page, lifecycleListener);
+    assertTrue(observedEvents.isEmpty());
+    
+    ImmutableMultimap<String, String> stateValues = ImmutableMultimap.<String,String>builder()
+            .put("stringThing", "string")
+            .build();
+
+    navigation.goTo(PageWithExtraState.class, stateValues);
+    assertEquals(1, observedEvents.size());
   }
 
   public void testInheritedStateFieldsAreWritten() throws Exception {
