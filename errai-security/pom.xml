@@ -22,24 +22,4 @@
     <picketlink.version>2.5.3.Final</picketlink.version>
     <deltaspike.version>0.4</deltaspike.version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.jboss.arquillian</groupId>
-        <artifactId>arquillian-bom</artifactId>
-        <version>1.0.3.Final</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <!-- <dependency> -->
-    <!-- <groupId>org.mortbay.jetty</groupId> -->
-    <!-- <artifactId>jetty-util</artifactId> -->
-    <!-- <version>6.1.26</version> -->
-    <!-- </dependency> -->
-  </dependencies>
 </project>
