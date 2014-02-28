@@ -11,10 +11,10 @@ import javax.inject.Inject;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
-import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEvent;
-import org.jboss.errai.ui.nav.client.local.lifecycle.TransitionEventImpl;
+import org.jboss.errai.ioc.client.lifecycle.impl.AccessImpl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
@@ -283,7 +283,7 @@ public class Navigation {
 
   /**
    * Call navigation and page related lifecycle methods. If the
-   * {@link TransitionEvent} is fired successfully, load the new page.
+   * {@link Access} is fired successfully, load the new page.
    */
   private <W extends IsWidget> void maybeShowPage(final PageNode<W> toPage, final HistoryToken state) {
     toPage.produceContent(new CreationalCallback<W>() {
@@ -294,8 +294,8 @@ public class Navigation {
         }
         maybeAttachContentPanel();
 
-        final TransitionEvent<W> transitionEvent = new TransitionEventImpl<W>();
-        transitionEvent.fireAsync(widget, new LifecycleCallback() {
+        final Access<W> accessEvent = new AccessImpl<W>();
+        accessEvent.fireAsync(widget, new LifecycleCallback() {
 
           @Override
           public void callback(boolean success) {

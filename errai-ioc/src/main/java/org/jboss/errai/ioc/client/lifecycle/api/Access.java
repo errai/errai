@@ -8,16 +8,28 @@ package org.jboss.errai.ioc.client.lifecycle.api;
 public interface Access<T> extends LifecycleEvent<T> {
   
   /**
-   * @return True if a method has been accessed. False if a field has been accessed.
+   * @return True if a method has been accessed.
    */
   public boolean isMethodAccess();
   
   /**
-   * This must be set before the event is fired.
+   * @return True if a field has been accessed.
+   */
+  public boolean isFieldAccess();
+  
+  /**
+   * This must be set before the event is fired. Defaults to false if not set.
    * 
-   * @param isMethodAccessed True if a method has been accessed. False if a field has been accessed.
+   * @param isMethodAccessed True if a method has been accessed.
    */
   public void setIsMethodAccess(boolean isMethodAccessed);
+  
+  /**
+   * This must be set before the event is fired. Defaults to false if not set.
+   * 
+   * @param isFieldAccessed True if a field has been accessed.
+   */
+  public void setIsFieldAccess(boolean isFieldAccessed);
   
   /**
    * This must be set before the event is fired.

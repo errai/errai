@@ -8,10 +8,12 @@ import org.jboss.errai.ioc.client.lifecycle.api.Access;
 public class AccessImpl<T> extends LifecycleEventImpl<T> implements Access<T> {
   
   private boolean isMethodAccess;
+  private boolean isFieldAccess;
   private String accessedName;
 
-  public AccessImpl(final boolean isMethodAccess, final String accessedName) {
+  public AccessImpl(final boolean isMethodAccess, final boolean isFieldAccess, final String accessedName) {
     this.isMethodAccess = isMethodAccess;
+    this.isFieldAccess = isFieldAccess;
     this.accessedName = accessedName;
   }
   
@@ -40,6 +42,16 @@ public class AccessImpl<T> extends LifecycleEventImpl<T> implements Access<T> {
   @Override
   public Class<?> getEventType() {
     return Access.class;
+  }
+
+  @Override
+  public boolean isFieldAccess() {
+    return isFieldAccess;
+  }
+
+  @Override
+  public void setIsFieldAccess(final boolean isFieldAccessed) {
+    this.isFieldAccess = isFieldAccessed;
   }
 
 }
