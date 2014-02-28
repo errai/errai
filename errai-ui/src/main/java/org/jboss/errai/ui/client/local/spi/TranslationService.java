@@ -139,11 +139,13 @@ public abstract class TranslationService {
       return pattern;
 
     // TODO add support for actually using { in a message
-    StringBuilder builder = new StringBuilder();
+    StringBuilder builder = new StringBuilder(pattern);
+    int argId = 0;
     for (Object arg : args) {
-      String part1 = pattern.substring(0, pattern.indexOf('{'));
-      String part2 = pattern.substring(pattern.indexOf('}') + 1);
-      builder.append(part1).append(arg).append(part2);
+      String rcode = "{" + (argId++) + "}";
+      int startIdx = builder.indexOf(rcode);
+      int endIdx = startIdx + rcode.length();
+      builder.replace(startIdx, endIdx, String.valueOf(arg));
     }
     return builder.toString();
   }
