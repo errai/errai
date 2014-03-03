@@ -7,7 +7,6 @@ import org.jboss.errai.security.client.local.nav.SecurityNavigationUtil;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
-import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
@@ -24,17 +23,13 @@ public class DefaultSecurityErrorCallback {
 
   @UncaughtException
   private void handleError(final Throwable throwable) {
-    if (throwable instanceof SecurityException) {
-      final Class<? extends UniquePageRole> pageRole;
-      if (throwable instanceof UnauthenticatedException) {
-        pageRole = LoginPage.class;
-      }
-      else {
-        pageRole = SecurityError.class;
-      }
-
-      SecurityNavigationUtil.navigateToPage(pageRole);
+    if (throwable instanceof UnauthenticatedException) {
+      SecurityNavigationUtil.navigateToPage(LoginPage.class);
     }
+    else if (throwable instanceof UnauthorizedException) {
+      SecurityNavigationUtil.navigateToPage(SecurityError.class);
+    }
+
   }
 
 }
