@@ -12,6 +12,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
+ * This {@link Extension} allows type level {@link RequireAuthentication} and
+ * {@link RequireRoles} annotations to trigger server-side interceptors on their
+ * method calls.
+ * 
  * @author edewit@redhat.com
  */
 public class SecurityAnnotationExtension implements Extension {
@@ -29,7 +33,8 @@ public class SecurityAnnotationExtension implements Extension {
     }
   }
 
-  private <X> void copyAnnotation(ProcessAnnotatedType<X> annotatedType, Method method, Class<? extends Annotation> annotation) {
+  private <X> void copyAnnotation(ProcessAnnotatedType<X> annotatedType, Method method,
+          Class<? extends Annotation> annotation) {
     if (method.isAnnotationPresent(annotation)) {
       AnnotatedTypeBuilder<X> builder = new AnnotatedTypeBuilder<X>().readFromType(annotatedType.getAnnotatedType())
               .addToMethod(getMethod(annotatedType, method.getName()), method.getAnnotation(annotation));

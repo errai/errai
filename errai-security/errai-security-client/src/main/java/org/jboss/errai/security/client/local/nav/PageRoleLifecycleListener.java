@@ -16,6 +16,12 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
+/**
+ * Listens for page navigation events and redirects if the logged in user lacks
+ * sufficient roles.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleListener<W> {
   
   private final Set<String> roles;

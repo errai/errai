@@ -1,32 +1,15 @@
 package org.jboss.errai.security.shared.util;
 
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.security.shared.RequireRoles;
 
+/**
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 public class AnnotationUtils {
 
-  public static Annotation[] mergeAnnotations(final Annotation[] first, final Annotation[] second) {
-    final Map<Class<? extends Annotation>, Annotation> retMap = new HashMap<Class<? extends Annotation>, Annotation>();
-
-    for (int i = 0; i < first.length; i++) {
-      retMap.put(first[i].annotationType(), first[i]);
-    }
-
-    for (int i = 0; i < second.length; i++) {
-      final Annotation annotation = retMap.get(second[i].annotationType());
-      if (annotation == null) {
-        retMap.put(second[i].annotationType(), second[i]);
-      }
-    }
-    
-    return retMap.values().toArray(new Annotation[retMap.size()]);
-  }
-  
   /**
    * Merge roles from multiple {@link RequireRoles}.
    * 

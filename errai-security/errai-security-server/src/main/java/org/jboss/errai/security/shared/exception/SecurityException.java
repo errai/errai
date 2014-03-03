@@ -1,5 +1,10 @@
 package org.jboss.errai.security.shared.exception;
 
+/**
+ * A base class for all Errai Security exceptions.
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 public class SecurityException extends RuntimeException {
 
   public SecurityException(final String message) {

@@ -22,6 +22,8 @@ import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.ui.nav.client.local.Page;
 
 /**
+ * Register page lifecycle listeners when {@linkplain Page pages} are created.
+ * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @CodeDecorator

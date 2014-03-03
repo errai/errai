@@ -9,6 +9,11 @@ import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
+/**
+ * Listens for page navigations and redirects when a user is not logged in.
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 public class PageAuthenticationLifecycleListener<W extends IsWidget> implements LifecycleListener<W> {
 
   @Override
