@@ -6595,6 +6595,334 @@ Pipes can be authenticated by just adding the authenticator into the Pipe and yo
 
 There is also a method called [code]+enroll()+ for adding new users.
 
+== Errai Security
+
+Errai Security provides a lightweight security API for declaring RPC services and client-side UI elements which require authentication or authorization.
+
+[NOTE]
+.Manual Setup
+====
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai Security to your project.
+====
+
+=== Basic Model
+
+Errai Security provides two main concepts:
+
+* *Users*
+** A User corresponds to a single person.
+** It is usually associated with a username, full name, and email address.
+
+* *Roles*
+** A Role represents a priveleged group within your system.
+** A User can have several roles, and a role can be had by many users.
+** Roles are the primary way of defining authorization in Errai Security.
+
+By default the server-side Errai Security module uses link:$$http://www.picketlink.org/$$[PicketLink] for authentication. Later on we will explain how to use an alternative backend.
+
+=== Getting Started
+
+==== Making Users
+
+The simplest way to begin experimenting with Errai Security is to add Users and Roles programmatically. Here is some sample server-side code from the link:$$https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java$$[Errai Security Demo] that does just that.
+
+[source,java,numbered]
+----
+@Singleton
+@Startup
+public class PicketLinkDefaultUsers {
+
+  @Inject
+  private PartitionManager partitionManager; // <1>
+
+  /**
+   * <p>Loads some users during the first construction.</p>
+   */
+  @PostConstruct
+  public void create() {
+    final IdentityManager identityManager = partitionManager.createIdentityManager();
+    final RelationshipManager relationshipManager = partitionManager.createRelationshipManager();
+
+    User john = new User("john");
+
+    john.setEmail("john@doe.com");
+    john.setFirstName("John");
+    john.setLastName("Doe");
+
+    User hacker = new User("hacker");
+
+    hacker.setEmail("hacker@illegal.ru");
+    hacker.setFirstName("Hacker");
+    hacker.setLastName("anonymous");
+    
+    identityManager.add(john); // <2>
+    identityManager.add(hacker);
+    final Password defaultPassword = new Password("123");
+    identityManager.updateCredential(john, defaultPassword);
+    identityManager.updateCredential(hacker, defaultPassword);
+
+    Role roleDeveloper = new Role("simple");
+    Role roleAdmin = new Role("admin");
+
+    identityManager.add(roleDeveloper);
+    identityManager.add(roleAdmin);
+
+    relationshipManager.add(new Grant(john, roleDeveloper)); // <3>
+    relationshipManager.add(new Grant(john, roleAdmin));
+  }
+
+}
+----
+
+Here are the important things that are happening here:
+
+<1> PicketLink uses the concept of partitions, which are sections that can contain different users and roles. What we really need to make users and roles are the `IdentityManager` and `RelationshipManager`, but these objects are `@RequestScoped` so in order to access them when the application starts we must `@Inject` the `PartitionManager`.
+
+<2> Here we add are new users to the `IdentityManager`. It is also used below to give passwords to the new users, and to add the _simple_ and _admin_ roles.
+
+<3> The `RelationshipManager` defines relationships between entities. In this case, it is used to specify that a user belongs to a role.
+
+==== Authentication from the Client
+
+Once you've created some users and roles, you're ready to write some client-side code. The easiest way to perform authentication-related tasks from the client is using the `org.jboss.errai.security.clent.local.identity.Identity` class.
+
+Here is some sample code involving the user _john_ from the previous Security Demo excerpt.
+
+* Injecting the `Identity`:
++
+[source,java]
+----
+@Inject Identity identity;
+----
+
+* Logging in:
++
+[source,java]
+----
+identity.setUsername("john");
+identity.setPassword("123");
+
+identity.login(new RemoteCallback<User>() {
+
+    @Override
+    public void callback(User user) {
+      // handle successful login
+    }
+  }, new BusErrorCallback() {
+
+    @Override
+    public boolean error(Message message, Throwable t) {
+      if (t instanceof AuthenticationException) {
+        // handle authentication failure
+      }
+
+      // Returning true causes the error to propogate to top-level handlers
+      return true;
+    }
+  });
+----
+
+* Getting the currently authenticated User:
++
+[source,java]
+----
+identity.getUser(new RemoteCallback<User>() {
+
+    @Override
+    public void callback(User user) {
+      if (user != null) {
+        // Do something because we're logged in.
+      }
+      else {
+        // Do something else because we're not logged in.
+      }
+    }
+  });
+----
+
+* Checking if a user has a given set of roles:
++
+[source,java]
+----
+identity.hasPermission(new RemoteCallback<Boolean>() {
+
+    @Override
+    public void callback(Boolean result) {
+      if (result) {
+        // Success!
+      }
+    }
+  }, "simple", "admin");
+----
+
+* Logging out:
++
+[source,java]
+----
+identity.logout();
+----
+
+[NOTE]
+.Remote Procedure Calls
+====
+The above methods are implemented with Errai RPC calls to the service `org.jboss.errai.security.shared.AuthenticationService`. However, client-side interceptors are used for caching so that generally only calls to `login` and `logout` must be sent over the wire.
+====
+
+[TIP]
+.DataBinding with Identity
+====
+The Identity class is annotated with `@Bindable` so that it can be bound to a login form. You can checkout the documentation on Errai DataBinding or see an example in link:$$https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/client/local/LoginForm.java$$[Errai Security].
+====
+
+=== RequireAuthentication and RequireRoles
+
+The annotations `@RequireAuthentication` and `@RequireRoles` are the only two annotations necessary to secure a resource or UI element. In general, `@RequireAuthentication` blocks a resource from users who are not logged in and `@RequireRoles` blocks a resource from users who do not posess all the roles (a parameter of the annotation, given as an array of Strings). Below we will explain how different resources are blocked from unauthorized users.
+
+==== RPC Services
+
+To secure an Errai RPC service, simply annotate the RPC interface (either the entire type or just a method) with one of the security annotations.
+
+For example:
+
+* All methods on this interface require an authenticated user to access:
++
+[source,java]
+----
+@Remote
+@RequireAuthentication
+public interface UserOnlyStuff {
+  public void someMethod();
+  public void otherMethod();
+}
+----
+
+* Here the first method requires an authenticated user, and the second requires a user with the _admin_ role:
++
+[source,java]
+----
+@Remote
+public interface MixedService {
+
+  @RequireAuthentication
+  public void userService();
+
+  @RequireRoles({"admin"})
+  public void adminService();
+}
+----
+
+===== Error Callbacks
+
+When access to a secured RPC service is denied an `UnauthenticatedException` or `UnauthorizedException` is thrown. This error is then transmitted back to the client, where it can be caught with a `BusErrorCallback` (provided when the RPC is invoked).
+
+Here is how we would invoke the previous `MixedService` example with error handling:
+
+[source,java]
+----
+MessageBuilder.createCall(new RemoteCallback<Void>() {
+
+    @Override
+    public void callback(Void response) {
+      // ...
+    }
+  }, new BusErrorCallback() {
+
+    @Override
+    public boolean error(Message message, Throwable t) {
+      if (t instanceof UnauthenticatedException) {
+        // User is not logged in.
+        return false;
+      }
+      else if (t instanceof UnauthorizedException) {
+        // User is logged in but lacked sufficient roles.
+        return false;
+      }
+      else {
+        // Some other error has happened. Let it propogate.
+        return true;
+      }
+    }
+  });
+----
+
+[IMPORTANT]
+.DefaultSecurityErrorCallback
+====
+Errai Security provides a default global RPC handler that catches any thrown `UnauthenticatedException` or `UnauthorizedExceptions` and navigates to the page with the `LoginPage` or `SecurityError` role respectively.
+====
+
+==== Page Navigation
+
+Any class annotated with `@Page` can also be marked with `@RequireAuthentication` and `@RequireRoles`. By doing so, users will be prevented from navigating to the given page if they are not logged in or lack authorization.
+
+Here are two simple examples:
+
+* This page is only for logged in users:
++
+[source,java]
+----
+@Page
+@RequireAuthentication
+public class UserProfilePage extends SimplePanel {
+
+  @Inject private Identity identity;
+  private User user;
+
+  @PageShowing
+  private void setupPage() {
+    identity.getUser(new RemoteCallback<User>() {
+        @Override
+        public void callback(User response) {
+          // We don't have to check if this is null, since the page requires authentication.
+          user = response;
+          // do setup...
+        }
+    });
+  }
+
+}
+----
+
+* This page requires the _user_ and _admin_ roles:
++
+[source,java]
+----
+@Page
+@RequireRoles({"admin", "user"})
+public class AdminManagementPage extends SimplePanel {
+}
+----
+
+[IMPORTANT]
+.Redirection
+====
+When a user is denied access to a page they will be redirected to `LoginPage` or `SecurityError`. To direct a user to the page they were trying to reach after successful login, `@Inject` and invoke the `org.jboss.errai.security.client.local.nav.PageReturn`.
+====
+
+==== Hiding UI Elements
+
+Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have `display: none` added to it's CSS style.
+
+Here is an example of an Errai UI templated class using this feature:
+
+[source,java]
+----
+@Templated
+public class NavBar extends Composite {
+
+  @Inject
+  @DataField
+  @RequireAuthentication
+  private Button logoutButton;
+
+  @Inject
+  @DataField
+  @RequireRoles({"admin"})
+  private Button dropAllTablesButton;
+
+}
+----
+
 [[sid-74908675]]
 
 == Logging
@@ -7581,6 +7909,35 @@ mvn cordova:emulator -Dplatform=ios
 For these to work you'll need to have the SDK's installed and on your path! In case of android you will additionally have to have ANDROID_HOME environment variable set.
 ====
 
+=== Errai Security
+
+==== Compile-time dependency
+
+Errai Security requires to modules to be included in a project:
+
+[source, xml]
+----
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-security-server</artifactId>
+  <version>${errai.version}</version>
+</dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-security-client</artifactId>
+  <scope>provided</scope>
+  <version>${errai.version}</version>
+</dependency>
+----
+
+==== GWT Module Descriptor
+
+Once you have Errai Security Client on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's [code]+*.gwt.xml+ file:
+
+[source, xml]
+----
+<inherits name="org.jboss.errai.security.Security" />
+----
 
 === Errai Project Dependencies
 
