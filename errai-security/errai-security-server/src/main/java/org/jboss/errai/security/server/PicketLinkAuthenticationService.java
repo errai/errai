@@ -10,7 +10,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.User;
-import org.jboss.errai.security.shared.exception.SecurityException;
+import org.jboss.errai.security.shared.exception.AuthenticationException;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.RelationshipManager;
@@ -43,10 +43,10 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     credentials.setCredential(new Password(password));
 
     if (identity.login() != Identity.AuthenticationResult.SUCCESS) {
-      throw new SecurityException();
+      throw new AuthenticationException();
     }
 
-    final User user = createUser((org.picketlink.idm.model.basic.User) identity.getAccount());
+    final User user = createUser((org.picketlink.idm.model.basic.User) identity.getAccount(), getRoles());
     return user;
   }
 
@@ -54,14 +54,16 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   /**
    * TODO this is wrong, maybe we can configure the attributes of picketLink to provide us with the right information
    * @param picketLinkUser the user returned by picketLink
+   * @param roles The roles the given user has.
    * @return our user
    */
-  private User createUser(org.picketlink.idm.model.basic.User picketLinkUser) {
+  private User createUser(org.picketlink.idm.model.basic.User picketLinkUser, List<Role> roles) {
     User user = new User();
     user.setLoginName(picketLinkUser.getLoginName());
     user.setFullName(picketLinkUser.getFirstName() + " " + picketLinkUser.getLastName());
     user.setShortName(picketLinkUser.getLastName());
-    user.setRoles(getRoles());
+    user.setEmail(picketLinkUser.getEmail());
+    user.setRoles(roles);
     return user;
   }
 
@@ -78,7 +80,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   @Override
   public User getUser() {
     if (identity.isLoggedIn()) {
-      return createUser((org.picketlink.idm.model.basic.User) identity.getAccount());
+      return createUser((org.picketlink.idm.model.basic.User) identity.getAccount(), getRoles());
     }
     return null;
   }

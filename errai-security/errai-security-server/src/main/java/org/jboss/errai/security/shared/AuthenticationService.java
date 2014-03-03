@@ -1,6 +1,7 @@
 package org.jboss.errai.security.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.security.shared.exception.AuthenticationException;
 
 /**
  * AuthenticationService service for authenticating users and getting their roles.
@@ -16,6 +17,7 @@ public interface AuthenticationService {
    * @param username The username to log in with.
    * @param password The password to authenticate with.
    * @return The logged in {@link User}.
+   * @throws Implementations should throw an {@link AuthenticationException} if authentication fails.
    */
   public User login(String username, String password);
 
