@@ -23,7 +23,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -95,20 +94,17 @@ public class LoginForm extends Composite {
 
   @PageShowing
   private void isLoggedIn() {
-    identity.getUser(new AsyncCallback<User>() {
+    identity.getUser(new RemoteCallback<User>() {
+
       @Override
-      public void onSuccess(User result) {
-        if (result != null) {
+      public void callback(final User response) {
+        if (response != null) {
           form.getStyle().setDisplay(Style.Display.NONE);
           logout.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
         } else {
           form.getStyle().setDisplay(Style.Display.BLOCK);
           logout.getElement().getStyle().setDisplay(Style.Display.NONE);
         }
-      }
-
-      @Override
-      public void onFailure(Throwable caught) {
       }
     });
   }

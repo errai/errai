@@ -11,6 +11,7 @@ import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
 import org.jboss.errai.security.client.local.identity.UserEventModule;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
+import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 /**
  * Intercepts RPC logins through {@link AuthenticationService} for populating
@@ -70,6 +71,7 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
                                   module.fireLoggedInEvent(response);
                                 }
                               });
+                      StyleBindingsRegistry.get().updateStyles();
                     }
                   });
         }
@@ -92,6 +94,7 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
                             module.fireLoggedOutEvent();
                           }
                         });
+                StyleBindingsRegistry.get().updateStyles();
               }
             });
     context.proceed();

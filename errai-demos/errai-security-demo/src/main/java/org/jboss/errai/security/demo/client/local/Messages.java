@@ -14,7 +14,6 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -44,9 +43,10 @@ public class Messages extends Composite {
   @EventHandler("hello")
   private void onHelloClicked(ClickEvent event) {
     System.out.println("Messages.onHelloClicked");
-    identity.getUser(new AsyncCallback<User>() {
+    identity.getUser(new RemoteCallback<User>() {
+
       @Override
-      public void onSuccess(User result) {
+      public void callback(User response) {
         messageServiceCaller.call(new RemoteCallback<String>() {
                                     @Override
                                     public void callback(String o) {
@@ -54,10 +54,6 @@ public class Messages extends Composite {
                                     }
                                   }
         ).hello();
-      }
-
-      @Override
-      public void onFailure(Throwable caught) {
       }
     });
   }

@@ -1,11 +1,12 @@
 package org.jboss.errai.security.demo.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.shared.LoggedInEvent;
@@ -18,9 +19,10 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 
 @ApplicationScoped
 @Templated("#root")
@@ -51,15 +53,18 @@ public class WelcomePage extends Composite {
 
   @AfterInitialization
   private void setupUserLabel() {
-    identity.getUser(new AsyncCallback<User>() {
-      @Override
-      public void onSuccess(User user) {
-        userLabel.setText(user != null ? user.getFullName() : ANONYMOUS);
-      }
+    identity.getUser(new RemoteCallback<User>() {
 
       @Override
-      public void onFailure(Throwable caught) {
+      public void callback(final User user) {
+        userLabel.setText(user != null ? user.getFullName() : ANONYMOUS);
+      }
+    }, new BusErrorCallback() {
+      
+      @Override
+      public boolean error(Message message, Throwable throwable) {
         userLabel.setText(ANONYMOUS);
+        return true;
       }
     });
   }

@@ -1,9 +1,8 @@
 package org.jboss.errai.security.client.local;
 
-import static org.jboss.errai.ui.nav.client.local.api.LoginPage.CURRENT_PAGE_COOKIE;
-
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -13,10 +12,8 @@ import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.ui.shared.api.style.StyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * @author edewit@redhat.com
@@ -45,7 +42,6 @@ public class SecurityTest extends AbstractErraiCDITest {
   public void testLoginIsPreformed() {
     // given
     SecurityTestModule module = IOC.getBeanManager().lookupBean(SecurityTestModule.class).getInstance();
-    Cookies.setCookie(CURRENT_PAGE_COOKIE, "TestPage");
 
     // when
     module.login(
@@ -59,7 +55,7 @@ public class SecurityTest extends AbstractErraiCDITest {
 
     // then
     assertEquals(new Integer(1), spy.getCallCount("login"));
-    assertEquals("#TestPage", Window.Location.getHash());
+    assertEquals("", Window.Location.getHash());
   }
 
   public void testLogoutIsPreformed() {
@@ -86,15 +82,18 @@ public class SecurityTest extends AbstractErraiCDITest {
     SecurityTestModule module = IOC.getBeanManager().lookupBean(SecurityTestModule.class).getInstance();
 
     // when
-    module.identity.hasPermission(new AsyncCallback<Boolean>() {
-      @Override
-      public void onSuccess(Boolean result) {
-        assertFalse(result);
-      }
+    module.identity.hasPermission(new RemoteCallback<Boolean>() {
 
       @Override
-      public void onFailure(Throwable caught) {
-        fail("unexpected failure " + caught.getMessage());
+      public void callback(Boolean response) {
+        assertFalse(response);
+      }
+    }, new BusErrorCallback() {
+      
+      @Override
+      public boolean error(Message message, Throwable throwable) {
+        fail("unexpected failure " + throwable.getMessage());
+        return false;
       }
     }, "role1", "role2");
 
