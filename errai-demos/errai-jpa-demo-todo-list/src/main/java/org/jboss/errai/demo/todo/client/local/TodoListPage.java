@@ -33,7 +33,6 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -73,9 +72,10 @@ public class TodoListPage extends Composite {
 
   @PageShowing
   private void onPageShowing() {
-    identity.getUser(new AsyncCallback<User>() {
+    identity.getUser(new RemoteCallback<User>() {
+
       @Override
-      public void onSuccess(User result) {
+      public void callback(final User result) {
         user = result;
         username.setText(user.getFullName());
         errorLabel.setVisible(false);
@@ -88,10 +88,12 @@ public class TodoListPage extends Composite {
           }
         }).getSharedTodoLists();
       }
-
+    }, new BusErrorCallback() {
+      
       @Override
-      public void onFailure(Throwable caught) {
+      public boolean error(Message message, Throwable throwable) {
         logoutTransition.go();
+        return false;
       }
     });
   }
