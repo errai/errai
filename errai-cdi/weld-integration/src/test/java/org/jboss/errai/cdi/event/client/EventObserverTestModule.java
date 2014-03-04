@@ -74,8 +74,13 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
   private void onEvent(@Observes String event) {
     System.out.println("Observed unqualified");
     addQualifiedReceivedEvent("", event);
-
   }
+
+  // This serves as a regression test for ERRAI-680. It should be possible to have 2 private
+  // observer methods with the same name.
+  private void onEvent(@Observes Integer event) {
+  }
+  
   @SuppressWarnings("unused")
   private void onEventAny(@Observes @Any String event) {
     System.out.println("Observed @Any");

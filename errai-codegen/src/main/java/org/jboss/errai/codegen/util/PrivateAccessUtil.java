@@ -1,23 +1,25 @@
 package org.jboss.errai.codegen.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.jboss.errai.codegen.meta.MetaParameter;
 
 /**
  * Utility class with methods that generate code to access private, default
- * access ("package private"), and protected methods and fields in arbirtary
+ * access ("package private"), and protected methods and fields in arbitrary
  * classes. Each generator allows the choice of generating Java Reflection code
  * (for use on the server side) or JSNI code (for use on the client side).
  *
  * @author Mike Brock
  * @author Jonathan Fuerth
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PrivateAccessUtil {
   private static final Map<String, PrivateMemberAccessor> PRIVATE_MEMBER_ACCESSORS
@@ -191,6 +193,14 @@ public class PrivateAccessUtil {
 
   public static String getPrivateMethodName(final MetaMethod method) {
     final MetaClass declaringClass = method.getDeclaringClass();
-    return condensify(declaringClass.getFullyQualifiedName()) + "_" + method.getName();
+    String name =  condensify(declaringClass.getFullyQualifiedName()) + "_" + method.getName();
+    
+    if (method.getParameters() != null) {
+      for (MetaParameter p : method.getParameters()) {
+       name += "_" + p.getType().getName(); 
+      }
+    }
+    
+    return name;
   }
 }
