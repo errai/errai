@@ -7952,6 +7952,18 @@ Once you have Errai Security Client on your classpath, ensure your application i
 <inherits name="org.jboss.errai.security.Security" />
 ----
 
+==== CDI and Interceptor Bindings
+
+Errai security requires a CDI container to intercept calls to remote services. In particular, the following interceptors must be added to your applications `beans.xml`:
+
+[source,xml]
+----
+<interceptors>
+  <class>org.jboss.errai.security.server.SecurityUserInterceptor</class>
+  <class>org.jboss.errai.security.server.ServerSecurityRoleInterceptor</class>
+</interceptors>
+----
+
 === Errai Project Dependencies
 
 For those not using maven, here is the dependency tree of Errai project jars.
