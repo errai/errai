@@ -4488,10 +4488,6 @@ the containing class. Otherwise, it is interpreted as a literal String value.
 Field-reference sync params are captured just after the bean's `@PostConstruct` method is invoked. This means that
 values of referenced fields can be provided using `@Inject` (which in turn could come from a CDI Producer method)
 or by code in the `@PostConstruct` method.
-
-Unfortunately, Errai Navigation's writes page parameter values _after_ Errai Data Sync reads them, so Data Sync cannot
-refer to page parameter fields directly. Your application is responsible for setting fields before the `@PostConstruct`
-method returns. We hope to remedy this issue in a future release (community participation welcome!) 
 ====
 
 Transport (network) errors are logged to the slf4j logger channel `org.jboss.errai.jpa.sync.client.local.ClientSyncWorker`.
