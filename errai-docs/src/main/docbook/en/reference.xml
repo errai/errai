@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-02-14</date>
+    <date>2014-03-04</date>
     
     
     
@@ -1639,7 +1639,7 @@ public class TimeService {
 }</programlisting>
 <tip>
 <title>Best Practices</title>
-<simpara>Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential ��� albeit remote ��� that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.</simpara>
+<simpara>Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential albeit remote that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.</simpara>
 </tip>
 <section id="sid-5931407">
 <title>Container Wiring</title>
@@ -1719,7 +1719,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
 <simpara>As shown in the above example code, the annotation <literal><phrase role="code">@IOCProvider</phrase></literal> is used to denote top-level providers.</simpara>
 <simpara>The classpath will be searched for all annotated providers at compile time.</simpara>
 <important>
-<simpara>Top-level providers are regular beans, so they can inject dependencies���particularly from other top-level providers���as necessary.</simpara>
+<simpara>Top-level providers are regular beans, so they can inject dependencies particularly from other top-level providers as necessary.</simpara>
 </important>
 </section>
 <section id="sid-5931332">
@@ -2310,7 +2310,7 @@ public class Document {
    // code here
 }</programlisting>
 </example>
-<simpara>As such, when <literal><phrase role="code">Document</phrase></literal> events are fired, they will be limited in scope to the initiating conversational contents ��� which are implicitly inferred by the caller. So only the client which fired the <literal><phrase role="code">Subscription</phrase></literal> event will receive the fired <literal><phrase role="code">Document</phrase></literal> event.</simpara>
+<simpara>As such, when <literal><phrase role="code">Document</phrase></literal> events are fired, they will be limited in scope to the initiating conversational contents which are implicitly inferred by the caller. So only the client which fired the <literal><phrase role="code">Subscription</phrase></literal> event will receive the fired <literal><phrase role="code">Document</phrase></literal> event.</simpara>
 </section>
 <section id="sid-21758054_Events-ClientServerEventExample">
 <title>Client-Server Event Example</title>
@@ -2583,7 +2583,7 @@ public class Person {
   }
 }</programlisting>
 <simpara>Here we have set both of the class fields final. By doing so, we had to remove our default constructor. But that&#8217;s okay, because we have annotated the remaining constructor&#8217;s parameters using the <literal><phrase role="code">org.jboss.errai.marshalling.client.api.annotations.MapsTo</phrase></literal> annotation.</simpara>
-<simpara>By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property <literal><phrase role="code">name</phrase></literal> . Which in this case, defaults to the name of the corresponding field. This may not always be the case ��� as will be explored in the section on custom definitions. But for now that&#8217;s a safe assumption.</simpara>
+<simpara>By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property <literal><phrase role="code">name</phrase></literal> . Which in this case, defaults to the name of the corresponding field. This may not always be the case as will be explored in the section on custom definitions. But for now that&#8217;s a safe assumption.</simpara>
 </section>
 <section id="sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaFactoryMethod">
 <title>Example: An Immutable Entity with a Factory Method</title>
@@ -2760,7 +2760,7 @@ public MySuperCustomEntityMapping extends MappingDefinition {
     </listitem>
   
     <listitem>
-      <simpara>Using the <literal><phrase role="code">SimpleConstructorMapping</phrase></literal> class, we have indicated that a custom constructor will be needed to instantiate this class. We have called the <literal><phrase role="code">mapParmToIndex</phrase></literal> method with three parameters. The first, <literal><phrase role="code">"mySupername"</phrase></literal> describes the class field that we are targeting. The second parameter, the integer <literal><phrase role="code">0</phrase></literal> indicates the parameter index of the constructor arguments that we&#8217;ll be providing the value for the aforementioned field ��� in this case the first and only, and the final parameter <literal><phrase role="code">String.class</phrase></literal> tells the marshalling framework which marshalling contract to use in order to de-marshall the value.</simpara>
+      <simpara>Using the <literal><phrase role="code">SimpleConstructorMapping</phrase></literal> class, we have indicated that a custom constructor will be needed to instantiate this class. We have called the <literal><phrase role="code">mapParmToIndex</phrase></literal> method with three parameters. The first, <literal><phrase role="code">"mySupername"</phrase></literal> describes the class field that we are targeting. The second parameter, the integer <literal><phrase role="code">0</phrase></literal> indicates the parameter index of the constructor arguments that we&#8217;ll be providing the value for the aforementioned field in this case the first and only, and the final parameter <literal><phrase role="code">String.class</phrase></literal> tells the marshalling framework which marshalling contract to use in order to de-marshall the value.</simpara>
       
     </listitem>
   
@@ -2940,6 +2940,8 @@ private void onUncaughtException(Throwable t) {
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-ClientsideInterceptors">
 <title>Client-side Interceptors</title>
 <simpara>Client-side remote call interceptors provide the ability to manipulate or bypass the remote call before it&#8217;s being sent. This is useful for implementing crosscutting concerns like caching, for example when the remote call should be avoided if the data is already cached locally.</simpara>
+<section id="_annotating_the_remote_interface">
+<title>Annotating the Remote Interface</title>
 <simpara>To have a remote call intercepted, either an interface method or the remote interface type has to be annotated with <literal><phrase role="code">@InterceptedCall</phrase></literal> . If the type is annotated, all interface methods will be intercepted.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Remote
 public interface CustomerService {
@@ -2951,6 +2953,9 @@ public interface CustomerService {
 <programlisting language="java" linenumbering="unnumbered">@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
 public Customer retrieveCustomerById(long id);
 </programlisting>
+</section>
+<section id="_implementing_an_interceptor">
+<title>Implementing an Interceptor</title>
 <simpara>Implementing an interceptor is easy:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class MyCacheInterceptor implements RpcInterceptor {
 
@@ -2965,6 +2970,24 @@ public Customer retrieveCustomerById(long id);
 <simpara>Calling <literal><phrase role="code">proceed</phrase></literal> executes the next interceptor in the chain or the actual remote call if all interceptors have already been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of <literal><phrase role="code">proceed</phrase></literal> accepting a <literal><phrase role="code">RemoteCallback</phrase></literal> has to be used instead.</simpara>
 <simpara>The result of the remote call can be manipulated by calling <literal><phrase role="code">RemoteCallContext.setResult()</phrase></literal> .</simpara>
 <simpara>Not calling <literal><phrase role="code">proceed</phrase></literal> in the interceptor bypasses the actual remote call, passing <literal><phrase role="code">RestCallContext.getResult()</phrase></literal> to the <literal><phrase role="code">RemoteCallBack</phrase></literal> provided at the call site.</simpara>
+</section>
+<section id="_annotating_the_interceptor_alternative">
+<title>Annotating the Interceptor (alternative)</title>
+<simpara>If you cannot (or do not wish to) annotate the remote interface you may instead define remote call interceptors by annotating the interceptor class itself with <literal><phrase role="code">@InterceptsRemoteCall</phrase></literal>.  This annotation requires the developer to specify the remote interface that should be intercepted.  The interceptor will then be applied to all methods in that interface.  If the interface method is annotated with <literal><phrase role="code">InterceptedCall</phrase></literal>, that annotation will win out.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@InterceptsRemoteCall({ MyRemoteInterface.class, MyOtherRemoteInterface.class })
+public class CustomRpcInterceptor implements RpcInterceptor {
+
+  @Override
+  public void aroundInvoke(final RemoteCallContext context) {
+    // interceptor logic goes here
+  }
+}</programlisting>
+<simpara>This approach sacrifices granularity (you cannot intercept individual methods on the remote interface).  However, it does allow method interception without modification to the remote interface (which is particularly useful when the developer is not in control of the remote interface).</simpara>
+</section>
+<section id="_interceptors_and_ioc">
+<title>Interceptors and IOC</title>
+<simpara>It is worth noting that interceptors <emphasis role="strong">may</emphasis> be defined as managed beans using the <literal><phrase role="code">@Dependent</phrase></literal>, <literal><phrase role="code">@Singleton</phrase></literal>, or <literal><phrase role="code">@ApplicationScoped</phrase></literal> annotations.  If the Errai application is using IOC (i.e. imports the IOC Errai module) <emphasis role="strong">and</emphasis> the interceptor is annotated as a managed bean, then the IOC container will be used to get/create the interceptor instance.  This allows developers to <literal><phrase role="code">@Inject</phrase></literal> dependencies into interceptors.  If IOC is not being used, or else the interceptor is not properly annotated, then the interceptor class will simply be instantiated via <emphasis role="strong">new</emphasis>.</simpara>
+</section>
 </section>
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-SessionandrequestobjectsinRPCendpoints">
 <title>Session and request objects in RPC endpoints</title>
@@ -3249,7 +3272,7 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
   }
 };</programlisting>
 <simpara>To provide more customized error handling, Errai also defines client side exception handling via the <literal><phrase role="code">ClientExceptionMapper</phrase></literal> interface.  The client exception mapper allows developers to process a REST <literal><phrase role="code">Response</phrase></literal> into a <literal><phrase role="code">Throwable</phrase></literal> prior to the error being delivered to the <literal><phrase role="code">ErrorCallback</phrase></literal> described above.  The exception mapper class must be annotated with <literal><phrase role="code">javax.ws.rs.ext.Provider</phrase></literal> as well as implement the <literal><phrase role="code">ClientExceptionMapper</phrase></literal> interface.</simpara>
-<screen>@Provider
+<programlisting language="java" linenumbering="unnumbered">@Provider
 public class MyAppExceptionMapper implements ClientExceptionMapper {
 
   /**
@@ -3264,13 +3287,13 @@ public class MyAppExceptionMapper implements ClientExceptionMapper {
   }
 
 }
-</screen>
+</programlisting>
 <important>
 <title>Must be used in conjunction with <literal><phrase role="code">RestErrorCallback</phrase></literal></title>
 <simpara>It is important to note that the <literal><phrase role="code">ClientExceptionMapper</phrase></literal> will only be invoked when the callback passed to the <literal><phrase role="code">Caller</phrase></literal> is an instance of <literal><phrase role="code">RestErrorCallback</phrase></literal>.</simpara>
 </important>
 <simpara>The <literal><phrase role="code">ClientExceptionMapper</phrase></literal> will, by default, be invoked for every error response.  However, Errai also provides the <literal><phrase role="code">org.jboss.errai.enterprise.shared.api.annotations.MapsFrom</phrase></literal> annotation which provides for additional granularity.  An exception mapper can be annotated so that it is only invoked for methods on specific REST interfaces.</simpara>
-<screen>@Provider
+<programlisting language="java" linenumbering="unnumbered">@Provider
 @MapsFrom({ SomeRestInterface.class })
 public class SpecificClientExceptionMapper implements ClientExceptionMapper {
 
@@ -3282,7 +3305,7 @@ public class SpecificClientExceptionMapper implements ClientExceptionMapper {
      ... // Do something specific here
   }
 
-}</screen>
+}</programlisting>
 </section>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-ClientsideInterceptors">
@@ -3303,7 +3326,9 @@ public class SpecificClientExceptionMapper implements ClientExceptionMapper {
   
 </itemizedlist>
 
-<simpara>To have a JAX-RS remote call intercepted, either an interface method or the remote interface type has to be annotated with <literal><phrase role="code">@InterceptedCall</phrase></literal> . If the type is annotated, all interface methods will be intercepted.</simpara>
+<section id="_annotating_the_jax_rs_interface">
+<title>Annotating the JAX-RS Interface</title>
+<simpara>To have a JAX-RS remote call intercepted, either an interface method or the JAX-RS implementation class method has to be annotated with <literal><phrase role="code">@InterceptedCall</phrase></literal> . If the type is annotated, all interface methods will be intercepted.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Path("customers")
 public interface CustomerService {
 
@@ -3316,6 +3341,9 @@ public interface CustomerService {
 <simpara>Note that an ordered list of interceptors can be used for specifying an interceptor chain e.g.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
 public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
+</section>
+<section id="_implementing_an_interceptor_2">
+<title>Implementing an Interceptor</title>
 <simpara>Implementing an interceptor is easy:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class MyCacheInterceptor implements RestClientInterceptor {
 
@@ -3330,6 +3358,25 @@ public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
 <simpara>Calling <literal><phrase role="code">proceed</phrase></literal> executes the next interceptor in the chain or the actual remote call if all interceptors have already been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of <literal><phrase role="code">proceed</phrase></literal> accepting a <literal><phrase role="code">RemoteCallback</phrase></literal> has to be used instead.</simpara>
 <simpara>The result of the remote call can be manipulated by calling <literal><phrase role="code">RestCallContext.setResult()</phrase></literal> .</simpara>
 <simpara>Not calling <literal><phrase role="code">proceed</phrase></literal> in the interceptor bypasses the actual remote call, passing <literal><phrase role="code">RestCallContext.getResult()</phrase></literal> to the <literal><phrase role="code">RemoteCallBack</phrase></literal> provided at the call site.</simpara>
+</section>
+<section id="_annotating_the_interceptor_alternative_2">
+<title>Annotating the Interceptor (alternative)</title>
+<simpara>If you cannot (or do not wish to) annotate the JAX-RS interface you may instead define remote call interceptors by annotating the interceptor class itself with <literal><phrase role="code">@InterceptsRemoteCall</phrase></literal>.  This annotation requires the developer to specify the JAX-RS interface that should be intercepted.  The interceptor will then be applied to all methods in that interface.  If the interface method is annotated with <literal><phrase role="code">InterceptedCall</phrase></literal>, that annotation will win out.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@InterceptsRemoteCall({ MyJaxrsInterface.class, MyOtherJaxrsInterface.class })
+public class MyCacheInterceptor implements RestClientInterceptor {
+
+  @Override
+  public void aroundInvoke(final RestCallContext context) {
+    // Do interceptor logic here
+    context.proceed();
+  }
+}</programlisting>
+<simpara>This approach sacrifices granularity (you cannot intercept individual methods on the JAX-RS interface).  However, it does allow method interception without modification to the JAX-RS interface (which is particularly useful when the developer is not in control of the JAX-RS interface).</simpara>
+</section>
+<section id="_interceptors_and_ioc_2">
+<title>Interceptors and IOC</title>
+<simpara>It is worth noting that interceptors <emphasis role="strong">may</emphasis> be defined as managed beans using the <literal><phrase role="code">@Dependent</phrase></literal>, <literal><phrase role="code">@Singleton</phrase></literal>, or <literal><phrase role="code">@ApplicationScoped</phrase></literal> annotations.  If the Errai application is using IOC (i.e. imports the IOC Errai module) <emphasis role="strong">and</emphasis> the interceptor is annotated as a managed bean, then the IOC container will be used to get/create the interceptor instance.  This allows developers to <literal><phrase role="code">@Inject</phrase></literal> dependencies into interceptors.  If IOC is not being used, or else the interceptor is not properly annotated, then the interceptor class will simply be instantiated via <emphasis role="strong">new</emphasis>.</simpara>
+</section>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-WireFormat">
 <title>Wire Format</title>
@@ -4106,7 +4153,7 @@ public class Item {
 <simpara>Now let&#8217;s say we want to synchronize the data for all of a user&#8217;s grocery lists. This will make them available for offline use through Errai JPA, and at the same time it will update the server with the latest changes made on the client. Ultimately, the sync operation is accomplished via an annotated method or an asynchronous call into <literal>ClientSyncManager</literal>, but first we have to prepare a few things on the client and the server.</simpara>
 </section>
 <section id="sid-71467090_ErraiJPADataSync-ServerSide%E2%80%93DataSyncServiceImpl">
-<title>Server Side ��� DataSyncServiceImpl</title>
+<title>Server Side DataSyncServiceImpl</title>
 <simpara>A data sync operation begins when the client-side sync manager sends an <link linkend="sid-5931313">Errai RPC</link> request to the server. Although a server-side implementation of the remote interface is provided, you are responsible for implementing a thin wrapper around it. This wrapper serves two purposes:</simpara>
 <orderedlist numeration="arabic">
   
@@ -4192,9 +4239,6 @@ the containing class. Otherwise, it is interpreted as a literal String value.</s
 <simpara>Field-reference sync params are captured just after the bean&#8217;s <literal>@PostConstruct</literal> method is invoked. This means that
 values of referenced fields can be provided using <literal>@Inject</literal> (which in turn could come from a CDI Producer method)
 or by code in the <literal>@PostConstruct</literal> method.</simpara>
-<simpara>Unfortunately, Errai Navigation&#8217;s writes page parameter values <emphasis>after</emphasis> Errai Data Sync reads them, so Data Sync cannot
-refer to page parameter fields directly. Your application is responsible for setting fields before the <literal>@PostConstruct</literal>
-method returns. We hope to remedy this issue in a future release (community participation welcome!)</simpara>
 </note>
 <simpara>Transport (network) errors are logged to the slf4j logger channel <literal>org.jboss.errai.jpa.sync.client.local.ClientSyncWorker</literal>.
 As of Errai 3.0.0.M4, it is not possible to specify a custom error handler using the declarative API. See the next
@@ -5157,7 +5201,7 @@ public class LoginLayout extends PageLayout {
 </section>
 <section id="sid-51806600_ErraiUI-Stylesheetbinding">
 <title>Stylesheet binding</title>
-<simpara>When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part ��� which is an important usability consideration ��� is communicating that state to the user.</simpara>
+<simpara>When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part which is an important usability consideration is communicating that state to the user.</simpara>
 <simpara>Let&#8217;s start with the example case I just described. We have a control that we only want to be visible if the user is an admin. So the first thing we do is create a style binding annotation.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@StyleBinding
 @Retention(RetentionPolicy.RUNTIME)
@@ -5550,7 +5594,7 @@ public class OverallPageStrucutre extends Composite {
 </section>
 <section id="sid-54493676_ErraiUINavigation-OverridingthedefaultNagivatingPaneltype">
 <title>Overriding the default Nagivating Panel type</title>
-<simpara>By default Errai uses <literal><phrase role="code">com.���google.���gwt.���user.���client.���ui.SimplePanel</phrase></literal> as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a <literal><phrase role="code">com.google.gwt.user.client.ui.SimpleLayoutPanel</phrase></literal> that manages child size state.</simpara>
+<simpara>By default Errai uses <literal><phrase role="code">com.google.gwt.user.client.ui.SimplePanel</phrase></literal> as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a <literal><phrase role="code">com.google.gwt.user.client.ui.SimpleLayoutPanel</phrase></literal> that manages child size state.</simpara>
 <simpara>To provide your own implementation of the navigation panel you must implement <literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal> . For example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class NavigatingPanel implements NavigatingContainer {
 
@@ -5825,6 +5869,414 @@ public class KitchenSinkClient extends Composite {
 </section>
 </section>
 </chapter>
+<chapter id="_errai_security">
+<title>Errai Security</title>
+<simpara>Errai Security provides a lightweight security API for declaring RPC services and client-side UI elements which require authentication or authorization.</simpara>
+<note>
+<title>Manual Setup</title>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai Security to your project.</simpara>
+</note>
+<section id="_basic_model">
+<title>Basic Model</title>
+<simpara>Errai Security provides two main concepts:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara><emphasis role="strong">Users</emphasis></simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>A User corresponds to a single person.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>It is usually associated with a username, full name, and email address.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis role="strong">Roles</emphasis></simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>A Role represents a priveleged group within your system.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>A User can have several roles, and a role can be had by many users.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Roles are the primary way of defining authorization in Errai Security.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+<simpara>By default the server-side Errai Security module uses <ulink url="http://www.picketlink.org/">PicketLink</ulink> for authentication. Later on we will explain how to use an alternative backend.</simpara>
+</section>
+<section id="_getting_started">
+<title>Getting Started</title>
+<section id="_making_users">
+<title>Making Users</title>
+<simpara>The simplest way to begin experimenting with Errai Security is to add Users and Roles programmatically. Here is some sample server-side code from the <ulink url="https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java">Errai Security Demo</ulink> that does just that.</simpara>
+<programlisting language="java" linenumbering="numbered">@Singleton
+@Startup
+public class PicketLinkDefaultUsers {
+
+  @Inject
+  private PartitionManager partitionManager; // <co id="CO1-1"/>
+
+  /**
+   * &lt;p&gt;Loads some users during the first construction.&lt;/p&gt;
+   */
+  @PostConstruct
+  public void create() {
+    final IdentityManager identityManager = partitionManager.createIdentityManager();
+    final RelationshipManager relationshipManager = partitionManager.createRelationshipManager();
+
+    User john = new User("john");
+
+    john.setEmail("john@doe.com");
+    john.setFirstName("John");
+    john.setLastName("Doe");
+
+    User hacker = new User("hacker");
+
+    hacker.setEmail("hacker@illegal.ru");
+    hacker.setFirstName("Hacker");
+    hacker.setLastName("anonymous");
+
+    identityManager.add(john); // <co id="CO1-2"/>
+    identityManager.add(hacker);
+    final Password defaultPassword = new Password("123");
+    identityManager.updateCredential(john, defaultPassword);
+    identityManager.updateCredential(hacker, defaultPassword);
+
+    Role roleDeveloper = new Role("simple");
+    Role roleAdmin = new Role("admin");
+
+    identityManager.add(roleDeveloper);
+    identityManager.add(roleAdmin);
+
+    relationshipManager.add(new Grant(john, roleDeveloper)); // <co id="CO1-3"/>
+    relationshipManager.add(new Grant(john, roleAdmin));
+  }
+
+}</programlisting>
+<simpara>Here are the important things that are happening here:</simpara>
+<calloutlist>
+  
+  <callout arearefs="CO1-1">
+    <para>PicketLink uses the concept of partitions, which are sections that can contain different users and roles. What we really need to make users and roles are the <literal>IdentityManager</literal> and <literal>RelationshipManager</literal>, but these objects are <literal>@RequestScoped</literal> so in order to access them when the application starts we must <literal>@Inject</literal> the <literal>PartitionManager</literal>.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO1-2">
+    <para>Here we add are new users to the <literal>IdentityManager</literal>. It is also used below to give passwords to the new users, and to add the <emphasis>simple</emphasis> and <emphasis>admin</emphasis> roles.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO1-3">
+    <para>The <literal>RelationshipManager</literal> defines relationships between entities. In this case, it is used to specify that a user belongs to a role.</para>
+    
+  </callout>
+  
+</calloutlist>
+</section>
+<section id="_authentication_from_the_client">
+<title>Authentication from the Client</title>
+<simpara>Once you&#8217;ve created some users and roles, you&#8217;re ready to write some client-side code. The easiest way to perform authentication-related tasks from the client is using the <literal>org.jboss.errai.security.clent.local.identity.Identity</literal> class.</simpara>
+<simpara>Here is some sample code involving the user <emphasis>john</emphasis> from the previous Security Demo excerpt.</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Injecting the <literal>Identity</literal>:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">@Inject Identity identity;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Logging in:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">identity.setUsername("john");
+identity.setPassword("123");
+
+identity.login(new RemoteCallback&lt;User&gt;() {
+
+    @Override
+    public void callback(User user) {
+      // handle successful login
+    }
+  }, new BusErrorCallback() {
+
+    @Override
+    public boolean error(Message message, Throwable t) {
+      if (t instanceof AuthenticationException) {
+        // handle authentication failure
+      }
+
+      // Returning true causes the error to propogate to top-level handlers
+      return true;
+    }
+  });</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Getting the currently authenticated User:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">identity.getUser(new RemoteCallback&lt;User&gt;() {
+
+    @Override
+    public void callback(User user) {
+      if (user != null) {
+        // Do something because we're logged in.
+      }
+      else {
+        // Do something else because we're not logged in.
+      }
+    }
+  });</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Checking if a user has a given set of roles:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">identity.hasPermission(new RemoteCallback&lt;Boolean&gt;() {
+
+    @Override
+    public void callback(Boolean result) {
+      if (result) {
+        // Success!
+      }
+    }
+  }, "simple", "admin");</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Logging out:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">identity.logout();</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+<note>
+<title>Remote Procedure Calls</title>
+<simpara>The above methods are implemented with Errai RPC calls to the service <literal>org.jboss.errai.security.shared.AuthenticationService</literal>. However, client-side interceptors are used for caching so that generally only calls to <literal>login</literal> and <literal>logout</literal> must be sent over the wire.</simpara>
+</note>
+<tip>
+<title>DataBinding with Identity</title>
+<simpara>The Identity class is annotated with <literal>@Bindable</literal> so that it can be bound to a login form. You can checkout the documentation on Errai DataBinding or see an example in <ulink url="https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/client/local/LoginForm.java">Errai Security</ulink>.</simpara>
+</tip>
+</section>
+</section>
+<section id="_requireauthentication_and_requireroles">
+<title>RequireAuthentication and RequireRoles</title>
+<simpara>The annotations <literal>@RequireAuthentication</literal> and <literal>@RequireRoles</literal> are the only two annotations necessary to secure a resource or UI element. In general, <literal>@RequireAuthentication</literal> blocks a resource from users who are not logged in and <literal>@RequireRoles</literal> blocks a resource from users who do not posess all the roles (a parameter of the annotation, given as an array of Strings). Below we will explain how different resources are blocked from unauthorized users.</simpara>
+<section id="_rpc_services">
+<title>RPC Services</title>
+<simpara>To secure an Errai RPC service, simply annotate the RPC interface (either the entire type or just a method) with one of the security annotations.</simpara>
+<simpara>For example:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>All methods on this interface require an authenticated user to access:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">@Remote
+@RequireAuthentication
+public interface UserOnlyStuff {
+  public void someMethod();
+  public void otherMethod();
+}</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Here the first method requires an authenticated user, and the second requires a user with the <emphasis>admin</emphasis> role:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">@Remote
+public interface MixedService {
+
+  @RequireAuthentication
+  public void userService();
+
+  @RequireRoles({"admin"})
+  public void adminService();
+}</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+<section id="_error_callbacks">
+<title>Error Callbacks</title>
+<simpara>When access to a secured RPC service is denied an <literal>UnauthenticatedException</literal> or <literal>UnauthorizedException</literal> is thrown. This error is then transmitted back to the client, where it can be caught with a <literal>BusErrorCallback</literal> (provided when the RPC is invoked).</simpara>
+<simpara>Here is how we would invoke the previous <literal>MixedService</literal> example with error handling:</simpara>
+<programlisting language="java" linenumbering="unnumbered">MessageBuilder.createCall(new RemoteCallback&lt;Void&gt;() {
+
+    @Override
+    public void callback(Void response) {
+      // ...
+    }
+  }, new BusErrorCallback() {
+
+    @Override
+    public boolean error(Message message, Throwable t) {
+      if (t instanceof UnauthenticatedException) {
+        // User is not logged in.
+        return false;
+      }
+      else if (t instanceof UnauthorizedException) {
+        // User is logged in but lacked sufficient roles.
+        return false;
+      }
+      else {
+        // Some other error has happened. Let it propogate.
+        return true;
+      }
+    }
+  });</programlisting>
+<important>
+<title>DefaultSecurityErrorCallback</title>
+<simpara>Errai Security provides a default global RPC handler that catches any thrown <literal>UnauthenticatedException</literal> or <literal>UnauthorizedExceptions</literal> and navigates to the page with the <literal>LoginPage</literal> or <literal>SecurityError</literal> role respectively.</simpara>
+</important>
+</section>
+</section>
+<section id="_page_navigation">
+<title>Page Navigation</title>
+<simpara>Any class annotated with <literal>@Page</literal> can also be marked with <literal>@RequireAuthentication</literal> and <literal>@RequireRoles</literal>. By doing so, users will be prevented from navigating to the given page if they are not logged in or lack authorization.</simpara>
+<simpara>Here are two simple examples:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>This page is only for logged in users:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">@Page
+@RequireAuthentication
+public class UserProfilePage extends SimplePanel {
+
+  @Inject private Identity identity;
+  private User user;
+
+  @PageShowing
+  private void setupPage() {
+    identity.getUser(new RemoteCallback&lt;User&gt;() {
+        @Override
+        public void callback(User response) {
+          // We don't have to check if this is null, since the page requires authentication.
+          user = response;
+          // do setup...
+        }
+    });
+  }
+
+}</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>This page requires the <emphasis>user</emphasis> and <emphasis>admin</emphasis> roles:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">@Page
+@RequireRoles({"admin", "user"})
+public class AdminManagementPage extends SimplePanel {
+}</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+<important>
+<title>Redirection</title>
+<simpara>When a user is denied access to a page they will be redirected to <literal>LoginPage</literal> or <literal>SecurityError</literal>. To direct a user to the page they were trying to reach after successful login, <literal>@Inject</literal> and invoke the <literal>org.jboss.errai.security.client.local.nav.PageReturn</literal>.</simpara>
+</important>
+</section>
+<section id="_hiding_ui_elements">
+<title>Hiding UI Elements</title>
+<simpara>Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have <literal>display: none</literal> added to it&#8217;s CSS style.</simpara>
+<simpara>Here is an example of an Errai UI templated class using this feature:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated
+public class NavBar extends Composite {
+
+  @Inject
+  @DataField
+  @RequireAuthentication
+  private Button logoutButton;
+
+  @Inject
+  @DataField
+  @RequireRoles({"admin"})
+  private Button dropAllTablesButton;
+
+}</programlisting>
+</section>
+</section>
+<section id="_using_an_alternative_to_picketlink">
+<title>Using an Alternative to PicketLink</title>
+<simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. The default implementation of this interface uses PicketLink, but it is possible to create and use an alternative implementation by following these steps:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Create an implementing class for <literal>AuthenticationService</literal>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Annotate your class with <literal>@Alternative</literal>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add the following to your <literal>beans.xml</literal> (replacing the fully-qualified class name):</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">&lt;alternatives&gt;
+  &lt;class&gt;org.jboss.errai.example.AuthenticationServiceImpl&lt;/class&gt;
+&lt;/alternatives&gt;</programlisting>
+
+      
+    </listitem>
+  
+</orderedlist>
+</section>
+</chapter>
 <chapter id="sid-74908675">
 <title>Logging</title>
 <simpara>Errai now supports using the <ulink url="http://www.slf4j.org/">slf4j</ulink> logging api on the server and client. This gives you the flexibility of choosing your own logging back-end for your server-side code, while still allowing a uniform logging interface that can be used in shared packages.</simpara>
@@ -5834,7 +6286,7 @@ public class KitchenSinkClient extends Composite {
 </section>
 <section id="sid-74908675_Logging-ClientSideSetup">
 <title>Client-Side Setup</title>
-<simpara>The client-side slf4j code uses the ��� <ulink url="http://www.gwtproject.org/doc/latest/DevGuideLogging.html">GWT Logging</ulink> as the back-end. Using slf4j in client-side code has two steps:</simpara>
+<simpara>The client-side slf4j code uses the <ulink url="http://www.gwtproject.org/doc/latest/DevGuideLogging.html">GWT Logging</ulink> as the back-end. Using slf4j in client-side code has two steps:</simpara>
 <orderedlist numeration="arabic">
   
     <listitem>
@@ -6754,6 +7206,29 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <important>
 <simpara>For these to work you&#8217;ll need to have the SDK&#8217;s installed and on your path! In case of android you will additionally have to have ANDROID_HOME environment variable set.</simpara>
 </important>
+</section>
+</section>
+<section id="_errai_security_2">
+<title>Errai Security</title>
+<section id="_compile_time_dependency">
+<title>Compile-time dependency</title>
+<simpara>Errai Security requires to modules to be included in a project:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-security-server&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-security-client&lt;/artifactId&gt;
+  &lt;scope&gt;provided&lt;/scope&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+</section>
+<section id="_gwt_module_descriptor_2">
+<title>GWT Module Descriptor</title>
+<simpara>Once you have Errai Security Client on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.security.Security" /&gt;</programlisting>
 </section>
 </section>
 <section id="_errai_project_dependencies">
@@ -9853,6 +10328,917 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 </itemizedlist>
 
 </section>
+<section id="_errai_security_3">
+<title>Errai Security</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-security-server:jar:3.0-SNAPSHOT</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-data-binding:jar:3.0-SNAPSHOT:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ui:jar:3.0-SNAPSHOT:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:3.0-SNAPSHOT:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:3.0-SNAPSHOT:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.codehaus.jackson:jackson-mapper-asl:jar:1.9.12:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.codehaus.jackson:jackson-core-asl:jar:1.9.9:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jsoup:jsoup:jar:1.7.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.stanbol:org.apache.stanbol.enhancer.engines.htmlextractor:jar:0.10.0:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.apache.clerezza:rdf.core:jar:0.12-incubating:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.osgi:org.osgi.core:jar:4.2.0:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.osgi:org.osgi.compendium:jar:4.2.0:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.clerezza:utils:jar:0.1-incubating:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>commons-codec:commons-codec:jar:1.4:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.httpcomponents:httpcore:jar:4.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.wymiwyg:wymiwyg-commons-core:jar:0.7.6:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>commons-logging:commons-logging-api:jar:1.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.activation:activation:jar:1.1.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.lesscss:lesscss:jar:1.3.3:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>commons-io:commons-io:jar:2.4:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>commons-logging:commons-logging:jar:1.1.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.commons:commons-lang3:jar:3.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mozilla:rhino:jar:1.7R4:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-api:jar:2.5.3.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-idm-api:jar:2.5.3.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-impl:jar:2.5.3.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-common:jar:2.5.3.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-idm-impl:jar:2.5.3.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.deltaspike.core:deltaspike-core-api:jar:0.4:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.weld.se:weld-se-core:jar:1.1.6.Final:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.weld:weld-spi:jar:1.1.Final:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.weld:weld-api:jar:1.1.Final:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.weld:weld-core:jar:1.1.13.Final:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-ext:jar:1.6.1:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>ch.qos.cal10n:cal10n-api:jar:0.7.4:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.el:el-api:jar:2.2:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-security-client:jar:3.0-SNAPSHOT</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-bus:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-config:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-marshalling:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.inject:guice:jar:3.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>aopalliance:aopalliance:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.inject:javax.inject:jar:1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mvel:mvel2:jar:2.1.7.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.slf4j:slf4j-api:jar:1.6.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.javassist:javassist:jar:3.15.0-GA:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai.io.netty:netty:jar:4.0.0.Alpha1.errai.r1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.guava:guava:jar:14.0.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jgroups:jgroups:jar:3.2.0.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-common:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai.reflections:reflections:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>dom4j:dom4j:jar:1.6.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>xml-apis:xml-apis:jar:1.4.01:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>de.benediktmeurer.gwt-slf4j:gwt-slf4j:jar:0.0.2:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ui:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.codehaus.jackson:jackson-mapper-asl:jar:1.9.12:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.codehaus.jackson:jackson-core-asl:jar:1.9.9:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jsoup:jsoup:jar:1.7.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.stanbol:org.apache.stanbol.enhancer.engines.htmlextractor:jar:0.10.0:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.apache.clerezza:rdf.core:jar:0.12-incubating:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.osgi:org.osgi.core:jar:4.2.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.osgi:org.osgi.compendium:jar:4.2.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.clerezza:utils:jar:0.1-incubating:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>commons-codec:commons-codec:jar:1.4:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.httpcomponents:httpcore:jar:4.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.wymiwyg:wymiwyg-commons-core:jar:0.7.6:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>commons-logging:commons-logging-api:jar:1.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.activation:activation:jar:1.1.1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.lesscss:lesscss:jar:1.3.3:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>commons-io:commons-io:jar:2.4:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>commons-logging:commons-logging:jar:1.1.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.commons:commons-lang3:jar:3.1:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.mozilla:rhino:jar:1.7R4:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-data-binding:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.guava:guava-gwt:jar:14.0.1:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>com.google.code.findbugs:jsr305:jar:1.3.9:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-navigation:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-codegen-gwt:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-javax-enterprise:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.annotation:jsr250-api:jar:1.0:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.enterprise:cdi-api:jar:1.0-SP4:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-ioc-bus-support:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-cdi-client:jar:3.0-SNAPSHOT:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.jboss.errai:errai-security-server:jar:3.0-SNAPSHOT:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-api:jar:2.5.3.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-idm-api:jar:2.5.3.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-impl:jar:2.5.3.Final:compile</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-common:jar:2.5.3.Final:compile</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.picketlink:picketlink-idm-impl:jar:2.5.3.Final:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.apache.deltaspike.core:deltaspike-core-api:jar:0.4:compile</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-user:jar:2.5.1:provided</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>javax.validation:validation-api:jar:sources:1.0.0.GA:provided</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>org.json:json:jar:20090211:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>com.google.gwt:gwt-dev:jar:2.5.1:provided</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
 </section>
 </chapter>
 <chapter id="sid-32473113">
@@ -9890,7 +11276,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 </section>
 <section id="sid-32473113_Troubleshooting%26FAQ-I%27mgetting%22java.lang.RuntimeException%3ATherearenoproxyprovidersregisteredyet.%22inmy@PostConstructmethod%21">
 <title>I&#8217;m getting "java.lang.RuntimeException: There are no proxy providers registered yet." in my @PostConstruct method!</title>
-<simpara><emphasis>Answer:</emphasis> You can&#8217;t invoke RPC methods via <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> or by other means until after the Errai Bus has finished its initial handshake. Try changing your <literal><phrase role="code">@PostConstruct</phrase></literal> annotation to <literal><phrase role="code">@AfterInitialization</phrase></literal> . This will cause your method to be invoked later���after the bus handshake has completed.</simpara>
+<simpara><emphasis>Answer:</emphasis> You can&#8217;t invoke RPC methods via <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> or by other means until after the Errai Bus has finished its initial handshake. Try changing your <literal><phrase role="code">@PostConstruct</phrase></literal> annotation to <literal><phrase role="code">@AfterInitialization</phrase></literal> . This will cause your method to be invoked later after the bus handshake has completed.</simpara>
 <simpara>If this doesn&#8217;t help, it is also possible that the proxies were never generated in the first place. Check in <literal><phrase role="code">.errai/RpcProxyLoaderImpl.java</phrase></literal> to see if proxy code exists for the <literal><phrase role="code">@Remote</phrase></literal> and/or <literal><phrase role="code">@Path</phrase></literal> interface in question. If not, your <literal><phrase role="code">@Remote</phrase></literal> interfaces were not present on the GWT compiler&#8217;s classpath when your application module was compiled. Double-check your GWT compilation classpath: all <literal><phrase role="code">@Remote</phrase></literal> interfaces must be visible to (in or inherited by) the GWT module that contains the <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> types. Pay special attention that your <literal><phrase role="code">@Remote</phrase></literal> and <literal><phrase role="code">@Path</phrase></literal> interfaces are not in a package excluded from the GWT module (by default, every subpackage other than <literal><phrase role="code">client</phrase></literal> and <literal><phrase role="code">shared</phrase></literal> is invisible to the GWT compiler).</simpara>
 </section>
 </chapter>
@@ -10083,6 +11469,6 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 </chapter>
 <chapter id="sid-5833086">
 <title>Errai License</title>
-<simpara>Errai is distributed under the terms of the Apache License, Version 2.0. See <ulink url="http://www.apache.org/licenses/LICENSE-2.0">������the full Apache license text</ulink>.</simpara>
+<simpara>Errai is distributed under the terms of the Apache License, Version 2.0. See <ulink url="http://www.apache.org/licenses/LICENSE-2.0">the full Apache license text</ulink>.</simpara>
 </chapter>
 </book>
