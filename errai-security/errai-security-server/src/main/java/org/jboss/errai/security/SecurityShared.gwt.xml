@@ -11,8 +11,6 @@
   <inherits name="org.jboss.errai.ui.nav.Navigation"/>
   <inherits name="org.jboss.errai.ui.UI"/>
 
-  <inherits name="javax.interceptor.Support"/>
-
   <source path="client"/>
   <source path="shared"/>
 </module>
