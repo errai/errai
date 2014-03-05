@@ -84,7 +84,7 @@ Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/ar
 
 ===== Starting with the Errai Forge Addon
 
-Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/forge-errai/blob/v2.0.0.Beta1/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
+Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/forge-errai/blob/master/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
 
 
 In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:
@@ -6594,6 +6594,12 @@ There is also a method called [code]+enroll()+ for adding new users.
 == Errai Security
 
 Errai Security provides a lightweight security API for declaring RPC services and client-side UI elements which require authentication or authorization.
+
+[TIP]
+.Plugin Tip
+====
+Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Security_ to follow along with this section.
+====
 
 [NOTE]
 .Manual Setup
