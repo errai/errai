@@ -3,7 +3,9 @@ package org.jboss.errai.ioc.tests.lifecycle.client.local;
 import static org.junit.Assert.*;
 
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
+import org.jboss.errai.ioc.client.lifecycle.api.Destruction;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
@@ -292,7 +294,63 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(2, callbackCounter.getValue());
     assertEquals(1, listenerCounter.getValue());
   }
-  
+
+  @Test
+  public void testUnregisterSingleInstanceListenerTwice() throws Exception {
+    final Counter listenerCounter = new Counter();
+    final LifecycleListener<Integer> listener = new CountingListener(listenerCounter);
+
+    final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
+
+    final Integer instance = 1337;
+    IOC.registerLifecycleListener(instance, listener);
+
+    // Precondition
+    assertEquals(0, listenerCounter.getValue());
+    event.fireAsync(instance);
+    assertEquals(1, listenerCounter.getValue());
+    IOC.unregisterLifecycleListener(instance, listener);
+    event.fireAsync(instance);
+    assertEquals(1, listenerCounter.getValue());
+
+    // Actual test
+    try {
+      IOC.unregisterLifecycleListener(instance, listener);
+    }
+    catch (Exception e) {
+      fail("Second unregister call caused an exception: " + e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUnregisterSingleInstanceListenerAfterDestruction() throws Exception {
+    final Counter listenerCounter = new Counter();
+    final LifecycleListener<Integer> listener = new CountingListener(listenerCounter);
+
+    final SyncBeanManager bm = IOC.getBeanManager();
+    final Access<Integer> event = bm.lookupBean(Access.class).getInstance();
+    final Destruction<Integer> destruction = bm.lookupBean(Destruction.class).getInstance();
+
+    final Integer instance = 1337;
+    IOC.registerLifecycleListener(instance, listener);
+
+    // Precondition
+    assertEquals(0, listenerCounter.getValue());
+    event.fireAsync(instance);
+    assertEquals(1, listenerCounter.getValue());
+    destruction.fireAsync(instance);
+    event.fireAsync(instance);
+    assertEquals(1, listenerCounter.getValue());
+
+    // Actual test
+    try {
+      IOC.unregisterLifecycleListener(instance, listener);
+    }
+    catch (Exception e) {
+      fail("Unregister call caused an exception: " + e.getMessage());
+    }
+  }
+
   @Test
   public void testVeto() throws Exception {
     final Counter listenerCounter = new Counter();
