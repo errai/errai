@@ -71,10 +71,11 @@ public class User implements Serializable {
 
     User user = (User) o;
 
-    if (email != null ? !email.equals(user.email) : user.email != null) return false;
-    if (fullName != null ? !fullName.equals(user.fullName) : user.fullName != null) return false;
-    if (loginName != null ? !loginName.equals(user.loginName) : user.loginName != null) return false;
-    if (shortName != null ? !shortName.equals(user.shortName) : user.shortName != null) return false;
+    if ( (email != null) ? !email.equals(user.email) : user.email != null) return false;
+    if ( (fullName != null) ? !fullName.equals(user.fullName) : user.fullName != null) return false;
+    if ( (loginName != null) ? !loginName.equals(user.loginName) : user.loginName != null) return false;
+    if ( (shortName != null) ? !shortName.equals(user.shortName) : user.shortName != null) return false;
+    if ( (roles != null) ? !roles.equals(user.roles) : user.roles != null) return false;
 
     return true;
   }
