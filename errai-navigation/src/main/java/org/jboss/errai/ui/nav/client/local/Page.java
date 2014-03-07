@@ -7,10 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares that the target type, <em>which must be a subtype of Widget</em> is
- * a named page with optional state information within the Errai Navigation
+ * Declares that the target type,
+ * <em>which must be a subtype of Widget or an implementation of IsWidget,</em>
+ * is a named page with optional state information within the Errai Navigation
  * system.
- *
+ * 
  * @see TransitionTo
  * @see PageState
  * @see PageRole

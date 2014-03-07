@@ -7,7 +7,22 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.jboss.errai.ui.nav.client.local.testpages.*;
+import org.jboss.errai.ui.nav.client.local.testpages.ApplicationScopedPage;
+import org.jboss.errai.ui.nav.client.local.testpages.EntryPointPage;
+import org.jboss.errai.ui.nav.client.local.testpages.ExplicitlyDependentScopedPage;
+import org.jboss.errai.ui.nav.client.local.testpages.ImplicitlyDependentScopedPage;
+import org.jboss.errai.ui.nav.client.local.testpages.PageA;
+import org.jboss.errai.ui.nav.client.local.testpages.PageAWithRedirect;
+import org.jboss.errai.ui.nav.client.local.testpages.PageBWithRedirect;
+import org.jboss.errai.ui.nav.client.local.testpages.PageC;
+import org.jboss.errai.ui.nav.client.local.testpages.PageCWithRedirect;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithDoubleRedirect;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithException;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedLifecycleMethods;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithLifecycleMethods;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithPageShowingHistoryTokenMethod;
+import org.jboss.errai.ui.nav.client.local.testpages.SingletonScopedPage;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
 
 import com.google.common.collect.ImmutableMultimap;
@@ -136,6 +151,56 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
     assertEquals(1, page.afterHideCallCount);
+  }
+
+  public void testExplicitlyDependentScopedPageIsDestroyedAfterHiding() throws Exception {
+    assertEquals(0, ExplicitlyDependentScopedPage.getPreDestroyCallCount());
+    navigation.goTo(ExplicitlyDependentScopedPage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, ExplicitlyDependentScopedPage.getPreDestroyCallCount());
+
+    // go somewhere else; doesn't matter where
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(1, ExplicitlyDependentScopedPage.getPreDestroyCallCount());
+  }
+
+  public void testImplicitlyDependentScopedPageIsDestroyedAfterHiding() throws Exception {
+    assertEquals(0, ImplicitlyDependentScopedPage.getPreDestroyCallCount());
+    navigation.goTo(ImplicitlyDependentScopedPage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, ImplicitlyDependentScopedPage.getPreDestroyCallCount());
+
+    // go somewhere else; doesn't matter where
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(1, ImplicitlyDependentScopedPage.getPreDestroyCallCount());
+  }
+
+  public void testApplicationScopedPageIsNotDestroyedAfterHiding() throws Exception {
+    assertEquals(0, ApplicationScopedPage.getPreDestroyCallCount());
+    navigation.goTo(ApplicationScopedPage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, ApplicationScopedPage.getPreDestroyCallCount());
+
+    // go somewhere else; doesn't matter where
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, ApplicationScopedPage.getPreDestroyCallCount());
+  }
+
+  public void testSingletonScopedPageIsNotDestroyedAfterHiding() throws Exception {
+    assertEquals(0, SingletonScopedPage.getPreDestroyCallCount());
+    navigation.goTo(SingletonScopedPage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, SingletonScopedPage.getPreDestroyCallCount());
+
+    // go somewhere else; doesn't matter where
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, SingletonScopedPage.getPreDestroyCallCount());
+  }
+
+  public void testEntryPointPageIsNotDestroyedAfterHiding() throws Exception {
+    assertEquals(0, EntryPointPage.getPreDestroyCallCount());
+    navigation.goTo(EntryPointPage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, EntryPointPage.getPreDestroyCallCount());
+
+    // go somewhere else; doesn't matter where
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, EntryPointPage.getPreDestroyCallCount());
   }
 
   public void testPageWithInheritedLifecycleMethods() throws Exception {

@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -44,8 +47,21 @@ import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.ui.nav.client.local.*;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
+import org.jboss.errai.ui.nav.client.local.HistoryToken;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageHidden;
+import org.jboss.errai.ui.nav.client.local.PageHiding;
+import org.jboss.errai.ui.nav.client.local.PageRole;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
+import org.jboss.errai.ui.nav.client.local.PageShown;
+import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
+import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
@@ -229,7 +245,12 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    *          with {@code @Page}.
    */
   private void appendPageHidingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-    createAndProcessHideMethod(pageImplBuilder, pageClass, PageHiding.class);
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(
+                    void.class,
+                    createMethodNameFromAnnotation(PageHiding.class),
+                    Parameter.of(pageClass, "widget")).body();
+    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHiding.class, false);
+    method.finish();
   }
 
   /**
@@ -242,19 +263,42 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    *          with {@code @Page}.
    */
   private void appendPageHiddenMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-    createAndProcessHideMethod(pageImplBuilder, pageClass, PageHidden.class);
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(
+            void.class,
+            createMethodNameFromAnnotation(PageHidden.class),
+            Parameter.of(pageClass, "widget")).body();
+    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHidden.class, false);
+
+    if (pageClass.getAnnotation(Singleton.class) == null
+            && pageClass.getAnnotation(ApplicationScoped.class) == null
+            && pageClass.getAnnotation(EntryPoint.class) == null) {
+      method.append(Stmt.loadVariable("bm").invoke("destroyBean", Stmt.loadVariable("widget")));
+    }
+    method.finish();
   }
 
-  private void createAndProcessHideMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass,
-      Class<? extends Annotation> annotation) {
-    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
-              Parameter.of(pageClass, "widget"))
-              .body();
-    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, false);
-  }
-
+  /**
+   * Searches the given class for methods bearing the given annotation. Verifies
+   * that such methods follow the rules (returns void; takes PageState as a
+   * parameter (or not); is the only method with this annotation), creates a
+   * private accessor if required, and then appends a call to that method to the
+   * given method builder.
+   *
+   * @param pageImplBuilder
+   *          the class to add private accessors to if necessary
+   * @param methodToAppendTo
+   *          the method builder to append to
+   * @param pageClass
+   *          the class to search for annotated methods in
+   * @param annotation
+   *          the annotation to search for in pageClass
+   * @param methodCanTakeParameters
+   *          true if the method is allowed a parameter of type PageState
+   * @throws UnsupportedOperationException
+   *           if the annotated methods in pageClass violate any of the rules
+   */
   private void checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder,
-      BlockBuilder<?> method, MetaClass pageClass, Class<? extends Annotation> annotation,
+      BlockBuilder<?> methodToAppendTo, MetaClass pageClass, Class<? extends Annotation> annotation,
       boolean methodCanTakeParameters) {
     List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(annotation);
     if (annotatedMethods.size() > 1) {
@@ -301,10 +345,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         }
       }
 
-      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(metaMethod), paramValues));
+      methodToAppendTo.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(metaMethod), paramValues));
     }
-
-    method.finish();
   }
 
   private String createAnnotionName(Class<? extends Annotation> annotation) {
@@ -414,13 +456,15 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     }
 
     if (addPrivateAccessors) {
-      method.append(Stmt.invokeStatic(CDI.class, "fireEvent", 
+      method.append(Stmt.invokeStatic(CDI.class, "fireEvent",
           Stmt.newObject(NavigationEvent.class).withParameters(
               Stmt.newObject(PageRequest.class).withParameters(getPageName(pageClass), Stmt.loadVariable("pageState")))
       ));
     }
 
     checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, true);
+
+    method.finish();
   }
 
   /**
@@ -443,7 +487,10 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
         // entry for the node itself
         out.print("\"" + pageName + "\"");
-        if (pageClass.getAnnotation(Page.class).startingPage() == true) {
+
+        Page pageAnnotation = pageClass.getAnnotation(Page.class);
+        List<Class<? extends PageRole>> roles = Arrays.asList(pageAnnotation.role());
+        if (pageAnnotation.startingPage() == true || roles.contains(DefaultPage.class)) {
           out.print(" [penwidth=3]");
         }
         out.println();

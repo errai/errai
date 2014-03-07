@@ -34,6 +34,12 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * Configuration is decentralized: it is based on fields and annotations present
  * in other application classes. This configuration is gathered at compile time.
  * 
+ * @see Page
+ * @see PageState
+ * @see PageShowing
+ * @see PageShown
+ * @see PageHiding
+ * @see PageHidden
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @EntryPoint
