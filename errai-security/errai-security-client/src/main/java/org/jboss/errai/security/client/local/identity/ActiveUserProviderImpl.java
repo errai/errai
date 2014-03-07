@@ -7,8 +7,9 @@ import javax.inject.Singleton;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.NonCachingUserService;
 import org.jboss.errai.security.shared.User;
+import org.slf4j.Logger;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -19,10 +20,13 @@ public class ActiveUserProviderImpl implements ActiveUserProvider {
   private static ActiveUserProvider instance;
 
   @Inject
-  private Caller<AuthenticationService> authServiceCaller;
-
-  @Inject
   private LocalStorageHandler storageHandler;
+  
+  @Inject
+  private Caller<NonCachingUserService> userServiceCaller;
+  
+  @Inject
+  private Logger logger;
 
   private boolean valid = false;
 
@@ -38,7 +42,9 @@ public class ActiveUserProviderImpl implements ActiveUserProvider {
 
   @PostConstruct
   private void maybeLoadStoredCache() {
+    logger.debug("PostConstruct invoked.");
     if (!isCacheValid()) {
+      logger.debug("Checking for user in local storage.");
       final User storedUser = storageHandler.getUser();
 
       if (storedUser != null) {
@@ -49,9 +55,11 @@ public class ActiveUserProviderImpl implements ActiveUserProvider {
 
   @AfterInitialization
   private void updateCacheFromServer() {
-    authServiceCaller.call(new RemoteCallback<User>() {
+    logger.debug("AfterInitialization invoked.");
+    userServiceCaller.call(new RemoteCallback<User>() {
       @Override
       public void callback(final User response) {
+        logger.debug("Response received from AfterInitialization RPC: " + String.valueOf(response));
         setActiveUser(response);
       }
     }).getUser();
@@ -68,6 +76,7 @@ public class ActiveUserProviderImpl implements ActiveUserProvider {
   }
 
   private void setActiveUser(User user, boolean localStorage) {
+    logger.debug("Setting active user: " + String.valueOf(user));
     valid = true;
     activeUser = user;
     if (localStorage) {
@@ -87,6 +96,7 @@ public class ActiveUserProviderImpl implements ActiveUserProvider {
 
   @Override
   public void invalidateCache() {
+    logger.debug("Invalidating cache.");
     valid = false;
     activeUser = null;
     storageHandler.setUser(null);
