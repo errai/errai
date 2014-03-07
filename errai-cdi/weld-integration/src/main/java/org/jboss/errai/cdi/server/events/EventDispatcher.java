@@ -241,8 +241,18 @@ public class EventDispatcher implements MessageCallback {
       Class<?> bmImplClass = Class.forName("org.jboss.weld.manager.BeanManagerImpl");
       clearObserverCache(bmImplClass, bm);
       
-      Method accessibleBms = bmImplClass.getMethod("getAccessibleManagers");
-      for (BeanManager accessibleBm : (Iterable<BeanManager>) accessibleBms.invoke(bm)) {
+      Method accessibleBmsMethod = bmImplClass.getMethod("getAccessibleManagers");
+      
+      Iterable<BeanManager> accessibleBms = null;
+      try {
+        accessibleBms = (Iterable<BeanManager>) accessibleBmsMethod.invoke(bm);
+      }
+      catch (IllegalArgumentException e) {
+        bm = unwrapWeldProxy(bm);
+        accessibleBms = (Iterable<BeanManager>) accessibleBmsMethod.invoke(bm);
+      }
+      
+      for (BeanManager accessibleBm : accessibleBms) {
         clearObserverCache(bmImplClass, accessibleBm);
         clearCount++;
       }
@@ -278,18 +288,20 @@ public class EventDispatcher implements MessageCallback {
         getterMethod = bmImplClass.getMethod("getAccessibleObserverNotifier");
       }
       catch (NoSuchMethodException nsme) {
-        // Weld >= 2.1
-        
+        // Weld >= 2.1        
         // In case the bean manager instance is a proxy we need to unwrap it first
-        Class<?> bmProxyClass = Class.forName("org.jboss.weld.bean.builtin.BeanManagerProxy");
-        Method unwrapMethod = bmProxyClass.getMethod("unwrap", BeanManager.class);
-        bm = (BeanManager) unwrapMethod.invoke(null, bm);
-        
+        bm = unwrapWeldProxy(bm);
         getterMethod = bmImplClass.getMethod("getGlobalStrictObserverNotifier");
       }
     }
     Object thingToCallClearOn = getterMethod.invoke(bm);
     Method clearMethod = thingToCallClearOn.getClass().getMethod("clear");
     clearMethod.invoke(thingToCallClearOn);
+  }
+  
+  private static BeanManager unwrapWeldProxy(BeanManager bm) throws Exception {
+    Class<?> bmProxyClass = Class.forName("org.jboss.weld.bean.builtin.BeanManagerProxy");
+    Method unwrapMethod = bmProxyClass.getMethod("unwrap", BeanManager.class);
+    return (BeanManager) unwrapMethod.invoke(null, bm);
   }
 }
