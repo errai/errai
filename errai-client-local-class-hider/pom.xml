@@ -49,6 +49,7 @@
         <configuration>
           <archive>
             <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+            <index>false</index>
           </archive>
         </configuration>
       </plugin>
