@@ -4,8 +4,10 @@ import javax.inject.Provider;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.security.client.local.SecurityProperties;
 import org.jboss.errai.security.shared.User;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.storage.client.Storage;
 
 @IOCProvider
@@ -24,7 +26,7 @@ public class LocalStorageHandlerProvider implements Provider<LocalStorageHandler
 
   private class LocalStorageHandlerImpl implements LocalStorageHandler {
 
-    private static final String storageKey = "ERRAI-ACTIVE-USER";
+    private static final String storageKey = "errai-active-user";
 
     @Override
     public User getUser() {
@@ -58,10 +60,12 @@ public class LocalStorageHandlerProvider implements Provider<LocalStorageHandler
     }
 
   }
+  
+  private final SecurityProperties properties = GWT.create(SecurityProperties.class);
 
   @Override
   public LocalStorageHandler get() {
-    if (Storage.isLocalStorageSupported()) {
+    if (Storage.isLocalStorageSupported() && properties.isLocalStorageAllowed()) {
       return new LocalStorageHandlerImpl();
     }
     else {

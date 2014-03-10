@@ -16,4 +16,8 @@
 
   <source path="client"/>
   <source path="shared"/>
+  
+  <generate-with class="org.jboss.errai.security.rebind.SecurityPropertiesGenerator">
+    <when-type-is class="org.jboss.errai.security.client.local.SecurityProperties" />
+  </generate-with>
 </module>
