@@ -1,18 +1,22 @@
 package org.jboss.errai.demo.todo.client.local.shadow;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.jboss.errai.bus.client.api.BusLifecycleAdapter;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.server.annotations.ShadowService;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
+import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.demo.todo.shared.User;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.persistence.*;
-import java.util.List;
+import org.jboss.errai.security.shared.Role;
 
 /**
  * ShadowService implementation of the SignupService this service will get invoked automatically when the bus
@@ -51,8 +55,16 @@ public class SignupServiceShadow implements SignupService {
   }
 
   @Override
-  public User register(User newUserObject, String password) throws RegistrationException {
+  public RegistrationResult register(User newUserObject, String password) throws RegistrationException {
     entityManager.persist(new TempUser(newUserObject, password));
-    return newUserObject;
+
+    final org.jboss.errai.security.shared.User securityUser = new org.jboss.errai.security.shared.User();
+    securityUser.setLoginName(newUserObject.getLoginName());
+    securityUser.setFullName(newUserObject.getLoginName());
+    securityUser.setShortName(newUserObject.getShortName());
+    securityUser.setEmail(newUserObject.getEmail());
+    securityUser.setRoles(new ArrayList<Role>(0));
+    
+    return new RegistrationResult(newUserObject, securityUser);
   }
 }

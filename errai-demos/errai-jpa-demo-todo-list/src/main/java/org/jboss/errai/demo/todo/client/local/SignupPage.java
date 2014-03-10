@@ -12,6 +12,7 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
+import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.ui.nav.client.local.Page;
@@ -80,9 +81,9 @@ public class SignupPage extends Composite {
     }
 
     try {
-      signupService.call(new RemoteCallback<User>() {
+      signupService.call(new RemoteCallback<RegistrationResult>() {
         @Override
-        public void callback(final User response) {
+        public void callback(final RegistrationResult response) {
           todoListPageLink.go();
         }
       },

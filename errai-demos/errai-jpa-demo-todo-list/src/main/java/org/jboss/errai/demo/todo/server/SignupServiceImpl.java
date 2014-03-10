@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
+import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.picketlink.idm.IdentityManager;
@@ -23,11 +24,11 @@ public class SignupServiceImpl implements SignupService {
 
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
-  public org.jboss.errai.demo.todo.shared.User register(org.jboss.errai.demo.todo.shared.User newUserObject, String password) throws RegistrationException {
+  public RegistrationResult register(org.jboss.errai.demo.todo.shared.User newUserObject, String password) throws RegistrationException {
     final String email = newUserObject.getEmail().toLowerCase();
     User user = new User(email);
     user.setEmail(email);
-    user.setFirstName("");
+    user.setFirstName(newUserObject.getShortName());
     user.setLastName(newUserObject.getFullName());
     identityManager.add(user);
     identityManager.updateCredential(user, new Password(password));
@@ -40,7 +41,8 @@ public class SignupServiceImpl implements SignupService {
     entityManager.detach(newUserObject);
 
     System.out.println("Saved new user " + newUserObject + " (id=" + newUserObject.getEmail() + ")");
-    service.login(newUserObject.getEmail(), password);
-    return newUserObject;
+    final org.jboss.errai.security.shared.User securityUser = service.login(newUserObject.getEmail(), password);
+    
+    return new RegistrationResult(newUserObject, securityUser);
   }
 }

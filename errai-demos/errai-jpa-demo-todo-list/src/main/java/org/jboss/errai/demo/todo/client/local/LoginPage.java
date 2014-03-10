@@ -82,12 +82,7 @@ public class LoginPage extends Composite {
             }, new BusErrorCallback() {
               @Override
               public boolean error(Message message, Throwable throwable) {
-                if (throwable.getMessage().contains("org.picketlink.authentication.UserAlreadyLoggedInException")) {
-                  toListPage.go();
-                }
-                else {
-                  loginError.setVisible(true);
-                }
+                loginError.setVisible(true);
 
                 return false;
               }
