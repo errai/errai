@@ -61,7 +61,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     User user = new User();
     user.setLoginName(picketLinkUser.getLoginName());
     user.setFullName(picketLinkUser.getFirstName() + " " + picketLinkUser.getLastName());
-    user.setShortName(picketLinkUser.getLastName());
+    user.setShortName(picketLinkUser.getFirstName());
     user.setEmail(picketLinkUser.getEmail());
     user.setRoles(roles);
     return user;

@@ -77,7 +77,7 @@ public class TodoListPage extends Composite {
       @Override
       public void callback(final User result) {
         user = result;
-        username.setText(user.getFullName());
+        username.setText(user.getShortName());
         errorLabel.setVisible(false);
         refreshItems();
 
