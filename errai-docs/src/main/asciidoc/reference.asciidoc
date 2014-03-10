@@ -6901,6 +6901,84 @@ public class AdminManagementPage extends SimplePanel {
 When a user is denied access to a page they will be redirected to `LoginPage` or `SecurityError`. To direct a user to the page they were trying to reach after successful login, `@Inject` and invoke the `org.jboss.errai.security.client.local.nav.PageReturn`.
 ====
 
+===== Page Redirection and Caching
+
+Security checks performed before page navigation do not use any RPC calls, but are instead performed from a cached (in-memory) instance of the `org.jboss.errai.security.shared.User`. This prevents the possibility of lengthy delays between page navigation while waiting for RPC return values.
+
+But the drawback is that any attempts to navigate to a secured `@Page` before the cache is populated will result in redirection to the `LoginPage` -- even if the user is in fact logged in.
+
+In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.
+
+One option offered by Errai is to persist the `org.jboss.errai.security.shared.User` object in the browsers local storage. This can be done by adding the following to `ErraiApp.properties`:
+
+----
+errai.security.userLocalStorage=true
+----
+
+With this option enabled the `User` will be persisted to local storage, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline.
+
+[IMPORTANT]
+.User is stored in plain text
+====
+The `errai.security.userLocalStorage=true` setting causes the `User` to be stored in *plain text* in local storage. That includes the following information:
+
+* The user's login name.
+* The user's full name.
+* The user's email address.
+* The user's security roles.
+====
+
+If you do not wish to use local storage, you will likely want to handle this case in the `@PageShowing` method of your `LoginPage`. Here is an outline of what you might want to do:
+
+[source,java]
+----
+@Page(role = LoginPage.class)
+@Templated
+public class ExampleLoginPage extends Composite {
+
+  @Inject
+  private ActiveUserProvider userProvider;
+
+  @Inject
+  private Caller<AuthenticationService> authService;
+
+  @Inject
+  private PageReturn transition;
+
+  @Inject
+  @DataField
+  private Label status;
+
+  @PageShowing
+  public void checkForPendingCache() {
+    // Check if cache is invalid.
+    if (!userProvider.isCacheValid()) {
+      // Update the status.
+      status.setText("loading...");
+
+      // Force cache to update by calling getUser
+      authService.call(new RemoteCallback<User> {
+        @Override
+        public void callback(User response) {
+          /* An interceptor will have updated the cache by now.
+             So check if we are logged in and redirect if necessary.
+          */
+          if (response != null) {
+            /* This is a special transition that takes us back to
+               a secure page from which we were redirected. */
+            transition.goBackOrHome();
+          }
+          else {
+            status.setText("You are not logged in.");
+          }
+        }
+      });
+    }
+  }
+
+}
+----
+
 ==== Hiding UI Elements
 
 Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have `display: none` added to it's CSS style.
