@@ -6,8 +6,14 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.enterprise.inject.Specializes;
+import javax.inject.Named;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Modifier;
@@ -22,6 +28,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.api.LoadAsync;
+import org.jboss.errai.ioc.client.api.LoadAsync.NO_FRAGMENT;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanContext;
@@ -40,14 +47,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
-import javax.enterprise.inject.Specializes;
-import javax.inject.Named;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 
 /**
  * @author Mike Brock
@@ -134,7 +135,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     else {
       targetBlock = callbackBuilder;
     }
-        /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
+    /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
     ctx.pushBlockBuilder(targetBlock);
 
     targetBlock.append(
@@ -198,12 +199,14 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
 
       final String frameworkOrSystemProperty
           = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.testing.simulated_loadasync_latency");
-      if (Boolean.parseBoolean(frameworkOrSystemProperty)) {
-        callbackBuilder.append(Stmt.invokeStatic(FakeGWT.class, "runAsync", objectBuilder));
-      }
-      else {
-        callbackBuilder.append(Stmt.invokeStatic(GWT.class, "runAsync", objectBuilder));
-      }
+      
+      Class<?> fragmentName = type.getAnnotation(LoadAsync.class).value();
+      
+      Class<?> gwtClass = Boolean.parseBoolean(frameworkOrSystemProperty) ? FakeGWT.class : GWT.class;
+      Statement asyncStatement = (NO_FRAGMENT.class.equals(fragmentName)) ? 
+            Stmt.invokeStatic(gwtClass, "runAsync", objectBuilder) :
+              Stmt.invokeStatic(gwtClass, "runAsync", fragmentName, objectBuilder);
+      callbackBuilder.append(asyncStatement);
     }
     /*
       declare a final variable for the BeanProvider and initialize it with the anonymous class we just
@@ -343,6 +346,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     return qualifiers;
   }
 
+  @Override
   public boolean isPseudo() {
     return replaceable;
   }
@@ -357,6 +361,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     return type;
   }
 
+  @Override
   public String getCreationalCallbackVarName() {
     return creationalCallbackVarName;
   }

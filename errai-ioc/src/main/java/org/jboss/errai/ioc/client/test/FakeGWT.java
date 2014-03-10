@@ -16,6 +16,11 @@ public class FakeGWT {
   public static Throwable trace;
   private static final Logger logger = LoggerFactory.getLogger(FakeGWT.class);
 
+  public static void runAsync(final Class<?> fragmentName, final RunAsyncCallback callback) {
+    // no use for the fragment name here.
+    runAsync(callback);
+  }
+  
   public static void runAsync(final RunAsyncCallback callback) {
     final int delay = Random.nextInt(50) + 1;
 

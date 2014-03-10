@@ -16,16 +16,15 @@
 
 package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 
-import org.jboss.errai.ioc.client.api.LoadAsync;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
 
 /**
  * @author Mike Brock
  */
-@Singleton @LoadAsync
+@Singleton @LoadAsync(ServiceA.class)
 public class Bean {
   @Inject private ServiceA serviceA;
   @Inject private ServiceB serviceB;

@@ -16,19 +16,20 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
-import com.google.gwt.user.client.Random;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
-import org.jboss.errai.ioc.client.api.LoadAsync;
-
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.inject.*;
+import javax.inject.Inject;
+
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
+import com.google.gwt.user.client.Random;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped @LoadAsync
+@ApplicationScoped @LoadAsync(DependentScopedBean.class)
 public class ApplicationScopedBean {
   @Inject DependentScopedBean bean1;
   @Inject DependentScopedBean bean2;

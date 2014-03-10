@@ -27,5 +27,5 @@ public @interface LoadAsync {
    */
   Class<?> value() default org.jboss.errai.ioc.client.api.LoadAsync.NO_FRAGMENT.class;
 
-  static abstract class NO_FRAGMENT {};
+  public static abstract class NO_FRAGMENT {};
 }
