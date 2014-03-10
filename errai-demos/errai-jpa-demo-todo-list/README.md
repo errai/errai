@@ -59,6 +59,8 @@ Once the above command has completed, you should be able to access the app at th
 
 Code-and-Refresh
 ----------------
+Configure Development mode to use your JBoss or EAP server by setting the `errai.jboss.home` property in the `pom.xml`
+ to the full path to the home directory of the application server.
 
 To try it in GWT's dev mode, after completing the above steps, do this:
 
