@@ -27,6 +27,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Singleton;
 
 import org.jboss.errai.codegen.BlockStatement;
+import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
@@ -34,6 +35,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -132,8 +134,12 @@ public abstract class ProxyUtil {
                               Stmt.loadVariable("interceptorErrorCallback").invoke("error", Variable.get("message"),
                                   Variable.get("throwable")))
                           .append(
+                              Stmt.if_(BooleanExpressionBuilder.create(
+                                      Stmt.loadVariable("providedErrorCallback"), BooleanOperator.NotEquals, Stmt.loadLiteral(null)))
+                              .append(
                               Stmt.loadVariable("providedErrorCallback").invoke("error", Variable.get("message"),
                                   Variable.get("throwable")))
+                              .finish())
                           .append(Stmt.load(true).returnValue())
                           .finish()
                           .finish())
