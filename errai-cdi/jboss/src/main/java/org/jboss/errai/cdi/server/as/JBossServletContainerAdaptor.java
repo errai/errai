@@ -20,7 +20,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 /**
  * Acts as a an adaptor between gwt's ServletContainer interface and a JBoss AS
  * 7 instance.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class JBossServletContainerAdaptor extends ServletContainer {
@@ -35,7 +35,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
   /**
    * Initialize the command context for a remote JBoss AS instance.
-   * 
+   *
    * @param port
    *          The port to which the JBoss instance binds.
    * @param appRootDir
@@ -62,7 +62,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
       try {
         logger.branch(Type.INFO, "Creating new command context...");
 
-        ctx = CommandContextFactory.getInstance().newCommandContext();
+        ctx = CommandContextFactory.getInstance().newCommandContext("remote://localhost:9999", null, null);
         this.ctx = ctx;
 
         logger.log(Type.INFO, "Command context created");
@@ -77,7 +77,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
       try {
         /*
          * Need to add deployment resource to specify exploded archive
-         * 
+         *
          * path : the absolute path the deployment file/directory archive : true
          * iff the an archived file, false iff an exploded archive enabled :
          * true iff war should be automatically scanned and deployed
@@ -150,7 +150,8 @@ public class JBossServletContainerAdaptor extends ServletContainer {
   private void attemptCommandContextConnection(final int maxRetries) throws UnableToCompleteException {
     for (int retry = 0; retry < maxRetries; retry++) {
       try {
-        logger.branch(Type.INFO, "Attempting to connect to JBoss AS...");
+        logger.branch(Type.INFO, "Attempting to connect to JBoss AS at " +
+                ctx.getDefaultControllerHost() + ":" + ctx.getDefaultControllerPort());
         ctx.connectController();
         logger.log(Type.INFO, "Connected to JBoss AS");
 

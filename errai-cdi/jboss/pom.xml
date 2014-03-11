@@ -7,7 +7,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <jboss.version>7.2.0.Final</jboss.version>
+    <jboss.version>8.0.0.Final</jboss.version>
   </properties>
 
   <!-- Parent -->
@@ -28,24 +28,15 @@
 
     <!-- JBoss -->
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-cli</artifactId>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-cli</artifactId>
       <version>${jboss.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.jboss.as</groupId>
-          <artifactId>jboss-as-build-config</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.jboss.remoting3</groupId>
-          <artifactId>jboss-remoting</artifactId>
+          <groupId>org.wildfly</groupId>
+          <artifactId>wildfly-build-config</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-        <groupId>org.jboss.remoting3</groupId>
-        <artifactId>jboss-remoting</artifactId>
-        <version>3.2.14.GA</version>
     </dependency>
 
     <dependency>
@@ -70,4 +61,23 @@
 
   </dependencies>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.remoting</groupId>
+        <artifactId>jboss-remoting</artifactId>
+        <version>4.0.0.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.xnio</groupId>
+        <artifactId>xnio-api</artifactId>
+        <version>3.2.0.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.xnio</groupId>
+        <artifactId>xnio-nio</artifactId>
+        <version>3.2.0.Final</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
