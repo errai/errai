@@ -1,6 +1,7 @@
 package org.jboss.errai.security.client.local.identity;
 
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.marshalling.client.Marshalling;
@@ -11,6 +12,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.storage.client.Storage;
 
 @IOCProvider
+@Singleton
 public class LocalStorageHandlerProvider implements Provider<LocalStorageHandler> {
 
   private class NoopStorageHandler implements LocalStorageHandler {
