@@ -1867,7 +1867,7 @@ It may be necessary at times to manually obtain instances of beans managed by Er
 
 As you might expect, you can inject a bean manager instance into any of your managed beans. If you use Errai IOC in its default mode you will need to inject the synchronous bean manager ( [code]+org.jboss.errai.ioc.client.container.SyncBeanManager+ ).
 
-If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager ( [code]+org.jboss.errai.ioc.client.container.async.AsyncBeanManager+ ) instead. Asynchronous IOC brings support for link:$$http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html$$[code splitting] . That means that any bean annotated with [code]+@LoadAsync+ can be compiled into a separate JavaScript file that's downloaded when the bean is first needed on the client.
+If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager ( [code]+org.jboss.errai.ioc.client.container.async.AsyncBeanManager+ ) instead. Asynchronous IOC brings support for link:$$http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html$$[code splitting] . That means that any bean annotated with [code]+@LoadAsync+ can be compiled into a separate JavaScript file that's downloaded when the bean is first needed on the client. [code]+@LoadAsync+ also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same JavaScript file.
 
 .Injecting the client-side bean manager
 ====
@@ -7303,6 +7303,8 @@ Errai also supports configuring portable types in [code]+ErraiApp.properties+ as
 * _errai.ioc.QualifyingMetaDataFactory_ specifies the fully-qualified class name of the QualifyingMetadataFactory implementation to use with Errai IoC.
 
 * _errai.ioc.enabled.alternatives_ specifies a whitespace-separated list of fully-qualified class names for _alternative beans_ . See <<sid-22872133, Alternatives and Mocks>> for details.
+
+* _errai.ioc.async_bean_manager_ a boolean property that when set to true (defaults to false) will activate asynchronous IOC to allow for link:$$http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html$$[code splitting]. The code of types annotated with [code]+@LoadAsync+ will be downloaded the first time it is needed. [code]+@LoadAsync+ also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same split point.
 
 * _errai.ioc.blacklist_ specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).
 
