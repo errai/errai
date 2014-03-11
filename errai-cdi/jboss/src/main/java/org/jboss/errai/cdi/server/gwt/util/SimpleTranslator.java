@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;

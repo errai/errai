@@ -33,6 +33,10 @@ public class JBossServletContainerAdaptor extends ServletContainer {
   @SuppressWarnings("unused")
   private final Process jbossProcess;
 
+  private static final String NATIVE_CONTROLLER_PATH = "remote://localhost:9999";
+  private static final String HTTP_CONTROLLER_PATH = "http-remoting://localhost:9990";
+  private static final int MAX_RETRIES = 9;
+
   /**
    * Initialize the command context for a remote JBoss AS instance.
    *
@@ -60,19 +64,20 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     try {
       // Create command context
       try {
-        logger.branch(Type.INFO, "Creating new command context...");
 
-        ctx = CommandContextFactory.getInstance().newCommandContext("remote://localhost:9999", null, null);
+        logger.branch(Type.INFO, "Creating new command context...");
+        ctx = CommandContextFactory.getInstance().newCommandContext();
         this.ctx = ctx;
 
         logger.log(Type.INFO, "Command context created");
         logger.unbranch();
-      } catch (CliInitializationException e) {
+      }
+      catch (CliInitializationException e) {
         logger.branch(TreeLogger.Type.ERROR, "Could not initialize JBoss AS command context", e);
         throw new UnableToCompleteException();
       }
 
-      attemptCommandContextConnection(9);
+      attemptCommandContextConnection(MAX_RETRIES);
 
       try {
         /*
@@ -95,14 +100,16 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
         logger.log(Type.INFO, "Deployment resource added");
         logger.unbranch();
-      } catch (IOException e) {
+      }
+      catch (IOException e) {
         logger.branch(Type.ERROR, String.format("Could not add deployment %s", getAppName()), e);
         throw new UnableToCompleteException();
       }
 
       attemptDeploy();
 
-    } catch (UnableToCompleteException e) {
+    }
+    catch (UnableToCompleteException e) {
       logger.branch(Type.INFO, "Attempting to stop container...");
       stopHelper();
 
@@ -139,40 +146,64 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
       logger.log(Type.INFO, String.format("%s removed", getAppName()));
       logger.unbranch();
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       logger.log(Type.ERROR, "Could not shutdown AS", e);
       throw new UnableToCompleteException();
-    } finally {
+    }
+    finally {
       stopHelper();
     }
   }
 
-  private void attemptCommandContextConnection(final int maxRetries) throws UnableToCompleteException {
-    for (int retry = 0; retry < maxRetries; retry++) {
-      try {
-        logger.branch(Type.INFO, "Attempting to connect to JBoss AS at " +
-                ctx.getDefaultControllerHost() + ":" + ctx.getDefaultControllerPort());
-        ctx.connectController();
-        logger.log(Type.INFO, "Connected to JBoss AS");
+  private void attemptCommandContextConnection(final int maxRetries)
+          throws UnableToCompleteException {
 
-        return;
-      } catch (CommandLineException e) {
-        if (retry < maxRetries) {
-          logger.log(Type.INFO, String.format("Attempt %d failed", retry + 1), e);
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException e1) {
-            logger.log(Type.WARN, "Thread was interrupted while waiting for AS to reload", e1);
-          }
+    final String[] controllers = new String[] {
+        HTTP_CONTROLLER_PATH,
+        NATIVE_CONTROLLER_PATH
+    };
+    final String[] protocols = new String[controllers.length];
+    for (int i = 0; i < controllers.length; i++) {
+      protocols[i] = controllers[i].split(":", 2)[0];
+    }
+
+    for (int retry = 0; retry < maxRetries; retry++) {
+      for (int i = 0; i < controllers.length; i++) {
+        final String controller = controllers[i];
+        final String protocol = protocols[i];
+        try {
+          logger.branch(Type.INFO, String.format("Attempting to connect with %s protocol.", protocol));
+          ctx.connectController(controller);
+          logger.log(Type.INFO, "Connected to JBoss AS");
+
+          return;
         }
-        else {
-          logger.log(Type.ERROR, "Could not connect to AS", e);
-          throw new UnableToCompleteException();
+        catch (CommandLineException e) {
+          logger.log(
+                  Type.INFO,
+                  String.format("Attempt %d failed at connecting with %s protocol", retry + 1, protocol),
+                  e);
         }
-      } finally {
-        logger.unbranch();
+        finally {
+          logger.unbranch();
+        }
+      }
+
+      // No connection attempts have succeeded, so wait a bit before trying
+      // again.
+      if (retry < maxRetries) {
+        try {
+          Thread.sleep(1000);
+        }
+        catch (InterruptedException e1) {
+          logger.log(Type.WARN, "Thread was interrupted while waiting for AS to reload", e1);
+        }
       }
     }
+
+    logger.log(Type.ERROR, "Could not connect to AS");
+    throw new UnableToCompleteException();
   }
 
   private void stopHelper() {
@@ -191,7 +222,8 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
       logger.log(Type.INFO, "JBoss AS instance stopped");
       logger.unbranch();
-    } catch (CommandLineException e) {
+    }
+    catch (CommandLineException e) {
       logger.log(Type.ERROR, "Could not shutdown JBoss AS instance. "
               + "Restarting this container while a JBoss AS instance is still running will cause errors.");
     }
@@ -224,7 +256,8 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
       logger.log(Type.INFO, String.format("%s %sed", getAppName(), opName));
       logger.unbranch();
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       logger.branch(Type.ERROR, String.format("Could not %s %s", opName, getAppName()), e);
       throw new UnableToCompleteException();
     }
