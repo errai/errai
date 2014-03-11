@@ -3,6 +3,7 @@ package org.jboss.errai.security.client.local.nav;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.jboss.errai.security.client.local.util.SecurityUtil;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 
@@ -18,7 +19,7 @@ public class PageReturnImpl implements PageReturn {
 
   @Override
   public void goBackOrHome() {
-    final String lastPage = SecurityNavigationUtil.getLastCachedPageName();
+    final String lastPage = SecurityUtil.getLastCachedPageName();
     if (lastPage != null) {
       nav.goTo(lastPage);
     }

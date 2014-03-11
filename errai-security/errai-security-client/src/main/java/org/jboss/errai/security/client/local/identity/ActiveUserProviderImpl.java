@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.security.client.local.util.SecurityUtil;
 import org.jboss.errai.security.shared.NonCachingUserService;
 import org.jboss.errai.security.shared.User;
 import org.slf4j.Logger;
@@ -60,7 +61,7 @@ public class ActiveUserProviderImpl implements ActiveUserProvider {
       @Override
       public void callback(final User response) {
         logger.debug("Response received from AfterInitialization RPC: " + String.valueOf(response));
-        setActiveUser(response);
+        SecurityUtil.performLoginStatusChangeActions(response);
       }
     }).getUser();
   }

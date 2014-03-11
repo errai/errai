@@ -9,6 +9,7 @@ import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
+import org.jboss.errai.security.client.local.util.SecurityUtil;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
@@ -47,7 +48,7 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
       else
         destination = SecurityError.class;
       
-      SecurityNavigationUtil.navigateToPage(destination);
+      SecurityUtil.navigateToPage(destination);
     }
   }
 

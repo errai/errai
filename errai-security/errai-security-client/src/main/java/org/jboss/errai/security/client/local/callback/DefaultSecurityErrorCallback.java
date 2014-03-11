@@ -3,7 +3,7 @@ package org.jboss.errai.security.client.local.callback;
 import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.api.UncaughtException;
-import org.jboss.errai.security.client.local.nav.SecurityNavigationUtil;
+import org.jboss.errai.security.client.local.util.SecurityUtil;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -24,10 +24,10 @@ public class DefaultSecurityErrorCallback {
   @UncaughtException
   private void handleError(final Throwable throwable) {
     if (throwable instanceof UnauthenticatedException) {
-      SecurityNavigationUtil.navigateToPage(LoginPage.class);
+      SecurityUtil.navigateToPage(LoginPage.class);
     }
     else if (throwable instanceof UnauthorizedException) {
-      SecurityNavigationUtil.navigateToPage(SecurityError.class);
+      SecurityUtil.navigateToPage(SecurityError.class);
     }
 
   }

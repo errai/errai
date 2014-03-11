@@ -6,16 +6,24 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
+import javax.enterprise.event.Event;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
 import org.jboss.errai.security.client.local.identity.LocalStorageHandler;
+import org.jboss.errai.security.client.local.util.SecurityUtil;
+import org.jboss.errai.security.client.local.util.SecurityUtil.SecurityModule;
 import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.LoggedInEvent;
+import org.jboss.errai.security.shared.LoggedOutEvent;
 import org.jboss.errai.security.shared.NonCachingUserService;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.security.util.GwtMockitoRunnerExtension;
+import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +45,14 @@ public class UserCacheTest {
   private NonCachingUserService authService;
   @Mock
   private Logger logger;
+  @Mock
+  private Event<LoggedInEvent> loginEvent;
+  @Mock
+  private Event<LoggedOutEvent> logoutEvent;
+  @Mock
+  private Navigation nav;
+  @InjectMocks
+  private SecurityModule module;
   @InjectMocks
   private ActiveUserProviderImpl userProvider;
 
@@ -67,11 +83,19 @@ public class UserCacheTest {
   }
 
   @Before
-  public void setup() throws NoSuchMethodException, SecurityException {
+  public void setup() throws NoSuchMethodException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
     loadMethod = userProvider.getClass().getDeclaredMethod("maybeLoadStoredCache");
     rpcMethod = userProvider.getClass().getDeclaredMethod("updateCacheFromServer");
     loadMethod.setAccessible(true);
     rpcMethod.setAccessible(true);
+    
+    final Field securityField = SecurityUtil.class.getDeclaredField("moduleInstance");
+    securityField.setAccessible(true);
+    securityField.set(null, module);
+    
+    final Field moduleField = SecurityModule.class.getDeclaredField("userProvider");
+    moduleField.setAccessible(true);
+    moduleField.set(module, userProvider);
   }
 
   @Test

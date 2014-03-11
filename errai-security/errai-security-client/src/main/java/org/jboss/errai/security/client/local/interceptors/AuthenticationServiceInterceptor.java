@@ -4,14 +4,11 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
-import org.jboss.errai.common.client.util.CreationalCallback;
-import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
-import org.jboss.errai.security.client.local.identity.UserEventModule;
+import org.jboss.errai.security.client.local.util.SecurityUtil;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
-import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 /**
  * Intercepts RPC logins through {@link AuthenticationService} for populating
@@ -56,47 +53,13 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
 
       @Override
       public void callback(final User response) {
-        if (response != null) {
-          IOC.getAsyncBeanManager().lookupBean(ActiveUserProvider.class)
-                  .getInstance(new CreationalCallback<ActiveUserProvider>() {
-
-                    @Override
-                    public void callback(final ActiveUserProvider provider) {
-                      provider.setActiveUser(response);
-                      IOC.getAsyncBeanManager().lookupBean(UserEventModule.class)
-                              .getInstance(new CreationalCallback<UserEventModule>() {
-
-                                @Override
-                                public void callback(final UserEventModule module) {
-                                  module.fireLoggedInEvent(response);
-                                }
-                              });
-                      StyleBindingsRegistry.get().updateStyles();
-                    }
-                  });
-        }
+        SecurityUtil.performLoginStatusChangeActions(response);
       }
     });
   }
 
   private void logout(final RemoteCallContext context) {
-    IOC.getAsyncBeanManager().lookupBean(ActiveUserProvider.class)
-            .getInstance(new CreationalCallback<ActiveUserProvider>() {
-
-              @Override
-              public void callback(final ActiveUserProvider provider) {
-                provider.setActiveUser(null);
-                IOC.getAsyncBeanManager().lookupBean(UserEventModule.class)
-                        .getInstance(new CreationalCallback<UserEventModule>() {
-
-                          @Override
-                          public void callback(final UserEventModule module) {
-                            module.fireLoggedOutEvent();
-                          }
-                        });
-                StyleBindingsRegistry.get().updateStyles();
-              }
-            });
+    SecurityUtil.performLoginStatusChangeActions(null);
     context.proceed();
   }
 
@@ -110,7 +73,7 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
 
         @Override
         public void callback(final User response) {
-          provider.setActiveUser(response);
+          SecurityUtil.performLoginStatusChangeActions(response);
         }
       });
     }
