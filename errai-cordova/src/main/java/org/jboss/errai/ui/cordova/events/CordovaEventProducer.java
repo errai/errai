@@ -1,11 +1,18 @@
 package org.jboss.errai.ui.cordova.events;
 
-import com.googlecode.gwtphonegap.client.event.*;
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import org.jboss.errai.ioc.client.api.AfterInitialization;
+
+import com.googlecode.gwtphonegap.client.event.BatteryCriticalHandler;
+import com.googlecode.gwtphonegap.client.event.BatteryLowHandler;
+import com.googlecode.gwtphonegap.client.event.BatteryStatusHandler;
+import com.googlecode.gwtphonegap.client.event.OffLineHandler;
+import com.googlecode.gwtphonegap.client.event.OnlineHandler;
+import com.googlecode.gwtphonegap.client.event.PauseHandler;
+import com.googlecode.gwtphonegap.client.event.ResumeHandler;
 
 /**
  * @author edewit@redhat.com

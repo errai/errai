@@ -1,11 +1,25 @@
 package org.jboss.errai.ui.cordova.events;
 
-import com.googlecode.gwtphonegap.client.event.*;
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import org.jboss.errai.ioc.client.api.AfterInitialization;
+
+import com.googlecode.gwtphonegap.client.event.BackButtonPressedEvent;
+import com.googlecode.gwtphonegap.client.event.BackButtonPressedHandler;
+import com.googlecode.gwtphonegap.client.event.EndCallButtonPressedEvent;
+import com.googlecode.gwtphonegap.client.event.EndCallButtonPressedHandler;
+import com.googlecode.gwtphonegap.client.event.MenuButtonPressedEvent;
+import com.googlecode.gwtphonegap.client.event.MenuButtonPressedHandler;
+import com.googlecode.gwtphonegap.client.event.SearchButtonPressedEvent;
+import com.googlecode.gwtphonegap.client.event.SearchButtonPressedHandler;
+import com.googlecode.gwtphonegap.client.event.StartCallButtonPressedEvent;
+import com.googlecode.gwtphonegap.client.event.StartCallButtonPressedHandler;
+import com.googlecode.gwtphonegap.client.event.VolumeDownButtonPressedEvent;
+import com.googlecode.gwtphonegap.client.event.VolumeDownButtonPressedHandler;
+import com.googlecode.gwtphonegap.client.event.VolumeUpButtonPressedEvent;
+import com.googlecode.gwtphonegap.client.event.VolumeUpButtonPressedHandler;
 
 /**
  * @author edewit@redhat.com
