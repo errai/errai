@@ -3,7 +3,6 @@ package org.jboss.errai.ioc.rebind.ioc.injector.async;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Refs;
@@ -15,7 +14,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 
 /**
  * @author Mike Brock
@@ -83,6 +81,10 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
 
     }
     else {
+      /*
+       * Fix for ERRAI-705. Forces the injector to be rendered if it is pseudo-dependent.
+       */
+      providerInjector.renderProvider(injectableInstance);
 
       block.append(
           Stmt.loadVariable(providerInjector.getCreationalCallbackVarName())
