@@ -2,12 +2,13 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+   <!-- This is inherited from the web-fragment.xml in errai-javaee-all -->
   <!--<servlet>-->
     <!--<servlet-name>ErraiServlet</servlet-name>-->
     <!--<servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>-->
     <!--<init-param>-->
       <!--<param-name>auto-discover-services</param-name>-->
-      <!--<param-value>true</param-value>-->
+      <!--<param-value>false</param-value>-->
     <!--</init-param>-->
     <!--<load-on-startup>1</load-on-startup>-->
   <!--</servlet>-->
@@ -16,4 +17,9 @@
     <!--<servlet-name>ErraiServlet</servlet-name>-->
     <!--<url-pattern>*.erraiBus</url-pattern>-->
   <!--</servlet-mapping>-->
+
+  <servlet-mapping>
+    <servlet-name>javax.ws.rs.core.Application</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
+  </servlet-mapping>
 </web-app>
