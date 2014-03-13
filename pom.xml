@@ -416,7 +416,7 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.4</version>
+        <version>${version.commons-codec}</version>
       </dependency>
 
       <dependency>
