@@ -304,7 +304,6 @@
         <version>3.9.0-build-16</version>
       </dependency>
 
-
       <dependency>
         <groupId>com.googlecode.gwtphonegap</groupId>
         <artifactId>gwtphonegap</artifactId>
@@ -406,6 +405,12 @@
         <groupId>com.sun.grizzly</groupId>
         <artifactId>grizzly-nio-framework</artifactId>
         <version>1.9.19-beta2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${version.commons-lang}</version>
       </dependency>
 
       <dependency>
