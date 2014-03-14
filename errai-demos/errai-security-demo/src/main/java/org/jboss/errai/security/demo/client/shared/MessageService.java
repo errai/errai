@@ -10,14 +10,16 @@ import org.jboss.errai.security.shared.RequireRoles;
 /**
  * @author edewit@redhat.com
  */
-@Path("message")
+@Path("/message")
 public interface MessageService {
   @RequireAuthentication
+  @Path("/hello")
   @GET
   @Produces("application/json")
   String hello();
 
   @RequireRoles("admin")
+  @Path("/ping")
   @GET
   @Produces("application/json")
   String ping();

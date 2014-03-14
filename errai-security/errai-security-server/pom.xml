@@ -55,6 +55,11 @@
       <artifactId>weld-se-core</artifactId>
       <scope>provided</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>jaxrs-api</artifactId>
+    </dependency>
 
     <!-- Test Deps -->
     <dependency>

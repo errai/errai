@@ -363,7 +363,6 @@
           <groupId>de.benediktmeurer.gwt-slf4j</groupId>
           <artifactId>gwt-slf4j</artifactId>
           <scope>provided</scope>
-          <version>0.0.2</version>
         </dependency>
         <dependency>
           <groupId>org.hibernate</groupId>
