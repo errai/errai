@@ -47,7 +47,6 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
         super.send(message);
       }
     };
-
     backupBus = UntestableFrameworkUtil.installAlternativeBusImpl(fakeBus);
 
     InitVotes.reset();
@@ -56,12 +55,14 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    UntestableFrameworkUtil.installAlternativeBusImpl(backupBus);
     messageBeanTypeLog.clear();
     if (testTimer != null) {
       testTimer.cancel();
     }
     super.gwtTearDown();
+    
+    ClientMessageBusImpl fakeBus = UntestableFrameworkUtil.installAlternativeBusImpl(backupBus);
+    fakeBus.stop(true);
   }
 
   @Test

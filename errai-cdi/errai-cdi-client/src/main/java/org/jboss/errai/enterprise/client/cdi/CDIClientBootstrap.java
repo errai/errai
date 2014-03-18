@@ -40,11 +40,9 @@ import com.google.gwt.core.client.EntryPoint;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CDIClientBootstrap implements EntryPoint {
-  static final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
   private static final Logger logger = LoggerFactory.getLogger(CDIClientBootstrap.class);
 
   final static Runnable initRemoteCdiSubsystem = new Runnable() {
-
     @Override
     public void run() {
       logger.info("CDI subsystem syncing with server ...");
@@ -71,7 +69,7 @@ public class CDIClientBootstrap implements EntryPoint {
       MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
           .command(CDICommands.AttachRemote)
           .errorsHandledBy(serverDispatchErrorCallback)
-          .sendNowWith(bus);
+          .sendNowWith(ErraiBus.get());
 
       CDI.resendSubscriptionRequestForAllEventTypes();
 
@@ -85,10 +83,9 @@ public class CDIClientBootstrap implements EntryPoint {
   };
 
   final static Runnable declareServices = new Runnable() {
-    final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
-
     @Override
     public void run() {
+      final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
       if (!bus.isSubscribed(CDI.CLIENT_DISPATCHER_SUBJECT)) {
         logger.info("declare CDI dispatch service");
         bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
