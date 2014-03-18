@@ -1,107 +1,27 @@
 package org.jboss.errai.security.client.local;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createCall;
-import junit.framework.AssertionFailedError;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
+import org.jboss.errai.security.client.local.res.Counter;
+import org.jboss.errai.security.client.local.res.ErrorCountingCallback;
 import org.jboss.errai.security.client.shared.AdminService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
 import org.jboss.errai.security.client.shared.DiverseService;
 import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
-import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
-import org.jboss.errai.ui.nav.client.local.DefaultPage;
-import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.junit.Test;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
-import com.google.gwt.user.client.Timer;
-
-public class SecurityInterceptorTest extends AbstractErraiCDITest {
-
-  public static long TIME_LIMIT = 60000;
-
-  private static class Counter {
-    private int count = 0;
-
-    public void increment() {
-      count += 1;
-    }
-
-    public int getCount() {
-      return count;
-    }
-  }
-
-  private class ErrorCountingCallback extends BusErrorCallback {
-    private final Counter counter;
-    private final Class<? extends SecurityException> throwType;
-
-    public ErrorCountingCallback(final Counter counter, final Class<? extends SecurityException> throwType) {
-      this.counter = counter;
-      this.throwType = throwType;
-    }
-
-    @Override
-    public boolean error(Message message, Throwable throwable) {
-      if (throwable.getClass().equals(throwType)) {
-        counter.increment();
-        return false;
-      }
-      else {
-        return true;
-      }
-    }
-  }
-
-  @Override
-  protected void gwtSetUp() throws Exception {
-    final UncaughtExceptionHandler oldHandler = GWT.getUncaughtExceptionHandler();
-    GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-      @Override
-      public void onUncaughtException(Throwable t) {
-        if (!(t instanceof SecurityException)) {
-          // let's not swallow assertion errors
-          oldHandler.onUncaughtException(t);
-        }
-      }
-    });
-
-    super.gwtSetUp();
-
-    CDI.addPostInitTask(new Runnable() {
-
-      @Override
-      public void run() {
-        final Navigation nav = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
-        nav.goToWithRole(DefaultPage.class);
-      }
-    });
-  }
-
-  @Override
-  protected void gwtTearDown() throws Exception {
-    ((ClientMessageBusImpl) ErraiBus.get()).removeAllUncaughtExceptionHandlers();
-    super.gwtTearDown();
-  }
-
-  @Override
-  public String getModuleName() {
-    return "org.jboss.errai.security.SecurityInterceptorTest";
-  }
+/**
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+public class SecurityInterceptorTest extends AbstractSecurityInterceptorTest {
 
   @Test
   public void testAuthInterceptorNotLoggedInHomogenous() throws Exception {
@@ -536,50 +456,5 @@ public class SecurityInterceptorTest extends AbstractErraiCDITest {
         }, AuthenticationService.class).login("admin", "123");
       }
     });
-  }
-
-  private void runNavTest(final Runnable runnable) {
-    CDI.addPostInitTask(new Runnable() {
-
-      @Override
-      public void run() {
-        InitVotes.registerOneTimeInitCallback(runnable);
-      }
-    });
-  }
-
-  private void testUntil(final long duration, final Runnable runnable) {
-    delayTestFinish((int) (2 * TIME_LIMIT));
-    final long startTime = System.currentTimeMillis();
-    final int interval = 500;
-    new Timer() {
-      @Override
-      public void run() {
-        final long buffer = 4 * interval;
-        if (System.currentTimeMillis() + buffer < startTime + duration) {
-          boolean passed = true;
-          try {
-            runnable.run();
-          }
-          catch (AssertionFailedError e) {
-            passed = false;
-          }
-          catch (Throwable t) {
-            cancel();
-          }
-          finally {
-            if (passed) {
-              cancel();
-              finishTest();
-            }
-          }
-        }
-        else {
-          cancel();
-          runnable.run();
-          finishTest();
-        }
-      }
-    }.scheduleRepeating(interval);
   }
 }
