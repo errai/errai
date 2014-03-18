@@ -29,6 +29,7 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
 
   private final List<String> messageBeanTypeLog = new ArrayList<String>();
   private ClientMessageBusImpl backupBus;
+  private Timer testTimer;
 
   @Override
   public String getModuleName() {
@@ -57,13 +58,16 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
   protected void gwtTearDown() throws Exception {
     UntestableFrameworkUtil.installAlternativeBusImpl(backupBus);
     messageBeanTypeLog.clear();
+    if (testTimer != null) {
+      testTimer.cancel();
+    }
     super.gwtTearDown();
   }
 
   @Test
   public void testLocalEventNotInitiallyAdvertisedToServer() {
     final long start = System.currentTimeMillis();
-    new Timer() {
+    testTimer = new Timer() {
       @Override
       public void run() {
         try {
@@ -84,7 +88,8 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
           }
         }
       }
-    }.scheduleRepeating(500);
+    };
+    testTimer.scheduleRepeating(500);
     delayTestFinish(30000);
   }
 
@@ -108,7 +113,7 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
           MessageBuilder.createMessage("queueSessionInvalidationService").done().sendNowWith(ErraiBus.get());
           delayTestFinish(30000);
           final long secondStart = System.currentTimeMillis();
-          new Timer() {
+          testTimer = new Timer() {
             @Override
             public void run() {
               try {
@@ -129,7 +134,8 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
                 }
               }
             }
-          }.scheduleRepeating(500);
+          };
+          testTimer.scheduleRepeating(500);
         }
         else if (System.currentTimeMillis() - start > 25000) {
           cancel();
@@ -143,7 +149,7 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
   @Test
   public void testPortableLocalEventNotInitiallyAdvertisedToServer() {
     final long start = System.currentTimeMillis();
-    new Timer() {
+    testTimer = new Timer() {
       @Override
       public void run() {
         try {
@@ -162,7 +168,8 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
           }
         }
       }
-    }.scheduleRepeating(500);
+    };
+    testTimer.scheduleRepeating(500);
     delayTestFinish(60000);
   }
 
@@ -179,7 +186,7 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
           MessageBuilder.createMessage("queueSessionInvalidationService").done().sendNowWith(ErraiBus.get());
           delayTestFinish(30000);
           final long secondStart = System.currentTimeMillis();
-          new Timer() {
+          testTimer = new Timer() {
             @Override
             public void run() {
               try {
@@ -200,7 +207,8 @@ public class EventAdvertisingIntegrationTest extends AbstractErraiCDITest {
                 }
               }
             }
-          }.scheduleRepeating(500);
+          };
+          testTimer.scheduleRepeating(500);
         }
         else if (System.currentTimeMillis() - start > 25000) {
           cancel();
