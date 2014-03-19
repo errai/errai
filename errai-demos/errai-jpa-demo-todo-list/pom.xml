@@ -421,6 +421,7 @@
         <dependency><groupId>org.hibernate.javax.persistence</groupId><artifactId>hibernate-jpa-2.0-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-jpa-client</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.hibernate.common</groupId><artifactId>hibernate-commons-annotations</artifactId><scope>provided</scope></dependency>
+        <dependency><artifactId>resteasy-cdi</artifactId><groupId>org.jboss.resteasy</groupId><scope>provided</scope></dependency>
       </dependencies>
     </profile>
   </profiles>

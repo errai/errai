@@ -70,7 +70,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
   }
 
   protected void testUntil(final long duration, final Runnable runnable) {
-    delayTestFinish((int) (2 * TIME_LIMIT));
+    delayTestFinish((int) (2 * duration));
     final long startTime = System.currentTimeMillis();
     final int interval = 500;
     new Timer() {

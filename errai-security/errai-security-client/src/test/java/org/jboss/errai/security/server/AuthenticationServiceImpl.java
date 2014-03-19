@@ -17,13 +17,11 @@ import org.jboss.errai.security.shared.User;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   private String username;
-  private String password;
   private User user;
 
   @Override
   public User login(String username, String password) {
     this.username = username;
-    this.password = password;
     user = new User(username);
     user.setRoles(getRoles());
 
@@ -39,7 +37,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public void logout() {
     user = null;
     username = null;
-    password = null;
   }
 
   @Override

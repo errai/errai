@@ -8,6 +8,11 @@ import org.jboss.errai.security.shared.exception.SecurityException;
 
 import com.google.gwt.http.client.Response;
 
+/**
+ * Extracts {@link SecurityException SecurityExceptions} from jax-rs responses.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 @Provider
 public class SecurityExceptionMapper extends AbstractJSONClientExceptionMapper {
   // TODO Add logging.

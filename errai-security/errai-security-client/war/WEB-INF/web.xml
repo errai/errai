@@ -24,6 +24,11 @@
     <param-value>org.jboss.errai.jaxrs.ErraiProvider</param-value>
   </context-param>
   
+  <context-param>
+    <param-name>resteasy.injector.factory</param-name>
+    <param-value>org.jboss.resteasy.cdi.CdiInjectorFactory</param-value>
+  </context-param>
+
   <filter>
     <filter-name>Resteasy</filter-name>
     <filter-class>org.jboss.resteasy.plugins.server.servlet.FilterDispatcher</filter-class>

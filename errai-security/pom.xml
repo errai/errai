@@ -22,4 +22,15 @@
     <picketlink.version>2.5.3.Final</picketlink.version>
     <deltaspike.version>0.4</deltaspike.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>4.2.1</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
 </project>
