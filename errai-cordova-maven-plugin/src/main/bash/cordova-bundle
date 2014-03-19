@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ -z "$1" ]; then
-  echo -e "Version not specified! \nuse: 'cordoave-bundle <version number>'";
+  echo -e "Version not specified! \nuse: 'cordova-bundle <version number>'";
   exit;
 else
   echo "Version to deploy '$1'";
