@@ -47,14 +47,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Acts as a bridge between Errai Bus and the CDI event system.<br/>
- * Includes marshalling/unmarshalling of event types.
+ * Acts as a bridge between Errai Bus and the CDI event system.
+ * 
+ * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class EventDispatcher implements MessageCallback {
   private static final Logger log = LoggerFactory.getLogger("EventDispatcher");
-
   private static final String CDI_EVENT_CHANNEL_OPEN = "cdi.event.channel.open";
-  private static final String CDI_REMOTE_EVENTS_ACTIVE = "cdi.event.active.events";
 
   private final BeanManager beanManager;
   private final EventRoutingTable eventRoutingTable;
@@ -63,6 +64,7 @@ public class EventDispatcher implements MessageCallback {
   private final Map<String, Annotation> allQualifiers;
   private final AfterBeanDiscovery afterBeanDiscovery;
 
+  @SuppressWarnings("rawtypes")
   private final Set<ObserverMethod> activeObserverMethods = new HashSet<ObserverMethod>();
 
   private final Set<String> activeObserverSignatures
@@ -217,6 +219,7 @@ public class EventDispatcher implements MessageCallback {
 
   private static String getSignatureFromMessage(final Message message) {
     final String typeName = message.get(String.class, CDIProtocol.BeanType);
+    @SuppressWarnings("unchecked")
     final Set<String> annotationTypes = new TreeSet<String>(message.get(Set.class, CDIProtocol.Qualifiers));
 
     return typeName + annotationTypes;
@@ -230,6 +233,8 @@ public class EventDispatcher implements MessageCallback {
    * are no ObserverMethods interested in it, Weld remembers this fact in its
    * cache, and even if an interested ObserverMethod is registered later on,
    * that ObserverMethod will never receive events.
+   * 
+   * TODO Implement ERRAI-700 to avoid this workaround.
    *
    * @param bm
    *          The bean manager to clear the cache on, and to search for other

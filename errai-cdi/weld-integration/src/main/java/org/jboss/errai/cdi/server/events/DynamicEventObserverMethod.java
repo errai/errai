@@ -38,12 +38,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the
- * CDI container. The purpose of this implementation is to observe an event which is exposed to the bus and
- * transmit the event to all clients listening to this event.</p>
- *
+ * An implementation of the CDI SPI {@code ObserverMethod} interface to observe events within the
+ * CDI container with the purpose of propagating these events to all connected clients using Errai's
+ * message bus.
+ * 
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
+@SuppressWarnings("rawtypes")
 public class DynamicEventObserverMethod implements ObserverMethod {
 
   private static final Logger log = LoggerFactory.getLogger(DynamicEventObserverMethod.class);
@@ -151,8 +153,10 @@ public class DynamicEventObserverMethod implements ObserverMethod {
   @Override
   public boolean equals(final Object o) {
     log.info("Checking for equality with " + o);
-    if (this == o) return true;
-    if (!(o instanceof DynamicEventObserverMethod)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof DynamicEventObserverMethod))
+      return false;
 
     final DynamicEventObserverMethod that = (DynamicEventObserverMethod) o;
 
