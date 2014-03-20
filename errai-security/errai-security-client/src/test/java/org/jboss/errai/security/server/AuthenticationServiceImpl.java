@@ -1,7 +1,7 @@
 package org.jboss.errai.security.server;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -44,8 +44,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return user;
   }
 
-  public List<Role> getRoles() {
-    final List<Role> roles = new ArrayList<Role>(2);
+  public Set<Role> getRoles() {
+    final Set<Role> roles = new HashSet<Role>();
     if (isLoggedIn()) {
       if (username.equals("admin")) {
         roles.add(new Role("admin"));

@@ -1,14 +1,15 @@
 package org.jboss.errai.security.shared.api.identity;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
-import java.io.Serializable;
-import java.util.List;
-
 /**
  * A user.
- *
+ * 
  * @author edewit@redhat.com
  */
 @Portable
@@ -16,39 +17,57 @@ import java.util.List;
 public class User implements Serializable {
   private static final long serialVersionUID = 1L;
   private String loginName;
-  private String fullName;
-  private String shortName;
+  private String lastName;
+  private String firstName;
   private String email;
-  private List<Role> roles;
+  private Set<Role> roles;
 
-  public User() {}
+  public User(String loginName, String firstName, String lastName, String email, Set<Role> roles) {
+    this.loginName = loginName;
+    this.lastName = lastName;
+    this.firstName = firstName;
+    this.email = email;
+    this.roles = roles;
+  }
+
+  public User(String loginName, String firstName, String lastName, String email) {
+    this(loginName, firstName, lastName, email, new HashSet<Role>(0));
+  }
+
+  public User(String loginName, String firstName, String lastName) {
+    this(loginName, firstName, lastName, "");
+  }
 
   public User(String loginName) {
-    this.loginName = loginName;
+    this(loginName, "", "");
+  }
+
+  public User() {
+    this("");
   }
 
   public void setLoginName(String loginName) {
-    this.loginName = loginName;
+    this.loginName = filterNull(loginName);
   }
 
   public String getLoginName() {
     return loginName;
   }
 
-  public String getFullName() {
-    return fullName;
+  public String getLastName() {
+    return lastName;
   }
 
-  public void setFullName(String fullName) {
-    this.fullName = fullName;
+  public void setLastName(String lastName) {
+    this.lastName = filterNull(lastName);
   }
 
-  public String getShortName() {
-    return shortName;
+  public String getFirstName() {
+    return firstName;
   }
 
-  public void setShortName(String shortName) {
-    this.shortName = shortName;
+  public void setFirstName(String firstName) {
+    this.firstName = filterNull(firstName);
   }
 
   public String getEmail() {
@@ -56,7 +75,7 @@ public class User implements Serializable {
   }
 
   public void setEmail(String email) {
-    this.email = email;
+    this.email = filterNull(email);
   }
 
   @Override
@@ -66,35 +85,40 @@ public class User implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof User)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof User))
+      return false;
 
     User user = (User) o;
 
-    if ( (email != null) ? !email.equals(user.email) : user.email != null) return false;
-    if ( (fullName != null) ? !fullName.equals(user.fullName) : user.fullName != null) return false;
-    if ( (loginName != null) ? !loginName.equals(user.loginName) : user.loginName != null) return false;
-    if ( (shortName != null) ? !shortName.equals(user.shortName) : user.shortName != null) return false;
-    if ( (roles != null) ? !roles.equals(user.roles) : user.roles != null) return false;
+    return email.equals(user.email)
+            && lastName.equals(user.lastName)
+            && loginName.equals(user.loginName)
+            && firstName.equals(user.firstName)
+            && roles.equals(user.roles);
+  }
 
-    return true;
+  private String filterNull(final String value) {
+    return (value == null) ? "" : value;
   }
 
   @Override
   public String toString() {
-    return "User{" +
-            "loginName='" + loginName + '\'' +
-            ", fullName='" + fullName + '\'' +
-            ", shortName='" + shortName + '\'' +
-            ", email='" + email + '\'' +
-            '}';
+    return "User{" + "loginName='" + loginName + '\'' + ", firstName='" + firstName + '\'' + ", lastName='" + lastName
+            + '\'' + ", email='" + email + '\'' + ", roles=" + roles.toString() + ' ' + '}';
   }
 
-  public List<Role> getRoles() {
+  public Set<Role> getRoles() {
     return roles;
   }
 
-  public void setRoles(List<Role> roles) {
-    this.roles = roles;
+  public void setRoles(Set<Role> roles) {
+    if (roles == null) {
+      this.roles = new HashSet<Role>(0);
+    }
+    else {
+      this.roles = roles;
+    }
   }
 }

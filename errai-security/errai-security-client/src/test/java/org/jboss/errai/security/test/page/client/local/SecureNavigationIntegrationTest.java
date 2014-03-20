@@ -1,8 +1,7 @@
 package org.jboss.errai.security.test.page.client.local;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -118,9 +117,10 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         final User user = new User();
-        user.setRoles(Arrays.asList(new Role[] {
-            new Role("user")
-        }));
+        final Set<Role> roles = new HashSet<Role>();
+        roles.add(new Role("user"));
+        user.setRoles(roles);
+
         // Cache a logged in user.
         bm.lookupBean(ActiveUserProvider.class).getInstance().setActiveUser(user);
 
@@ -144,10 +144,11 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         final User user = new User();
-        user.setRoles(Arrays.asList(new Role[] {
-            new Role("user"),
-            new Role("admin")
-        }));
+        final Set<Role> roles = new HashSet<Role>();
+        roles.add(new Role("user"));
+        roles.add(new Role("admin"));
+
+        user.setRoles(roles);
         // Cache a logged in user.
         bm.lookupBean(ActiveUserProvider.class).getInstance().setActiveUser(user);
 

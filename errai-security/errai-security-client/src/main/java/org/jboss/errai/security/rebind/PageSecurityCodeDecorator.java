@@ -17,10 +17,8 @@ import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.security.client.local.nav.PageAuthenticationLifecycleListener;
 import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListener;
-import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 import org.jboss.errai.ui.nav.client.local.Page;
 
 /**
@@ -39,33 +37,8 @@ public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
   public List<? extends Statement> generateDecorator(InjectableInstance<Page> ctx) {
     final List<Statement> stmts = new ArrayList<Statement>();
 
-    if (ctx.getInjector().getInjectedType().isAnnotationPresent(RequireAuthentication.class)) {
-      final String authListenerVar = ctx.getInjector().getInstanceVarName() + "_authListener";
-      ctx.getTargetInjector().addStatementToEndOfInjector(
-              Stmt.declareFinalVariable(
-                      authListenerVar,
-                      MetaClassFactory.parameterizedAs(LifecycleListener.class,
-                              MetaClassFactory.typeParametersOf(ctx.getInjector().getInjectedType())),
-                      Stmt.create().newObject(PageAuthenticationLifecycleListener.class)));
-      ctx.getTargetInjector().addStatementToEndOfInjector(
-              Stmt.loadVariable("context").invoke("addInitializationCallback",
-                      Refs.get(ctx.getInjector().getInstanceVarName()),
-                      createInitializationCallback(
-                              ctx,
-                              Stmt.invokeStatic(IOC.class, "registerLifecycleListener",
-                                      Refs.get(ctx.getInjector().getInstanceVarName()),
-                                      Refs.get(authListenerVar)))));
-      ctx.getTargetInjector().addStatementToEndOfInjector(
-              Stmt.loadVariable("context").invoke("addDestructionCallback",
-                      Refs.get(ctx.getInjector().getInstanceVarName()),
-                      createDestructionCallback(
-                              ctx,
-                              Stmt.invokeStatic(IOC.class, "unregisterLifecycleListener",
-                                      Refs.get(ctx.getInjector().getInstanceVarName()),
-                                      Refs.get(authListenerVar)))));
-    }
-    if (ctx.getInjector().getInjectedType().isAnnotationPresent(RequireRoles.class)) {
-      final RequireRoles annotation = ctx.getAnnotation(RequireRoles.class);
+    if (ctx.getInjector().getInjectedType().isAnnotationPresent(RestrictAccess.class)) {
+      final RestrictAccess annotation = ctx.getAnnotation(RestrictAccess.class);
       final String roleListenerVar = ctx.getInjector().getInstanceVarName() + "_roleListener";
       ctx.getTargetInjector().addStatementToEndOfInjector(
               Stmt.declareFinalVariable(
@@ -73,7 +46,7 @@ public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
                       MetaClassFactory.parameterizedAs(LifecycleListener.class,
                               MetaClassFactory.typeParametersOf(ctx.getInjector().getInjectedType())),
                               Stmt.newObject(PageRoleLifecycleListener.class,
-                                                      (Object[]) annotation.value())));
+                                                      (Object[]) annotation.roles())));
       ctx.getTargetInjector().addStatementToEndOfInjector(
               Stmt.loadVariable("context")
                       .invoke("addInitializationCallback",

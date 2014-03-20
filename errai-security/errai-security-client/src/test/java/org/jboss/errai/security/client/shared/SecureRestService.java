@@ -5,8 +5,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 
 @Path("test")
 public interface SecureRestService {
@@ -15,14 +14,14 @@ public interface SecureRestService {
   @GET
   @Consumes("application/json")
   @Produces("application/json")
-  @RequireRoles("admin")
+  @RestrictAccess(roles = "admin")
   public void admin();
   
   @Path("/user")
   @GET
   @Consumes("application/json")
   @Produces("application/json")
-  @RequireAuthentication
+  @RestrictAccess
   public void user();
   
   @GET

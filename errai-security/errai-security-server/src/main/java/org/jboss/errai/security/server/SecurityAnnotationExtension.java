@@ -1,21 +1,19 @@
 package org.jboss.errai.security.server;
 
-import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
-import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 
 /**
- * This {@link Extension} allows type level {@link RequireAuthentication} and
- * {@link RequireRoles} annotations to trigger server-side interceptors on their
- * method calls.
+ * This {@link Extension} allows type level {@link RestrictAccess} annotations to
+ * trigger server-side interceptors on their method calls.
  * 
  * @author edewit@redhat.com
  */
@@ -28,8 +26,7 @@ public class SecurityAnnotationExtension implements Extension {
 
     for (Class<?> anInterface : interfaces) {
       for (Method method : anInterface.getMethods()) {
-        copyAnnotation(processAnnotatedType, method, RequireAuthentication.class);
-        copyAnnotation(processAnnotatedType, method, RequireRoles.class);
+        copyAnnotation(processAnnotatedType, method, RestrictAccess.class);
       }
     }
   }

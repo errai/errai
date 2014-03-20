@@ -1,6 +1,5 @@
 package org.jboss.errai.demo.todo.client.local.shadow;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -16,7 +15,6 @@ import org.jboss.errai.demo.todo.shared.RegistrationException;
 import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.demo.todo.shared.User;
-import org.jboss.errai.security.shared.api.identity.Role;
 
 /**
  * ShadowService implementation of the SignupService this service will get invoked automatically when the bus
@@ -59,11 +57,27 @@ public class SignupServiceShadow implements SignupService {
     entityManager.persist(new TempUser(newUserObject, password));
 
     final org.jboss.errai.security.shared.api.identity.User securityUser = new org.jboss.errai.security.shared.api.identity.User();
+    String[] names = newUserObject.getFullName().split("\\s+");
+    final String firstName, lastName;
+    
+    if (names.length > 1) {
+      lastName = names[names.length-1];
+    }
+    else {
+      lastName = "";
+    }
+
+    if (names.length > 0) {
+      firstName = names[0];
+    }
+    else {
+      firstName = "";
+    }
+
     securityUser.setLoginName(newUserObject.getLoginName());
-    securityUser.setFullName(newUserObject.getLoginName());
-    securityUser.setShortName(newUserObject.getShortName());
+    securityUser.setLastName(lastName);
+    securityUser.setFirstName(firstName);
     securityUser.setEmail(newUserObject.getEmail());
-    securityUser.setRoles(new ArrayList<Role>(0));
     
     return new RegistrationResult(newUserObject, securityUser);
   }

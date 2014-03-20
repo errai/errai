@@ -2,8 +2,8 @@ package org.jboss.errai.security.test.style.client.local;
 
 import static org.jboss.errai.enterprise.client.cdi.api.CDI.addPostInitTask;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -15,6 +15,7 @@ import org.jboss.errai.security.test.style.client.local.res.TemplatedStyleWidget
 import org.junit.Test;
 
 public class SecurityStyleTest extends AbstractErraiCDITest {
+  // TODO add more tests
 
   @Override
   public String getModuleName() {
@@ -23,7 +24,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
   
   private final User nobody;
   private final User regularUser;
-  private final User admin;
+  private final User adminUser;
   
   private final Role userRole = new Role("user");
   private final Role adminRole = new Role("admin");
@@ -33,18 +34,17 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
   
   public SecurityStyleTest() {
     nobody = new User();
-    nobody.setRoles(new ArrayList<Role>(0));
 
     regularUser = new User();
-    regularUser.setRoles(Arrays.asList(new Role[] {
-            userRole
-    }));
+    final Set<Role> regularUserRoles = new HashSet<Role>();
+    regularUserRoles.add(userRole);
+    regularUser.setRoles(regularUserRoles);
 
-    admin = new User();
-    admin.setRoles(Arrays.asList(new Role[] {
-            userRole,
-            adminRole
-    }));
+    adminUser = new User();
+    final Set<Role> adminUserRoles = new HashSet<Role>();
+    adminUserRoles.add(userRole);
+    adminUserRoles.add(adminRole);
+    adminUser.setRoles(adminUserRoles);
   }
   
   @Override

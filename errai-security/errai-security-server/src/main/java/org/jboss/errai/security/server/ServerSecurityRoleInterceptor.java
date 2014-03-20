@@ -8,7 +8,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -21,7 +21,7 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  *
  * @author edewit@redhat.com
  */
-@RequireRoles({})
+@RestrictAccess
 @Interceptor
 public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
 
@@ -35,19 +35,19 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
     final User user = authenticationService.getUser();
-    final RequireRoles annotation = getRequiredRoleAnnotation(context.getTarget().getClass(), context.getMethod());
+    final RestrictAccess annotation = getRequiredRoleAnnotation(context.getTarget().getClass(), context.getMethod());
     if (user == null) {
       throw new UnauthenticatedException();
     }
-    else if (!hasAllRoles(user.getRoles(), annotation.value())) {
+    else if (!hasAllRoles(user.getRoles(), annotation.roles())) {
       throw new UnauthorizedException();
     } else {
       return context.proceed();
     }
   }
 
-  private RequireRoles getRequiredRoleAnnotation(Class<?> aClass, Method method) {
-    RequireRoles requireRoles = getRequiredRoleAnnotation(method.getAnnotations());
+  private RestrictAccess getRequiredRoleAnnotation(Class<?> aClass, Method method) {
+    RestrictAccess requireRoles = getRequiredRoleAnnotation(method.getAnnotations());
     if (requireRoles != null) {
       return requireRoles;
     }
@@ -64,9 +64,9 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
     return requireRoles;
   }
 
-  private RequireRoles getRequireRoles(Class<?> aClass, Method searchMethod) {
+  private RestrictAccess getRequireRoles(Class<?> aClass, Method searchMethod) {
     for (Method method : aClass.getMethods()) {
-      final RequireRoles requireRoles = getRequireRoles(searchMethod, method);
+      final RestrictAccess requireRoles = getRequireRoles(searchMethod, method);
       if (requireRoles != null) {
         return requireRoles;
       }
@@ -75,8 +75,8 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
     return null;
   }
 
-  private RequireRoles getRequireRoles(Method searchMethod, Method method) {
-    RequireRoles requiredRoles = null;
+  private RestrictAccess getRequireRoles(Method searchMethod, Method method) {
+    RestrictAccess requiredRoles = null;
 
     if (searchMethod.getName().equals(method.getName())
             && Arrays.equals(searchMethod.getParameterTypes(), method.getParameterTypes())) {

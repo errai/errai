@@ -4,21 +4,20 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 
 /**
  * @author edewit@redhat.com
  */
 @Path("/message")
 public interface MessageService {
-  @RequireAuthentication
+  @RestrictAccess
   @Path("/hello")
   @GET
   @Produces("application/json")
   String hello();
 
-  @RequireRoles("admin")
+  @RestrictAccess(roles = "admin")
   @Path("/ping")
   @GET
   @Produces("application/json")

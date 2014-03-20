@@ -1,12 +1,10 @@
 package org.jboss.errai.security.client.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 
 @Remote
 public interface  ServiceInterface {
-  @RequireRoles("admin")
-  @RequireAuthentication
+  @RestrictAccess(roles = "admin")
   void annotatedServiceMethod();
 }

@@ -1,7 +1,7 @@
 package org.jboss.errai.security.client.local.nav;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
@@ -57,7 +57,10 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
     return eventType.equals(Access.class);
   }
   
-  private boolean containsRoles(final List<Role> userRoles, final Set<String> requiredRoles) {
+  private boolean containsRoles(final Collection<Role> userRoles, final Set<String> requiredRoles) {
+    if (userRoles == null && requiredRoles != null && !requiredRoles.isEmpty())
+      return false;
+
     final Set<String> userRolesByName = new HashSet<String>();
     for (final Role role : userRoles)
       userRolesByName.add(role.getName());

@@ -57,7 +57,7 @@ public class WelcomePage extends Composite {
 
       @Override
       public void callback(final User user) {
-        userLabel.setText(user != null ? user.getFullName() : ANONYMOUS);
+        userLabel.setText(user != null ? user.getFirstName() : ANONYMOUS);
       }
     }, new BusErrorCallback() {
       
@@ -71,7 +71,7 @@ public class WelcomePage extends Composite {
 
   @SuppressWarnings("unused")
   private void onLoggedIn(@Observes LoggedInEvent loggedInEvent) {
-    userLabel.setText(loggedInEvent.getUser().getFullName());
+    userLabel.setText(loggedInEvent.getUser().getFirstName());
   }
 
   @SuppressWarnings("unused")

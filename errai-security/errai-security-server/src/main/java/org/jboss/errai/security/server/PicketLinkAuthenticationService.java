@@ -1,7 +1,7 @@
 package org.jboss.errai.security.server;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -52,16 +52,15 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
 
 
   /**
-   * TODO this is wrong, maybe we can configure the attributes of picketLink to provide us with the right information
    * @param picketLinkUser the user returned by picketLink
    * @param roles The roles the given user has.
    * @return our user
    */
-  private User createUser(org.picketlink.idm.model.basic.User picketLinkUser, List<Role> roles) {
+  private User createUser(org.picketlink.idm.model.basic.User picketLinkUser, Set<Role> roles) {
     User user = new User();
     user.setLoginName(picketLinkUser.getLoginName());
-    user.setFullName(picketLinkUser.getFirstName() + " " + picketLinkUser.getLastName());
-    user.setShortName(picketLinkUser.getFirstName());
+    user.setLastName(picketLinkUser.getLastName());
+    user.setFirstName(picketLinkUser.getFirstName());
     user.setEmail(picketLinkUser.getEmail());
     user.setRoles(roles);
     return user;
@@ -85,8 +84,8 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     return null;
   }
 
-  public List<Role> getRoles() {
-    List<Role> roles = new ArrayList<Role>();
+  public Set<Role> getRoles() {
+    Set<Role> roles = new HashSet<Role>();
 
     if (identity.isLoggedIn()) {
       RelationshipQuery<Grant> query =

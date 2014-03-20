@@ -6,8 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.interceptor.InvocationContext;
 
@@ -44,7 +45,9 @@ public class SecurityRoleInterceptorTest {
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
     final User user = new User();
-    user.setRoles(Arrays.asList(new Role("admin"), new Role("user")));
+    final Set<Role> roles = new HashSet<Role>();
+    roles.addAll(Arrays.asList(new Role("admin"), new Role("user")));
+    user.setRoles(roles);
     when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
 
@@ -94,7 +97,6 @@ public class SecurityRoleInterceptorTest {
     when(context.getTarget()).thenReturn(service);
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
     final User user = new User();
-    user.setRoles(new ArrayList<Role>());
     when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
   }
@@ -108,7 +110,6 @@ public class SecurityRoleInterceptorTest {
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(Service.class.getMethod("annotatedServiceMethod"));
     final User user = new User();
-    user.setRoles(new ArrayList<Role>());
     when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
 

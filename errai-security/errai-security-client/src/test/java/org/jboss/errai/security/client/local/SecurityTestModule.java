@@ -1,18 +1,17 @@
 package org.jboss.errai.security.client.local;
 
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
+import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.security.client.local.identity.Identity;
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.inject.Inject;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 
 /**
  * @author edewit@redhat.com
@@ -23,7 +22,7 @@ public class SecurityTestModule extends Composite {
   Identity identity;
 
   @DataField
-  @RequireRoles("admin")
+  @RestrictAccess(roles = "admin")
   Button test = new Button();
 
   void login(RemoteCallback<User> callback, BusErrorCallback errorCallback) {

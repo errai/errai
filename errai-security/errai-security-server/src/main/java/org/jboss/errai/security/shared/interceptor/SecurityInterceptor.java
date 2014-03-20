@@ -1,9 +1,9 @@
 package org.jboss.errai.security.shared.interceptor;
 
 import java.lang.annotation.Annotation;
-import java.util.List;
+import java.util.Collection;
 
-import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
 import org.jboss.errai.security.shared.api.identity.Role;
 
 /**
@@ -12,7 +12,7 @@ import org.jboss.errai.security.shared.api.identity.Role;
  */
 public abstract class SecurityInterceptor {
 
-  protected boolean hasAllRoles(List<Role> roles, String[] roleNames) {
+  protected boolean hasAllRoles(Collection<Role> roles, String[] roleNames) {
     for (String roleName : roleNames) {
       final Role role = new Role(roleName);
       if (!roles.contains(role)) {
@@ -23,10 +23,10 @@ public abstract class SecurityInterceptor {
     return true;
   }
 
-  protected RequireRoles getRequiredRoleAnnotation(Annotation[] annotations) {
+  protected RestrictAccess getRequiredRoleAnnotation(Annotation[] annotations) {
     for (Annotation annotation : annotations) {
-      if (annotation instanceof RequireRoles) {
-        return (RequireRoles) annotation;
+      if (annotation instanceof RestrictAccess) {
+        return (RestrictAccess) annotation;
       }
     }
     return null;

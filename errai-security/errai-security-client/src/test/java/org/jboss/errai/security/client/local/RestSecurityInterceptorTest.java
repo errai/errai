@@ -1,7 +1,5 @@
 package org.jboss.errai.security.client.local;
 
-import java.util.ArrayList;
-
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
@@ -21,7 +19,6 @@ import org.jboss.errai.security.client.local.res.CountingCallback;
 import org.jboss.errai.security.client.local.res.RestErrorCountingCallback;
 import org.jboss.errai.security.client.local.res.RestSecurityTestModule;
 import org.jboss.errai.security.client.shared.SecureRestService;
-import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -120,8 +117,6 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   public void testUserAllowedWhenLoggedIn() throws Exception {
     final Counter callbackCounter = new Counter();
     final RemoteCallback<Void> callback = new CountingCallback(callbackCounter);
-    final User user = new User("user");
-    user.setRoles(new ArrayList<Role>());
 
     helper(new Runnable() {
       @Override
@@ -170,7 +165,6 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
     final Counter errorCounter = new Counter();
     final RestErrorCallback errorCallback = new RestErrorCountingCallback(errorCounter, UnauthorizedException.class);
     final User user = new User("user");
-    user.setRoles(new ArrayList<Role>());
 
     helper(new Runnable() {
       @Override
