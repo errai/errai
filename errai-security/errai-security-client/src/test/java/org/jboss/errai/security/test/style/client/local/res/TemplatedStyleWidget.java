@@ -2,7 +2,7 @@ package org.jboss.errai.security.test.style.client.local.res;
 
 import javax.inject.Inject;
 
-import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 

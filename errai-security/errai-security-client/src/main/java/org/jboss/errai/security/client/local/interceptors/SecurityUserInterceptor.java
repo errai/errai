@@ -8,9 +8,9 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
 import org.jboss.errai.security.client.local.util.SecurityUtil;
-import org.jboss.errai.security.shared.RequireAuthentication;
-import org.jboss.errai.security.shared.SecurityInterceptor;
+import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
+import org.jboss.errai.security.shared.interceptor.SecurityInterceptor;
 
 /**
  * Intercepts RPC calls to resources marked with {@link RequireAuthentication}.

@@ -8,12 +8,12 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.RequireRoles;
-import org.jboss.errai.security.shared.SecurityInterceptor;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
+import org.jboss.errai.security.shared.interceptor.SecurityInterceptor;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
  * SecurityRoleInterceptor server side implementation of the SecurityRoleInterceptor does the same,

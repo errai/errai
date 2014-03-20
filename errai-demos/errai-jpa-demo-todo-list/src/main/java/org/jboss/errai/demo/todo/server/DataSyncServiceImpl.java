@@ -10,8 +10,8 @@ import org.jboss.errai.jpa.sync.client.shared.DataSyncService;
 import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 @ApplicationScoped @Service
 public class DataSyncServiceImpl implements DataSyncService {

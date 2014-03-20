@@ -15,7 +15,7 @@ import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.demo.todo.shared.User;
-import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
@@ -34,7 +34,7 @@ public class TodoListServiceImpl implements TodoListService {
   @Override
   public List<SharedList> getSharedTodoLists() {
     final ArrayList<SharedList> sharedLists = new ArrayList<SharedList>();
-    org.jboss.errai.security.shared.User currentUser = service.getUser();
+    org.jboss.errai.security.shared.api.identity.User currentUser = service.getUser();
     final TypedQuery<User> query = entityManager.createNamedQuery("sharedWithMe", User.class);
     query.setParameter("loginName", currentUser.getLoginName());
 

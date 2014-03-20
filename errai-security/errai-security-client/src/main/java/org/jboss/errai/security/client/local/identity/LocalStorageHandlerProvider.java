@@ -5,8 +5,8 @@ import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.marshalling.client.Marshalling;
-import org.jboss.errai.security.client.local.SecurityProperties;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.client.local.context.SecurityProperties;
+import org.jboss.errai.security.shared.api.identity.User;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.storage.client.Storage;

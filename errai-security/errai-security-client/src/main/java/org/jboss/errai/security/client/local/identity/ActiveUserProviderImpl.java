@@ -8,8 +8,8 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.security.client.local.util.SecurityUtil;
-import org.jboss.errai.security.shared.NonCachingUserService;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.NonCachingUserService;
 import org.slf4j.Logger;
 
 /**

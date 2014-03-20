@@ -8,9 +8,9 @@ import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
  * Identity holds the username and password and performs the authentication

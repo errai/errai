@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import javax.interceptor.InvocationContext;
 
 import org.jboss.errai.security.server.SecurityUserInterceptor;
-import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.junit.Test;
 
 /**

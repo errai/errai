@@ -1,8 +1,8 @@
 package org.jboss.errai.security.client.local;
 
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;

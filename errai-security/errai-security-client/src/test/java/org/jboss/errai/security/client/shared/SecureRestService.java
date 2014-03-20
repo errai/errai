@@ -5,8 +5,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import org.jboss.errai.security.shared.RequireAuthentication;
-import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
 
 @Path("test")
 public interface SecureRestService {

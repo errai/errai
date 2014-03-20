@@ -3,7 +3,7 @@ package org.jboss.errai.security.shared.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>

@@ -1,7 +1,8 @@
-package org.jboss.errai.security.shared;
+package org.jboss.errai.security.shared.event;
 
 import org.jboss.errai.common.client.api.annotations.LocalEvent;
 import org.jboss.errai.common.client.api.annotations.MapsTo;
+import org.jboss.errai.security.shared.api.identity.User;
 
 /**
  * LoggedInEvent fired when a user logs-in.

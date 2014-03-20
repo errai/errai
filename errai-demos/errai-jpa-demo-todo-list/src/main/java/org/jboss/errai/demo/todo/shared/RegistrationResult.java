@@ -8,10 +8,10 @@ public class RegistrationResult {
 
   private final User todoUser;
 
-  private final org.jboss.errai.security.shared.User securityUser;
+  private final org.jboss.errai.security.shared.api.identity.User securityUser;
 
   public RegistrationResult(@MapsTo("todoUser") final User todoUser,
-          @MapsTo("securityUser") final org.jboss.errai.security.shared.User securityUser) {
+          @MapsTo("securityUser") final org.jboss.errai.security.shared.api.identity.User securityUser) {
     this.todoUser = todoUser;
     this.securityUser = securityUser;
   }
@@ -20,7 +20,7 @@ public class RegistrationResult {
     return todoUser;
   }
 
-  public org.jboss.errai.security.shared.User getSecurityUser() {
+  public org.jboss.errai.security.shared.api.identity.User getSecurityUser() {
     return securityUser;
   }
 

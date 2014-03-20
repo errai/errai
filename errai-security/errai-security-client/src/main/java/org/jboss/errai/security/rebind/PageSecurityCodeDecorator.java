@@ -19,8 +19,8 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.security.client.local.nav.PageAuthenticationLifecycleListener;
 import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListener;
-import org.jboss.errai.security.shared.RequireAuthentication;
-import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
 import org.jboss.errai.ui.nav.client.local.Page;
 
 /**

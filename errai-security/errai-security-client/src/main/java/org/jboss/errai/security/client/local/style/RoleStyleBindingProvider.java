@@ -10,9 +10,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
-import org.jboss.errai.security.shared.RequireRoles;
-import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.ui.shared.api.style.AnnotationStyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 

@@ -1,7 +1,10 @@
-package org.jboss.errai.security.shared;
+package org.jboss.errai.security.shared.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
+import org.jboss.errai.security.shared.api.identity.Role;
 
 /**
  * Base class for the security interceptors

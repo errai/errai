@@ -7,8 +7,8 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
 import org.jboss.errai.security.client.local.util.SecurityUtil;
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
  * Intercepts RPC logins through {@link AuthenticationService} for populating

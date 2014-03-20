@@ -4,9 +4,9 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-import org.jboss.errai.security.shared.LoggedInEvent;
-import org.jboss.errai.security.shared.LoggedOutEvent;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.event.LoggedInEvent;
+import org.jboss.errai.security.shared.event.LoggedOutEvent;
 
 @Dependent
 public class UserEventModule {

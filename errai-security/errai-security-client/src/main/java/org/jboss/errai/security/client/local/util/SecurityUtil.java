@@ -10,9 +10,9 @@ import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
-import org.jboss.errai.security.shared.LoggedInEvent;
-import org.jboss.errai.security.shared.LoggedOutEvent;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.event.LoggedInEvent;
+import org.jboss.errai.security.shared.event.LoggedOutEvent;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;

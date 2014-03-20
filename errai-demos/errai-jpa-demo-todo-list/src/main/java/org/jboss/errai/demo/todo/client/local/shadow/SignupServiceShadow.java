@@ -16,7 +16,7 @@ import org.jboss.errai.demo.todo.shared.RegistrationException;
 import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.demo.todo.shared.User;
-import org.jboss.errai.security.shared.Role;
+import org.jboss.errai.security.shared.api.identity.Role;
 
 /**
  * ShadowService implementation of the SignupService this service will get invoked automatically when the bus
@@ -58,7 +58,7 @@ public class SignupServiceShadow implements SignupService {
   public RegistrationResult register(User newUserObject, String password) throws RegistrationException {
     entityManager.persist(new TempUser(newUserObject, password));
 
-    final org.jboss.errai.security.shared.User securityUser = new org.jboss.errai.security.shared.User();
+    final org.jboss.errai.security.shared.api.identity.User securityUser = new org.jboss.errai.security.shared.api.identity.User();
     securityUser.setLoginName(newUserObject.getLoginName());
     securityUser.setFullName(newUserObject.getLoginName());
     securityUser.setShortName(newUserObject.getShortName());

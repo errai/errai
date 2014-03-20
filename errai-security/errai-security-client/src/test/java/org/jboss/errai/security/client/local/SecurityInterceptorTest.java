@@ -12,10 +12,10 @@ import org.jboss.errai.security.client.local.res.ErrorCountingCallback;
 import org.jboss.errai.security.client.shared.AdminService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
 import org.jboss.errai.security.client.shared.DiverseService;
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.junit.Test;
 
 /**

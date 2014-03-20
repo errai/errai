@@ -1,13 +1,14 @@
 package org.jboss.errai.security.server;
 
 import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
-import org.jboss.errai.security.shared.RequireAuthentication;
-import org.jboss.errai.security.shared.RequireRoles;
+import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
+import org.jboss.errai.security.shared.api.annotation.RequireRoles;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 

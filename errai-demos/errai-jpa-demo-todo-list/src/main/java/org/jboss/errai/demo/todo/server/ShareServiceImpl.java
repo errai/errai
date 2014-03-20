@@ -5,7 +5,7 @@ import org.jboss.errai.demo.todo.shared.ShareList;
 import org.jboss.errai.demo.todo.shared.ShareService;
 import org.jboss.errai.demo.todo.shared.UnknownUserException;
 import org.jboss.errai.demo.todo.shared.User;
-import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -24,7 +24,7 @@ public class ShareServiceImpl implements ShareService {
 
   @Override
   public void share(String email) throws UnknownUserException {
-    org.jboss.errai.security.shared.User currentUser = service.getUser();
+    org.jboss.errai.security.shared.api.identity.User currentUser = service.getUser();
 
     //if this was the real world we would sent a mail to the user that this todo list was just shared with him.
     //but this is _only_ a demo.

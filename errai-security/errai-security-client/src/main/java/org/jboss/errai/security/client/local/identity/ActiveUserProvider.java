@@ -1,7 +1,7 @@
 package org.jboss.errai.security.client.local.identity;
 
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
  * Provides a cached copy of the actively logged in user. This cached copy is

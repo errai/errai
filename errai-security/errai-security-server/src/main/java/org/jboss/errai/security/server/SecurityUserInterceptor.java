@@ -5,9 +5,9 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.RequireAuthentication;
+import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
  * SecurityUserInterceptor server side implementation of the

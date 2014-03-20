@@ -1,4 +1,4 @@
-package org.jboss.errai.security.client.local;
+package org.jboss.errai.security.client.local.context;
 
 public interface SecurityProperties {
   

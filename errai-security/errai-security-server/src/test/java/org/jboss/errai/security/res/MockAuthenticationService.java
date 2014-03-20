@@ -3,9 +3,9 @@ package org.jboss.errai.security.res;
 import java.util.List;
 
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 @SuppressWarnings("unchecked")
 public class MockAuthenticationService extends AbstractRpcProxy implements AuthenticationService {

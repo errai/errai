@@ -4,9 +4,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.security.shared.AuthenticationService;
-import org.jboss.errai.security.shared.NonCachingUserService;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.jboss.errai.security.shared.service.NonCachingUserService;
 
 @Singleton
 @Service

@@ -1,4 +1,4 @@
-package org.jboss.errai.security.shared;
+package org.jboss.errai.security.shared.api.identity;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.security.shared;
+package org.jboss.errai.security.shared.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

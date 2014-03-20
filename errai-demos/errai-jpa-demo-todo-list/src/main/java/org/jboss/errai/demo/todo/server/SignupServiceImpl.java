@@ -10,7 +10,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
 import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
-import org.jboss.errai.security.shared.AuthenticationService;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.model.basic.User;
@@ -41,7 +41,7 @@ public class SignupServiceImpl implements SignupService {
     entityManager.detach(newUserObject);
 
     System.out.println("Saved new user " + newUserObject + " (id=" + newUserObject.getEmail() + ")");
-    final org.jboss.errai.security.shared.User securityUser = service.login(newUserObject.getEmail(), password);
+    final org.jboss.errai.security.shared.api.identity.User securityUser = service.login(newUserObject.getEmail(), password);
     
     return new RegistrationResult(newUserObject, securityUser);
   }

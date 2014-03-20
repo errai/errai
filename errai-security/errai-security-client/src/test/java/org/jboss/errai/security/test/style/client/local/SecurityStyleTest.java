@@ -9,8 +9,8 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
-import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.User;
+import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.test.style.client.local.res.TemplatedStyleWidget;
 import org.junit.Test;
 

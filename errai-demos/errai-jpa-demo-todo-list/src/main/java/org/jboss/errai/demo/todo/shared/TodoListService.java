@@ -1,7 +1,7 @@
 package org.jboss.errai.demo.todo.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.jboss.errai.security.shared.RequireAuthentication;
+import org.jboss.errai.security.shared.api.annotation.RequireAuthentication;
 
 import java.util.List;
 
