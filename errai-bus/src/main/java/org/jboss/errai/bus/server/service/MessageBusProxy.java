@@ -16,9 +16,13 @@
 
 package org.jboss.errai.bus.server.service;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-import org.jboss.errai.bus.client.api.BooleanRoutingRule;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+
 import org.jboss.errai.bus.client.api.BusMonitor;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SubscribeListener;
@@ -31,12 +35,8 @@ import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.common.client.api.Assert;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * @author Mike Brock
@@ -178,11 +178,6 @@ public class MessageBusProxy implements ServerMessageBus {
   @Override
   public void closeQueue(MessageQueue queue) {
     proxied.closeQueue(queue);
-  }
-
-  @Override
-  public void addRule(String subject, BooleanRoutingRule rule) {
-    proxied.addRule(subject, rule);
   }
 
   @Override

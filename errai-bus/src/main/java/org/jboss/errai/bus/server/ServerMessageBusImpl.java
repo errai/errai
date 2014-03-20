@@ -25,7 +25,17 @@ import static org.jboss.errai.common.client.protocols.MessageParts.RemoteService
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -34,7 +44,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.jboss.errai.bus.client.api.BooleanRoutingRule;
 import org.jboss.errai.bus.client.api.BusMonitor;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.RoutingFlag;
@@ -513,25 +522,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     fireQueueCloseListeners(new QueueCloseEvent(queue));
-  }
-
-  /**
-   * Adds a rule for a specific subscription. The <tt>BooleanRoutingRule</tt> determines if a message should
-   * be routed based on the already specified rules or not.
-   *
-   * @param subject
-   *     - the subject of the subscription
-   * @param rule
-   *     - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
-   */
-  @Override
-  public void addRule(final String subject, final BooleanRoutingRule rule) {
-    final DeliveryPlan plan = subscriptions.get(subject);
-    if (plan == null) {
-      throw new RuntimeException("no such subject: " + subject);
-    }
-
-    subscriptions.put(subject, new RuleDelegateMessageCallback(plan, rule));
   }
 
   /**

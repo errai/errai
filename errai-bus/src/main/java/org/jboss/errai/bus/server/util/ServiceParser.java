@@ -8,8 +8,6 @@ import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
-import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 
 /**
  * Parses and stores {@link Service} and {@link Command} meta-data for registering a
@@ -66,16 +64,6 @@ public abstract class ServiceParser {
    *         a {@link MessageCallback}.
    */
   public abstract boolean isCallback();
-
-  /**
-   * @return True iff this service is annotated with {@link RequireRoles}.
-   */
-  public abstract boolean hasRule();
-
-  /**
-   * @return True iff this service is annotated with {@link RequireAuthentication}.
-   */
-  public abstract boolean hasAuthentication();
 
   public abstract MessageCallback getCallback(Object delegateInstance, MessageBus bus);
 

@@ -11,8 +11,6 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
-import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 
 /**
@@ -103,16 +101,6 @@ public class ServiceTypeParser extends ServiceParser {
   @Override
   public String toString() {
     return clazz.toString();
-  }
-
-  @Override
-  public boolean hasRule() {
-    return clazz.isAnnotationPresent(RequireRoles.class);
-  }
-
-  @Override
-  public boolean hasAuthentication() {
-    return clazz.isAnnotationPresent(RequireAuthentication.class);
   }
 
   @Override

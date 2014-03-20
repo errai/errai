@@ -16,16 +16,15 @@
 
 package org.jboss.errai.bus.server.api;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.BooleanRoutingRule;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.api.messaging.MessageBus},
@@ -57,15 +56,6 @@ public interface ServerMessageBus extends MessageBus {
    * @param queue - the message queue to close
    */
   public void closeQueue(MessageQueue queue);
-
-  /**
-   * Adds a rule for a specific subscription. The <tt>BooleanRoutingRule</tt> determines if a message should
-   * be routed based on the already specified rules or not.
-   *
-   * @param subject - the subject of the subscription
-   * @param rule    - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
-   */
-  public void addRule(String subject, BooleanRoutingRule rule);
 
   /**
    * Returns the associated scheduler which keeps track of timed events

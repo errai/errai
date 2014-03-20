@@ -24,8 +24,6 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.protocols.SecurityCommands;
-import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.tests.support.GenericServiceB;
 import org.jboss.errai.bus.client.tests.support.NonPortableException;
 import org.jboss.errai.bus.client.tests.support.Person;
@@ -548,83 +546,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
               }
             })
             .sendGlobalWith(ErraiBus.get());
-      }
-    });
-  }
-
-  public void testMultipleEndpointsOnRemoteServiceWithAuthentication() {
-    class TestCount {
-      private int countdown;
-
-      TestCount(final int countdown) {
-        this.countdown = countdown;
-      }
-
-      public boolean done() {
-        return --countdown == 0;
-      }
-    }
-
-    final TestCount testCount = new TestCount(2);
-
-    class CommunicationTasks {
-      public void tryCommunication() {
-        MessageBuilder.createMessage()
-            .toSubject("TestSvcAuth")
-            .command("foo")
-            .done().repliesTo(new MessageCallback() {
-          @Override
-          public void callback(final Message message) {
-            assertEquals("Foo!", message.get(String.class, "Msg"));
-            if (testCount.done()) {
-              finishTest();
-            }
-          }
-        }).sendGlobalWith(ErraiBus.get());
-
-        MessageBuilder.createMessage()
-            .toSubject("TestSvcAuth")
-            .command("bar")
-            .done()
-            .repliesTo(new MessageCallback() {
-              @Override
-              public void callback(final Message message) {
-                assertEquals("Bar!", message.get(String.class, "Msg"));
-                if (testCount.done()) {
-                  finishTest();
-                }
-              }
-            })
-            .sendGlobalWith(ErraiBus.get());
-      }
-    }
-
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        // create a login client to handle the authentication handshake
-        ErraiBus.get().subscribe("LoginClient", new MessageCallback() {
-          @Override
-          public void callback(final Message message) {
-            if (message.getCommandType().equals("FailedAuth")) {
-              fail("failed to authenticate with server");
-            }
-            else if (message.getCommandType().equals("SuccessfulAuth")) {
-              new CommunicationTasks().tryCommunication();
-            }
-            else {
-              MessageBuilder.createConversation(message)
-                  .subjectProvided()
-                  .command(SecurityCommands.AuthRequest)
-                  .with(MessageParts.ReplyTo, "LoginClient")
-                  .with(SecurityParts.Name, "test")
-                  .with(SecurityParts.Password, "test123")
-                  .done().reply();
-            }
-          }
-        });
-
-        new CommunicationTasks().tryCommunication();
       }
     });
   }

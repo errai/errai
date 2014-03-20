@@ -17,21 +17,18 @@ package org.jboss.errai.bus.server.service.bootstrap;
 
 import static com.google.inject.Guice.createInjector;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.AbstractModule;
 
 /**
  * Load the default components configured through ErraiService.properties.
@@ -45,55 +42,6 @@ class DefaultComponents implements BootstrapExecution {
   public void execute(final BootstrapContext context) {
 
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
-
-    // MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
-
-    /*** Authentication Adapter ***/
-
-    if (config.hasProperty("errai.authentication_adapter")) {
-      try {
-        final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(config.getProperty("errai.authentication_adapter"))
-            .asSubclass(AuthenticationAdapter.class);
-
-        log.info("authentication adapter configured: " + authAdapterClass.getName());
-
-        final Runnable create = new Runnable() {
-          public void run() {
-            final AuthenticationAdapter authAdapterInst = Guice.createInjector(new AbstractModule() {
-              @Override
-              protected void configure() {
-                bind(AuthenticationAdapter.class).to(authAdapterClass);
-                bind(ErraiServiceConfigurator.class).toInstance(context.getConfig());
-                bind(MessageBus.class).toInstance(context.getBus());
-                bind(ServerMessageBus.class).toInstance(context.getBus());
-              }
-            }).getInstance(AuthenticationAdapter.class);
-
-            config.getExtensionBindings().put(AuthenticationAdapter.class, new ResourceProvider() {
-              public Object get() {
-                return authAdapterInst;
-              }
-            });
-          }
-        };
-
-        try {
-          create.run();
-        }
-        catch (Throwable e) {
-          log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
-          context.defer(create);
-        }
-
-      }
-      catch (ErraiBootstrapFailure e) {
-        throw e;
-      }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
-      }
-    }
-
 
     /*** Dispatcher ***/
 

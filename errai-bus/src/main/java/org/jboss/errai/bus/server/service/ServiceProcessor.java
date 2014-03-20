@@ -17,7 +17,6 @@ package org.jboss.errai.bus.server.service;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,11 +27,9 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.io.RPCEndpointFactory;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
-import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
 import org.jboss.errai.bus.server.util.NotAService;
@@ -144,16 +141,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       svc = createServiceInjector(loadClass, context, config, false);
     }
 
-    RolesRequiredRule rule = null;
-    
-    // Will never return true for service methods
-    if (svcParser.hasRule()) {
-      rule = new RolesRequiredRule(loadClass.getAnnotation(RequireRoles.class).value(), context.getBus());
-    }
-    else if (svcParser.hasAuthentication()) {
-      rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
-    }
-
     // If we have created an injector, get a callback and register it
     if (svc != null) {
       MessageCallback callback = svcParser.getCallback(svc, context.getBus());
@@ -163,9 +150,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         }
         else {
           context.getBus().subscribe(svcParser.getServiceName(), callback);
-        }
-        if (rule != null) {
-          context.getBus().addRule(svcParser.getServiceName(), rule);
         }
       }
     }

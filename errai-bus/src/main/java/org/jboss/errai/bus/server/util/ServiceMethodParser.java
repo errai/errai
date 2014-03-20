@@ -66,16 +66,6 @@ public class ServiceMethodParser extends ServiceParser {
   }
 
   @Override
-  public boolean hasRule() {
-    return false;
-  }
-
-  @Override
-  public boolean hasAuthentication() {
-    return false;
-  }
-
-  @Override
   public MessageCallback getCallback(Object delegate, MessageBus bus) {
     if (hasCommandPoints()) {
       return new CommandBindingsCallback(getCommandPoints(), delegate, bus);
