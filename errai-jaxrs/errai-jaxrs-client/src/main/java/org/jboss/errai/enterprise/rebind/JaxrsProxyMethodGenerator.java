@@ -19,9 +19,7 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -46,14 +44,10 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
+import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.framework.CallContextStatus;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
@@ -73,19 +67,26 @@ import com.google.gwt.user.client.Cookies;
 public class JaxrsProxyMethodGenerator {
   private static final String APPEND = "append";
 
-  private final GeneratorContext context;
+  private final MetaClass remote;
   private final MetaClass declaringClass;
   private final JaxrsResourceMethod resourceMethod;
   private final BlockBuilder<?> methodBlock;
   private final List<Statement> parameters;
+  private final InterceptorProvider interceptorProvider;
+  private final GeneratorContext context;
 
-  public JaxrsProxyMethodGenerator(final ClassStructureBuilder<?> classBuilder,
-          final JaxrsResourceMethod resourceMethod,
-          final GeneratorContext context) {
+  public JaxrsProxyMethodGenerator(final MetaClass remote, 
+      final ClassStructureBuilder<?> classBuilder, 
+      final JaxrsResourceMethod resourceMethod, 
+      final InterceptorProvider interceptorProvider,
+      final GeneratorContext context) {
+    
+    this.remote = remote;
     this.declaringClass = classBuilder.getClassDefinition();
     this.resourceMethod = resourceMethod;
+    this.interceptorProvider = interceptorProvider;
     this.context = context;
-
+    
     Parameter[] parms = DefParameters.from(resourceMethod.getMethod()).getParameters().toArray(new Parameter[0]);
     Parameter[] finalParms = new Parameter[parms.length];
     parameters = new ArrayList<Statement>();
@@ -104,7 +105,7 @@ public class JaxrsProxyMethodGenerator {
       methodBlock.append(generateRequestBuilder());
       methodBlock.append(generateHeaders(jaxrsParams));
 
-      List<Class<?>> interceptors = getInterceptors();
+      List<Class<?>> interceptors = interceptorProvider.getInterceptors(remote, resourceMethod.getMethod());
       if (!interceptors.isEmpty()) {
         methodBlock.append(generateInterceptorLogic(interceptors));
       }
@@ -113,75 +114,6 @@ public class JaxrsProxyMethodGenerator {
       }
     }
     generateReturnStatement();
-  }
-  
-  /**
-   * Scans for interceptors for this proxy method.
-   *  
-   * @return the list of interceptors that should be triggered when invoking this proxy method.
-   */
-  private List<Class<?>> getInterceptors() {
-    final List<Class<?>> interceptors = new ArrayList<Class<?>>();
-    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
-    if (interceptedCall == null) {
-      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
-    }
-    
-    if (interceptedCall == null) {
-      Collection<MetaClass> interceptorClasses = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class, 
-              RebindUtils.findTranslatablePackages(context), context);
-      
-      for (MetaClass interceptorClass : interceptorClasses) {
-        InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
-        if (interceptsDeclaringClass(interceptor)) {
-          interceptors.add(interceptorClass.asClass());
-        }
-      }
-    } 
-    else {
-      for (Class<?> clazz : interceptedCall.value()) {
-        interceptors.add(clazz);
-      }
-    }
-    
-    final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
-            RebindUtils.findTranslatablePackages(context), context);
-    
-    for (final MetaClass featureInterceptor : featureInterceptors) {
-      final Class<? extends Annotation>[] annotations = 
-        featureInterceptor.getAnnotation(FeatureInterceptor.class).value();
-      
-      for (int i = 0; i < annotations.length; i++) {
-        if (declaringClass.isAnnotationPresent(annotations[i])
-                || resourceMethod.getMethod().isAnnotationPresent(annotations[i])) {
-          interceptors.add(featureInterceptor.asClass());
-        }
-      }
-    }
-    
-    return interceptors;
-  }
-
-  /**
-   * Returns true if the given interceptor is configured to intercept the
-   * remote interface currently being generated.
-   */
-  private boolean interceptsDeclaringClass(InterceptsRemoteCall interceptor) {
-    Class<?>[] intercepts = interceptor.value();
-    for (Class<?> iclass : intercepts) {
-      if (declaringClass.asClass().equals(iclass)) {
-        return true;
-      }
-      MetaClass[] dinterfaces = declaringClass.getInterfaces();
-      if (dinterfaces != null) {
-        for (MetaClass dinterface : dinterfaces) {
-          if (dinterface.asClass().equals(iclass)) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
   }
 
   /**
@@ -323,7 +255,8 @@ public class JaxrsProxyMethodGenerator {
    * 
    * @param params
    *          the resource method's parameters
-   * @return a block statement with the corresponding calls to {@link RequestBuilder#setHeader(String, String)}
+   * @return a block statement with the corresponding calls to
+   *         {@link RequestBuilder#setHeader(String, String)}
    */
   private Statement generateHeaders(final JaxrsResourceMethodParameters params) {
     BlockStatement block = new BlockStatement();
@@ -373,7 +306,8 @@ public class JaxrsProxyMethodGenerator {
 
   /**
    * Generates the logic required to make this proxy method interceptable.
-   * @param interceptors 
+   * 
+   * @param interceptors
    * @return statement representing the interceptor logic.
    */
   private Statement generateInterceptorLogic(List<Class<?>> interceptors) {
@@ -431,8 +365,9 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} 
-   * for interceptable methods.
+   * Generates the call to
+   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
+   * interceptable methods.
    * 
    * @return statement representing the request
    */
@@ -443,8 +378,9 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} 
-   * for non-interceptable methods.
+   * Generates the call to
+   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
+   * non-interceptable methods.
    * 
    * @return statement representing the request
    */
@@ -453,8 +389,9 @@ public class JaxrsProxyMethodGenerator {
   }
 
   /**
-   * Generates the call to {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} 
-   * for proxy methods.
+   * Generates the call to
+   * {@link RequestBuilder#sendRequest(String, com.google.gwt.http.client.RequestCallback)} for
+   * proxy methods.
    * 
    * @return statement representing the request
    */

@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.ProxyUtil;
+import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -52,12 +53,14 @@ public class JaxrsProxyGenerator {
   private final JaxrsHeaders headers;
   private final String rootResourcePath;
   private final GeneratorContext context;
+  private final InterceptorProvider interceptorProvider;
 
-  public JaxrsProxyGenerator(MetaClass remote, final GeneratorContext context) {
+  public JaxrsProxyGenerator(MetaClass remote, final GeneratorContext context, final InterceptorProvider interceptorProvider) {
     this.remote = remote;
     this.context = context;
     this.rootResourcePath = remote.getAnnotation(Path.class).value();
     this.headers = JaxrsHeaders.fromClass(remote);
+    this.interceptorProvider = interceptorProvider;
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -90,7 +93,7 @@ public class JaxrsProxyGenerator {
     for (MetaMethod method : remote.getMethods()) {
       if (ProxyUtil.shouldProxyMethod(method)) {
         JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
-        new JaxrsProxyMethodGenerator(classBuilder, resourceMethod, context).generate();
+        new JaxrsProxyMethodGenerator(remote, classBuilder, resourceMethod, interceptorProvider, context).generate();
       }
     }
     return classBuilder;
