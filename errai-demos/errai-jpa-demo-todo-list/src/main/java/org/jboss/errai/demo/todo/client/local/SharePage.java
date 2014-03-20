@@ -9,7 +9,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.todo.shared.ShareService;
 import org.jboss.errai.demo.todo.shared.UnknownUserException;
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.TextBox;
 /**
  * @author edewit@redhat.com
  */
-@RestrictAccess
+@RestrictedAccess
 @Templated("#main")
 @Page(path="share")
 public class SharePage extends Composite {

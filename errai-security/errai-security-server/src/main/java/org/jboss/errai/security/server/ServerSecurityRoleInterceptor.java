@@ -8,7 +8,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -21,7 +21,7 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  *
  * @author edewit@redhat.com
  */
-@RestrictAccess
+@RestrictedAccess
 @Interceptor
 public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
 
@@ -35,7 +35,7 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
     final User user = authenticationService.getUser();
-    final RestrictAccess annotation = getRequiredRoleAnnotation(context.getTarget().getClass(), context.getMethod());
+    final RestrictedAccess annotation = getRestrictedAccessAnnotation(context.getTarget().getClass(), context.getMethod());
     if (user == null) {
       throw new UnauthenticatedException();
     }
@@ -46,41 +46,41 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
     }
   }
 
-  private RestrictAccess getRequiredRoleAnnotation(Class<?> aClass, Method method) {
-    RestrictAccess requireRoles = getRequiredRoleAnnotation(method.getAnnotations());
-    if (requireRoles != null) {
-      return requireRoles;
+  private RestrictedAccess getRestrictedAccessAnnotation(Class<?> aClass, Method method) {
+    RestrictedAccess annotation = getRestrictedAccessAnnotation(method.getAnnotations());
+    if (annotation != null) {
+      return annotation;
     }
 
     Class<?>[] interfaces = aClass.getInterfaces();
-    for (int i = 0, interfacesLength = interfaces.length; i < interfacesLength && requireRoles == null; i++) {
-      requireRoles = getRequireRoles(interfaces[i], method);
+    for (int i = 0, interfacesLength = interfaces.length; i < interfacesLength && annotation == null; i++) {
+      annotation = getRestrictedAccess(interfaces[i], method);
     }
 
-    if (requireRoles == null) {
+    if (annotation == null) {
       throw new IllegalArgumentException("could not find method that was intercepted!");
     }
 
-    return requireRoles;
+    return annotation;
   }
 
-  private RestrictAccess getRequireRoles(Class<?> aClass, Method searchMethod) {
+  private RestrictedAccess getRestrictedAccess(Class<?> aClass, Method searchMethod) {
     for (Method method : aClass.getMethods()) {
-      final RestrictAccess requireRoles = getRequireRoles(searchMethod, method);
-      if (requireRoles != null) {
-        return requireRoles;
+      final RestrictedAccess annotation = getRestrictAccess(searchMethod, method);
+      if (annotation != null) {
+        return annotation;
       }
     }
 
     return null;
   }
 
-  private RestrictAccess getRequireRoles(Method searchMethod, Method method) {
-    RestrictAccess requiredRoles = null;
+  private RestrictedAccess getRestrictAccess(Method searchMethod, Method method) {
+    RestrictedAccess requiredRoles = null;
 
     if (searchMethod.getName().equals(method.getName())
             && Arrays.equals(searchMethod.getParameterTypes(), method.getParameterTypes())) {
-      requiredRoles = getRequiredRoleAnnotation(method.getAnnotations());
+      requiredRoles = getRestrictedAccessAnnotation(method.getAnnotations());
     }
 
     return requiredRoles;

@@ -19,7 +19,7 @@ import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.security.client.local.identity.Identity;
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
@@ -40,7 +40,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
-@RestrictAccess
+@RestrictedAccess
 @Templated("#main")
 @Page(path="list", role = DefaultPage.class)
 public class TodoListPage extends Composite {

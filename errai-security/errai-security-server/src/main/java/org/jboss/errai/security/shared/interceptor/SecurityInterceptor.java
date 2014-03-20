@@ -3,7 +3,7 @@ package org.jboss.errai.security.shared.interceptor;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.Role;
 
 /**
@@ -23,10 +23,10 @@ public abstract class SecurityInterceptor {
     return true;
   }
 
-  protected RestrictAccess getRequiredRoleAnnotation(Annotation[] annotations) {
+  protected RestrictedAccess getRestrictedAccessAnnotation(Annotation[] annotations) {
     for (Annotation annotation : annotations) {
-      if (annotation instanceof RestrictAccess) {
-        return (RestrictAccess) annotation;
+      if (annotation instanceof RestrictedAccess) {
+        return (RestrictedAccess) annotation;
       }
     }
     return null;

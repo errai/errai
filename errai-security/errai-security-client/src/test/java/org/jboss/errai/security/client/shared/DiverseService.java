@@ -1,15 +1,15 @@
 package org.jboss.errai.security.client.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 
 @Remote
 public interface DiverseService {
   
-  @RestrictAccess
+  @RestrictedAccess
   public void needsAuthentication();
   
-  @RestrictAccess(roles = "admin")
+  @RestrictedAccess(roles = "admin")
   public void adminOnly();
   
   public void anybody();

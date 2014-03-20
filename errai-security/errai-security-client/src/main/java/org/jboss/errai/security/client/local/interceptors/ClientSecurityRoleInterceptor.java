@@ -8,14 +8,14 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
 import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
 import org.jboss.errai.security.client.local.util.SecurityUtil;
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.interceptor.SecurityInterceptor;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
 
 /**
- * Intercepts RPC calls to resources marked with {@link RestrictAccess}. This
+ * Intercepts RPC calls to resources marked with {@link RestrictedAccess}. This
  * interceptor throws an {@link UnauthenticatedException} if the user is not
  * logged in, and a {@link UnauthorizedException} if the user does not have the
  * required roles.
@@ -23,15 +23,15 @@ import org.jboss.errai.security.shared.util.AnnotationUtils;
  * @author edewit@redhat.com
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@FeatureInterceptor(RestrictAccess.class)
+@FeatureInterceptor(RestrictedAccess.class)
 public class ClientSecurityRoleInterceptor extends SecurityInterceptor implements
         RemoteCallInterceptor<RemoteCallContext> {
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
     securityCheck(
             AnnotationUtils.mergeRoles(
-                    getRequiredRoleAnnotation(context.getTypeAnnotations()),
-                    getRequiredRoleAnnotation(context.getAnnotations())),
+                    getRestrictedAccessAnnotation(context.getTypeAnnotations()),
+                    getRestrictedAccessAnnotation(context.getAnnotations())),
             context);
   }
 

@@ -41,7 +41,7 @@ import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @StyleBinding
 @InterceptorBinding
-public @interface RestrictAccess {
+public @interface RestrictedAccess {
 
   /**
    * The set of roles that the calling user must belong to in order to invoke

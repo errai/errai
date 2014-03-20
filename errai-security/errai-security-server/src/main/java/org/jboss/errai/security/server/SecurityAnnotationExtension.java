@@ -9,10 +9,10 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 
 /**
- * This {@link Extension} allows type level {@link RestrictAccess} annotations to
+ * This {@link Extension} allows type level {@link RestrictedAccess} annotations to
  * trigger server-side interceptors on their method calls.
  * 
  * @author edewit@redhat.com
@@ -26,7 +26,7 @@ public class SecurityAnnotationExtension implements Extension {
 
     for (Class<?> anInterface : interfaces) {
       for (Method method : anInterface.getMethods()) {
-        copyAnnotation(processAnnotatedType, method, RestrictAccess.class);
+        copyAnnotation(processAnnotatedType, method, RestrictedAccess.class);
       }
     }
   }

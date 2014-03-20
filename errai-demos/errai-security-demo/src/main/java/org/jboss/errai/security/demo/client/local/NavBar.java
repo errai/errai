@@ -4,7 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -17,7 +17,7 @@ public class NavBar extends Composite {
 
   @Inject @DataField Anchor messages;
   @Inject @DataField Anchor login;
-  @Inject @DataField @RestrictAccess(roles = "admin") Anchor admin;
+  @Inject @DataField @RestrictedAccess(roles = "admin") Anchor admin;
 
   @Inject TransitionTo<Messages> messagesTab;
   @Inject TransitionTo<LoginForm> loginTab;

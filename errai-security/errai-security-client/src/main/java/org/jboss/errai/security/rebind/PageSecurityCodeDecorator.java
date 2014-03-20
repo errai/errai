@@ -18,7 +18,7 @@ import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListener;
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.nav.client.local.Page;
 
 /**
@@ -37,8 +37,8 @@ public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
   public List<? extends Statement> generateDecorator(InjectableInstance<Page> ctx) {
     final List<Statement> stmts = new ArrayList<Statement>();
 
-    if (ctx.getInjector().getInjectedType().isAnnotationPresent(RestrictAccess.class)) {
-      final RestrictAccess annotation = ctx.getAnnotation(RestrictAccess.class);
+    if (ctx.getInjector().getInjectedType().isAnnotationPresent(RestrictedAccess.class)) {
+      final RestrictedAccess annotation = ctx.getAnnotation(RestrictedAccess.class);
       final String roleListenerVar = ctx.getInjector().getInstanceVarName() + "_roleListener";
       ctx.getTargetInjector().addStatementToEndOfInjector(
               Stmt.declareFinalVariable(

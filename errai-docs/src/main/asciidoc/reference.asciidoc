@@ -6767,7 +6767,7 @@ identity.logout();
 [NOTE]
 .Remote Procedure Calls
 ====
-The above methods are implemented with Errai RPC calls to the service `org.jboss.errai.security.shared.AuthenticationService`. However, client-side interceptors are used for caching so that generally only calls to `login` and `logout` must be sent over the wire.
+The above methods are implemented with Errai RPC calls to the service `org.jboss.errai.security.shared.service.AuthenticationService`. However, client-side interceptors are used for caching so that generally only calls to `login` and `logout` must be sent over the wire.
 ====
 
 [TIP]
@@ -6776,9 +6776,9 @@ The above methods are implemented with Errai RPC calls to the service `org.jboss
 The Identity class is annotated with `@Bindable` so that it can be bound to a login form. You can checkout the documentation on Errai DataBinding or see an example in link:$$https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/client/local/LoginForm.java$$[Errai Security].
 ====
 
-=== RequireAuthentication and RequireRoles
+=== RestrictedAccess
 
-The annotations `@RequireAuthentication` and `@RequireRoles` are the only two annotations necessary to secure a resource or UI element. In general, `@RequireAuthentication` blocks a resource from users who are not logged in and `@RequireRoles` blocks a resource from users who do not posess all the roles (a parameter of the annotation, given as an array of Strings). Below we will explain how different resources are blocked from unauthorized users.
+The annotation `@RestrictedAccess` is the only annotation necessary to secure a resource or UI element. In general, `@RestrictedAccess` blocks a resource from users who are not logged; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.
 
 ==== RPC Services
 
@@ -6791,7 +6791,7 @@ For example:
 [source,java]
 ----
 @Remote
-@RequireAuthentication
+@RestrictedAccess
 public interface UserOnlyStuff {
   public void someMethod();
   public void otherMethod();
@@ -6805,10 +6805,10 @@ public interface UserOnlyStuff {
 @Remote
 public interface MixedService {
 
-  @RequireAuthentication
+  @RestrictedAccess
   public void userService();
 
-  @RequireRoles({"admin"})
+  @RestrictedAccess(roles = {"admin"})
   public void adminService();
 }
 ----
@@ -6855,7 +6855,7 @@ Errai Security provides a default global RPC handler that catches any thrown `Un
 
 ==== Page Navigation
 
-Any class annotated with `@Page` can also be marked with `@RequireAuthentication` and `@RequireRoles`. By doing so, users will be prevented from navigating to the given page if they are not logged in or lack authorization.
+Any class annotated with `@Page` can also be marked with `@RestrictedAccess`. By doing so, users will be prevented from navigating to the given page if they are not logged in or lack authorization.
 
 Here are two simple examples:
 
@@ -6864,7 +6864,7 @@ Here are two simple examples:
 [source,java]
 ----
 @Page
-@RequireAuthentication
+@RestrictedAccess
 public class UserProfilePage extends SimplePanel {
 
   @Inject private Identity identity;
@@ -6890,7 +6890,7 @@ public class UserProfilePage extends SimplePanel {
 [source,java]
 ----
 @Page
-@RequireRoles({"admin", "user"})
+@RestrictedAccess(roles = {"admin", "user"})
 public class AdminManagementPage extends SimplePanel {
 }
 ----
@@ -6903,13 +6903,13 @@ When a user is denied access to a page they will be redirected to `LoginPage` or
 
 ===== Page Redirection and Caching
 
-Security checks performed before page navigation do not use any RPC calls, but are instead performed from a cached (in-memory) instance of the `org.jboss.errai.security.shared.User`. This prevents the possibility of lengthy delays between page navigation while waiting for RPC return values.
+Security checks performed before page navigation do not use any RPC calls, but are instead performed from a cached (in-memory) instance of the `org.jboss.errai.security.shared.api.identity.User`. This prevents the possibility of lengthy delays between page navigation while waiting for RPC return values.
 
 But the drawback is that any attempts to navigate to a secured `@Page` before the cache is populated will result in redirection to the `LoginPage` -- even if the user is in fact logged in.
 
 In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.
 
-One option offered by Errai is to persist the `org.jboss.errai.security.shared.User` object in the browsers local storage. This can be done by adding the following to `ErraiApp.properties`:
+One option offered by Errai is to persist the `org.jboss.errai.security.shared.api.identity.User` object in the browsers local storage. This can be done by adding the following to `ErraiApp.properties`:
 
 ----
 errai.security.userLocalStorage=true
@@ -6992,12 +6992,12 @@ public class NavBar extends Composite {
 
   @Inject
   @DataField
-  @RequireAuthentication
+  @RestrictedAccess
   private Button logoutButton;
 
   @Inject
   @DataField
-  @RequireRoles({"admin"})
+  @RestrictedAccess(roles = {"admin"})
   private Button dropAllTablesButton;
 
 }
@@ -8040,12 +8040,11 @@ Once you have Errai Security Client on your classpath, ensure your application i
 
 ==== CDI and Interceptor Bindings
 
-Errai security requires a CDI container to intercept calls to remote services. In particular, the following interceptors must be added to your applications `beans.xml`:
+Errai security requires a CDI container to intercept calls to remote services. In particular, the following interceptor must be added to your application's `beans.xml`:
 
 [source,xml]
 ----
 <interceptors>
-  <class>org.jboss.errai.security.server.SecurityUserInterceptor</class>
   <class>org.jboss.errai.security.server.ServerSecurityRoleInterceptor</class>
 </interceptors>
 ----

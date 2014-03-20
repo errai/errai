@@ -7,7 +7,7 @@ import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.security.shared.api.annotation.RestrictAccess;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.shared.api.style.StyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
@@ -62,7 +62,7 @@ public class SecurityTest extends AbstractErraiCDITest {
     // given
     SecurityTestModule module = IOC.getBeanManager().lookupBean(SecurityTestModule.class).getInstance();
     final Boolean[] executedStyleBinding = {Boolean.FALSE};
-    StyleBindingsRegistry.get().addStyleBinding(null, RestrictAccess.class, new StyleBindingExecutor() {
+    StyleBindingsRegistry.get().addStyleBinding(null, RestrictedAccess.class, new StyleBindingExecutor() {
       @Override
       public void invokeBinding(Element element) {
         executedStyleBinding[0] = Boolean.TRUE;
