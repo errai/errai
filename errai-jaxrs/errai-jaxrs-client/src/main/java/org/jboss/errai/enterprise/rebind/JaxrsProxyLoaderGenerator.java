@@ -19,6 +19,7 @@ package org.jboss.errai.enterprise.rebind;
 import java.util.Collection;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.ext.Provider;
 
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
@@ -27,6 +28,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
@@ -37,8 +39,12 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
+import org.jboss.errai.enterprise.shared.api.annotations.MapsFrom;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
@@ -66,12 +72,14 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
 
     final InterceptorProvider interceptorProvider = getInterceptorProvider(context);
-    
-    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Path.class, 
+    final Multimap<MetaClass, MetaClass> exceptionMappers = getClientExceptionMappers(context);
+
+    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Path.class,
         RebindUtils.findTranslatablePackages(context), context)) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
-        ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote, context, interceptorProvider).generate();
+        ClassStructureBuilder<?> remoteProxy =
+            new JaxrsProxyGenerator(remote, context, interceptorProvider, exceptionMappers).generate();
         loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         // create the proxy provider
@@ -89,14 +97,52 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     return classBuilder.toJavaString();
   }
-  
+
+  /**
+   * Returns an {@link InterceptorProvider} that can be used to retrieve interceptors for the remote
+   * interface/method.
+   */
   private InterceptorProvider getInterceptorProvider(final GeneratorContext context) {
     final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
         RebindUtils.findTranslatablePackages(context), context);
-    
+
     final Collection<MetaClass> standaloneInterceptors = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class,
         RebindUtils.findTranslatablePackages(context), context);
-    
+
     return new InterceptorProvider(featureInterceptors, standaloneInterceptors);
+  }
+
+  /**
+   * Returns a {@link Multimap} of client side exception mappers to remote interfaces they apply to
+   * (see {@link MapsFrom}). If a generic (default) exception mapper is found the value collection
+   * of the map will contain null.
+   */
+  private Multimap<MetaClass, MetaClass> getClientExceptionMappers(final GeneratorContext context) {
+    final Multimap<MetaClass, MetaClass> result = ArrayListMultimap.create();
+
+    Collection<MetaClass> providers = ClassScanner.getTypesAnnotatedWith(Provider.class,
+        RebindUtils.findTranslatablePackages(context), context);
+
+    MetaClass genericExceptionMapperClass = null;
+    for (MetaClass metaClass : providers) {
+      if (!metaClass.isAbstract() && metaClass.isAssignableTo(ClientExceptionMapper.class)) {
+        MapsFrom mapsFrom = metaClass.getAnnotation(MapsFrom.class);
+        if (mapsFrom == null && genericExceptionMapperClass == null) {
+          // Found a generic client-side exception mapper (to be used for all REST interfaces)
+          genericExceptionMapperClass = metaClass;
+          result.put(genericExceptionMapperClass, null);
+        }
+        else {
+          Class<?>[] remotes = mapsFrom.value();
+          if (remotes != null) {
+            for (Class<?> remote : remotes) {
+              result.put(metaClass, MetaClassFactory.get(remote));
+            }
+          }
+        }
+      }
+    }
+
+    return result;
   }
 }

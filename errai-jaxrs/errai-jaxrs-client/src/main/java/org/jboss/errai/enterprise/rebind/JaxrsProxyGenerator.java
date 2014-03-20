@@ -19,7 +19,6 @@ package org.jboss.errai.enterprise.rebind;
 import java.util.Collection;
 
 import javax.ws.rs.Path;
-import javax.ws.rs.ext.Provider;
 
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -29,17 +28,15 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
-import org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper;
-import org.jboss.errai.enterprise.shared.api.annotations.MapsFrom;
 
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.GeneratorContext;
 
 /**
@@ -54,10 +51,13 @@ public class JaxrsProxyGenerator {
   private final String rootResourcePath;
   private final GeneratorContext context;
   private final InterceptorProvider interceptorProvider;
+  private final Multimap<MetaClass, MetaClass> exceptionMappers;
 
-  public JaxrsProxyGenerator(MetaClass remote, final GeneratorContext context, final InterceptorProvider interceptorProvider) {
+  public JaxrsProxyGenerator(MetaClass remote, final GeneratorContext context,
+      final InterceptorProvider interceptorProvider, Multimap<MetaClass, MetaClass> exceptionMappers) {
     this.remote = remote;
     this.context = context;
+    this.exceptionMappers = exceptionMappers;
     this.rootResourcePath = remote.getAnnotation(Path.class).value();
     this.headers = JaxrsHeaders.fromClass(remote);
     this.interceptorProvider = interceptorProvider;
@@ -75,7 +75,7 @@ public class JaxrsProxyGenerator {
             .privateField("errorCallback", ErrorCallback.class)
             .finish()
             .publicConstructor()
-            .append(generateCtor())
+            .append(generateConstructor())
             .finish()
             .publicMethod(RemoteCallback.class, "getRemoteCallback")
             .append(Stmt.loadClassMember("remoteCallback").returnValue())
@@ -102,28 +102,18 @@ public class JaxrsProxyGenerator {
   /**
    * @return the generated body of the proxy's constructor
    */
-  private Statement generateCtor() {
-    // Try to find an ClientExceptionMapper that applies to the remote REST interface
-    Collection<MetaClass> providers = ClassScanner.getTypesAnnotatedWith(Provider.class, 
-        RebindUtils.findTranslatablePackages(context), context);
+  private Statement generateConstructor() {
     MetaClass exceptionMapperClass = null;
-    for (MetaClass metaClass : providers) {
-      if (!metaClass.isAbstract() && metaClass.isAssignableTo(ClientExceptionMapper.class)) {
-        MapsFrom mapsFrom = metaClass.getAnnotation(MapsFrom.class);
-        if (mapsFrom == null && exceptionMapperClass == null) {
-          // Default mapper
-          exceptionMapperClass = metaClass;
-        } else {
-          Class<?>[] classes = mapsFrom.value();
-          if (classes != null) {
-            for (Class<?> class1 : classes) {
-              if (class1.getName().equals(this.remote.getFullyQualifiedName())) {
-                exceptionMapperClass = metaClass;
-                break;
-              }
-            }
-          }
-        }
+    for (MetaClass exceptionMapper : exceptionMappers.keySet()) {
+      Collection<MetaClass> remotes = exceptionMappers.get(exceptionMapper);
+      if (remotes.contains(null) && exceptionMapperClass == null) {
+        // generic (default) exception mapper
+        exceptionMapperClass = exceptionMapper;
+      }
+      else if (remotes.contains(remote)) {
+        exceptionMapperClass = exceptionMapper;
+        // Stop if we find an exception mapper specific to this remote interface 
+        break;
       }
     }
     
@@ -132,8 +122,9 @@ public class JaxrsProxyGenerator {
       ContextualStatementBuilder setMapper = Stmt.loadVariable("this").invoke("setExceptionMapper", 
           Stmt.newObject(exceptionMapperClass));
       return setMapper;
-    } else {
-      return Stmt.returnVoid();
+    } 
+    else {
+      return EmptyStatement.INSTANCE; 
     }
   }
 }
