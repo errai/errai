@@ -33,7 +33,7 @@ public class OnDemandEventObserver {
     eventLog.add(event);
   }
 
-  public static List<UnobservedEvent> getEventLog() {
+  public List<UnobservedEvent> getEventLog() {
     return eventLog;
   }
 }

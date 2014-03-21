@@ -168,7 +168,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
             System.out.println("Restarting bus...");
             bus.init();
           }
-        }.schedule(2000);
+        }.schedule(4000);
       }
     });
 
@@ -197,7 +197,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       public void run() {
         testEventObservers();
       }
-    }.schedule(15000);
+    }.schedule(30000);
     
     delayTestFinish(240000);
   }
