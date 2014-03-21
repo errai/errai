@@ -8,7 +8,8 @@ import java.util.Set;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.jboss.errai.security.client.local.util.SecurityUtil;
+import org.jboss.errai.security.client.local.context.SecurityContext;
+import org.jboss.errai.security.client.local.context.impl.SecurityContextImpl;
 import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.test.style.client.local.res.TemplatedStyleWidget;
@@ -28,6 +29,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
   private final Role adminRole = new Role("admin");
   
   private SyncBeanManager bm;
+  private SecurityContext securityContext;
   
   public SecurityStyleTest() {
     regularUser = new User();
@@ -50,6 +52,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         bm = IOC.getBeanManager();
+        securityContext = bm.lookupBean(SecurityContextImpl.class).getInstance();
       }
     });
   }
@@ -66,7 +69,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
         // Make sure we are not logged in as anyone.
-        SecurityUtil.performLoginStatusChangeActions(null);
+        securityContext.setUser(null);
         
         assertTrue(widget.getControl().isVisible());
         assertFalse(widget.getUserAnchor().isVisible());
@@ -87,7 +90,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
 
-        SecurityUtil.performLoginStatusChangeActions(regularUser);
+        securityContext.setUser(regularUser);
         
         assertTrue(widget.getControl().isVisible());
         assertTrue(widget.getUserAnchor().isVisible());
@@ -108,7 +111,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
 
-        SecurityUtil.performLoginStatusChangeActions(adminUser);
+        securityContext.setUser(adminUser);
         
         assertTrue(widget.getControl().isVisible());
         assertTrue(widget.getUserAnchor().isVisible());

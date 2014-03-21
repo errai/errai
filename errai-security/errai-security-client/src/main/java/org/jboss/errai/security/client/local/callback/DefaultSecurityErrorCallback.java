@@ -1,9 +1,10 @@
 package org.jboss.errai.security.client.local.callback;
 
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.api.UncaughtException;
-import org.jboss.errai.security.client.local.util.SecurityUtil;
+import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -18,16 +19,23 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Singleton
+@ApplicationScoped
 public class DefaultSecurityErrorCallback {
+  
+  private final SecurityContext context;
+  
+  @Inject
+  public DefaultSecurityErrorCallback(final SecurityContext context) {
+    this.context = context;
+  }
 
   @UncaughtException
   private void handleError(final Throwable throwable) {
     if (throwable instanceof UnauthenticatedException) {
-      SecurityUtil.navigateToPage(LoginPage.class);
+      context.navigateToPage(LoginPage.class);
     }
     else if (throwable instanceof UnauthorizedException) {
-      SecurityUtil.navigateToPage(SecurityError.class);
+      context.navigateToPage(SecurityError.class);
     }
 
   }

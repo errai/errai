@@ -9,7 +9,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
+import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -30,10 +30,10 @@ import com.google.gwt.user.client.Element;
 @Singleton
 public class RoleStyleBindingProvider {
 
-  private final ActiveUserProvider userProvider;
+  private final ActiveUserCache userProvider;
 
   @Inject
-  public RoleStyleBindingProvider(final ActiveUserProvider userProvider) {
+  public RoleStyleBindingProvider(final ActiveUserCache userProvider) {
     this.userProvider = userProvider;
   }
 
@@ -42,7 +42,7 @@ public class RoleStyleBindingProvider {
     StyleBindingsRegistry.get().addStyleBinding(this, RestrictedAccess.class, new AnnotationStyleBindingExecutor() {
       @Override
       public void invokeBinding(final Element element, final Annotation annotation) {
-        final User user = userProvider.getActiveUser();
+        final User user = userProvider.getUser();
         if (user == null || user.getRoles() == null || !hasRoles(user.getRoles(), ((RestrictedAccess) annotation).roles()))
           element.getStyle().setDisplay(Display.NONE);
         else

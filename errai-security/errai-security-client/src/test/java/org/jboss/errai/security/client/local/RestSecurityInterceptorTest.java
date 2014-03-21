@@ -1,5 +1,9 @@
 package org.jboss.errai.security.client.local;
 
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.inject.Default;
+
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
@@ -12,8 +16,7 @@ import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
+import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.client.local.res.Counter;
 import org.jboss.errai.security.client.local.res.CountingCallback;
 import org.jboss.errai.security.client.local.res.RestErrorCountingCallback;
@@ -38,6 +41,8 @@ import com.google.gwt.user.client.Timer;
 public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest {
 
   public static final String BASE_URL = "/";
+  
+  private ActiveUserCache activeUserCache;
 
   @Override
   protected void gwtSetUp() throws Exception {
@@ -50,6 +55,13 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
         MessageBuilder.createCall(new VoidCallback(), AuthenticationService.class).logout();
       }
     });
+    // This @Default annotation is necessary because of an IOC bug
+    activeUserCache = IOC.getBeanManager().lookupBean(ActiveUserCache.class, new Annotation() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Default.class;
+      }
+    }).getInstance();
   }
 
   @Test
@@ -169,7 +181,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
     helper(new Runnable() {
       @Override
       public void run() {
-        IOC.getBeanManager().lookupBean(ActiveUserProvider.class).getInstance().setActiveUser(user);
+        activeUserCache.setUser(user);
         restCallHelper(callback, errorCallback).admin();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
@@ -192,11 +204,10 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
     helper(new Runnable() {
       @Override
       public void run() {
-        final SyncBeanManager bm = IOC.getBeanManager();
         MessageBuilder.createCall(new RemoteCallback<User>() {
           @Override
           public void callback(User response) {
-            bm.lookupBean(ActiveUserProvider.class).getInstance().invalidateCache();
+            activeUserCache.invalidateCache();
             restCallHelper(callback, errorCallback).admin();
           }
         }, new BusErrorCallback() {
@@ -228,8 +239,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
     helper(new Runnable() {
       @Override
       public void run() {
-        final SyncBeanManager bm = IOC.getBeanManager();
-        bm.lookupBean(ActiveUserProvider.class).getInstance().invalidateCache();
+        activeUserCache.invalidateCache();
         restCallHelper(callback, errorCallback).admin();
 
         testUntil(TIME_LIMIT, new Runnable() {

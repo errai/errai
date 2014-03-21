@@ -1,7 +1,9 @@
 package org.jboss.errai.security.client.local.callback;
 
+import javax.inject.Inject;
+
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
-import org.jboss.errai.security.client.local.util.SecurityUtil;
+import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
@@ -11,37 +13,43 @@ import com.google.gwt.http.client.Request;
 
 public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
 
-  private final RestErrorCallback wrapped;
+  private RestErrorCallback wrapped;
 
-  public DefaultRestSecurityErrorCallback(final RestErrorCallback wrapped) {
+  private final SecurityContext context;
+
+  public DefaultRestSecurityErrorCallback(final RestErrorCallback wrapped, final SecurityContext context) {
+    this.context = context;
     this.wrapped = wrapped;
   }
 
-  public DefaultRestSecurityErrorCallback() {
+  @Inject
+  public DefaultRestSecurityErrorCallback(final SecurityContext context) {
     this(new RestErrorCallback() {
       @Override
       public boolean error(Request message, Throwable throwable) {
         return true;
       }
-    });
+    }, context);
   }
 
   @Override
   public boolean error(final Request message, final Throwable throwable) {
     if (wrapped.error(message, throwable)) {
       if (throwable instanceof UnauthenticatedException) {
-        SecurityUtil.navigateToPage(LoginPage.class);
+        context.navigateToPage(LoginPage.class);
 
-        return false;
       }
       else if (throwable instanceof UnauthorizedException) {
-        SecurityUtil.navigateToPage(SecurityError.class);
+        context.navigateToPage(SecurityError.class);
 
-        return false;
       }
     }
 
     return false;
+  }
+  
+  public void setWrappedErrorCallback(final RestErrorCallback errorCallback) {
+    wrapped = errorCallback;
   }
 
 }

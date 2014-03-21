@@ -1,79 +1,87 @@
 package org.jboss.errai.security.client.local.interceptors;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
-import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
-import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
-import org.jboss.errai.security.client.local.util.SecurityUtil;
+import org.jboss.errai.security.client.local.context.ActiveUserCache;
+import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
  * Intercepts RPC logins through {@link AuthenticationService} for populating
- * and removing the current logged in user via {@link ActiveUserProvider}.
+ * and removing the current logged in user via {@link ActiveUserCache}.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @InterceptsRemoteCall({ AuthenticationService.class })
+@Dependent
 public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<RemoteCallContext> {
+  
+  private final SecurityContext securityContext;
+  
+  @Inject
+  public AuthenticationServiceInterceptor(final SecurityContext securityContext) {
+    this.securityContext = securityContext;
+  }
 
   @Override
-  public void aroundInvoke(final RemoteCallContext context) {
-    if (context.getMethodName().equals("login")) {
-      login(context);
+  public void aroundInvoke(final RemoteCallContext callContext) {
+    if (callContext.getMethodName().equals("login")) {
+      login(callContext);
     }
-    else if (context.getMethodName().equals("logout")) {
-      logout(context);
+    else if (callContext.getMethodName().equals("logout")) {
+      logout(callContext);
     }
-    else if (context.getMethodName().equals("getUser")) {
-      getUser(context);
+    else if (callContext.getMethodName().equals("getUser")) {
+      getUser(callContext);
     }
-    else if (context.getMethodName().equals("isLoggedIn")) {
-      isLoggedIn(context);
+    else if (callContext.getMethodName().equals("isLoggedIn")) {
+      isLoggedIn(callContext);
     }
     else {
-      context.proceed();
+      callContext.proceed();
     }
   }
 
-  private void isLoggedIn(final RemoteCallContext context) {
-    final ActiveUserProvider provider = ActiveUserProviderImpl.getInstance();
-    if (provider.isCacheValid()) {
-      context.setResult(provider.hasActiveUser());
+  private void isLoggedIn(final RemoteCallContext callContext) {
+    if (securityContext.isValid()) {
+      callContext.setResult(securityContext.hasUser());
     }
     else {
-      context.proceed();
+      callContext.proceed();
     }
   }
 
-  private void login(final RemoteCallContext context) {
-    context.proceed(new RemoteCallback<User>() {
+  private void login(final RemoteCallContext callContext) {
+    callContext.proceed(new RemoteCallback<User>() {
 
       @Override
       public void callback(final User response) {
-        SecurityUtil.performLoginStatusChangeActions(response);
+        securityContext.setUser(response);
       }
     });
   }
 
-  private void logout(final RemoteCallContext context) {
-    SecurityUtil.performLoginStatusChangeActions(null);
-    context.proceed();
+  private void logout(final RemoteCallContext callContext) {
+    securityContext.setUser(null);
+    callContext.proceed();
   }
 
   private void getUser(final RemoteCallContext context) {
-    final ActiveUserProvider provider = ActiveUserProviderImpl.getInstance();
-    if (provider.isCacheValid()) {
-      context.setResult(provider.getActiveUser());
+    if (securityContext.isValid()) {
+      context.setResult(securityContext.getUser());
     }
     else {
       context.proceed(new RemoteCallback<User>() {
 
         @Override
         public void callback(final User response) {
-          SecurityUtil.performLoginStatusChangeActions(response);
+          securityContext.setUser(response);
         }
       });
     }

@@ -7,9 +7,8 @@ import java.util.Set;
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
-import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
-import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
-import org.jboss.errai.security.client.local.util.SecurityUtil;
+import org.jboss.errai.security.client.local.context.SecurityContext;
+import org.jboss.errai.security.client.local.context.impl.SecurityContextImpl;
 import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
@@ -25,11 +24,11 @@ import com.google.gwt.user.client.ui.IsWidget;
  */
 public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleListener<W> {
   
-  private final Set<String> roles;
+  private Set<String> roles;
   
   public PageRoleLifecycleListener(final String... roles) {
     this.roles = new HashSet<String>();
-    
+
     for (int i = 0; i < roles.length; i++) {
       this.roles.add(roles[i]);
     }
@@ -37,18 +36,20 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
 
   @Override
   public void observeEvent(final LifecycleEvent<W> event) {
-    final ActiveUserProvider activeUserProvider = ActiveUserProviderImpl.getInstance();
-    if (!activeUserProvider.isCacheValid() || !activeUserProvider.hasActiveUser()
-            || !containsRoles(activeUserProvider.getActiveUser().getRoles(), roles)) {
+    // There is no good way to inject the context within the bootstrapper.
+    final SecurityContext securityContext = SecurityContextImpl.getInstance();
+
+    if (!securityContext.isValid() || !securityContext.hasUser()
+            || !containsRoles(securityContext.getUser().getRoles(), roles)) {
       event.veto();
 
       final Class<? extends UniquePageRole> destination;
-      if (!activeUserProvider.hasActiveUser())
+      if (!securityContext.hasUser())
         destination = LoginPage.class;
       else
         destination = SecurityError.class;
       
-      SecurityUtil.navigateToPage(destination);
+      securityContext.navigateToPage(destination);
     }
   }
 

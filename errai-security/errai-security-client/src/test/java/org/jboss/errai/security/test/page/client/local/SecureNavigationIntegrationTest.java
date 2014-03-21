@@ -1,7 +1,10 @@
 package org.jboss.errai.security.test.page.client.local;
 
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.enterprise.inject.Default;
 
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -10,7 +13,7 @@ import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.client.local.TestLoginPage;
 import org.jboss.errai.security.client.local.TestPage;
 import org.jboss.errai.security.client.local.TestSecurityErrorPage;
-import org.jboss.errai.security.client.local.identity.ActiveUserProvider;
+import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.test.page.client.res.RequireAuthenticationPage;
@@ -24,6 +27,7 @@ import com.google.gwt.user.client.Timer;
 public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
   private SyncBeanManager bm;
+  private ActiveUserCache activeUserCache;
 
   @Override
   public String getModuleName() {
@@ -34,6 +38,13 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     bm = IOC.getBeanManager();
+    activeUserCache = bm.lookupBean(ActiveUserCache.class, new Annotation() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Default.class;
+      }
+    }).getInstance();
+
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       
       @Override
@@ -76,7 +87,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
       public void run() {
         final User user = new User();
         // Cache a logged in user.
-        bm.lookupBean(ActiveUserProvider.class).getInstance().setActiveUser(user);
+        activeUserCache.setUser(user);
 
         final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
 
@@ -122,7 +133,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
         user.setRoles(roles);
 
         // Cache a logged in user.
-        bm.lookupBean(ActiveUserProvider.class).getInstance().setActiveUser(user);
+        activeUserCache.setUser(user);
 
         final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
 
@@ -150,7 +161,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
         user.setRoles(roles);
         // Cache a logged in user.
-        bm.lookupBean(ActiveUserProvider.class).getInstance().setActiveUser(user);
+        activeUserCache.setUser(user);
 
         final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
 

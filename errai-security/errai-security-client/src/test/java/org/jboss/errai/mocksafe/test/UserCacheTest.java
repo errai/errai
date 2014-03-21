@@ -13,10 +13,11 @@ import javax.enterprise.event.Event;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.security.client.local.identity.ActiveUserProviderImpl;
+import org.jboss.errai.security.client.local.context.ActiveUserCache;
+import org.jboss.errai.security.client.local.context.SecurityContext;
+import org.jboss.errai.security.client.local.context.impl.BasicUserCacheImpl;
+import org.jboss.errai.security.client.local.context.impl.SecurityContextImpl;
 import org.jboss.errai.security.client.local.identity.LocalStorageHandler;
-import org.jboss.errai.security.client.local.util.SecurityUtil;
-import org.jboss.errai.security.client.local.util.SecurityUtil.SecurityModule;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.event.LoggedInEvent;
 import org.jboss.errai.security.shared.event.LoggedOutEvent;
@@ -52,9 +53,9 @@ public class UserCacheTest {
   @Mock
   private Navigation nav;
   @InjectMocks
-  private SecurityModule module;
+  private SecurityContext securityContext = new SecurityContextImpl();
   @InjectMocks
-  private ActiveUserProviderImpl userProvider;
+  private ActiveUserCache userCache = new BasicUserCacheImpl();
 
   private Method loadMethod;
   private Method rpcMethod;
@@ -84,18 +85,14 @@ public class UserCacheTest {
 
   @Before
   public void setup() throws NoSuchMethodException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-    loadMethod = userProvider.getClass().getDeclaredMethod("maybeLoadStoredCache");
-    rpcMethod = userProvider.getClass().getDeclaredMethod("updateCacheFromServer");
+    loadMethod = BasicUserCacheImpl.class.getDeclaredMethod("maybeLoadStoredCache");
+    rpcMethod = SecurityContextImpl.class.getDeclaredMethod("updateCacheFromServer");
     loadMethod.setAccessible(true);
     rpcMethod.setAccessible(true);
     
-    final Field securityField = SecurityUtil.class.getDeclaredField("moduleInstance");
-    securityField.setAccessible(true);
-    securityField.set(null, module);
-    
-    final Field moduleField = SecurityModule.class.getDeclaredField("userProvider");
-    moduleField.setAccessible(true);
-    moduleField.set(module, userProvider);
+    final Field userCacheField = SecurityContextImpl.class.getDeclaredField("userCache");
+    userCacheField.setAccessible(true);
+    userCacheField.set(securityContext, userCache);
   }
 
   @Test
@@ -105,14 +102,14 @@ public class UserCacheTest {
     when(storageHandler.getUser()).thenReturn(new User("adam"));
     when(caller.call(any(RemoteCallback.class))).then(new AuthServiceAnswer(expected));
 
-    loadMethod.invoke(userProvider);
+    loadMethod.invoke(userCache);
     // Precondition
-    assertEquals("adam", userProvider.getActiveUser().getLoginName());
+    assertEquals("adam", userCache.getUser().getLoginName());
 
     // Actual test
-    rpcMethod.invoke(userProvider);
+    rpcMethod.invoke(securityContext);
 
-    assertEquals(expected, userProvider.getActiveUser());
+    assertEquals(expected, userCache.getUser());
     verify(storageHandler).setUser(expected);
   }
 
@@ -123,12 +120,12 @@ public class UserCacheTest {
     when(storageHandler.getUser()).thenReturn(null);
     when(caller.call(any(RemoteCallback.class))).then(new AuthServiceAnswer(expected));
 
-    loadMethod.invoke(userProvider);
-    rpcMethod.invoke(userProvider);
+    loadMethod.invoke(userCache);
+    rpcMethod.invoke(securityContext);
 
     verify(caller).call(any(RemoteCallback.class));
     verify(storageHandler).setUser(expected);
-    assertEquals(expected, userProvider.getActiveUser());
+    assertEquals(expected, userCache.getUser());
   }
 
   @Test
@@ -137,13 +134,13 @@ public class UserCacheTest {
 
     when(storageHandler.getUser()).thenReturn(new User("eve"));
 
-    userProvider.setActiveUser(expected);
-    assertTrue(userProvider.isCacheValid());
+    userCache.setUser(expected);
+    assertTrue(userCache.isValid());
     verify(storageHandler).setUser(expected);
 
-    loadMethod.invoke(userProvider);
+    loadMethod.invoke(userCache);
 
-    assertEquals(expected, userProvider.getActiveUser());
+    assertEquals(expected, userCache.getUser());
     verify(storageHandler, new Times(0)).getUser();
     verify(storageHandler).setUser(expected);
   }
@@ -151,21 +148,21 @@ public class UserCacheTest {
   @Test
   public void testStorageWhenActiveUserSet() throws Exception {
     final User expected = new User("adam");
-    userProvider.setActiveUser(expected);
+    userCache.setUser(expected);
 
     verify(storageHandler).setUser(expected);
   }
 
   @Test
   public void testStorageWhenNullUserSet() throws Exception {
-    userProvider.setActiveUser(null);
+    userCache.setUser(null);
 
     verify(storageHandler).setUser(null);
   }
 
   @Test
   public void testStorageRemovedWhenCacheInvalidated() throws Exception {
-    userProvider.invalidateCache();
+    userCache.invalidateCache();
 
     verify(storageHandler).setUser(null);
   }

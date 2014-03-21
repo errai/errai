@@ -1,4 +1,4 @@
-package org.jboss.errai.security.client.local.identity;
+package org.jboss.errai.security.client.local.context;
 
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
@@ -9,29 +9,29 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface ActiveUserProvider {
+public interface ActiveUserCache {
 
   /**
    * @return True iff there is a cached {@link User} available from a recent login.
    */
-  public boolean hasActiveUser();
+  public boolean hasUser();
 
   /**
    * @return The currently logged in {@link User}, or {@literal null}.
    */
-  public User getActiveUser();
+  public User getUser();
 
   /**
    * Manually set the currently logged in {@link User}.
    * 
    * @param user The {@link User} currently logged in.
    */
-  public void setActiveUser(User user);
+  public void setUser(User user);
   
   /**
    * @return False if the cached {@link User} has been invalidated.
    */
-  public boolean isCacheValid();
+  public boolean isValid();
   
   /**
    * Invalidate the cached {@link User}.

@@ -7,6 +7,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.security.client.local.callback.DefaultRestSecurityErrorCallback;
+import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.demo.client.shared.MessageService;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -35,6 +36,9 @@ public class Messages extends Composite {
   @Inject
   @DataField("newItemForm")
   private Label label;
+  
+  @Inject
+  private SecurityContext securityContext;
 
   @Inject
   @DataField
@@ -60,7 +64,7 @@ public class Messages extends Composite {
                   public void callback(String o) {
                     label.setText(o);
                   }
-                }, new DefaultRestSecurityErrorCallback()).hello();
+                }, new DefaultRestSecurityErrorCallback(securityContext)).hello();
       }
     });
   }
@@ -86,6 +90,6 @@ public class Messages extends Composite {
         // occur.
         return true;
       }
-    })).ping();
+    }, securityContext)).ping();
   }
 }

@@ -6,8 +6,8 @@ import javax.inject.Inject;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.client.local.identity.Identity;
-import org.jboss.errai.security.client.local.nav.PageReturn;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
@@ -35,13 +35,13 @@ public class LoginForm extends Composite {
 
   @Inject
   TransitionTo<WelcomePage> welcomePage;
-  
-  @Inject
-  PageReturn pageReturn;
 
   @Inject
   @Model
   Identity identity;
+  
+  @Inject
+  private SecurityContext securityContext;
 
   @Inject
   @Bound
@@ -74,7 +74,7 @@ public class LoginForm extends Composite {
       @Override
       public void callback(final User response) {
         if (response != null) {
-          pageReturn.goBackOrHome();
+          securityContext.navigateBackOrHome();
         }
       }
     }, new BusErrorCallback() {
