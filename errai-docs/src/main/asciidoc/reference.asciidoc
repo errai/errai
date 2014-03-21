@@ -7425,17 +7425,6 @@ The AsyncDispatcher provides full asynchronous delivery of messages. When this d
 
 * _$$errai.bus.buffer_allocation_mode$$_ Buffer allocation mode. Allowed values are [code]+direct+ and [code]+heap+ . Direct allocation puts buffer memory outside of the JVM heap, while heap allocation uses buffer memory inside the Java heap. For most situations, heap allocation is preferable. However, if the application is data intensive and requires a substantially large buffer, it is preferable to use a direct buffer. From a throughput perspective, current JVM implementations pay about a 20% performance penalty for direct-allocated memory access. However, your application may show better scaling characteristics with direct buffers. Benchmarking under real load conditions is the only way to know the optimal setting for your use case and expected load. Default value: [code]+direct+ .
 
-
-[[sid-5931338_Messaging%28ErraiBus%29Configuration-Security]]
-
-===== Security
-
-* _$$errai.authentication_adapter$$_ specifies the authentication modelAdapter the bus should use for determining whether calls should be serviced based on authentication and security principals.
-
-
-* _$$errai.require_authentication_for_all$$_ indicates whether or not the bus should always require the use of authentication for all requests inbound for the bus. If this is turned on, an authentication model adapter must be defined, and any user must be authenticated before the bus will deliver any messages from the client to any service.
-
-
 [[sid-5931338_Messaging%28ErraiBus%29Configuration-Clustering]]
 
 ===== Clustering
@@ -7480,19 +7469,6 @@ before the worker pool
 implementation.
 ##
 errai.async.worker.timeout=5
-
-##
-## Specify the Authentication/Authorization Adapter to use
-##
-#errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
-#errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
-
-##
-## This property indicates whether or not authentication is required for all communication with the
-bus. Set this
-## to 'true' if all access to your application should be secure.
-##
-#errai.require_authentication_for_all=true
 ----
 
 [[sid-5931338_Messaging%28ErraiBus%29Configuration-ServletConfiguration]]
