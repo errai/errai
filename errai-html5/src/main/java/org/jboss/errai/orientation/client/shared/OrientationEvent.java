@@ -1,9 +1,7 @@
 package org.jboss.errai.orientation.client.shared;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
-import org.jboss.errai.common.client.api.annotations.Portable;
 
-@Portable
 public class OrientationEvent {
 
   private final double x;
