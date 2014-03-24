@@ -11,6 +11,9 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.slf4j.Logger;
 
 /**
+ * A {@link Simple} implementation for {@link ActiveUserCache}, storing a
+ * {@link User} in memory and in browser local storage (if configured).
+ * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @Simple

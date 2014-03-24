@@ -9,12 +9,12 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 /**
- * Used to denote a simpler implementation that is used as a component of a
- * {@link Complex} implementation.
+ * Used to denote a more complex implementation usually implemented using an
+ * {@link Simple} implementation.
  * 
- * For example, {@link SecurityContext} extends {@link ActiveUserCache}. But the
- * default implementation of {@code SecurityContext} uses a
- * {@code @Simple ActiveUserCache} to implement the lesser functionality.
+ * For example, {@link SecurityContext} extends {@link ActiveUserCache}. The
+ * default implementation of {@code SecurityContext} is {@code @Complex}, and
+ * uses a {@code @Simple ActiveUserCache} to implement the lesser functionality.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -22,5 +22,5 @@ import javax.inject.Qualifier;
 @Target({ ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
 @Documented
 @Qualifier
-public @interface Simple {
+public @interface Complex {
 }

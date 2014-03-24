@@ -67,7 +67,7 @@ public class LocalStorageHandlerProvider implements Provider<LocalStorageHandler
 
   @Override
   public LocalStorageHandler get() {
-    if (Storage.isLocalStorageSupported() && properties.isLocalStorageAllowed()) {
+    if (Storage.isLocalStorageSupported() && properties.isLocalStorageOfUserAllowed()) {
       return new LocalStorageHandlerImpl();
     }
     else {

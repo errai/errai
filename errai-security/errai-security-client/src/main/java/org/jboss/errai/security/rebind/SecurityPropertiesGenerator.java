@@ -18,6 +18,7 @@ public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
 
   private static final String PACKAGE_NAME = SecurityProperties.class.getPackage().getName();
   private static final String CLASS_NAME = SecurityProperties.class.getSimpleName() + "Impl";
+  private static final String LOCAL_STORAGE_METHOD_NAME = "isLocalStorageOfUserAllowed";
 
   @Override
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
@@ -26,7 +27,7 @@ public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
     return ClassBuilder.define(PACKAGE_NAME + "." + CLASS_NAME)
             .publicScope().implementsInterface(SecurityProperties.class)
             .body()
-            .publicMethod(Boolean.class, "isLocalStorageAllowed")
+            .publicMethod(Boolean.class, LOCAL_STORAGE_METHOD_NAME)
               .body()
               .append(Stmt.loadLiteral(isLocalStorageAllowed).returnValue())
               .finish()

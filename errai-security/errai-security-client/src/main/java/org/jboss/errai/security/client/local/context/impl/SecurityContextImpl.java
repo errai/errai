@@ -3,11 +3,14 @@ package org.jboss.errai.security.client.local.context.impl;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
+import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.security.client.local.context.ActiveUserCache;
+import org.jboss.errai.security.client.local.context.Complex;
 import org.jboss.errai.security.client.local.context.Simple;
 import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -21,8 +24,16 @@ import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.slf4j.Logger;
 
 /**
+ * This {@link SecurityContext} acts as an {@link Complex}
+ * {@link ActiveUserCache} that not only caches the logged in user, but also
+ * performs changes to security-related UI styles, sends events, and performs
+ * any other Errai Security tasks required when the cached user information
+ * changes.
+ * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@Default
+@Complex
 @ApplicationScoped
 public class SecurityContextImpl implements SecurityContext {
 
@@ -67,7 +78,7 @@ public class SecurityContextImpl implements SecurityContext {
       @Override
       public void callback(final User response) {
         logger.debug("Response received from AfterInitialization RPC: " + String.valueOf(response));
-        performLoginStatusChange(response);
+        setUser(response);
       }
     }).getUser();
   }
@@ -111,12 +122,6 @@ public class SecurityContextImpl implements SecurityContext {
     }
   }
 
-  private void performLoginStatusChange(final User user) {
-    // User must be updated before style bindings updated.
-    userCache.setUser(user);
-    performLoginStatusChangeActions(user);
-  }
-
   private void performLoginStatusChangeActions(final User user) {
     StyleBindingsRegistry.get().updateStyles();
     if (user == null) {
@@ -149,7 +154,9 @@ public class SecurityContextImpl implements SecurityContext {
 
   @Override
   public void setUser(User user) {
-    performLoginStatusChange(user);
+    // User must be updated before style bindings updated.
+    userCache.setUser(user);
+    performLoginStatusChangeActions(user);
   }
 
   @Override
