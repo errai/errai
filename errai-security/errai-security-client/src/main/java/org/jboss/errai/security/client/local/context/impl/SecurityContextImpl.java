@@ -1,5 +1,7 @@
 package org.jboss.errai.security.client.local.context.impl;
 
+import java.lang.annotation.Annotation;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -8,7 +10,9 @@ import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.client.local.context.Complex;
 import org.jboss.errai.security.client.local.context.Simple;
@@ -24,7 +28,7 @@ import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.slf4j.Logger;
 
 /**
- * This {@link SecurityContext} acts as an {@link Complex}
+ * This implements {@link SecurityContext} and implements a {@link Complex}
  * {@link ActiveUserCache} that not only caches the logged in user, but also
  * performs changes to security-related UI styles, sends events, and performs
  * any other Errai Security tasks required when the cached user information
@@ -35,7 +39,7 @@ import org.slf4j.Logger;
 @Default
 @Complex
 @ApplicationScoped
-public class SecurityContextImpl implements SecurityContext {
+public class SecurityContextImpl implements SecurityContext, ActiveUserCache {
 
   @Inject
   private Event<LoggedInEvent> loginEvent;
@@ -46,10 +50,7 @@ public class SecurityContextImpl implements SecurityContext {
   @Inject
   private Navigation navigation;
 
-  @Inject
-  @Simple
-  // Must inject by concrete class because of IOC bug
-  private BasicUserCacheImpl userCache;
+  private ActiveUserCache userCache;
 
   @Inject
   private Logger logger;
@@ -59,16 +60,25 @@ public class SecurityContextImpl implements SecurityContext {
 
   private String lastPageCache;
 
-  private static SecurityContextImpl instance;
-
-  public static SecurityContextImpl getInstance() {
-    return instance;
-  }
-
   @PostConstruct
   private void setup() {
-    instance = this;
-    performLoginStatusChangeActions(userCache.getUser());
+    /*
+     * Manually inject ActiveUserCache to work around IOC circular dependency
+     * bug.
+     */
+    IOC.getAsyncBeanManager().lookupBean(ActiveUserCache.class, new Annotation() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Simple.class;
+      }
+    }).getInstance(new CreationalCallback<ActiveUserCache>() {
+      @Override
+      public void callback(final ActiveUserCache userCache) {
+        SecurityContextImpl.this.userCache = userCache;
+        performLoginStatusChangeActions(userCache.getUser());
+      }
+    });
+    ;
   }
 
   @AfterInitialization
@@ -162,6 +172,11 @@ public class SecurityContextImpl implements SecurityContext {
   @Override
   public boolean isValid() {
     return userCache.isValid();
+  }
+
+  @Override
+  public ActiveUserCache getActiveUserCache() {
+    return this;
   }
 
 }

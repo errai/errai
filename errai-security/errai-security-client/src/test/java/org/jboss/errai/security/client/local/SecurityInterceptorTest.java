@@ -39,7 +39,6 @@ public class SecurityInterceptorTest extends AbstractSecurityInterceptorTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    // This @Default annotation is necessary because of an IOC bug
     provider = IOC.getBeanManager().lookupBean(ActiveUserCache.class, defaultAnno).getInstance();
   }
 

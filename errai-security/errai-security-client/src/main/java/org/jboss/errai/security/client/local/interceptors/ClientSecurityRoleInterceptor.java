@@ -8,6 +8,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
+import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
@@ -46,9 +47,10 @@ public class ClientSecurityRoleInterceptor extends SecurityInterceptor implement
   }
 
   private void securityCheck(final String[] values, final RemoteCallContext callContext) {
-    if (securityContext.isValid()) {
-      if (securityContext.hasUser()) {
-        if (hasAllRoles(securityContext.getUser().getRoles(), values)) {
+    final ActiveUserCache userCache = securityContext.getActiveUserCache();
+    if (userCache.isValid()) {
+      if (userCache.hasUser()) {
+        if (hasAllRoles(userCache.getUser().getRoles(), values)) {
           callContext.proceed(new RemoteCallback<Object>() {
 
             @Override
@@ -60,7 +62,7 @@ public class ClientSecurityRoleInterceptor extends SecurityInterceptor implement
             @Override
             public boolean error(Object message, Throwable throwable) {
               if (throwable instanceof UnauthenticatedException) {
-                securityContext.invalidateCache();
+                userCache.invalidateCache();
               }
 
               return true;

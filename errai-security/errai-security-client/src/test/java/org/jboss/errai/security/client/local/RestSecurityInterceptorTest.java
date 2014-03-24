@@ -55,7 +55,6 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
         MessageBuilder.createCall(new VoidCallback(), AuthenticationService.class).logout();
       }
     });
-    // This @Default annotation is necessary because of an IOC bug
     activeUserCache = IOC.getBeanManager().lookupBean(ActiveUserCache.class, new Annotation() {
       @Override
       public Class<? extends Annotation> annotationType() {

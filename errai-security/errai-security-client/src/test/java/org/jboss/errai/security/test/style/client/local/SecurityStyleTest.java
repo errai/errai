@@ -69,7 +69,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
         // Make sure we are not logged in as anyone.
-        securityContext.setUser(null);
+        securityContext.getActiveUserCache().setUser(null);
         
         assertTrue(widget.getControl().isVisible());
         assertFalse(widget.getUserAnchor().isVisible());
@@ -90,7 +90,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
 
-        securityContext.setUser(regularUser);
+        securityContext.getActiveUserCache().setUser(regularUser);
         
         assertTrue(widget.getControl().isVisible());
         assertTrue(widget.getUserAnchor().isVisible());
@@ -111,7 +111,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
 
-        securityContext.setUser(adminUser);
+        securityContext.getActiveUserCache().setUser(adminUser);
         
         assertTrue(widget.getControl().isVisible());
         assertTrue(widget.getUserAnchor().isVisible());

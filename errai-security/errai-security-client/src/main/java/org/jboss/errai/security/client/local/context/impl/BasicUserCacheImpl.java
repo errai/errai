@@ -1,7 +1,7 @@
 package org.jboss.errai.security.client.local.context.impl;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.security.client.local.context.ActiveUserCache;
@@ -17,7 +17,7 @@ import org.slf4j.Logger;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @Simple
-@Dependent
+@ApplicationScoped
 public class BasicUserCacheImpl implements ActiveUserCache {
 
   @Inject

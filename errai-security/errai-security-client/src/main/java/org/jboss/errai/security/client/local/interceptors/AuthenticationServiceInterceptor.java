@@ -49,8 +49,9 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
   }
 
   private void isLoggedIn(final RemoteCallContext callContext) {
-    if (securityContext.isValid()) {
-      callContext.setResult(securityContext.hasUser());
+    final ActiveUserCache userCache = securityContext.getActiveUserCache();
+    if (userCache.isValid()) {
+      callContext.setResult(userCache.hasUser());
     }
     else {
       callContext.proceed();
@@ -62,26 +63,27 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
 
       @Override
       public void callback(final User response) {
-        securityContext.setUser(response);
+        securityContext.getActiveUserCache().setUser(response);
       }
     });
   }
 
   private void logout(final RemoteCallContext callContext) {
-    securityContext.setUser(null);
+    securityContext.getActiveUserCache().setUser(null);
     callContext.proceed();
   }
 
   private void getUser(final RemoteCallContext context) {
-    if (securityContext.isValid()) {
-      context.setResult(securityContext.getUser());
+    final ActiveUserCache userCache = securityContext.getActiveUserCache();
+    if (userCache.isValid()) {
+      context.setResult(userCache.getUser());
     }
     else {
       context.proceed(new RemoteCallback<User>() {
 
         @Override
         public void callback(final User response) {
-          securityContext.setUser(response);
+          userCache.setUser(response);
         }
       });
     }

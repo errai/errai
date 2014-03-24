@@ -24,7 +24,7 @@ public class SignupServiceInterceptor implements RemoteCallInterceptor<RemoteCal
 
       @Override
       public void callback(final RegistrationResult response) {
-        securityContext.setUser(response.getSecurityUser());
+        securityContext.getActiveUserCache().setUser(response.getSecurityUser());
         context.setResult(response);
       }
     });

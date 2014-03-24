@@ -5,12 +5,10 @@ import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 /**
  * Caches information regarding security events and the current user (i.e. which
  * user is logged in, and what was the last page they were rejected from).
- * Updates security-related UI elements when the cached user is updated through
- * {@link ActiveUserCache} methods.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface SecurityContext extends ActiveUserCache {
+public interface SecurityContext {
 
   /**
    * Navigate to the page with a given role, caching the current page so that it
@@ -43,5 +41,11 @@ public interface SecurityContext extends ActiveUserCache {
    * @see {@link #navigateToPage(Class, String)}
    */
   public String getLastCachedPageName();
+
+  /**
+   * @return The {@link Complex} {@link ActiveUserCache} for getting and setting
+   *         the currently active {@link User}.
+   */
+  public ActiveUserCache getActiveUserCache();
 
 }
