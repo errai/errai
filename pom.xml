@@ -117,6 +117,7 @@
     <module>errai-bom</module>
     <module>errai-demos</module>
     <module>errai-client-local-class-hider</module>    
+    <module>errai-annotation-processors</module>
   </modules>
 
   <dependencies>
