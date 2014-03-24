@@ -84,6 +84,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Generates the code required for {@link Templated} classes.
  *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
 public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
@@ -112,9 +113,6 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
     final List<Statement> initStmts = new ArrayList<Statement>();
 
-    /*
-     * Do the work
-     */
     generateTemplatedInitialization(ctx, initStmts);
 
     if (declaringClass.isAnnotationPresent(EntryPoint.class)) {
@@ -123,9 +121,22 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
     List<Statement> stmts = new ArrayList<Statement>();
     final Statement initCallback = InjectUtil.createInitializationCallback(declaringClass, "obj", initStmts);
-    stmts.add(Stmt.loadVariable("context").invoke("addInitializationCallback",
-        Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
-
+    Statement addInitCallback
+      = Stmt.loadVariable("context").invoke("addInitializationCallback",  
+          Refs.get(ctx.getInjector().getInstanceVarName()), initCallback);
+    
+    if (ctx.getInjectionContext().isAsync()) {
+      final Statement runnable = Stmt.newObject(Runnable.class).extend()
+        .publicOverridesMethod("run")
+        .append(addInitCallback)
+        .finish()
+        .finish();
+      stmts.add(Stmt.loadVariable("async").invoke("runOnFinish", runnable));
+    }
+    else {
+      stmts.add(addInitCallback);
+    }
+    
     Statement destructionCallback = generateTemplateDestruction(ctx);
     if (destructionCallback != null) {
       stmts.add(destructionCallback);
