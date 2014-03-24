@@ -62,7 +62,7 @@
     <maven.compiler.source>1.6</maven.compiler.source>
     <argLine></argLine>
     <!-- Set this property to the full path to your JBoss/Wildfly/EAP installation to run DevMode -->
-    <errai.jboss.home>/home/yyz/mbarkley/jboss-as-7.1.1.Final</errai.jboss.home>
+    <errai.jboss.home></errai.jboss.home>
   </properties>
   <dependencyManagement>
     <dependencies>
