@@ -34,7 +34,7 @@ import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.client.local.res.Counter;
-import org.jboss.errai.security.client.local.res.CountingCallback;
+import org.jboss.errai.security.client.local.res.CountingRemoteCallback;
 import org.jboss.errai.security.client.local.res.RestErrorCountingCallback;
 import org.jboss.errai.security.client.local.res.RestSecurityTestModule;
 import org.jboss.errai.security.client.shared.SecureRestService;
@@ -48,7 +48,7 @@ import com.google.gwt.user.client.Timer;
 
 /**
  * Most of the logic within the client-side interceptors is tested in
- * {@link SecurityInterceptorTest}. This test class ensures that the same
+ * {@link BusSecurityInterceptorTest}. This test class ensures that the same
  * interceptors are properly generated for jaxrs endpoints (as well as the
  * server-side interceptors).
  * 
@@ -85,7 +85,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
     helper(new Runnable() {
       @Override
       public void run() {
-        restCallHelper(new CountingCallback(callbackCounter), null).anybody();
+        restCallHelper(new CountingRemoteCallback(callbackCounter), null).anybody();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -99,7 +99,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   @Test
   public void testAdminBlockedWhenNotLoggedIn() throws Exception {
     final Counter callbackCounter = new Counter();
-    final RemoteCallback<Void> callback = new CountingCallback(callbackCounter);
+    final RemoteCallback<Void> callback = new CountingRemoteCallback(callbackCounter);
     final Counter errorCounter = new Counter();
     final RestErrorCallback errorCallback = new RestErrorCountingCallback(errorCounter, UnauthenticatedException.class);
 
@@ -121,7 +121,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   @Test
   public void testUserBlockedWhenNotLoggedIn() throws Exception {
     final Counter callbackCounter = new Counter();
-    final RemoteCallback<Void> callback = new CountingCallback(callbackCounter);
+    final RemoteCallback<Void> callback = new CountingRemoteCallback(callbackCounter);
     final Counter errorCounter = new Counter();
     final RestErrorCallback errorCallback = new RestErrorCountingCallback(errorCounter, UnauthenticatedException.class);
 
@@ -143,7 +143,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   @Test
   public void testUserAllowedWhenLoggedIn() throws Exception {
     final Counter callbackCounter = new Counter();
-    final RemoteCallback<Void> callback = new CountingCallback(callbackCounter);
+    final RemoteCallback<Void> callback = new CountingRemoteCallback(callbackCounter);
 
     helper(new Runnable() {
       @Override
@@ -188,7 +188,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   @Test
   public void testAdminBlockedWhenNotLoggedInAsUser() throws Exception {
     final Counter callbackCounter = new Counter();
-    final RemoteCallback<Void> callback = new CountingCallback(callbackCounter);
+    final RemoteCallback<Void> callback = new CountingRemoteCallback(callbackCounter);
     final Counter errorCounter = new Counter();
     final RestErrorCallback errorCallback = new RestErrorCountingCallback(errorCounter, UnauthorizedException.class);
     final User user = new User("user");
@@ -212,7 +212,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   @Test
   public void testServerSideAuthorizationInterceptorNotAuthorized() throws Exception {
     final Counter callbackCounter = new Counter();
-    final RemoteCallback<Void> callback = new CountingCallback(callbackCounter);
+    final RemoteCallback<Void> callback = new CountingRemoteCallback(callbackCounter);
     final Counter errorCounter = new Counter();
     final RestErrorCallback errorCallback = new RestErrorCountingCallback(errorCounter, UnauthorizedException.class);
 
@@ -247,7 +247,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   @Test
   public void testServerSideAuthenticationInterceptorNotLoggedIn() throws Exception {
     final Counter callbackCounter = new Counter();
-    final RemoteCallback<Void> callback = new CountingCallback(callbackCounter);
+    final RemoteCallback<Void> callback = new CountingRemoteCallback(callbackCounter);
     final Counter errorCounter = new Counter();
     final RestErrorCallback errorCallback = new RestErrorCountingCallback(errorCounter, UnauthenticatedException.class);
 

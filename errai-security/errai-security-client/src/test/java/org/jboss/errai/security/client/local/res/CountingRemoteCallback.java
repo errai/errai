@@ -18,11 +18,11 @@ package org.jboss.errai.security.client.local.res;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 
-public class CountingCallback implements RemoteCallback<Void> {
+public class CountingRemoteCallback implements RemoteCallback<Void> {
 
   private final Counter counter;
 
-  public CountingCallback(final Counter counter) {
+  public CountingRemoteCallback(final Counter counter) {
     this.counter = counter;
   }
 

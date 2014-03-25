@@ -22,12 +22,16 @@ import java.lang.annotation.Annotation;
 
 import javax.enterprise.inject.Default;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.VoidCallback;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.client.local.res.Counter;
+import org.jboss.errai.security.client.local.res.CountingMessageCallback;
 import org.jboss.errai.security.client.local.res.ErrorCountingCallback;
 import org.jboss.errai.security.client.shared.AdminService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
@@ -41,7 +45,7 @@ import org.junit.Test;
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class SecurityInterceptorTest extends AbstractSecurityInterceptorTest {
+public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest {
   
   private Annotation defaultAnno = new Annotation() {
     @Override
@@ -56,6 +60,12 @@ public class SecurityInterceptorTest extends AbstractSecurityInterceptorTest {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     provider = IOC.getBeanManager().lookupBean(ActiveUserCache.class, defaultAnno).getInstance();
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new VoidCallback(), AuthenticationService.class).logout();
+      }
+    });
   }
 
   @Test
@@ -480,4 +490,105 @@ public class SecurityInterceptorTest extends AbstractSecurityInterceptorTest {
       }
     });
   }
+  
+  @Test
+  public void testSecureCallbackNotLoggedIn() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createMessage("SecureMessageCallback")
+        .signalling()
+        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
+        
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(0, counter.getCount());
+            assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+  
+  @Test
+  public void testSecureClassNotLoggedIn() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createMessage("methodInSecureClass")
+        .signalling()
+        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
+        
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(0, counter.getCount());
+            assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+  
+  @Test
+  public void testSecureMethodNotLoggedIn() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createMessage("secureMethod")
+        .signalling()
+        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
+        
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(0, counter.getCount());
+            assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+  
+  @Test
+  public void testInsecureMethodInClassWithSecureMethodNotLoggedIn() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createMessage("insecureMethod")
+        .signalling()
+        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
+        
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+  
 }

@@ -32,9 +32,10 @@ import org.jboss.errai.security.shared.interceptor.SecurityInterceptor;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
- * SecurityRoleInterceptor server side implementation of the SecurityRoleInterceptor does the same,
- * but throws an exception instead of 'redirecting' the user.
- *
+ * SecurityRoleInterceptor server side implementation of the
+ * SecurityRoleInterceptor does the same, but throws an exception instead of
+ * 'redirecting' the user.
+ * 
  * @author edewit@redhat.com
  */
 @RestrictedAccess
@@ -51,19 +52,26 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
     final User user = authenticationService.getUser();
-    final RestrictedAccess annotation = getRestrictedAccessAnnotation(context.getTarget().getClass(), context.getMethod());
+    final RestrictedAccess annotation = getRestrictedAccessAnnotation(context.getTarget().getClass(),
+            context.getMethod());
     if (user == null) {
       throw new UnauthenticatedException();
     }
     else if (!hasAllRoles(user.getRoles(), annotation.roles())) {
       throw new UnauthorizedException();
-    } else {
+    }
+    else {
       return context.proceed();
     }
   }
 
   private RestrictedAccess getRestrictedAccessAnnotation(Class<?> aClass, Method method) {
-    RestrictedAccess annotation = getRestrictedAccessAnnotation(method.getAnnotations());
+    RestrictedAccess annotation = method.getAnnotation(RestrictedAccess.class);
+    if (annotation != null) {
+      return annotation;
+    }
+
+    annotation = method.getDeclaringClass().getAnnotation(RestrictedAccess.class);
     if (annotation != null) {
       return annotation;
     }
@@ -74,7 +82,9 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
     }
 
     if (annotation == null) {
-      throw new IllegalArgumentException("could not find method that was intercepted!");
+      throw new IllegalArgumentException(
+              String.format("Could not @RestrictedAccess annotation on method (%s), class (%s), or interfaces.",
+                      method.getName(), method.getDeclaringClass().getCanonicalName()));
     }
 
     return annotation;
@@ -96,7 +106,7 @@ public class ServerSecurityRoleInterceptor extends SecurityInterceptor {
 
     if (searchMethod.getName().equals(method.getName())
             && Arrays.equals(searchMethod.getParameterTypes(), method.getParameterTypes())) {
-      requiredRoles = getRestrictedAccessAnnotation(method.getAnnotations());
+      requiredRoles = method.getAnnotation(RestrictedAccess.class);
     }
 
     return requiredRoles;
