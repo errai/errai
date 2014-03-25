@@ -7340,7 +7340,7 @@ If you are also using Errai IOC or Errai CDI and wish to use inject Errai Messag
 ----
   <dependency>
     <groupId>org.jboss.errai</groupId>
-    <artifactId>erria-ioc-bus-support</artifactId>
+    <artifactId>errai-ioc-bus-support</artifactId>
     <version>${errai.version}</version>
   </dependency>
 ----
