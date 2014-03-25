@@ -60,7 +60,7 @@ image:images/forge-install-addon.png[]
 
 ** _Name_: errai-forge-addon
 
-** _Version_: 2.0.0-SNAPSHOT
+** _Version_: 3.0-SNAPSHOT
 +
 image:images/enter-addon-coordinate.png[]
 +
@@ -69,7 +69,7 @@ image:images/enter-addon-coordinate.png[]
 ====
 link:$$http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jboss.errai.forge%22%20AND%20a%3A%22errai-forge-addon%22$$[Here] you may find the published versions of the Errai Forge Addon. You may use these versions without downloading and building them yourself.
 
-To download and build the latest version (2.0.0-SNAPSHOT), run:
+To download and build the latest version, run:
 [code]
 ----
 git clone https://github.com/errai/forge-errai.git
