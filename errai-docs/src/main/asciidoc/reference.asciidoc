@@ -6937,13 +6937,10 @@ If you do not wish to use local storage, you will likely want to handle this cas
 public class ExampleLoginPage extends Composite {
 
   @Inject
-  private ActiveUserProvider userProvider;
+  private SecurityContext securityContext;
 
   @Inject
   private Caller<AuthenticationService> authService;
-
-  @Inject
-  private PageReturn transition;
 
   @Inject
   @DataField
@@ -6951,8 +6948,10 @@ public class ExampleLoginPage extends Composite {
 
   @PageShowing
   public void checkForPendingCache() {
+    ActiveUserCache userCache = securityContext.getActiveUserCache();
+
     // Check if cache is invalid.
-    if (!userProvider.isCacheValid()) {
+    if (!userCache.isCacheValid()) {
       // Update the status.
       status.setText("loading...");
 
@@ -6966,7 +6965,7 @@ public class ExampleLoginPage extends Composite {
           if (response != null) {
             /* This is a special transition that takes us back to
                a secure page from which we were redirected. */
-            transition.goBackOrHome();
+            securityContext.navigateBackOrHome();
           }
           else {
             status.setText("You are not logged in.");
@@ -6978,6 +6977,12 @@ public class ExampleLoginPage extends Composite {
 
 }
 ----
+
+[TIP]
+.Inject the AciveUserCache
+====
+You can also `@Inject` the `ActiveUserCache` directly.
+====
 
 ==== Hiding UI Elements
 
