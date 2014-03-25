@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-03-04</date>
+    <date>2014-03-25</date>
     
     
     
@@ -83,7 +83,7 @@
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">
 <title>Starting with the Errai Forge Addon</title>
-<simpara>Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions <ulink url="https://github.com/errai/forge-errai/blob/v2.0.0.Beta1/README.asciidoc">here</ulink> to install the Errai Forge Addon and create a new project.</simpara>
+<simpara>Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions <ulink url="https://github.com/errai/errai/blob/master/errai-forge-addon/README.asciidoc">here</ulink> to install the Errai Forge Addon and create a new project.</simpara>
 <simpara>In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:</simpara>
 <programlisting language="java" linenumbering="unnumbered">// Add the package declaration here
 
@@ -1960,7 +1960,7 @@ private void updateTime() {
 <title>Client-Side Bean Manager</title>
 <simpara>It may be necessary at times to manually obtain instances of beans managed by Errai IOC from outside the container managed scope or creating a hard dependency from your bean. Errai IOC provides a simple client-side bean manager for handling these scenarios: <literal><phrase role="code">org.jboss.errai.ioc.client.container.ClientBeanManager</phrase></literal> .</simpara>
 <simpara>As you might expect, you can inject a bean manager instance into any of your managed beans. If you use Errai IOC in its default mode you will need to inject the synchronous bean manager ( <literal><phrase role="code">org.jboss.errai.ioc.client.container.SyncBeanManager</phrase></literal> ).</simpara>
-<simpara>If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager ( <literal><phrase role="code">org.jboss.errai.ioc.client.container.async.AsyncBeanManager</phrase></literal> ) instead. Asynchronous IOC brings support for <ulink url="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html">code splitting</ulink> . That means that any bean annotated with <literal><phrase role="code">@LoadAsync</phrase></literal> can be compiled into a separate JavaScript file that&#8217;s downloaded when the bean is first needed on the client.</simpara>
+<simpara>If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager ( <literal><phrase role="code">org.jboss.errai.ioc.client.container.async.AsyncBeanManager</phrase></literal> ) instead. Asynchronous IOC brings support for <ulink url="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html">code splitting</ulink> . That means that any bean annotated with <literal><phrase role="code">@LoadAsync</phrase></literal> can be compiled into a separate JavaScript file that&#8217;s downloaded when the bean is first needed on the client. <literal><phrase role="code">@LoadAsync</phrase></literal> also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same JavaScript file.</simpara>
 <example>
 <title>Injecting the client-side bean manager</title>
 <programlisting language="java" linenumbering="unnumbered">public MyManagedBean {
@@ -5872,6 +5872,10 @@ public class KitchenSinkClient extends Composite {
 <chapter id="_errai_security">
 <title>Errai Security</title>
 <simpara>Errai Security provides a lightweight security API for declaring RPC services and client-side UI elements which require authentication or authorization.</simpara>
+<tip>
+<title>Plugin Tip</title>
+<simpara>Use the <link linkend="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">Errai Forge Addon</link> <emphasis>Add Errai Features</emphasis> command and select <emphasis>Errai Security</emphasis> to follow along with this section.</simpara>
+</tip>
 <note>
 <title>Manual Setup</title>
 <simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai Security to your project.</simpara>
@@ -6094,7 +6098,7 @@ identity.login(new RemoteCallback&lt;User&gt;() {
 
 <note>
 <title>Remote Procedure Calls</title>
-<simpara>The above methods are implemented with Errai RPC calls to the service <literal>org.jboss.errai.security.shared.AuthenticationService</literal>. However, client-side interceptors are used for caching so that generally only calls to <literal>login</literal> and <literal>logout</literal> must be sent over the wire.</simpara>
+<simpara>The above methods are implemented with Errai RPC calls to the service <literal>org.jboss.errai.security.shared.service.AuthenticationService</literal>. However, client-side interceptors are used for caching so that generally only calls to <literal>login</literal> and <literal>logout</literal> must be sent over the wire.</simpara>
 </note>
 <tip>
 <title>DataBinding with Identity</title>
@@ -6102,9 +6106,9 @@ identity.login(new RemoteCallback&lt;User&gt;() {
 </tip>
 </section>
 </section>
-<section id="_requireauthentication_and_requireroles">
-<title>RequireAuthentication and RequireRoles</title>
-<simpara>The annotations <literal>@RequireAuthentication</literal> and <literal>@RequireRoles</literal> are the only two annotations necessary to secure a resource or UI element. In general, <literal>@RequireAuthentication</literal> blocks a resource from users who are not logged in and <literal>@RequireRoles</literal> blocks a resource from users who do not posess all the roles (a parameter of the annotation, given as an array of Strings). Below we will explain how different resources are blocked from unauthorized users.</simpara>
+<section id="_restrictedaccess">
+<title>RestrictedAccess</title>
+<simpara>The annotation <literal>@RestrictedAccess</literal> is the only annotation necessary to secure a resource or UI element. In general, <literal>@RestrictedAccess</literal> blocks a resource from users who are not logged; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.</simpara>
 <section id="_rpc_services">
 <title>RPC Services</title>
 <simpara>To secure an Errai RPC service, simply annotate the RPC interface (either the entire type or just a method) with one of the security annotations.</simpara>
@@ -6116,7 +6120,7 @@ identity.login(new RemoteCallback&lt;User&gt;() {
       <simpara>All methods on this interface require an authenticated user to access:</simpara>
       
 <programlisting language="java" linenumbering="unnumbered">@Remote
-@RequireAuthentication
+@RestrictedAccess
 public interface UserOnlyStuff {
   public void someMethod();
   public void otherMethod();
@@ -6131,10 +6135,10 @@ public interface UserOnlyStuff {
 <programlisting language="java" linenumbering="unnumbered">@Remote
 public interface MixedService {
 
-  @RequireAuthentication
+  @RestrictedAccess
   public void userService();
 
-  @RequireRoles({"admin"})
+  @RestrictedAccess(roles = {"admin"})
   public void adminService();
 }</programlisting>
 
@@ -6179,7 +6183,7 @@ public interface MixedService {
 </section>
 <section id="_page_navigation">
 <title>Page Navigation</title>
-<simpara>Any class annotated with <literal>@Page</literal> can also be marked with <literal>@RequireAuthentication</literal> and <literal>@RequireRoles</literal>. By doing so, users will be prevented from navigating to the given page if they are not logged in or lack authorization.</simpara>
+<simpara>Any class annotated with <literal>@Page</literal> can also be marked with <literal>@RestrictedAccess</literal>. By doing so, users will be prevented from navigating to the given page if they are not logged in or lack authorization.</simpara>
 <simpara>Here are two simple examples:</simpara>
 
 <itemizedlist>
@@ -6188,7 +6192,7 @@ public interface MixedService {
       <simpara>This page is only for logged in users:</simpara>
       
 <programlisting language="java" linenumbering="unnumbered">@Page
-@RequireAuthentication
+@RestrictedAccess
 public class UserProfilePage extends SimplePanel {
 
   @Inject private Identity identity;
@@ -6215,7 +6219,7 @@ public class UserProfilePage extends SimplePanel {
       <simpara>This page requires the <emphasis>user</emphasis> and <emphasis>admin</emphasis> roles:</simpara>
       
 <programlisting language="java" linenumbering="unnumbered">@Page
-@RequireRoles({"admin", "user"})
+@RestrictedAccess(roles = {"admin", "user"})
 public class AdminManagementPage extends SimplePanel {
 }</programlisting>
 
@@ -6228,6 +6232,93 @@ public class AdminManagementPage extends SimplePanel {
 <title>Redirection</title>
 <simpara>When a user is denied access to a page they will be redirected to <literal>LoginPage</literal> or <literal>SecurityError</literal>. To direct a user to the page they were trying to reach after successful login, <literal>@Inject</literal> and invoke the <literal>org.jboss.errai.security.client.local.nav.PageReturn</literal>.</simpara>
 </important>
+<section id="_page_redirection_and_caching">
+<title>Page Redirection and Caching</title>
+<simpara>Security checks performed before page navigation do not use any RPC calls, but are instead performed from a cached (in-memory) instance of the <literal>org.jboss.errai.security.shared.api.identity.User</literal>. This prevents the possibility of lengthy delays between page navigation while waiting for RPC return values.</simpara>
+<simpara>But the drawback is that any attempts to navigate to a secured <literal>@Page</literal> before the cache is populated will result in redirection to the <literal>LoginPage</literal>&#8201;&#8212;&#8201;even if the user is in fact logged in.</simpara>
+<simpara>In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.</simpara>
+<simpara>One option offered by Errai is to persist the <literal>org.jboss.errai.security.shared.api.identity.User</literal> object in the browsers local storage. This can be done by adding the following to <literal>ErraiApp.properties</literal>:</simpara>
+<screen>errai.security.userLocalStorage=true</screen>
+<simpara>With this option enabled the <literal>User</literal> will be persisted to local storage, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline.</simpara>
+<important>
+<title>User is stored in plain text</title>
+<simpara>The <literal>errai.security.userLocalStorage=true</literal> setting causes the <literal>User</literal> to be stored in <emphasis role="strong">plain text</emphasis> in local storage. That includes the following information:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>The user&#8217;s login name.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>The user&#8217;s full name.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>The user&#8217;s email address.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>The user&#8217;s security roles.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+</important>
+<simpara>If you do not wish to use local storage, you will likely want to handle this case in the <literal>@PageShowing</literal> method of your <literal>LoginPage</literal>. Here is an outline of what you might want to do:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Page(role = LoginPage.class)
+@Templated
+public class ExampleLoginPage extends Composite {
+
+  @Inject
+  private SecurityContext securityContext;
+
+  @Inject
+  private Caller&lt;AuthenticationService&gt; authService;
+
+  @Inject
+  @DataField
+  private Label status;
+
+  @PageShowing
+  public void checkForPendingCache() {
+    ActiveUserCache userCache = securityContext.getActiveUserCache();
+
+    // Check if cache is invalid.
+    if (!userCache.isCacheValid()) {
+      // Update the status.
+      status.setText("loading...");
+
+      // Force cache to update by calling getUser
+      authService.call(new RemoteCallback&lt;User&gt; {
+        @Override
+        public void callback(User response) {
+          /* An interceptor will have updated the cache by now.
+             So check if we are logged in and redirect if necessary.
+          */
+          if (response != null) {
+            /* This is a special transition that takes us back to
+               a secure page from which we were redirected. */
+            securityContext.navigateBackOrHome();
+          }
+          else {
+            status.setText("You are not logged in.");
+          }
+        }
+      });
+    }
+  }
+
+}</programlisting>
+<tip>
+<title>Inject the AciveUserCache</title>
+<simpara>You can also <literal>@Inject</literal> the <literal>ActiveUserCache</literal> directly.</simpara>
+</tip>
+</section>
 </section>
 <section id="_hiding_ui_elements">
 <title>Hiding UI Elements</title>
@@ -6238,12 +6329,12 @@ public class NavBar extends Composite {
 
   @Inject
   @DataField
-  @RequireAuthentication
+  @RestrictedAccess
   private Button logoutButton;
 
   @Inject
   @DataField
-  @RequireRoles({"admin"})
+  @RestrictedAccess(roles = {"admin"})
   private Button dropAllTablesButton;
 
 }</programlisting>
@@ -6626,6 +6717,11 @@ public class NamedLogExample {
     </listitem>
   
     <listitem>
+      <simpara><emphasis>errai.ioc.async_bean_manager</emphasis> a boolean property that when set to true (defaults to false) will activate asynchronous IOC to allow for <ulink url="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html">code splitting</ulink>. The code of types annotated with <literal><phrase role="code">@LoadAsync</phrase></literal> will be downloaded the first time it is needed. <literal><phrase role="code">@LoadAsync</phrase></literal> also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same split point.</simpara>
+      
+    </listitem>
+  
+    <listitem>
       <simpara><emphasis>errai.ioc.blacklist</emphasis> specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).</simpara>
       
     </listitem>
@@ -6654,7 +6750,7 @@ public class NamedLogExample {
 <simpara>If you are also using Errai IOC or Errai CDI and wish to use inject Errai Messaging dependencies, you will also want this dependency:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
     &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-    &lt;artifactId&gt;erria-ioc-bus-support&lt;/artifactId&gt;
+    &lt;artifactId&gt;errai-ioc-bus-support&lt;/artifactId&gt;
     &lt;version&gt;${errai.version}&lt;/version&gt;
   &lt;/dependency&gt;</programlisting>
 <simpara>Or if you are not using Maven, have <literal><phrase role="code">errai-ioc-bus-support-${errai.version}.jar</phrase></literal> on the classpath.</simpara>
@@ -6742,24 +6838,6 @@ public class NamedLogExample {
 </itemizedlist>
 
 </section>
-<section id="sid-5931338_Messaging%28ErraiBus%29Configuration-Security">
-<title>Security</title>
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara><emphasis>errai.authentication_adapter</emphasis> specifies the authentication modelAdapter the bus should use for determining whether calls should be serviced based on authentication and security principals.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara><emphasis>errai.require_authentication_for_all</emphasis> indicates whether or not the bus should always require the use of authentication for all requests inbound for the bus. If this is turned on, an authentication model adapter must be defined, and any user must be authenticated before the bus will deliver any messages from the client to any service.</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-</section>
 <section id="sid-5931338_Messaging%28ErraiBus%29Configuration-Clustering">
 <title>Clustering</title>
 
@@ -6817,20 +6895,7 @@ before the worker pool
 ## terminates it and reclaims the thread. This option is only valid when using the AsyncDispatcher
 implementation.
 ##
-errai.async.worker.timeout=5
-
-##
-## Specify the Authentication/Authorization Adapter to use
-##
-#errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
-#errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
-
-##
-## This property indicates whether or not authentication is required for all communication with the
-bus. Set this
-## to 'true' if all access to your application should be secure.
-##
-#errai.require_authentication_for_all=true</programlisting>
+errai.async.worker.timeout=5</programlisting>
 </section>
 </section>
 <section id="sid-5931338_Messaging%28ErraiBus%29Configuration-ServletConfiguration">
@@ -7229,6 +7294,13 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <title>GWT Module Descriptor</title>
 <simpara>Once you have Errai Security Client on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.security.Security" /&gt;</programlisting>
+</section>
+<section id="_cdi_and_interceptor_bindings">
+<title>CDI and Interceptor Bindings</title>
+<simpara>Errai security requires a CDI container to intercept calls to remote services. In particular, the following interceptor must be added to your application&#8217;s <literal>beans.xml</literal>:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;interceptors&gt;
+  &lt;class&gt;org.jboss.errai.security.server.ServerSecurityRoleInterceptor&lt;/class&gt;
+&lt;/interceptors&gt;</programlisting>
 </section>
 </section>
 <section id="_errai_project_dependencies">

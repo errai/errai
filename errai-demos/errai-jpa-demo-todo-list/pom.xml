@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jpa-demo-todo-list</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.0.0.20140325-M5</version>
   <packaging>war</packaging>
   <name>Errai::JPA::Demos::ToDoList</name>
   <description>A GWT framework.</description>
@@ -49,8 +49,7 @@
   <properties>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
-    <jetty.version>6.1.25</jetty.version>
-    <errai.version>3.0-SNAPSHOT</errai.version>
+    <jetty.version>6.1.25</jetty.version>    
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
     <maven.compiler.target>1.6</maven.compiler.target>
@@ -93,7 +92,7 @@
       <dependency>
         <groupId>org.jboss.errai.bom</groupId>
         <artifactId>errai-bom</artifactId>
-        <version>${errai.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -177,8 +176,7 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jpa-datasync</artifactId>
-      <version>${errai.version}</version>
+      <artifactId>errai-jpa-datasync</artifactId>      
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -360,7 +358,7 @@
           <runTarget>${errai.dev.context}/index.html</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${errai.version}/errai-client-local-class-hider-${errai.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>
