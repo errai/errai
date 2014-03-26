@@ -7010,7 +7010,7 @@ public class NavBar extends Composite {
 
 === Using an Alternative to PicketLink
 
-All Errai Security authentication is implemented with Errai Remote Procedure Calls to the `AuthenticationService`. A default implementation of this interface using PicketLink is provided in the `errai-security-picketlink` jar. But it is possible to use a different sever-side security framework by implementing the `AuthenticationService` and annotating the implementation with `@Service`.
+All Errai Security authentication is implemented with Errai Remote Procedure Calls to the `AuthenticationService`. A default implementation of this interface using PicketLink is provided in the `errai-security-picketlink` jar. But it is possible to use a different sever-side security framework by providing your own custom implementation of `AuthenticationService` and annotating it with `@Service`. In that case your project should not depend on `errai-security-picketlink`.
 
 [[sid-74908675]]
 

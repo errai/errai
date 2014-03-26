@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-03-25</date>
+    <date>2014-03-26</date>
     
     
     
@@ -6342,30 +6342,7 @@ public class NavBar extends Composite {
 </section>
 <section id="_using_an_alternative_to_picketlink">
 <title>Using an Alternative to PicketLink</title>
-<simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. The default implementation of this interface uses PicketLink, but it is possible to create and use an alternative implementation by following these steps:</simpara>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>Create an implementing class for <literal>AuthenticationService</literal>.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Annotate your class with <literal>@Alternative</literal>.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Add the following to your <literal>beans.xml</literal> (replacing the fully-qualified class name):</simpara>
-      
-<programlisting language="xml" linenumbering="unnumbered">&lt;alternatives&gt;
-  &lt;class&gt;org.jboss.errai.example.AuthenticationServiceImpl&lt;/class&gt;
-&lt;/alternatives&gt;</programlisting>
-
-      
-    </listitem>
-  
-</orderedlist>
+<simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. A default implementation of this interface using PicketLink is provided in the <literal>errai-security-picketlink</literal> jar. But it is possible to use a different sever-side security framework by implementing the <literal>AuthenticationService</literal> and annotating the implementation with <literal>@Service</literal>.</simpara>
 </section>
 </chapter>
 <chapter id="sid-74908675">
@@ -7287,6 +7264,12 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
   &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
   &lt;artifactId&gt;errai-security-client&lt;/artifactId&gt;
   &lt;scope&gt;provided&lt;/scope&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+<simpara>If you are using picketlink for authentication, you should also include this:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-security-picketlink&lt;/artifactId&gt;
   &lt;version&gt;${errai.version}&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 </section>
