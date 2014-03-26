@@ -7010,20 +7010,7 @@ public class NavBar extends Composite {
 
 === Using an Alternative to PicketLink
 
-All Errai Security authentication is implemented with Errai Remote Procedure Calls to the `AuthenticationService`. The default implementation of this interface uses PicketLink, but it is possible to create and use an alternative implementation by following these steps:
-
-. Create an implementing class for `AuthenticationService`.
-
-. Annotate your class with `@Alternative`.
-
-. Add the following to your `beans.xml` (replacing the fully-qualified class name):
-+
-[source,xml]
-----
-<alternatives>
-  <class>org.jboss.errai.example.AuthenticationServiceImpl</class>
-</alternatives>
-----
+All Errai Security authentication is implemented with Errai Remote Procedure Calls to the `AuthenticationService`. A default implementation of this interface using PicketLink is provided in the `errai-security-picketlink` jar. But it is possible to use a different sever-side security framework by implementing the `AuthenticationService` and annotating the implementation with `@Service`.
 
 [[sid-74908675]]
 
@@ -8009,6 +7996,17 @@ Errai Security requires to modules to be included in a project:
   <version>${errai.version}</version>
 </dependency>
 ----
+
+If you are using picketlink for authentication, you should also include this:
+[source, xml]
+----
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-security-picketlink</artifactId>
+  <version>${errai.version}</version>
+</dependency>
+----
+
 
 ==== GWT Module Descriptor
 
