@@ -185,6 +185,21 @@
         <artifactId>errai-validation</artifactId>
         <version>${version.org.jboss.errai}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-security-client</artifactId>
+        <version>${version.org.jboss.errai}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-security-server</artifactId>
+        <version>${version.org.jboss.errai}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-security-picketlink</artifactId>
+        <version>${version.org.jboss.errai}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>

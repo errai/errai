@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-security</artifactId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>errai-security-picketlink</artifactId>
+  <name>Errai::Security::PicketLink</name>
+  <description>Provides a default PicketLink implementation for the Authentication.</description>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-server</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.picketlink</groupId>
+      <artifactId>picketlink-api</artifactId>
+      <version>${picketlink.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.picketlink</groupId>
+      <artifactId>picketlink-impl</artifactId>
+      <version>${picketlink.version}</version>
+    </dependency>
+  </dependencies>
+</project>
