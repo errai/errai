@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.bus.client.api.Local;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
@@ -104,12 +103,12 @@ public class ServiceTypeParser extends ServiceParser {
   }
 
   @Override
-  public MessageCallback getCallback(Object delegateInstance, MessageBus bus) {
+  public MessageCallback getCallback(Object delegateInstance) {
     if (isCallback()) {
       return (MessageCallback) delegateInstance;
     }
     else if (hasCommandPoints()) {
-      return new CommandBindingsCallback(getCommandPoints(), delegateInstance, bus);
+      return new CommandBindingsCallback(getCommandPoints(), delegateInstance);
     }
     else {
       return null;

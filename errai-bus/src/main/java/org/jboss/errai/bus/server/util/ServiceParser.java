@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.jboss.errai.bus.client.api.Local;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -65,6 +64,6 @@ public abstract class ServiceParser {
    */
   public abstract boolean isCallback();
 
-  public abstract MessageCallback getCallback(Object delegateInstance, MessageBus bus);
+  public abstract MessageCallback getCallback(Object delegateInstance);
 
 }

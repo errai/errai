@@ -143,7 +143,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
     // If we have created an injector, get a callback and register it
     if (svc != null) {
-      MessageCallback callback = svcParser.getCallback(svc, context.getBus());
+      MessageCallback callback = svcParser.getCallback(svc);
       if (callback != null) {
         if (svcParser.isLocal()) {
           context.getBus().subscribeLocal(svcParser.getServiceName(), callback);

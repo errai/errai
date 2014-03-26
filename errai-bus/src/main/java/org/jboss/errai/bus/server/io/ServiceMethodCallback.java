@@ -2,9 +2,7 @@ package org.jboss.errai.bus.server.io;
 
 import java.lang.reflect.Method;
 
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 /**
  * A callback implementation for methods annotated with
@@ -12,7 +10,7 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class ServiceMethodCallback implements MessageCallback {
+public class ServiceMethodCallback extends MethodBindingCallback {
 
   private Object delegate;
   private Method service;
@@ -21,36 +19,32 @@ public class ServiceMethodCallback implements MessageCallback {
   /**
    * Create a callback to the given service method.
    * 
-   * @param delegate The instance on which the service method should be invoked.
-   * @param service The service method to be invoked.
+   * @param delegate
+   *          The instance on which the service method should be invoked.
+   * @param service
+   *          The service method to be invoked.
    */
   public ServiceMethodCallback(Object delegate, Method service) {
     this.delegate = delegate;
     this.service = service;
     this.service.setAccessible(true);
-    if (service.getParameterTypes().length == 0) {
-      noArgs = true;
-    }
-    else if (service.getParameterTypes().length != 1 || !service.getParameterTypes()[0].equals(Message.class)) {
-      throw new RuntimeException(delegate.getClass().getName() + "#" + service.getName() + " has incorrect arguments");
-    }
+
+    noArgs = (service.getParameterTypes().length == 0);
+    verifyMethodSignature(service);
   }
 
   @Override
   public void callback(Message message) {
-    if (noArgs) {
-      try {
+    try {
+      if (noArgs) {
         service.invoke(delegate);
-      } catch (Exception e) {
-        throw new MessageDeliveryFailure(e);
+      }
+      else {
+        service.invoke(delegate, message);
       }
     }
-    else {
-      try {
-        service.invoke(delegate, message);
-      } catch (Exception e) {
-        throw new MessageDeliveryFailure(e);
-      }
+    catch (Exception e) {
+      maybeUnwrapAndThrowError(e);
     }
   }
 }

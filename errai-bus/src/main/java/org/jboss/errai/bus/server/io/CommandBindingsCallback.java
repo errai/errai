@@ -16,71 +16,60 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.client.util.ErrorHelper;
-import org.jboss.errai.common.client.api.Assert;
-import org.slf4j.Logger;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
-public class CommandBindingsCallback implements MessageCallback {
-  private static final Logger log = getLogger(CommandBindingsCallback.class);
-  
+public class CommandBindingsCallback extends MethodBindingCallback {
   private final Map<String, MethodDispatcher> methodDispatchers;
   private final MessageCallback defaultCallback;
   private final boolean defaultAction;
-  private final MessageBus bus;
 
-  public CommandBindingsCallback(final Map<String, Method> commandBindings, final Object delegate, final MessageBus bus) {
+  public CommandBindingsCallback(final Map<String, Method> commandBindings, final Object delegate) {
     this.methodDispatchers = new HashMap<String, MethodDispatcher>(commandBindings.size() * 2);
     this.defaultAction = delegate instanceof MessageCallback;
     this.defaultCallback = defaultAction ? (MessageCallback) delegate : null;
-    this.bus = Assert.notNull(bus);
 
     for (final Map.Entry<String, Method> entry : commandBindings.entrySet()) {
-      final Class[] parmTypes = entry.getValue().getParameterTypes();
+      final Method method = entry.getValue();
+      final Class<?>[] parmTypes = method.getParameterTypes();
 
-      if (parmTypes.length > 1 ||
-          (parmTypes.length == 1 && !Message.class.isAssignableFrom(parmTypes[0]))) {
-        throw new IllegalStateException("method does not implement signature: " + entry.getValue().getName()
-            + "(" + Message.class.getName() + ")");
-      }
-      
-      entry.getValue().setAccessible(true);
+      verifyMethodSignature(method);
 
-      methodDispatchers.put(entry.getKey(),
-          parmTypes.length == 0 ?
-              new NoParamMethodDispatcher(delegate, entry.getValue()) :
-              new DefaultMethodDispatcher(delegate, entry.getValue()));
+      method.setAccessible(true);
+
+      methodDispatchers.put(entry.getKey(), parmTypes.length == 0 ? new NoParamMethodDispatcher(delegate, method)
+              : new DefaultMethodDispatcher(delegate, method));
     }
   }
 
   public void callback(final Message message) {
     final MethodDispatcher method = methodDispatchers.get(message.getCommandType());
 
-    if (method == null) {
-      if (defaultAction) {
-        defaultCallback.callback(message);
+    try {
+      if (method == null) {
+        if (defaultAction) {
+          defaultCallback.callback(message);
+        }
+        else {
+          throw new MessageDeliveryFailure(String.format("Unrecognized command, %s, in service %s",
+                  message.getCommandType(), message.getSubject()));
+        }
       }
       else {
-        ErrorHelper.sendClientError(bus, message, "no such command: " + message.getCommandType(), "");
-      }
-    }
-    else {
-      try {
         method.dispatch(message);
       }
-      catch (Exception e) {
-        // see ERRAI-290: we may want to hand this exception over to a user-provided server-side callback.
-        log.error("Command method threw an exception. This exception is not propagated to the client.", e);
-      }
+    }
+    catch (MessageDeliveryFailure e) {
+      throw e;
+    }
+    catch (Exception e) {
+      maybeUnwrapAndThrowError(e);
     }
   }
 

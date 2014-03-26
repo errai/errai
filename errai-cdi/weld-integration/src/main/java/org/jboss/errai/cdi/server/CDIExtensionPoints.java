@@ -427,7 +427,7 @@ public class CDIExtensionPoints implements Extension {
         
         for (final ServiceParser svcParser : managedTypes.getDelegateServices(delegateClass)) {
           final Object delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
-          final MessageCallback callback = svcParser.getCallback(delegateInstance, bus);
+          final MessageCallback callback = svcParser.getCallback(delegateInstance);
           
           if (callback != null) {
             if (svcParser.isLocal()) {
