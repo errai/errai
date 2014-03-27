@@ -591,4 +591,53 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
   
+  @Test
+  public void testCommandMethodInSecureClassNotLoggedIn() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createMessage("commandMethodInSecureClass")
+        .command("command")
+        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
+        
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+  
+  @Test
+  public void testSecureCommandMethodNotLoggedIn() throws Exception {
+    asyncTest();
+    final Counter counter = new Counter();
+    final Counter errorCounter = new Counter();
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createMessage("secureCommandMethod")
+        .command("command")
+        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
+        
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
 }
