@@ -46,15 +46,7 @@ where `$VERSION` should be replaced with a version of the Errai Forge Addon.
 [IMPORTANT]
 .Published Versions
 ====
-link:$$http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jboss.errai.forge%22%20AND%20a%3A%22errai-forge-addon%22$$[Here] you may find the published versions of the Errai Forge Addon. You may use these versions without downloading and building them yourself.
-
-To download and build the latest version, run:
-[code]
-----
-git clone https://github.com/errai/forge-errai.git
-cd forge-errai
-mvn clean install
-----
+link:$$http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jboss.errai.forge%22%20AND%20a%3A%22errai-forge-addon%22$$[Here] you may find the published versions of the Errai Forge Addon. Since Errai version _3.0.0.20140325-M5_, the addon version mirrors that of Errai. To avoid unnecessary difficulties, we advise you to use a version of the Errai Forge addon that matches the version of Errai you are installing.
 ====
 
 === Making an Errai Project
