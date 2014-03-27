@@ -1,8 +1,9 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gwt.user.client.ui.IsWidget;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -10,11 +11,11 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.PageRole;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * The NavigationGraph is responsible for creating or retrieving instances of
@@ -93,10 +94,15 @@ public abstract class NavigationGraph {
 
   public PageNode getPageByRole(Class<? extends UniquePageRole> role) {
     final Collection<PageNode<? extends IsWidget>> pageNodes = pagesByRole.get(role);
-    if (pageNodes.size() > 1) {
-      throw new IllegalArgumentException("Role '" + role + "' is not unique multiple pages: " + pageNodes + " found");
+    if (pageNodes.size() == 1) {
+      return pageNodes.iterator().next();
     }
-    return pageNodes.iterator().next();
+    else if (pageNodes.size() < 1) {
+      throw new MissingPageRoleException(role);
+    }
+    else {
+      throw new IllegalStateException("Role '" + role + "' is not unique multiple pages: " + pageNodes + " found");
+    }
   }
 
   /**

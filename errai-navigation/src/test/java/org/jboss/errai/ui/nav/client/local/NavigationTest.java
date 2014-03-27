@@ -7,10 +7,13 @@ import junit.framework.AssertionFailedError;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
+import org.jboss.errai.ui.nav.client.local.testpages.MissingPageRole;
+import org.jboss.errai.ui.nav.client.local.testpages.MissingUniquePageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.PageIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
@@ -22,6 +25,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -49,7 +53,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     try {
       navGraph.getPage("page that does not exist");
       fail("Did not get an exception for a missing page");
-    } catch (IllegalArgumentException ex) {
+    }
+    catch (IllegalArgumentException ex) {
       assertTrue(ex.getMessage().contains("page that does not exist"));
     }
   }
@@ -103,8 +108,29 @@ public class NavigationTest extends AbstractErraiCDITest {
 
     assertTrue(pageByRole.size() == 2);
     for (PageNode<?> pageNode : pageByRole) {
-      assertTrue(pageNode.name() + " is not a page annotated with the admin role", pageNode.name().matches("Page.?WithRole"));
+      assertTrue(pageNode.name() + " is not a page annotated with the admin role",
+              pageNode.name().matches("Page.?WithRole"));
     }
+  }
+
+  public void testGetMissingPageByRole() throws Exception {
+    final Collection<PageNode<? extends IsWidget>> pagesByRole = navGraph.getPagesByRole(MissingPageRole.class);
+    
+    assertNotNull(pagesByRole);
+    assertTrue(pagesByRole.isEmpty());
+  }
+  
+  public void testGetMissingPageByUniqueRole() throws Exception {
+    Throwable thrown = null;
+    try {
+    navGraph.getPageByRole(MissingUniquePageRole.class);
+    }
+    catch (Throwable e) {
+      thrown = e;
+    }
+    
+    assertNotNull("Expected an exception to be thrown.", thrown);
+    assertEquals(MissingPageRoleException.class, thrown.getClass());
   }
 
   public void testGetPageWithDefaultRole() {
@@ -121,13 +147,13 @@ public class NavigationTest extends AbstractErraiCDITest {
       public void onValueChange(ValueChangeEvent<String> event) {
         historyHandlerRegistration.removeHandler();
         assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
-        assertEquals(page.asWidget(), ((SimplePanel)navigation.getContentPanel().asWidget()).getWidget());
+        assertEquals(page.asWidget(), ((SimplePanel) navigation.getContentPanel().asWidget()).getWidget());
         finishTest();
       }
     });
 
     delayTestFinish(5000);
-    navigation.goTo(PageIsWidget.class, ImmutableMultimap.<String, String>of());
+    navigation.goTo(PageIsWidget.class, ImmutableMultimap.<String, String> of());
   }
 
   public void testIsWidgetPageTransition() {
@@ -139,7 +165,7 @@ public class NavigationTest extends AbstractErraiCDITest {
       public void onValueChange(ValueChangeEvent<String> event) {
         historyHandlerRegistration.removeHandler();
         assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
-        assertEquals(targetPage.asWidget(), ((SimplePanel)navigation.getContentPanel().asWidget()).getWidget());
+        assertEquals(targetPage.asWidget(), ((SimplePanel) navigation.getContentPanel().asWidget()).getWidget());
         finishTest();
       }
     });
@@ -157,7 +183,7 @@ public class NavigationTest extends AbstractErraiCDITest {
       public void onValueChange(ValueChangeEvent<String> event) {
         historyHandlerRegistration.removeHandler();
         assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
-        assertEquals(targetPage.asWidget(), ((SimplePanel)navigation.getContentPanel().asWidget()).getWidget());
+        assertEquals(targetPage.asWidget(), ((SimplePanel) navigation.getContentPanel().asWidget()).getWidget());
         finishTest();
       }
     });
@@ -235,16 +261,17 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   /**
-   * Give the bootstrapper time to attach the Navigation content panel to the RootPanel and then run
-   * a test.
-   *
+   * Give the bootstrapper time to attach the Navigation content panel to the
+   * RootPanel and then run a test.
+   * 
    * @param test
    *          The test code to be executed after the content panel is attached
    * @param timeout
-   *          The time in milliseconds to wait for the bootstrapper before giving up
+   *          The time in milliseconds to wait for the bootstrapper before
+   *          giving up
    * @param interval
-   *          The interval in milliseconds at which to poll the content panel while waiting for
-   *          bootstrapping
+   *          The interval in milliseconds at which to poll the content panel
+   *          while waiting for bootstrapping
    */
   private void runPostAttachTests(final Runnable test, final int timeout, final int interval) {
     delayTestFinish(timeout + 2 * interval);
@@ -261,7 +288,8 @@ public class NavigationTest extends AbstractErraiCDITest {
           try {
             assertEquals(RootPanel.get(), navigation.getContentPanel().asWidget().getParent());
 
-          } catch (AssertionFailedError e) {
+          }
+          catch (AssertionFailedError e) {
             return;
           }
           test.run();
