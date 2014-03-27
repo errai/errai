@@ -116,8 +116,7 @@
     <module>errai-cdi-async-databinding-tests</module>
     <module>errai-bom</module>
     <module>errai-demos</module>
-    <module>errai-client-local-class-hider</module>
-    <module>errai-forge-addon</module>
+    <module>errai-client-local-class-hider</module>    
   </modules>
 
   <dependencies>
