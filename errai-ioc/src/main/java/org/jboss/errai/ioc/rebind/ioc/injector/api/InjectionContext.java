@@ -515,6 +515,11 @@ public class InjectionContext {
         if (!iface.isPublic())
           continue;
 
+        // workaround for https://code.google.com/p/google-web-toolkit/issues/detail?id=8369
+        if (iface.getFullyQualifiedName()
+            .equals("com.google.gwt.user.cellview.client.AbstractCellTable$TableSectionChangeHandler"))
+          continue;
+        
         if (processedTypes.add(iface)) {
           final Injector injectorDelegate =
               getInjectorFactory().getQualifyingTypeInjector(iface, injector, iface.getParameterizedType());
