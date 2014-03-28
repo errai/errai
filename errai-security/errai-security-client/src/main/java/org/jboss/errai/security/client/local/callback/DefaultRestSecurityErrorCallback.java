@@ -23,6 +23,7 @@ import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
+import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
 import com.google.gwt.http.client.Request;
@@ -51,19 +52,26 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
   @Override
   public boolean error(final Request message, final Throwable throwable) {
     if (wrapped.error(message, throwable)) {
-      if (throwable instanceof UnauthenticatedException) {
-        context.navigateToPage(LoginPage.class);
-
+      try {
+        if (throwable instanceof UnauthenticatedException) {
+          context.navigateToPage(LoginPage.class);
+        }
+        else if (throwable instanceof UnauthorizedException) {
+          context.navigateToPage(SecurityError.class);
+        }
+        else {
+          return true;
+        }
       }
-      else if (throwable instanceof UnauthorizedException) {
-        context.navigateToPage(SecurityError.class);
-
+      catch (MissingPageRoleException ex) {
+        throw new RuntimeException(
+                "Could not redirect the user to the appropriate page because no page with that role was found.", ex);
       }
     }
 
     return false;
   }
-  
+
   public void setWrappedErrorCallback(final RestErrorCallback errorCallback) {
     wrapped = errorCallback;
   }

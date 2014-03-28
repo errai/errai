@@ -25,6 +25,7 @@ import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
+import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
 /**
@@ -37,21 +38,27 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
  */
 @ApplicationScoped
 public class DefaultSecurityErrorCallback {
-  
+
   private final SecurityContext context;
-  
+
   @Inject
   public DefaultSecurityErrorCallback(final SecurityContext context) {
     this.context = context;
   }
 
   @UncaughtException
-  private void handleError(final Throwable throwable) {
-    if (throwable instanceof UnauthenticatedException) {
-      context.navigateToPage(LoginPage.class);
+  public void handleError(final Throwable throwable) {
+    try {
+      if (throwable instanceof UnauthenticatedException) {
+        context.navigateToPage(LoginPage.class);
+      }
+      else if (throwable instanceof UnauthorizedException) {
+        context.navigateToPage(SecurityError.class);
+      }
     }
-    else if (throwable instanceof UnauthorizedException) {
-      context.navigateToPage(SecurityError.class);
+    catch (MissingPageRoleException ex) {
+      throw new RuntimeException(
+              "Could not redirect the user to the appropriate page because no page with that role was found.", ex);
     }
 
   }
