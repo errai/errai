@@ -34,7 +34,7 @@ public class SpyAbstractRpcProxy extends AbstractRpcProxy implements Authenticat
   public User login(String username, String password) {
     this.remoteCallback.callback(null);
     calls.add("login");
-    return null;
+    return User.ANONYMOUS;
   }
 
   @Override
@@ -53,7 +53,7 @@ public class SpyAbstractRpcProxy extends AbstractRpcProxy implements Authenticat
   public User getUser() {
     this.remoteCallback.callback(null);
     calls.add("getUser");
-    return null;
+    return User.ANONYMOUS;
   }
 
   public Integer getCallCount(String method) {

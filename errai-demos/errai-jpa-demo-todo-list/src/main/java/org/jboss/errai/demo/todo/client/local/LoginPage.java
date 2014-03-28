@@ -4,18 +4,17 @@ import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
-import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.dom.client.Document;
@@ -33,21 +32,20 @@ import com.google.gwt.user.client.ui.TextBox;
 @Templated("#main")
 @Page(path = "login", role = { org.jboss.errai.ui.nav.client.local.api.LoginPage.class, SecurityError.class })
 public class LoginPage extends Composite {
-
+  
   @Inject
-  private @Model
-  Identity identity;
+  private Caller<AuthenticationService> authCaller;
 
   @Inject
   private @DataField
   Label loginError;
 
   @Inject
-  private @Bound
+  private
   @DataField
   TextBox username;
   @Inject
-  private @Bound
+  private
   @DataField
   PasswordTextBox password;
 
@@ -73,21 +71,19 @@ public class LoginPage extends Composite {
 
   @EventHandler("loginButton")
   private void login(ClickEvent e) {
-    identity.login(
-            new RemoteCallback<User>() {
-              @Override
-              public void callback(User user) {
-                toListPage.go();
-              }
-            }, new BusErrorCallback() {
-              @Override
-              public boolean error(Message message, Throwable throwable) {
-                loginError.setVisible(true);
+    authCaller.call(new RemoteCallback<User>() {
+      @Override
+      public void callback(User user) {
+        toListPage.go();
+      }
+    }, new BusErrorCallback() {
+      @Override
+      public boolean error(Message message, Throwable throwable) {
+        loginError.setVisible(true);
 
-                return false;
-              }
-            }
-            );
+        return false;
+      }
+    }).login(username.getText(), password.getText());
   }
 
   @EventHandler({ "username", "password" })

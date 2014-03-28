@@ -1,6 +1,6 @@
 package org.jboss.errai.demo.todo.client.local.shadow;
 
-import org.jboss.errai.demo.todo.shared.User;
+import org.jboss.errai.demo.todo.shared.TodoListUser;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -23,7 +23,7 @@ public class TempUser {
   public TempUser() {
   }
 
-  public TempUser(User user, String password) {
+  public TempUser(TodoListUser user, String password) {
     this.email = user.getEmail();
     this.fullName = user.getFullName();
     this.shortName = user.getShortName();
@@ -31,8 +31,8 @@ public class TempUser {
     this.password = password;
   }
 
-  public User asUser() {
-    User user = new User();
+  public TodoListUser asUser() {
+    TodoListUser user = new TodoListUser();
     user.setEmail(email);
     user.setFullName(fullName);
     user.setShortName(shortName);

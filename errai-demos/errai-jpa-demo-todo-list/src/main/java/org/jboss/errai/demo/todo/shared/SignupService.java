@@ -16,5 +16,5 @@ public interface SignupService {
    *           if the signup is not possible (for example, disallowed password;
    *           email address already in use; etc).
    */
-  RegistrationResult register(User newUserObject, String password) throws RegistrationException;
+  TodoListUser register(TodoListUser newUserObject, String password) throws RegistrationException;
 }

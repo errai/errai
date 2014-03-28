@@ -14,25 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.security.client.local.context.impl;
-
-import java.lang.annotation.Annotation;
+package org.jboss.errai.security.client.local.context;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
-import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.security.client.local.context.ActiveUserCache;
-import org.jboss.errai.security.client.local.context.Complex;
-import org.jboss.errai.security.client.local.context.Simple;
-import org.jboss.errai.security.client.local.context.SecurityContext;
+import org.jboss.errai.security.client.local.api.SecurityContext;
+import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.event.LoggedInEvent;
 import org.jboss.errai.security.shared.event.LoggedOutEvent;
@@ -44,18 +37,10 @@ import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.slf4j.Logger;
 
 /**
- * This implements {@link SecurityContext} and implements a {@link Complex}
- * {@link ActiveUserCache} that not only caches the logged in user, but also
- * performs changes to security-related UI styles, sends events, and performs
- * any other Errai Security tasks required when the cached user information
- * changes.
- * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Default
-@Complex
 @ApplicationScoped
-public class SecurityContextImpl implements SecurityContext, ActiveUserCache {
+public class SecurityContextImpl implements SecurityContext {
 
   @Inject
   private Event<LoggedInEvent> loginEvent;
@@ -66,6 +51,7 @@ public class SecurityContextImpl implements SecurityContext, ActiveUserCache {
   @Inject
   private Navigation navigation;
 
+  @Inject
   private ActiveUserCache userCache;
 
   @Inject
@@ -78,23 +64,7 @@ public class SecurityContextImpl implements SecurityContext, ActiveUserCache {
 
   @PostConstruct
   private void setup() {
-    /*
-     * Manually inject ActiveUserCache to work around IOC circular dependency
-     * bug.
-     */
-    IOC.getAsyncBeanManager().lookupBean(ActiveUserCache.class, new Annotation() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return Simple.class;
-      }
-    }).getInstance(new CreationalCallback<ActiveUserCache>() {
-      @Override
-      public void callback(final ActiveUserCache userCache) {
-        SecurityContextImpl.this.userCache = userCache;
-        performLoginStatusChangeActions(userCache.getUser());
-      }
-    });
-    ;
+    performLoginStatusChangeActions(userCache.getUser());
   }
 
   @AfterInitialization
@@ -104,7 +74,7 @@ public class SecurityContextImpl implements SecurityContext, ActiveUserCache {
       @Override
       public void callback(final User response) {
         logger.debug("Response received from AfterInitialization RPC: " + String.valueOf(response));
-        setUser(response);
+        setCachedUser(response);
       }
     }).getUser();
   }
@@ -169,30 +139,25 @@ public class SecurityContextImpl implements SecurityContext, ActiveUserCache {
   }
 
   @Override
-  public boolean hasUser() {
+  public boolean hasCachedUser() {
     return userCache.hasUser();
   }
 
   @Override
-  public User getUser() {
+  public User getCachedUser() {
     return userCache.getUser();
   }
 
   @Override
-  public void setUser(User user) {
+  public void setCachedUser(final User user) {
     // User must be updated before style bindings updated.
     userCache.setUser(user);
     performLoginStatusChangeActions(user);
   }
 
   @Override
-  public boolean isValid() {
+  public boolean isUserCacheValid() {
     return userCache.isValid();
-  }
-
-  @Override
-  public ActiveUserCache getActiveUserCache() {
-    return this;
   }
 
 }

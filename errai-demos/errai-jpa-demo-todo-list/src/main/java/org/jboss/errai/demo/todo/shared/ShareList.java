@@ -18,31 +18,31 @@ public class ShareList {
   private Long id;
 
   @OneToOne
-  private User user;
+  private TodoListUser user;
 
   @ManyToMany
-  private List<User> sharedWith;
+  private List<TodoListUser> sharedWith;
 
   public Long getId() {
     return id;
   }
 
-  public User getUser() {
+  public TodoListUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(TodoListUser user) {
     this.user = user;
   }
 
-  public List<User> getSharedWith() {
+  public List<TodoListUser> getSharedWith() {
     if (sharedWith == null) {
-      sharedWith = new ArrayList<User>();
+      sharedWith = new ArrayList<TodoListUser>();
     }
     return sharedWith;
   }
 
-  public void setSharedWith(List<User> sharedWith) {
+  public void setSharedWith(List<TodoListUser> sharedWith) {
     this.sharedWith = sharedWith;
   }
 

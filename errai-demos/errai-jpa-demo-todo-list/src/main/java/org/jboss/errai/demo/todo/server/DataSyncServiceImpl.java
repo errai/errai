@@ -30,7 +30,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     if (dataSet.getQueryName().equals("allItemsForUser")) {
       // the userId that comes from the client can be tampered with and that is why we override it here
       // the server state is more secure.
-      dataSet.getParameters().put("userId", currentUser.getLoginName());
+      dataSet.getParameters().put("userId", currentUser.getIdentifier());
     }
     else {
       throw new IllegalArgumentException("You don't have permission to sync dataset");

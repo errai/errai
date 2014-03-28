@@ -2,19 +2,20 @@ package org.jboss.errai.mocksafe.test;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doThrow;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
+import org.jboss.errai.security.client.local.api.SecurityContext;
+import org.jboss.errai.security.client.local.callback.DefaultBusSecurityErrorCallback;
 import org.jboss.errai.security.client.local.callback.DefaultRestSecurityErrorCallback;
-import org.jboss.errai.security.client.local.callback.DefaultSecurityErrorCallback;
-import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.util.GwtMockitoRunnerExtension;
@@ -38,7 +39,7 @@ public class DefaultErrorCallbackTest {
   private RestErrorCallback wrapped;
 
   @InjectMocks
-  private DefaultSecurityErrorCallback busErrorCallback;
+  private DefaultBusSecurityErrorCallback busErrorCallback;
 
   @InjectMocks
   private DefaultRestSecurityErrorCallback restErrorCallback;

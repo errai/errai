@@ -16,16 +16,15 @@
  */
 package org.jboss.errai.security.server;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.security.shared.service.NonCachingUserService;
 
-@Singleton
-@Service
+@Dependent @Service
 public class NonCachingUserServiceImpl implements NonCachingUserService {
   
   @Inject

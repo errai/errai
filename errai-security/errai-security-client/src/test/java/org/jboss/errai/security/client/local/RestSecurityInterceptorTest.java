@@ -32,13 +32,14 @@ import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.security.client.local.context.ActiveUserCache;
 import org.jboss.errai.security.client.local.res.Counter;
 import org.jboss.errai.security.client.local.res.CountingRemoteCallback;
 import org.jboss.errai.security.client.local.res.RestErrorCountingCallback;
 import org.jboss.errai.security.client.local.res.RestSecurityTestModule;
+import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.client.shared.SecureRestService;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
@@ -57,7 +58,7 @@ import com.google.gwt.user.client.Timer;
 public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest {
 
   public static final String BASE_URL = "/";
-  
+
   private ActiveUserCache activeUserCache;
 
   @Override
@@ -191,7 +192,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
     final RemoteCallback<Void> callback = new CountingRemoteCallback(callbackCounter);
     final Counter errorCounter = new Counter();
     final RestErrorCallback errorCallback = new RestErrorCountingCallback(errorCounter, UnauthorizedException.class);
-    final User user = new User("user");
+    final User user = new UserImpl("user");
 
     helper(new Runnable() {
       @Override

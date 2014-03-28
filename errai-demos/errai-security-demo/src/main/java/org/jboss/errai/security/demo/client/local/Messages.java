@@ -16,17 +16,19 @@
  */
 package org.jboss.errai.security.demo.client.local;
 
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
+import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.callback.DefaultRestSecurityErrorCallback;
-import org.jboss.errai.security.client.local.context.SecurityContext;
-import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.demo.client.shared.MessageService;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -43,8 +45,9 @@ import com.google.gwt.user.client.ui.Label;
 @Templated("#main")
 @Page
 public class Messages extends Composite {
+  
   @Inject
-  private Identity identity;
+  private Caller<AuthenticationService> authCaller;
 
   @Inject
   private Caller<MessageService> messageServiceCaller;
@@ -52,7 +55,7 @@ public class Messages extends Composite {
   @Inject
   @DataField("newItemForm")
   private Label label;
-  
+
   @Inject
   private SecurityContext securityContext;
 
@@ -63,14 +66,14 @@ public class Messages extends Composite {
   @Inject
   @DataField
   private Button ping;
-  
+
   @Inject
   private Logger logger;
 
   @EventHandler("hello")
   private void onHelloClicked(ClickEvent event) {
     System.out.println("Messages.onHelloClicked");
-    identity.getUser(new RemoteCallback<User>() {
+    authCaller.call(new RemoteCallback<User>() {
 
       @Override
       public void callback(User response) {
@@ -82,7 +85,8 @@ public class Messages extends Composite {
                   }
                 }, new DefaultRestSecurityErrorCallback(securityContext)).hello();
       }
-    });
+
+    }).getUser();
   }
 
   @EventHandler("ping")
@@ -95,13 +99,16 @@ public class Messages extends Composite {
     }, new DefaultRestSecurityErrorCallback(new RestErrorCallback() {
       @Override
       public boolean error(Request message, Throwable throwable) {
-        identity.getUser(new RemoteCallback<User>() {
+        authCaller.call(new RemoteCallback<User>() {
+
           @Override
-          public void callback(User response) {
-            final String name = (response != null) ? response.getLoginName() : "Anonymous";
+          public void callback(User user) {
+            final String name = (user.getProperty(FIRST_NAME) != null) ? user.getProperty(FIRST_NAME) : "Anonymous";
             logger.warn(name + " has attempted to access a protected resource!");
           }
-        });
+
+        }).getUser();
+
         // By returning true here, the default security redirection logic will
         // occur.
         return true;

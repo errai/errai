@@ -29,9 +29,11 @@ import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.client.local.TestLoginPage;
 import org.jboss.errai.security.client.local.TestPage;
 import org.jboss.errai.security.client.local.TestSecurityErrorPage;
-import org.jboss.errai.security.client.local.context.ActiveUserCache;
-import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.client.local.spi.ActiveUserCache;
+import org.jboss.errai.security.shared.api.Role;
+import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.test.page.client.res.RequireAuthenticationPage;
 import org.jboss.errai.security.test.page.client.res.RequiresRoleBasedPage;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
@@ -62,7 +64,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
     }).getInstance();
 
     InitVotes.registerOneTimeInitCallback(new Runnable() {
-      
+
       @Override
       public void run() {
         bm.lookupBean(Navigation.class).getInstance().goToWithRole(DefaultPage.class);
@@ -101,7 +103,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        final User user = new User();
+        final User user = new UserImpl("testuser");
         // Cache a logged in user.
         activeUserCache.setUser(user);
 
@@ -143,10 +145,9 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        final User user = new User();
         final Set<Role> roles = new HashSet<Role>();
-        roles.add(new Role("user"));
-        user.setRoles(roles);
+        roles.add(new RoleImpl("user"));
+        final User user = new UserImpl("testuser", roles);
 
         // Cache a logged in user.
         activeUserCache.setUser(user);
@@ -170,12 +171,11 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        final User user = new User();
         final Set<Role> roles = new HashSet<Role>();
-        roles.add(new Role("user"));
-        roles.add(new Role("admin"));
+        roles.add(new RoleImpl("user"));
+        roles.add(new RoleImpl("admin"));
+        final User user = new UserImpl("testuser", roles);
 
-        user.setRoles(roles);
         // Cache a logged in user.
         activeUserCache.setUser(user);
 

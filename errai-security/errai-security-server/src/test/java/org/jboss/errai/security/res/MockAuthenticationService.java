@@ -19,7 +19,7 @@ package org.jboss.errai.security.res;
 import java.util.List;
 
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
-import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
@@ -36,7 +36,7 @@ public class MockAuthenticationService extends AbstractRpcProxy implements Authe
 
   @Override
   public User login(String username, String password) {
-    return null;
+    return User.ANONYMOUS;
   }
 
   @Override
@@ -51,6 +51,6 @@ public class MockAuthenticationService extends AbstractRpcProxy implements Authe
 
   @Override
   public User getUser() {
-    return null;
+    return User.ANONYMOUS;
   }
 }

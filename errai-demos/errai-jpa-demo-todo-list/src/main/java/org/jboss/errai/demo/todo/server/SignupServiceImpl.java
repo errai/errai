@@ -8,41 +8,54 @@ import javax.persistence.EntityManager;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
-import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
+import org.jboss.errai.demo.todo.shared.TodoListUser;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.model.basic.User;
+import org.slf4j.Logger;
 
 @Stateless @Service
 public class SignupServiceImpl implements SignupService {
 
-  @Inject AuthenticationService service;
-  @Inject IdentityManager identityManager;
-  @Inject EntityManager entityManager;
+  @Inject private IdentityManager identityManager;
+  @Inject private EntityManager entityManager;
+  @Inject private AuthenticationService authService;
+  
+  @Inject Logger logger;
 
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
-  public RegistrationResult register(org.jboss.errai.demo.todo.shared.User newUserObject, String password) throws RegistrationException {
-    final String email = newUserObject.getEmail().toLowerCase();
-    User user = new User(email);
-    user.setEmail(email);
-    user.setFirstName(newUserObject.getShortName());
-    user.setLastName(newUserObject.getFullName());
-    identityManager.add(user);
-    identityManager.updateCredential(user, new Password(password));
+  public TodoListUser register(TodoListUser newTodoListUser, String password) throws RegistrationException {
+    final User picketLinkUser = makePicketLinkUser(newTodoListUser);
+    final String email = picketLinkUser.getEmail();
 
     //users login with their email address
-    newUserObject.setLoginName(email);
-    newUserObject.setEmail(email);
-    entityManager.persist(newUserObject);
-    entityManager.flush();
-    entityManager.detach(newUserObject);
+    newTodoListUser.setLoginName(email);
+    newTodoListUser.setEmail(email);
 
-    System.out.println("Saved new user " + newUserObject + " (id=" + newUserObject.getEmail() + ")");
-    final org.jboss.errai.security.shared.api.identity.User securityUser = service.login(newUserObject.getEmail(), password);
+    identityManager.add(picketLinkUser);
+    identityManager.updateCredential(picketLinkUser, new Password(password));
+
+    entityManager.persist(newTodoListUser);
+    entityManager.flush();
+    entityManager.detach(newTodoListUser);
+
+    logger.info("Saved new user " + newTodoListUser + " (id=" + newTodoListUser.getEmail() + ")");
     
-    return new RegistrationResult(newUserObject, securityUser);
+    return (TodoListUser) authService.login(email, password);
   }
+  
+  private User makePicketLinkUser(TodoListUser todoListUser) {
+    final String email = todoListUser.getEmail().toLowerCase();
+    final User picketLinkUser = new User(email);
+
+    picketLinkUser.setEmail(email);
+    picketLinkUser.setFirstName(todoListUser.getShortName());
+    picketLinkUser.setLastName(todoListUser.getFullName());
+    
+    return picketLinkUser;
+  }
+
 }

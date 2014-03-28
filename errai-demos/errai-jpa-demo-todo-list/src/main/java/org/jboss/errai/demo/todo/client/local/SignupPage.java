@@ -12,9 +12,8 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
-import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
-import org.jboss.errai.demo.todo.shared.User;
+import org.jboss.errai.demo.todo.shared.TodoListUser;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
@@ -22,6 +21,7 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.slf4j.Logger;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Button;
@@ -36,7 +36,7 @@ public class SignupPage extends Composite {
 
   @Inject private @DataField Label overallErrorMessage;
 
-  @Inject private @Model User user;
+  @Inject private @Model TodoListUser user;
   @Inject private @Bound @DataField TextBox shortName;
   @Inject private @Bound @DataField TextBox fullName;
   @Inject private @Bound @DataField TextBox email;
@@ -51,6 +51,8 @@ public class SignupPage extends Composite {
   @Inject private TransitionTo<TodoListPage> todoListPageLink;
 
   @Inject private Validator validator;
+  
+  @Inject private Logger logger;
 
   @PostConstruct
   private void init() {
@@ -59,9 +61,9 @@ public class SignupPage extends Composite {
 
   @EventHandler("signupButton")
   private void doSignup(ClickEvent e) {
-    Set<ConstraintViolation<User>> violations = validator.validate(user);
+    Set<ConstraintViolation<TodoListUser>> violations = validator.validate(user);
     if (violations.size() > 0) {
-      ConstraintViolation<User> violation = violations.iterator().next();
+      ConstraintViolation<TodoListUser> violation = violations.iterator().next();
       overallErrorMessage.setText(violation.getPropertyPath() + " " + violation.getMessage());
       overallErrorMessage.setVisible(true);
       return;
@@ -81,9 +83,9 @@ public class SignupPage extends Composite {
     }
 
     try {
-      signupService.call(new RemoteCallback<RegistrationResult>() {
+      signupService.call(new RemoteCallback<TodoListUser>() {
         @Override
-        public void callback(final RegistrationResult response) {
+        public void callback(final TodoListUser user) {
           todoListPageLink.go();
         }
       },
@@ -92,6 +94,7 @@ public class SignupPage extends Composite {
         public boolean error(Message message, Throwable throwable) {
           overallErrorMessage.setText(throwable.getMessage());
           overallErrorMessage.setVisible(true);
+          logger.error(throwable.getMessage(), throwable);
           return false;
         }
       }).register(user, password1.getText());

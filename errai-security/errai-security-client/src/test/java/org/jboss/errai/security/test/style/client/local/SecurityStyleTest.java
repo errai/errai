@@ -24,11 +24,13 @@ import java.util.Set;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.jboss.errai.security.client.local.context.SecurityContext;
-import org.jboss.errai.security.client.local.context.impl.SecurityContextImpl;
+import org.jboss.errai.security.client.local.api.SecurityContext;
+import org.jboss.errai.security.client.local.context.SecurityContextImpl;
+import org.jboss.errai.security.shared.api.Role;
+import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
-import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.test.style.client.local.res.TemplatedStyleWidget;
 import org.junit.Test;
 
@@ -41,34 +43,32 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
   public String getModuleName() {
     return "org.jboss.errai.security.test.style.StyleTest";
   }
-  
+
   private final User regularUser;
   private final User adminUser;
-  
-  private final Role userRole = new Role("user");
-  private final Role adminRole = new Role("admin");
-  
+
+  private final RoleImpl userRole = new RoleImpl("user");
+  private final RoleImpl adminRole = new RoleImpl("admin");
+
   private SyncBeanManager bm;
   private SecurityContext securityContext;
-  
+
   public SecurityStyleTest() {
-    regularUser = new User();
     final Set<Role> regularUserRoles = new HashSet<Role>();
     regularUserRoles.add(userRole);
-    regularUser.setRoles(regularUserRoles);
+    regularUser = new UserImpl("testuser", regularUserRoles);
 
-    adminUser = new User();
     final Set<Role> adminUserRoles = new HashSet<Role>();
     adminUserRoles.add(userRole);
     adminUserRoles.add(adminRole);
-    adminUser.setRoles(adminUserRoles);
+    adminUser = new UserImpl("testadmin", adminUserRoles);
   }
-  
+
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     addPostInitTask(new Runnable() {
-      
+
       @Override
       public void run() {
         bm = IOC.getBeanManager();
@@ -76,22 +76,23 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       }
     });
   }
-  
+
   /**
    * Regression test for ERRAI-644.
    */
   @Test
-  public void testTemplatedElementsStyleAppliedWhenNotLoggedIn() throws Exception {
+  public void testTemplatedElementsStyleWhenNotLoggedIn() throws Exception {
     asyncTest();
     addPostInitTask(new Runnable() {
-      
+
       @Override
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
         // Make sure we are not logged in as anyone.
-        securityContext.getActiveUserCache().setUser(null);
+        securityContext.setCachedUser(User.ANONYMOUS);
         
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getControl()));
+        assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAuthenticatedAnchor()));
         assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAnchor()));
         assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAdminAnchor()));
         assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAdminAnchor()));
@@ -100,19 +101,20 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       }
     });
   }
-  
+
   @Test
-  public void testTemplatedElementsStyleAppliedWhenUnauthorized() throws Exception {
+  public void testTemplatedElementsStyleWithSomeRoles() throws Exception {
     asyncTest();
     addPostInitTask(new Runnable() {
-      
+
       @Override
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
 
-        securityContext.getActiveUserCache().setUser(regularUser);
+        securityContext.setCachedUser(regularUser);
         
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getControl()));
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAuthenticatedAnchor()));
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAnchor()));
         assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAdminAnchor()));
         assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAdminAnchor()));
@@ -121,19 +123,20 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       }
     });
   }
-  
+
   @Test
-  public void testTemplatedElementsStyleNotAppliedWhenAuthorized() throws Exception {
+  public void testTemplatedElementsStyleFullyAuthorized() throws Exception {
     asyncTest();
     addPostInitTask(new Runnable() {
-      
+
       @Override
       public void run() {
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
 
-        securityContext.getActiveUserCache().setUser(adminUser);
+        securityContext.setCachedUser(adminUser);
         
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getControl()));
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAuthenticatedAnchor()));
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAnchor()));
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAdminAnchor()));
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAdminAnchor()));
@@ -150,6 +153,9 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
       
       @Override
       public void run() {
+        // Make sure we are not logged in as anyone.
+        securityContext.setCachedUser(User.ANONYMOUS);
+
         final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
 
         Anchor customStyledUserAnchor = widget.getCustomStyledUserAnchor();
@@ -160,7 +166,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
         assertEquals("Custom style binding not applied", "blue", bgColor);
         assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, customStyledUserAnchor));
         
-        securityContext.getActiveUserCache().setUser(adminUser);
+        securityContext.setCachedUser(adminUser);
         assertEquals("Custom style binding not applied", "red", color);
         assertEquals("Custom style binding not applied", "blue", bgColor);
         assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, customStyledUserAnchor));

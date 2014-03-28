@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.security.client.local.context;
+package org.jboss.errai.security.client.local.api;
 
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 
 /**
@@ -57,11 +59,48 @@ public interface SecurityContext {
    * @see {@link #navigateToPage(Class, String)}
    */
   public String getLastCachedPageName();
+  
+  /**
+   * @return True iff {@link SecurityContext#isCacheValid()} is true and
+   *         {@link SecurityContext#getCachedUser()} will not return
+   *         {@link User#ANONYMOUS}.
+   */
+  public boolean hasCachedUser();
 
   /**
-   * @return The {@link Complex} {@link ActiveUserCache} for getting and setting
-   *         the currently active {@link User}.
+   * Remote calls to {@link AuthenticationService} are cached, such that calls
+   * to this method can retrieve the logged in {@link User} from memory.
+   * 
+   * @return The currently logged in {@link User}. If no user is logged in (or
+   *         the cache is {@link SecurityContext#invalidateCache() invalid})
+   *         then {@link User#ANONYMOUS}.
    */
-  public ActiveUserCache getActiveUserCache();
-
+  public User getCachedUser();
+  
+  /**
+   * Validate and set the cached user. Subsequent calls to
+   * {@link SecurityContext#getCachedUser()} will return the given user until
+   * this method or {@link SecurityContext#invalidateCache()} is called.
+   * 
+   * Subsequent calls to {@link SecurityContext#isCacheValid()} will return true
+   * until {@link SecurityContext#invalidateCache()} is called.
+   * 
+   * @param user
+   *          The {@link User} to cache. Must not be {@code null}. To set no
+   *          user as logged in, user {@link User#ANONYMOUS}.
+   */
+  public void setCachedUser(User user);
+  
+  /**
+   * @return True if a call to {@link SecurityContext#getCachedUser()}
+   *         accurately reflects the {@link User} that would be returned from a
+   *         call to {@link AuthenticationService#getUser()}.
+   */
+  public boolean isUserCacheValid();
+  
+  /**
+   * Invalidate the cached {@link User}. Subsequent calls to
+   * {@link SecurityContext#isUserCacheValid()} will return false.
+   */
+  public void invalidateCache();
 }

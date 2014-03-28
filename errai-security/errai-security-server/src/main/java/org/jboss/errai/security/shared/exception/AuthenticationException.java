@@ -19,7 +19,7 @@ package org.jboss.errai.security.shared.exception;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
- * Thrown when authentication fails.
+ * Super-type of all Exceptions thrown during authentication.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -27,5 +27,16 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 public class AuthenticationException extends SecurityException {
 
   private static final long serialVersionUID = 1L;
+  
+  public AuthenticationException() {
+    super();
+  }
 
+  public AuthenticationException(String message) {
+    super(message);
+  }
+  
+  public AuthenticationException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
 }

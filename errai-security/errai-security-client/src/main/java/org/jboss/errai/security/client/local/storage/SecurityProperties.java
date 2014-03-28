@@ -14,38 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.security.shared.api.identity;
+package org.jboss.errai.security.client.local.storage;
 
-import org.jboss.errai.common.client.api.annotations.MapsTo;
-import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.security.shared.api.identity.User;
 
 /**
- * Role represents the role a user has.
- * @author edewit@redhat.com
+ * Stores compile-time configurations for Errai Security.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-@Portable
-public class Role {
-  private final String name;
+public interface SecurityProperties {
 
-  public Role(@MapsTo("role") String name) {
-    this.name = name;
-  }
+  /**
+   * @return True iff {@literal ErraiApp.properties} was configured to allow
+   *         {@link User Users} to be cached in browser local storage.
+   */
+  public Boolean isLocalStorageOfUserAllowed();
 
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Role)) return false;
-
-    Role role = (Role) o;
-    return name.equals(role.name);
-  }
-
-  @Override
-  public int hashCode() {
-    return name.hashCode();
-  }
 }

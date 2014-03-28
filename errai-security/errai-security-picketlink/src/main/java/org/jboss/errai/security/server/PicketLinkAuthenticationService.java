@@ -16,27 +16,40 @@
  */
 package org.jboss.errai.security.server;
 
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.EMAIL;
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.LAST_NAME;
+
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.shared.api.Role;
+import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.api.identity.UserImpl;
+import org.jboss.errai.security.shared.exception.AlreadyLoggedInException;
 import org.jboss.errai.security.shared.exception.AuthenticationException;
+import org.jboss.errai.security.shared.exception.FailedAuthenticationException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.picketlink.Identity;
+import org.picketlink.Identity.AuthenticationResult;
+import org.picketlink.authentication.UserAlreadyLoggedInException;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.RelationshipManager;
 import org.picketlink.idm.credential.Password;
+import org.picketlink.idm.model.Attribute;
 import org.picketlink.idm.model.basic.Grant;
 import org.picketlink.idm.query.RelationshipQuery;
 
 /**
  * PicketLink version of the AuthenticationService and default implementation.
- * To change implementations put a alternatives into your beans.xml
  *
  * @author edewit@redhat.com
  */
@@ -46,7 +59,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
 
   @Inject
   private Identity identity;
-  
+
   @Inject
   private RelationshipManager relationshipManager;
 
@@ -58,11 +71,24 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     credentials.setUserId(username);
     credentials.setCredential(new Password(password));
 
-    if (identity.login() != Identity.AuthenticationResult.SUCCESS) {
-      throw new AuthenticationException();
+    final AuthenticationResult result;
+    
+    try {
+      result = identity.login();
+    }
+    catch (UserAlreadyLoggedInException ex) {
+      throw new AlreadyLoggedInException("Already logged in as "
+              + ((org.picketlink.idm.model.basic.User) identity.getAccount()).getLoginName());
+    }
+    catch (RuntimeException ex) {
+      throw new AuthenticationException("An error occurred while authenticating.", ex);
     }
 
-    final User user = createUser((org.picketlink.idm.model.basic.User) identity.getAccount(), getRoles());
+    if (result != Identity.AuthenticationResult.SUCCESS) {
+      throw new FailedAuthenticationException();
+    }
+
+    final User user = createUser((org.picketlink.idm.model.basic.User) identity.getAccount(), getRolesOfCurrentUser());
     return user;
   }
 
@@ -72,15 +98,25 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
    * @param roles The roles the given user has.
    * @return our user
    */
-  private User createUser(org.picketlink.idm.model.basic.User picketLinkUser, Set<Role> roles) {
-    User user = new User();
-    user.setLoginName(picketLinkUser.getLoginName());
-    user.setLastName(picketLinkUser.getLastName());
-    user.setFirstName(picketLinkUser.getFirstName());
-    user.setEmail(picketLinkUser.getEmail());
-    user.setRoles(roles);
+  private User createUser(org.picketlink.idm.model.basic.User picketLinkUser, Set<? extends Role> roles) {
+    User user = new UserImpl(picketLinkUser.getLoginName(), roles, translatePicketLinkAttributes(picketLinkUser));
     return user;
   }
+
+  private Map<String, String> translatePicketLinkAttributes(
+          org.picketlink.idm.model.basic.User picketLinkUser) {
+    Map<String, String> result = new HashMap<String, String>();
+
+    result.put(FIRST_NAME, picketLinkUser.getFirstName());
+    result.put(LAST_NAME, picketLinkUser.getLastName());
+    result.put(EMAIL, picketLinkUser.getEmail());
+
+    for (Map.Entry<String, Attribute<? extends Serializable>> entry : picketLinkUser.getAttributesMap().entrySet()) {
+      result.put(entry.getKey(), entry.getValue() == null ? null : entry.getValue().toString());
+    }
+    return result;
+  }
+
 
   @Override
   public boolean isLoggedIn() {
@@ -95,12 +131,12 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   @Override
   public User getUser() {
     if (identity.isLoggedIn()) {
-      return createUser((org.picketlink.idm.model.basic.User) identity.getAccount(), getRoles());
+      return createUser((org.picketlink.idm.model.basic.User) identity.getAccount(), getRolesOfCurrentUser());
     }
-    return null;
+    return User.ANONYMOUS;
   }
 
-  public Set<Role> getRoles() {
+  private Set<Role> getRolesOfCurrentUser() {
     Set<Role> roles = new HashSet<Role>();
 
     if (identity.isLoggedIn()) {
@@ -108,7 +144,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
               relationshipManager.createRelationshipQuery(Grant.class);
       query.setParameter(Grant.ASSIGNEE, identity.getAccount());
       for (final Grant grant : query.getResultList()) {
-        roles.add(new Role(grant.getRole().getName()));
+        roles.add(new RoleImpl(grant.getRole().getName()));
       }
     }
 

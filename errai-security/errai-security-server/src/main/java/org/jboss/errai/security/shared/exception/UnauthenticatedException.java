@@ -29,4 +29,15 @@ public class UnauthenticatedException extends SecurityException {
 
   private static final long serialVersionUID = 1L;
 
+  public UnauthenticatedException() {
+    super();
+  }
+
+  public UnauthenticatedException(String message) {
+    super(message);
+  }
+
+  public UnauthenticatedException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

@@ -14,25 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.security.client.local.context.impl;
+package org.jboss.errai.security.client.local.context;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jboss.errai.security.client.local.context.ActiveUserCache;
-import org.jboss.errai.security.client.local.context.Simple;
-import org.jboss.errai.security.client.local.identity.LocalStorageHandler;
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.security.client.local.spi.ActiveUserCache;
+import org.jboss.errai.security.client.local.storage.UserStorageHandler;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.slf4j.Logger;
 
 /**
- * A {@link Simple} implementation for {@link ActiveUserCache}, storing a
- * {@link User} in memory and in browser local storage (if configured).
- * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Simple
 @ApplicationScoped
 public class BasicUserCacheImpl implements ActiveUserCache {
 
@@ -40,11 +36,11 @@ public class BasicUserCacheImpl implements ActiveUserCache {
   private Logger logger;
 
   @Inject
-  private LocalStorageHandler storageHandler;
+  private UserStorageHandler userStorageHandler;
 
   private boolean valid = false;
 
-  private User activeUser;
+  private User activeUser = User.ANONYMOUS;
 
   @Override
   public User getUser() {
@@ -53,6 +49,7 @@ public class BasicUserCacheImpl implements ActiveUserCache {
 
   @Override
   public void setUser(User user) {
+    Assert.notNull("User should not be null. Use User.ANONYMOUS instead.", user);
     setActiveUser(user, true);
   }
 
@@ -61,7 +58,7 @@ public class BasicUserCacheImpl implements ActiveUserCache {
     logger.debug("PostConstruct invoked.");
     if (!isValid()) {
       logger.debug("Checking for user in local storage.");
-      final User storedUser = storageHandler.getUser();
+      final User storedUser = userStorageHandler.getUser();
 
       if (storedUser != null) {
         setActiveUser(storedUser, false);
@@ -74,13 +71,9 @@ public class BasicUserCacheImpl implements ActiveUserCache {
     valid = true;
     activeUser = user;
     if (localStorage) {
-      storageHandler.setUser(user);
+      final User toPersist = (!user.equals(User.ANONYMOUS)) ? user : null;
+      userStorageHandler.setUser(toPersist);
     }
-  }
-
-  @Override
-  public boolean hasUser() {
-    return getUser() != null;
   }
 
   @Override
@@ -92,8 +85,13 @@ public class BasicUserCacheImpl implements ActiveUserCache {
   public void invalidateCache() {
     logger.debug("Invalidating cache.");
     valid = false;
-    activeUser = null;
-    storageHandler.setUser(null);
+    activeUser = User.ANONYMOUS;
+    userStorageHandler.setUser(null);
+  }
+
+  @Override
+  public boolean hasUser() {
+    return !User.ANONYMOUS.equals(activeUser);
   }
 
 }

@@ -16,18 +16,21 @@
  */
 package org.jboss.errai.security.demo.client.local;
 
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.security.client.local.identity.Identity;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.event.LoggedInEvent;
 import org.jboss.errai.security.shared.event.LoggedOutEvent;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
@@ -55,9 +58,9 @@ public class WelcomePage extends Composite {
   @Inject
   @DataField
   private Label userLabel;
-
+  
   @Inject
-  private Identity identity;
+  private Caller<AuthenticationService> authCaller;
 
   @Inject
   TransitionTo<Messages> startButtonClicked;
@@ -69,25 +72,25 @@ public class WelcomePage extends Composite {
 
   @AfterInitialization
   private void setupUserLabel() {
-    identity.getUser(new RemoteCallback<User>() {
+    authCaller.call(new RemoteCallback<User>() {
 
       @Override
       public void callback(final User user) {
-        userLabel.setText(user != null ? user.getFirstName() : ANONYMOUS);
+        userLabel.setText(user.getProperty(FIRST_NAME) != null ? user.getProperty(FIRST_NAME) : ANONYMOUS);
       }
     }, new BusErrorCallback() {
-      
+
       @Override
       public boolean error(Message message, Throwable throwable) {
         userLabel.setText(ANONYMOUS);
         return true;
       }
-    });
+    }).getUser();
   }
 
   @SuppressWarnings("unused")
   private void onLoggedIn(@Observes LoggedInEvent loggedInEvent) {
-    userLabel.setText(loggedInEvent.getUser().getFirstName());
+    userLabel.setText(loggedInEvent.getUser().getProperty(FIRST_NAME));
   }
 
   @SuppressWarnings("unused")

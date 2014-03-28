@@ -32,6 +32,11 @@ public class TemplatedStyleWidget extends Composite {
   @Inject
   @DataField
   private Anchor control;
+  
+  @Inject
+  @DataField
+  @RestrictedAccess
+  private Anchor authenticatedAnchor;
 
   @Inject
   @DataField
@@ -68,6 +73,10 @@ public class TemplatedStyleWidget extends Composite {
 
   public Anchor getControl() {
     return control;
+  }
+
+  public Anchor getAuthenticatedAnchor() {
+    return authenticatedAnchor;
   }
 
   public Anchor getCustomStyledUserAnchor() {

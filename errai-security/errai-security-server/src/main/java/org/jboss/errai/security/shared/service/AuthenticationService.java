@@ -51,7 +51,8 @@ public interface AuthenticationService {
   /**
    * Get the currently authenitcated user.
    * 
-   * @return The currently authenticated user, or {@code null} if no user is authenticated.
+   * @return The currently authenticated user. Never returns {@code null}. If no
+   *         user is logged in, returns {@link User#ANONYMOUS}.
    */
   public User getUser();
 }

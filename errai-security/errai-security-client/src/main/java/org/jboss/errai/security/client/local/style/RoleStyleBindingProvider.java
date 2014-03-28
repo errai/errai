@@ -17,17 +17,13 @@
 package org.jboss.errai.security.client.local.style;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.jboss.errai.security.client.local.context.ActiveUserCache;
+import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
-import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.ui.shared.api.style.AnnotationStyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
@@ -45,11 +41,11 @@ import com.google.gwt.user.client.Element;
 @Singleton
 public class RoleStyleBindingProvider {
 
-  private final ActiveUserCache userProvider;
+  private final ActiveUserCache userCache;
 
   @Inject
   public RoleStyleBindingProvider(final ActiveUserCache userProvider) {
-    this.userProvider = userProvider;
+    this.userCache = userProvider;
   }
 
   @PostConstruct
@@ -57,27 +53,14 @@ public class RoleStyleBindingProvider {
     StyleBindingsRegistry.get().addStyleBinding(this, RestrictedAccess.class, new AnnotationStyleBindingExecutor() {
       @Override
       public void invokeBinding(final Element element, final Annotation annotation) {
-        final User user = userProvider.getUser();
-        if (user == null || user.getRoles() == null || !hasRoles(user.getRoles(), ((RestrictedAccess) annotation).roles()))
+        final User user = userCache.getUser();
+        if (User.ANONYMOUS.equals(userCache.getUser()) || !user.hasAllRoles(((RestrictedAccess) annotation).roles())) {
           element.addClassName(RestrictedAccess.CSS_CLASS_NAME);
-        else
+        }
+        else {
           element.removeClassName(RestrictedAccess.CSS_CLASS_NAME);
+        }
       }
     });
   }
-  
-  private boolean hasRoles(final Collection<Role> userRoles, final String[] requiredRoles) {
-    final Set<String> userRolesByName = new HashSet<String>();
-    for (final Role role : userRoles) {
-      userRolesByName.add(role.getName());
-    }
-
-    for (int i = 0; i < requiredRoles.length; i++) {
-      if (!userRolesByName.contains(requiredRoles[i]))
-        return false;
-    }
-    
-    return true;
-  }
-
 }

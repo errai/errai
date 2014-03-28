@@ -26,11 +26,15 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 @Portable
 public class SecurityException extends RuntimeException {
 
+  public SecurityException() {
+  }
+
   public SecurityException(final String message) {
     super(message);
   }
 
-  public SecurityException() {
+  public SecurityException(final String message, final Throwable cause) {
+    super(message, cause);
   }
 
   private static final long serialVersionUID = 9032128765408654433L;

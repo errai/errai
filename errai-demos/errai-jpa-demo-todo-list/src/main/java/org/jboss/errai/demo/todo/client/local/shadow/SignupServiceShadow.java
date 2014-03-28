@@ -12,9 +12,8 @@ import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.server.annotations.ShadowService;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
-import org.jboss.errai.demo.todo.shared.RegistrationResult;
 import org.jboss.errai.demo.todo.shared.SignupService;
-import org.jboss.errai.demo.todo.shared.User;
+import org.jboss.errai.demo.todo.shared.TodoListUser;
 
 /**
  * ShadowService implementation of the SignupService this service will get invoked automatically when the bus
@@ -53,32 +52,9 @@ public class SignupServiceShadow implements SignupService {
   }
 
   @Override
-  public RegistrationResult register(User newUserObject, String password) throws RegistrationException {
+  public TodoListUser register(TodoListUser newUserObject, String password) throws RegistrationException {
     entityManager.persist(new TempUser(newUserObject, password));
 
-    final org.jboss.errai.security.shared.api.identity.User securityUser = new org.jboss.errai.security.shared.api.identity.User();
-    String[] names = newUserObject.getFullName().split("\\s+");
-    final String firstName, lastName;
-    
-    if (names.length > 1) {
-      lastName = names[names.length-1];
-    }
-    else {
-      lastName = "";
-    }
-
-    if (names.length > 0) {
-      firstName = names[0];
-    }
-    else {
-      firstName = "";
-    }
-
-    securityUser.setLoginName(newUserObject.getLoginName());
-    securityUser.setLastName(lastName);
-    securityUser.setFirstName(firstName);
-    securityUser.setEmail(newUserObject.getEmail());
-    
-    return new RegistrationResult(newUserObject, securityUser);
+    return newUserObject;
   }
 }

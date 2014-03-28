@@ -21,7 +21,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.security.client.local.context.SecurityProperties;
+import org.jboss.errai.security.client.local.storage.SecurityProperties;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;

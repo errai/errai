@@ -1,24 +1,36 @@
 package org.jboss.errai.demo.todo.shared;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.validation.client.shared.GwtCompatibleEmail;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
+
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.security.shared.api.Role;
+import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.validation.client.shared.GwtCompatibleEmail;
 
 /**
  * Represents a user of the To-do List application.
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-@Portable @Bindable @Entity
+@Portable @Bindable @Entity(name="User")
 @NamedQuery(name="userByEmail", query="SELECT u FROM User u WHERE u.email = :email")
-public class User implements Serializable {
+public class TodoListUser implements User {
 
   private static final long serialVersionUID = 1L;
+  
+  public static final String SHORT_NAME = "shortName";
+  public static final String FULL_NAME = "longName";
 
   @Id
   private String loginName;
@@ -44,6 +56,8 @@ public class User implements Serializable {
   @NotNull
   @GwtCompatibleEmail
   private String email;
+  
+  private transient Map<String, String> properties = new HashMap<String, String>();
 
   public String getLoginName() {
     return loginName;
@@ -59,6 +73,7 @@ public class User implements Serializable {
 
   public void setShortName(String shortName) {
     this.shortName = shortName;
+    properties.put(SHORT_NAME, shortName);
   }
 
   public String getFullName() {
@@ -67,6 +82,7 @@ public class User implements Serializable {
 
   public void setFullName(String fullName) {
     this.fullName = fullName;
+    properties.put(FULL_NAME, fullName);
   }
 
   public String getEmail() {
@@ -75,6 +91,7 @@ public class User implements Serializable {
 
   public void setEmail(String email) {
     this.email = email;
+    properties.put(StandardUserProperties.EMAIL, email);
   }
 
   @Override
@@ -87,19 +104,51 @@ public class User implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
+    if (!(obj instanceof User))
       return false;
-    if (getClass() != obj.getClass())
-      return false;
-    User other = (User) obj;
-    if (loginName == null) {
-      if (other.loginName != null)
-        return false;
-    }
-    else if (!loginName.equals(other.loginName))
-      return false;
-    return true;
+    
+    final User user = (User) obj;
+    
+    return getIdentifier().equals(user.getIdentifier());
+  }
+
+  @Override
+  public String getIdentifier() {
+    return getLoginName();
+  }
+
+  @Override
+  public Set<Role> getRoles() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public boolean hasAllRoles(String... roleNames) {
+    return roleNames.length == 0;
+  }
+
+  @Override
+  public boolean hasAnyRoles(String... roleNames) {
+    return false;
+  }
+
+  @Override
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+  @Override
+  public void setProperty(String name, String value) {
+    properties.put(name, value);
+  }
+
+  @Override
+  public void removeProperty(String name) {
+    properties.remove(name);
+  }
+
+  @Override
+  public String getProperty(String name) {
+    return properties.get(name);
   }
 }

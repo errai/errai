@@ -35,7 +35,7 @@ public class AnnotationUtils {
    */
   public static String[] mergeRoles(final RestrictedAccess... accessRestrictions) {
     final Set<String> roles = new HashSet<String>();
-    
+
     for (int i = 0; i < accessRestrictions.length; i++) {
       if (accessRestrictions[i] == null)
         continue;
@@ -45,7 +45,7 @@ public class AnnotationUtils {
         roles.add(values[j]);
       }
     }
-    
+
     return roles.toArray(new String[roles.size()]);
   }
 

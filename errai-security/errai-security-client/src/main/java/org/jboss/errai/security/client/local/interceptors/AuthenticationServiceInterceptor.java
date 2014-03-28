@@ -23,14 +23,13 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
-import org.jboss.errai.security.client.local.context.ActiveUserCache;
-import org.jboss.errai.security.client.local.context.SecurityContext;
+import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
  * Intercepts RPC logins through {@link AuthenticationService} for populating
- * and removing the current logged in user via {@link ActiveUserCache}.
+ * and removing the current logged in user via {@link SecurityContext}.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -65,9 +64,8 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
   }
 
   private void isLoggedIn(final RemoteCallContext callContext) {
-    final ActiveUserCache userCache = securityContext.getActiveUserCache();
-    if (userCache.isValid()) {
-      callContext.setResult(userCache.hasUser());
+    if (securityContext.isUserCacheValid()) {
+      callContext.setResult(securityContext.hasCachedUser());
     }
     else {
       callContext.proceed();
@@ -79,27 +77,26 @@ public class AuthenticationServiceInterceptor implements RemoteCallInterceptor<R
 
       @Override
       public void callback(final User response) {
-        securityContext.getActiveUserCache().setUser(response);
+        securityContext.setCachedUser(response);
       }
     });
   }
 
   private void logout(final RemoteCallContext callContext) {
-    securityContext.getActiveUserCache().setUser(null);
+    securityContext.setCachedUser(User.ANONYMOUS);
     callContext.proceed();
   }
 
   private void getUser(final RemoteCallContext context) {
-    final ActiveUserCache userCache = securityContext.getActiveUserCache();
-    if (userCache.isValid()) {
-      context.setResult(userCache.getUser());
+    if (securityContext.isUserCacheValid()) {
+      context.setResult(securityContext.getCachedUser());
     }
     else {
       context.proceed(new RemoteCallback<User>() {
 
         @Override
         public void callback(final User response) {
-          userCache.setUser(response);
+          securityContext.setCachedUser(response);
         }
       });
     }

@@ -16,10 +16,8 @@
  */
 package org.jboss.errai.security;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -31,8 +29,10 @@ import javax.interceptor.InvocationContext;
 import org.jboss.errai.security.client.shared.ServiceInterface;
 import org.jboss.errai.security.res.Service;
 import org.jboss.errai.security.server.ServerSecurityRoleInterceptor;
-import org.jboss.errai.security.shared.api.identity.Role;
+import org.jboss.errai.security.shared.api.Role;
+import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
@@ -60,10 +60,9 @@ public class SecurityRoleInterceptorTest {
     // when
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
-    final User user = new User();
     final Set<Role> roles = new HashSet<Role>();
-    roles.addAll(Arrays.asList(new Role("admin"), new Role("user")));
-    user.setRoles(roles);
+    roles.addAll(Arrays.asList(new RoleImpl("admin"), new RoleImpl("user")));
+    final User user = new UserImpl("testuser", roles);
     when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
 
@@ -91,7 +90,7 @@ public class SecurityRoleInterceptorTest {
     // when
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
-    when(authenticationService.getUser()).thenReturn(null);
+    when(authenticationService.getUser()).thenReturn(User.ANONYMOUS);
     interceptor.aroundInvoke(context);
 
     fail("exception shoudl have been thrown");
@@ -112,7 +111,7 @@ public class SecurityRoleInterceptorTest {
   private void invokeTest(InvocationContext context, Object service) throws Exception {
     when(context.getTarget()).thenReturn(service);
     when(context.getMethod()).thenReturn(getAnnotatedServiceMethod());
-    final User user = new User();
+    final User user = new UserImpl("testuser");
     when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
   }
@@ -125,7 +124,7 @@ public class SecurityRoleInterceptorTest {
     // when
     when(context.getTarget()).thenReturn(new Service());
     when(context.getMethod()).thenReturn(Service.class.getMethod("annotatedServiceMethod"));
-    final User user = new User();
+    final User user = new UserImpl("testuser");
     when(authenticationService.getUser()).thenReturn(user);
     interceptor.aroundInvoke(context);
 

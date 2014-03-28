@@ -16,6 +16,8 @@
  */
 package org.jboss.errai.security.demo.server;
 
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
+
 import javax.inject.Inject;
 
 import org.jboss.errai.security.demo.client.shared.MessageService;
@@ -33,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
   public String hello() {
     //User cannot be null because authentication is required for this method
     final User user = authenticationService.getUser();
-    String name = user.getFirstName() + " " + user.getLastName();
+    String name = user.getProperty(FIRST_NAME) + " " + user.getProperty(LAST_NAME);
     return "Hello " + name + " how are you";
   }
 

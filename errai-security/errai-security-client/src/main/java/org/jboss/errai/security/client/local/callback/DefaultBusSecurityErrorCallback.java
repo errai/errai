@@ -20,7 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.api.UncaughtException;
-import org.jboss.errai.security.client.local.context.SecurityContext;
+import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -37,12 +37,12 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @ApplicationScoped
-public class DefaultSecurityErrorCallback {
-
+public class DefaultBusSecurityErrorCallback {
+  
   private final SecurityContext context;
 
   @Inject
-  public DefaultSecurityErrorCallback(final SecurityContext context) {
+  public DefaultBusSecurityErrorCallback(final SecurityContext context) {
     this.context = context;
   }
 

@@ -14,7 +14,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.demo.todo.shared.TodoListService;
-import org.jboss.errai.demo.todo.shared.User;
+import org.jboss.errai.demo.todo.shared.TodoListUser;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
 import com.google.common.base.Function;
@@ -35,12 +35,12 @@ public class TodoListServiceImpl implements TodoListService {
   public List<SharedList> getSharedTodoLists() {
     final ArrayList<SharedList> sharedLists = new ArrayList<SharedList>();
     org.jboss.errai.security.shared.api.identity.User currentUser = service.getUser();
-    final TypedQuery<User> query = entityManager.createNamedQuery("sharedWithMe", User.class);
-    query.setParameter("loginName", currentUser.getLoginName());
+    final TypedQuery<TodoListUser> query = entityManager.createNamedQuery("sharedWithMe", TodoListUser.class);
+    query.setParameter("loginName", currentUser.getIdentifier());
 
-    final Map<String, User> userNames = Maps.uniqueIndex(query.getResultList(), new Function<User, String>() {
+    final Map<String, TodoListUser> userNames = Maps.uniqueIndex(query.getResultList(), new Function<TodoListUser, String>() {
       @Override
-      public String apply(User input) {
+      public String apply(TodoListUser input) {
         return input != null ? input.getLoginName() : "";
       }
     });
