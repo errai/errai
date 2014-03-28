@@ -24,13 +24,17 @@ import java.lang.annotation.Target;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
+
 /**
  * Indicates that an annotated widget should automatically be bound to a property of a data model
  * associated with a {@link DataBinder} (see {@link AutoBound} and {@link Model}).
  * <p>
  * The annotated widget can either be a field, method or constructor parameter or a method return
- * type. Note that a {@link Bound} field can but does not have to be injected. The following example
- * shows all use cases for the {@link Bound} annotation.
+ * value and must implement either {@link HasText} or {@link HasValue}. Note that a {@link Bound}
+ * field can but does not have to be injected. The following example shows all valid use cases for
+ * the {@link Bound} annotation.
  * 
  * <pre>
  *      public class MyBean {
@@ -44,17 +48,17 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  *        private TextBox injectedBoundTextBox;
  *  
  *        {@code @Inject}
- *        public MyBean({@code @Bound} Widget boundWidget) {
+ *        public MyBean({@code @Bound} SomeWidget boundWidget) {
  *          this.boundWidget = boundWidget;
  *        }
  *        
  *        {@code @Inject}
- *        public void setWidget({@code @Bound} Widget boundWidget) {
+ *        public void setWidget({@code @Bound} SomeWidget boundWidget) {
  *          this.boundWidget = boundWidget;
  *        }
  *  
  *        {@code @Bound}
- *        public Widget getWidget() {
+ *        public SomeWidget getWidget() {
  *          ...
  *        }
  *      }
