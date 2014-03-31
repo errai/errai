@@ -24,6 +24,9 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
 
 import org.jboss.errai.codegen.BlockStatement;
+import org.jboss.errai.codegen.Modifier;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Stmt;
@@ -41,37 +44,58 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
-                        final IOCConfigProcessor procFactory) {
+      final IOCConfigProcessor procFactory) {
 
     injectionContext.mapElementType(WiringElementType.SingletonBean, ApplicationScoped.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
   }
 
-  public static void addTypeHeirarchyFor(final IOCProcessingContext context, final Set<MetaClass> classes) {
+  private static void addTypeHierarchyFor(final IOCProcessingContext context, final Set<MetaClass> classes) {
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
 
+    int i = 0, addLookupMethodCount = 0;
+    MethodCommentBuilder<?> currentBlock = null;
     for (final MetaClass subClass : classes) {
       MetaClass cls = subClass;
       do {
+        // We'll generate a separate lookup method for every 500 lines to make sure we're not
+        // exceeding the method size byte limit. See ERRAI-346 and ERRAI-679
+        if ((i++ % 500) == 0) {
+          Statement lookupMethod = Stmt.invokeStatic(context.getBootstrapClass(), "addLookups_" + addLookupMethodCount);
+          if (currentBlock != null) {
+            currentBlock
+                .append(lookupMethod);
+            currentBlock.modifiers(Modifier.Static).finish();
+          }
+          else {
+            instanceInitializer.addStatement(lookupMethod);
+          }
+          currentBlock =
+              context.getBootstrapBuilder().privateMethod(void.class, "addLookups_" + addLookupMethodCount++);
+        }
+
         if (cls != subClass) {
-          instanceInitializer.addStatement(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
+          currentBlock.append(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
                   .invoke("addLookup", subClass.getFullyQualifiedName(), cls.getFullyQualifiedName()));
         }
 
         for (final MetaClass interfaceClass : cls.getInterfaces()) {
-          instanceInitializer.addStatement(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
+          currentBlock.append(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
                   .invoke("addLookup", subClass.getFullyQualifiedName(), interfaceClass.getFullyQualifiedName()));
 
         }
       }
       while ((cls = cls.getSuperClass()) != null);
     }
+
+    if (currentBlock != null) {
+      currentBlock.modifiers(Modifier.Static).finish();
+    }
   }
 
   @Override
-  public void afterInitialization(final IOCProcessingContext context,
-                                  final InjectionContext injectionContext,
-                                  final IOCConfigProcessor procFactory) {
+  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext,
+      final IOCConfigProcessor procFactory) {
 
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
 
@@ -88,7 +112,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       }
     }
 
-    addTypeHeirarchyFor(context, knownTypesWithSuperTypes);
+    addTypeHierarchyFor(context, knownTypesWithSuperTypes);
 
     instanceInitializer.addStatement(Stmt.nestedCall(Stmt.newObject(CDI.class))
             .invoke("initLookupTable", Stmt.invokeStatic(CDIEventTypeLookup.class, "get")));

@@ -71,6 +71,10 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
     startEvent.fire(new StartEvent());
   }
 
+//  private void onObject(@Observes Object foo) {
+//    
+//  }
+  
   private void onEvent(@Observes String event) {
     System.out.println("Observed unqualified");
     addQualifiedReceivedEvent("", event);
