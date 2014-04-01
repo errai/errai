@@ -18,6 +18,8 @@ package org.jboss.errai.marshalling.server;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.io.IOException;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.config.util.ClassScanner;
@@ -75,6 +77,10 @@ public class MappingContextSingleton {
           log.debug("failed to load static marshallers", t);
           log.warn("static marshallers were not found.");
 
+          if (MarshallingGenUtil.isForceStaticMarshallers()) {
+            throw new IOException("Enforcing static marshallers but failed to load generated server marshallers", t);
+          }
+
           sContext = loadDynamicMarshallers();
         }
         finally {
@@ -84,6 +90,7 @@ public class MappingContextSingleton {
     }
     catch (Throwable t) {
       t.printStackTrace();
+      log.error(t.getMessage());
       throw new RuntimeException("critical problem loading the marshallers", t);
     }
 
@@ -159,7 +166,6 @@ public class MappingContextSingleton {
     };
   }
 
-
   private static final Marshaller<Object> NULL_MARSHALLER = new Marshaller<Object>() {
     @Override
     public Object demarshall(EJValue o, MarshallingSession ctx) {
@@ -176,7 +182,6 @@ public class MappingContextSingleton {
       return null;
     }
   };
-
 
   public static ServerMappingContext loadDynamicMarshallers() {
     dynamicMarshallingWarning();
@@ -282,7 +287,7 @@ public class MappingContextSingleton {
               EncDecUtil.qualifyMarshaller(
                   new DefaultArrayMarshaller(type, marshaller),
                   (Class<Object>) type.asClass()
-              ), type, true);
+                  ), type, true);
 
           if (outerDef != null) {
             newDef.setClientMarshallerClass(outerDef.getClientMarshallerClass());
@@ -306,7 +311,7 @@ public class MappingContextSingleton {
         final MappingDefinition def = factory.getDefinition(clazz);
 
         if (def == null) {
-           return null;
+          return null;
         }
 
         return def.getMarshallerInstance();

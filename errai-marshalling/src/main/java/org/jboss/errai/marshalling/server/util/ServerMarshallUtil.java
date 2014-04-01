@@ -125,14 +125,11 @@ public abstract class ServerMarshallUtil {
         for (File file : directory.listFiles()) {
           file.delete();
         }
-
         directory.delete();
       }
-
       directory.mkdirs();
 
       final FileOutputStream outputStream = new FileOutputStream(sourceFile);
-
       outputStream.write(classStr.getBytes("UTF-8"));
       outputStream.flush();
       outputStream.close();
