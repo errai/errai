@@ -16,6 +16,7 @@
 
 package org.jboss.errai.samples.restdemo.client.local;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +26,17 @@ import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
+import org.jboss.errai.samples.restdemo.client.shared.GWTRandomProvider;
+import org.jboss.errai.samples.restdemo.client.shared.SType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -129,6 +134,27 @@ public class App {
       }
     });
 
+
+
+    final List<String> beans = new ArrayList<String>();
+    for (int i = 0; i < 1000; i++) {
+      final SType sType1 = SType.create(new GWTRandomProvider());
+      String json = Marshalling.toJSON(sType1);
+      beans.add(json);
+    }
+    
+    Button marshall = new Button("Demarshall", new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        long s = System.currentTimeMillis();
+        for (String bean : beans) {
+          final SType sTyp2 = Marshalling.fromJSON(bean, SType.class);
+        }
+        long e = System.currentTimeMillis();
+        LogUtil.log("TOTAL: " + (e - s) + "ms");
+      }
+    });
+
     FlexTable newCustomerTable = new FlexTable();
     newCustomerTable.setWidget(0, 1, custFirstName);
     newCustomerTable.setWidget(0, 2, custLastName);
@@ -142,6 +168,7 @@ public class App {
     vPanel.add(newCustomerTable);
     vPanel.add(new HTML("<hr>"));
     vPanel.add(get);
+    vPanel.add(marshall);
     vPanel.addStyleName("whole-customer-table");
     RootPanel.get().add(vPanel);
 
