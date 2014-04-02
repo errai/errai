@@ -1,16 +1,7 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
@@ -28,39 +19,37 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
   /**
    * A map of all named beans.
    */
-  private final Map<String, List<AsyncBeanDef>> namedBeans
-      = new HashMap<String, List<AsyncBeanDef>>();
+  private final Map<String, List<AsyncBeanDef>> namedBeans = new HashMap<String, List<AsyncBeanDef>>();
 
   /**
    * A map of all beans managed by the bean mean manager, keyed by type.
    */
-  private final Map<Class<?>, List<AsyncBeanDef>> beanMap
-      = new HashMap<Class<?>, List<AsyncBeanDef>>();
+  private final Map<Class<?>, List<AsyncBeanDef>> beanMap = new HashMap<Class<?>, List<AsyncBeanDef>>();
 
   /**
-   * A map which contains bean instances as keys, and their associated {@link org.jboss.errai.ioc.client.container.CreationalContext}s as values.
+   * A map which contains bean instances as keys, and their associated
+   * {@link org.jboss.errai.ioc.client.container.CreationalContext}s as values.
    */
-  private final Map<Object, CreationalContext> creationalContextMap
-      = new IdentityHashMap<Object, CreationalContext>();
+  private final Map<Object, CreationalContext> creationalContextMap = new IdentityHashMap<Object, CreationalContext>();
 
   /**
-   * A map which contains proxied instances as keys, and the underlying proxied bean instances as values.
+   * A map which contains proxied instances as keys, and the underlying proxied bean instances as
+   * values.
    */
-  private final Map<Object, Object> proxyLookupForManagedBeans
-      = new IdentityHashMap<Object, Object>();
+  private final Map<Object, Object> proxyLookupForManagedBeans = new IdentityHashMap<Object, Object>();
 
   /**
-   * A collection which contains a list of all known concrete bean types being managed. eg. no interface or
-   * abstract types will be present in this collection.
+   * A collection which contains a list of all known concrete bean types being managed. eg. no
+   * interface or abstract types will be present in this collection.
    */
-  private final Set<String> concreteBeans
-      = new HashSet<String>();
+  private final Set<String> concreteBeans = new HashSet<String>();
 
   public AsyncBeanManagerImpl() {
 
-
-    // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose of
-    // lookups. This modifies the lookup behavior to exclude other non-concrete types from qualified matching.
+    // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose
+    // of
+    // lookups. This modifies the lookup behavior to exclude other non-concrete types from qualified
+    // matching.
     concreteBeans.add("java.lang.Object");
   }
 
@@ -70,9 +59,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                                                       final Object instance,
                                                       final Annotation[] qualifiers,
                                                       final String name,
-                                                      final boolean concrete) {
+                                                      final boolean concrete,
+                                                      final Class<Object> beanActivatorType) {
 
-    return registerBean(AsyncSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, instance));
+    return registerBean(AsyncSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback,
+        instance, beanActivatorType));
   }
 
   private AsyncBeanDef<Object> _registerDependentBean(final Class<Object> type,
@@ -80,9 +71,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                                                       final AsyncBeanProvider<Object> callback,
                                                       final Annotation[] qualifiers,
                                                       final String name,
-                                                      final boolean concrete) {
+                                                      final boolean concrete,
+                                                      final Class<Object> beanActivatorType) {
 
-    return registerBean(AsyncDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback));
+    return registerBean(
+        AsyncDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, beanActivatorType));
   }
 
   private void registerSingletonBean(final Class<Object> type,
@@ -91,10 +84,12 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                                      final Object instance,
                                      final Annotation[] qualifiers,
                                      final String beanName,
-                                     final boolean concrete) {
+                                     final boolean concrete,
+                                     final Class<Object> beanActivatorType) {
 
 
-    _registerNamedBean(beanName, _registerSingletonBean(type, beanType, callback, instance, qualifiers, beanName, concrete));
+    _registerNamedBean(beanName, 
+        _registerSingletonBean(type, beanType, callback, instance, qualifiers, beanName, concrete, beanActivatorType));
   }
 
   private void registerDependentBean(final Class<Object> type,
@@ -102,14 +97,17 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                                      final AsyncBeanProvider<Object> callback,
                                      final Annotation[] qualifiers,
                                      final String beanName,
-                                     final boolean concrete) {
+                                     final boolean concrete,
+                                     final Class<Object> beanActivatorType) {
 
-    _registerNamedBean(beanName, _registerDependentBean(type, beanType, callback, qualifiers, beanName, concrete));
+    _registerNamedBean(beanName, 
+        _registerDependentBean(type, beanType, callback, qualifiers, beanName, concrete, beanActivatorType));
   }
 
   private void _registerNamedBean(final String name,
                                   final AsyncBeanDef beanDef) {
-    if (name == null) return;
+    if (name == null)
+      return;
 
     if (!namedBeans.containsKey(name)) {
       namedBeans.put(name, new ArrayList<AsyncBeanDef>());
@@ -124,7 +122,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                       final Object instance,
                       final Annotation[] qualifiers) {
 
-    addBean(type, beanType, callback, instance, qualifiers, null, beanType.equals(type));
+    addBean(type, beanType, callback, instance, qualifiers, null, beanType.equals(type), null);
   }
 
   @Override
@@ -135,9 +133,8 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                       final Annotation[] qualifiers,
                       final String name) {
 
-    addBean(type, beanType, callback, instance, qualifiers, name, beanType.equals(type));
+    addBean(type, beanType, callback, instance, qualifiers, name, beanType.equals(type), null);
   }
-
 
   @Override
   public void addBean(final Class<Object> type,
@@ -146,20 +143,20 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name,
-                      final boolean concreteType) {
+                      final boolean concreteType,
+                      final Class<Object> beanActivatorType) {
 
     if (concreteType) {
       concreteBeans.add(type.getName());
     }
 
     if (instance != null) {
-      registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType);
+      registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType, beanActivatorType);
     }
     else {
-      registerDependentBean(type, beanType, callback, qualifiers, name, concreteType);
+      registerDependentBean(type, beanType, callback, qualifiers, name, concreteType, beanActivatorType);
     }
   }
-
 
   @Override
   @SuppressWarnings("unchecked")
@@ -185,8 +182,9 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     destroyBean(ref);
 
     /**
-     * Just yield. In truth, all code will have been downloaded at this time, which means the only problem is that
-     * we need to make callback-based lookup. A minimum yield is sufficient to guarantee everything has happened.
+     * Just yield. In truth, all code will have been downloaded at this time, which means the only
+     * problem is that we need to make callback-based lookup. A minimum yield is sufficient to
+     * guarantee everything has happened.
      */
     new Timer() {
       @Override
@@ -216,7 +214,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     return proxyLookupForManagedBeans.containsKey(ref);
   }
 
-
   @Override
   public void addProxyReference(final Object proxyRef, final Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
@@ -224,11 +221,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
 
   /**
    * Associates a bean instance with a creational context.
-   *
+   * 
    * @param ref
-   *     the reference to the bean
+   *          the reference to the bean
    * @param creationalContext
-   *     the {@link CreationalContext} instance to associate the bean instance with.
+   *          the {@link CreationalContext} instance to associate the bean instance with.
    */
   @Override
   public void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
@@ -244,7 +241,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     return bean;
   }
 
-
   @Override
   public Collection<AsyncBeanDef> lookupBeans(final String name) {
     if (!namedBeans.containsKey(name)) {
@@ -254,7 +250,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
       return namedBeans.get(name);
     }
   }
-
 
   @Override
   @SuppressWarnings("unchecked")
@@ -281,7 +276,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
 
     return Collections.unmodifiableList(matching);
   }
-
 
   @Override
   @SuppressWarnings("unchecked")
@@ -341,9 +335,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     return Collections.unmodifiableList(matching);
   }
 
-
   @Override
-  @SuppressWarnings("unchecked")
   public <T> AsyncBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
     final Collection<AsyncBeanDef<T>> matching = lookupBeans(type, qualifiers);
 

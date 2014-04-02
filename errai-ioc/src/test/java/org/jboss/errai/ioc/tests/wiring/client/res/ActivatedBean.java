@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2014 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
+import javax.enterprise.context.Dependent;
 
-public interface Bootstrapper {
-  BootstrapInjectionContext bootstrapContainer();
+import org.jboss.errai.ioc.client.api.ActivatedBy;
+
+@Dependent
+@ActivatedBy(TestBeanActivator.class)
+public class ActivatedBean {
+
 }

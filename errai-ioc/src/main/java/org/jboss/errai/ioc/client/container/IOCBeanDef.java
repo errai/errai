@@ -19,84 +19,96 @@ package org.jboss.errai.ioc.client.container;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import org.jboss.errai.ioc.client.api.ActivatedBy;
+
 /**
  * Represents a bean definition within the bean manager.
- *
+ * 
  * @author Mike Brock
  */
 public interface IOCBeanDef<T> {
   /**
    * Returns the type of the bean.
-   *
+   * 
    * @see #getBeanClass()
    * @return the type of the bean.
    */
   public Class<T> getType();
 
-
   /**
    * Returns the actual bean class represented by this bean.
-   *
+   * 
    * @return the actual type of the bean.
    */
   public Class<?> getBeanClass();
 
   /**
    * Returns the scope of the bean.
-   *
+   * 
    * @returns the annotation type representing the scope of the bean.
    */
   public Class<? extends Annotation> getScope();
 
   /**
    * Returns an instance of the bean within the active scope.
-   *
+   * 
    * @return The bean instance.
    */
   public T getInstance();
 
   /**
-   * Returns an instance of the bean within the active scope, using the specified SimpleCreationalContext.
-   *
+   * Returns an instance of the bean within the active scope, using the specified
+   * SimpleCreationalContext.
+   * 
    * @param context
    * @return
    */
   T getInstance(CreationalContext context);
 
   /**
-   * Returns a new instance of the bean. Calling this method overrides the underlying scope and instantiates a new
-   * instance of the bean.
-   *
+   * Returns a new instance of the bean. Calling this method overrides the underlying scope and
+   * instantiates a new instance of the bean.
+   * 
    * @return a new instance of the bean.
    */
   public T newInstance();
 
   /**
    * Returns any qualifiers associated with the bean.
+   * 
    * @return
    */
   public Set<Annotation> getQualifiers();
 
-
   /**
    * Returns true if the beans qualifiers match the specified set of qualifiers.
-   *
-   * @param annotations the qualifiers to compare
+   * 
+   * @param annotations
+   *          the qualifiers to compare
    * @return returns whether or not the bean matches the set of qualifiers
    */
   public boolean matches(Set<Annotation> annotations);
 
   /**
    * Returns the name of the bean.
-   *
+   * 
    * @return the name of the bean. If the bean does not have a name, returns null.
    */
   public String getName();
 
   /**
    * Returns true if the bean is a concrete bean definition and not an interface or abstract type.
-   *
+   * 
    * @return true if concrete.
    */
   public boolean isConcrete();
+
+  /**
+   * Returns true if the bean is activated. All managed beans are activated by default unless a
+   * {@link BeanActivator} was specified using {@link ActivatedBy} which will be consulted when
+   * invoking this method.
+   * 
+   * @return true if activated, otherwise false.
+   */
+  public boolean isActivated();
 }

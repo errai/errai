@@ -24,12 +24,14 @@ import javax.enterprise.context.Dependent;
 
 /**
  * Represents a default dependent scoped bean.
- *
+ * 
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   protected final SyncBeanManagerImpl beanManager;
   protected final BeanProvider<T> beanProvider;
+  private final Class<Object> beanActivatorType;
 
   protected IOCDependentBean(final SyncBeanManagerImpl beanManager,
                              final Class<T> type,
@@ -37,7 +39,8 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
                              final Annotation[] qualifiers,
                              final String name,
                              final boolean concrete,
-                             final BeanProvider<T> beanProvider) {
+                             final BeanProvider<T> beanProvider,
+                             final Class<Object> beanActivatorType) {
     this.beanManager = beanManager;
     this.type = type;
     this.beanType = beanType;
@@ -52,6 +55,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     this.name = name;
     this.concrete = concrete;
     this.beanProvider = beanProvider;
+    this.beanActivatorType = beanActivatorType;
   }
 
   public static <T> IOCBeanDef<T> newBean(final SyncBeanManagerImpl beanManager,
@@ -60,8 +64,9 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
                                           final Annotation[] qualifiers,
                                           final String name,
                                           final boolean concrete,
-                                          final BeanProvider<T> callback) {
-    return new IOCDependentBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback);
+                                          final BeanProvider<T> callback,
+                                          final Class<Object> beanActivatorType) {
+    return new IOCDependentBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback, beanActivatorType);
   }
 
   @Override
@@ -94,5 +99,15 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   @Override
   public Class<? extends Annotation> getScope() {
     return Dependent.class;
+  }
+
+  @Override
+  public boolean isActivated() {
+    if (beanActivatorType == null) { 
+      return true;
+    }
+    
+    BeanActivator activator = (BeanActivator) beanManager.lookupBean(beanActivatorType).getInstance();
+    return activator.isActivated();
   }
 }

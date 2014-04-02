@@ -17,16 +17,7 @@
 package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
@@ -84,9 +75,11 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
                                                     final Object instance,
                                                     final Annotation[] qualifiers,
                                                     final String name,
-                                                    final boolean concrete) {
+                                                    final boolean concrete,
+                                                    final Class<Object> beanActivatorType) {
 
-    return registerBean(IOCSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, instance));
+    return registerBean(IOCSingletonBean.newBean(
+        this, type, beanType, qualifiers, name, concrete, callback, instance, beanActivatorType));
   }
 
   private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
@@ -94,9 +87,11 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
                                                     final BeanProvider<Object> callback,
                                                     final Annotation[] qualifiers,
                                                     final String name,
-                                                    final boolean concrete) {
+                                                    final boolean concrete,
+                                                    final Class<Object> beanActivatorType) {
 
-    return registerBean(IOCDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback));
+    return registerBean(IOCDependentBean.newBean(
+        this, type, beanType, qualifiers, name, concrete, callback, beanActivatorType));
   }
 
   private void registerSingletonBean(final Class<Object> type,
@@ -105,10 +100,12 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
                                      final Object instance,
                                      final Annotation[] qualifiers,
                                      final String beanName,
-                                     final boolean concrete) {
+                                     final boolean concrete,
+                                     final Class<Object> activator) {
 
 
-    _registerNamedBean(beanName, _registerSingletonBean(type, beanType, callback, instance, qualifiers, beanName, concrete));
+    _registerNamedBean(beanName, 
+        _registerSingletonBean(type, beanType, callback, instance, qualifiers, beanName, concrete, activator));
   }
 
   private void registerDependentBean(final Class<Object> type,
@@ -116,9 +113,11 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
                                      final BeanProvider<Object> callback,
                                      final Annotation[] qualifiers,
                                      final String beanName,
-                                     final boolean concrete) {
+                                     final boolean concrete,
+                                     final Class<Object> activator) {
 
-    _registerNamedBean(beanName, _registerDependentBean(type, beanType, callback, qualifiers, beanName, concrete));
+    _registerNamedBean(beanName, 
+        _registerDependentBean(type, beanType, callback, qualifiers, beanName, concrete, activator));
   }
 
   private void _registerNamedBean(final String name,
@@ -139,7 +138,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
                       final Object instance,
                       final Annotation[] qualifiers) {
 
-    addBean(type, beanType, callback, instance, qualifiers, null, true);
+    addBean(type, beanType, callback, instance, qualifiers, null, true, null);
   }
 
   @Override
@@ -150,7 +149,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
                       final Annotation[] qualifiers,
                       final String name) {
 
-    addBean(type, beanType, callback, instance, qualifiers, name, true);
+    addBean(type, beanType, callback, instance, qualifiers, name, true, null);
   }
 
   @Override
@@ -160,7 +159,8 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
                       Object instance,
                       final Annotation[] qualifiers,
                       final String name,
-                      final boolean concreteType) {
+                      final boolean concreteType,
+                      final Class<Object> beanActivatorType) {
 
     if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
       throw new RuntimeException("you cannot record a lazy initialization reference!");
@@ -171,10 +171,10 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
     }
 
     if (instance != null) {
-      registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType);
+      registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType, beanActivatorType);
     }
     else {
-      registerDependentBean(type, beanType, callback, qualifiers, name, concreteType);
+      registerDependentBean(type, beanType, callback, qualifiers, name, concreteType, beanActivatorType);
     }
   }
 
@@ -247,7 +247,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type) {
     final List<IOCBeanDef> beanList;
 
@@ -330,7 +329,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
     final Collection<IOCBeanDef<T>> matching = lookupBeans(type, qualifiers);
 

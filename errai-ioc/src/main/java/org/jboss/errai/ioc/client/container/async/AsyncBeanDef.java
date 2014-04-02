@@ -4,6 +4,8 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.ioc.client.api.ActivatedBy;
+import org.jboss.errai.ioc.client.container.BeanActivator;
 
 /**
  * @author Mike Brock
@@ -86,4 +88,13 @@ public interface AsyncBeanDef<T> {
    * @return true if concrete.
    */
   public boolean isConcrete();
+  
+  /**
+   * Returns true if the bean is activated. All managed beans are activated by default unless a
+   * {@link BeanActivator} was specified using {@link ActivatedBy} which will be consulted when
+   * invoking this method.
+   * 
+   * @return true if activated, otherwise false.
+   */
+  public boolean isActivated();
 }

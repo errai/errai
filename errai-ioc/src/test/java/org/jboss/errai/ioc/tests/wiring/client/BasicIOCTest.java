@@ -16,25 +16,14 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import java.util.List;
+
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
-import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
-import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
-import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
-import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
-import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
-import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
-import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
-import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
-import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton;
-import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton2;
-import org.jboss.errai.ioc.tests.wiring.client.res.TestProviderDependentBean;
-import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
-import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
+import org.jboss.errai.ioc.tests.wiring.client.res.*;
 import org.junit.runner.RunWith;
-
-import java.util.List;
 
 @RunWith(IOCSimulatedTestRunner.class)
 public class BasicIOCTest extends IOCClientTestCase {
@@ -181,4 +170,25 @@ public class BasicIOCTest extends IOCClientTestCase {
     assertEquals("foo", dependentBean.getTestProvidedIface().getText());
   }
   
+  public void testBeanActivator() {
+    TestBeanActivator activator = IOC.getBeanManager().lookupBean(TestBeanActivator.class).getInstance();
+    activator.setActived(true);
+    
+    IOCBeanDef<ActivatedBean> bean = IOC.getBeanManager().lookupBean(ActivatedBean.class);
+    assertTrue(bean.isActivated());
+
+    activator.setActived(false);
+    assertFalse(bean.isActivated());
+    
+    IOCBeanDef<ActivatedBeanInterface> qualifiedBean = IOC.getBeanManager().lookupBean(ActivatedBeanInterface.class);
+    assertFalse(qualifiedBean.isActivated());
+    
+    activator.setActived(true);
+    assertTrue(qualifiedBean.isActivated());
+  }
+  
+  public void testBeanActiveByDefault() {
+    IOCBeanDef<BeanManagerDependentBean> bean = IOC.getBeanManager().lookupBean(BeanManagerDependentBean.class);
+    assertTrue(bean.isActivated());
+  }
 }

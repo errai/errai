@@ -16,16 +16,16 @@
 
 package org.jboss.errai.ioc.client;
 
-import org.jboss.errai.ioc.client.container.BeanProvider;
-import org.jboss.errai.ioc.client.container.IOCResolutionException;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
-import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerSetup;
+import java.lang.annotation.Annotation;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.lang.annotation.Annotation;
+
+import org.jboss.errai.ioc.client.container.BeanProvider;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerSetup;
 
 public class SimpleInjectionContext implements BootstrapInjectionContext {
   public static final Object LAZY_INIT_REF = new Object();
@@ -79,7 +79,6 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
     ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers, name);
   }
 
-  @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,
                       final BeanProvider callback,
@@ -87,6 +86,19 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
                       final Annotation[] qualifiers,
                       final String name,
                       final boolean concrete) {
+
+    addBean(type, beanType, callback, instance, qualifiers, name, concrete, null);   
+  }
+  
+  @SuppressWarnings("unchecked")
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final BeanProvider callback,
+                      Object instance,
+                      final Annotation[] qualifiers,
+                      final String name,
+                      final boolean concrete,
+                      final Class beanActivatorType) {
 
     if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
       try {
@@ -98,9 +110,10 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
       }
     }
 
-    ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers, name, concrete);
+    ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers, name, concrete, beanActivatorType);
   }
 
+  @Override
   public SimpleCreationalContext getRootContext() {
     return rootContext;
   }

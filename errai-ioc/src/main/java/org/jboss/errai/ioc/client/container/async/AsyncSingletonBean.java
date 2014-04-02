@@ -1,10 +1,10 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import java.lang.annotation.Annotation;
+
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock
@@ -19,9 +19,10 @@ public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
                            final String name,
                            final boolean concrete,
                            final AsyncBeanProvider<T> callback,
-                           final T instance) {
+                           final T instance,
+                           final Class<Object> beanActivatorType) {
 
-    super(beanManager, type, beanType, qualifiers, name, concrete, callback);
+    super(beanManager, type, beanType, qualifiers, name, concrete, callback, beanActivatorType);
     this.instance = instance;
   }
 
@@ -38,6 +39,8 @@ public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
    *     The instance of the bean.
    * @param <T>
    *     The type of the bean
+   * @param activator
+   *    The bean activator to use, may be null.    
    *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
@@ -48,9 +51,11 @@ public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
                                           final String name,
                                           final boolean concrete,
                                           final AsyncBeanProvider<T> callback,
-                                          final T instance) {
+                                          final T instance,
+                                          final Class<Object> beanActivatorType) {
 
-    return new AsyncSingletonBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback, instance);
+    return new AsyncSingletonBean<T>(
+        beanManager, type, beanType, qualifiers, name, concrete, callback, instance, beanActivatorType);
   }
 
   @Override

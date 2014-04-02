@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.api.ActivatedBy;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
@@ -144,11 +145,21 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
 
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       final QualifyingMetadata md = delegate.getQualifyingMetadata();
-      context.getProcessingContext().appendToEnd(
-          Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-              .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                  isSingleton() ? valueRef : null, md.render(), delegate.getBeanName(), false));
-
+      
+      ActivatedBy ab = delegate.getInjectedType().getAnnotation(ActivatedBy.class);
+      if (ab != null) {
+        context.getProcessingContext().appendToEnd(
+            Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                    isSingleton() ? valueRef : null, md.render(), delegate.getBeanName(), false, Stmt.load(ab.value())));
+      }
+      else {
+        context.getProcessingContext().appendToEnd(
+            Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                    isSingleton() ? valueRef : null, md.render(), delegate.getBeanName(), false));
+      }
+      
       for (final RegistrationHook hook : getRegistrationHooks()) {
         hook.onRegister(context, valueRef);
       }

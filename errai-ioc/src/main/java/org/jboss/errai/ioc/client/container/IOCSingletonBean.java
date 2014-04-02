@@ -16,8 +16,9 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
+
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Represents a bean inside the container, capturing the type, qualifiers and instance reference for the bean.
@@ -34,9 +35,10 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
                            final String name,
                            final boolean concrete,
                            final BeanProvider<T> callback,
-                           final T instance) {
+                           final T instance,
+                           final Class<Object> beanActivatorType) {
 
-    super(beanManager, type, beanType, qualifiers, name, concrete, callback);
+    super(beanManager, type, beanType, qualifiers, name, concrete, callback, beanActivatorType);
     this.instance = instance;
   }
 
@@ -53,6 +55,8 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
    *     The instance of the bean.
    * @param <T>
    *     The type of the bean
+   * @param activator
+   *     The bean activator to use, may be null.     
    *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
@@ -63,9 +67,11 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
                                           final String name,
                                           final boolean concrete,
                                           final BeanProvider<T> callback,
-                                          final T instance) {
+                                          final T instance,
+                                          final Class<Object> beanActivatorType) {
 
-    return new IOCSingletonBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback, instance);
+    return new IOCSingletonBean<T>(
+        beanManager, type, beanType, qualifiers, name, concrete, callback, instance, beanActivatorType);
   }
 
   @Override

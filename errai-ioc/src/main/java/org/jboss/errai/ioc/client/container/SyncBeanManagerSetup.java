@@ -23,20 +23,20 @@ import java.lang.annotation.Annotation;
  */
 public interface SyncBeanManagerSetup {
   /**
-   * Register a bean with the manager. This is usually called by the generated code to advertise the bean. Adding
-   * beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
-   * the wiring scenario of auto-discovered beans at runtime.
-   *
+   * Register a bean with the manager. This is usually called by the generated code to advertise the
+   * bean. Adding beans at runtime will make beans available for lookup through the BeanManager, but
+   * will not in any way alter the wiring scenario of auto-discovered beans at runtime.
+   * 
    * @param type
-   *     the bean type
+   *          the bean type
    * @param beanType
-   *     the actual type of the bean
+   *          the actual type of the bean
    * @param callback
-   *     the creational callback used to construct the bean
+   *          the creational callback used to construct the bean
    * @param instance
-   *     the instance reference
+   *          the instance reference
    * @param qualifiers
-   *     any qualifiers
+   *          any qualifiers
    */
   void addBean(Class<Object> type,
                Class<?> beanType,
@@ -45,22 +45,23 @@ public interface SyncBeanManagerSetup {
                Annotation[] qualifiers);
 
   /**
-   * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
-   * Adding beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
-   * the wiring scenario of auto-discovered beans at runtime.
-   *
+   * Register a bean with the manager with a name. This is usually called by the generated code to
+   * advertise the bean. Adding beans at runtime will make beans available for lookup through the
+   * BeanManager, but will not in any way alter the wiring scenario of auto-discovered beans at
+   * runtime.
+   * 
    * @param type
-   *     the bean type
+   *          the bean type
    * @param beanType
-   *     the actual type of the bean
+   *          the actual type of the bean
    * @param callback
-   *     the creational callback used to construct the bean
+   *          the creational callback used to construct the bean
    * @param instance
-   *     the instance reference
+   *          the instance reference
    * @param qualifiers
-   *     any qualifiers
+   *          any qualifiers
    * @param name
-   *     the name of the bean
+   *          the name of the bean
    */
   void addBean(Class<Object> type,
                Class<?> beanType,
@@ -70,25 +71,27 @@ public interface SyncBeanManagerSetup {
                String name);
 
   /**
-   * Register a bean with the manager with a name as well as specifying whether the bean should be treated a concrete
-   * type. This is usually called by the generated code to advertise the bean. Adding beans at runtime will make beans
-   * available for lookup through the BeanManager, but will not in any way alter the wiring scenario of auto-discovered
-   * beans at runtime.
-   *
+   * Register a bean with the manager with a name as well as specifying whether the bean should be
+   * treated a concrete type. This is usually called by the generated code to advertise the bean.
+   * Adding beans at runtime will make beans available for lookup through the BeanManager, but will
+   * not in any way alter the wiring scenario of auto-discovered beans at runtime.
+   * 
    * @param type
-   *     the bean type
+   *          the bean type
    * @param beanType
-   *     the actual type of the bean
+   *          the actual type of the bean
    * @param callback
-   *     the creational callback used to construct the bean
+   *          the creational callback used to construct the bean
    * @param instance
-   *     the instance reference
+   *          the instance reference
    * @param qualifiers
-   *     any qualifiers
+   *          any qualifiers
    * @param name
-   *     the name of the bean
+   *          the name of the bean
    * @param concreteType
-   *     true if bean should be treated as concrete (ie. not an interface or abstract type).
+   *          true if bean should be treated as concrete (ie. not an interface or abstract type).
+   * @param beanActivator
+   *          the bean activator type to use.
    */
   void addBean(Class<Object> type,
                Class<?> beanType,
@@ -96,5 +99,7 @@ public interface SyncBeanManagerSetup {
                Object instance,
                Annotation[] qualifiers,
                String name,
-               boolean concreteType);
+               boolean concreteType,
+               Class<Object> beanActivatorType);
+
 }

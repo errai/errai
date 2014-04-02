@@ -41,5 +41,6 @@ public interface AsyncBeanManagerSetup {
                Object instance,
                Annotation[] qualifiers,
                String name,
-               boolean concreteType);
+               boolean concreteType,
+               Class<Object> beanActivatorType);
 }

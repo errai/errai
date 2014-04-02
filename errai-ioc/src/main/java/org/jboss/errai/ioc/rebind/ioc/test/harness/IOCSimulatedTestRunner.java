@@ -16,32 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.test.harness;
 
-import com.google.gwt.junit.JUnitShell;
-import junit.framework.TestCase;
-import junit.framework.TestResult;
-import org.jboss.errai.codegen.exception.GenerationException;
-import org.jboss.errai.common.client.api.tasks.AsyncTask;
-import org.jboss.errai.common.client.api.tasks.TaskManager;
-import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
-import org.jboss.errai.common.client.util.TimeUnit;
-import org.jboss.errai.ioc.client.BootstrapInjectionContext;
-import org.jboss.errai.ioc.client.Bootstrapper;
-import org.jboss.errai.ioc.client.SimpleInjectionContext;
-import org.jboss.errai.ioc.client.IOCClientTestCase;
-import org.jboss.errai.ioc.client.QualifierEqualityFactory;
-import org.jboss.errai.ioc.client.QualifierEqualityFactoryProvider;
-import org.jboss.errai.ioc.client.QualifierUtil;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.junit.runner.Description;
-import org.junit.runner.Result;
-import org.junit.runner.Runner;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.ParentRunner;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -52,6 +26,32 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+
+import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.TaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
+import org.jboss.errai.common.client.util.TimeUnit;
+import org.jboss.errai.ioc.client.BootstrapInjectionContext;
+import org.jboss.errai.ioc.client.Bootstrapper;
+import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.QualifierEqualityFactory;
+import org.jboss.errai.ioc.client.QualifierEqualityFactoryProvider;
+import org.jboss.errai.ioc.client.QualifierUtil;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.junit.runner.Description;
+import org.junit.runner.Result;
+import org.junit.runner.Runner;
+import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunNotifier;
+import org.junit.runners.ParentRunner;
+
+import com.google.gwt.junit.JUnitShell;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -114,7 +114,16 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
             notifier.fireTestRunFinished(new Result());
 
             if (!result.wasSuccessful()) {
-              notifier.fireTestFailure(new Failure(description, null));
+              Failure failure = null;
+              
+              if (result.failures().hasMoreElements()) {
+                failure = new Failure(description, result.failures().nextElement().thrownException());
+              }
+              else if (result.errors().hasMoreElements()) {
+                failure = new Failure(description, result.errors().nextElement().thrownException());
+              }
+              
+              notifier.fireTestFailure(failure);
             }
             else {
               notifier.fireTestFinished(description);

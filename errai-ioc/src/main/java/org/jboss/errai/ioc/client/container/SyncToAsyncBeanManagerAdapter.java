@@ -16,16 +16,16 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import org.jboss.errai.common.client.util.CreationalCallback;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 
 /**
  * An adapter that makes the asynchronous bean manager API work with a synchronous bean manager.
@@ -177,6 +177,11 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
       @Override
       public boolean isConcrete() {
         return beanDef.isConcrete();
+      }
+
+      @Override
+      public boolean isActivated() {
+        return beanDef.isActivated();
       }
     };
 

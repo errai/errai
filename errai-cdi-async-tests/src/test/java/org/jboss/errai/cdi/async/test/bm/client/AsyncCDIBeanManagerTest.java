@@ -24,40 +24,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 
-import org.jboss.errai.cdi.async.test.bm.client.res.AbstractBean;
-import org.jboss.errai.cdi.async.test.bm.client.res.ApplicationScopedBean;
-import org.jboss.errai.cdi.async.test.bm.client.res.CommonInterface;
-import org.jboss.errai.cdi.async.test.bm.client.res.CommonInterfaceB;
-import org.jboss.errai.cdi.async.test.bm.client.res.Cow;
-import org.jboss.errai.cdi.async.test.bm.client.res.CreditCard;
-import org.jboss.errai.cdi.async.test.bm.client.res.DependentScopedBean;
-import org.jboss.errai.cdi.async.test.bm.client.res.DependentScopedBeanWithDependencies;
-import org.jboss.errai.cdi.async.test.bm.client.res.FoobieScopedBean;
-import org.jboss.errai.cdi.async.test.bm.client.res.FoobieScopedOverriddenBean;
-import org.jboss.errai.cdi.async.test.bm.client.res.InheritedApplicationScopedBean;
-import org.jboss.errai.cdi.async.test.bm.client.res.InheritedFromAbstractBean;
-import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceA;
-import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceB;
-import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceC;
-import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceD;
-import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceRoot;
-import org.jboss.errai.cdi.async.test.bm.client.res.LincolnBar;
-import org.jboss.errai.cdi.async.test.bm.client.res.OuterBeanInterface;
-import org.jboss.errai.cdi.async.test.bm.client.res.Pig;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualA;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualAppScopeBeanA;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualAppScopeBeanB;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualB;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualEnum;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanApples;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanOranges;
-import org.jboss.errai.cdi.async.test.bm.client.res.QualV;
-import org.jboss.errai.cdi.async.test.bm.client.res.Visa;
+import org.jboss.errai.cdi.async.test.bm.client.res.*;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
@@ -539,5 +512,37 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
       if (def.getType().equals(clazz)) return true;
     }
     return false;
+  }
+  
+  public void testBeanActivator() {
+    final RefHolder<TestBeanActivator> activatorRef = new RefHolder<TestBeanActivator>();
+    // This will happen synchronously as BeanActivators can not be annotated @LoadAsync
+    IOC.getAsyncBeanManager().lookupBean(TestBeanActivator.class)
+    .getInstance(new CreationalCallback<TestBeanActivator>() {
+      @Override
+      public void callback(TestBeanActivator beanInstance) {
+        activatorRef.set(beanInstance);
+      }
+    });
+    
+    TestBeanActivator activator = activatorRef.get();
+    activator.setActived(true);
+    
+    AsyncBeanDef<ActivatedBean> bean = IOC.getAsyncBeanManager().lookupBean(ActivatedBean.class);
+    assertTrue(bean.isActivated());
+
+    activator.setActived(false);
+    assertFalse(bean.isActivated());
+    
+    AsyncBeanDef<ActivatedBeanInterface> qualifiedBean = IOC.getAsyncBeanManager().lookupBean(ActivatedBeanInterface.class);
+    assertFalse(qualifiedBean.isActivated());
+    
+    activator.setActived(true);
+    assertTrue(qualifiedBean.isActivated());
+  }
+  
+  public void testBeanActiveByDefault() {
+    AsyncBeanDef<DependentScopedBean> bean = IOC.getAsyncBeanManager().lookupBean(DependentScopedBean.class);
+    assertTrue(bean.isActivated());
   }
 }

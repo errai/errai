@@ -43,6 +43,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.api.ActivatedBy;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -225,7 +226,6 @@ public abstract class AbstractInjector implements Injector {
     }
   }
 
-
   protected RegisterCache _registerCache;
 
   @Override
@@ -237,9 +237,9 @@ public abstract class AbstractInjector implements Injector {
     if (_registerCache == null)
       registrationHooks.add(registrationHook);
     else
-      registrationHook.onRegister(_registerCache.getInjectionContextForRegister(), _registerCache.getValueRefForRegister());
+      registrationHook.onRegister(_registerCache.getInjectionContextForRegister(), _registerCache
+          .getValueRefForRegister());
   }
-
 
   public void registerWithBeanManager(final InjectionContext context,
                                       Statement valueRef) {
@@ -254,11 +254,20 @@ public abstract class AbstractInjector implements Injector {
         valueRef = Stmt.loadStatic(SimpleInjectionContext.class, "LAZY_INIT_REF");
       }
 
-      final ContextualStatementBuilder statement =
-              loadVariable(context.getProcessingContext().getContextVariableReference())
-              .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                      valueRef, qualifyingMetadata.render(), beanName, true);
+      final ContextualStatementBuilder statement;
 
+      ActivatedBy ab = getInjectedType().getAnnotation(ActivatedBy.class);
+      if (ab != null) {
+        statement = loadVariable(context.getProcessingContext().getContextVariableReference())
+            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                valueRef, qualifyingMetadata.render(), beanName, true, Stmt.load(ab.value()));
+      }
+      else {
+        statement = loadVariable(context.getProcessingContext().getContextVariableReference())
+            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                valueRef, qualifyingMetadata.render(), beanName, true);
+
+      }
       context.getProcessingContext().appendToEnd(statement);
 
       addDisablingHook(new Runnable() {
@@ -351,7 +360,8 @@ public abstract class AbstractInjector implements Injector {
   protected static boolean hasNewQualifier(final InjectableInstance instance) {
     if (instance != null) {
       for (final Annotation annotation : instance.getQualifiers()) {
-        if (annotation.annotationType().equals(New.class)) return true;
+        if (annotation.annotationType().equals(New.class))
+          return true;
       }
     }
     return false;
@@ -444,9 +454,9 @@ public abstract class AbstractInjector implements Injector {
   }
 
   /**
-   * Add a statement to the end of the bean injector code. Statements added here will be rendered after all other
-   * binding activity and right before the injector returns the bean reference.
-   *
+   * Add a statement to the end of the bean injector code. Statements added here will be rendered
+   * after all other binding activity and right before the injector returns the bean reference.
+   * 
    * @param statement
    */
   @Override
@@ -456,7 +466,6 @@ public abstract class AbstractInjector implements Injector {
     }
     addToEndStatements.add(statement);
   }
-
 
   @Override
   public boolean isProxied() {
@@ -469,7 +478,6 @@ public abstract class AbstractInjector implements Injector {
 
   static final String RENDERED_PROXIES = "^RenderedProxies";
 
-
   public List<Statement> createProxyDeclaration(InjectionContext context, Statement beanRef) {
     if (isProxied()) {
       final BuildMetaClass type = ProxyMaker.makeProxy(
@@ -477,7 +485,7 @@ public abstract class AbstractInjector implements Injector {
           context.getProcessingContext().isGwtTarget() ? "jsni" : "reflection",
           getProxyPropertyMap(),
           getWeavingStatementsMap()
-      );
+          );
 
       if (!context.hasAttribute(RENDERED_PROXIES)) {
         context.setAttribute(RENDERED_PROXIES, new HashSet<String>());
@@ -496,11 +504,12 @@ public abstract class AbstractInjector implements Injector {
           getProxyInstanceVarName(),
           type,
           Stmt.newObject(type)
-      ));
+          ));
 
       proxyCloseStmts.add(ProxyMaker.closeProxy(Refs.get(getProxyInstanceVarName()), beanRef));
 
-      proxyCloseStmts.addAll(ProxyMaker.createAllPropertyBindings(Refs.get(getProxyInstanceVarName()), getProxyPropertyMap()));
+      proxyCloseStmts.addAll(ProxyMaker.createAllPropertyBindings(Refs.get(getProxyInstanceVarName()),
+          getProxyPropertyMap()));
 
       return proxyCloseStmts;
     }
@@ -542,7 +551,6 @@ public abstract class AbstractInjector implements Injector {
     addWeavedStatement(method, statement, WeaveType.AfterInvoke);
   }
 
-
   @Override
   public ProxyMaker.ProxyProperty addProxyProperty(String propertyName, Class type, Statement statement) {
     return addProxyProperty(propertyName, MetaClassFactory.get(type), statement);
@@ -559,22 +567,20 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public void updateProxies() {
-  }
+  public void updateProxies() {}
 
   public static QualifyingMetadata getMetadataWithAny(QualifyingMetadata metadata) {
     if (metadata == null)
-      return JSR330QualifyingMetadata.createFromAnnotations(new Annotation[] {BuiltInQualifiers.ANY_INSTANCE});
-    
-    Annotation[] qualifiers = new Annotation[metadata.getQualifiers().length+1];
-    
+      return JSR330QualifyingMetadata.createFromAnnotations(new Annotation[] { BuiltInQualifiers.ANY_INSTANCE });
+
+    Annotation[] qualifiers = new Annotation[metadata.getQualifiers().length + 1];
+
     for (int i = 0; i < metadata.getQualifiers().length; i++) {
       qualifiers[i] = metadata.getQualifiers()[i];
     }
-    
-    qualifiers[qualifiers.length-1] = BuiltInQualifiers.ANY_INSTANCE;
-    
+
+    qualifiers[qualifiers.length - 1] = BuiltInQualifiers.ANY_INSTANCE;
+
     return JSR330QualifyingMetadata.createFromAnnotations(qualifiers);
   }
 }
-

@@ -7,6 +7,8 @@ import java.util.HashSet;
 import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.ioc.client.container.BeanActivator;
+import org.jboss.errai.ioc.client.container.RefHolder;
 
 /**
  * @author Mike Brock
@@ -14,6 +16,7 @@ import org.jboss.errai.common.client.util.CreationalCallback;
 public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
   protected final AsyncBeanManagerImpl beanManager;
   protected final AsyncBeanProvider<T> beanProvider;
+  private final Class<Object> beanActivatorType;
 
   protected AsyncDependentBean(final AsyncBeanManagerImpl beanManager,
                                final Class<T> type,
@@ -21,7 +24,8 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
                                final Annotation[] qualifiers,
                                final String name,
                                final boolean concrete,
-                               final AsyncBeanProvider<T> beanProvider) {
+                               final AsyncBeanProvider<T> beanProvider,
+                               final Class<Object> beanActivatorType) {
     this.beanManager = beanManager;
     this.type = type;
     this.beanType = beanType;
@@ -36,6 +40,7 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
     this.name = name;
     this.concrete = concrete;
     this.beanProvider = beanProvider;
+    this.beanActivatorType = beanActivatorType;
   }
 
   public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManagerImpl beanManager,
@@ -44,8 +49,10 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
                                             final Annotation[] qualifiers,
                                             final String name,
                                             final boolean concrete,
-                                            final AsyncBeanProvider<T> provider) {
-    return new AsyncDependentBean<T>(beanManager, type, beanType, qualifiers, name, concrete, provider);
+                                            final AsyncBeanProvider<T> provider,
+                                            final Class<Object> beanActivatorType) {
+    return new AsyncDependentBean<T>(beanManager, type, beanType, qualifiers, name, concrete, provider,
+        beanActivatorType);
   }
 
   @Override
@@ -96,5 +103,22 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
             + qualifiers + ", concrete=" + concrete + "]";
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean isActivated() {
+    if (beanActivatorType == null) {
+      return true;
+    }
 
+    final RefHolder<Boolean> result = new RefHolder<Boolean>();
+    beanManager
+        .lookupBean(beanActivatorType).getInstance(new CreationalCallback() {
+          @Override
+          public void callback(Object bean) {
+            result.set(((BeanActivator) bean).isActivated());
+          }
+        });
+    
+    return result.get();
+  }
 }

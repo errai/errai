@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2014 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
+import javax.inject.Singleton;
 
-public interface Bootstrapper {
-  BootstrapInjectionContext bootstrapContainer();
+import org.jboss.errai.ioc.client.container.BeanActivator;
+import org.junit.Ignore;
+
+@Ignore
+@Singleton
+public class TestBeanActivator implements BeanActivator {
+
+  private boolean activated;
+  
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  public void setActived(boolean activated) {
+    this.activated = activated;
+  }
+  
 }
