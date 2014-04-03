@@ -1,17 +1,15 @@
 /*
  * Copyright 2013 JBoss, by Red Hat, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.jboss.errai.ui.rebind;
 
@@ -79,6 +77,7 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ui.shared.api.style.TemplatingFinishedRegistry;
 
 /**
  * Generates the code required for {@link Templated} classes.
@@ -114,6 +113,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final List<Statement> initStmts = new ArrayList<Statement>();
 
     generateTemplatedInitialization(ctx, initStmts);
+    initStmts.add(Stmt.invokeStatic(TemplatingFinishedRegistry.class, "get").invoke("templatingFinished",
+        Refs.get(ctx.getInjector().getInstanceVarName())));
 
     if (declaringClass.isAnnotationPresent(EntryPoint.class)) {
       initStmts.add(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("obj")));
@@ -121,10 +122,9 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
     List<Statement> stmts = new ArrayList<Statement>();
     final Statement initCallback = InjectUtil.createInitializationCallback(declaringClass, "obj", initStmts);
-    Statement addInitCallback
-      = Stmt.loadVariable("context").invoke("addInitializationCallback",  
-          Refs.get(ctx.getInjector().getInstanceVarName()), initCallback);
-    
+    Statement addInitCallback = Stmt.loadVariable("context").invoke("addInitializationCallback",
+        Refs.get(ctx.getInjector().getInstanceVarName()), initCallback);
+
     if (ctx.getInjectionContext().isAsync()) {
       final Statement runnable = Stmt.newObject(Runnable.class).extend()
         .publicOverridesMethod("run")
@@ -136,7 +136,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     else {
       stmts.add(addInitCallback);
     }
-    
+
     Statement destructionCallback = generateTemplateDestruction(ctx);
     if (destructionCallback != null) {
       stmts.add(destructionCallback);
@@ -153,7 +153,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     List<Statement> destructionStatements = new ArrayList<Statement>();
     final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getEnclosingType());
     final Map<String, MetaClass> dataFieldTypes =
-      DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
+        DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
 
     for (final String fieldName : dataFields.keySet()) {
       Statement field = dataFields.get(fieldName);
@@ -164,13 +164,13 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       }
     }
 
-    if (destructionStatements.isEmpty())
-      return null;
+    destructionStatements.add(Stmt.invokeStatic(TemplatingFinishedRegistry.class, "get").invoke("removeTemplatedBean",
+        Refs.get(ctx.getInjector().getInstanceVarName())));
 
     Statement destructionLogic =
-      Stmt.loadVariable("context").invoke("addDestructionCallback",
-        Refs.get(ctx.getInjector().getInstanceVarName()),
-        InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj", destructionStatements));
+        Stmt.loadVariable("context").invoke("addDestructionCallback",
+            Refs.get(ctx.getInjector().getInstanceVarName()),
+            InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj", destructionStatements));
 
     return destructionLogic;
   }
@@ -180,7 +180,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    */
   @SuppressWarnings("serial")
   private void generateTemplatedInitialization(final InjectableInstance<Templated> ctx,
-                                               final List<Statement> initStmts) {
+      final List<Statement> initStmts) {
 
     final Map<MetaClass, BuildMetaClass> constructed = getConstructedTemplateTypes(ctx);
 
@@ -197,22 +197,22 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
        */
       final String templateVarName = InjectUtil.getUniqueVarName();
       initStmts.add(Stmt
-          .declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass))
-          .named(templateVarName)
-          .initializeWith(
-              Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
+        .declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass))
+        .named(templateVarName)
+        .initializeWith(
+            Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
 
       /*
        * Get root Template Element
        */
       final String rootTemplateElementVarName = InjectUtil.getUniqueVarName();
       initStmts.add(Stmt
-          .declareVariable(Element.class)
-          .named(rootTemplateElementVarName)
-          .initializeWith(
-              Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateElement", Stmt
-                  .loadVariable(templateVarName).invoke("getContents").invoke("getText"),
-                  getTemplateFragmentName(declaringClass))));
+        .declareVariable(Element.class)
+        .named(rootTemplateElementVarName)
+        .initializeWith(
+            Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateElement", Stmt
+              .loadVariable(templateVarName).invoke("getContents").invoke("getText"),
+                getTemplateFragmentName(declaringClass))));
 
       final Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
 
@@ -231,9 +231,10 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
        */
       final String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
       initStmts.add(Stmt.declareVariable(dataFieldElementsVarName,
-          new TypeLiteral<Map<String, Element>>() {},
+          new TypeLiteral<Map<String, Element>>() {
+          },
           Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement))
-      );
+        );
 
       /*
        * Attach Widget field children Elements to the Template DOM
@@ -243,9 +244,11 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       /*
        * The Map<String, Widget> to store actual component field references.
        */
-      initStmts.add(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {},
-          Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {}))
-      );
+      initStmts.add(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {
+      },
+          Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
+          }))
+        );
       final Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
 
       generateComponentCompositions(ctx, initStmts, component, rootTemplateElement,
@@ -256,15 +259,20 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   }
 
   private void generateEventHandlerMethodClasses(final InjectableInstance<Templated> ctx,
-                                                 final List<Statement> initStmts, final Statement component,
-                                                 final String dataFieldElementsVarName, final Statement fieldsMap) {
+      final List<Statement> initStmts, final Statement component,
+      final String dataFieldElementsVarName, final Statement fieldsMap) {
 
-    final Map<String, MetaClass> dataFieldTypes = DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
+    final Map<String, MetaClass> dataFieldTypes = DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx,
+        ctx.getEnclosingType());
     dataFieldTypes.put("this", ctx.getEnclosingType());
 
     final MetaClass declaringClass = ctx.getEnclosingType();
 
-    /* Ensure that no @DataFields are handled more than once when used in combination with @SyncNative */
+    /*
+     * Ensure that no @DataFields are handled more than once when used in combination with
+     * 
+     * @SyncNative
+     */
     final Set<String> processedNativeHandlers = new HashSet<String>();
     final Set<String> processedEventHandlers = new HashSet<String>();
 
@@ -292,8 +300,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
          */
         final MetaClass handlerType = MetaClassFactory.get(EventListener.class);
         final BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType)
-            .extend()
-            .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
+          .extend()
+          .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
         listenerBuiler.append(InjectUtil.invokePublicOrPrivateMethod(ctx.getInjectionContext(), component,
             method, Stmt.loadVariable("event")));
 
@@ -343,8 +351,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           }
           else {
             /*
-             * We are completely native and have no reference to this data-field
-             * Element in Java
+             * We are completely native and have no reference to this data-field Element in Java
              */
             initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupNativeEventListener", component,
                 Stmt.loadVariable(dataFieldElementsVarName).invoke("get", name), listenerInstance,
@@ -359,11 +366,10 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         final MetaClass handlerType;
         try {
           handlerType = getHandlerForEvent(eventType);
-        }
-        catch (GenerationException e) {
+        } catch (GenerationException e) {
           /*
-           *  see ERRAI-373 for details on this crazy inference (without this message, the cause of the
-           *  problem is nearly impossible to diagnose)
+           * see ERRAI-373 for details on this crazy inference (without this message, the cause of
+           * the problem is nearly impossible to diagnose)
            */
           if (declaringClass.getClass() == JavaReflectionClass.class) {
             throw new GenerationException(
@@ -376,9 +382,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         }
 
         final BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType)
-            .extend()
-            .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
-
+          .extend()
+          .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
 
         listenerBuiler.append(InjectUtil.invokePublicOrPrivateMethod(ctx.getInjectionContext(),
             component, method, Stmt.loadVariable("event")));
@@ -407,7 +412,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
           processedEventHandlers.add(name);
 
-          // Where will the event come from? It could be a @DataField member, or it could be the templated widget itself!
+          // Where will the event come from? It could be a @DataField member, or it could be the
+          // templated widget itself!
           final Statement eventSource;
           if ("this".equals(name)) {
             eventSource = Stmt.loadVariable("obj");
@@ -446,13 +452,11 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   private MetaClass getHandlerForEvent(final MetaClass eventType) {
 
     /*
-     * All handlers event must have an overrided method getAssociatedType(). We
-     * take advantage of this information to get the associated handler. Ex:
-     * com.google.gwt.event.dom.client.ClickEvent --->
-     * com.google.gwt.event.dom.client.ClickHandler
-     *
-     * com.google.gwt.event.dom.client.BlurEvent --->
-     * com.google.gwt.event.dom.client.BlurHandler
+     * All handlers event must have an overrided method getAssociatedType(). We take advantage of
+     * this information to get the associated handler. Ex:
+     * com.google.gwt.event.dom.client.ClickEvent ---> com.google.gwt.event.dom.client.ClickHandler
+     * 
+     * com.google.gwt.event.dom.client.BlurEvent ---> com.google.gwt.event.dom.client.BlurHandler
      */
 
     if (eventType == null) {
@@ -511,45 +515,43 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * @param rootTemplateElement
    */
   private void translateTemplate(InjectableInstance<Templated> ctx, List<Statement> initStmts,
-          Statement rootTemplateElement) {
+      Statement rootTemplateElement) {
     initStmts.add(
-            Stmt.invokeStatic(
-                    TemplateUtil.class,
-                    "translateTemplate",
-                    getTemplateFileName(ctx.getEnclosingType()),
-                    rootTemplateElement
-                    ));
+      Stmt.invokeStatic(
+          TemplateUtil.class,
+          "translateTemplate",
+          getTemplateFileName(ctx.getEnclosingType()),
+          rootTemplateElement
+        ));
   }
 
   private void generateComponentCompositions(final InjectableInstance<Templated> ctx,
-                                             final List<Statement> initStmts,
-                                             final Statement component,
-                                             final Statement rootTemplateElement,
-                                             final Statement dataFieldElements,
-                                             final Statement fieldsMap) {
+      final List<Statement> initStmts,
+      final Statement component,
+      final Statement rootTemplateElement,
+      final Statement dataFieldElements,
+      final Statement fieldsMap) {
 
     /*
-     * Merge each field's Widget Element into the DOM in place of the
-     * corresponding data-field
+     * Merge each field's Widget Element into the DOM in place of the corresponding data-field
      */
     final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getEnclosingType());
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getEnclosingType()
-          .getFullyQualifiedName(), getTemplateFileName(ctx.getEnclosingType()), Cast.to(Widget.class, field.getValue()),
+        .getFullyQualifiedName(), getTemplateFileName(ctx.getEnclosingType()), Cast.to(Widget.class, field.getValue()),
           dataFieldElements, field.getKey()));
     }
 
     /*
-     * Add each field to the Collection of children of the new Composite
-     * Template
+     * Add each field to the Collection of children of the new Composite Template
      */
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
     }
 
     /*
-     * Attach the Template to the Component, and set up the GWT Widget hierarchy
-     * to preserve Handlers and DOM events.
+     * Attach the Template to the Component, and set up the GWT Widget hierarchy to preserve
+     * Handlers and DOM events.
      */
     initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement,
         Stmt.nestedCall(fieldsMap).invoke("values")));
@@ -561,24 +563,26 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    */
   private void generateTemplateResourceInterface(final InjectableInstance<Templated> ctx, final MetaClass type) {
     final ClassStructureBuilder<?> componentTemplateResource = ClassBuilder.define(getTemplateTypeName(type)).publicScope()
-        .interfaceDefinition().implementsInterface(Template.class).implementsInterface(ClientBundle.class)
-        .body()
-        .publicMethod(TextResource.class, "getContents").annotatedWith(new Source() {
+      .interfaceDefinition().implementsInterface(Template.class).implementsInterface(ClientBundle.class)
+      .body()
+      .publicMethod(TextResource.class, "getContents").annotatedWith(new Source() {
 
-          @Override
-          public Class<? extends Annotation> annotationType() {
-            return Source.class;
-          }
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Source.class;
+        }
 
-          @Override
-          public String[] value() {
-            return new String[]{getTemplateFileName(type)};
-          }
+        @Override
+        public String[] value() {
+          return new String[] {
+            getTemplateFileName(type)
+          };
+        }
 
-        }).finish();
+      }).finish();
 
     ctx.getInjectionContext().getProcessingContext().getBootstrapClass()
-        .addInnerClass(new InnerClass(componentTemplateResource.getClassDefinition()));
+      .addInnerClass(new InnerClass(componentTemplateResource.getClassDefinition()));
 
     getConstructedTemplateTypes(ctx).put(type, componentTemplateResource.getClassDefinition());
   }
