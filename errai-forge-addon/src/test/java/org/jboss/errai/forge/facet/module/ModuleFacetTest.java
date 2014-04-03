@@ -32,7 +32,7 @@ import javax.enterprise.context.Dependent;
 
 import org.apache.maven.model.Model;
 import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.config.ProjectConfig.ProjectProperty;
+import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ModuleVault;
 import org.jboss.errai.forge.constant.ModuleVault.Module;
 import org.jboss.errai.forge.test.base.ForgeTest;

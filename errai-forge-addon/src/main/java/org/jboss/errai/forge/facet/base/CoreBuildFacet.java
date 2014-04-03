@@ -25,7 +25,7 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Resource;
 import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.config.ProjectConfig.ProjectProperty;
+import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.DefaultVault.DefaultValue;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;

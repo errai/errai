@@ -19,7 +19,7 @@ package org.jboss.errai.forge.facet.resource;
 import java.io.File;
 
 import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.config.ProjectConfig.ProjectProperty;
+import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
 
 /**

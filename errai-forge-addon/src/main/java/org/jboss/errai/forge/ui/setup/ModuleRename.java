@@ -19,7 +19,7 @@ package org.jboss.errai.forge.ui.setup;
 import javax.inject.Inject;
 
 import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.config.ProjectConfig.ProjectProperty;
+import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.aggregate.CoreFacet;
 import org.jboss.errai.forge.facet.module.ModuleCoreFacet;
 import org.jboss.errai.forge.ui.features.AddErraiFeatureCommand;

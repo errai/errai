@@ -30,7 +30,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.codehaus.plexus.util.cli.shell.Shell;
 import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.config.ProjectConfig.ProjectProperty;
+import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ModuleVault.Module;
 import org.jboss.errai.forge.facet.resource.AbstractXmlResourceFacet;
 import org.w3c.dom.Document;

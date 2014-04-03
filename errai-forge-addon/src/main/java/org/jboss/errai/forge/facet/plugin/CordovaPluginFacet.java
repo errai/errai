@@ -21,10 +21,18 @@ import java.util.Arrays;
 
 import org.apache.maven.model.PluginExecution;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
+import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
 
+/**
+ * Configures the cordova plugin for building native mobile apps.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+@FacetConstraint({ CoreBuildFacet.class })
 public class CordovaPluginFacet extends AbstractProfilePluginFacet {
 
   public CordovaPluginFacet() {

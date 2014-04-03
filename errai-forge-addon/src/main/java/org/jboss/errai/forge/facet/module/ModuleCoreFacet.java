@@ -32,7 +32,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.codehaus.plexus.util.cli.shell.Shell;
 import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.config.ProjectConfig.ProjectProperty;
+import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ModuleVault.Module;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.w3c.dom.Document;

@@ -16,9 +16,12 @@
  */
 package org.jboss.errai.forge.config;
 
-import java.io.File;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
+import org.jboss.errai.forge.config.converter.ConfigTypeConverter;
+import org.jboss.errai.forge.config.converter.ConfigTypeConverterFactory;
 import org.jboss.forge.addon.configuration.Configuration;
 import org.jboss.forge.addon.configuration.facets.ConfigurationFacet;
 import org.jboss.forge.addon.facets.AbstractFacet;
@@ -34,35 +37,12 @@ import org.jboss.forge.addon.projects.ProjectFacet;
 @FacetConstraint({ ConfigurationFacet.class })
 public class ProjectConfig extends AbstractFacet<Project> implements ProjectFacet {
 
-  /**
-   * An enumeration of project properties stored in a {@link ProjectConfig}.
-   * 
-   * @author Max Barkley <mbarkley@redhat.com>
-   */
-  public static enum ProjectProperty {
-    MODULE_FILE(File.class),
-    MODULE_LOGICAL(String.class),
-    /*
-     * This can be different than the logical name if the module uses the
-     * "rename-to" attribute.
-     */
-    MODULE_NAME(String.class),
-    INSTALLED_FEATURES(SerializableSet.class),
-    ERRAI_VERSION(String.class);
-
-    /**
-     * The type of value stored by this property.
-     */
-    public final Class<?> valueType;
-
-    private ProjectProperty(Class<?> type) {
-      valueType = type;
-    }
-  }
-
   public static final String PREFIX = "errai-forge-";
 
   private Project project;
+  
+  @Inject
+  private ConfigTypeConverterFactory converterFactory;
 
   @Override
   public Project getFaceted() {
@@ -84,7 +64,6 @@ public class ProjectConfig extends AbstractFacet<Project> implements ProjectFace
    * @return The value associated with the given {@link ProjectProperty}, or
    *         null if none exists.
    */
-  @SuppressWarnings("unchecked")
   public <T> T getProjectProperty(final ProjectProperty property, final Class<T> type) {
     final ConfigurationFacet config = project.getFacet(ConfigurationFacet.class);
     final Object rawPropertyValue = config.getConfiguration().getProperty(getProjectAttribute(property));
@@ -94,16 +73,9 @@ public class ProjectConfig extends AbstractFacet<Project> implements ProjectFace
         throw new RuntimeException(String.format("Expected type %s for property %s. Found type %s.",
                 property.valueType, property.name(), type));
       
-      // Special cases
-      if (type.equals(File.class)) {
-        return (T) new File(rawPropertyValue.toString());
-      }
-      else if (type.equals(SerializableSet.class)) {
-        return (T) SerializableSet.deserialize(rawPropertyValue.toString());
-      }
-      else {
-        return (T) rawPropertyValue;
-      }
+      final ConfigTypeConverter<T> converter = converterFactory.getConverter(type);
+
+      return (T) converter.convertFromString(rawPropertyValue.toString());
     }
     else {
       return null;
@@ -128,16 +100,12 @@ public class ProjectConfig extends AbstractFacet<Project> implements ProjectFace
               + property.valueType + ", not " + value.getClass());
     }
 
+    @SuppressWarnings("unchecked")
+    final ConfigTypeConverter<T> converter = (ConfigTypeConverter<T>) converterFactory.getConverter(property.valueType);
     final Configuration config = project.getFacet(ConfigurationFacet.class).getConfiguration();
-    if (property.valueType.equals(File.class)) {
-      config.setProperty(getProjectAttribute(property), File.class.cast(value).getAbsolutePath());
-    }
-    else if (property.valueType.equals(SerializableSet.class)) {
-      config.setProperty(getProjectAttribute(property), SerializableSet.class.cast(value).serialize());
-    }
-    else {
-      config.setProperty(getProjectAttribute(property), value);
-    }
+    final String attribute = getProjectAttribute(property);
+    
+    config.addProperty(attribute, converter.convertToString(value));
   }
 
   /**
