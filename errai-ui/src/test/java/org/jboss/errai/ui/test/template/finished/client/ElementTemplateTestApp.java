@@ -4,10 +4,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.test.template.finished.client.res.ElementFormComponent;
 
-@EntryPoint
 public class ElementTemplateTestApp {
 
   @Inject

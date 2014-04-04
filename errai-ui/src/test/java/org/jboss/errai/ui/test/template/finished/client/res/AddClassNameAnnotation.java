@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 import org.jboss.errai.ui.shared.api.annotations.style.TemplateFinishedBinding;
 
 /**
- *
+ * 
  * @author Dennis Schumann <dennis.schumann@devbliss.com>
  */
 @Retention(RetentionPolicy.RUNTIME)

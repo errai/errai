@@ -22,15 +22,19 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   @Test
   public void testTemplatingFinishInvokedDirectly() {
     System.out.println("Start testing template finished stuff");
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(AddClassNameAnnotation.class, createTestExecutor());
-    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(ElementTemplateTestApp.class).getInstance();
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+            AddClassNameAnnotation.class, createTestExecutor());
+    ElementTemplateTestApp app = IOC.getBeanManager()
+            .lookupBean(ElementTemplateTestApp.class).getInstance();
 
     Element annotatedElement = app.getForm().getUsername().getElement();
-    System.out.println("Annotated Element class name => " + annotatedElement.getClassName());
+    System.out.println("Annotated Element class name => "
+            + annotatedElement.getClassName());
     assertTrue(annotatedElement.getClassName().endsWith("testing-classname"));
 
     // IOC.getBeanManager().destroyBean(app);
-    app = IOC.getBeanManager().lookupBean(ElementTemplateTestApp.class).newInstance();
+    app = IOC.getBeanManager().lookupBean(ElementTemplateTestApp.class)
+            .newInstance();
 
     assertEquals(2, invokeTimes);
   }
@@ -43,8 +47,9 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
         invokeTimes++;
         System.out.println("INVOKE IS CALLED!"); // TODO: Remove
         if (!(annoation instanceof AddClassNameAnnotation)) {
-          System.err.println("In ElementTemplateFinishedTest the given annotation in invoke has an incorrect type. Expected AddClassNameAnnotation but is "
-              + annoation.getClass().getName());
+          System.err
+                  .println("In ElementTemplateFinishedTest the given annotation in invoke has an incorrect type. Expected AddClassNameAnnotation but is "
+                          + annoation.getClass().getName());
         }
         AddClassNameAnnotation addClassNameAnnotation = (AddClassNameAnnotation) annoation;
         element.addClassName(addClassNameAnnotation.classname());

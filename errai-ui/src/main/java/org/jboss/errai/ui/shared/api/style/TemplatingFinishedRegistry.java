@@ -11,7 +11,7 @@ import org.jboss.errai.ioc.client.container.Tuple;
 
 /**
  * ClassDescription for TemplatingFinishedRegistry
- *
+ * 
  * @author Dennis Schumann <dennis.schumann@devbliss.com>
  */
 public class TemplatingFinishedRegistry {
@@ -32,42 +32,57 @@ public class TemplatingFinishedRegistry {
   }
 
   public void templatingFinished(Object beanInst) {
-    System.out.println("Templating finished called => " + beanInst.getClass().getName());
+    System.out.println("Templating finished called => "
+            + beanInst.getClass().getName());
     if (beanExecutorMapping.containsKey(beanInst)) {
-      for (Tuple<Element, List<TemplateFinishedElementExecutor>> elementExecutorTuple : beanExecutorMapping.get(beanInst)) {
-        for (TemplateFinishedElementExecutor executor : elementExecutorTuple.getValue()) {
-          executor.invoke(elementExecutorTuple.getKey(), elementAnnotation.get(elementExecutorTuple.getKey()));
+      for (Tuple<Element, List<TemplateFinishedElementExecutor>> elementExecutorTuple : beanExecutorMapping
+              .get(beanInst)) {
+        for (TemplateFinishedElementExecutor executor : elementExecutorTuple
+                .getValue()) {
+          executor.invoke(elementExecutorTuple.getKey(),
+                  elementAnnotation.get(elementExecutorTuple.getKey()));
         }
       }
     }
   }
 
-  public void addTemplatingFinishedExecutor(final Class<? extends Annotation> annotation,
-      final TemplateFinishedElementExecutor templateFinishedExecutor) {
+  public void addTemplatingFinishedExecutor(
+          final Class<? extends Annotation> annotation,
+          final TemplateFinishedElementExecutor templateFinishedExecutor) {
     System.out.println("Templating executor added for " + annotation.getName());
     if (!finishedCallbacks.containsKey(annotation)) {
-      finishedCallbacks.put(annotation, new ArrayList<TemplateFinishedElementExecutor>());
+      finishedCallbacks.put(annotation,
+              new ArrayList<TemplateFinishedElementExecutor>());
     }
     finishedCallbacks.get(annotation).add(templateFinishedExecutor);
 
     // Check if there are already elements that should be executed
-    for (Entry<Element, Annotation> elementAnnotationEntry : elementAnnotation.entrySet()) {
-      System.out.println("Found element and annotation => " + elementAnnotationEntry.getKey().getClassName() + " with "
-          + elementAnnotationEntry.getValue().annotationType().getName());
+    for (Entry<Element, Annotation> elementAnnotationEntry : elementAnnotation
+            .entrySet()) {
+      System.out.println("Found element and annotation => "
+              + elementAnnotationEntry.getKey().getClassName() + " with "
+              + elementAnnotationEntry.getValue().annotationType().getName());
       if (elementAnnotationEntry.getValue().annotationType().equals(annotation)) {
-        templateFinishedExecutor.invoke(elementAnnotationEntry.getKey(), elementAnnotationEntry.getValue());
+        templateFinishedExecutor.invoke(elementAnnotationEntry.getKey(),
+                elementAnnotationEntry.getValue());
       }
     }
   }
 
-  public void addBeanElement(Object beanInst, Element element, Annotation annotation) {
-    System.out.println("Templating add element for " + annotation.getClass().getName());
+  public void addBeanElement(Object beanInst, Element element,
+          Annotation annotation) {
+    System.out.println("Templating add element for "
+            + annotation.getClass().getName());
     if (!beanExecutorMapping.containsKey(beanInst)) {
-      beanExecutorMapping.put(beanInst, new ArrayList<Tuple<Element, List<TemplateFinishedElementExecutor>>>());
+      beanExecutorMapping
+              .put(beanInst,
+                      new ArrayList<Tuple<Element, List<TemplateFinishedElementExecutor>>>());
     }
-    List<TemplateFinishedElementExecutor> executors = finishedCallbacks.get(annotation.getClass());
+    List<TemplateFinishedElementExecutor> executors = finishedCallbacks
+            .get(annotation.getClass());
     if (executors == null) {
-      finishedCallbacks.put(annotation.getClass(), new ArrayList<TemplateFinishedElementExecutor>());
+      finishedCallbacks.put(annotation.getClass(),
+              new ArrayList<TemplateFinishedElementExecutor>());
     }
     beanExecutorMapping.get(beanInst).add(Tuple.of(element, executors));
     elementAnnotation.put(element, annotation);
@@ -76,7 +91,8 @@ public class TemplatingFinishedRegistry {
   public void removeTemplatedBean(Object beanInst) {
     System.out.println("Remove was called");
     if (beanExecutorMapping.containsKey(beanInst)) {
-      for (Tuple<Element, List<TemplateFinishedElementExecutor>> elementExecutorTuple : beanExecutorMapping.get(beanInst)) {
+      for (Tuple<Element, List<TemplateFinishedElementExecutor>> elementExecutorTuple : beanExecutorMapping
+              .get(beanInst)) {
         elementAnnotation.remove(elementExecutorTuple.getKey());
       }
       beanExecutorMapping.remove(beanInst);
@@ -85,7 +101,8 @@ public class TemplatingFinishedRegistry {
 
   public void removeBeanElement(Object beanInst, Element element) {
     if (beanExecutorMapping.containsKey(beanInst)) {
-      for (Tuple<Element, List<TemplateFinishedElementExecutor>> elementExecutorTuple : beanExecutorMapping.get(beanInst)) {
+      for (Tuple<Element, List<TemplateFinishedElementExecutor>> elementExecutorTuple : beanExecutorMapping
+              .get(beanInst)) {
         if (elementExecutorTuple.getKey() == element) {
           beanExecutorMapping.remove(elementExecutorTuple);
         }
