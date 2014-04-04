@@ -6986,7 +6986,7 @@ You can also `@Inject` the `ActiveUserCache` directly.
 
 ==== Hiding UI Elements
 
-Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have `display: none` added to it's CSS style.
+Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have the CSS class "errai-restricted-access-style" added to it. By defining this style (for example with `visibility: none`) you can hide or otherwise modify the display of the element for unautorized users.
 
 Here is an example of an Errai UI templated class using this feature:
 
