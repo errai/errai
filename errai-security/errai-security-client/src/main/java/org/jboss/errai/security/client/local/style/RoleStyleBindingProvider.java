@@ -32,7 +32,6 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.ui.shared.api.style.AnnotationStyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.Element;
 
 /**
@@ -60,9 +59,9 @@ public class RoleStyleBindingProvider {
       public void invokeBinding(final Element element, final Annotation annotation) {
         final User user = userProvider.getUser();
         if (user == null || user.getRoles() == null || !hasRoles(user.getRoles(), ((RestrictedAccess) annotation).roles()))
-          element.getStyle().setDisplay(Display.NONE);
+          element.addClassName(RestrictedAccess.CSS_CLASS_NAME);
         else
-          element.getStyle().clearDisplay();
+          element.removeClassName(RestrictedAccess.CSS_CLASS_NAME);
       }
     });
   }

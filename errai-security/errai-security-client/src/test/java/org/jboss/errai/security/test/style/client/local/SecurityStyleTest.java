@@ -26,10 +26,13 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.client.local.context.SecurityContext;
 import org.jboss.errai.security.client.local.context.impl.SecurityContextImpl;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.Role;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.test.style.client.local.res.TemplatedStyleWidget;
 import org.junit.Test;
+
+import com.google.gwt.user.client.ui.Widget;
 
 public class SecurityStyleTest extends AbstractErraiCDITest {
 
@@ -77,7 +80,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
    * Regression test for ERRAI-644.
    */
   @Test
-  public void testTemplatedElementsHiddenWhenNotLoggedIn() throws Exception {
+  public void testTemplatedElementsStyleAppliedWhenNotLoggedIn() throws Exception {
     asyncTest();
     addPostInitTask(new Runnable() {
       
@@ -87,10 +90,10 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
         // Make sure we are not logged in as anyone.
         securityContext.getActiveUserCache().setUser(null);
         
-        assertTrue(widget.getControl().isVisible());
-        assertFalse(widget.getUserAnchor().isVisible());
-        assertFalse(widget.getUserAdminAnchor().isVisible());
-        assertFalse(widget.getAdminAnchor().isVisible());
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getControl()));
+        assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAnchor()));
+        assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAdminAnchor()));
+        assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAdminAnchor()));
 
         finishTest();
       }
@@ -98,7 +101,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
   }
   
   @Test
-  public void testTemplatedElementsHiddenWhenUnauthorized() throws Exception {
+  public void testTemplatedElementsStyleAppliedWhenUnauthorized() throws Exception {
     asyncTest();
     addPostInitTask(new Runnable() {
       
@@ -108,10 +111,10 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
 
         securityContext.getActiveUserCache().setUser(regularUser);
         
-        assertTrue(widget.getControl().isVisible());
-        assertTrue(widget.getUserAnchor().isVisible());
-        assertFalse(widget.getUserAdminAnchor().isVisible());
-        assertFalse(widget.getAdminAnchor().isVisible());
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getControl()));
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAnchor()));
+        assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAdminAnchor()));
+        assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAdminAnchor()));
 
         finishTest();
       }
@@ -119,7 +122,7 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
   }
   
   @Test
-  public void testTemplatedElementsShownWhenAuthorized() throws Exception {
+  public void testTemplatedElementsStyleNotAppliedWhenAuthorized() throws Exception {
     asyncTest();
     addPostInitTask(new Runnable() {
       
@@ -129,14 +132,19 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
 
         securityContext.getActiveUserCache().setUser(adminUser);
         
-        assertTrue(widget.getControl().isVisible());
-        assertTrue(widget.getUserAnchor().isVisible());
-        assertTrue(widget.getUserAdminAnchor().isVisible());
-        assertTrue(widget.getAdminAnchor().isVisible());
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getControl()));
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAnchor()));
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getUserAdminAnchor()));
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, widget.getAdminAnchor()));
 
         finishTest();
       }
     });
+  }
+  
+  private boolean hasStyle(final String name, final Widget widget) {
+    String cssClasses = widget.getElement().getAttribute("class");
+    return cssClasses != null && cssClasses.contains(name);
   }
 
 }

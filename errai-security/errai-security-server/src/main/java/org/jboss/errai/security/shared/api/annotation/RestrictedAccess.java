@@ -41,6 +41,7 @@ import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 
 /**
@@ -65,4 +66,10 @@ public @interface RestrictedAccess {
    */
   @Nonbinding
   String[] roles() default {};
+  
+  /**
+   * This CSS class name is applied to {@link DataField} annotated elements when
+   * a user lacks authorization.
+   */
+  public static final String CSS_CLASS_NAME = "errai-restricted-access-style";
 }

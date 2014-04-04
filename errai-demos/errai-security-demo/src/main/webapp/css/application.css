@@ -111,4 +111,8 @@ ul.plain {
 	margin-right: 2px;
 }
 
+.errai-restricted-access-style {
+	visibility: hidden;
+}
+
 /* Story List */
