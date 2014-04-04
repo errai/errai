@@ -191,7 +191,6 @@
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <webappDirectory>src/main/webapp/</webappDirectory>
           <strict>true</strict>
-          <style>PRETTY</style>
         </configuration>
         <executions>
           <execution>
