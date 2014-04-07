@@ -89,7 +89,7 @@ public class InjectUtil {
 
     for (final Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
       if (type.isAnnotationPresent(a)) {
-        final DecoratorTask task = new DecoratorTask(injector, type, ctx.getDecorator(a));
+        final DecoratorTask task = new DecoratorTask(injector, type, a, ctx.getDecorator(a));
         injectionTasks.add(task);
       }
     }
@@ -308,7 +308,7 @@ public class InjectUtil {
             switch (elType) {
               case FIELD:
                 if (field.isAnnotationPresent(a)) {
-                  accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
+                  accumulator.add(new DecoratorTask(injector, field, a, ctx.getDecorator(a)));
                 }
                 break;
             }
@@ -329,13 +329,13 @@ public class InjectUtil {
             switch (elType) {
               case METHOD:
                 if (meth.isAnnotationPresent(a)) {
-                  accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
+                  accumulator.add(new DecoratorTask(injector, meth, a, ctx.getDecorator(a)));
                 }
                 break;
               case PARAMETER:
                 for (final MetaParameter parameter : meth.getParameters()) {
                   if (parameter.isAnnotationPresent(a)) {
-                    final DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                    final DecoratorTask task = new DecoratorTask(injector, parameter, a, ctx.getDecorator(a));
                     accumulator.add(task);
                   }
                 }
@@ -370,13 +370,13 @@ public class InjectUtil {
           switch (elType) {
             case CONSTRUCTOR:
               if (cns.isAnnotationPresent(a)) {
-                tasks.add(new DecoratorTask(injector, cns, ctx.getDecorator(a)));
+                tasks.add(new DecoratorTask(injector, cns, a, ctx.getDecorator(a)));
               }
               break;
             case PARAMETER:
               for (final MetaParameter parameter : cns.getParameters()) {
                 if (parameter.isAnnotationPresent(a)) {
-                  final DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                  final DecoratorTask task = new DecoratorTask(injector, parameter, a, ctx.getDecorator(a));
                   tasks.add(task);
                 }
               }
