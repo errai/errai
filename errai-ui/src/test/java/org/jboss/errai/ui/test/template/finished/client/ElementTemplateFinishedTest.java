@@ -8,7 +8,7 @@ import static junit.framework.Assert.assertTrue;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.shared.api.style.TemplateFinishedElementExecutor;
-import org.jboss.errai.ui.shared.api.style.TemplatingFinishedRegistry;
+import org.jboss.errai.ui.shared.api.style.TemplateFinishedRegistry;
 import org.jboss.errai.ui.test.template.finished.client.res.AddClassNameAnnotation;
 import org.jboss.errai.ui.test.template.finished.client.res.ElementFormComponent;
 import org.jboss.errai.ui.test.template.finished.client.res.ElementFormComponentMultiple;
@@ -45,7 +45,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   @Override
   public void gwtTearDown() throws Exception {
     for (TemplateFinishedElementExecutor executor : executors) {
-      TemplatingFinishedRegistry.get().removeTemplatingFinishedExecutor(
+      TemplateFinishedRegistry.get().removeTemplatingFinishedExecutor(
               executor);
     }
     super.gwtTearDown();
@@ -53,7 +53,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
 
   @Test
   public void testTemplatingFinishInvoked() {
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(
             createAddClassNameExecutor());
 
     ElementFormComponent form = IOC.getBeanManager()
@@ -68,7 +68,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   @Test
   public void testTemplateRemove() {
     TemplateFinishedElementExecutor executor = createAddClassNameExecutor();
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
     ElementFormComponent form = IOC.getBeanManager()
             .lookupBean(ElementFormComponent.class).getInstance();
 
@@ -83,11 +83,11 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
             .endsWith("testing-classname"));
     assertEquals(2, invokeTimes);
 
-    TemplatingFinishedRegistry.get().removeTemplatingFinishedExecutor(executor);
+    TemplateFinishedRegistry.get().removeTemplatingFinishedExecutor(executor);
 
     // If we finish an destroyed bean it should do nothing and the count remain
     // on 2
-    TemplatingFinishedRegistry.get().templatingFinished(secondForm);
+    TemplateFinishedRegistry.get().templatingFinished(secondForm);
 
     assertEquals(2, invokeTimes);
     IOC.getBeanManager().destroyBean(form);
@@ -97,7 +97,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   @Test
   public void testBeanRemovedOnDestruct() {
     TemplateFinishedElementExecutor executor = createAddClassNameExecutor();
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
     ElementFormComponent form = IOC.getBeanManager()
             .lookupBean(ElementFormComponent.class).getInstance();
 
@@ -106,7 +106,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
     assertEquals(1, invokeTimes);
     IOC.getBeanManager().destroyBean(form);
 
-    TemplatingFinishedRegistry.get().templatingFinished(form);
+    TemplateFinishedRegistry.get().templatingFinished(form);
 
     assertEquals(1, invokeTimes);
   }
@@ -114,7 +114,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   @Test
   public void testRefreshWithTemplateFinished() {
     TemplateFinishedElementExecutor executor = createAddClassNameExecutor();
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
     ElementFormComponent form = IOC.getBeanManager()
             .lookupBean(ElementFormComponent.class).getInstance();
 
@@ -123,7 +123,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
     assertEquals(1, invokeTimes);
 
     addClass = false;
-    TemplatingFinishedRegistry.get().templatingFinished(form);
+    TemplateFinishedRegistry.get().templatingFinished(form);
 
     assertFalse(form.getUsername().getElement().getClassName()
             .endsWith("testing-classname"));
@@ -139,7 +139,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
 
     assertEquals(0, invokeTimes);
 
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
 
     assertEquals(1, invokeTimes);
     assertTrue(form.getUsername().getElement().getClassName()
@@ -152,9 +152,9 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   public void testMultipleExecutorsForSameAnnotation() {
     TemplateFinishedElementExecutor classNameExecutor = createAddClassNameExecutor();
     TemplateFinishedElementExecutor secondClassNameExecutor = createAddClassNameExecutor();
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(
             secondClassNameExecutor);
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(
             classNameExecutor);
 
     ElementFormComponent form = IOC.getBeanManager()
@@ -171,9 +171,9 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   public void testMultipleAnnotations() {
     TemplateFinishedElementExecutor classNameExecutor = createAddClassNameExecutor();
     TemplateFinishedElementExecutor permissionExecutor = createPermissionExecutor(PERMISSION_VALUE);
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(
             classNameExecutor);
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(
             permissionExecutor);
 
     ElementFormComponentMultiple form = IOC.getBeanManager()
@@ -194,9 +194,9 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   public void testMultipleAnnotationsPermissionDenied() {
     TemplateFinishedElementExecutor classNameExecutor = createAddClassNameExecutor();
     TemplateFinishedElementExecutor permissionExecutor = createPermissionExecutor("authenticate-password");
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(
             classNameExecutor);
-    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+    TemplateFinishedRegistry.get().addTemplatingFinishedExecutor(
             permissionExecutor);
 
     ElementFormComponentMultiple form = IOC.getBeanManager()

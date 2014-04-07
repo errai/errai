@@ -4,8 +4,10 @@ import com.google.gwt.dom.client.Element;
 import java.lang.annotation.Annotation;
 
 /**
- * ClassDescription for TemplateFinishedElementExecutor Interface to support the
- * Template Finished invoke.
+ * ClassDescription for TemplateFinishedElementExecutor Interface to support the Template Finished invoke.
+ * This executors need to be registered at the {@link TemplateFinishedRegistry}
+ * It's possible to have multiple executors for the same Annotation.
+ * 
  * 
  * @author Dennis Schumann <dennis.schumann@devbliss.com>
  */
@@ -13,8 +15,6 @@ public interface TemplateFinishedElementExecutor {
 
   /**
    * Invoke is called for every element that is annotated on a Templated class.
-   * If the element has multiple times the same annotation the invoke method is
-   * called for every annotation.
    * 
    * @param element
    *          The dom element that is annotated

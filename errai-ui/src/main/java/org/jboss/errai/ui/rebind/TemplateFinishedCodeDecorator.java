@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -13,10 +14,12 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.style.TemplateFinishedBinding;
-import org.jboss.errai.ui.shared.api.style.TemplatingFinishedRegistry;
+import org.jboss.errai.ui.shared.api.style.TemplateFinishedRegistry;
 
 /**
  * ClassDescription for TemplateFinishedCodeDecorator
+ * Generates code for Annotations that use {@link TemplateFinishedBinding}. Only Fields with a getElement are supported.
+ * See the {@link TemplateFinishedRegistry} to register executors for the Annotations.
  * 
  * @author Dennis Schumann <dennis.schumann@devbliss.com>
  */
@@ -25,14 +28,12 @@ public class TemplateFinishedCodeDecorator extends
         IOCDecoratorExtension<TemplateFinishedBinding> {
   private static final Map<String, List<String>> alreadyAdded = new HashMap<String, List<String>>();
 
-  public TemplateFinishedCodeDecorator(
-          Class<TemplateFinishedBinding> decoratesWith) {
+  public TemplateFinishedCodeDecorator(Class<TemplateFinishedBinding> decoratesWith) {
     super(decoratesWith);
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(
-          InjectableInstance<TemplateFinishedBinding> ctx) {
+  public List<? extends Statement> generateDecorator(InjectableInstance<TemplateFinishedBinding> ctx) {
     final Statement valueAccessor;
 
     switch (ctx.getTaskType()) {
@@ -68,7 +69,7 @@ public class TemplateFinishedCodeDecorator extends
     for (Annotation annotation : ctx.getAnnotations()) {
       if (annotation.annotationType().isAnnotationPresent(
               TemplateFinishedBinding.class)) {
-        stmts.add(Stmt.invokeStatic(TemplatingFinishedRegistry.class, "get")
+        stmts.add(Stmt.invokeStatic(TemplateFinishedRegistry.class, "get")
                 .invoke("addBeanElement",
                         Refs.get(ctx.getInjector().getInstanceVarName()),
                         Stmt.nestedCall(valueAccessor).invoke("getElement"),
