@@ -25,11 +25,12 @@ public class ElementFormComponentMultiple extends Composite {
   @Inject
   @DataField
   @AddClassNameAnnotation(classname = "testing-classname")
-  @PermissionAnnotation("CreateUser")
+  @PermissionAnnotation("authenticate-user")
   private TextBox username;
 
   @Inject
   @DataField
+  @PermissionAnnotation("authenticate-password")
   private PasswordTextBox password;
 
   @Inject

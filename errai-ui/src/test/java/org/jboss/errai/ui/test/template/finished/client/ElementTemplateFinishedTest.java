@@ -11,14 +11,20 @@ import org.jboss.errai.ui.shared.api.style.TemplateFinishedElementExecutor;
 import org.jboss.errai.ui.shared.api.style.TemplatingFinishedRegistry;
 import org.jboss.errai.ui.test.template.finished.client.res.AddClassNameAnnotation;
 import org.jboss.errai.ui.test.template.finished.client.res.ElementFormComponent;
+import org.jboss.errai.ui.test.template.finished.client.res.ElementFormComponentMultiple;
+import org.jboss.errai.ui.test.template.finished.client.res.PermissionAnnotation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
+
+  private static final String PERMISSION_VALUE = "authenticate-user";
+
   private int invokeTimes = 0;
   private List<TemplateFinishedElementExecutor> executors;
   private boolean addClass;
+  private boolean isAllowed;
 
   @Override
   public String getModuleName() {
@@ -30,6 +36,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   public void gwtSetUp() throws Exception {
     super.gwtSetUp();
     addClass = true;
+    isAllowed = true;
     invokeTimes = 0;
     executors = new ArrayList<TemplateFinishedElementExecutor>();
   }
@@ -47,7 +54,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   @Test
   public void testTemplatingFinishInvoked() {
     TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
-            createTestExecutor());
+            createAddClassNameExecutor());
 
     ElementFormComponent form = IOC.getBeanManager()
             .lookupBean(ElementFormComponent.class).newInstance();
@@ -60,15 +67,13 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
 
   @Test
   public void testTemplateRemove() {
-    System.out.println("====> Start Remove");
-    TemplateFinishedElementExecutor executor = createTestExecutor();
+    TemplateFinishedElementExecutor executor = createAddClassNameExecutor();
     TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
     ElementFormComponent form = IOC.getBeanManager()
             .lookupBean(ElementFormComponent.class).getInstance();
 
     assertTrue(form.getUsername().getElement().getClassName()
             .endsWith("testing-classname"));
-    System.out.println("====> Assert Remove");
     assertEquals(1, invokeTimes);
 
     ElementFormComponent secondForm = IOC.getBeanManager()
@@ -90,8 +95,25 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   }
 
   @Test
+  public void testBeanRemovedOnDestruct() {
+    TemplateFinishedElementExecutor executor = createAddClassNameExecutor();
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
+    ElementFormComponent form = IOC.getBeanManager()
+            .lookupBean(ElementFormComponent.class).getInstance();
+
+    assertTrue(form.getUsername().getElement().getClassName()
+            .endsWith("testing-classname"));
+    assertEquals(1, invokeTimes);
+    IOC.getBeanManager().destroyBean(form);
+
+    TemplatingFinishedRegistry.get().templatingFinished(form);
+
+    assertEquals(1, invokeTimes);
+  }
+
+  @Test
   public void testRefreshWithTemplateFinished() {
-    TemplateFinishedElementExecutor executor = createTestExecutor();
+    TemplateFinishedElementExecutor executor = createAddClassNameExecutor();
     TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
     ElementFormComponent form = IOC.getBeanManager()
             .lookupBean(ElementFormComponent.class).getInstance();
@@ -109,19 +131,119 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
     IOC.getBeanManager().destroyBean(form);
   }
 
-  private TemplateFinishedElementExecutor createTestExecutor() {
+  @Test
+  public void testAddExecutorForAlreadyFinishedTemplate() {
+    TemplateFinishedElementExecutor executor = createAddClassNameExecutor();
+    ElementFormComponent form = IOC.getBeanManager()
+            .lookupBean(ElementFormComponent.class).getInstance();
+
+    assertEquals(0, invokeTimes);
+
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(executor);
+
+    assertEquals(1, invokeTimes);
+    assertTrue(form.getUsername().getElement().getClassName()
+            .endsWith("testing-classname"));
+
+    IOC.getBeanManager().destroyBean(form);
+  }
+
+  @Test
+  public void testMultipleExecutorsForSameAnnotation() {
+    TemplateFinishedElementExecutor classNameExecutor = createAddClassNameExecutor();
+    TemplateFinishedElementExecutor secondClassNameExecutor = createAddClassNameExecutor();
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+            secondClassNameExecutor);
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+            classNameExecutor);
+
+    ElementFormComponent form = IOC.getBeanManager()
+            .lookupBean(ElementFormComponent.class).getInstance();
+
+    assertTrue(form.getUsername().getElement().getClassName()
+            .contains("testing-classname"));
+    assertEquals(2, invokeTimes);
+
+    IOC.getBeanManager().destroyBean(form);
+  }
+
+  @Test
+  public void testMultipleAnnotations() {
+    TemplateFinishedElementExecutor classNameExecutor = createAddClassNameExecutor();
+    TemplateFinishedElementExecutor permissionExecutor = createPermissionExecutor(PERMISSION_VALUE);
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+            classNameExecutor);
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+            permissionExecutor);
+
+    ElementFormComponentMultiple form = IOC.getBeanManager()
+            .lookupBean(ElementFormComponentMultiple.class).getInstance();
+
+    assertFalse(form.getUsername().getElement().getClassName()
+            .contains("disabled"));
+    assertTrue(form.getPassword().getElement().getClassName()
+            .contains("disabled"));
+    assertTrue(form.getUsername().getElement().getClassName()
+            .contains("testing-classname"));
+    assertEquals(3, invokeTimes);
+
+    IOC.getBeanManager().destroyBean(form);
+  }
+
+  @Test
+  public void testMultipleAnnotationsPermissionDenied() {
+    TemplateFinishedElementExecutor classNameExecutor = createAddClassNameExecutor();
+    TemplateFinishedElementExecutor permissionExecutor = createPermissionExecutor("authenticate-password");
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+            classNameExecutor);
+    TemplatingFinishedRegistry.get().addTemplatingFinishedExecutor(
+            permissionExecutor);
+
+    ElementFormComponentMultiple form = IOC.getBeanManager()
+            .lookupBean(ElementFormComponentMultiple.class).getInstance();
+
+    assertTrue(form.getUsername().getElement().getClassName()
+            .contains("disabled"));
+    assertFalse(form.getPassword().getElement().getClassName()
+            .contains("disabled"));
+    assertTrue(form.getUsername().getElement().getClassName()
+            .contains("testing-classname"));
+    assertEquals(3, invokeTimes);
+
+    IOC.getBeanManager().destroyBean(form);
+  }
+
+  private TemplateFinishedElementExecutor createPermissionExecutor(
+          final String expectedPermission) {
     TemplateFinishedElementExecutor executor = new TemplateFinishedElementExecutor() {
 
       @Override
       public void invoke(Element element, Annotation annoation) {
         invokeTimes++;
-        System.out.println("INVOKE IS CALLED! "
-                + annoation.getClass().getName()); // TODO: Remove
-        if (!(annoation instanceof AddClassNameAnnotation)) {
-          System.err
-                  .println("In ElementTemplateFinishedTest the given annotation in invoke has an incorrect type. Expected AddClassNameAnnotation but is "
-                          + annoation.getClass().getName());
+        PermissionAnnotation permissionAnnotation = (PermissionAnnotation) annoation;
+        if (!expectedPermission.equals(permissionAnnotation.value())) {
+          element.addClassName("disabled");
         }
+        else {
+          element.removeClassName("disabled");
+        }
+      }
+
+      @Override
+      public Class<? extends Annotation> getTargetAnnotationType() {
+        return PermissionAnnotation.class;
+      }
+    };
+    executors.add(executor);
+    return executor;
+  }
+
+  private TemplateFinishedElementExecutor createAddClassNameExecutor() {
+    TemplateFinishedElementExecutor executor = new TemplateFinishedElementExecutor() {
+
+      @Override
+      public void invoke(Element element, Annotation annoation) {
+        invokeTimes++;
         AddClassNameAnnotation addClassNameAnnotation = (AddClassNameAnnotation) annoation;
         if (addClass) {
           element.addClassName(addClassNameAnnotation.classname());
