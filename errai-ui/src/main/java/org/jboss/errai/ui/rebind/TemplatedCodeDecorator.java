@@ -25,7 +25,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
