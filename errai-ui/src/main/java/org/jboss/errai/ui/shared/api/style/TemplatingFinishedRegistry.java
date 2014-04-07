@@ -21,7 +21,7 @@ public class TemplatingFinishedRegistry {
   private final Map<Class<? extends Annotation>, List<TemplateFinishedElementExecutor>> finishedCallbacks = new HashMap<Class<? extends Annotation>, List<TemplateFinishedElementExecutor>>();
   private final Map<Object, List<Tuple<Element, List<TemplateFinishedElementExecutor>>>> beanExecutorMapping = new HashMap<Object, List<Tuple<Element, List<TemplateFinishedElementExecutor>>>>();
   // Allow more than one annotation for an element?
-  private final Map<Element, Annotation> elementAnnotation = new HashMap<Element, Annotation>();
+  private final Map<Element, List<Annotation>> elementAnnotation = new HashMap<Element, List<Annotation>>();
 
   private TemplatingFinishedRegistry() {
   }
@@ -35,57 +35,85 @@ public class TemplatingFinishedRegistry {
     System.out.println("Templating finished called => "
             + beanInst.getClass().getName());
     if (beanExecutorMapping.containsKey(beanInst)) {
+      System.out.println("Found beanInst");
       for (Tuple<Element, List<TemplateFinishedElementExecutor>> elementExecutorTuple : beanExecutorMapping
               .get(beanInst)) {
+        System.out.println(" for elements");
         for (TemplateFinishedElementExecutor executor : elementExecutorTuple
                 .getValue()) {
-          executor.invoke(elementExecutorTuple.getKey(),
-                  elementAnnotation.get(elementExecutorTuple.getKey()));
+          System.out.println("For values");
+          for (Annotation elmAnnotation : elementAnnotation
+                  .get(elementExecutorTuple.getKey())) {
+            if (executor.getTargetAnnotationType().equals(
+                    elmAnnotation.annotationType()))
+              executor.invoke(elementExecutorTuple.getKey(), elmAnnotation);
+          }
         }
       }
     }
   }
 
   public void addTemplatingFinishedExecutor(
-          final Class<? extends Annotation> annotation,
           final TemplateFinishedElementExecutor templateFinishedExecutor) {
-    System.out.println("Templating executor added for " + annotation.getName());
-    if (!finishedCallbacks.containsKey(annotation)) {
-      finishedCallbacks.put(annotation,
+    System.out.println("Templating executor added for "
+            + templateFinishedExecutor.getTargetAnnotationType().getName());
+    if (!finishedCallbacks.containsKey(templateFinishedExecutor
+            .getTargetAnnotationType())) {
+      finishedCallbacks.put(templateFinishedExecutor.getTargetAnnotationType(),
               new ArrayList<TemplateFinishedElementExecutor>());
+      System.out.println("Added new annotation");
     }
-    finishedCallbacks.get(annotation).add(templateFinishedExecutor);
+    finishedCallbacks.get(templateFinishedExecutor.getTargetAnnotationType())
+            .add(templateFinishedExecutor);
 
     // Check if there are already elements that should be executed
-    for (Entry<Element, Annotation> elementAnnotationEntry : elementAnnotation
+    for (Entry<Element, List<Annotation>> elementAnnotationEntry : elementAnnotation
             .entrySet()) {
-      System.out.println("Found element and annotation => "
-              + elementAnnotationEntry.getKey().getClassName() + " with "
-              + elementAnnotationEntry.getValue().annotationType().getName());
-      if (elementAnnotationEntry.getValue().annotationType().equals(annotation)) {
-        templateFinishedExecutor.invoke(elementAnnotationEntry.getKey(),
-                elementAnnotationEntry.getValue());
+      // System.out.println("Found element and annotation => "
+      // + elementAnnotationEntry.getKey().getClassName() + " with "
+      // + elementAnnotationEntry.getValue().annotationType().getName());
+      for (Annotation elmAnnotation : elementAnnotationEntry.getValue()) {
+        if (elmAnnotation.annotationType().equals(
+                templateFinishedExecutor.getTargetAnnotationType())) {
+          templateFinishedExecutor.invoke(elementAnnotationEntry.getKey(),
+                  elmAnnotation);
+        }
       }
+    }
+  }
+
+  public void removeTemplatingFinishedExecutor(
+          final TemplateFinishedElementExecutor templateFinishedExecutor) {
+    System.out.println("Remove executor");
+    if (finishedCallbacks.containsKey(templateFinishedExecutor
+            .getTargetAnnotationType())) {
+      finishedCallbacks.get(templateFinishedExecutor.getTargetAnnotationType())
+              .remove(templateFinishedExecutor);
+      System.out.println("Executor REMOVED! "
+              + finishedCallbacks.get(
+                      templateFinishedExecutor.getTargetAnnotationType())
+                      .size());
     }
   }
 
   public void addBeanElement(Object beanInst, Element element,
           Annotation annotation) {
-    System.out.println("Templating add element for "
-            + annotation.getClass().getName());
     if (!beanExecutorMapping.containsKey(beanInst)) {
       beanExecutorMapping
               .put(beanInst,
                       new ArrayList<Tuple<Element, List<TemplateFinishedElementExecutor>>>());
     }
     List<TemplateFinishedElementExecutor> executors = finishedCallbacks
-            .get(annotation.getClass());
+            .get(annotation.annotationType());
     if (executors == null) {
-      finishedCallbacks.put(annotation.getClass(),
-              new ArrayList<TemplateFinishedElementExecutor>());
+      executors = new ArrayList<TemplateFinishedElementExecutor>();
+      finishedCallbacks.put(annotation.getClass(), executors);
     }
     beanExecutorMapping.get(beanInst).add(Tuple.of(element, executors));
-    elementAnnotation.put(element, annotation);
+    if (!elementAnnotation.containsKey(element)) {
+      elementAnnotation.put(element, new ArrayList<Annotation>());
+    }
+    elementAnnotation.get(element).add(annotation);
   }
 
   public void removeTemplatedBean(Object beanInst) {
