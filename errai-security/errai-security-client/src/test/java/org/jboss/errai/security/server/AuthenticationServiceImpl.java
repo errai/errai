@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.api.identity.Role;
@@ -29,7 +28,6 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
 
 @Service
 @ApplicationScoped
-@Alternative
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   private String username;

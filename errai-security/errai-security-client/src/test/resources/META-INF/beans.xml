@@ -3,7 +3,4 @@
   <interceptors>
     <class>org.jboss.errai.security.server.ServerSecurityRoleInterceptor</class>
   </interceptors>
-  <alternatives>
-    <class>org.jboss.errai.security.server.AuthenticationServiceImpl</class>
-  </alternatives>
 </beans>
