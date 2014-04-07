@@ -168,8 +168,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       }
     }
 
-    if (destructionStatements.isEmpty())
-      return null;
+    destructionStatements.add(Stmt.invokeStatic(TemplateFinishedRegistry.class, "get").invoke("removeTemplatedBean",
+        Refs.get(ctx.getInjector().getInstanceVarName())));
 
     Statement destructionLogic =
       Stmt.loadVariable("context").invoke("addDestructionCallback",

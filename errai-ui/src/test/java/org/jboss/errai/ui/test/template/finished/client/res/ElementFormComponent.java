@@ -7,8 +7,6 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -28,14 +26,6 @@ public class ElementFormComponent extends Composite {
   @DataField
   private PasswordTextBox password;
 
-  @Inject
-  @DataField("remember")
-  private CheckBox rememberMe;
-
-  @Inject
-  @DataField
-  private Button submit;
-
   public Element getForm() {
     return form;
   }
@@ -47,13 +37,4 @@ public class ElementFormComponent extends Composite {
   public PasswordTextBox getPassword() {
     return password;
   }
-
-  public CheckBox getRememberMe() {
-    return rememberMe;
-  }
-
-  public Button getSubmit() {
-    return submit;
-  }
-
 }

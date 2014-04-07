@@ -24,7 +24,6 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   private int invokeTimes = 0;
   private List<TemplateFinishedElementExecutor> executors;
   private boolean addClass;
-  private boolean isAllowed;
 
   @Override
   public String getModuleName() {
@@ -36,7 +35,6 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
   public void gwtSetUp() throws Exception {
     super.gwtSetUp();
     addClass = true;
-    isAllowed = true;
     invokeTimes = 0;
     executors = new ArrayList<TemplateFinishedElementExecutor>();
   }
@@ -60,7 +58,7 @@ public class ElementTemplateFinishedTest extends AbstractErraiCDITest {
             .lookupBean(ElementFormComponent.class).newInstance();
 
     assertTrue(form.getUsername().getElement().getClassName()
-            .endsWith("testing-classname"));
+            .equals("input-xlarge testing-classname"));
     assertEquals(1, invokeTimes);
     IOC.getBeanManager().destroyBean(form);
   }

@@ -48,6 +48,7 @@ public class TemplateFinishedCodeDecorator extends
               "problem with template finished binding. element target type is invalid: "
                       + ctx.getTaskType() + " . Only Fields are supported.");
     }
+
     final List<Statement> stmts = new ArrayList<Statement>();
 
     // Check that it is not already done with this field. That is a workaround
