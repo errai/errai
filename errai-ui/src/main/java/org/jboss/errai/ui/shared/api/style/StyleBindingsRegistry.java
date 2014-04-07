@@ -1,7 +1,5 @@
 package org.jboss.errai.ui.shared.api.style;
 
-import com.google.gwt.user.client.Element;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.gwt.user.client.Element;
 
 /**
  * @author Mike Brock
@@ -22,6 +22,7 @@ public class StyleBindingsRegistry {
   private final Map<Object, List<Object>> houseKeepingMap = new HashMap<Object, List<Object>>();
 
   private final Map<Class<? extends Annotation>, List<StyleBindingExecutor>> styleBindings = new HashMap<Class<? extends Annotation>, List<StyleBindingExecutor>>();
+  private final List<Object> beansWithStyleBindings = new ArrayList<Object>();
 
   private final Map<Annotation, List<ElementBinding>> elementBindings = new HashMap<Annotation, List<ElementBinding>>();
 
@@ -34,6 +35,7 @@ public class StyleBindingsRegistry {
       styleBindings.put(annotation, styleBindingList = new ArrayList<StyleBindingExecutor>());
     }
     styleBindingList.add(binding);
+    
     recordHouskeepingData(beanInst, binding);
 
     updateStyles();
@@ -63,6 +65,7 @@ public class StyleBindingsRegistry {
       houseKeepingMap.put(beanInst, toCleanList = new ArrayList<Object>());
     }
     toCleanList.add(toClean);
+    beansWithStyleBindings.add(beanInst);
   }
 
   public void cleanAllForBean(final Object beanInst) {
@@ -78,6 +81,7 @@ public class StyleBindingsRegistry {
       }
 
       houseKeepingMap.remove(beanInst);
+      beansWithStyleBindings.remove(beanInst);
     }
   }
 
@@ -100,6 +104,12 @@ public class StyleBindingsRegistry {
           }
         }
       }
+    }
+  }
+  
+  public void updateStyles(Object beanInst) {
+    if (beansWithStyleBindings.contains(beanInst)) {
+      updateStyles();
     }
   }
 

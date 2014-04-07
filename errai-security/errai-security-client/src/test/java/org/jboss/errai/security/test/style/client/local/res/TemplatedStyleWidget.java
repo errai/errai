@@ -22,21 +22,22 @@ import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 
 @Templated
 public class TemplatedStyleWidget extends Composite {
-  
+
   @Inject
   @DataField
   private Anchor control;
-  
+
   @Inject
   @DataField
   @RestrictedAccess(roles = "user")
   private Anchor userAnchor;
-  
+
   @Inject
   @DataField
   @RestrictedAccess(roles = "admin")
@@ -44,8 +45,14 @@ public class TemplatedStyleWidget extends Composite {
 
   @Inject
   @DataField
-  @RestrictedAccess(roles = {"user", "admin"})
+  @RestrictedAccess(roles = { "user", "admin" })
   private Anchor userAdminAnchor;
+
+  @Inject
+  @DataField
+  @CustomBinding
+  @RestrictedAccess
+  private Anchor customStyledUserAnchor;
 
   public Anchor getUserAnchor() {
     return userAnchor;
@@ -61,6 +68,15 @@ public class TemplatedStyleWidget extends Composite {
 
   public Anchor getControl() {
     return control;
+  }
+
+  public Anchor getCustomStyledUserAnchor() {
+    return customStyledUserAnchor;
+  }
+  
+  @CustomBinding
+  private void testBindingStyleUpdate(Style style) {
+    style.setColor("red");
   }
 
 }

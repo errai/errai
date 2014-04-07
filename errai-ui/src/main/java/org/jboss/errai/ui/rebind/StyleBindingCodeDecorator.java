@@ -18,7 +18,6 @@ package org.jboss.errai.ui.rebind;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.Parameter;
@@ -110,19 +109,6 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
         .invoke("addElementBinding", Refs.get(ctx.getInjector().getInstanceVarName()),
             ctx.getRawAnnotation(),
             Stmt.nestedCall(valueAccessor).invoke("getElement")));
-
-    if (!ctx.getInjector().hasAttribute(StyleBindingCodeDecorator.class.getName())) {
-      final Statement initCallback = InjectUtil.createInitializationCallback(ctx.getEnclosingType(), "obj",
-          Collections.<Statement>singletonList(
-              Stmt.invokeStatic(StyleBindingsRegistry.class, "get").invoke("updateStyles"))
-      );
-
-      stmts.add(Stmt.loadVariable("context")
-          .invoke("addInitializationCallback", Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
-
-
-      ctx.getInjector().setAttribute(StyleBindingCodeDecorator.class.getName(), Boolean.TRUE);
-    }
 
     addCleanup(ctx, stmts);
 

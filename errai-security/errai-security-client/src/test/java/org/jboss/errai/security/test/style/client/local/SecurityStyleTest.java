@@ -32,6 +32,7 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.test.style.client.local.res.TemplatedStyleWidget;
 import org.junit.Test;
 
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SecurityStyleTest extends AbstractErraiCDITest {
@@ -142,9 +143,35 @@ public class SecurityStyleTest extends AbstractErraiCDITest {
     });
   }
   
+  @Test
+  public void testAdditionalStyleBindingApplied() throws Exception {
+    asyncTest();
+    addPostInitTask(new Runnable() {
+      
+      @Override
+      public void run() {
+        final TemplatedStyleWidget widget = bm.lookupBean(TemplatedStyleWidget.class).getInstance();
+
+        Anchor customStyledUserAnchor = widget.getCustomStyledUserAnchor();
+        String color = customStyledUserAnchor.getElement().getStyle().getColor();
+        String bgColor = customStyledUserAnchor.getElement().getStyle().getBackgroundColor();
+        
+        assertEquals("Custom style binding not applied", "red", color);
+        assertEquals("Custom style binding not applied", "blue", bgColor);
+        assertTrue(hasStyle(RestrictedAccess.CSS_CLASS_NAME, customStyledUserAnchor));
+        
+        securityContext.getActiveUserCache().setUser(adminUser);
+        assertEquals("Custom style binding not applied", "red", color);
+        assertEquals("Custom style binding not applied", "blue", bgColor);
+        assertFalse(hasStyle(RestrictedAccess.CSS_CLASS_NAME, customStyledUserAnchor));
+        
+        finishTest();
+      }
+    });
+  }
+  
   private boolean hasStyle(final String name, final Widget widget) {
     String cssClasses = widget.getElement().getAttribute("class");
     return cssClasses != null && cssClasses.contains(name);
   }
-
 }
