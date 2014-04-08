@@ -6686,25 +6686,22 @@ Here are the important things that are happening here:
 
 ==== Authentication from the Client
 
-Once you've created some users and roles, you're ready to write some client-side code. The easiest way to perform authentication-related tasks from the client is using the `org.jboss.errai.security.clent.local.identity.Identity` class.
+Once you've created some users and roles, you're ready to write some client-side code. Authentication is performed with the `org.jboss.errai.security.shared.service.AuthenticationService` via Errai RPC.
 
 Here is some sample code involving the user _john_ from the previous Security Demo excerpt.
 
-* Injecting the `Identity`:
+* Injecting the `Caller<AuthenticationService>`:
 +
 [source,java]
 ----
-@Inject Identity identity;
+@Inject Caller<AuthenticationService> authServiceCaller;
 ----
 
 * Logging in:
 +
 [source,java]
 ----
-identity.setUsername("john");
-identity.setPassword("123");
-
-identity.login(new RemoteCallback<User>() {
+authServiceCaller.call(new RemoteCallback<User>() {
 
     @Override
     public void callback(User user) {
@@ -6721,59 +6718,38 @@ identity.login(new RemoteCallback<User>() {
       // Returning true causes the error to propogate to top-level handlers
       return true;
     }
-  });
+  }).login("john", "123");
 ----
 
 * Getting the currently authenticated User:
 +
 [source,java]
 ----
-identity.getUser(new RemoteCallback<User>() {
+authServiceCaller.call(new RemoteCallback<User>() {
 
     @Override
     public void callback(User user) {
-      if (user != null) {
+      if (!user.equals(User.ANONYMOUS)) {
         // Do something because we're logged in.
       }
       else {
         // Do something else because we're not logged in.
       }
     }
-  });
-----
-
-* Checking if a user has a given set of roles:
-+
-[source,java]
-----
-identity.hasPermission(new RemoteCallback<Boolean>() {
-
-    @Override
-    public void callback(Boolean result) {
-      if (result) {
-        // Success!
-      }
-    }
-  }, "simple", "admin");
+  }).getUser();
 ----
 
 * Logging out:
 +
 [source,java]
 ----
-identity.logout();
+authServiceCaller.call().logout();
 ----
 
 [NOTE]
-.Remote Procedure Calls
+.AuthenticationService Caching
 ====
-The above methods are implemented with Errai RPC calls to the service `org.jboss.errai.security.shared.service.AuthenticationService`. However, client-side interceptors are used for caching so that generally only calls to `login` and `logout` must be sent over the wire.
-====
-
-[TIP]
-.DataBinding with Identity
-====
-The Identity class is annotated with `@Bindable` so that it can be bound to a login form. You can checkout the documentation on Errai DataBinding or see an example in link:$$https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/client/local/LoginForm.java$$[Errai Security].
+Client-side interceptors are used for caching so that generally only calls to `login` and `logout` must be sent over the wire. The cache is automatically invalidated when a service throws an `UnauthetnticatedException`, but it can also be invalidated manually via the `SecurityContext`.
 ====
 
 === RestrictedAccess
@@ -6848,9 +6824,9 @@ MessageBuilder.createCall(new RemoteCallback<Void>() {
 ----
 
 [IMPORTANT]
-.DefaultSecurityErrorCallback
+.DefaultBusSecurityErrorCallback
 ====
-Errai Security provides a default global RPC handler that catches any thrown `UnauthenticatedException` or `UnauthorizedExceptions` and navigates to the page with the `LoginPage` or `SecurityError` role respectively.
+Errai Security provides a default global RPC handler that catches a thrown `UnauthenticatedException` or `UnauthorizedException` and navigates to the page with the `LoginPage` or `SecurityError` role respectively.
 ====
 
 ==== Page Navigation
@@ -6867,19 +6843,19 @@ Here are two simple examples:
 @RestrictedAccess
 public class UserProfilePage extends SimplePanel {
 
-  @Inject private Identity identity;
+  @Inject private Caller<AuthenticationService> authServiceCaller;
   private User user;
 
   @PageShowing
   private void setupPage() {
-    identity.getUser(new RemoteCallback<User>() {
+    authServiceCaller.call(new RemoteCallback<User>() {
         @Override
         public void callback(User response) {
-          // We don't have to check if this is null, since the page requires authentication.
+          // We don't have to check if this is a valid user, since the page requires authentication.
           user = response;
           // do setup...
         }
-    });
+    }).getUser();
   }
 
 }
@@ -6898,7 +6874,7 @@ public class AdminManagementPage extends SimplePanel {
 [IMPORTANT]
 .Redirection
 ====
-When a user is denied access to a page they will be redirected to `LoginPage` or `SecurityError`. To direct a user to the page they were trying to reach after successful login, `@Inject` and invoke the `org.jboss.errai.security.client.local.nav.PageReturn`.
+When a user is denied access to a page they will be redirected to `LoginPage` or `SecurityError`. To direct a user to the page they were trying to reach after successful login, `@Inject` the `SecurityContext` and invoke the `navigateBackOrHome` method.
 ====
 
 ===== Page Redirection and Caching
@@ -6909,18 +6885,18 @@ But the drawback is that any attempts to navigate to a secured `@Page` before th
 
 In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.
 
-One option offered by Errai is to persist the `org.jboss.errai.security.shared.api.identity.User` object in the browsers local storage. This can be done by adding the following to `ErraiApp.properties`:
+One option offered by Errai is to persist the `org.jboss.errai.security.shared.api.identity.User` object in a cookie. This can be done by adding the following to `ErraiApp.properties`:
 
 ----
 errai.security.userLocalStorage=true
 ----
 
-With this option enabled the `User` will be persisted to local storage, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline.
+With this option enabled the `User` will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.
 
 [IMPORTANT]
 .User is stored in plain text
 ====
-The `errai.security.userLocalStorage=true` setting causes the `User` to be stored in *plain text* in local storage. That includes the following information:
+The `errai.security.userLocalStorage=true` setting causes the `User` to be stored in *plain text*. That includes the following information:
 
 * The user's login name.
 * The user's full name.
@@ -6928,7 +6904,7 @@ The `errai.security.userLocalStorage=true` setting causes the `User` to be store
 * The user's security roles.
 ====
 
-If you do not wish to use local storage, you will likely want to handle this case in the `@PageShowing` method of your `LoginPage`. Here is an outline of what you might want to do:
+If you do not wish to use this feature you will likely want to handle this case in the `@PageShowing` method of your `LoginPage`. Here is an outline of what you might want to do:
 
 [source,java]
 ----
@@ -6958,11 +6934,11 @@ public class ExampleLoginPage extends Composite {
       // Force cache to update by calling getUser
       authService.call(new RemoteCallback<User> {
         @Override
-        public void callback(User response) {
+        public void callback(User user) {
           /* An interceptor will have updated the cache by now.
              So check if we are logged in and redirect if necessary.
           */
-          if (response != null) {
+          if (!user.equals(User.ANONYMOUS)) {
             /* This is a special transition that takes us back to
                a secure page from which we were redirected. */
             securityContext.navigateBackOrHome();
@@ -6971,18 +6947,12 @@ public class ExampleLoginPage extends Composite {
             status.setText("You are not logged in.");
           }
         }
-      });
+      }).getUser();
     }
   }
 
 }
 ----
-
-[TIP]
-.Inject the AciveUserCache
-====
-You can also `@Inject` the `ActiveUserCache` directly.
-====
 
 ==== Hiding UI Elements
 
