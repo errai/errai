@@ -16,47 +16,45 @@ import com.google.gwt.user.client.Element;
 public class StyleBindingsRegistry {
   private static final StyleBindingsRegistry INSTANCE = new StyleBindingsRegistry();
 
-  private StyleBindingsRegistry() {
-  }
+  private StyleBindingsRegistry() {}
 
   private final Map<Object, List<Object>> houseKeepingMap = new HashMap<Object, List<Object>>();
-
-  private final Map<Class<? extends Annotation>, List<StyleBindingExecutor>> styleBindings = new HashMap<Class<? extends Annotation>, List<StyleBindingExecutor>>();
-  private final List<Object> beansWithStyleBindings = new ArrayList<Object>();
+  private final Map<Class<? extends Annotation>, List<StyleBindingExecutor>> styleBindings =
+      new HashMap<Class<? extends Annotation>, List<StyleBindingExecutor>>();
 
   private final Map<Annotation, List<ElementBinding>> elementBindings = new HashMap<Annotation, List<ElementBinding>>();
-
-  private final Map<Class<? extends Annotation>, Set<Annotation>> mapping = new HashMap<Class<? extends Annotation>, Set<Annotation>>();
+  private final Map<Class<? extends Annotation>, Set<Annotation>> mapping =
+      new HashMap<Class<? extends Annotation>, Set<Annotation>>();
 
   public void addStyleBinding(final Object beanInst, final Class<? extends Annotation> annotation,
           final StyleBindingExecutor binding) {
+
     List<StyleBindingExecutor> styleBindingList = styleBindings.get(annotation);
     if (styleBindingList == null) {
       styleBindings.put(annotation, styleBindingList = new ArrayList<StyleBindingExecutor>());
     }
     styleBindingList.add(binding);
-    
     recordHouskeepingData(beanInst, binding);
-
     updateStyles();
   }
 
   public void addElementBinding(final Object beanInst, final Annotation annotation, final Element element) {
-    addElementBinding(beanInst, annotation, new ElementBinding(this, element));
+    System.out.println("ELEMENT BINDING: " + beanInst.getClass());
+    addElementBinding(annotation, new ElementBinding(this, element, beanInst));
   }
 
-  private void addElementBinding(final Object beanInst, final Annotation annotation, final ElementBinding element) {
+  private void addElementBinding(final Annotation annotation, final ElementBinding binding) {
     List<ElementBinding> elementsList = elementBindings.get(annotation);
     if (elementsList == null) {
       elementBindings.put(annotation, elementsList = new ArrayList<ElementBinding>());
     }
-    elementsList.add(element);
+    elementsList.add(binding);
     Set<Annotation> mappedAnnotations = mapping.get(annotation.annotationType());
     if (mappedAnnotations == null) {
       mapping.put(annotation.annotationType(), mappedAnnotations = new HashSet<Annotation>());
     }
     mappedAnnotations.add(annotation);
-    recordHouskeepingData(beanInst, element);
+    recordHouskeepingData(binding.getBeanInstance(), binding);
   }
 
   private void recordHouskeepingData(final Object beanInst, final Object toClean) {
@@ -65,7 +63,6 @@ public class StyleBindingsRegistry {
       houseKeepingMap.put(beanInst, toCleanList = new ArrayList<Object>());
     }
     toCleanList.add(toClean);
-    beansWithStyleBindings.add(beanInst);
   }
 
   public void cleanAllForBean(final Object beanInst) {
@@ -81,35 +78,34 @@ public class StyleBindingsRegistry {
       }
 
       houseKeepingMap.remove(beanInst);
-      beansWithStyleBindings.remove(beanInst);
     }
   }
 
   public void updateStyles() {
+    updateStyles(null);
+  }
+
+  public void updateStyles(Object beanInst) {
     for (final Map.Entry<Class<? extends Annotation>, List<StyleBindingExecutor>> entry : styleBindings.entrySet()) {
       if (mapping.containsKey(entry.getKey())) {
         for (final Annotation mappedAnnotation : mapping.get(entry.getKey())) {
           final List<ElementBinding> elementList = elementBindings.get(mappedAnnotation);
           if (elementList != null) {
-            for (final ElementBinding element : elementList) {
-              for (final StyleBindingExecutor executor : entry.getValue()) {
-                if (executor instanceof AnnotationStyleBindingExecutor) {
-                  ((AnnotationStyleBindingExecutor) executor).invokeBinding(element.getElement(), mappedAnnotation);
-                }
-                else {
-                  executor.invokeBinding(element.getElement());
+            for (final ElementBinding binding : elementList) {
+              if (beanInst == null || beanInst.equals(binding.getBeanInstance())) {
+                for (final StyleBindingExecutor executor : entry.getValue()) {
+                  if (executor instanceof AnnotationStyleBindingExecutor) {
+                    ((AnnotationStyleBindingExecutor) executor).invokeBinding(binding.getElement(), mappedAnnotation);
+                  }
+                  else {
+                    executor.invokeBinding(binding.getElement());
+                  }
                 }
               }
             }
           }
         }
       }
-    }
-  }
-  
-  public void updateStyles(Object beanInst) {
-    if (beansWithStyleBindings.contains(beanInst)) {
-      updateStyles();
     }
   }
 

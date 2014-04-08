@@ -125,8 +125,7 @@ public final class TemplateUtil {
     initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
     DOM.setEventListener(component.getElement(), component);
     
-    // TODO
-    StyleBindingsRegistry.get().updateStyles();
+    StyleBindingsRegistry.get().updateStyles(component);
   }
 
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
