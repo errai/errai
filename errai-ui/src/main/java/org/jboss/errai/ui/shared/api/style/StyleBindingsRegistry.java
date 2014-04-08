@@ -39,7 +39,6 @@ public class StyleBindingsRegistry {
   }
 
   public void addElementBinding(final Object beanInst, final Annotation annotation, final Element element) {
-    System.out.println("ELEMENT BINDING: " + beanInst.getClass());
     addElementBinding(annotation, new ElementBinding(this, element, beanInst));
   }
 
