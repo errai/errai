@@ -29,9 +29,10 @@ public class ErraiSimpleFormatter extends Formatter {
     date.setTime(record.getMillis());
     // Get simple class name of logger
     String name = record.getLoggerName().substring(Math.max(record.getLoggerName().lastIndexOf(".") + 1, 0));
+    Object thrown = (record.getThrown() != null) ? record.getThrown() : "";
 
     return StringFormat.format(getSimpleFormatString(defaultFormat), date, record.getLoggerName(), name, record
-            .getLevel().getName(), record.getMessage(), record.getThrown());
+            .getLevel().getName(), record.getMessage(), thrown);
   }
   
   /**
