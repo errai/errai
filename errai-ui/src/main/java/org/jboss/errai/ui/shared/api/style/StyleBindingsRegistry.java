@@ -14,9 +14,7 @@ import com.google.gwt.user.client.Element;
  * @author Mike Brock
  */
 public class StyleBindingsRegistry {
-  private static final StyleBindingsRegistry INSTANCE = new StyleBindingsRegistry();
-
-  private StyleBindingsRegistry() {}
+  private static StyleBindingsRegistry INSTANCE = new StyleBindingsRegistry();
 
   private final Map<Object, List<Object>> houseKeepingMap = new HashMap<Object, List<Object>>();
   private final Map<Class<? extends Annotation>, List<StyleBindingExecutor>> styleBindings =
@@ -110,5 +108,9 @@ public class StyleBindingsRegistry {
 
   public static StyleBindingsRegistry get() {
     return INSTANCE;
+  }
+  
+  public static void set(StyleBindingsRegistry registry) {
+    INSTANCE = registry;
   }
 }

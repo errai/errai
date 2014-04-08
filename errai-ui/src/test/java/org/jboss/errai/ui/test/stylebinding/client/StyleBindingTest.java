@@ -22,6 +22,7 @@ import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.jboss.errai.ui.test.stylebinding.client.res.StyleBoundTemplate;
 import org.jboss.errai.ui.test.stylebinding.client.res.StyleControl;
+import org.jboss.errai.ui.test.stylebinding.client.res.TestModel;
 
 /**
  * @author Mike Brock
@@ -73,4 +74,29 @@ public class StyleBindingTest extends AbstractErraiCDITest {
 
     assertEquals("hidden", instance.getTestA().getElement().getStyle().getVisibility());
   }
+  
+  public void testDestroyingBeanCleansUpPropertyChangeHandler() {
+    StyleBindingsRegistry registry = new StyleBindingsRegistry() {
+      @Override
+      public void updateStyles(Object beanInst) {
+        fail("updateStyles should not be called after bean was destroyed");
+      }
+    };
+    
+    final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    final StyleBoundTemplate instance = bean.getInstance();
+    TestModel model = instance.getTestModel();
+    model.setTestB("");
+    
+    assertEquals("", instance.getTestB().getText());
+    assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
+
+    IOC.getBeanManager().destroyBean(instance);
+    StyleBindingsRegistry.set(registry);
+    
+    model.setTestB("0");
+    assertEquals("", instance.getTestB().getText());
+    assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
+  }
+  
 }

@@ -67,7 +67,7 @@ public class PropertyChangeHandlerSupport {
   /**
    * Removes a {@link PropertyChangeHandler} from the list of handlers. If the handler was added
    * more than once to the same event source, it will be notified one less time after being removed.
-   * If listener is null, or was never added, no exception is thrown and no action is taken.
+   * If handler is null, or was never added, no exception is thrown and no action is taken.
    * 
    * @param handler
    *          The {@link PropertyChangeHandler} to remove.
@@ -79,7 +79,7 @@ public class PropertyChangeHandlerSupport {
   /**
    * Removes a {@link PropertyChangeHandler}, causing it no longer to be notified only when the
    * given property of the bound object changes. If the same handler instance was added for the same
-   * property multiple times, it will be notified one less time per change than before. If listener
+   * property multiple times, it will be notified one less time per change than before. If handler
    * is null, was never added, or the property name does not correspond to a property of the bound
    * object, no exception is thrown and no action is taken.
    * 

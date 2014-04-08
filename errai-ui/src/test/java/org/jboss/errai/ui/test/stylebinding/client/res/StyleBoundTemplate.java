@@ -1,15 +1,16 @@
 package org.jboss.errai.ui.test.stylebinding.client.res;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
+import javax.inject.Inject;
+
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.inject.Inject;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 
 /**
  * @author Mike Brock
@@ -38,5 +39,9 @@ public class StyleBoundTemplate extends Composite {
      if ("0".equals(getTestModel().getTestB())) {
        style.setVisibility(Style.Visibility.HIDDEN);
      }
+     else {
+       style.clearVisibility();
+     }
   }
+
 }

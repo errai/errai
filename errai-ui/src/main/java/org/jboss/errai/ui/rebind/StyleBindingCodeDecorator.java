@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.rebind.DataBindingUtil;
@@ -57,37 +58,37 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
     final Statement valueAccessor;
 
     switch (ctx.getTaskType()) {
-      case Method:
-      case PrivateMethod:
-        final MetaParameter[] parameters = ctx.getMethod().getParameters();
-        if (!ctx.getMethod().getReturnType().isVoid() && parameters.length == 0) {
-          valueAccessor = InjectUtil.invokePublicOrPrivateMethod(
+    case Method:
+    case PrivateMethod:
+      final MetaParameter[] parameters = ctx.getMethod().getParameters();
+      if (!ctx.getMethod().getReturnType().isVoid() && parameters.length == 0) {
+        valueAccessor = InjectUtil.invokePublicOrPrivateMethod(
               ctx.getInjectionContext(),
               Refs.get(ctx.getInjector().getInstanceVarName()),
               ctx.getMethod());
-        }
-        else if (ctx.getMethod().getReturnType().isVoid() && parameters.length == 1) {
-          // this method returns void and accepts exactly one parm. assume it's a handler method.
-          return bindHandlingMethod(ctx, parameters[0]);
-        }
-        else {
-          throw new RuntimeException("problem with style binding. method is not a valid binding " + ctx.getMethod());
-        }
-        break;
+      }
+      else if (ctx.getMethod().getReturnType().isVoid() && parameters.length == 1) {
+        // this method returns void and accepts exactly one parm. assume it's a handler method.
+        return bindHandlingMethod(ctx, parameters[0]);
+      }
+      else {
+        throw new RuntimeException("problem with style binding. method is not a valid binding " + ctx.getMethod());
+      }
+      break;
 
-      case Field:
-      case PrivateField:
-        valueAccessor = InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext(),
+    case Field:
+    case PrivateField:
+      valueAccessor = InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext(),
             Refs.get(ctx.getInjector().getInstanceVarName()), ctx.getField());
-        break;
+      break;
 
-      case Type:
-        // for api annotations being on a type is allowed.
-        if (ctx.getRawAnnotation().annotationType().getPackage().getName().startsWith("org.jboss.errai")) {
-          return new ArrayList<Statement>();
-        }
-      default:
-        throw new RuntimeException("problem with style binding. element target type is invalid: " + ctx.getTaskType());
+    case Type:
+      // for api annotations being on a type is allowed.
+      if (ctx.getRawAnnotation().annotationType().getPackage().getName().startsWith("org.jboss.errai")) {
+        return new ArrayList<Statement>();
+      }
+    default:
+      throw new RuntimeException("problem with style binding. element target type is invalid: " + ctx.getTaskType());
     }
 
     final List<Statement> stmts = new ArrayList<Statement>();
@@ -98,10 +99,12 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
       if (!ctx.getInjector().hasAttribute(DATA_BINDING_CONFIG_ATTR)) {
         ctx.getInjector().setAttribute(DATA_BINDING_CONFIG_ATTR, Boolean.TRUE);
 
+        stmts.add(Stmt.declareFinalVariable("bindingChangeHandler", StyleBindingChangeHandler.class,
+            Stmt.newObject(StyleBindingChangeHandler.class)));
         stmts.add(Stmt.nestedCall(
             dataBinder.getValueAccessor()).invoke("addPropertyChangeHandler",
-            Stmt.newObject(StyleBindingChangeHandler.class))
-        );
+            Stmt.loadVariable("bindingChangeHandler"))
+            );
       }
     }
 
@@ -115,7 +118,8 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
     return stmts;
   }
 
-  private static List<? extends Statement> bindHandlingMethod(final InjectableInstance<?> ctx, final MetaParameter parameter) {
+  private static List<? extends Statement> bindHandlingMethod(final InjectableInstance<?> ctx,
+      final MetaParameter parameter) {
     final Statement elementAccessor;
     if (MetaClassFactory.get(Element.class).isAssignableFrom(parameter.getType())) {
       elementAccessor = Refs.get("element");
@@ -145,15 +149,22 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
                 ctx.getRawAnnotation().annotationType(), bindExec));
     addCleanup(ctx, stmts);
 
-
     return stmts;
   }
 
   private static void addCleanup(final InjectableInstance<?> ctx, final List<Statement> stmts) {
+    final DataBindingUtil.DataBinderRef dataBinder = DataBindingUtil.lookupDataBinderRef(ctx);
+
     if (!ctx.getInjector().hasAttribute(STYLE_BINDING_HOUSEKEEPING_ATTR)) {
-      final Statement destructionCallback = InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj",
-          Arrays.<Statement>asList(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
-              .invoke("cleanAllForBean", Refs.get(ctx.getInjector().getInstanceVarName()))));
+      final Statement destructionCallback =
+          InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj",
+              Arrays.<Statement> asList(
+                  Stmt.invokeStatic(StyleBindingsRegistry.class, "get").invoke("cleanAllForBean",
+                      Refs.get(ctx.getInjector().getInstanceVarName())),
+                  (dataBinder != null) ? Stmt.nestedCall(dataBinder.getValueAccessor()).invoke(
+                      "removePropertyChangeHandler", Stmt.loadVariable("bindingChangeHandler")) : EmptyStatement.INSTANCE)
+
+          );
 
       stmts.add(Stmt.loadVariable("context").invoke("addDestructionCallback",
           Refs.get(ctx.getInjector().getInstanceVarName()),
