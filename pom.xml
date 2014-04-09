@@ -135,7 +135,7 @@
       <dependency>
         <groupId>org.jboss.integration-platform</groupId>
         <artifactId>jboss-integration-platform-bom</artifactId>
-        <version>6.0.0.CR3</version>
+        <version>6.0.0.CR6</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -314,20 +314,6 @@
         <groupId>com.googlecode.gwtphonegap</groupId>
         <artifactId>gwtphonegap</artifactId>
         <version>2.4.0.0</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.appengine</groupId>
-        <artifactId>appengine-api-1.0-sdk</artifactId>
-        <version>${appengine.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.appengine</groupId>
-        <artifactId>appengine-api-labs</artifactId>
-        <version>${appengine.version}</version>
-        <scope>provided</scope>
       </dependency>
 
       <dependency>
