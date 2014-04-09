@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-03-26</date>
+    <date>2014-04-09</date>
     
     
     
@@ -6010,15 +6010,15 @@ public class PicketLinkDefaultUsers {
 </section>
 <section id="_authentication_from_the_client">
 <title>Authentication from the Client</title>
-<simpara>Once you&#8217;ve created some users and roles, you&#8217;re ready to write some client-side code. The easiest way to perform authentication-related tasks from the client is using the <literal>org.jboss.errai.security.clent.local.identity.Identity</literal> class.</simpara>
+<simpara>Once you&#8217;ve created some users and roles, you&#8217;re ready to write some client-side code. Authentication is performed with the <literal>org.jboss.errai.security.shared.service.AuthenticationService</literal> via Errai RPC.</simpara>
 <simpara>Here is some sample code involving the user <emphasis>john</emphasis> from the previous Security Demo excerpt.</simpara>
 
 <itemizedlist>
   
     <listitem>
-      <simpara>Injecting the <literal>Identity</literal>:</simpara>
+      <simpara>Injecting the <literal>Caller&lt;AuthenticationService&gt;</literal>:</simpara>
       
-<programlisting language="java" linenumbering="unnumbered">@Inject Identity identity;</programlisting>
+<programlisting language="java" linenumbering="unnumbered">@Inject Caller&lt;AuthenticationService&gt; authServiceCaller;</programlisting>
 
       
     </listitem>
@@ -6026,10 +6026,7 @@ public class PicketLinkDefaultUsers {
     <listitem>
       <simpara>Logging in:</simpara>
       
-<programlisting language="java" linenumbering="unnumbered">identity.setUsername("john");
-identity.setPassword("123");
-
-identity.login(new RemoteCallback&lt;User&gt;() {
+<programlisting language="java" linenumbering="unnumbered">authServiceCaller.call(new RemoteCallback&lt;User&gt;() {
 
     @Override
     public void callback(User user) {
@@ -6046,7 +6043,7 @@ identity.login(new RemoteCallback&lt;User&gt;() {
       // Returning true causes the error to propogate to top-level handlers
       return true;
     }
-  });</programlisting>
+  }).login("john", "123");</programlisting>
 
       
     </listitem>
@@ -6054,34 +6051,18 @@ identity.login(new RemoteCallback&lt;User&gt;() {
     <listitem>
       <simpara>Getting the currently authenticated User:</simpara>
       
-<programlisting language="java" linenumbering="unnumbered">identity.getUser(new RemoteCallback&lt;User&gt;() {
+<programlisting language="java" linenumbering="unnumbered">authServiceCaller.call(new RemoteCallback&lt;User&gt;() {
 
     @Override
     public void callback(User user) {
-      if (user != null) {
+      if (!user.equals(User.ANONYMOUS)) {
         // Do something because we're logged in.
       }
       else {
         // Do something else because we're not logged in.
       }
     }
-  });</programlisting>
-
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Checking if a user has a given set of roles:</simpara>
-      
-<programlisting language="java" linenumbering="unnumbered">identity.hasPermission(new RemoteCallback&lt;Boolean&gt;() {
-
-    @Override
-    public void callback(Boolean result) {
-      if (result) {
-        // Success!
-      }
-    }
-  }, "simple", "admin");</programlisting>
+  }).getUser();</programlisting>
 
       
     </listitem>
@@ -6089,7 +6070,7 @@ identity.login(new RemoteCallback&lt;User&gt;() {
     <listitem>
       <simpara>Logging out:</simpara>
       
-<programlisting language="java" linenumbering="unnumbered">identity.logout();</programlisting>
+<programlisting language="java" linenumbering="unnumbered">authServiceCaller.call().logout();</programlisting>
 
       
     </listitem>
@@ -6097,18 +6078,14 @@ identity.login(new RemoteCallback&lt;User&gt;() {
 </itemizedlist>
 
 <note>
-<title>Remote Procedure Calls</title>
-<simpara>The above methods are implemented with Errai RPC calls to the service <literal>org.jboss.errai.security.shared.service.AuthenticationService</literal>. However, client-side interceptors are used for caching so that generally only calls to <literal>login</literal> and <literal>logout</literal> must be sent over the wire.</simpara>
+<title>AuthenticationService Caching</title>
+<simpara>Client-side interceptors are used for caching so that generally only calls to <literal>login</literal> and <literal>logout</literal> must be sent over the wire. The cache is automatically invalidated when a service throws an <literal>UnauthenticatedException</literal>, but it can also be invalidated manually via the <literal>SecurityContext</literal>.</simpara>
 </note>
-<tip>
-<title>DataBinding with Identity</title>
-<simpara>The Identity class is annotated with <literal>@Bindable</literal> so that it can be bound to a login form. You can checkout the documentation on Errai DataBinding or see an example in <ulink url="https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/client/local/LoginForm.java">Errai Security</ulink>.</simpara>
-</tip>
 </section>
 </section>
 <section id="_restrictedaccess">
 <title>RestrictedAccess</title>
-<simpara>The annotation <literal>@RestrictedAccess</literal> is the only annotation necessary to secure a resource or UI element. In general, <literal>@RestrictedAccess</literal> blocks a resource from users who are not logged; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.</simpara>
+<simpara>The annotation <literal>@RestrictedAccess</literal> is the only annotation necessary to secure a resource or UI element. In general, <literal>@RestrictedAccess</literal> blocks a resource from users who are not logged in; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.</simpara>
 <section id="_rpc_services">
 <title>RPC Services</title>
 <simpara>To secure an Errai RPC service, simply annotate the RPC interface (either the entire type or just a method) with one of the security annotations.</simpara>
@@ -6176,8 +6153,8 @@ public interface MixedService {
     }
   });</programlisting>
 <important>
-<title>DefaultSecurityErrorCallback</title>
-<simpara>Errai Security provides a default global RPC handler that catches any thrown <literal>UnauthenticatedException</literal> or <literal>UnauthorizedExceptions</literal> and navigates to the page with the <literal>LoginPage</literal> or <literal>SecurityError</literal> role respectively.</simpara>
+<title>DefaultBusSecurityErrorCallback</title>
+<simpara>Errai Security provides a default global RPC handler that catches a thrown <literal>UnauthenticatedException</literal> or <literal>UnauthorizedException</literal> and navigates to the page with the <literal>LoginPage</literal> or <literal>SecurityError</literal> role respectively.</simpara>
 </important>
 </section>
 </section>
@@ -6195,19 +6172,19 @@ public interface MixedService {
 @RestrictedAccess
 public class UserProfilePage extends SimplePanel {
 
-  @Inject private Identity identity;
+  @Inject private Caller&lt;AuthenticationService&gt; authServiceCaller;
   private User user;
 
   @PageShowing
   private void setupPage() {
-    identity.getUser(new RemoteCallback&lt;User&gt;() {
+    authServiceCaller.call(new RemoteCallback&lt;User&gt;() {
         @Override
         public void callback(User response) {
-          // We don't have to check if this is null, since the page requires authentication.
+          // We don't have to check if this is a valid user, since the page requires authentication.
           user = response;
           // do setup...
         }
-    });
+    }).getUser();
   }
 
 }</programlisting>
@@ -6230,19 +6207,19 @@ public class AdminManagementPage extends SimplePanel {
 
 <important>
 <title>Redirection</title>
-<simpara>When a user is denied access to a page they will be redirected to <literal>LoginPage</literal> or <literal>SecurityError</literal>. To direct a user to the page they were trying to reach after successful login, <literal>@Inject</literal> and invoke the <literal>org.jboss.errai.security.client.local.nav.PageReturn</literal>.</simpara>
+<simpara>When a user is denied access to a page they will be redirected to a <literal>LoginPage (@Page(role = LoginPage.class))</literal> or <literal>SecurityError (@Page(role = SecurityError.class))</literal> page. To direct a user to the page they were trying to reach after successful login, <literal>@Inject</literal> the <literal>SecurityContext</literal> and invoke the <literal>navigateBackOrHome</literal> method.</simpara>
 </important>
 <section id="_page_redirection_and_caching">
 <title>Page Redirection and Caching</title>
 <simpara>Security checks performed before page navigation do not use any RPC calls, but are instead performed from a cached (in-memory) instance of the <literal>org.jboss.errai.security.shared.api.identity.User</literal>. This prevents the possibility of lengthy delays between page navigation while waiting for RPC return values.</simpara>
 <simpara>But the drawback is that any attempts to navigate to a secured <literal>@Page</literal> before the cache is populated will result in redirection to the <literal>LoginPage</literal>&#8201;&#8212;&#8201;even if the user is in fact logged in.</simpara>
 <simpara>In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.</simpara>
-<simpara>One option offered by Errai is to persist the <literal>org.jboss.errai.security.shared.api.identity.User</literal> object in the browsers local storage. This can be done by adding the following to <literal>ErraiApp.properties</literal>:</simpara>
+<simpara>One option offered by Errai is to persist the <literal>org.jboss.errai.security.shared.api.identity.User</literal> object in a cookie. This can be done by adding the following to <literal>ErraiApp.properties</literal>:</simpara>
 <screen>errai.security.userLocalStorage=true</screen>
-<simpara>With this option enabled the <literal>User</literal> will be persisted to local storage, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline.</simpara>
+<simpara>With this option enabled the <literal>User</literal> will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.</simpara>
 <important>
 <title>User is stored in plain text</title>
-<simpara>The <literal>errai.security.userLocalStorage=true</literal> setting causes the <literal>User</literal> to be stored in <emphasis role="strong">plain text</emphasis> in local storage. That includes the following information:</simpara>
+<simpara>The <literal>errai.security.userLocalStorage=true</literal> setting causes the <literal>User</literal> to be stored in <emphasis role="strong">plain text</emphasis>. That includes the following information:</simpara>
 
 <itemizedlist>
   
@@ -6269,7 +6246,7 @@ public class AdminManagementPage extends SimplePanel {
 </itemizedlist>
 
 </important>
-<simpara>If you do not wish to use local storage, you will likely want to handle this case in the <literal>@PageShowing</literal> method of your <literal>LoginPage</literal>. Here is an outline of what you might want to do:</simpara>
+<simpara>If you do not wish to use this feature you will likely want to handle this case in the <literal>@PageShowing</literal> method of your <literal>LoginPage</literal>. Here is an outline of what you might want to do:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(role = LoginPage.class)
 @Templated
 public class ExampleLoginPage extends Composite {
@@ -6286,21 +6263,19 @@ public class ExampleLoginPage extends Composite {
 
   @PageShowing
   public void checkForPendingCache() {
-    ActiveUserCache userCache = securityContext.getActiveUserCache();
-
     // Check if cache is invalid.
-    if (!userCache.isCacheValid()) {
+    if (!securityContext.isUserCacheValid()) {
       // Update the status.
       status.setText("loading...");
 
       // Force cache to update by calling getUser
       authService.call(new RemoteCallback&lt;User&gt; {
         @Override
-        public void callback(User response) {
+        public void callback(User user) {
           /* An interceptor will have updated the cache by now.
              So check if we are logged in and redirect if necessary.
           */
-          if (response != null) {
+          if (!user.equals(User.ANONYMOUS)) {
             /* This is a special transition that takes us back to
                a secure page from which we were redirected. */
             securityContext.navigateBackOrHome();
@@ -6309,20 +6284,16 @@ public class ExampleLoginPage extends Composite {
             status.setText("You are not logged in.");
           }
         }
-      });
+      }).getUser();
     }
   }
 
 }</programlisting>
-<tip>
-<title>Inject the AciveUserCache</title>
-<simpara>You can also <literal>@Inject</literal> the <literal>ActiveUserCache</literal> directly.</simpara>
-</tip>
 </section>
 </section>
 <section id="_hiding_ui_elements">
 <title>Hiding UI Elements</title>
-<simpara>Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have <literal>display: none</literal> added to it&#8217;s CSS style.</simpara>
+<simpara>Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have the CSS class "errai-restricted-access-style" added to it. By defining this style (for example with <literal>visibility: none</literal>) you can hide or otherwise modify the display of the element for unautorized users.</simpara>
 <simpara>Here is an example of an Errai UI templated class using this feature:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class NavBar extends Composite {
@@ -6342,7 +6313,7 @@ public class NavBar extends Composite {
 </section>
 <section id="_using_an_alternative_to_picketlink">
 <title>Using an Alternative to PicketLink</title>
-<simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. A default implementation of this interface using PicketLink is provided in the <literal>errai-security-picketlink</literal> jar. But it is possible to use a different sever-side security framework by implementing the <literal>AuthenticationService</literal> and annotating the implementation with <literal>@Service</literal>.</simpara>
+<simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. A default implementation of this interface using PicketLink is provided in the <literal>errai-security-picketlink</literal> jar. But it is possible to use a different sever-side security framework by providing your own custom implementation of <literal>AuthenticationService</literal> and annotating it with <literal>@Service</literal>. In that case your project should not depend on <literal>errai-security-picketlink</literal>.</simpara>
 </section>
 </chapter>
 <chapter id="sid-74908675">

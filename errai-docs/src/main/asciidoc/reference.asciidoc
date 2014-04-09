@@ -6749,12 +6749,12 @@ authServiceCaller.call().logout();
 [NOTE]
 .AuthenticationService Caching
 ====
-Client-side interceptors are used for caching so that generally only calls to `login` and `logout` must be sent over the wire. The cache is automatically invalidated when a service throws an `UnauthetnticatedException`, but it can also be invalidated manually via the `SecurityContext`.
+Client-side interceptors are used for caching so that generally only calls to `login` and `logout` must be sent over the wire. The cache is automatically invalidated when a service throws an `UnauthenticatedException`, but it can also be invalidated manually via the `SecurityContext`.
 ====
 
 === RestrictedAccess
 
-The annotation `@RestrictedAccess` is the only annotation necessary to secure a resource or UI element. In general, `@RestrictedAccess` blocks a resource from users who are not logged; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.
+The annotation `@RestrictedAccess` is the only annotation necessary to secure a resource or UI element. In general, `@RestrictedAccess` blocks a resource from users who are not logged in; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.
 
 ==== RPC Services
 
@@ -6874,7 +6874,7 @@ public class AdminManagementPage extends SimplePanel {
 [IMPORTANT]
 .Redirection
 ====
-When a user is denied access to a page they will be redirected to `LoginPage` or `SecurityError`. To direct a user to the page they were trying to reach after successful login, `@Inject` the `SecurityContext` and invoke the `navigateBackOrHome` method.
+When a user is denied access to a page they will be redirected to a `LoginPage (@Page(role = LoginPage.class))` or `SecurityError (@Page(role = SecurityError.class))` page. To direct a user to the page they were trying to reach after successful login, `@Inject` the `SecurityContext` and invoke the `navigateBackOrHome` method.
 ====
 
 ===== Page Redirection and Caching
@@ -6923,11 +6923,9 @@ public class ExampleLoginPage extends Composite {
   private Label status;
 
   @PageShowing
-  public void checkForPendingCache() {
-    ActiveUserCache userCache = securityContext.getActiveUserCache();
-
+  public void checkForPendingCache() {    
     // Check if cache is invalid.
-    if (!userCache.isCacheValid()) {
+    if (!securityContext.isUserCacheValid()) {
       // Update the status.
       status.setText("loading...");
 
