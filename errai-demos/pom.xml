@@ -45,8 +45,7 @@
     <module>errai-jpa-demo-grocery-list</module>
     <module>errai-jpa-demo-todo-list</module>
     <module>errai-jaxrs-demo-crud</module>
-    <module>errai-ui-demo-i18n</module>
-    <module>errai-aerogear-demo</module>
+    <module>errai-ui-demo-i18n</module>    
     <module>errai-security-demo</module>
   </modules>
 
