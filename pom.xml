@@ -655,7 +655,7 @@
       <dependency>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-common-core</artifactId>
-        <version>2.2.14.GA</version>
+        <version>${version.org.jboss.jboss-common-core}</version>
       </dependency>
 
       <dependency>
