@@ -673,7 +673,7 @@
       <dependency>
         <groupId>org.jboss.logging</groupId>
         <artifactId>jboss-logging</artifactId>
-        <version>3.1.2.GA</version>
+        <version>${version.org.jboss.logging}</version>
       </dependency>
 
       <dependency>
