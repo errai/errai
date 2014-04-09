@@ -745,7 +745,7 @@
       <dependency>
         <groupId>org.jgroups</groupId>
         <artifactId>jgroups</artifactId>
-        <version>3.2.0.Final</version>
+        <version>${version.org.jgroups}</version>
       </dependency>
 
       <dependency>
