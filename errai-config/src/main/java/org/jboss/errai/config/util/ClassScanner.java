@@ -34,8 +34,7 @@ import com.google.gwt.core.ext.GeneratorContext;
  */
 public final class ClassScanner {
   public static class CacheHolder implements CacheStore {
-    final Map<MetaClass, Collection<MetaClass>> subtypesCache =
-        new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
+    final Map<MetaClass, Collection<MetaClass>> subtypesCache = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
 
     @Override
     public void clear() {
@@ -52,36 +51,62 @@ public final class ClassScanner {
 
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
-  private ClassScanner() {}
+  private ClassScanner() {
+  }
 
   public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                                     final Set<String> packages) {
+          final Set<String> packages, final GeneratorContext genCtx) {
 
     final Collection<MetaParameter> result = new HashSet<MetaParameter>();
-    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-      for (final MetaMethod method : metaClass.getDeclaredMethods()) {
-        for (final MetaParameter parameter : method.getParameters()) {
-          if (parameter.isAnnotationPresent(annotation)) {
-            result.add(parameter);
+
+    if (genCtx != null) {
+      for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
+        for (final MetaMethod method : metaClass.getDeclaredMethods()) {
+          for (final MetaParameter parameter : method.getParameters()) {
+            if (parameter.isAnnotationPresent(annotation)) {
+              result.add(parameter);
+            }
+          }
+        }
+      }
+      try {
+        for (final Method m : ScannerSingleton.getOrCreateInstance().getMethodsWithAnyParamAnnotated(annotation)) {
+          Class<?> clazz = m.getDeclaringClass();
+          if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getName())) {
+            MetaMethod mm = new JavaReflectionMethod(m);
+            for (final MetaParameter parameter : mm.getParameters()) {
+              if (parameter.isAnnotationPresent(annotation)) {
+                result.add(parameter);
+              }
+            }
+          }
+        }
+      } catch (Exception ignored) {
+      }
+    }
+    else {
+      for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+        for (final MetaMethod method : metaClass.getDeclaredMethods()) {
+          for (final MetaParameter parameter : method.getParameters()) {
+            if (parameter.isAnnotationPresent(annotation)) {
+              result.add(parameter);
+            }
           }
         }
       }
     }
 
     filterResultsParameter(result, packages, null);
-
     return Collections.unmodifiableCollection(result);
   }
 
-  public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
-    return getParametersAnnotatedWith(annotation, null);
+  public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
+          final GeneratorContext genCtx) {
+    return getParametersAnnotatedWith(annotation, null, genCtx);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                            final Set<String> packages,
-                                                            final String excludeRegEx,
-                                                            final GeneratorContext genCtx,
-                                                            boolean reflections) {
+          final Set<String> packages, final String excludeRegEx, final GeneratorContext genCtx, boolean reflections) {
 
     final Collection<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
@@ -97,8 +122,7 @@ public final class ClassScanner {
             result.add(MetaClassFactory.get(cls));
           }
         }
-      }
-      catch (Exception ignored) {
+      } catch (Exception ignored) {
       }
     }
     else {
@@ -115,8 +139,7 @@ public final class ClassScanner {
             result.add(e);
           }
         }
-      }
-      catch (Exception ignored) {
+      } catch (Exception ignored) {
       }
     }
     filterResultsClass(result, packages, excludeRegEx);
@@ -128,29 +151,27 @@ public final class ClassScanner {
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-      boolean reflections) {
+          boolean reflections) {
     return getTypesAnnotatedWith(annotation, null, null, null, reflections);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-      final GeneratorContext genCtx) {
+          final GeneratorContext genCtx) {
     return getTypesAnnotatedWith(annotation, null, null, genCtx, true);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                            final Set<String> packages, final GeneratorContext genCtx) {
+          final Set<String> packages, final GeneratorContext genCtx) {
     return getTypesAnnotatedWith(annotation, packages, null, genCtx, true);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWithExcluding(final Class<? extends Annotation> annotation,
-                                                                     final String excludeRegex,
-                                                                     final GeneratorContext genCtx) {
+          final String excludeRegex, final GeneratorContext genCtx) {
     return getTypesAnnotatedWith(annotation, null, excludeRegex, genCtx, true);
   }
 
   public static Collection<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                               final Set<String> packages,
-                                                               final GeneratorContext genCtx) {
+          final Set<String> packages, final GeneratorContext genCtx) {
     final Collection<MetaMethod> result = new HashSet<MetaMethod>(50);
 
     if (genCtx != null) {
@@ -169,8 +190,7 @@ public final class ClassScanner {
             result.add(new JavaReflectionMethod(metaClass, m));
           }
         }
-      }
-      catch (Exception ignored) {
+      } catch (Exception ignored) {
       }
     }
     else {
@@ -188,8 +208,7 @@ public final class ClassScanner {
   }
 
   public static Collection<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                             final Set<String> packages,
-                                                             final GeneratorContext genCtx) {
+          final Set<String> packages, final GeneratorContext genCtx) {
     final Collection<MetaField> result = new HashSet<MetaField>(50);
 
     if (genCtx != null) {
@@ -207,8 +226,7 @@ public final class ClassScanner {
             result.add(new JavaReflectionField(f));
           }
         }
-      }
-      catch (Exception ignored) {
+      } catch (Exception ignored) {
       }
     }
     else {
@@ -236,11 +254,10 @@ public final class ClassScanner {
 
     final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    if(!Boolean.getBoolean("org.jboss.errai.skip.reloadable.subtypes")) {
+    if (!Boolean.getBoolean("org.jboss.errai.skip.reloadable.subtypes")) {
       for (final MetaClass mc : getAllReloadableCachedClasses(genCtx)) {
         if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
-                && !root.getFullyQualifiedName().equals(mc.getFullyQualifiedName())
-                && root.isAssignableFrom(mc)) {
+                && !root.getFullyQualifiedName().equals(mc.getFullyQualifiedName()) && root.isAssignableFrom(mc)) {
           result.add(mc.getErased());
         }
       }
@@ -286,9 +303,8 @@ public final class ClassScanner {
     return false;
   }
 
-  private static void filterResultsClass(final Collection<MetaClass> result,
-                                         final Set<String> packages,
-                                         final String excludeRegEx) {
+  private static void filterResultsClass(final Collection<MetaClass> result, final Set<String> packages,
+          final String excludeRegEx) {
 
     final Pattern excludePattern;
     if (excludeRegEx != null) {
@@ -304,9 +320,8 @@ public final class ClassScanner {
     }
   }
 
-  private static void filterResultsMethod(final Collection<MetaMethod> result,
-                                          final Set<String> packages,
-                                          final String excludeRegEx) {
+  private static void filterResultsMethod(final Collection<MetaMethod> result, final Set<String> packages,
+          final String excludeRegEx) {
 
     final Pattern excludePattern;
     if (excludeRegEx != null) {
@@ -322,9 +337,8 @@ public final class ClassScanner {
     }
   }
 
-  private static void filterResultsField(final Collection<MetaField> result,
-                                         final Set<String> packages,
-                                         final String excludeRegEx) {
+  private static void filterResultsField(final Collection<MetaField> result, final Set<String> packages,
+          final String excludeRegEx) {
 
     final Pattern excludePattern;
     if (excludeRegEx != null) {
@@ -340,9 +354,8 @@ public final class ClassScanner {
     }
   }
 
-  private static void filterResultsParameter(final Collection<MetaParameter> result,
-                                             final Set<String> packages,
-                                             final String excludeRegEx) {
+  private static void filterResultsParameter(final Collection<MetaParameter> result, final Set<String> packages,
+          final String excludeRegEx) {
 
     final Pattern excludePattern;
     if (excludeRegEx != null) {
@@ -354,15 +367,13 @@ public final class ClassScanner {
 
     final Iterator<MetaParameter> filterIterator = result.iterator();
     while (filterIterator.hasNext()) {
-      _removeIfNotMatches(filterIterator, filterIterator.next().getDeclaringMember().getDeclaringClass(),
-          packages, excludePattern);
+      _removeIfNotMatches(filterIterator, filterIterator.next().getDeclaringMember().getDeclaringClass(), packages,
+              excludePattern);
     }
   }
 
-  private static void _removeIfNotMatches(final Iterator<?> iterator,
-                                          final MetaClass type,
-                                          final Set<String> packages,
-                                          final Pattern excludePattern) {
+  private static void _removeIfNotMatches(final Iterator<?> iterator, final MetaClass type, final Set<String> packages,
+          final Pattern excludePattern) {
 
     if (packages == null || packages.contains(type.getPackageName())) {
       if (excludePattern != null && excludePattern.matcher(type.getFullyQualifiedName()).matches()) {

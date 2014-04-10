@@ -41,6 +41,11 @@ public class JavaReflectionMethod extends MetaMethod {
   private MetaParameter[] parameters;
   private MetaClass returnType;
 
+  public JavaReflectionMethod(final Method method) {
+    this.declaringClass = MetaClassFactory.get(Assert.notNull(method.getDeclaringClass()));
+    this.method = Assert.notNull(method);
+  }
+  
   public JavaReflectionMethod(final MetaClass referenceClass, final Method method) {
     this.declaringClass = Assert.notNull(referenceClass);
     this.method = Assert.notNull(method);

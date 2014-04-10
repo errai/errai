@@ -92,16 +92,16 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       currentBlock.modifiers(Modifier.Static).finish();
     }
   }
-
+  
   @Override
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext,
       final IOCConfigProcessor procFactory) {
-
+    
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
-
     final Set<MetaClass> knownObserverTypes = new HashSet<MetaClass>();
 
-    for (final MetaParameter parameter : ClassScanner.getParametersAnnotatedWith(Observes.class)) {
+    for (final MetaParameter parameter : ClassScanner.getParametersAnnotatedWith(Observes.class,
+            context.getGeneratorContext())) {
       knownObserverTypes.add(parameter.getType());
     }
 

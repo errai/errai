@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
+import org.jboss.errai.reflections.scanners.MethodParameterScanner;
 import org.jboss.errai.reflections.scanners.Scanner;
 import org.jboss.errai.reflections.scanners.SubTypesScanner;
 import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
@@ -494,6 +495,18 @@ public class Reflections extends ReflectionUtils {
     }
 
     return result;
+  }
+  
+
+  /** get methods with any parameter annotated with given annotation */
+  public Set<Method> getMethodsWithAnyParamAnnotated(Class<? extends Annotation> annotation) {
+      Set<String> methods = getStore().get(MethodParameterScanner.class, annotation.getName());
+      Set<Method> result = Sets.newHashSet();
+      for (String method : methods) {
+        result.add(Utils.getMethodFromDescriptor(method));
+      }
+      return result;
+
   }
 
   /**
