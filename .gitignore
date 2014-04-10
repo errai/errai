@@ -33,3 +33,4 @@ gwt-unitCache/
 class_list.txt
 *.jpage
 .factorypath
+/errai-ui/nb-configuration.xml

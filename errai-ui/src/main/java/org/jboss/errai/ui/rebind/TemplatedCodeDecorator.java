@@ -62,6 +62,7 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.shared.api.style.TemplateFinishedRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,6 +115,9 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final List<Statement> initStmts = new ArrayList<Statement>();
 
     generateTemplatedInitialization(ctx, initStmts);
+    initStmts.add(Stmt.invokeStatic(TemplateFinishedRegistry.class, "get")
+            .invoke("templatingFinished",
+                    Refs.get(ctx.getInjector().getInstanceVarName())));
 
     if (declaringClass.isAnnotationPresent(EntryPoint.class)) {
       initStmts.add(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("obj")));
@@ -164,8 +168,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       }
     }
 
-    if (destructionStatements.isEmpty())
-      return null;
+    destructionStatements.add(Stmt.invokeStatic(TemplateFinishedRegistry.class, "get").invoke("removeTemplatedBean",
+        Refs.get(ctx.getInjector().getInstanceVarName())));
 
     Statement destructionLogic =
       Stmt.loadVariable("context").invoke("addDestructionCallback",
