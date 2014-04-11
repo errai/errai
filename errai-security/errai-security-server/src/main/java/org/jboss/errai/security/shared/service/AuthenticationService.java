@@ -17,6 +17,7 @@
 package org.jboss.errai.security.shared.service;
 
 import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.AuthenticationException;
 
@@ -29,7 +30,7 @@ import org.jboss.errai.security.shared.exception.AuthenticationException;
 public interface AuthenticationService {
 
   /**
-   * Login with the given username and password.
+   * Login with the given username and password, throwing an exception if the login fails.
    * 
    * @param username The username to log in with.
    * @param password The password to authenticate with.
@@ -44,12 +45,12 @@ public interface AuthenticationService {
   public boolean isLoggedIn();
 
   /**
-   * Log out the currently authenticated user.
+   * Log out the currently authenticated user. Has no effect if there is no current user.
    */
   public void logout();
 
   /**
-   * Get the currently authenitcated user.
+   * Get the currently authenticated user.
    * 
    * @return The currently authenticated user. Never returns {@code null}. If no
    *         user is logged in, returns {@link User#ANONYMOUS}.
