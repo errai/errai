@@ -1,5 +1,9 @@
 package org.jboss.errai.security.client.local;
 
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -7,6 +11,7 @@ import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 import com.google.gwt.user.client.Cookies;
 
@@ -29,7 +34,25 @@ public class PrePopulatedUserStorageIntegrationTest extends AbstractSecurityInte
   protected void gwtSetUp() throws Exception {
     MarshallerFramework.initializeDefaultSessionProvider();
     prePopulatedUser = new UserImpl("remembered");
+
+    // must ensure we are logged out on the server side before any @AfterInitialization methods run
+    // (previous tests may have logged in)
+    InitVotes.waitFor(PrePopulatedUserStorageIntegrationTest.class);
+    InitVotes.registerOneTimeDependencyCallback(ClientMessageBus.class, new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void x) {
+            InitVotes.voteFor(PrePopulatedUserStorageIntegrationTest.class);
+          }
+        }, AuthenticationService.class).logout();
+      }
+    });
+
+    // now fake a remembered client-side user from a previous session
     Cookies.setCookie(UserCookieEncoder.USER_COOKIE_NAME, Marshalling.toJSON(prePopulatedUser));
+
     super.gwtSetUp();
   }
 
