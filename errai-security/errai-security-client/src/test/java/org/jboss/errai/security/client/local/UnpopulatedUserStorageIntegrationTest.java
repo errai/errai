@@ -12,6 +12,7 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Timer;
 
 /**
  * Tests for proper behaviour when the app loads up and the remembered user
@@ -56,4 +57,59 @@ public class UnpopulatedUserStorageIntegrationTest extends AbstractErraiCDITest 
       }
     });
   }
+
+  // NOTE: the 500ms delay in the logout polling timer is critical to the success of this test,
+  //       because if we log out immediately from within the login success callback, the SecurityContextImpl's
+  //       own initial getUser() request to the server may come back AFTER our logout() call!
+  //       See ERRAI-728 for details.
+  public void testForgetUserAfterSuccessfulLogout() throws Exception {
+    asyncTest();
+
+    class WorkerSharedState {
+      boolean loginCompleted = false;
+    }
+    final WorkerSharedState sharedState = new WorkerSharedState();
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        final SecurityContext securityContext = IOC.getBeanManager().lookupBean(SecurityContext.class).getInstance();
+
+        // ensure we're starting with a clean slate
+        assertEquals(User.ANONYMOUS, securityContext.getCachedUser());
+
+        // perform login
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(User response) {
+
+            // unblock the timer that's waiting to do the logout
+            sharedState.loginCompleted = true;
+          }
+        }, AuthenticationService.class).login("user", "password");
+
+        // poll until login finishes, then log out
+        new Timer() {
+
+          @Override
+          public void run() {
+            if (sharedState.loginCompleted) {
+              MessageBuilder.createCall(new RemoteCallback<Void>() {
+                @Override
+                public void callback(Void response) {
+                  assertEquals(User.ANONYMOUS, securityContext.getCachedUser());
+                  assertNull(Cookies.getCookie(UserCookieEncoder.USER_COOKIE_NAME));
+                  finishTest();
+                }
+              }, AuthenticationService.class).logout();
+            }
+            else {
+              schedule(500);
+            }
+          }
+        }.schedule(500);
+      }
+    });
+  }
+
 }
