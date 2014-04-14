@@ -7792,8 +7792,6 @@ proxyLoader.loadBindableProxies();
 <inherits name="org.jboss.errai.common.ErraiCommon"/>
 ----
 
-====
-
 === Errai UI
 
 [[sid-51806600_ErraiUI-pom.xml]]

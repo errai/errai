@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-04-09</date>
+    <date>2014-04-14</date>
     
     
     
@@ -7114,6 +7114,13 @@ errai.async.worker.timeout=5</programlisting>
 <programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.databinding.DataBinding" /&gt;</programlisting>
 </example>
 </section>
+<section id="_bootstrapping_data_binding_without_errai_ioc">
+<title>Bootstrapping Data Binding without Errai IOC</title>
+<simpara>In case you don&#8217;t want to or cannot use Errai&#8217;s IOC container you will have to manually bootstrap Errai Data Binding and inherit the Errai Common GWT module:</simpara>
+<programlisting language="java" linenumbering="unnumbered">BindableProxyLoader proxyLoader = GWT.create(BindableProxyLoader.class);
+proxyLoader.loadBindableProxies();</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.common.ErraiCommon"/&gt;</programlisting>
+</section>
 </section>
 <section id="_errai_ui">
 <title>Errai UI</title>
@@ -10024,8 +10031,8 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 </itemizedlist>
 
 </section>
-<section id="_errai_jaxrs_2">
-<title>Errai JAXRS</title>
+<section id="_errai_cordova">
+<title>Errai Cordova</title>
 
 <itemizedlist>
   
