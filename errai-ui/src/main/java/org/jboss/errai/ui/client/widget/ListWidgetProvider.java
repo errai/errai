@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
@@ -28,7 +29,7 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
       this.itemWidgetType = itemWidgetType;
     }
 
-    public GenericListWidget(Class<W> itemWidgetType, HtmlListPanel panel) {
+    public GenericListWidget(Class<W> itemWidgetType, HTMLPanel panel) {
       super(panel);
       this.itemWidgetType = itemWidgetType;
     }
@@ -45,9 +46,9 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
     Class<?> itemWidgetType = typeargs[1];
     if (qualifiers != null) {
       if (qualifiers[0].annotationType().equals(OrderedList.class)) {
-        return new GenericListWidget(itemWidgetType, new HtmlListPanel(true));
+        return new GenericListWidget(itemWidgetType, new HTMLPanel("ol",""));
       } else if (qualifiers[0].annotationType().equals(UnOrderedList.class)) {
-        return new GenericListWidget(itemWidgetType, new HtmlListPanel(false));
+        return new GenericListWidget(itemWidgetType, new HTMLPanel("ul", ""));
       }
     }
 

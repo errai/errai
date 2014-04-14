@@ -16,20 +16,23 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
+import java.util.ArrayList;
+
+import javax.inject.Inject;
+
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.client.widget.LocaleSelector;
 import org.jboss.errai.ui.client.widget.OrderedList;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.Locale;
-import org.jboss.errai.ui.shared.api.annotations.*;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 
 @Templated
 public class NavBar extends Composite {

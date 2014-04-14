@@ -26,7 +26,6 @@ import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ui.client.widget.HtmlListPanel;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
@@ -35,6 +34,7 @@ import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -131,7 +131,7 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     Widget item = listWidget.getWidget(0);
     assertNotNull(item);
     Widget panel = item.getParent();
-    assertTrue(panel instanceof HtmlListPanel);
+    assertTrue(panel instanceof HTMLPanel);
     assertEquals(panel.getElement(), DOM.createElement("ul"));
   }
 
