@@ -24,11 +24,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jboss.errai.bus.server.async.InterruptHandle;
+import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.common.client.util.TimeUnit;
-import org.jboss.errai.bus.server.async.InterruptHandle;
-import org.jboss.errai.bus.server.async.TimedTask;
 
 public class PooledExecutorService implements TaskProvider {
   private final BlockingQueue<TimedTask> queue;
@@ -90,7 +93,8 @@ public class PooledExecutorService implements TaskProvider {
    * @param queueSize The size of the underlying worker queue.
    */
   public PooledExecutorService(int queueSize) {
-    this(queueSize, SaturationPolicy.CallerRuns);
+    this(queueSize, SaturationPolicy.valueOf(
+            ErraiConfigAttribs.SATURATION_POLICY.get(new ErraiServiceConfiguratorImpl())));
   }
 
   public PooledExecutorService(int queueSize, SaturationPolicy saturationPolicy) {
@@ -101,6 +105,7 @@ public class PooledExecutorService implements TaskProvider {
     scheduledTasks = new PriorityBlockingQueue<TimedTask>();
     schedulerThread = new SchedulerThread();
     this.saturationPolicy = saturationPolicy;
+    
   }
 
   /**
