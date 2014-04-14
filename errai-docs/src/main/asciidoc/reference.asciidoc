@@ -8418,7 +8418,7 @@ For those not using maven, here is the dependency tree of Errai project jars.
 **** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
 
 
-==== Errai JAXRS
+==== Errai Cordova
 * org.jboss.errai:errai-cordova:jar
 ** org.jboss.errai:errai-bus:jar:compile
 *** org.jboss.errai:errai-common:jar:compile
