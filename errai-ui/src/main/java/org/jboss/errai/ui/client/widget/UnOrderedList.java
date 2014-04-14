@@ -12,7 +12,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Qualifies a {@link ListWidget} to be UnOrderedList created by the {@link ListWidgetProvider}
  * @author edewit@redhat.com
  */
-@Target( { TYPE, METHOD, PARAMETER, FIELD })
+@Target( {METHOD, PARAMETER, FIELD })
 @Retention(RUNTIME)
 @Documented
 @Qualifier
