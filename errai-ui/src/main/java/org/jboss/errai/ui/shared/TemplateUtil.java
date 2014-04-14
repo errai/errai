@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
 
@@ -122,9 +123,11 @@ public final class TemplateUtil {
   }
 
   public static void initWidget(Composite component, Element wrapped, Collection<Widget> dataFields) {
-    initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
-    DOM.setEventListener(component.getElement(), component);
+    if (!(component instanceof ListWidget)) {
+      initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
+    }
     
+    DOM.setEventListener(component.getElement(), component);
     StyleBindingsRegistry.get().updateStyles(component);
   }
 
