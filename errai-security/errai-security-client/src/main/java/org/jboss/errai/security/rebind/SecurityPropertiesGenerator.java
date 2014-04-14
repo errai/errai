@@ -30,7 +30,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 @GenerateAsync(SecurityProperties.class)
 public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
 
-  public static final String ERRAI_USER_LOCAL_STORAGE = "errai.security.userLocalStorage";
+  public static final String USER_COOKIE_ENABLED_PROP = "errai.security.user_cookie_enabled";
 
   private static final String PACKAGE_NAME = SecurityProperties.class.getPackage().getName();
   private static final String CLASS_NAME = SecurityProperties.class.getSimpleName() + "Impl";
@@ -58,7 +58,7 @@ public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
 
   private boolean isLocalStorageSettingEnabled() {
     final String localStorageSetting = EnvUtil.getEnvironmentConfig().getFrameworkProperties()
-            .get(ERRAI_USER_LOCAL_STORAGE);
+            .get(USER_COOKIE_ENABLED_PROP);
     final boolean isLocalStorageAllowed;
     if (localStorageSetting == null || localStorageSetting.equals("false")) {
       isLocalStorageAllowed = false;
@@ -67,7 +67,7 @@ public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
       isLocalStorageAllowed = true;
     }
     else {
-      throw new IllegalStateException("The ErraiApp property, " + ERRAI_USER_LOCAL_STORAGE
+      throw new IllegalStateException("The ErraiApp property, " + USER_COOKIE_ENABLED_PROP
               + ", must have a value of \"true\" or \"false\". Given: " + localStorageSetting);
     }
 

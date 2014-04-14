@@ -6888,7 +6888,7 @@ In practice, this is only likely to happen if a user starts an Errai app with a 
 One option offered by Errai is to persist the `org.jboss.errai.security.shared.api.identity.User` object in a cookie. This can be done by adding the following to `ErraiApp.properties`:
 
 ----
-errai.security.userLocalStorage=true
+errai.security.user_cookie_enabled=true
 ----
 
 With this option enabled the `User` will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.
@@ -6896,7 +6896,7 @@ With this option enabled the `User` will be persisted in a browser cookie, which
 [IMPORTANT]
 .User is stored in plain text
 ====
-The `errai.security.userLocalStorage=true` setting causes the `User` to be stored in *plain text*. That includes the following information:
+The `errai.security.user_cookie_enabled=true` setting causes the `User` to be stored in *plain text*. That includes the following information:
 
 * The user's login name.
 * The user's full name.
