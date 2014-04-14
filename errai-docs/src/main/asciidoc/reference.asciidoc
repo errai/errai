@@ -7770,10 +7770,26 @@ You must also inherit the Errai data binding module by adding the following line
 .App.gwt.xml
 ====
 
-
 [source, xml]
 ----
 <inherits name="org.jboss.errai.databinding.DataBinding" />
+----
+
+====
+
+==== Bootstrapping Data Binding without Errai IOC
+
+In case you don't want to or cannot use Errai's IOC container you will have to manually bootstrap Errai Data Binding and inherit the Errai Common GWT module:
+
+[source, java]
+----
+BindableProxyLoader proxyLoader = GWT.create(BindableProxyLoader.class);
+proxyLoader.loadBindableProxies();
+----
+
+[source, xml]
+----
+<inherits name="org.jboss.errai.common.ErraiCommon"/>
 ----
 
 ====
