@@ -119,20 +119,38 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
   }
   
   @Test
-  public void shouldCreateULorOL() {
+  public void testUnorderedListWidget() {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel());
 
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
     ListWidget<TestModel, BindingItemWidget> listWidget = app.getUlListWidget();
+    assertNotNull(listWidget);
     listWidget.setItems(modelList);
 
-    assertNotNull(listWidget);
+    
     Widget item = listWidget.getWidget(0);
     assertNotNull(item);
     Widget panel = item.getParent();
     assertTrue(panel instanceof HTMLPanel);
-    assertEquals(panel.getElement(), DOM.createElement("ul"));
+    assertEquals(panel.getElement().getNodeName(), "UL");
+  }
+  
+  @Test
+  public void testTableListWidget() {
+    List<TestModel> modelList = new ArrayList<TestModel>();
+    modelList.add(new TestModel());
+
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    ListWidget<TestModel, BindingItemWidget> listWidget = app.getTableListWidget();
+    assertNotNull(listWidget);
+    listWidget.setItems(modelList);
+    
+    Widget item = listWidget.getWidget(0);
+    assertNotNull(item);
+    Widget panel = item.getParent();
+    assertTrue(panel instanceof HTMLPanel);
+    assertEquals(panel.getElement().getNodeName(), "TABLE");
   }
 
   @Test
