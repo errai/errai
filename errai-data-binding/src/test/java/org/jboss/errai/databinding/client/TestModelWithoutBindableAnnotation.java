@@ -20,14 +20,17 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.junit.Ignore;
 
 /**
- * Simple bindable model for testing purposes (needs to be configured as bindable type in ErraiApp.properties).
+ * Simple bindable model for testing purposes (needs to be configured as
+ * bindable type in ErraiApp.properties).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Portable @Ignore
+@Portable
+@Ignore
 public class TestModelWithoutBindableAnnotation {
 
   private String value;
+  private TestModelWithoutBindableAnnotation child;
 
   public String getValue() {
     return value;
@@ -37,10 +40,19 @@ public class TestModelWithoutBindableAnnotation {
     this.value = value;
   }
 
+  public TestModelWithoutBindableAnnotation getChild() {
+    return child;
+  }
+
+  public void setChild(TestModelWithoutBindableAnnotation child) {
+    this.child = child;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((child == null) ? 0 : child.hashCode());
     result = prime * result + ((value == null) ? 0 : value.hashCode());
     return result;
   }
@@ -54,6 +66,12 @@ public class TestModelWithoutBindableAnnotation {
     if (getClass() != obj.getClass())
       return false;
     TestModelWithoutBindableAnnotation other = (TestModelWithoutBindableAnnotation) obj;
+    if (child == null) {
+      if (other.child != null)
+        return false;
+    }
+    else if (!child.equals(other.child))
+      return false;
     if (value == null) {
       if (other.value != null)
         return false;
@@ -65,7 +83,7 @@ public class TestModelWithoutBindableAnnotation {
 
   @Override
   public String toString() {
-    return "TestModelWithoutBindableAnnotation [value=" + value + "]";
+    return "TestModelWithoutBindableAnnotation [value=" + value + ", child=" + child + "]";
   }
 
 }

@@ -301,7 +301,7 @@ public class BindableProxyGenerator {
             "put",
             property,
             Stmt.newObject(PropertyType.class, readMethod.getReturnType().asBoxed().asClass(),
-                readMethod.getReturnType().isAnnotationPresent(Bindable.class),
+                DataBindingUtil.isBindableType(readMethod.getReturnType()),
                 readMethod.getReturnType().isAssignableTo(List.class))
             )
             );

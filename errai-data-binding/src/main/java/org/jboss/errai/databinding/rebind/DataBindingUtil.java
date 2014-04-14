@@ -54,8 +54,9 @@ import org.slf4j.LoggerFactory;
 import com.google.gwt.core.ext.GeneratorContext;
 
 /**
- * Utility to retrieve a data binder reference. The reference is either to an injected
- * {@link AutoBound} data binder or to a generated data binder for an injected {@link Model}.
+ * Utility to retrieve a data binder reference. The reference is either to an
+ * injected {@link AutoBound} data binder or to a generated data binder for an
+ * injected {@link Model}.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
@@ -64,15 +65,13 @@ public class DataBindingUtil {
   private static final Logger log = LoggerFactory.getLogger(DataBindingUtil.class);
   public static final String TRANSIENT_BINDER_VALUE = "DataModelBinder";
   public static final String BINDER_MODEL_TYPE_VALUE = "DataBinderModelType";
-  
-  public static final Annotation[] MODEL_QUALIFICATION = new Annotation[] {
-      new Model() {
-        @Override
-        public Class<? extends Annotation> annotationType() {
-          return Model.class;
-        }
-      }
-   };
+
+  public static final Annotation[] MODEL_QUALIFICATION = new Annotation[] { new Model() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Model.class;
+    }
+  } };
 
   /**
    * Represents a reference to an injected or generated data binder.
@@ -96,8 +95,8 @@ public class DataBindingUtil {
   }
 
   /**
-   * Tries to find a data binder reference for either an injected {@link Model} or an injected
-   * {@link AutoBound} data binder.
+   * Tries to find a data binder reference for either an injected {@link Model}
+   * or an injected {@link AutoBound} data binder.
    * 
    * @param inst
    *          the injectable instance
@@ -124,9 +123,8 @@ public class DataBindingUtil {
     Statement dataBinderRef;
     MetaClass dataModelType;
 
-    InjectUtil.BeanMetric beanMetric =
-        InjectUtil.getFilteredBeanMetric(inst.getInjectionContext(),
-            inst.getInjector().getInjectedType(), Model.class);
+    InjectUtil.BeanMetric beanMetric = InjectUtil.getFilteredBeanMetric(inst.getInjectionContext(), inst.getInjector()
+            .getInjectedType(), Model.class);
 
     if (!beanMetric.getAllInjectors().isEmpty()) {
       final Collection<Object> allInjectors = beanMetric.getAllInjectors();
@@ -160,15 +158,15 @@ public class DataBindingUtil {
       List<MetaField> modelFields = inst.getInjector().getInjectedType().getFieldsAnnotatedWith(Model.class);
       if (!modelFields.isEmpty()) {
         throw new GenerationException("Found one or more fields annotated with @Model but missing @Inject "
-            + modelFields.toString());
+                + modelFields.toString());
       }
 
-      List<MetaParameter> modelParameters =
-          inst.getInjector().getInjectedType().getParametersAnnotatedWith(Model.class);
+      List<MetaParameter> modelParameters = inst.getInjector().getInjectedType()
+              .getParametersAnnotatedWith(Model.class);
       if (!modelParameters.isEmpty()) {
         throw new GenerationException(
-            "Found one or more constructor or method parameters annotated with @Model but missing @Inject "
-                + modelParameters.toString());
+                "Found one or more constructor or method parameters annotated with @Model but missing @Inject "
+                        + modelParameters.toString());
       }
     }
 
@@ -184,8 +182,8 @@ public class DataBindingUtil {
     Statement dataBinderRef = null;
     MetaClass dataModelType = null;
 
-    InjectUtil.BeanMetric beanMetric = InjectUtil.getFilteredBeanMetric(inst.getInjectionContext(),
-        inst.getInjector().getInjectedType(), AutoBound.class);
+    InjectUtil.BeanMetric beanMetric = InjectUtil.getFilteredBeanMetric(inst.getInjectionContext(), inst.getInjector()
+            .getInjectedType(), AutoBound.class);
 
     final Collection<Object> allInjectors = beanMetric.getAllInjectors();
     if (allInjectors.size() > 1) {
@@ -208,8 +206,8 @@ public class DataBindingUtil {
         assertTypeIsDataBinder(field.getType());
         dataModelType = (MetaClass) field.getType().getParameterizedType().getTypeParameters()[0];
         dataBinderRef = Stmt.invokeStatic(inst.getInjectionContext().getProcessingContext().getBootstrapClass(),
-            PrivateAccessUtil.getPrivateFieldInjectorName(field),
-            Variable.get(inst.getInjector().getInstanceVarName()));
+                PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                Variable.get(inst.getInjector().getInstanceVarName()));
         inst.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
       }
     }
@@ -220,8 +218,8 @@ public class DataBindingUtil {
           assertTypeIsDataBinder(field.getType());
           dataModelType = (MetaClass) field.getType().getParameterizedType().getTypeParameters()[0];
           dataBinderRef = Stmt.invokeStatic(inst.getInjectionContext().getProcessingContext().getBootstrapClass(),
-              PrivateAccessUtil.getPrivateFieldInjectorName(field),
-              Variable.get(inst.getInjector().getInstanceVarName()));
+                  PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                  Variable.get(inst.getInjector().getInstanceVarName()));
           inst.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
           break;
         }
@@ -232,8 +230,8 @@ public class DataBindingUtil {
   }
 
   /**
-   * Ensures the provided type is a {@link DataBinder} and throws a {@link GenerationException} in
-   * case it's not.
+   * Ensures the provided type is a {@link DataBinder} and throws a
+   * {@link GenerationException} in case it's not.
    * 
    * @param type
    *          the type to check
@@ -242,14 +240,14 @@ public class DataBindingUtil {
     final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
 
     if (!databinderMetaClass.isAssignableFrom(type)) {
-      throw new GenerationException("Type of @AutoBound element must be " + DataBinder.class.getName() +
-          " but is: " + type.getFullyQualifiedName());
+      throw new GenerationException("Type of @AutoBound element must be " + DataBinder.class.getName() + " but is: "
+              + type.getFullyQualifiedName());
     }
   }
 
   /**
-   * Ensured the provided type is bindable and throws a {@link GenerationException} in case it's
-   * not.
+   * Ensured the provided type is bindable and throws a
+   * {@link GenerationException} in case it's not.
    * 
    * @param type
    *          the type to check
@@ -261,17 +259,29 @@ public class DataBindingUtil {
   }
 
   /**
+   * Checks if the provided type is bindable.
+   * 
+   * @param type
+   *          the type to check
+   * 
+   * @return true if the provide type is bindable, otherwise false.
+   */
+  public static boolean isBindableType(MetaClass type) {
+    return (type.isAnnotationPresent(Bindable.class) || getConfiguredBindableTypes().contains(type)); 
+  }
+
+  /**
    * Returns all bindable types on the classpath.
    * 
    * @param context
    *          the current generator context
    * 
-   * @return a set of meta classes representing the all bindable types (both annotated and
-   *         configured in ErraiApp.properties).
+   * @return a set of meta classes representing the all bindable types (both
+   *         annotated and configured in ErraiApp.properties).
    */
   public static Set<MetaClass> getAllBindableTypes(final GeneratorContext context) {
-    Collection<MetaClass> annotatedBindableTypes =
-        ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context), context);
+    Collection<MetaClass> annotatedBindableTypes = ClassScanner.getTypesAnnotatedWith(Bindable.class,
+            RebindUtils.findTranslatablePackages(context), context);
 
     Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
     bindableTypes.addAll(DataBindingUtil.getConfiguredBindableTypes());
@@ -299,24 +309,22 @@ public class DataBindingUtil {
             for (final String s : props.getString(key).split(" ")) {
               try {
                 bindableTypes.add(MetaClassFactory.get(s.trim()));
-              }
-              catch (Exception e) {
+              } catch (Exception e) {
                 throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
               }
             }
             break;
           }
         }
-      }
+      } 
       catch (IOException e) {
         throw new RuntimeException("Error reading ErraiApp.properties", e);
-      }
+      } 
       finally {
         if (inputStream != null) {
           try {
             inputStream.close();
-          }
-          catch (IOException e) {
+          } catch (IOException e) {
             log.warn("Failed to close input stream", e);
           }
         }

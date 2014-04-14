@@ -97,6 +97,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
   }
+  
+  @Test
+  public void testNestedBindingOfNonAnnotatedType() {
+    TextBox textBox = new TextBox();
+    TestModelWithoutBindableAnnotation model =
+        DataBinder.forType(TestModelWithoutBindableAnnotation.class).bind(textBox, "child.value").getModel();
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
+
+    model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
 
   @Test
   public void testBindingOfReadOnlyField() {
