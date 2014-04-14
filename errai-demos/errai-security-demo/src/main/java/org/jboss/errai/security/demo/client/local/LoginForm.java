@@ -26,6 +26,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.jboss.errai.ui.client.widget.AbstractForm;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
@@ -35,19 +36,19 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.slf4j.Logger;
 
+import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Page(role = LoginPage.class)
 @Templated("#root")
 @Dependent
-public class LoginForm extends Composite {
+public class LoginForm extends AbstractForm {
 
   @Inject Logger logger;
 
@@ -65,7 +66,7 @@ public class LoginForm extends Composite {
   private TextBox username;
 
   @DataField
-  private final Element form = DOM.createDiv();
+  private final Element form = DOM.createForm();
 
   @Inject
   @DataField
@@ -73,14 +74,19 @@ public class LoginForm extends Composite {
 
   @Inject
   @DataField
-  private Anchor login;
+  private Button login;
 
   @Inject
   @DataField
-  private Anchor logout;
+  private Button logout;
 
   @DataField
   Element alert = DOM.createDiv();
+  
+  @Override
+  protected FormElement getFormElement() {
+    return FormElement.as(form);
+  }
 
   @EventHandler("login")
   private void loginClicked(ClickEvent event) {
@@ -88,9 +94,8 @@ public class LoginForm extends Composite {
 
       @Override
       public void callback(final User user) {
-        if (!user.equals(User.ANONYMOUS)) {
-          securityContext.navigateBackOrHome();
-        }
+        submit();
+        securityContext.navigateBackOrHome();
       }
     }, new BusErrorCallback() {
       @Override

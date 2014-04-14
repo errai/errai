@@ -5542,6 +5542,91 @@ public class QuickHandlerComponent extends Composite {
 }
 ----
 
+=== HTML Form Support
+
+Using asynchronous Javascript calls often make realizing the benefits of modern browsers difficult when it comes to form submission. But there is now a base class in Errai UI for creating `@Templated` form widgets that are perfect for tasks such as creating a login form.
+
+==== A Login Form that Triggers Browsers' "Remember Password" Feature
+
+Here is a sample `@Templated` login form class. This form has:
+
+* a `username` text field
+* a `password` field
+* a button that with a click handler that attempts to login asynchronously
+
+.Login.java
+[source, java]
+----
+@Dependent
+@Templated
+public class LoginForm extends AbstractForm { // <1>
+  
+  @Inject
+  private Caller<AuthenticationService> authenticationServiceCaller;
+
+  @Inject
+  @DataField
+  private TextBox username;
+  
+  @Inject
+  @DataField
+  private PasswordTextBox password;
+
+  @DataField
+  private final FormElement form = DOM.createForm(); // <2>
+
+  @Inject
+  @DataField
+  private Button login; // <3>
+  
+  @Override
+  protected FormElement getFormElement() {
+    return form; // <4>
+  }
+
+  @EventHandler("login")
+  private void loginClicked(ClickEvent event) {
+    authenticationServiceCaller.call(new RemoteCallback<User>() {
+
+      @Override
+      public void callback(User response) {
+        // Now that we're logged in, submit the form
+        submit(); // <5>
+      }
+    }).login(username.getText(), password.getText());
+  }
+
+}
+----
+
+The key things that you should take from this example:
+
+<1> The class extends `org.jboss.errai.ui.client.widget.AbstractForm`.
+<2> The `form` field is a `@DataField` but it is not injected.
+<3> The login button is a regular button widget, with a click handling method below.
+<4> The `getFormElement` method inherited from `AbstractForm` must return the `FormElement` that will be submitted.
+<5> After the user has successfully logged in asynchronously we call `submit()`. This causes form submission to happen in a way that will not cause the page to refresh, but will still properly notify the browser of a form submission.
+
+When a user successfully logs in via this example, the web browser should prompt them to remember the username and password (assuming this is a feature of the browser being used).
+
+==== Using the Correct Elements in the Template
+
+The most likely way to go wrong is to accidentally use the wrong types of elements in your template. It is very important that you use a proper `from` element with `input` elements *with the exception of the submit button*. Here is an html template that could accompany the `LoginForm.java` example above:
+
+.LoginForm.html
+[source, html]
+----
+<div>
+  <form data-field="form">
+    <input type="text" name="username" data-field="username">
+    <input type="password" name="password" data-field="password">
+    <button data-field="login">Sign In</button>
+  </form>
+</div>
+----
+
+To reiterate, notice that the `username` and `password` fields are legitimate `input` elements. This is because we want these values to be submitted when `AbstractForm.submit()` is called (so that the browser notices them). However, we do not want there to be any way to submit the form other than calling `AbstractForm.submit()`, so the `button` element is notably missing the `type="submit"` attribute pair.
+
 [[sid-51806600_ErraiUI-DataBinding]]
 
 === Data Binding
