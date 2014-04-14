@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 
 /**

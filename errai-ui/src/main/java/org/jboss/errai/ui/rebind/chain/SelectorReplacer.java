@@ -19,7 +19,6 @@ public class SelectorReplacer implements Command {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void execute(Element element) {
     String selector = element.getAttribute("class");
     if (isNotEmpty(selector)) {

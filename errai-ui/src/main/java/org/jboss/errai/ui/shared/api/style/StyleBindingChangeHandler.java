@@ -22,6 +22,7 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 /**
  * @author Mike Brock
  */
+@SuppressWarnings("rawtypes")
 public class StyleBindingChangeHandler implements PropertyChangeHandler {
   @Override
   public void onPropertyChange(PropertyChangeEvent event) {

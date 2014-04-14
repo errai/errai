@@ -1,14 +1,14 @@
 package org.jboss.errai.ui.client.widget;
 
-import org.jboss.errai.ui.client.local.spi.TranslationService;
-import org.jboss.errai.ui.shared.TemplateUtil;
-import org.jboss.errai.ui.shared.api.Locale;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.inject.Singleton;
+
+import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.api.Locale;
 
 /**
  * Util component to get all locales that your application supports and set a specific one.
