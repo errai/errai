@@ -67,7 +67,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   /**
    * Invokes the given Runnable after the bus has finished initializing (it's
-   * online and connected to the server).
+   * online and connected to the server). The test timeout is 45 seconds.
    * <p/>
    * You must call {@link #finishTest()} within your runnable, or the test will
    * time out.
@@ -76,7 +76,22 @@ public abstract class AbstractErraiTest extends GWTTestCase {
    *     the stuff to run once the bus is online.
    */
   protected void runAfterInit(final Runnable r) {
-    delayTestFinish(45000);
+    runAfterInit(45000, r);
+  }
+
+  /**
+   * Invokes the given Runnable after the bus has finished initializing (it's
+   * online and connected to the server).
+   * <p/>
+   * You must call {@link #finishTest()} within your runnable before the given
+   * timeout has elapsed, or the test will fail with a time out.
+   *
+   * @param r
+   *          the stuff to run once the bus is online.
+   */
+  protected void runAfterInit(int timeoutMillis, final Runnable r) {
+    delayTestFinish(timeoutMillis);
     InitVotes.registerOneTimeInitCallback(r);
   }
+
 }

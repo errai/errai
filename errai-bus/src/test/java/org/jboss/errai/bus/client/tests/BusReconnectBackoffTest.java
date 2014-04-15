@@ -9,9 +9,7 @@ import org.jboss.errai.bus.client.api.TransportErrorHandler;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
-import org.jboss.errai.bus.client.framework.transports.TransportStatistics;
 import org.jboss.errai.common.client.api.Assert;
 
 import com.google.gwt.user.client.Timer;
@@ -31,48 +29,48 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
     transportErrorCounter = new TransportErrorCounter();
     bus.addTransportErrorHandler(transportErrorCounter);
   }
-  
+
   @Override
   protected void gwtTearDown() throws Exception {
     bus.removeTransportErrorHandler(transportErrorCounter);
     changeSimulatedErrorCode(0);
     super.gwtTearDown();
   }
-  
+
   public void testBusReconnectFrequencyWhenIdle() {
-    runAfterInit(new Runnable() {
+    runAfterInit(60000, new Runnable() {
       @Override
       public void run() {
         changeSimulatedErrorCode(404);
-        
+
         final long startTime = System.currentTimeMillis();
-        
+
         new Timer() {
-          
+
           @Override
           public void run() {
             final int totalRetries = transportErrorCounter.getTotalRetryCount();
             final long elapsedClockTime = System.currentTimeMillis() - startTime;
-            
+
             double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
-            
+
             System.out.println(transportErrorCounter);
             System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
             assertTrue(retriesPerSecond < 3);
-            
+
             if (elapsedClockTime > 16000) finishTest();
           }
         }.scheduleRepeating(2000);
       }
     });
   }
-  
+
   public void testBusReconnectFrequencyWhenSending() {
-    runAfterInit(new Runnable() {
+    runAfterInit(60000, new Runnable() {
       @Override
       public void run() {
         changeSimulatedErrorCode(404);
-        
+
         MessageBuilder.createMessage().toSubject("TestService3").done()
         .repliesTo(new MessageCallback() {
 
@@ -84,19 +82,19 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
         }).sendNowWith(bus);
 
         final long startTime = System.currentTimeMillis();
-        
+
         new Timer() {
-          
+
           @Override
           public void run() {
             final int totalRetries = transportErrorCounter.getTotalRetryCount();
             final long elapsedClockTime = System.currentTimeMillis() - startTime;
-            
+
             double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
-            
+
             System.out.println(transportErrorCounter);
             System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
-            
+
             // NOTE TO MAINTAINERS: Hi! If this assertion fails, it could be
             // because throttling is broken, but it might also be because
             // transport handlers left over from the previous test have not been
@@ -105,14 +103,14 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
             // effective. Especially suspect would be pending timers that don't
             // get canceled when you call stop().
             assertTrue("Retries per second is now " + retriesPerSecond, retriesPerSecond < 3);
-            
+
             if (elapsedClockTime > 16000) finishTest();
           }
         }.scheduleRepeating(2000);
       }
     });
   }
-  
+
   /**
    * Sends a synchronous request to the server which sets the servlet filter to
    * respond to further requests with the given HTTP status code.
@@ -120,7 +118,7 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
    * This method blocks until the HTTP request has been completed, so the new
    * error code is already in effect when this method returns. You don't have to
    * use any nasty callbacks or delays!
-   * 
+   *
    * @param newCode
    *          The HTTP status code that will be sent in response to all
    *          subsequent ErraiBus requests.
@@ -130,7 +128,7 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
     xhReq.open("GET", "errorSimulator.erraiBus?errorCode=" + newCode, false);
     xhReq.send();
   }-*/;
-  
+
   private class TransportErrorCounter implements TransportErrorHandler {
 
     /**
@@ -138,19 +136,19 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
      * can't be accumulated without knowledge of prior state. So we accumulate
      * retry data by transport.
      */
-    private Map<TransportHandler, StatsForHandler> statsPerHandler =
+    private final Map<TransportHandler, StatsForHandler> statsPerHandler =
             new IdentityHashMap<TransportHandler, BusReconnectBackoffTest.TransportErrorCounter.StatsForHandler>();
-    
+
     class StatsForHandler {
       final TransportHandler handler;
       long totalTimeBetweenRetries = 0;
       int retries = 0;
       int lastRetryCount = 0;
-      
+
       public StatsForHandler(TransportHandler handler) {
         this.handler = Assert.notNull(handler);
       }
-      
+
       void accumulate(TransportError error) {
         if (error.getSource() != handler) {
           throw new IllegalArgumentException("wrong handler. " + error.getSource() + " != " + handler);
@@ -188,7 +186,7 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
       }
 
     }
-    
+
     @Override
     public void onError(TransportError error) {
       TransportHandler source = error.getSource();
