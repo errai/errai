@@ -66,12 +66,16 @@ public class DataBindingUtil {
   public static final String TRANSIENT_BINDER_VALUE = "DataModelBinder";
   public static final String BINDER_MODEL_TYPE_VALUE = "DataBinderModelType";
 
-  public static final Annotation[] MODEL_QUALIFICATION = new Annotation[] { new Model() {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return Model.class;
-    }
-  } };
+  public static final Annotation[] MODEL_QUALIFICATION = new Annotation[] { 
+    new Model() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Model.class;
+      }
+    } 
+  };
+  
+  private DataBindingUtil() {}
 
   /**
    * Represents a reference to an injected or generated data binder.
@@ -267,7 +271,7 @@ public class DataBindingUtil {
    * @return true if the provide type is bindable, otherwise false.
    */
   public static boolean isBindableType(MetaClass type) {
-    return (type.isAnnotationPresent(Bindable.class) || getConfiguredBindableTypes().contains(type)); 
+    return (type.isAnnotationPresent(Bindable.class) || getConfiguredBindableTypes().contains(type));
   }
 
   /**
@@ -288,14 +292,19 @@ public class DataBindingUtil {
     return bindableTypes;
   }
 
+  private static Set<MetaClass> configuredBindableTypes = null; 
+
   /**
    * Reads bindable types from all ErraiApp.properties files on the classpath.
    * 
    * @return a set of meta classes representing the configured bindable types.
    */
   public static Set<MetaClass> getConfiguredBindableTypes() {
-    final Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
-
+    if (configuredBindableTypes != null) {
+      return configuredBindableTypes;
+    }
+    
+    Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
     final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
     for (URL url : erraiAppProperties) {
       InputStream inputStream = null;
@@ -316,11 +325,9 @@ public class DataBindingUtil {
             break;
           }
         }
-      } 
-      catch (IOException e) {
+      } catch (IOException e) {
         throw new RuntimeException("Error reading ErraiApp.properties", e);
-      } 
-      finally {
+      } finally {
         if (inputStream != null) {
           try {
             inputStream.close();
@@ -330,6 +337,8 @@ public class DataBindingUtil {
         }
       }
     }
-    return bindableTypes;
+    
+    configuredBindableTypes = bindableTypes;
+    return configuredBindableTypes;
   }
 }
