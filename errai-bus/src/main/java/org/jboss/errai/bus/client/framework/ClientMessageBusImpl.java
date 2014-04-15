@@ -348,9 +348,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (getState() == BusState.CONNECTED) {
 
       /**
-       * This is an optimization to improve unit testing speed. If a test case does not tear down the bus after
-       * each test, calling this will ensure that any services dependent on the bus will still be loaded.
+       * This is an optimization to improve unit testing speed. If a test case
+       * does not tear down the bus after each test, calling this will ensure
+       * that any services dependent on the bus will still be loaded.
+       * 
+       * It's very important that we call waitFor first because InitVotes is
+       * reset between most tests. Calling voteFor has not effect without a
+       * prior waitFor.
        */
+      InitVotes.waitFor(ClientMessageBus.class);
       InitVotes.voteFor(ClientMessageBus.class);
       return;
     }
