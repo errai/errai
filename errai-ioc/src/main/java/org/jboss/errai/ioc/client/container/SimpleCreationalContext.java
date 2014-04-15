@@ -197,16 +197,7 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
         for (final ProxyResolver pr : entry.getValue()) {
           pr.resolve(wiredInst);
         }
-
-        final Iterator<Tuple<Object, InitializationCallback>> initCallbacks = initializationCallbacks.iterator();
-        while (initCallbacks.hasNext()) {
-          final Tuple<Object, InitializationCallback> tuple = initCallbacks.next();
-          if (tuple.getKey() == wiredInst) {
-            tuple.getValue().init(tuple.getKey());
-            initCallbacks.remove();
-          }
-        }
-
+        
         unresolvedIterator.remove();
       }
       else {
@@ -215,7 +206,17 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
 
         if (iocBeanDef != null) {
           if (!wired.containsKey(entry.getKey())) {
-            addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), iocBeanDef.getInstance(this));
+            Object instance = iocBeanDef.getInstance(this);
+            addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), instance);
+            
+            final Iterator<Tuple<Object, InitializationCallback>> initCallbacks = initializationCallbacks.iterator();
+            while (initCallbacks.hasNext()) {
+              final Tuple<Object, InitializationCallback> tuple = initCallbacks.next();
+              if (tuple.getKey() == instance) {
+                tuple.getValue().init(tuple.getKey());
+                initCallbacks.remove();
+              }
+            }
           }
 
           beansResolved = true;

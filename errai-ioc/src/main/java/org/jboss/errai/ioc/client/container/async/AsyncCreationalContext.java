@@ -257,15 +257,6 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           pr.resolve(wiredInst);
         }
 
-        final Iterator<Tuple<Object, InitializationCallback>> initCallbacks = initializationCallbacks.iterator();
-        while (initCallbacks.hasNext()) {
-          final Tuple<Object, InitializationCallback> tuple = initCallbacks.next();
-          if (tuple.getKey() == wiredInst) {
-            tuple.getValue().init(tuple.getKey());
-            initCallbacks.remove();
-          }
-        }
-
         unresolvedIterator.remove();
       }
       else {
@@ -278,6 +269,14 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
               @Override
               public void callback(final Object beanInstance) {
                 addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), beanInstance);
+                final Iterator<Tuple<Object, InitializationCallback>> initCallbacks = initializationCallbacks.iterator();
+                while (initCallbacks.hasNext()) {
+                  final Tuple<Object, InitializationCallback> tuple = initCallbacks.next();
+                  if (tuple.getKey() == beanInstance) {
+                    tuple.getValue().init(tuple.getKey());
+                    initCallbacks.remove();
+                  }
+                }
                 resolveAllProxies(resolveFinishedCallback);
               }
             }, this);

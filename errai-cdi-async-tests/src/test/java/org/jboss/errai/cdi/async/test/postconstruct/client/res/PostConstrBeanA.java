@@ -26,8 +26,17 @@ import javax.inject.Inject;
 @Dependent
 public class PostConstrBeanA {
   @Inject
-  public PostConstrBeanB postConstrBeanB;
+  private PostConstrBeanB postConstrBeanB;
+  
+  // required to make proxyable
+  public PostConstrBeanA() {
+  }
 
+  @Inject
+  public PostConstrBeanA(PostConstrBeanA selfRefProxy) {
+    
+  }
+  
   @PostConstruct
   private void postConstr() {
     PostConstructTestUtil.record(PostConstrBeanA.class.getName());
