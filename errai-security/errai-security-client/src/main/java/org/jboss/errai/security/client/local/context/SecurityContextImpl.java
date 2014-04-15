@@ -21,9 +21,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.BusState;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -65,16 +70,38 @@ public class SecurityContextImpl implements SecurityContext {
   @PostConstruct
   private void setup() {
     performLoginStatusChangeActions(userCache.getUser());
+    InitVotes.waitFor(SecurityContext.class);
+    InitVotes.registerOneTimeDependencyCallback(ClientMessageBus.class, new Runnable() {
+      
+      @Override
+      public void run() {
+        if (((ClientMessageBusImpl) ErraiBus.get()).getState() == BusState.CONNECTED) {
+          initializeCacheFromServer();
+        }
+        else {
+          // Don't cause initialization to fail if remote communication is disabled
+          InitVotes.voteFor(SecurityContext.class);
+        }
+      }
+    });
   }
 
-  @AfterInitialization
-  private void updateCacheFromServer() {
-    logger.debug("AfterInitialization invoked.");
+  private void initializeCacheFromServer() {
+    logger.debug("Attempting to initialize User cache from server.");
     userServiceCaller.call(new RemoteCallback<User>() {
       @Override
-      public void callback(final User response) {
-        logger.debug("Response received from AfterInitialization RPC: " + String.valueOf(response));
-        setCachedUser(response);
+      public void callback(final User user) {
+        logger.debug("Response received. Initializing user to " + String.valueOf(user));
+        setCachedUser(user);
+        InitVotes.voteFor(SecurityContext.class);
+      }
+    }, new ErrorCallback<Object>() {
+
+      @Override
+      public boolean error(final Object message, final Throwable throwable) {
+        logger.warn("Error received while attempting to populate cache: " + throwable.getMessage());
+        InitVotes.voteFor(SecurityContext.class);
+        return false;
       }
     }).getUser();
   }

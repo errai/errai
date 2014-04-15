@@ -16,11 +16,9 @@
  */
 package org.jboss.errai.mocksafe.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -28,6 +26,7 @@ import java.lang.reflect.Method;
 import javax.enterprise.event.Event;
 
 import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.context.BasicUserCacheImpl;
@@ -38,7 +37,6 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.event.LoggedInEvent;
 import org.jboss.errai.security.shared.event.LoggedOutEvent;
-import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.security.shared.service.NonCachingUserService;
 import org.jboss.errai.security.util.GwtMockitoRunnerExtension;
 import org.jboss.errai.ui.nav.client.local.Navigation;
@@ -58,7 +56,7 @@ public class UserCacheTest {
   @Mock
   private UserStorageHandler userStorageHandler;
   @Mock
-  private Caller<AuthenticationService> caller;
+  private Caller<NonCachingUserService> caller;
   @Mock
   private NonCachingUserService authService;
   @Mock
@@ -103,7 +101,7 @@ public class UserCacheTest {
   @Before
   public void setup() throws NoSuchMethodException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
     loadMethod = BasicUserCacheImpl.class.getDeclaredMethod("maybeLoadStoredCache");
-    rpcMethod = SecurityContextImpl.class.getDeclaredMethod("updateCacheFromServer");
+    rpcMethod = SecurityContextImpl.class.getDeclaredMethod("initializeCacheFromServer");
     loadMethod.setAccessible(true);
     rpcMethod.setAccessible(true);
 
@@ -117,7 +115,7 @@ public class UserCacheTest {
     final User expected = new UserImpl("eve");
 
     when(userStorageHandler.getUser()).thenReturn(new UserImpl("adam"));
-    when(caller.call(any(RemoteCallback.class))).then(new AuthServiceAnswer(expected));
+    when(caller.call(any(RemoteCallback.class), any(ErrorCallback.class))).then(new AuthServiceAnswer(expected));
 
     loadMethod.invoke(userCache);
     // Precondition
@@ -135,12 +133,12 @@ public class UserCacheTest {
     final User expected = new UserImpl("adam");
 
     when(userStorageHandler.getUser()).thenReturn(null);
-    when(caller.call(any(RemoteCallback.class))).then(new AuthServiceAnswer(expected));
+    when(caller.call(any(RemoteCallback.class), any(ErrorCallback.class))).then(new AuthServiceAnswer(expected));
 
     loadMethod.invoke(userCache);
     rpcMethod.invoke(securityContext);
 
-    verify(caller).call(any(RemoteCallback.class));
+    verify(caller).call(any(RemoteCallback.class), any(ErrorCallback.class));
     verify(userStorageHandler).setUser(expected);
     assertEquals(expected, userCache.getUser());
   }
