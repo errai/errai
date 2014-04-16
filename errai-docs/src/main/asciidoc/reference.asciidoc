@@ -7116,6 +7116,18 @@ public class ExampleLoginPage extends Composite {
 }
 ----
 
+===== Form Based Login
+
+If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. Here are the steps required:
+
+. Create a login page using an html form that posts to a Java servlet.
+
+. On the servlet attempt to login with the `AuthenticationService`. If a user's login request is successful, use the `org.jboss.errai.security.shared.api.UserCookieEncoder` to create a cookie.
+
+. Set the cookie in the HTTP response and redirect the user to your Errai app.
+
+. Make sure this is in your ErraiApp.properties file: `errai.security.user_cookie_enabled=true`
+
 ==== Hiding UI Elements
 
 Errai Security annotations can also be used to hide Errai UI template fields. When a user is not logged in or lacks required roles the annotated field will have the CSS class "errai-restricted-access-style" added to it. By defining this style (for example with `visibility: none`) you can hide or otherwise modify the display of the element for unautorized users.
