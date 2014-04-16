@@ -1,20 +1,21 @@
 package org.jboss.errai.security.server;
 
 import static org.jboss.errai.security.server.FormAuthenticationScheme.*;
-import static org.jboss.errai.security.server.PicketLinkAuthenticationFilter.*;
-import static org.mockito.Matchers.*;
+import static org.jboss.errai.security.server.tmp.AuthenticationFilter.*;
 import static org.mockito.Mockito.*;
 
 import javax.enterprise.inject.Instance;
 import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.errai.security.server.FormAuthenticationScheme;
 import org.jboss.errai.security.server.mock.MockFilterConfig;
+import org.jboss.errai.security.server.mock.MockHttpServletRequest;
 import org.jboss.errai.security.server.mock.MockHttpSession;
 import org.jboss.errai.security.server.mock.MockIdentity;
 import org.jboss.errai.security.server.mock.MockServletContext;
+import org.jboss.errai.security.server.tmp.AuthenticationFilter;
+import org.jboss.errai.security.server.tmp.HTTPAuthenticationScheme;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -27,60 +28,71 @@ import org.picketlink.credential.DefaultLoginCredentials;
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseSecurityFilterTest {
 
-    /**
-     * Configuration that can be passed to {@link UberFireSecurityFilter#init(javax.servlet.FilterConfig)}.
-     */
-    protected MockFilterConfig filterConfig;
+  /**
+   * Configuration that can be passed to {@link UberFireSecurityFilter#init(javax.servlet.FilterConfig)}.
+   */
+  protected MockFilterConfig filterConfig;
 
-    /**
-     * A mock HttpSession that mock requests can use. This value is returned as the session from the mock request.
-     */
-    protected MockHttpSession mockHttpSession;
+  protected final String contextPath = "/test-context";
 
-    @Mock
-    protected HttpServletRequest request;
+  /**
+   * A mock HttpSession that mock requests can use. This value is returned as the session from the mock request.
+   */
+  protected MockHttpSession mockHttpSession;
 
-    @Mock
-    protected HttpServletResponse response;
+  protected MockHttpServletRequest request;
 
-    @Mock
-    protected FilterChain filterChain;
+  @Mock
+  protected HttpServletResponse response;
 
-    @Mock
-    protected Instance<DefaultLoginCredentials> credentialsInstance;
+  @Mock
+  protected FilterChain filterChain;
 
-    @Spy
-    protected DefaultLoginCredentials credentials = new DefaultLoginCredentials();
+  @Mock
+  protected Instance<DefaultLoginCredentials> credentialsInstance;
 
-    @Mock
-    protected Instance<Identity> identityInstance;
+  @Spy
+  protected DefaultLoginCredentials credentials = new DefaultLoginCredentials();
 
-    @Spy
-    protected MockIdentity identity;
+  @Mock
+  protected Instance<Identity> identityInstance;
 
-    @InjectMocks
-    protected PicketLinkAuthenticationFilter uberFireFilter;
+  @Spy
+  protected MockIdentity identity;
 
-    @Before
-    public void setup() {
-        filterConfig = new MockFilterConfig( new MockServletContext() );
+  @Mock(name = "applicationPreferredAuthSchemeInstance")
+  protected Instance<HTTPAuthenticationScheme> preferredAuthFilterInstance;
 
-        // useful minimum configuration. tests may overwrite these values before calling filter.init().
-        filterConfig.initParams.put( AUTH_TYPE_INIT_PARAM, FormAuthenticationScheme.class.getName() );
-        filterConfig.initParams.put( HOST_PAGE_INIT_PARAM, "/dont/care" );
-        filterConfig.initParams.put( FORCE_REAUTHENTICATION_INIT_PARAM, "true" );
+  @InjectMocks
+  protected AuthenticationFilter authFilter;
 
-        mockHttpSession = new MockHttpSession();
+  @Mock
+  protected AuthenticationService authService;
 
-        when( request.getMethod() ).thenReturn( "POST" );
-        when( request.getSession() ).thenReturn( mockHttpSession );
-        when( request.getSession( anyBoolean() ) ).thenReturn( mockHttpSession );
+  @InjectMocks
+  protected FormAuthenticationScheme formAuthenticationScheme;
 
-        identity.setCredentials( credentials );
+  @Before
+  public void setup() {
+    filterConfig = new MockFilterConfig(new MockServletContext());
+    filterConfig.setContextPath(contextPath);
 
-        when( identityInstance.get() ).thenReturn( identity );
+    // useful minimum configuration. tests may overwrite these values before calling filter.init().
+    filterConfig.initParams.put(HOST_PAGE_INIT_PARAM, "/dont/care/host");
+    filterConfig.initParams.put(LOGIN_PAGE_INIT_PARAM, "/dont/care/login");
+    filterConfig.initParams.put(FORCE_REAUTHENTICATION_INIT_PARAM, "true");
 
-        when( credentialsInstance.get() ).thenReturn( credentials );
-    }
+    mockHttpSession = new MockHttpSession();
+
+    request = new MockHttpServletRequest(mockHttpSession, "POST", "/some/servlet/path", "/dont/care/login");
+
+    identity.setCredentials(credentials);
+
+    when(identityInstance.get()).thenReturn(identity);
+
+    when(credentialsInstance.get()).thenReturn(credentials);
+
+    when(preferredAuthFilterInstance.get()).thenReturn(formAuthenticationScheme);
+  }
 
 }
