@@ -16,15 +16,15 @@
  */
 package org.jboss.errai.security.demo.client.local;
 
-import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
-import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.callback.DefaultRestSecurityErrorCallback;
 import org.jboss.errai.security.demo.client.shared.MessageService;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -57,15 +57,15 @@ public class Messages extends Composite {
   private Label label;
 
   @Inject
-  private SecurityContext securityContext;
-
-  @Inject
   @DataField
   private Button hello;
 
   @Inject
   @DataField
   private Button ping;
+  
+  @Inject
+  private Instance<DefaultRestSecurityErrorCallback> defaultCallbackInstance;
 
   @Inject
   private Logger logger;
@@ -83,7 +83,7 @@ public class Messages extends Composite {
                   public void callback(String o) {
                     label.setText(o);
                   }
-                }, new DefaultRestSecurityErrorCallback(securityContext)).hello();
+                }, defaultCallbackInstance.get()).hello();
       }
 
     }).getUser();
@@ -96,7 +96,7 @@ public class Messages extends Composite {
       public void callback(String o) {
         label.setText(o);
       }
-    }, new DefaultRestSecurityErrorCallback(new RestErrorCallback() {
+    }, defaultCallbackInstance.get().setWrappedErrorCallback(new RestErrorCallback() {
       @Override
       public boolean error(Request message, Throwable throwable) {
         authCaller.call(new RemoteCallback<User>() {
@@ -113,6 +113,6 @@ public class Messages extends Composite {
         // occur.
         return true;
       }
-    }, securityContext)).ping();
+    })).ping();
   }
 }

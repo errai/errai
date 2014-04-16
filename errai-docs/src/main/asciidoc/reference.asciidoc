@@ -6711,7 +6711,7 @@ By default the server-side Errai Security module uses link:$$http://www.picketli
 
 ==== Making Users
 
-The simplest way to begin experimenting with Errai Security is to add Users and Roles programmatically. Here is some sample server-side code from the link:$$https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java$$[Errai Security Demo] that does just that.
+The simplest way to begin experimenting with Errai Security is to add Users and Roles to PicketLink programmatically. Here is some sample server-side code from the link:$$https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java$$[Errai Security Demo].
 
 [source,java,numbered]
 ----
@@ -6792,7 +6792,7 @@ authServiceCaller.call(new RemoteCallback<User>() {
     public void callback(User user) {
       // handle successful login
     }
-  }, new BusErrorCallback() {
+  }, new ErrorCallback<Message>() {
 
     @Override
     public boolean error(Message message, Throwable t) {
@@ -6876,7 +6876,7 @@ public interface MixedService {
 
 ===== Error Callbacks
 
-When access to a secured RPC service is denied an `UnauthenticatedException` or `UnauthorizedException` is thrown. This error is then transmitted back to the client, where it can be caught with a `BusErrorCallback` (provided when the RPC is invoked).
+When access to a secured RPC service is denied an `UnauthenticatedException` or `UnauthorizedException` is thrown. This error is then transmitted back to the client, where it can be caught with an `ErrorCallback` (provided when the RPC is invoked).
 
 Here is how we would invoke the previous `MixedService` example with error handling:
 
@@ -6888,7 +6888,7 @@ MessageBuilder.createCall(new RemoteCallback<Void>() {
     public void callback(Void response) {
       // ...
     }
-  }, new BusErrorCallback() {
+  }, new ErrorCallback<Message>() { // <1>
 
     @Override
     public boolean error(Message message, Throwable t) {
@@ -6905,14 +6905,93 @@ MessageBuilder.createCall(new RemoteCallback<Void>() {
         return true;
       }
     }
-  });
+  }, MixedService.class).adminService();
 ----
+
+<1> This `ErrorCallback` is parameterized with the type `Message` because it is an Errai Bus RPC. In the next section we will demonstrate the use of a JAX-RS RPC.
 
 [IMPORTANT]
 .DefaultBusSecurityErrorCallback
 ====
-Errai Security provides a default global RPC handler that catches a thrown `UnauthenticatedException` or `UnauthorizedException` and navigates to the page with the `LoginPage` or `SecurityError` role respectively.
+Errai Security provides a default global Bus RPC handler that catches any thrown `UnauthenticatedException` or `UnauthorizedException` and navigates to the page with the `LoginPage` or `SecurityError` role respectively.
 ====
+
+===== JAX-RS RPC
+
+JAX-RS RPCs are secured exactly as bus RPCs. Here is the first example from the previous section, but converted to use JAX-RS instead of the Errai Bus.
+
+[source,java]
+----
+@Path("/rest-endpoint")
+@RestrictedAccess
+public interface UserOnlyStuff {
+
+  @Path("/some-method")
+  @GET
+  public void someMethod();
+
+  @Path("/other-method")
+  @GET
+  public void otherMethod();
+}
+----
+
+There are two important differences when calling a secured JAX-RS RPC (in contrast to an Errai Bus RPC):
+
+* JAX-RS RPC calls use the `RestErrorCallback` (an interface extending `ErrorCallback<Request>`).
+
+* There is now global error-handling for JAX-RS.
+
+Because there is no global error-handling, you should always pass a `RestErrorCallback` when using a JAX-RS RPC. Errai provides the `DefaultRestSecurityErrorCallback` that provides the same default behaviour as the `DefaultBusSecurityErrorCallback` mentioned above. It can also optionally wrap a provided callback as demonstrated below:
+
+* Injecting a callback `Instance`:
++
+[source,java]
+----
+@Inject
+private Instance<DefaultRestSecurityErrorCallback> defaultCallbackInstance;
+----
+
+* Wrapping a custom callback in a default callback:
++
+[source,java]
+----
+void callSomeService() {
+  userOnlyStuffService.call(new RemoteCallback<Void>() {
+
+    @Override
+    public void callback(Void response) {
+      // Handle success...
+    }
+  }, defaultCallbackInstance.get()
+        .setWrappedErrorCallback(new RestErrorCallback() {
+
+          @Override
+          public boolean error(Request request, Throwable t) {
+            // Handle error...
+
+            // Returning true means the default navigation behaviour will occur
+            return true;
+          }
+        }
+  )).someMethod();
+}
+----
+
+* Using the default callback without a wrapped callback:
++
+[source,java]
+----
+void callSomeService() {
+  userOnlyStuffService.call(new RemoteCallback<Void>() {
+
+    @Override
+    public void callback(Void response) {
+      // Handle success...
+    }
+  }, defaultCallbackInstance.get()).someMethod();
+}
+----
 
 ==== Page Navigation
 
