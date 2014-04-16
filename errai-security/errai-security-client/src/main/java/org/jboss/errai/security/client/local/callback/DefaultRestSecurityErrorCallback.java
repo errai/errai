@@ -16,6 +16,7 @@
  */
 package org.jboss.errai.security.client.local.callback;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
@@ -28,29 +29,63 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
 import com.google.gwt.http.client.Request;
 
+/**
+ * A {@link RestErrorCallback} that catches {@link UnauthenticatedException
+ * UnauthenticatedExceptions} and {@link UnauthorizedException
+ * UnauthorizedExceptions} and navigates to the page with the {@link LoginPage}
+ * or {@link SecurityError} role, respectively.
+ * 
+ * Optionally, this class can wrap a given {@link RestErrorCallback} that it
+ * will call first, in which case this class will only perform the actions
+ * described above if the wrapped callback returns true.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+@Dependent
 public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
+
+  private static RestErrorCallback defaultWrapped = new RestErrorCallback() {
+    @Override
+    public boolean error(Request message, Throwable throwable) {
+      return true;
+    }
+  };
 
   private RestErrorCallback wrapped;
 
   private final SecurityContext context;
 
+  /**
+   * Create a {@link DefaultRestSecurityErrorCallback} wrapping a given
+   * {@link RestErrorCallback}.
+   * 
+   * @param wrapped
+   *          The wrapped callback (should never be {@code null}, that will be
+   *          invoked first when
+   *          {@link RestErrorCallback#error(Request, Throwable)} is called. If
+   *          the error method on the {@code wrapped} returns {@code false}, the
+   *          whole callback returns {@code false} immediately.
+   * @param context
+   *          The {@link SecurityContext}.
+   */
   public DefaultRestSecurityErrorCallback(final RestErrorCallback wrapped, final SecurityContext context) {
     this.context = context;
     this.wrapped = wrapped;
   }
 
+  /**
+   * Create a {@link DefaultRestSecurityErrorCallback}.
+   * 
+   * @param context
+   *          The {@link SecurityContext}.
+   */
   @Inject
   public DefaultRestSecurityErrorCallback(final SecurityContext context) {
-    this(new RestErrorCallback() {
-      @Override
-      public boolean error(Request message, Throwable throwable) {
-        return true;
-      }
-    }, context);
+    this(defaultWrapped, context);
   }
 
   @Override
-  public boolean error(final Request message, final Throwable throwable) {
+  public boolean error(final Request message, final Throwable throwable) throws MissingPageRoleException {
     if (wrapped.error(message, throwable)) {
       try {
         if (throwable instanceof UnauthenticatedException) {
@@ -72,8 +107,20 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
     return false;
   }
 
-  public void setWrappedErrorCallback(final RestErrorCallback errorCallback) {
-    wrapped = errorCallback;
+  /**
+   * Set the wrapped callback that will be invoked first when
+   * {@link RestErrorCallback#error(Request, Throwable)} is called. If the error
+   * method on the wrapped callback returns {@code false}, the whole callback
+   * returns {@code false} immediately.
+   * 
+   * @param wrapped
+   *          The wrapped callback. Passing in {@code null} clears any previous
+   *          wrapped callback.
+   * @return A reference to this callback for chaining.
+   */
+  public RestErrorCallback setWrappedErrorCallback(final RestErrorCallback wrapped) {
+    this.wrapped = (wrapped != null) ? wrapped : defaultWrapped;
+    return this;
   }
 
 }
