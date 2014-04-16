@@ -5934,7 +5934,13 @@ public class LoginLayout extends PageLayout {
 
 === Stylesheet binding
 
-When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part which is an important usability consideration is communicating that state to the user.
+When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. One common case is showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part which is an important usability consideration is communicating that state to the user.
+
+.RestrictedAccess in Errai Security
+[TIP]
+====
+Errai Security contains a `RestrictedAccess` annotation that uses style sheet binding to implement a feature similar in nature to this example.
+====
 
 Let's start with the example case I just described. We have a control that we only want to be visible if the user is an admin. So the first thing we do is create a style binding annotation.
 
@@ -5974,6 +5980,22 @@ public class HelloWorldForm extends Composite {
 ----
 
 Now before the form is shown to the user the [code]+applyAdminStyling+ method will be executed where the [code]+sessionManager+ is queried to see if the user is an admin if not the delete button that is also annotated with [code]+@Admin+ will be hidden from the view.
+
+The above example took at `Style` object as a parameter, but it is also possible to use an `Element`. So the `applyAdminStyling` method above could have also been written like this:
+
+[source, java]
+----
+  @Admin
+  private void applyAdminStyling(Element element) {
+    if (!sessionManager.isAdmin()) {
+      element.addClassName("disabled");
+    }
+  }
+----
+
+The CSS class "disabled" could apply the same style as before ("visibility: hidden") or it could have more complex behaviour that is dependent on the element type.
+
+==== Usage with Data Binding
 
 In addition when using this in conjunction with Errai Databinding. Any Errai UI component which uses @AutoBound, will get live updating of the style rules for free, anytime the model changes. Allowing dynamic styling based on user input and other state changes.
 
