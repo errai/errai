@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-04-14</date>
+    <date>2014-04-17</date>
     
     
     
@@ -3025,6 +3025,47 @@ public class MyBean {
 }</programlisting>
 <simpara>The remote methods will get executed only after <literal><phrase role="code">sendBatch()</phrase></literal> was called. The method <literal><phrase role="code">sendBatch</phrase></literal> accepts an additional <literal><phrase role="code">RemoteCallback</phrase></literal> instance as a parameter which will we invoked when all remote calls have completed in success. Consequently, an <literal><phrase role="code">ErrorCallback</phrase></literal> can also be provided which will get executed for all remote calls that have completed in failure.</simpara>
 </section>
+<section id="_asynchronous_handling_of_rpcs_on_the_server">
+<title>Asynchronous handling of RPCs on the server</title>
+<simpara>If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service has to be contacted) it might be preferrable to start a separate thread in the RPC service method or leverage an existing thread from a dedicated thread pool that will provide the result. In this case the RPC endpoint method can return immediately and the thread handling the incoming request doesn&#8217;t need to stay active until the result is available.</simpara>
+<simpara>Errai provides a special return type <literal><phrase role="code">CallableFuture</phrase></literal> to indicate to the RPC system that the result of the remote method call will be provided at a later point (after the remote method call has returned).</simpara>
+<simpara>Here&#8217;s an example returning a result of type String:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Remote
+public interface LongRunningService {
+  public CallableFuture&lt;String&gt; someLongRunningTask();
+}</programlisting>
+<programlisting language="java" linenumbering="unnumbered">@Service
+public class LongRunningServiceImpl implements LongRunningService {
+  @Override
+  public CallableFuture&lt;String&gt; someLongRunningTask() {
+    final CallableFuture&lt;String&gt; future = CallableFutureFactory.get().createFuture(String.class);
+
+    final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Thread.sleep(5000);
+          future.setValue("foobar");
+        }
+        catch (Throwable t) {
+          t.printStackTrace();
+        }
+      }
+    });
+    executorService.shutdown();
+    return future;
+  }
+}</programlisting>
+<simpara>Note that the client-side code does not change when using this feature and will work exactly as described in <xref linkend="sid-5931313_RemoteProcedureCalls%28RPC%29-Makingcalls"/> i.e.:</simpara>
+<programlisting language="java" linenumbering="unnumbered">  MessageBuilder.createCall(new RemoteCallback&lt;String&gt;() {
+          @Override
+          public void callback(String response) {
+            assertEquals("foobar", response);
+            finishTest();
+          }
+        }, LongRunningService.class).someLongRunningTask();</programlisting>
+</section>
 </chapter>
 <chapter id="sid-19398997">
 <title>Errai JAX-RS</title>
@@ -4982,6 +5023,126 @@ public class QuickHandlerComponent extends Composite {
 }</programlisting>
 </section>
 </section>
+<section id="_html_form_support">
+<title>HTML Form Support</title>
+<simpara>Using asynchronous Javascript calls often make realizing the benefits of modern browsers difficult when it comes to form submission. But there is now a base class in Errai UI for creating <literal>@Templated</literal> form widgets that are perfect for tasks such as creating a login form.</simpara>
+<section id="_a_login_form_that_triggers_browsers_remember_password_feature">
+<title>A Login Form that Triggers Browsers' "Remember Password" Feature</title>
+<simpara>Here is a sample <literal>@Templated</literal> login form class. This form has:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>a <literal>username</literal> text field</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>a <literal>password</literal> field</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>a button that with a click handler that attempts to login asynchronously</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<formalpara>
+<title>Login.java</title>
+<para>
+<programlisting language="java" linenumbering="unnumbered">@Dependent
+@Templated
+public class LoginForm extends AbstractForm { // <co id="CO1-1"/>
+
+  @Inject
+  private Caller&lt;AuthenticationService&gt; authenticationServiceCaller;
+
+  @Inject
+  @DataField
+  private TextBox username;
+
+  @Inject
+  @DataField
+  private PasswordTextBox password;
+
+  @DataField
+  private final FormElement form = DOM.createForm(); // <co id="CO1-2"/>
+
+  @Inject
+  @DataField
+  private Button login; // <co id="CO1-3"/>
+
+  @Override
+  protected FormElement getFormElement() {
+    return form; // <co id="CO1-4"/>
+  }
+
+  @EventHandler("login")
+  private void loginClicked(ClickEvent event) {
+    authenticationServiceCaller.call(new RemoteCallback&lt;User&gt;() {
+
+      @Override
+      public void callback(User response) {
+        // Now that we're logged in, submit the form
+        submit(); // <co id="CO1-5"/>
+      }
+    }).login(username.getText(), password.getText());
+  }
+
+}</programlisting>
+</para>
+</formalpara>
+<simpara>The key things that you should take from this example:</simpara>
+<calloutlist>
+  
+  <callout arearefs="CO1-1">
+    <para>The class extends <literal>org.jboss.errai.ui.client.widget.AbstractForm</literal>.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO1-2">
+    <para>The <literal>form</literal> field is a <literal>@DataField</literal> but it is not injected.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO1-3">
+    <para>The login button is a regular button widget, with a click handling method below.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO1-4">
+    <para>The <literal>getFormElement</literal> method inherited from <literal>AbstractForm</literal> must return the <literal>FormElement</literal> that will be submitted.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO1-5">
+    <para>After the user has successfully logged in asynchronously we call <literal>submit()</literal>. This causes form submission to happen in a way that will not cause the page to refresh, but will still properly notify the browser of a form submission.</para>
+    
+  </callout>
+  
+</calloutlist>
+<simpara>When a user successfully logs in via this example, the web browser should prompt them to remember the username and password (assuming this is a feature of the browser being used).</simpara>
+</section>
+<section id="_using_the_correct_elements_in_the_template">
+<title>Using the Correct Elements in the Template</title>
+<simpara>The most likely way to go wrong is to accidentally use the wrong types of elements in your template. It is very important that you use a proper <literal>from</literal> element with <literal>input</literal> elements <emphasis role="strong">with the exception of the submit button</emphasis>. Here is an html template that could accompany the <literal>LoginForm.java</literal> example above:</simpara>
+<formalpara>
+<title>LoginForm.html</title>
+<para>
+<programlisting language="html" linenumbering="unnumbered">&lt;div&gt;
+  &lt;form data-field="form"&gt;
+    &lt;input type="text" name="username" data-field="username"&gt;
+    &lt;input type="password" name="password" data-field="password"&gt;
+    &lt;button data-field="login"&gt;Sign In&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/div&gt;</programlisting>
+</para>
+</formalpara>
+<simpara>To reiterate, notice that the <literal>username</literal> and <literal>password</literal> fields are legitimate <literal>input</literal> elements. This is because we want these values to be submitted when <literal>AbstractForm.submit()</literal> is called (so that the browser notices them). However, we do not want there to be any way to submit the form other than calling <literal>AbstractForm.submit()</literal>, so the <literal>button</literal> element is notably missing the <literal>type="submit"</literal> attribute pair.</simpara>
+</section>
+</section>
 <section id="sid-51806600_ErraiUI-DataBinding">
 <title>Data Binding</title>
 <simpara>A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks require a significant amount of boilerplate code which can be alleviated by Errai. Errai&#8217;s <link linkend="sid-51282340">data binding module</link> provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when used together with Errai UI.</simpara>
@@ -5201,7 +5362,11 @@ public class LoginLayout extends PageLayout {
 </section>
 <section id="sid-51806600_ErraiUI-Stylesheetbinding">
 <title>Stylesheet binding</title>
-<simpara>When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. A common case being: showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part which is an important usability consideration is communicating that state to the user.</simpara>
+<simpara>When developing moderately-complex web applications with Errai, you may find yourself needing to do quite a bit of programmatic style changes. One common case is showing or enabling controls only if a user has the necessary permissions to use them. One part of the problem is securing those features from being used, and the other part which is an important usability consideration is communicating that state to the user.</simpara>
+<tip>
+<title>RestrictedAccess in Errai Security</title>
+<simpara>Errai Security contains a <literal>RestrictedAccess</literal> annotation that uses style sheet binding to implement a feature similar in nature to this example.</simpara>
+</tip>
 <simpara>Let&#8217;s start with the example case I just described. We have a control that we only want to be visible if the user is an admin. So the first thing we do is create a style binding annotation.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@StyleBinding
 @Retention(RetentionPolicy.RUNTIME)
@@ -5228,7 +5393,18 @@ public class HelloWorldForm extends Composite {
   }
 }</programlisting>
 <simpara>Now before the form is shown to the user the <literal><phrase role="code">applyAdminStyling</phrase></literal> method will be executed where the <literal><phrase role="code">sessionManager</phrase></literal> is queried to see if the user is an admin if not the delete button that is also annotated with <literal><phrase role="code">@Admin</phrase></literal> will be hidden from the view.</simpara>
+<simpara>The above example took at <literal>Style</literal> object as a parameter, but it is also possible to use an <literal>Element</literal>. So the <literal>applyAdminStyling</literal> method above could have also been written like this:</simpara>
+<programlisting language="java" linenumbering="unnumbered">  @Admin
+  private void applyAdminStyling(Element element) {
+    if (!sessionManager.isAdmin()) {
+      element.addClassName("disabled");
+    }
+  }</programlisting>
+<simpara>The CSS class "disabled" could apply the same style as before ("visibility: hidden") or it could have more complex behaviour that is dependent on the element type.</simpara>
+<section id="_usage_with_data_binding">
+<title>Usage with Data Binding</title>
 <simpara>In addition when using this in conjunction with Errai Databinding. Any Errai UI component which uses @AutoBound, will get live updating of the style rules for free, anytime the model changes. Allowing dynamic styling based on user input and other state changes.</simpara>
+</section>
 </section>
 <section id="sid-51806600_ErraiUI-Internationalization%28i18n%29">
 <title>Internationalization (i18n)</title>
@@ -5943,13 +6119,13 @@ public class KitchenSinkClient extends Composite {
 <title>Getting Started</title>
 <section id="_making_users">
 <title>Making Users</title>
-<simpara>The simplest way to begin experimenting with Errai Security is to add Users and Roles programmatically. Here is some sample server-side code from the <ulink url="https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java">Errai Security Demo</ulink> that does just that.</simpara>
+<simpara>The simplest way to begin experimenting with Errai Security is to add Users and Roles to PicketLink programmatically. Here is some sample server-side code from the <ulink url="https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java">Errai Security Demo</ulink>.</simpara>
 <programlisting language="java" linenumbering="numbered">@Singleton
 @Startup
 public class PicketLinkDefaultUsers {
 
   @Inject
-  private PartitionManager partitionManager; // <co id="CO1-1"/>
+  private PartitionManager partitionManager; // <co id="CO2-1"/>
 
   /**
    * &lt;p&gt;Loads some users during the first construction.&lt;/p&gt;
@@ -5971,7 +6147,7 @@ public class PicketLinkDefaultUsers {
     hacker.setFirstName("Hacker");
     hacker.setLastName("anonymous");
 
-    identityManager.add(john); // <co id="CO1-2"/>
+    identityManager.add(john); // <co id="CO2-2"/>
     identityManager.add(hacker);
     final Password defaultPassword = new Password("123");
     identityManager.updateCredential(john, defaultPassword);
@@ -5983,7 +6159,7 @@ public class PicketLinkDefaultUsers {
     identityManager.add(roleDeveloper);
     identityManager.add(roleAdmin);
 
-    relationshipManager.add(new Grant(john, roleDeveloper)); // <co id="CO1-3"/>
+    relationshipManager.add(new Grant(john, roleDeveloper)); // <co id="CO2-3"/>
     relationshipManager.add(new Grant(john, roleAdmin));
   }
 
@@ -5991,17 +6167,17 @@ public class PicketLinkDefaultUsers {
 <simpara>Here are the important things that are happening here:</simpara>
 <calloutlist>
   
-  <callout arearefs="CO1-1">
+  <callout arearefs="CO2-1">
     <para>PicketLink uses the concept of partitions, which are sections that can contain different users and roles. What we really need to make users and roles are the <literal>IdentityManager</literal> and <literal>RelationshipManager</literal>, but these objects are <literal>@RequestScoped</literal> so in order to access them when the application starts we must <literal>@Inject</literal> the <literal>PartitionManager</literal>.</para>
     
   </callout>
   
-  <callout arearefs="CO1-2">
+  <callout arearefs="CO2-2">
     <para>Here we add are new users to the <literal>IdentityManager</literal>. It is also used below to give passwords to the new users, and to add the <emphasis>simple</emphasis> and <emphasis>admin</emphasis> roles.</para>
     
   </callout>
   
-  <callout arearefs="CO1-3">
+  <callout arearefs="CO2-3">
     <para>The <literal>RelationshipManager</literal> defines relationships between entities. In this case, it is used to specify that a user belongs to a role.</para>
     
   </callout>
@@ -6032,7 +6208,7 @@ public class PicketLinkDefaultUsers {
     public void callback(User user) {
       // handle successful login
     }
-  }, new BusErrorCallback() {
+  }, new ErrorCallback&lt;Message&gt;() {
 
     @Override
     public boolean error(Message message, Throwable t) {
@@ -6126,7 +6302,7 @@ public interface MixedService {
 
 <section id="_error_callbacks">
 <title>Error Callbacks</title>
-<simpara>When access to a secured RPC service is denied an <literal>UnauthenticatedException</literal> or <literal>UnauthorizedException</literal> is thrown. This error is then transmitted back to the client, where it can be caught with a <literal>BusErrorCallback</literal> (provided when the RPC is invoked).</simpara>
+<simpara>When access to a secured RPC service is denied an <literal>UnauthenticatedException</literal> or <literal>UnauthorizedException</literal> is thrown. This error is then transmitted back to the client, where it can be caught with an <literal>ErrorCallback</literal> (provided when the RPC is invoked).</simpara>
 <simpara>Here is how we would invoke the previous <literal>MixedService</literal> example with error handling:</simpara>
 <programlisting language="java" linenumbering="unnumbered">MessageBuilder.createCall(new RemoteCallback&lt;Void&gt;() {
 
@@ -6134,7 +6310,7 @@ public interface MixedService {
     public void callback(Void response) {
       // ...
     }
-  }, new BusErrorCallback() {
+  }, new ErrorCallback&lt;Message&gt;() { // <co id="CO3-1"/>
 
     @Override
     public boolean error(Message message, Throwable t) {
@@ -6151,11 +6327,109 @@ public interface MixedService {
         return true;
       }
     }
-  });</programlisting>
+  }, MixedService.class).adminService();</programlisting>
+<calloutlist>
+  
+  <callout arearefs="CO3-1">
+    <para>This <literal>ErrorCallback</literal> is parameterized with the type <literal>Message</literal> because it is an Errai Bus RPC. In the next section we will demonstrate the use of a JAX-RS RPC.</para>
+    
+  </callout>
+  
+</calloutlist>
 <important>
 <title>DefaultBusSecurityErrorCallback</title>
-<simpara>Errai Security provides a default global RPC handler that catches a thrown <literal>UnauthenticatedException</literal> or <literal>UnauthorizedException</literal> and navigates to the page with the <literal>LoginPage</literal> or <literal>SecurityError</literal> role respectively.</simpara>
+<simpara>Errai Security provides a default global Bus RPC handler that catches any thrown <literal>UnauthenticatedException</literal> or <literal>UnauthorizedException</literal> and navigates to the page with the <literal>LoginPage</literal> or <literal>SecurityError</literal> role respectively.</simpara>
 </important>
+</section>
+<section id="_jax_rs_rpc">
+<title>JAX-RS RPC</title>
+<simpara>JAX-RS RPCs are secured exactly as bus RPCs. Here is the first example from the previous section, but converted to use JAX-RS instead of the Errai Bus.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Path("/rest-endpoint")
+@RestrictedAccess
+public interface UserOnlyStuff {
+
+  @Path("/some-method")
+  @GET
+  public void someMethod();
+
+  @Path("/other-method")
+  @GET
+  public void otherMethod();
+}</programlisting>
+<simpara>There are two important differences when calling a secured JAX-RS RPC (in contrast to an Errai Bus RPC):</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>JAX-RS RPC calls use the <literal>RestErrorCallback</literal> (an interface extending <literal>ErrorCallback&lt;Request&gt;</literal>).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>There is now global error-handling for JAX-RS.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<simpara>Because there is no global error-handling, you should always pass a <literal>RestErrorCallback</literal> when using a JAX-RS RPC. Errai provides the <literal>DefaultRestSecurityErrorCallback</literal> that provides the same default behaviour as the <literal>DefaultBusSecurityErrorCallback</literal> mentioned above. It can also optionally wrap a provided callback as demonstrated below:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Injecting a callback <literal>Instance</literal>:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">@Inject
+private Instance&lt;DefaultRestSecurityErrorCallback&gt; defaultCallbackInstance;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Wrapping a custom callback in a default callback:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">void callSomeService() {
+  userOnlyStuffService.call(new RemoteCallback&lt;Void&gt;() {
+
+    @Override
+    public void callback(Void response) {
+      // Handle success...
+    }
+  }, defaultCallbackInstance.get()
+        .setWrappedErrorCallback(new RestErrorCallback() {
+
+          @Override
+          public boolean error(Request request, Throwable t) {
+            // Handle error...
+
+            // Returning true means the default navigation behaviour will occur
+            return true;
+          }
+        }
+  )).someMethod();
+}</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Using the default callback without a wrapped callback:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">void callSomeService() {
+  userOnlyStuffService.call(new RemoteCallback&lt;Void&gt;() {
+
+    @Override
+    public void callback(Void response) {
+      // Handle success...
+    }
+  }, defaultCallbackInstance.get()).someMethod();
+}</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
 </section>
 </section>
 <section id="_page_navigation">
@@ -6215,11 +6489,11 @@ public class AdminManagementPage extends SimplePanel {
 <simpara>But the drawback is that any attempts to navigate to a secured <literal>@Page</literal> before the cache is populated will result in redirection to the <literal>LoginPage</literal>&#8201;&#8212;&#8201;even if the user is in fact logged in.</simpara>
 <simpara>In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.</simpara>
 <simpara>One option offered by Errai is to persist the <literal>org.jboss.errai.security.shared.api.identity.User</literal> object in a cookie. This can be done by adding the following to <literal>ErraiApp.properties</literal>:</simpara>
-<screen>errai.security.userLocalStorage=true</screen>
+<screen>errai.security.user_cookie_enabled=true</screen>
 <simpara>With this option enabled the <literal>User</literal> will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.</simpara>
 <important>
 <title>User is stored in plain text</title>
-<simpara>The <literal>errai.security.userLocalStorage=true</literal> setting causes the <literal>User</literal> to be stored in <emphasis role="strong">plain text</emphasis>. That includes the following information:</simpara>
+<simpara>The <literal>errai.security.user_cookie_enabled=true</literal> setting causes the <literal>User</literal> to be stored in <emphasis role="strong">plain text</emphasis>. That includes the following information:</simpara>
 
 <itemizedlist>
   
@@ -6314,6 +6588,33 @@ public class NavBar extends Composite {
 <section id="_using_an_alternative_to_picketlink">
 <title>Using an Alternative to PicketLink</title>
 <simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. A default implementation of this interface using PicketLink is provided in the <literal>errai-security-picketlink</literal> jar. But it is possible to use a different sever-side security framework by providing your own custom implementation of <literal>AuthenticationService</literal> and annotating it with <literal>@Service</literal>. In that case your project should not depend on <literal>errai-security-picketlink</literal>.</simpara>
+<section id="_form_based_login">
+<title>Form Based Login</title>
+<simpara>If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. Here are the steps required:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Create a login page using an html form that posts to a Java servlet.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>On the servlet attempt to login with the <literal>AuthenticationService</literal>. If a user&#8217;s login request is successful, use the <literal>org.jboss.errai.security.shared.api.UserCookieEncoder</literal> to create a cookie.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Set the cookie in the HTTP response and redirect the user to your Errai app.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Make sure this is in your ErraiApp.properties file: <literal>errai.security.user_cookie_enabled=true</literal></simpara>
+      
+    </listitem>
+  
+</orderedlist>
+</section>
 </section>
 </chapter>
 <chapter id="sid-74908675">

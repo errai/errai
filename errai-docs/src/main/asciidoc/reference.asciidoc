@@ -3378,6 +3378,62 @@ public class MyBean {
 
 The remote methods will get executed only after [code]+sendBatch()+ was called. The method [code]+sendBatch+ accepts an additional [code]+RemoteCallback+ instance as a parameter which will we invoked when all remote calls have completed in success. Consequently, an [code]+ErrorCallback+ can also be provided which will get executed for all remote calls that have completed in failure.
 
+=== Asynchronous handling of RPCs on the server
+
+If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service has to be contacted) it might be preferrable to start a separate thread in the RPC service method or leverage an existing thread from a dedicated thread pool that will provide the result at a later point. In this case the RPC endpoint method can return immediately and the thread handling the incoming request doesn't need to stay active until the result is available.
+
+Errai provides a special return type [code]+CallableFuture+ to indicate to the RPC system that the result of the remote method call will be provided asynchronously (after the remote method call has returned).
+
+Here's an example returning a result of type String:
+
+[source, java]
+----
+@Remote
+public interface LongRunningService {
+  public CallableFuture<String> someLongRunningTask();
+}
+----
+
+[source, java]
+----
+@Service
+public class LongRunningServiceImpl implements LongRunningService {
+  @Override
+  public CallableFuture<String> someLongRunningTask() {
+    final CallableFuture<String> future = CallableFutureFactory.get().createFuture(String.class);
+
+    final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Thread.sleep(5000);
+          future.setValue("foobar");
+        }
+        catch (Throwable t) {
+          t.printStackTrace();
+        }
+      }
+    });
+    executorService.shutdown();
+    return future;
+  }
+}
+----
+
+Note that the client-side code does not change when using this feature and will work exactly as described in <<sid-5931313_RemoteProcedureCalls%28RPC%29-Makingcalls>> i.e.: 
+
+[source, java]
+----
+MessageBuilder.createCall(new RemoteCallback<String>() {
+  @Override
+  public void callback(String response) {
+    assertEquals("foobar", response);
+    finishTest();
+  }
+}, LongRunningService.class).someLongRunningTask();
+----
+
 [[sid-19398997]]
 
 == Errai JAX-RS
