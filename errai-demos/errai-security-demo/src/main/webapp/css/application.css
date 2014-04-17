@@ -115,4 +115,7 @@ ul.plain {
 	visibility: hidden;
 }
 
-/* Story List */
+/* Without this style, anchor widgets with no targets will have the text-selection cursor. */
+.gwt-Anchor {
+	cursor: pointer;
+}
