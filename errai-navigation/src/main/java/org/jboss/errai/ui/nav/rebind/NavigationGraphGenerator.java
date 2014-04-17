@@ -123,12 +123,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                 " are both named [" + pageName + "]");
       }
       Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
-      if (annotation.startingPage() || annotatedPageRoles.contains(DefaultPage.class)) {
-        if (annotation.startingPage()) {
-          pageRoles.put(DefaultPage.class, pageClass);
-          logger.log(TreeLogger.Type.WARN, "You are using the deprecated statingPage place change to role = DefaultPage.class");
-        }
-
+      if (annotatedPageRoles.contains(DefaultPage.class)) {
         // need to assign the page impl to a variable and add it to the map twice
         ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
         pageImplStmt = Variable.get("defaultPage");
@@ -490,7 +485,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
         Page pageAnnotation = pageClass.getAnnotation(Page.class);
         List<Class<? extends PageRole>> roles = Arrays.asList(pageAnnotation.role());
-        if (pageAnnotation.startingPage() == true || roles.contains(DefaultPage.class)) {
+        if (roles.contains(DefaultPage.class)) {
           out.print(" [penwidth=3]");
         }
         out.println();
