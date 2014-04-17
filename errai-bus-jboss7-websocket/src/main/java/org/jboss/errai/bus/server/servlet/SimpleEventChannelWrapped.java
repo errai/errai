@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import java.io.IOException;
+
 import org.jboss.as.websockets.WebSocket;
 import org.jboss.as.websockets.frame.TextFrame;
 import org.jboss.errai.bus.server.io.QueueChannel;
-
-import java.io.IOException;
 
 /**
 * @author Mike Brock
@@ -42,8 +42,4 @@ public class SimpleEventChannelWrapped implements QueueChannel {
     socket.writeFrame(TextFrame.from(data));
   }
 
-  @Override
-  public String getId() {
-    return socket.getSocketID();
-  }
 }

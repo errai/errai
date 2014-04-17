@@ -32,7 +32,7 @@ public class NettyQueueChannel implements QueueChannel {
 
   @Override
   public boolean isConnected() {
-    return channel.isConnected();
+    return channel.isActive();
   }
 
   @Override
@@ -40,8 +40,4 @@ public class NettyQueueChannel implements QueueChannel {
     channel.write(new TextWebSocketFrame(data));
   }
 
-  @Override
-  public String getId() {
-    return String.valueOf(channel.getId());
-  }
 }

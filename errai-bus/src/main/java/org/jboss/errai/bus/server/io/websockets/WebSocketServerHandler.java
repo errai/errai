@@ -20,19 +20,18 @@ import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
-import io.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ExceptionEvent;
-import io.netty.channel.MessageEvent;
-import io.netty.channel.SimpleChannelUpstreamHandler;
-import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
@@ -41,19 +40,18 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.protocols.BusCommand;
-import org.jboss.errai.bus.server.api.MessageQueue;
-import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
-import org.jboss.errai.bus.server.io.MessageFactory;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.util.LocalContext;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.client.api.json.EJObject;
-import org.jboss.errai.marshalling.client.api.json.EJString;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.server.JSONDecoder;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -68,22 +66,25 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.protocols.BusCommand;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
+import org.jboss.errai.bus.server.io.MessageFactory;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.util.LocalContext;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJString;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.server.JSONDecoder;
 
 /**
  * The working prototype ErraiBus Websocket Server.
  */
-public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
+public class WebSocketServerHandler extends SimpleChannelInboundHandler {
   public static final String SESSION_ATTR_WS_STATUS = "WebSocketStatus";
   public static final String WEBSOCKET_AWAIT_ACTIVATION = "AwaitingActivation";
   public static final String WEBSOCKET_ACTIVE = "Active";
@@ -99,20 +100,19 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
   }
 
   @Override
-  public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
-    final Object msg = e.getMessage();
-    if (msg instanceof HttpRequest) {
-      handleHttpRequest(ctx, (HttpRequest) msg);
+  protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {    
+    if (msg instanceof FullHttpRequest) {
+      handleHttpRequest(ctx, (FullHttpRequest) msg);
     }
     else if (msg instanceof WebSocketFrame) {
       handleWebSocketFrame(ctx, (WebSocketFrame) msg);
     }
   }
 
-  private void handleHttpRequest(final ChannelHandlerContext ctx, final HttpRequest req) throws Exception {
+  private void handleHttpRequest(final ChannelHandlerContext ctx, final FullHttpRequest req) throws Exception {
     // Allow only GET methods.
     if (req.getMethod() != GET) {
-      sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, FORBIDDEN));
+      sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
       return;
     }
 
@@ -121,23 +121,23 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
         this.getWebSocketLocation(req), null, false);
     this.handshaker = wsFactory.newHandshaker(req);
     if (this.handshaker == null) {
-      wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.getChannel());
+      wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel());
     }
     else {
-      this.handshaker.handshake(ctx.getChannel(), req);
+      this.handshaker.handshake(ctx.channel(), req);
     }
   }
 
   private void handleWebSocketFrame(final ChannelHandlerContext ctx, final WebSocketFrame frame) {
     // Check for closing frame
     if (frame instanceof CloseWebSocketFrame) {
-      activeChannels.remove(ctx.getChannel());
+      activeChannels.remove(ctx.channel());
 
-      this.handshaker.close(ctx.getChannel(), (CloseWebSocketFrame) frame);
+      this.handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame);
       return;
     }
     if (frame instanceof PingWebSocketFrame) {
-      ctx.getChannel().write(new PongWebSocketFrame(frame.getBinaryData()));
+      ctx.channel().write(new PongWebSocketFrame(frame.content()));
       return;
     }
     if (!(frame instanceof TextWebSocketFrame)) {
@@ -145,12 +145,12 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
           .getName()));
     }
 
-    @SuppressWarnings("unchecked") final EJValue val = JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
+    @SuppressWarnings("unchecked") final EJValue val = JSONDecoder.decode(((TextWebSocketFrame) frame).text());
 
     final QueueSession session;
 
     // this is not an active channel.
-    if (!activeChannels.containsKey(ctx.getChannel())) {
+    if (!activeChannels.containsKey(ctx.channel())) {
       if (val == null) {
         sendMessage(ctx, getFailedNegotiation("illegal handshake"));
         return;
@@ -182,14 +182,14 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
               WEBSOCKET_ACTIVE.equals(localContext.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
 
             final MessageQueue queueBySession = svc.getBus().getQueueBySession(sessionKey);
-            queueBySession.setDeliveryHandler(DirectDeliveryHandler.createFor(new NettyQueueChannel(ctx.getChannel())));
+            queueBySession.setDeliveryHandler(DirectDeliveryHandler.createFor(new NettyQueueChannel(ctx.channel())));
 
             // open the channel
-            activeChannels.put(ctx.getChannel(), session);
-            ctx.getChannel().getCloseFuture().addListener(new ChannelFutureListener() {
+            activeChannels.put(ctx.channel(), session);
+            ctx.channel().closeFuture().addListener(new ChannelFutureListener() {
               @Override
               public void operationComplete(final ChannelFuture channelFuture) throws Exception {
-                activeChannels.remove(ctx.getChannel());
+                activeChannels.remove(ctx.channel());
                 queueBySession.setDeliveryHandlerToDefault();
               }
             });
@@ -239,7 +239,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
     else {
       // this is an active session. send the message.
-      session = activeChannels.get(ctx.getChannel());
+      session = activeChannels.get(ctx.channel());
 
       for (final Message msg : MessageFactory.createCommandMessage(session, val)) {
         msg.setResource(HttpServletRequest.class.getName(), new SyntheticHttpServletRequest());
@@ -248,33 +248,33 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-  private void sendHttpResponse(final ChannelHandlerContext ctx, final HttpRequest req, final HttpResponse res) {
+  private void sendHttpResponse(final ChannelHandlerContext ctx, final FullHttpRequest req, final FullHttpResponse res) {
     // Generate an error page if response status code is not OK (200).
-    if (res.getStatus().getCode() != 200) {
-      res.setContent(ChannelBuffers.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8));
-      setContentLength(res, res.getContent().readableBytes());
+    if (res.getStatus().code() != 200) {
+      ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
+      res.content().writeBytes(buf);
+      
+      try {
+        setContentLength(res, res.getStatus().toString().getBytes("UTF-8").length);
+      } catch (UnsupportedEncodingException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     // Send the response and close the connection if necessary.
-    final ChannelFuture f = ctx.getChannel().write(res);
-    if (!isKeepAlive(req) || res.getStatus().getCode() != 200) {
+    final ChannelFuture f = ctx.channel().write(res);
+    if (!isKeepAlive(req) || res.getStatus().code() != 200) {
       f.addListener(ChannelFutureListener.CLOSE);
     }
   }
 
-  @Override
-  public void exceptionCaught(final ChannelHandlerContext ctx, final ExceptionEvent e) throws Exception {
-    //noinspection ThrowableResultOfMethodCallIgnored
-    e.getCause().printStackTrace();
-    e.getChannel().close();
-  }
 
   private String getWebSocketLocation(final HttpRequest req) {
-    return "ws://" + req.getHeader(HttpHeaders.Names.HOST) + WEBSOCKET_PATH;
+    return "ws://" + req.headers().get(HttpHeaders.Names.HOST) + WEBSOCKET_PATH;
   }
 
   public static void sendMessage(final ChannelHandlerContext ctx, final String message) {
-    ctx.getChannel().write(new TextWebSocketFrame(message));
+    ctx.channel().write(new TextWebSocketFrame(message));
   }
 
   private static String getFailedNegotiation(final String error) {

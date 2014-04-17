@@ -644,13 +644,7 @@
         <groupId>org.jboss.spec.javax.servlet</groupId>
         <artifactId>jboss-servlet-api_3.0_spec</artifactId>
         <version>1.0.0.Final</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.as</groupId>
-        <artifactId>jboss-as-websockets</artifactId>
-        <version>0.2.Alpha1</version>
-      </dependency>
+      </dependency>      
 
       <dependency>
         <groupId>org.jboss</groupId>
@@ -659,9 +653,15 @@
       </dependency>
 
       <dependency>
-        <groupId>org.jboss.errai.io.netty</groupId>
-        <artifactId>netty</artifactId>
-        <version>4.0.0.Alpha1.errai.r1</version>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-codec-http</artifactId>
+        <version>4.0.12.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.web</groupId>
+        <artifactId>jbossweb</artifactId>         
+        <version>7.0.16.Final</version>
       </dependency>
 
       <dependency>

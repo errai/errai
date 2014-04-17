@@ -16,18 +16,20 @@
 
 package org.jboss.errai.bus.server.io.websockets;
 
-
 import static org.slf4j.LoggerFactory.getLogger;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+
+import java.net.InetSocketAddress;
+
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.slf4j.Logger;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
 
 /**
  * @author Mike Brock
@@ -41,30 +43,35 @@ public class WebSocketServer {
   }
 
   public void start() {
-    int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(svc.getConfiguration());
+    final int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(svc.getConfiguration());
+    final ServerBootstrap bootstrap = new ServerBootstrap();
+    final WebSocketServerHandler webSocketHandler = new WebSocketServerHandler(svc);
 
-    // Configure the server.
-    final ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-            Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
+    try {
+      final ChannelFuture channelFuture = bootstrap.channel(NioServerSocketChannel.class)
+              .childHandler(new ChannelInitializer() {
+                @Override
+                protected void initChannel(Channel ch) throws Exception {
+                  ch.pipeline().addLast("decoder", new HttpRequestDecoder());
+                  ch.pipeline().addLast("encoder", new HttpResponseEncoder());
+                  ch.pipeline().addLast("handler", webSocketHandler);
+                }
 
-    final WebSocketServerPipelineFactory factory = new WebSocketServerPipelineFactory(svc);
+              }).bind(new InetSocketAddress(port)).sync();
 
-    // Set up the event pipeline factory.
-    bootstrap.setPipelineFactory(factory);
-
-    // Bind and start to accept incoming connections.
-    final Channel server = bootstrap.bind(new InetSocketAddress(port));
-
-    svc.addShutdownHook(new Runnable() {
-      @Override
-      public void run() {
-        bootstrap.releaseExternalResources();
-        factory.getWebSocketServerHandler().stop();
-        server.close();
-        svc = null;
-        log.info("web socket server stopped.");
-      }
-    });
+      svc.addShutdownHook(new Runnable() {
+        @Override
+        public void run() {
+          webSocketHandler.stop();
+          channelFuture.channel().close();
+          log.info("web socket server stopped.");
+        }
+      });
+      
+    } 
+    catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
 
     log.info("started web socket server on port: " + port);
   }

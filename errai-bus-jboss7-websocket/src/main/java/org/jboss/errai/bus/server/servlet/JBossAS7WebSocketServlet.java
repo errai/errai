@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import org.jboss.as.websockets.WebSocket;
 import org.jboss.as.websockets.Frame;
 import org.jboss.as.websockets.FrameType;
-import org.jboss.as.websockets.WebSocket;
 import org.jboss.as.websockets.frame.PongFrame;
 import org.jboss.as.websockets.frame.TextFrame;
 import org.jboss.as.websockets.servlet.WebSocketServlet;
@@ -43,6 +43,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import java.io.IOException;
 
 /**

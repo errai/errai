@@ -31,21 +31,19 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-bus</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
-
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-websockets</artifactId>
+      <groupId>org.jboss.spec.javax.servlet</groupId>
+      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
       <scope>provided</scope>
     </dependency>
-
+     
     <dependency>
-       <groupId>org.jboss.spec.javax.servlet</groupId>
-       <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-       <scope>provided</scope>
-     </dependency>
+      <groupId>org.jboss.web</groupId>
+      <artifactId>jbossweb</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>

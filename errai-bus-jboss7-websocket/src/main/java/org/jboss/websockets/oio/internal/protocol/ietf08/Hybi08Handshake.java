@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.io;
+package org.jboss.websockets.oio.internal.protocol.ietf08;
 
-import java.io.IOException;
+import org.jboss.websockets.oio.internal.protocol.ietf07.Hybi07Handshake;
 
 /**
+ * The handshaking protocol impelemtation for Hybi-07, which is identical to Hybi-08, and thus is just a thin
+ * subclass of {@link Hybi07Handshake} that sets a different version number.
+ *
  * @author Mike Brock
  */
-public interface QueueChannel {
-  public boolean isConnected();
-  public void write(String data) throws IOException;
+public class Hybi08Handshake extends Hybi07Handshake {
+  public Hybi08Handshake() {
+    super("8");
+  }
 }
