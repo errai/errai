@@ -18,22 +18,27 @@ package org.jboss.errai.security.demo.server;
 
 import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.security.demo.client.shared.AdminService;
 import org.jboss.errai.security.demo.client.shared.MessageService;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
- * @author edewit@redhat.com
+ * The service implementation for {@link MessageService} and {@link AdminService}.
  */
-public class MessageServiceImpl implements MessageService {
+@Service
+@Dependent
+public class ServiceImpl implements MessageService, AdminService {
+
   @Inject
-  AuthenticationService authenticationService;
+  private AuthenticationService authenticationService;
 
   @Override
   public String hello() {
-    //User cannot be null because authentication is required for this method
     final User user = authenticationService.getUser();
     String name = user.getProperty(FIRST_NAME) + " " + user.getProperty(LAST_NAME);
     return "Hello " + name + " how are you";

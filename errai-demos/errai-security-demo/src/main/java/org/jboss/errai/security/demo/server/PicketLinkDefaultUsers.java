@@ -16,6 +16,11 @@
  */
 package org.jboss.errai.security.demo.server;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.inject.Inject;
+
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.RelationshipManager;
@@ -24,11 +29,13 @@ import org.picketlink.idm.model.basic.Grant;
 import org.picketlink.idm.model.basic.Role;
 import org.picketlink.idm.model.basic.User;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
-
+/**
+ * This class loads on startup and sets up some PicketLink users. The
+ * {@link PartitionManager} is used to create {@link IdentityManager} and
+ * {@link RelationshipManager}. The {@link IdentityManager} creates {@link User
+ * Users} and {@link Role Roles} and the {@link RelationshipManager} creates
+ * relationships between them.
+ */
 @Singleton
 @Startup
 public class PicketLinkDefaultUsers {

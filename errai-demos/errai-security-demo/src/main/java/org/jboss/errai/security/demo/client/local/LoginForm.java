@@ -29,34 +29,40 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.client.widget.AbstractForm;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.slf4j.Logger;
 
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FormElement;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 
+/**
+ * A {@link LoginPage} that uses the {@link AuthenticationService}.
+ * 
+ * The primary of method of logging in users in Errai Security is the injecting
+ * a {@link Caller}, used to build an RPC to {@link AuthenticationService}.
+ * Caching is automatically handled so that after logging in or out, subsequent
+ * calls to {@link AuthenticationService#getUser()} do not require the network.
+ */
 @Page(role = LoginPage.class)
 @Templated("#root")
 @Dependent
 public class LoginForm extends AbstractForm {
 
-  @Inject Logger logger;
+  @Inject
+  private Logger logger;
 
   @Inject
-  TransitionTo<WelcomePage> welcomePage;
-  
-  @Inject
-  private Caller<AuthenticationService> authCaller;
+  private Caller<AuthenticationService> authServiceCaller;
 
   @Inject
   private SecurityContext securityContext;
@@ -65,35 +71,35 @@ public class LoginForm extends AbstractForm {
   @DataField
   private TextBox username;
 
-  @DataField
-  private final Element form = DOM.createForm();
-
   @Inject
   @DataField
   private PasswordTextBox password;
+
+  @DataField
+  private final FormElement form = Document.get().createFormElement();
 
   @Inject
   @DataField
   private Button login;
 
-  @Inject
   @DataField
-  private Button logout;
+  private Element alert = DOM.createDiv();
 
-  @DataField
-  Element alert = DOM.createDiv();
-  
   @Override
   protected FormElement getFormElement() {
-    return FormElement.as(form);
+    return form;
   }
 
   @EventHandler("login")
   private void loginClicked(ClickEvent event) {
-    authCaller.call(new RemoteCallback<User>() {
+    authServiceCaller.call(new RemoteCallback<User>() {
 
       @Override
       public void callback(final User user) {
+        /*
+         * This triggers most browsers to prompt users to remember their
+         * credentials.
+         */
         submit();
         securityContext.navigateBackOrHome();
       }
@@ -101,39 +107,23 @@ public class LoginForm extends AbstractForm {
       @Override
       public boolean error(Message message, Throwable throwable) {
         logger.error("Login failure reason: ", throwable);
-        alert.getStyle().setDisplay(Style.Display.BLOCK);
+        alert.getStyle().setVisibility(Visibility.VISIBLE);
         return false;
       }
     }).login(username.getText(), password.getText());
   }
-
-  @EventHandler("logout")
-  private void logoutClicked(ClickEvent event) {
-    authCaller.call(new RemoteCallback<Void>() {
-
-      @Override
-      public void callback(Void response) {
-        welcomePage.go();
-      }
-
-    }).logout();
-  }
-
+  
   @PageShowing
   private void isLoggedIn() {
-    authCaller.call(new RemoteCallback<Boolean>() {
+    authServiceCaller.call(new RemoteCallback<User>() {
 
       @Override
-      public void callback(final Boolean isLoggedIn) {
-        if (isLoggedIn) {
-          form.getStyle().setDisplay(Style.Display.NONE);
-          logout.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        } else {
-          form.getStyle().setDisplay(Style.Display.BLOCK);
-          logout.getElement().getStyle().setDisplay(Style.Display.NONE);
+      public void callback(final User user) {
+        if (!User.ANONYMOUS.equals(user)) {
+          login.setEnabled(false);
         }
       }
-
-    }).isLoggedIn();
+    }).getUser();
   }
+
 }

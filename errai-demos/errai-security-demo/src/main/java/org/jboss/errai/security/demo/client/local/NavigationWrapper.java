@@ -16,21 +16,40 @@
  */
 package org.jboss.errai.security.demo.client.local;
 
-import org.jboss.errai.security.shared.api.identity.User;
-import org.jboss.errai.security.shared.exception.UnauthorizedException;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.api.SecurityError;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
- * A {@link User} is sent to this page by the default error handlers when an
- * {@link UnauthorizedException} is caught.
- * 
- * @author edewit@redhat.com
+ * This {@link Templated} widget wraps the Errai Navigation
+ * {@link Navigation#getContentPanel() content panel} so that the {@link NavBar}
+ * is displayed above every {@link Page}.
  */
-@Page(role = SecurityError.class)
-@Templated
-public class SecurityErrorPage extends Composite {
+@Templated("#body")
+@Dependent
+public class NavigationWrapper extends Composite {
+
+  @Inject
+  private Navigation navigation;
+
+  @Inject
+  @DataField
+  private NavBar navbar;
+
+  @Inject
+  @DataField
+  private SimplePanel content;
+
+  @PostConstruct
+  public void clientMain() {
+    content.add(navigation.getContentPanel());
+  }
 }

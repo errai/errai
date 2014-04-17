@@ -22,6 +22,12 @@ import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+/**
+ * This {@link Page} is protected by the {@link RestrictedAccess} annotation.
+ * Because the {@link RestrictedAccess#roles() roles} attribute contains the
+ * single role "admin", users lacking the "admin" role will be disallowed from
+ * viewing this page.
+ */
 @Page
 @Templated("#root")
 @RestrictedAccess(roles = "admin")

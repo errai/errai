@@ -16,7 +16,7 @@
  */
 package org.jboss.errai.security.demo.client.local;
 
-import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -43,17 +43,21 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 
-@ApplicationScoped
-@Templated("#root")
+/**
+ * The {@link DefaultPage} for this demo. This page observes
+ * {@link LoggedInEvent LoggedInEvents} and {@link LoggedOutEvent
+ * LoggedOutEvents} to update the displayed username.
+ */
 @Page(role = DefaultPage.class)
+@Templated("#root")
+@ApplicationScoped
 public class WelcomePage extends Composite {
 
-  static final String ANONYMOUS = "anonymous";
+  private static final String ANONYMOUS = "anonymous";
 
   @Inject
-  public
   @DataField
-  Button startButton;
+  private Button startButton;
 
   @Inject
   @DataField
@@ -63,7 +67,7 @@ public class WelcomePage extends Composite {
   private Caller<AuthenticationService> authCaller;
 
   @Inject
-  TransitionTo<Messages> startButtonClicked;
+  private TransitionTo<Messages> startButtonClicked;
 
   @EventHandler("startButton")
   public void onStartButtonPress(ClickEvent e) {

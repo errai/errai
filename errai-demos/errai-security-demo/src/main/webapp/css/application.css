@@ -111,11 +111,28 @@ ul.plain {
 	margin-right: 2px;
 }
 
-.errai-restricted-access-style {
-	visibility: hidden;
+/* Without this style, anchor widgets with no targets will have the text-selection cursor. */
+a {
+	cursor: pointer;
 }
 
-/* Without this style, anchor widgets with no targets will have the text-selection cursor. */
-.gwt-Anchor {
-	cursor: pointer;
+/*
+ START RESTRICTED ACCESS STYLES
+ 
+ The "errai-restricted-access-style" class is applied to elements annotated with RestrictedAccess
+ when a user lacks the permission to view them.
+ 
+ Usually elements are hidden when this style is applied, but the "nobody" class is used by the 
+ "Login" nav button so that button is only shown when a user is not logged in.
+*/
+.errai-restricted-access-style {
+	display: none !important;
+}
+
+.nobody {
+	display: none !important;
+}
+
+.nobody.errai-restricted-access-style {
+	display: inherit !important;
 }

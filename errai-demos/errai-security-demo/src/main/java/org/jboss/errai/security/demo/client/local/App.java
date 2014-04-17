@@ -17,37 +17,31 @@
 package org.jboss.errai.security.demo.client.local;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
-import org.jboss.errai.ui.nav.client.local.Navigation;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 
-@Templated("#body")
-@ApplicationScoped
-public class App extends Composite {
-
+/**
+ * This is the entry point to the client portion of the web application. At
+ * compile time, Errai finds the {@code @EntryPoint} annotation on this class
+ * and generates bootstrap code that creates an instance of this class when the
+ * page loads. This client-side bootstrap code will also call the
+ * {@link #init()} method because it is annotated with the
+ * {@link PostConstruct} annotation.
+ */
+@EntryPoint
+public class App {
+  
   @Inject
-  private Navigation navigation;
-
-  @Inject
-  @DataField
-  private NavBar navbar;
-
-  @Inject
-  @DataField
-  private SimplePanel content;
-
+  private NavigationWrapper navWrapper;
+  
   @PostConstruct
-  public void clientMain() {
-    content.add(navigation.getContentPanel());
-    RootPanel.get().add(this);
+  public void init() {
+    RootPanel.get().add(navWrapper);
     RestClient.setApplicationRoot("/errai-security-demo/rest/");
   }
+
 }

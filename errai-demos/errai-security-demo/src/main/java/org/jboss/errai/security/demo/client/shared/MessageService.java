@@ -16,26 +16,20 @@
  */
 package org.jboss.errai.security.demo.client.shared;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
+import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
+import org.jboss.errai.security.shared.api.identity.User;
 
 /**
- * @author edewit@redhat.com
+ * This is a secured Errai Bus RPC service. Any authenticated {@link User} can
+ * access this service. Because the {@link RestrictedAccess} annotation is on
+ * the type, any methods added to this type would also be secured. It is also
+ * possible to annotate individual methods for finer-grained control, or to
+ * annotate both the type and methods (in which case the roles will be combined
+ * an all roles must be present for access to be granted).
  */
-@Path("/message")
+@Remote
+@RestrictedAccess
 public interface MessageService {
-  @RestrictedAccess
-  @Path("/hello")
-  @GET
-  @Produces("application/json")
   String hello();
-
-  @RestrictedAccess(roles = "admin")
-  @Path("/ping")
-  @GET
-  @Produces("application/json")
-  String ping();
 }
