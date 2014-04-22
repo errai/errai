@@ -16,7 +16,8 @@ public enum ProjectProperty {
    */
   MODULE_NAME(String.class),
   INSTALLED_FEATURES(SerializableSet.class),
-  ERRAI_VERSION(String.class);
+  ERRAI_VERSION(String.class),
+  CORE_IS_INSTALLED(Boolean.class);
 
   public final Class<?> valueType;
 

@@ -16,7 +16,10 @@
  */
 package org.jboss.errai.forge.facet.aggregate;
 
+import javax.inject.Inject;
+
 import org.jboss.errai.forge.config.ProjectConfig;
+import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.dependency.ErraiBuildDependencyFacet;
 import org.jboss.errai.forge.facet.module.ModuleCoreFacet;
 import org.jboss.errai.forge.facet.plugin.CleanPluginFacet;
@@ -26,7 +29,8 @@ import org.jboss.errai.forge.facet.plugin.GwtPluginFacet;
 import org.jboss.errai.forge.facet.plugin.JbossPluginFacet;
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
 import org.jboss.errai.forge.facet.resource.ErraiAppPropertiesFacet;
-import org.jboss.forge.addon.facets.constraints.FacetConstraint;
+import org.jboss.forge.addon.facets.FacetFactory;
+import org.jboss.forge.addon.projects.ProjectFacet;
 
 /**
  * Aggregates core facets required by all other facet aggregators. Installing
@@ -36,11 +40,24 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@FacetConstraint({ ProjectConfig.class, ErraiBuildDependencyFacet.class, CleanPluginFacet.class,
-    CompilerPluginFacet.class,
-    DependencyPluginFacet.class, GwtPluginFacet.class, JbossPluginFacet.class, WarPluginFacet.class,
-    ModuleCoreFacet.class, ErraiAppPropertiesFacet.class })
 public class CoreFacet extends BaseAggregatorFacet {
+  
+  @Inject
+  private FacetFactory facetFactory;
+
+  @SuppressWarnings({ "unchecked" })
+  private static final Class<? extends ProjectFacet>[] coreFacets = new Class[] {
+    ProjectConfig.class,
+    ErraiBuildDependencyFacet.class,
+    CleanPluginFacet.class,
+    CompilerPluginFacet.class,
+    DependencyPluginFacet.class,
+    GwtPluginFacet.class,
+    JbossPluginFacet.class,
+    WarPluginFacet.class,
+    ModuleCoreFacet.class,
+    ErraiAppPropertiesFacet.class
+  };
 
   @Override
   public String getFeatureName() {
@@ -55,5 +72,36 @@ public class CoreFacet extends BaseAggregatorFacet {
   @Override
   public String getShortName() {
     return "core";
+  }
+
+  @Override
+  public boolean install() {
+    boolean installWasSuccessful = true;
+    
+    for (int i = 0; i < coreFacets.length && installWasSuccessful; i++) {
+      try {
+        facetFactory.install(getProject(), coreFacets[i]);
+      }
+      catch (IllegalStateException e) {
+        installWasSuccessful = false;
+      }
+    }
+
+    if (installWasSuccessful) {
+      getProject().getFacet(ProjectConfig.class).setProjectProperty(ProjectProperty.CORE_IS_INSTALLED, true);
+    }
+
+    return installWasSuccessful;
+  }
+
+  @Override
+  public boolean isInstalled() {
+    if (!getProject().hasFacet(ProjectConfig.class))
+      return false;
+
+    final Boolean isCoreInstalled = getProject().getFacet(ProjectConfig.class).getProjectProperty(
+            ProjectProperty.CORE_IS_INSTALLED, Boolean.class);
+
+    return isCoreInstalled != null && isCoreInstalled;
   }
 }

@@ -11,7 +11,8 @@ public class ConfigTypeConverterFactory {
   private static final ConfigTypeConverter<?>[] DEFAULT_CONVERTERS = new ConfigTypeConverter<?>[] {
     new FileConverter(),
     new SetConverter(),
-    new StringConverter()
+    new StringConverter(),
+    new BooleanConverter()
   };
   
   private final Map<Class<?>, ConfigTypeConverter<?>> converterMap;
