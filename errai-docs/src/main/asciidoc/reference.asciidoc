@@ -7253,6 +7253,12 @@ Since these are native Javascript variables, they can easily be set in a script 
 
 The possible log levels correspond to those in [code]+java.util.logging.Level+ .
 
+.Logging Levels
+[IMPORTANT]
+====
+If you are increasing the logging level of an Errai log handler, you will also need to increase the `gwt.logging.logLevel` (set in your \*.gwt.xml). Handlers will not receive log records that are lower than the GWT log level, which is set to **INFO** in `ErraiCommon.gwt.xml`.
+==== 
+
 [[sid-74908675_Logging-FormatString]]
 
 ==== Format String
