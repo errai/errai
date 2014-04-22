@@ -187,7 +187,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
           logger.info("my queue session id: " + sessionId);
 
-          loadRpcProxies();
           processCapabilities(message);
 
           for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
@@ -385,6 +384,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     initialConnectTimer = new Timer() {
       @Override
       public void run() {
+        loadRpcProxies();
         sendInitialMessage();
       }
     };
@@ -895,10 +895,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   /**
    * Checks if subject is already listed in the subscriptions map
-   *
+   * 
    * @param subject
-   *     - subject to look for
-   *
+   *          subject to look for
+   * 
    * @return true if the subject is already subscribed
    */
   @Override
@@ -981,21 +981,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return transportError.isStopDefaultErrorHandler();
   }
 
-  /**
-   * Initializes the message bus by setting up the <tt>recvBuilder</tt> to
-   * accept responses. Also, initializes the incoming timer to ensure the
-   * client's polling with the server is active.
-   */
   private void loadRpcProxies() {
-    ((RpcProxyLoader) GWT.create(RpcProxyLoader.class)).loadProxies(ClientMessageBusImpl.this);
+    RpcProxyLoader proxyLoader = ((RpcProxyLoader) GWT.create(RpcProxyLoader.class));
+    proxyLoader.loadProxies(ClientMessageBusImpl.this);
   }
 
   /**
    * Adds a subscription listener, so it is possible to add subscriptions to the
    * client.
-   *
+   * 
    * @param listener
-   *     - subscription listener
+   *          subscription listener
    */
   @Override
   public void addSubscribeListener(final SubscribeListener listener) {
