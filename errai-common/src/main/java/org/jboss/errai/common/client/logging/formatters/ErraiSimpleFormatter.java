@@ -18,11 +18,18 @@ public class ErraiSimpleFormatter extends Formatter {
 
   public static final String defaultFormat = "%1$tH:%1$tM:%1$tS %4$s [%3$s] %5$s";
 
-  protected Date date;
+  private Date date;
+  private String customFormat;
 
   public ErraiSimpleFormatter() {
     date = new Date();
   }
+  
+  public ErraiSimpleFormatter(String customFormat) {
+    this();
+    this.customFormat = customFormat;
+  }
+  
 
   @Override
   public synchronized String format(LogRecord record) {
@@ -31,7 +38,7 @@ public class ErraiSimpleFormatter extends Formatter {
     String name = record.getLoggerName().substring(Math.max(record.getLoggerName().lastIndexOf(".") + 1, 0));
     Object thrown = (record.getThrown() != null) ? record.getThrown() : "";
 
-    return StringFormat.format(getSimpleFormatString(defaultFormat), date, record.getLoggerName(), name, record
+    return StringFormat.format(getSimpleFormatString(customFormat), date, record.getLoggerName(), name, record
             .getLevel().getName(), record.getMessage(), thrown);
   }
   
@@ -88,14 +95,21 @@ public class ErraiSimpleFormatter extends Formatter {
       return $wnd.erraiSimpleFormatString;
     }
   }-*/;
-  
+
   /**
-   * @param fallback A fall-back value if no format String has been set.
-   * @return The global format string, or {@code fallback} if none has been set.
+   * @param customFormat
+   *          the custom format provided when creating this formatter (see
+   *          {@link ErraiSimpleFormatter#ErraiSimpleFormatter(String)})
+   * @return The custom format string, if provided, otherwise the global format
+   *         string, or default format if no global format has been set.
    */
-  public static String getSimpleFormatString(String fallback) {
+  public String getSimpleFormatString(String customFormat) {
+    if (customFormat != null) {
+      return customFormat;
+    }
+
     String retVal = getSimpleFormatString();
-    return (!retVal.equals("")) ? retVal : fallback;
+    return (!retVal.equals("")) ? retVal : defaultFormat;
   }
 
 }

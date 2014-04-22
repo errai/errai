@@ -22,6 +22,8 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.bus.client.framework.transports.TransportStatistics;
+import org.jboss.errai.common.client.logging.formatters.ErraiSimpleFormatter;
+import org.jboss.errai.common.client.logging.handlers.ErraiConsoleLogHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,13 @@ public class ManagementConsole {
   public ManagementConsole(final ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
     this.errorDialog = new BusErrorDialog(clientMessageBus);
+
+    java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ManagementConsole.class.getName());
+    ErraiSimpleFormatter esf = new ErraiSimpleFormatter("%5$s");
+    ErraiConsoleLogHandler eclh = new ErraiConsoleLogHandler(esf);
+    logger.addHandler(eclh);
+    logger.setUseParentHandlers(false);
+    
     declareDebugFunction();
   }
 
