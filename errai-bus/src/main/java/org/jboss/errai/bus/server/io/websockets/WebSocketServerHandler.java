@@ -25,6 +25,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -84,6 +85,7 @@ import org.jboss.errai.marshalling.server.JSONDecoder;
 /**
  * The working prototype ErraiBus Websocket Server.
  */
+@Sharable
 public class WebSocketServerHandler extends SimpleChannelInboundHandler {
   public static final String SESSION_ATTR_WS_STATUS = "WebSocketStatus";
   public static final String WEBSOCKET_AWAIT_ACTIVATION = "AwaitingActivation";
