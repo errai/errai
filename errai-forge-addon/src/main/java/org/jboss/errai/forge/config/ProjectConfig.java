@@ -37,7 +37,7 @@ import org.jboss.forge.addon.projects.ProjectFacet;
 @FacetConstraint({ ConfigurationFacet.class })
 public class ProjectConfig extends AbstractFacet<Project> implements ProjectFacet {
 
-  public static final String PREFIX = "errai-forge-";
+  public static final String PREFIX = "ERRAI_FORGE_";
 
   private Project project;
   
