@@ -23,10 +23,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-
-import java.net.InetSocketAddress;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
 
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -57,12 +55,12 @@ public class WebSocketServer {
               .childHandler(new ChannelInitializer() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
-                  ch.pipeline().addLast("decoder", new HttpRequestDecoder());
-                  ch.pipeline().addLast("encoder", new HttpResponseEncoder());
+                  ch.pipeline().addLast("codec-http", new HttpServerCodec());
+                  ch.pipeline().addLast("aggregator", new HttpObjectAggregator(65536));
                   ch.pipeline().addLast("handler", webSocketHandler);
                 }
 
-              }).bind(new InetSocketAddress(port)).sync();
+              }).bind(port).sync();
 
       svc.addShutdownHook(new Runnable() {
         @Override

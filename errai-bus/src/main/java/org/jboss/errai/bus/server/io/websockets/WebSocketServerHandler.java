@@ -110,6 +110,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
       handleWebSocketFrame(ctx, (WebSocketFrame) msg);
     }
   }
+  
+  @Override
+  public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+      ctx.flush();
+  }
 
   private void handleHttpRequest(final ChannelHandlerContext ctx, final FullHttpRequest req) throws Exception {
     // Allow only GET methods.
@@ -135,11 +140,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
     if (frame instanceof CloseWebSocketFrame) {
       activeChannels.remove(ctx.channel());
 
-      this.handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame);
+      this.handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
       return;
     }
     if (frame instanceof PingWebSocketFrame) {
-      ctx.channel().write(new PongWebSocketFrame(frame.content()));
+      ctx.channel().write(new PongWebSocketFrame(frame.content().retain()));
       return;
     }
     if (!(frame instanceof TextWebSocketFrame)) {
@@ -255,12 +260,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
     if (res.getStatus().code() != 200) {
       ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
       res.content().writeBytes(buf);
-      
-      try {
-        setContentLength(res, res.getStatus().toString().getBytes("UTF-8").length);
-      } catch (UnsupportedEncodingException e) {
-        throw new RuntimeException(e);
-      }
+      buf.release();
+      setContentLength(res, res.content().readableBytes());
     }
 
     // Send the response and close the connection if necessary.
