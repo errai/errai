@@ -43,7 +43,7 @@ public final class ArtifactVault {
     GwtUser("gwt-user", "com.google.gwt"),
     Guava("guava", "com.google.guava"),
     GuavaGwt("guava-gwt", "com.google.guava"),
-    Hsq("hsqldb", "hsqldb"),
+    Hsq("hsqldb", "org.hsqldb"),
     JUnit("junit", "junit"),
     GwtSlf4j("gwt-slf4j", "de.benediktmeurer.gwt-slf4j"),
     JavaxInject("javax.inject", "javax.inject"),
