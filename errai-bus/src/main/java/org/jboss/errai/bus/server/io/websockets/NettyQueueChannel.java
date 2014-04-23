@@ -22,6 +22,7 @@ import org.jboss.errai.bus.server.io.QueueChannel;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class NettyQueueChannel implements QueueChannel {
   final Channel channel;
@@ -37,7 +38,7 @@ public class NettyQueueChannel implements QueueChannel {
 
   @Override
   public void write(String data) {
-    channel.write(new TextWebSocketFrame(data));
+    channel.writeAndFlush(new TextWebSocketFrame(data));
   }
 
 }

@@ -113,7 +113,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
   
   @Override
   public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-      ctx.flush();
+    ctx.flush();
   }
 
   private void handleHttpRequest(final ChannelHandlerContext ctx, final FullHttpRequest req) throws Exception {
@@ -277,7 +277,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
   }
 
   public static void sendMessage(final ChannelHandlerContext ctx, final String message) {
-    ctx.channel().write(new TextWebSocketFrame(message));
+    ctx.channel().writeAndFlush(new TextWebSocketFrame(message));
   }
 
   private static String getFailedNegotiation(final String error) {

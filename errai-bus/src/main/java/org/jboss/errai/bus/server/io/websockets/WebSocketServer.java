@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class WebSocketServer {
   private ErraiService svc;
