@@ -1195,6 +1195,12 @@ errai.bus.enable_web_socket_server=true
 
 The default port for the sideband server is [code]+8085+ . You can change this by specifying a port with the [code]+errai.bus.web_socket_port+ property in the [code]+ErraiService.properties+ file.
 
+[IMPORTANT]
+.Netty Dependencies
+====
+Make sure to deploy the required Netty dependencies to your server. If you started with one of our demos or our tutorial project it should be enough to *NOT* set [code]+netty-codec-http+ to provided. All required transitive dependencies should then be part of your war file (WEB-INF/lib).
+====
+
 [[sid-53380177_WebSockets-DeployingwithJBossAS7]]
 
 ==== Deploying with JBoss AS 7

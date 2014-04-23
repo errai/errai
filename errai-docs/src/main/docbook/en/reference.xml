@@ -1461,6 +1461,10 @@ public class HelloWorldService implements MessageCallback {
 <simpara>Activating the sideband server is as simple as adding the following to the <literal><phrase role="code">ErraiService.properties</phrase></literal> file:</simpara>
 <programlisting language="java" linenumbering="unnumbered">errai.bus.enable_web_socket_server=true</programlisting>
 <simpara>The default port for the sideband server is <literal><phrase role="code">8085</phrase></literal> . You can change this by specifying a port with the <literal><phrase role="code">errai.bus.web_socket_port</phrase></literal> property in the <literal><phrase role="code">ErraiService.properties</phrase></literal> file.</simpara>
+<important>
+<title>Netty Dependencies</title>
+<simpara>Make sure to deploy the required Netty dependencies as part of your application. If you started with our demos or tutorial it should be enough to <emphasis role="strong">NOT</emphasis> set <literal><phrase role="code">netty-codec-http</phrase></literal> to provided. All required transitive dependencies should then be part of your war file (WEB-INF/lib).</simpara>
+</important>
 </section>
 <section id="sid-53380177_WebSockets-DeployingwithJBossAS7">
 <title>Deploying with JBoss AS 7</title>
@@ -6711,6 +6715,10 @@ public class HandlerLevelAdjuster {
   erraiSystemLoghandlerLevel = "INFO";
 &lt;/script&gt;</programlisting>
 <simpara>The possible log levels correspond to those in <literal><phrase role="code">java.util.logging.Level</phrase></literal> .</simpara>
+<important>
+<title>Logging Levels</title>
+<simpara>If you are increasing the logging level of an Errai log handler, you will also need to increase the <literal>gwt.logging.logLevel</literal> (set in your \*.gwt.xml). Handlers will not receive log records that are lower than the GWT log level, which is set to <emphasis role="strong">INFO</emphasis> in <literal>ErraiCommon.gwt.xml</literal>.</simpara>
+</important>
 </section>
 <section id="sid-74908675_Logging-FormatString">
 <title>Format String</title>
@@ -8206,13 +8214,13 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>org.jboss:jboss-common-core:jar:2.2.14.GA:provided</simpara>
+      <simpara>org.jboss:jboss-common-core:jar:2.2.17.GA:provided</simpara>
       
 
 <itemizedlist>
   
     <listitem>
-      <simpara>org.jboss.logging:jboss-logging-spi:jar:2.0.5.GA:provided</simpara>
+      <simpara>org.jboss.logging:jboss-logging-spi:jar:2.1.0.GA:provided</simpara>
       
     </listitem>
   
@@ -9335,7 +9343,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <itemizedlist>
   
     <listitem>
-      <simpara>org.slf4j:slf4j-ext:jar:1.6.1:provided</simpara>
+      <simpara>org.slf4j:slf4j-ext:jar:1.7.2:provided</simpara>
       
     </listitem>
   
@@ -11387,7 +11395,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>org.slf4j:slf4j-ext:jar:1.6.1:provided</simpara>
+      <simpara>org.slf4j:slf4j-ext:jar:1.7.2:provided</simpara>
       
     </listitem>
   
@@ -11479,7 +11487,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>org.slf4j:slf4j-api:jar:1.7.:compile</simpara>
+      <simpara>org.slf4j:slf4j-api:jar:1.7.2:compile</simpara>
       
     </listitem>
   
