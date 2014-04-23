@@ -158,6 +158,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
     longPollingTransport.stop(stopAllCurrentRequests);
     if (webSocketChannel != null) {
       disconnectSocket(webSocketChannel);
+      webSocketChannel = null;
     }
     stopped = true;
     return Collections.emptyList();
