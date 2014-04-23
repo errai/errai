@@ -50,9 +50,7 @@ public class WebSocketServer {
     try {
       final NioEventLoopGroup bossGroup = new NioEventLoopGroup();
       final NioEventLoopGroup workerGroup = new NioEventLoopGroup();
-      final ChannelFuture channelFuture = bootstrap
-              .group(bossGroup, workerGroup)
-              .channel(NioServerSocketChannel.class)
+      final ChannelFuture channelFuture = bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
               .childHandler(new ChannelInitializer() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
@@ -66,14 +64,22 @@ public class WebSocketServer {
       svc.addShutdownHook(new Runnable() {
         @Override
         public void run() {
-          webSocketHandler.stop();
-          channelFuture.channel().close();
-          log.info("web socket server stopped.");
+          try {
+            webSocketHandler.stop();
+            channelFuture.channel().close();
+            log.info("web socket server stopped.");
+          } 
+          catch (Exception e) {
+            throw new RuntimeException(e);
+          }
+          finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+          }
         }
       });
-      
-    } 
-    catch (Throwable t) {
+
+    } catch (Throwable t) {
       throw new RuntimeException(t);
     }
 
