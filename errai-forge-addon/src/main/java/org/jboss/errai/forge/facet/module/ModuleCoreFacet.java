@@ -30,7 +30,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.codehaus.plexus.util.cli.shell.Shell;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ModuleVault.Module;
@@ -56,11 +55,6 @@ public class ModuleCoreFacet extends AbstractModuleFacet {
                   + "<!DOCTYPE module PUBLIC '-//Google Inc.//DTD Google Web Toolkit 1.6//EN'\n\t"
                   + "'http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd'>\n"
                   + "<module></module>\n";
-
-  public ModuleCoreFacet(final Shell shell) {
-    this();
-    this.shell = shell;
-  }
 
   public ModuleCoreFacet() {
     modules = Arrays.asList(new Module[] {

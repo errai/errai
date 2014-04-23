@@ -22,13 +22,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.codehaus.plexus.util.cli.shell.Shell;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ModuleVault.Module;
@@ -51,8 +49,6 @@ public abstract class AbstractModuleFacet extends AbstractXmlResourceFacet {
    * A collection of GWT modules to inherit in this project.
    */
   protected Collection<Module> modules;
-  @Inject
-  protected Shell shell;
 
   protected final String xPathRootExpression = "/module";
 
