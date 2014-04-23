@@ -8,7 +8,7 @@
   <version>3.0-SNAPSHOT</version>
   <name>Errai::Forge Addon</name>
   <properties>
-    <forge.api.version>2.1.1.Final</forge.api.version>
+    <forge.api.version>2.4.1.Final</forge.api.version>
   </properties>
 
   <url>https://github.com/errai/forge-errai</url>
@@ -22,7 +22,7 @@
   </licenses>
 
   <description>
-    A Forge 2.1 Addon for configuring Errai projects.
+    A Forge Addon for configuring Errai projects.
   </description>
 
   <developers>

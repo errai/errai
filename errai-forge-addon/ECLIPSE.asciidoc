@@ -1,4 +1,4 @@
-= Errai Forge 2.1 Addon: Eclipse Guide
+= Errai Forge 2 Addon: Eclipse Guide
 
 == Overview
 
@@ -22,9 +22,9 @@ This guide explains how to install and use the Errai Forge Addon via the Forge P
 +
 image:images/m2e-install.png[]
 
-=== Installing Forge 2.1 and the Errai Forge Addon
+=== Installing Forge 2 and the Errai Forge Addon
 
-===== 3. Install the link:$$http://download.jboss.org/jbosstools/builds/staging/jbosstools-forge_master/all/repo/$$[Forge 2.1 Eclipse Plugin]
+===== 3. Install the link:$$http://download.jboss.org/jbosstools/builds/staging/jbosstools-forge_master/all/repo/$$[Forge 2 Eclipse Plugin]
 
 .. In the Eclipse menu, go to _Help_ > _Install New Software..._
 +
