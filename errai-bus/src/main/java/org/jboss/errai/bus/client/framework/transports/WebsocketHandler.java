@@ -72,7 +72,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
     if (!isWebSocketSupported()) {
       unsupportedReason = UNSUPPORTED_MESSAGE_NO_CLIENT_SUPPORT;
-      logger.warn("websockets not supported by browser");
+      logger.warn("websockets not supported by this browser");
       hosed = true;
       return;
     }
@@ -102,11 +102,11 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   @Override
   public void transmit(final List<Message> txMessages) {
-    if (webSocketChannel != null) {
-      if (!transmitToSocket(webSocketChannel, BusToolsCli.encodeMessages(txMessages))) {
-        longPollingTransport.transmit(txMessages);
-        txCount++;
-        lastTransmission = System.currentTimeMillis();
+    // The HTTP long polling handler is cancelled when the websocket channel becomes available
+    if (longPollingTransport.isCancelled()) {
+      boolean success = transmitToSocket(webSocketChannel, BusToolsCli.encodeMessages(txMessages));
+      if (!success) {
+        logger.error("failed to deliver " + txMessages.size() + " message(s) using websocket");
       }
     }
     else {
@@ -131,10 +131,10 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
         if (messageBus.getState() == BusState.CONNECTION_INTERRUPTED)
           messageBus.setState(BusState.CONNECTED);
 
-        longPollingTransport.stop(false);
         // send final message to open the channel
         transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
 
+        longPollingTransport.stop(false);
         webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
 
         logger.info("web socket channel successfully negotiated. comet channel deactivated. (reconnect token: "
@@ -202,43 +202,44 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   }-*/;
 
   public native Object attemptWebSocketConnect(final String websocketAddr) /*-{
-      var thisRef = this;
-      var socket;
-      if (window.WebSocket) {
-          socket = new WebSocket(websocketAddr);
+    var thisRef = this;
+    var socket;
+    if (window.WebSocket) {
+      socket = new WebSocket(websocketAddr);
 
-          socket.onmessage = function (event) {
-              thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::handleReceived(Ljava/lang/String;)(event.data);
-          };
+      socket.onmessage = function (event) {
+          thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::handleReceived(Ljava/lang/String;)(event.data);
+      };
 
-          socket.onopen = function (event) {
-              thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::attachWebSocketChannel(Ljava/lang/Object;)(socket);
-          };
-          socket.onclose = function (event) {
+      socket.onopen = function (event) {
+          thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::attachWebSocketChannel(Ljava/lang/Object;)(socket);
+      };
+      socket.onclose = function (event) {
+          thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::notifyDisconnected()();
+
+          // should probably do something here.
+      };
+
+      socket.onerror = function (event) {
+          if (event.srcElement.readyState != WebSocket.OPEN) {
               thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::notifyDisconnected()();
-
-              // should probably do something here.
-          };
-
-          socket.onerror = function (event) {
-              if (event.srcElement.readyState != WebSocket.OPEN) {
-                  thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::notifyDisconnected()();
-              }
           }
-          return socket;
-      } else {
-          return "NotSupportedByBrowser";
       }
+      return socket;
+    } 
+    else {
+      return "NotSupportedByBrowser";
+    }
   }-*/;
 
   public native boolean transmitToSocket(final Object socket, final String text) /*-{
-      if (socket.readyState == WebSocket.OPEN) {
-          socket.send(text);
-          return true;
-      }
-      else {
-          return false;
-      }
+    if (socket.readyState == WebSocket.OPEN) {
+      socket.send(text);
+      return true;
+    }
+    else {
+      return false;
+    }
   }-*/;
 
   public native static boolean isConnected(final Object socket) /*-{

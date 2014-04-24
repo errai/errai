@@ -287,6 +287,10 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     }
   }
 
+  public boolean isCancelled() {
+    return receiveCommCallback.canceled;
+  }
+  
   private class NoPollRequestCallback extends LongPollRequestCallback {
 
     @Override
