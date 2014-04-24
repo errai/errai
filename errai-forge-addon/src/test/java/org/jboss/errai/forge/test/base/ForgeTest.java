@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.errai.forge.facet.aggregate.AggregatorFacetTest;
 import org.jboss.errai.forge.facet.plugin.BasePluginFacetTest;
 import org.jboss.forge.addon.facets.FacetFactory;
 import org.jboss.forge.addon.projects.Project;
@@ -57,7 +58,8 @@ public abstract class ForgeTest {
             .addBeansXML()
             .addClasses(
                     ForgeTest.class,
-                    BasePluginFacetTest.class
+                    BasePluginFacetTest.class,
+                    AggregatorFacetTest.class
                     )
             .addAsAddonDependencies(
                     AddonDependencyEntry.create("org.jboss.forge.furnace.container:cdi", FORGE_VERSION),

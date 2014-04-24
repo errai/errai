@@ -104,8 +104,8 @@ public class ProjectConfig extends AbstractFacet<Project> implements ProjectFace
     final ConfigTypeConverter<T> converter = (ConfigTypeConverter<T>) converterFactory.getConverter(property.valueType);
     final Configuration config = project.getFacet(ConfigurationFacet.class).getConfiguration();
     final String attribute = getProjectAttribute(property);
-    
-    config.addProperty(attribute, converter.convertToString(value));
+
+    config.setProperty(attribute, converter.convertToString(value));
   }
 
   /**

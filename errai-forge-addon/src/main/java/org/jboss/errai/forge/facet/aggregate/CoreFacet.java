@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
+import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.errai.forge.facet.dependency.ErraiBuildDependencyFacet;
 import org.jboss.errai.forge.facet.module.ModuleCoreFacet;
 import org.jboss.errai.forge.facet.plugin.CleanPluginFacet;
@@ -30,6 +31,7 @@ import org.jboss.errai.forge.facet.plugin.JbossPluginFacet;
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
 import org.jboss.errai.forge.facet.resource.ErraiAppPropertiesFacet;
 import org.jboss.forge.addon.facets.FacetFactory;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.ProjectFacet;
 
 /**
@@ -40,24 +42,21 @@ import org.jboss.forge.addon.projects.ProjectFacet;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@FacetConstraint({ ErraiBuildDependencyFacet.class, ProjectConfig.class, CoreBuildFacet.class })
 public class CoreFacet extends BaseAggregatorFacet {
-  
+
   @Inject
   private FacetFactory facetFactory;
 
+  /*
+   * These core facets cannot be FacetConstraints because we want users to be
+   * able to modify maven plugin configurations after running errai-setup
+   * (ERRAI-715).
+   */
   @SuppressWarnings({ "unchecked" })
-  private static final Class<? extends ProjectFacet>[] coreFacets = new Class[] {
-    ProjectConfig.class,
-    ErraiBuildDependencyFacet.class,
-    CleanPluginFacet.class,
-    CompilerPluginFacet.class,
-    DependencyPluginFacet.class,
-    GwtPluginFacet.class,
-    JbossPluginFacet.class,
-    WarPluginFacet.class,
-    ModuleCoreFacet.class,
-    ErraiAppPropertiesFacet.class
-  };
+  public static final Class<? extends ProjectFacet>[] coreFacets = new Class[] { 
+      CleanPluginFacet.class, CompilerPluginFacet.class, DependencyPluginFacet.class, GwtPluginFacet.class,
+      JbossPluginFacet.class, WarPluginFacet.class, ModuleCoreFacet.class, ErraiAppPropertiesFacet.class };
 
   @Override
   public String getFeatureName() {
@@ -77,7 +76,7 @@ public class CoreFacet extends BaseAggregatorFacet {
   @Override
   public boolean install() {
     boolean installWasSuccessful = true;
-    
+
     for (int i = 0; i < coreFacets.length && installWasSuccessful; i++) {
       try {
         facetFactory.install(getProject(), coreFacets[i]);

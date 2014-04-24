@@ -16,6 +16,7 @@
  */
 package org.jboss.errai.forge.facet.aggregate;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -73,7 +74,7 @@ public abstract class BaseAggregatorFacet implements ProjectFacet, MutableFacet<
                 toUninstall.getFeatureName());
       }
       else {
-        return String.format("The facet %s still requires %s.", facetType.getSimpleName());
+        return String.format("The facet %s still requires %s.", facetType.getSimpleName(), toUninstall.getFeatureName());
       }
     }
   }
@@ -134,6 +135,7 @@ public abstract class BaseAggregatorFacet implements ProjectFacet, MutableFacet<
     }
     directlyInstalled.remove(getClass());
     directlyInstalled.add(CoreFacet.class);
+    directlyInstalled.addAll(Arrays.asList(CoreFacet.coreFacets));
 
     final Set<Class<? extends ProjectFacet>> toUninstall = traverseUninstallable(directlyInstalled);
 
@@ -204,7 +206,7 @@ public abstract class BaseAggregatorFacet implements ProjectFacet, MutableFacet<
     while (!toVisit.isEmpty()) {
       final Class<? extends ProjectFacet> cur = toVisit.poll();
       if (!traversed.contains(cur)
-              && (!BaseAggregatorFacet.class.isAssignableFrom(cur) || !intentionallyInstalled.contains(cur))
+              && !intentionallyInstalled.contains(cur)
               // Only add errai facets to be uninstalled
               && (BaseAggregatorFacet.class.isAssignableFrom(cur) || AbstractBaseFacet.class.isAssignableFrom(cur))) {
         traversed.add(cur);

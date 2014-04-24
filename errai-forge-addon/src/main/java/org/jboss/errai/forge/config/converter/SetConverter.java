@@ -11,10 +11,7 @@ class SetConverter implements ConfigTypeConverter<SerializableSet> {
 
   @Override
   public String convertToString(final SerializableSet toStore) {
-    final SerializableSet serializableSet = new SerializableSet();
-    serializableSet.addAll(toStore);
-    
-    return serializableSet.serialize();
+    return toStore.serialize();
   }
 
   @Override

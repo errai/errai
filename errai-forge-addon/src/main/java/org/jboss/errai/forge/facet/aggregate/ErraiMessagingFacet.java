@@ -16,7 +16,6 @@
  */
 package org.jboss.errai.forge.facet.aggregate;
 
-import org.jboss.errai.forge.facet.dependency.ErraiBuildDependencyFacet;
 import org.jboss.errai.forge.facet.dependency.ErraiBusDependencyFacet;
 import org.jboss.errai.forge.facet.module.ErraiBusModuleFacet;
 import org.jboss.errai.forge.facet.resource.ErraiBusServletConfigFacet;
@@ -29,8 +28,8 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@FacetConstraint({ CoreFacet.class, ErraiBusDependencyFacet.class, ErraiBuildDependencyFacet.class,
-    ErraiBusModuleFacet.class, ErraiBusServletConfigFacet.class })
+@FacetConstraint({ CoreFacet.class, ErraiBusDependencyFacet.class, ErraiBusModuleFacet.class,
+    ErraiBusServletConfigFacet.class })
 public class ErraiMessagingFacet extends BaseAggregatorFacet {
 
   @Override
