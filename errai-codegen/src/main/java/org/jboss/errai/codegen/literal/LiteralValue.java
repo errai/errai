@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -43,7 +44,11 @@ public abstract class LiteralValue<T> implements Statement {
     final Statement internedStatement = context.intern(this);
 
     if (internedStatement != null) {
-      return internedStatement.generate(context);
+      boolean permissiveMode = GenUtil.isPermissiveMode();
+      GenUtil.setPermissiveMode(true);
+      String s = internedStatement.generate(context);
+      GenUtil.setPermissiveMode(permissiveMode);
+      return s;
     }
     else {
       return getCanonicalString(context);
