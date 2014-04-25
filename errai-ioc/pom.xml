@@ -33,25 +33,21 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-config</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-codegen</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-codegen-gwt</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-tools</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -68,7 +64,6 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javax-enterprise</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>

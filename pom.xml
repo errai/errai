@@ -919,7 +919,6 @@
       <plugin>
         <groupId>org.jboss.errai</groupId>
         <artifactId>jacoco-gwt-maven-plugin</artifactId>
-        <version>0.5.4.201202141554</version>
         <executions>
           <execution>
             <id>jacoco-initialize</id>
@@ -943,7 +942,6 @@
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
         <configuration>
           <skipTests>true</skipTests>
         </configuration>
@@ -951,7 +949,6 @@
 
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.2</version>
         <configuration>
           <archive>
             <manifest>
@@ -963,7 +960,6 @@
 
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.1.2</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -977,12 +973,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.0-beta-9</version>
       </plugin>
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
         <configuration>
           <filesets>
             <fileset>
@@ -1009,7 +1003,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.2</version>
         <executions>
           <execution>
             <id>enforce-sane-versions</id>
