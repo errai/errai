@@ -1463,7 +1463,7 @@ public class HelloWorldService implements MessageCallback {
 <simpara>The default port for the sideband server is <literal><phrase role="code">8085</phrase></literal> . You can change this by specifying a port with the <literal><phrase role="code">errai.bus.web_socket_port</phrase></literal> property in the <literal><phrase role="code">ErraiService.properties</phrase></literal> file.</simpara>
 <important>
 <title>Netty Dependencies</title>
-<simpara>Make sure to deploy the required Netty dependencies as part of your application. If you started with our demos or tutorial it should be enough to <emphasis role="strong">NOT</emphasis> set <literal><phrase role="code">netty-codec-http</phrase></literal> to provided. All required transitive dependencies should then be part of your war file (WEB-INF/lib).</simpara>
+<simpara>Make sure to deploy the required Netty dependencies to your server. If you started with one of our demos or our tutorial project it should be enough to <emphasis role="strong">NOT</emphasis> set <literal><phrase role="code">netty-codec-http</phrase></literal> to provided. All required transitive dependencies should then be part of your war file (WEB-INF/lib).</simpara>
 </important>
 </section>
 <section id="sid-53380177_WebSockets-DeployingwithJBossAS7">
