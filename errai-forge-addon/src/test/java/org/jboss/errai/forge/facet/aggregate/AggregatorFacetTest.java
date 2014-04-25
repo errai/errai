@@ -12,15 +12,21 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.config.SerializableSet;
+import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.aggregate.BaseAggregatorFacet.UninstallationExecption;
+import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.test.base.ForgeTest;
 import org.jboss.forge.addon.facets.Facet;
 import org.jboss.forge.addon.facets.FacetFactory;
 import org.jboss.forge.addon.facets.MutableFaceted;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
+import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
 import org.junit.Test;
@@ -129,6 +135,39 @@ public class AggregatorFacetTest extends ForgeTest {
     assertFalse("ErraiUiFacet was not uninstalled.", uiFacet.isInstalled());
     assertFalse("ErraiIocFacet was not uninstalled.", project.hasFacet(ErraiIocFacet.class));
     assertFalse("ErraiIocFacet was not uninstalled.", iocFacet.isInstalled());
+  }
+  
+  @Test
+  public void regressionTestForErrai726() throws Exception {
+    final Project project = createTestProject();
+
+    final ErraiIocFacet iocFacet = addFeature(project, ErraiIocFacet.class);
+    final ErraiUiFacet uiFacet = addFeature(project, ErraiUiFacet.class);
+
+    assertTrue(removeFeature(project, ErraiUiFacet.class));
+
+    // Preconditions
+    assertTrue("ErraiIocFacet was uninstalled.", project.hasFacet(ErraiIocFacet.class));
+    assertTrue("ErraiIocFacet was uninstalled.", iocFacet.isInstalled());
+    assertFalse("ErraiUiFacet was not uninstalled.", project.hasFacet(ErraiUiFacet.class));
+    assertFalse("ErraiUiFacet was not uninstalled.", uiFacet.isInstalled());
+    
+    final MavenFacet mavenFacet = project.getFacet(MavenFacet.class);
+    final Model pom = mavenFacet.getModel();
+    Profile profile = null;
+    for (final Profile p : pom.getProfiles()) {
+      if (p.getId() != null && p.getId().equals(AbstractBaseFacet.MAIN_PROFILE)) {
+        profile = p;
+        break;
+      }
+    }
+    
+    assertNotNull(profile);
+    
+    for (final Dependency dep : profile.getDependencies()) {
+      assertNotEquals(DependencyArtifact.ErraiUi.getArtifactId(), dep.getArtifactId());
+      assertNotEquals(DependencyArtifact.ErraiDataBinding.getArtifactId(), dep.getArtifactId());
+    }
   }
   
   private boolean removeFeature(final Project project, Class<? extends BaseAggregatorFacet> featureType) throws IllegalStateException, UninstallationExecption {

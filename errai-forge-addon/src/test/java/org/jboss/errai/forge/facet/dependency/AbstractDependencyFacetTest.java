@@ -16,12 +16,11 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,11 +71,15 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     }
     // Allows dependencies to be set from this class.
     @Override
+    public void setCoreDependencies(DependencyBuilder... deps) {
+      super.setCoreDependencies(deps);
+    }
+    @Override
     public void setProfileDependencies(String name, DependencyBuilder... deps) {
       super.setProfileDependencies(name, deps);
     }
   }
-  
+ 
   @Test
   public void testNoProfileEmptyInstall() throws Exception {
     final Project project = initializeJavaProject();
@@ -290,9 +293,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     assertEquals(1, pom.getProfiles().size());
     assertEquals(2, pom.getProfiles().get(0).getDependencies().size());
 
-    final Set<String> providedClassifiers = new HashSet<String>(2);
-    for (final Dependency provided : pom.getProfiles().get(0).getDependencies())
-      providedClassifiers.add(provided.getGroupId() + ":" + provided.getArtifactId());
+    final Set<String> providedClassifiers = getProvidedClassifiers(pom);
 
     assertTrue(providedClassifiers.contains(DependencyArtifact.ErraiTools.toString()));
     assertTrue(providedClassifiers.contains(DependencyArtifact.Hsq.toString()));
@@ -332,9 +333,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     assertEquals(1, pom.getProfiles().size());
     assertEquals(2, pom.getProfiles().get(0).getDependencies().size());
 
-    final Set<String> providedClassifiers = new HashSet<String>(2);
-    for (final Dependency provided : pom.getProfiles().get(0).getDependencies())
-      providedClassifiers.add(provided.getGroupId() + ":" + provided.getArtifactId());
+    final Set<String> providedClassifiers = getProvidedClassifiers(pom);
 
     assertTrue(providedClassifiers.contains(DependencyArtifact.ErraiTools.toString()));
     assertTrue(providedClassifiers.contains(DependencyArtifact.Hsq.toString()));
@@ -378,9 +377,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     assertEquals(1, pom.getProfiles().size());
     assertEquals(2, pom.getProfiles().get(0).getDependencies().size());
 
-    final Set<String> providedClassifiers = new HashSet<String>(2);
-    for (final Dependency provided : pom.getProfiles().get(0).getDependencies())
-      providedClassifiers.add(provided.getGroupId() + ":" + provided.getArtifactId());
+    final Set<String> providedClassifiers = getProvidedClassifiers(pom);
 
     assertTrue(providedClassifiers.contains(DependencyArtifact.ErraiTools.toString()));
     assertTrue(providedClassifiers.contains(DependencyArtifact.Hsq.toString()));
@@ -413,9 +410,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     assertEquals(1, pom.getProfiles().size());
     assertEquals(2, pom.getProfiles().get(0).getDependencies().size());
 
-    final Set<String> providedClassifiers = new HashSet<String>(2);
-    for (final Dependency provided : pom.getProfiles().get(0).getDependencies())
-      providedClassifiers.add(provided.getGroupId() + ":" + provided.getArtifactId());
+    final Set<String> providedClassifiers = getProvidedClassifiers(pom);
 
     assertTrue(providedClassifiers.contains(DependencyArtifact.ErraiTools.toString()));
     assertTrue(providedClassifiers.contains(DependencyArtifact.Hsq.toString()));
@@ -460,9 +455,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     assertEquals(1, pom.getProfiles().size());
     assertEquals(2, pom.getProfiles().get(0).getDependencies().size());
 
-    final Set<String> providedClassifiers = new HashSet<String>(2);
-    for (final Dependency provided : pom.getProfiles().get(0).getDependencies())
-      providedClassifiers.add(provided.getGroupId() + ":" + provided.getArtifactId());
+    final Set<String> providedClassifiers = getProvidedClassifiers(pom);
 
     assertTrue(providedClassifiers.contains(DependencyArtifact.ErraiTools.toString()));
     assertTrue(providedClassifiers.contains(DependencyArtifact.Hsq.toString()));
@@ -479,6 +472,55 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     coreFacet.setModel(pom);
 
     assertFalse(testFacet.isInstalled());
+  }
+  
+  @Test
+  public void testBlacklistedDependencyIsRemovedOnUninstall() throws Exception {
+    final Project project = initializeJavaProject();
+    final MavenFacet coreFacet = project.getFacet(MavenFacet.class);
+    Model pom = coreFacet.getModel();
+    prepareProjectPom(project);
+
+    final DependencyFacet depFacet = project.getFacet(DependencyFacet.class);
+
+    /*
+     * Setup
+     */
+    final BlacklistedDependencyFacet blacklistedFacet = facetFactory.install(project, BlacklistedDependencyFacet.class);
+    pom = coreFacet.getModel();
+
+    assertTrue(project.hasFacet(BlacklistedDependencyFacet.class.asSubclass(ProjectFacet.class)));
+    assertTrue(depFacet.hasDirectDependency(DependencyBuilder.create(DependencyArtifact.ErraiTools.toString())
+            .setVersion(Property.ErraiVersion.invoke())));
+    // This dependency should have been transitively included through
+    // errai-tools
+    assertTrue(depFacet.hasEffectiveDependency(DependencyBuilder.create(DependencyArtifact.Hsq.toString())));
+
+    assertEquals(1, pom.getProfiles().size());
+    assertEquals(2, pom.getProfiles().get(0).getDependencies().size());
+
+    Set<String> providedClassifiers = getProvidedClassifiers(pom);
+
+    assertTrue(providedClassifiers.contains(DependencyArtifact.ErraiTools.toString()));
+    assertTrue(providedClassifiers.contains(DependencyArtifact.Hsq.toString()));
+
+    /*
+     * Actual test: uninstall facet and check that transitive dependency is also gone.
+     */
+    blacklistedFacet.uninstall();
+    pom = coreFacet.getModel();
+    providedClassifiers = getProvidedClassifiers(pom);
+    
+    assertEquals(Collections.emptySet(), providedClassifiers);
+    assertFalse(depFacet.hasEffectiveDependency(DependencyBuilder.create(DependencyArtifact.Hsq.toString())));
+  }
+  
+  private Set<String> getProvidedClassifiers(final Model pom) {
+    final Set<String> providedClassifiers = new HashSet<String>();
+    for (final Dependency provided : pom.getProfiles().get(0).getDependencies())
+      providedClassifiers.add(provided.getGroupId() + ":" + provided.getArtifactId());
+    
+    return providedClassifiers;
   }
 
   private void prepareProjectPom(final Project project) {

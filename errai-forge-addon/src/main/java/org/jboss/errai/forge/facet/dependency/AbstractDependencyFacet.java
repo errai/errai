@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.maven.model.Activation;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -104,31 +105,78 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
   @Override
   public boolean uninstall() {
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
-    for (DependencyBuilder dep : coreDependencies) {
-      if (depFacet.hasDirectDependency(dep)) {
-        depFacet.removeDependency(dep);
+    final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
+
+    removeCoreDependencies(depFacet);
+
+    // This line must come AFTER removeCoreDependencies is called
+    final Model pom = coreFacet.getModel();
+
+    // Set blacklist profiles to inactive for dependency resolution.
+    final Map<String, Activation> profileActivationMap = setBlacklistProfilesToInactive(pom);
+    coreFacet.setModel(pom);
+    
+    final Map<String, Collection<DependencyBuilder>> removableProfileDependencies = new HashMap<String, Collection<DependencyBuilder>>();
+
+    removableProfileDependencies.putAll(getUneededBlacklistedDependencies(depFacet, pom));
+    removableProfileDependencies.putAll(profileDependencies);
+
+    removeProfileDependencies(pom, removableProfileDependencies);
+    
+    resetProfileActivations(pom, profileActivationMap);
+    coreFacet.setModel(pom);
+
+    return true;
+  }
+
+  private void resetProfileActivations(final Model pom, final Map<String, Activation> profileActivationMap) {
+    for (final Profile profile : pom.getProfiles()) {
+      if (profileActivationMap.containsKey(profile.getId())) {
+        profile.setActivation(profileActivationMap.get(profile.getId()));
       }
     }
+  }
 
-    // Remove blacklisted dependencies that are no longer transitively in the
-    // project
-    final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
-    Model pom = coreFacet.getModel();
+  private Map<String, Collection<DependencyBuilder>> getUneededBlacklistedDependencies(final DependencyFacet depFacet, final Model pom) {
+    final Map<String, Collection<DependencyBuilder>> retVal = new HashMap<String, Collection<DependencyBuilder>>();
+
     for (final Profile profile : pom.getProfiles()) {
       for (final DependencyArtifact artifact : ArtifactVault.getBlacklistedArtifacts(profile.getId())) {
         final DependencyBuilder dep = getDependency(artifact);
         if (!depFacet.hasEffectiveDependency(dep)) {
-          if (!profileDependencies.containsKey(profile.getId()))
-            profileDependencies.put(profile.getId(), new ArrayList<DependencyBuilder>());
-          profileDependencies.get(profile.getId()).add(dep.setScopeType("provided"));
+          if (!retVal.containsKey(profile.getId()))
+            retVal.put(profile.getId(), new ArrayList<DependencyBuilder>());
+          retVal.get(profile.getId()).add(dep.setScopeType("provided"));
         }
       }
     }
+    
+    return retVal;
+  }
+  
+  /**
+   * @return A map of the profile activations that were replaced.
+   */
+  private Map<String, Activation> setBlacklistProfilesToInactive(final Model pom) {
+    final Map<String, Activation> profileActivationMap = new HashMap<String, Activation>(pom.getProfiles().size());
+    final Activation inactive = new Activation();
+    inactive.setActiveByDefault(false);
 
-    pom = coreFacet.getModel();
+    for (final Profile profile : pom.getProfiles()) {
+      if (ArtifactVault.getBlacklistProfiles().contains(profile.getId())) {
+        profileActivationMap.put(profile.getId(), profile.getActivation());
+        profile.setActivation(inactive);
+      }
+    }
+    
+    return profileActivationMap;
+  }
+
+  private void removeProfileDependencies(final Model pom,
+          final Map<String, Collection<DependencyBuilder>> removableProfileDependencies) {
     for (Profile profile : pom.getProfiles()) {
-      if (profileDependencies.containsKey(profile.getId())) {
-        for (DependencyBuilder dep : profileDependencies.get(profile.getId())) {
+      if (removableProfileDependencies.containsKey(profile.getId())) {
+        for (DependencyBuilder dep : removableProfileDependencies.get(profile.getId())) {
           List<Dependency> profDeps = profile.getDependencies();
           for (int i = 0; i < profDeps.size(); i++) {
             if (MavenConverter.areSameArtifact(profDeps.get(i), dep)) {
@@ -139,9 +187,14 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
         }
       }
     }
-    coreFacet.setModel(pom);
+  }
 
-    return true;
+  private void removeCoreDependencies(final DependencyFacet depFacet) {
+    for (DependencyBuilder dep : coreDependencies) {
+      if (depFacet.hasDirectDependency(dep)) {
+        depFacet.removeDependency(dep);
+      }
+    }
   }
 
   @Override
