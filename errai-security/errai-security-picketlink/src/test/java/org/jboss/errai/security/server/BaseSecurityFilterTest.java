@@ -1,20 +1,21 @@
 package org.jboss.errai.security.server;
 
 import static org.jboss.errai.security.server.FormAuthenticationScheme.*;
-import static org.jboss.errai.security.server.tmp.AuthenticationFilter.*;
 import static org.mockito.Mockito.*;
+import static org.picketlink.authentication.web.AuthenticationFilter.*;
 
 import javax.enterprise.inject.Instance;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.security.server.mock.MockFilterConfig;
 import org.jboss.errai.security.server.mock.MockHttpServletRequest;
 import org.jboss.errai.security.server.mock.MockHttpSession;
 import org.jboss.errai.security.server.mock.MockIdentity;
 import org.jboss.errai.security.server.mock.MockServletContext;
-import org.jboss.errai.security.server.tmp.AuthenticationFilter;
-import org.jboss.errai.security.server.tmp.HTTPAuthenticationScheme;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -23,6 +24,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.picketlink.Identity;
+import org.picketlink.authentication.web.AuthenticationFilter;
+import org.picketlink.authentication.web.HTTPAuthenticationScheme;
 import org.picketlink.credential.DefaultLoginCredentials;
 
 @RunWith(MockitoJUnitRunner.class)

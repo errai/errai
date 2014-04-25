@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
-import org.jboss.errai.security.server.tmp.HTTPAuthenticationScheme;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.picketlink.authentication.web.HTTPAuthenticationScheme;
 import org.picketlink.credential.DefaultLoginCredentials;
 
 @Dependent
@@ -150,5 +150,10 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 not supported on this JVM?");
     }
+  }
+
+  @Override
+  public boolean isProtected(HttpServletRequest request) {
+    return true;
   }
 }
