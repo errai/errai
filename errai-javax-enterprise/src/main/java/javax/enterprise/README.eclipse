@@ -7,7 +7,7 @@ In the Package Explorer view:
 
  - Expand src/main/java
  - Right click on the parent folder of this README
-     (which is errai-ioc > src/main/java > org.jboss.errai.ioc.compat)
+     (which is errai-javax-enterprise > src/main/java > javax.enterprise)
  - From the popup menu, choose Build Path -> Exclude
 
 The project should now compile, and dependent projects in your workspace
@@ -15,10 +15,3 @@ should now also build cleanly.
 
 Note that you will have to repeat these steps every time you perform M2E's
 Update Project Configuration feature.
-
-
-== Attention Errai Maintainers ==
-
-The placement of this file in this directory is not an accident: without it,
-the item that needs to be right-clicked upon does not exist in the Eclipse
-Package Explorer view (empty packages are collapsed by default).
