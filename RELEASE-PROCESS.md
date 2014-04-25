@@ -45,7 +45,7 @@ Release Steps
 1. Build and package the release. These are the bits that will be uploaded to nexus.
    Expect this to take about 4 minutes, depending on network speed.
 
-        % mvn clean deploy -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
+        % mvn clean deploy -Dgwt.compiler.skip=true -Dmaven.test.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
 
 1. Create the a-la-carte binary Errai distribution and docs
 
@@ -63,7 +63,7 @@ Release Steps
 
 1. Tag and push the release to github
 
-        % git commit a -m "Updated to new version x.y.z"
+        % git commit -a -m "Updated to new version x.y.z"
         % git tag x.y.z.Final
     
   reset all versions to x.y.z+1-SNAPSHOT and commit
