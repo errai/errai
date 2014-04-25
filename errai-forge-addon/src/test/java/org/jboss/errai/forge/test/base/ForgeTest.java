@@ -37,7 +37,7 @@ public abstract class ForgeTest {
 
   public static final String DEPENDENCY = "org.jboss.errai.forge:errai-forge-addon";
   public static final String VERSION = "3.0-SNAPSHOT";
-  public static final String FORGE_VERSION = "2.4.1.Final";
+  public static final String FORGE_VERSION = "2.5.0.Final";
   public static final String ADDON_GROUP = "org.jboss.forge.addon";
 
   @Inject
