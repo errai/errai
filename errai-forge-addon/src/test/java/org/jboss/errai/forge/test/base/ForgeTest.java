@@ -36,8 +36,6 @@ import org.junit.runner.RunWith;
 public abstract class ForgeTest {
 
   public static final String DEPENDENCY = "org.jboss.errai.forge:errai-forge-addon";
-  public static final String VERSION = "3.0-SNAPSHOT";
-  public static final String FORGE_VERSION = "2.5.0.Final";
   public static final String ADDON_GROUP = "org.jboss.forge.addon";
 
   @Inject
@@ -48,10 +46,10 @@ public abstract class ForgeTest {
 
   @Deployment
   @Dependencies({
-      @AddonDependency(name = DEPENDENCY, version = VERSION),
-      @AddonDependency(name = ADDON_GROUP + ":projects", version = FORGE_VERSION),
-      @AddonDependency(name = ADDON_GROUP + ":facets", version = FORGE_VERSION),
-      @AddonDependency(name = ADDON_GROUP + ":maven", version = FORGE_VERSION)
+      @AddonDependency(name = DEPENDENCY),
+      @AddonDependency(name = ADDON_GROUP + ":projects"),
+      @AddonDependency(name = ADDON_GROUP + ":facets"),
+      @AddonDependency(name = ADDON_GROUP + ":maven")
   })
   public static ForgeArchive getDeployment() {
     final ForgeArchive archive = ShrinkWrap.create(ForgeArchive.class)
@@ -62,11 +60,11 @@ public abstract class ForgeTest {
                     AggregatorFacetTest.class
                     )
             .addAsAddonDependencies(
-                    AddonDependencyEntry.create("org.jboss.forge.furnace.container:cdi", FORGE_VERSION),
-                    AddonDependencyEntry.create(DEPENDENCY, VERSION),
-                    AddonDependencyEntry.create(ADDON_GROUP + ":projects", FORGE_VERSION),
-                    AddonDependencyEntry.create(ADDON_GROUP + ":facets", FORGE_VERSION),
-                    AddonDependencyEntry.create(ADDON_GROUP + ":maven", FORGE_VERSION)
+                    AddonDependencyEntry.create("org.jboss.forge.furnace.container:cdi"),
+                    AddonDependencyEntry.create(DEPENDENCY),
+                    AddonDependencyEntry.create(ADDON_GROUP + ":projects"),
+                    AddonDependencyEntry.create(ADDON_GROUP + ":facets"),
+                    AddonDependencyEntry.create(ADDON_GROUP + ":maven")
             );
 
     return archive;
