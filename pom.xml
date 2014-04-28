@@ -485,7 +485,7 @@
       </dependency>
 
       <dependency>
-        <groupId>log4j</groupId>
+        <groupId>log4j</groupId>git 
         <artifactId>log4j</artifactId>
         <version>${version.log4j}</version>
       </dependency>
@@ -494,12 +494,6 @@
         <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
         <artifactId>ostermiller-syntax</artifactId>
         <version>1.1.1</version>
-      </dependency>
-
-      <dependency>
-        <groupId>net.sf.jtidy</groupId>
-        <artifactId>jtidy</artifactId>
-        <version>r938</version>
       </dependency>
 
       <dependency>
