@@ -29,7 +29,6 @@ import org.jboss.errai.bus.server.annotations.Service;
 public class LocalTestTesterService implements MessageCallback {
   @Override
   public void callback(Message message) {
-    System.out.println("received: " +message);
     try {
       MessageBuilder.createConversation(message)
               .toSubject("LocalTestCompleteService")
