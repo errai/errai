@@ -533,12 +533,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>catalina</artifactId>
-        <version>6.0.20</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.codehaus.gmaven</groupId>
         <artifactId>gmaven-mojo</artifactId>
         <version>1.5</version>
