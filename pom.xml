@@ -388,18 +388,6 @@
       </dependency>
 
       <dependency>
-        <groupId>com.sun.grizzly</groupId>
-        <artifactId>grizzly-comet</artifactId>
-        <version>1.9.19-beta2</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.sun.grizzly</groupId>
-        <artifactId>grizzly-nio-framework</artifactId>
-        <version>1.9.19-beta2</version>
-      </dependency>
-
-      <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${version.commons-lang}</version>

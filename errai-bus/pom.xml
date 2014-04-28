@@ -167,18 +167,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sun.grizzly</groupId>
-      <artifactId>grizzly-comet</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sun.grizzly</groupId>
-      <artifactId>grizzly-nio-framework</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-vfs</artifactId>
       <scope>provided</scope>
