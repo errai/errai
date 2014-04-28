@@ -19,7 +19,7 @@
   </licenses>
 
   <description>
-    A GWT framework.
+    Errai is a GWT-based framework for building rich web applications using next-generation web technologies.
   </description>
 
   <parent>
