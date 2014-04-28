@@ -604,13 +604,6 @@
         <version>${version.org.javassist}</version>
       </dependency>
 
-      <!-- FIXME this apparently does not exist, and even if it did, it looks redundant with the one that follows. -->
-      <dependency>
-        <groupId>org.jboss.ejb3</groupId>
-        <artifactId>jboss-ejb3-api</artifactId>
-        <version>3.1.0</version>
-      </dependency>
-
       <dependency>
         <groupId>org.jboss.spec.javax.ejb</groupId>
         <artifactId>jboss-ejb-api_3.1_spec</artifactId>
