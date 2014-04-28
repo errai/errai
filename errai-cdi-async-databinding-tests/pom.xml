@@ -122,25 +122,21 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-common</artifactId>
-          <version>${project.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-bus</artifactId>
-          <version>${project.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc-bus-support</artifactId>
-          <version>${project.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc</artifactId>
-          <version>${project.version}</version>
           <exclusions>
             <exclusion>
               <groupId>javax.inject</groupId>
@@ -156,14 +152,12 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-cdi-client</artifactId>
-          <version>${project.version}</version>
           <scope>compile</scope>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-tools</artifactId>
-          <version>${project.version}</version>
         </dependency>
         <dependency>
           <groupId>org.mvel</groupId>
@@ -173,7 +167,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-data-binding</artifactId>
-          <version>${project.version}</version>
         </dependency>
 
         <!-- CDI Development Utils -->
@@ -244,7 +237,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-javax-enterprise</artifactId>
-          <version>${project.version}</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>

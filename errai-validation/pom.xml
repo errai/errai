@@ -27,20 +27,17 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
-      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-marshalling</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-data-binding</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -91,7 +88,8 @@
               </additionalClasspathElements>
               <useManifestOnlyJar>false</useManifestOnlyJar>
               <forkMode>pertest</forkMode>
-              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false</argLine>
+              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true
+                -Derrai.codegen.permissive=false</argLine>
 
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->

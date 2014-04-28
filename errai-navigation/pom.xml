@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
@@ -26,29 +27,26 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cdi-client</artifactId>
-      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
-      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javax-enterprise</artifactId>
-      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
-    <!-- Utility methods from Errai Marshalling are required at GWT compile (rebind) time -->
+    <!-- Utility methods from Errai Marshalling are required at GWT compile 
+      (rebind) time -->
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-marshalling</artifactId>
-      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -79,7 +77,6 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-weld-integration</artifactId>
-      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -132,7 +129,8 @@
                   <value>${project.build.directory}</value>
                 </property>
 
-                <!-- Do not accidently package server test marshallers when building Errai -->
+                <!-- Do not accidently package server test marshallers when 
+                  building Errai -->
                 <property>
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
