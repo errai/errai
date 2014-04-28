@@ -147,7 +147,7 @@ public abstract class AbstractFileResourceFacet extends AbstractBaseFacet {
     return getAbsoluteFilePath().exists();
   }
 
-  protected File getAbsoluteFilePath() {
+  public File getAbsoluteFilePath() {
     return new File(getProject().getRootDirectory().getUnderlyingResourceObject(), getRelFilePath());
   }
   

@@ -16,12 +16,27 @@
  */
 package org.jboss.errai.forge.test.base;
 
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.errai.forge.config.ProjectConfig;
+import org.jboss.errai.forge.config.ProjectProperty;
+import org.jboss.errai.forge.config.SerializableSet;
 import org.jboss.errai.forge.facet.aggregate.AggregatorFacetTest;
 import org.jboss.errai.forge.facet.plugin.BasePluginFacetTest;
+import org.jboss.errai.forge.facet.ui.command.res.ProjectFactoryMock;
+import org.jboss.errai.forge.facet.ui.command.res.SimpleTestableClass;
+import org.jboss.errai.forge.facet.ui.command.res.UIExecutionContextMock;
+import org.jboss.errai.forge.facet.ui.command.res.UIInputMock;
 import org.jboss.forge.addon.facets.FacetFactory;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFactory;
@@ -48,8 +63,10 @@ public abstract class ForgeTest {
   @Dependencies({
       @AddonDependency(name = DEPENDENCY),
       @AddonDependency(name = ADDON_GROUP + ":projects"),
+      @AddonDependency(name = ADDON_GROUP + ":parser-java"),
       @AddonDependency(name = ADDON_GROUP + ":facets"),
-      @AddonDependency(name = ADDON_GROUP + ":maven")
+      @AddonDependency(name = ADDON_GROUP + ":maven"),
+      @AddonDependency(name = ADDON_GROUP + ":ui")
   })
   public static ForgeArchive getDeployment() {
     final ForgeArchive archive = ShrinkWrap.create(ForgeArchive.class)
@@ -57,14 +74,22 @@ public abstract class ForgeTest {
             .addClasses(
                     ForgeTest.class,
                     BasePluginFacetTest.class,
-                    AggregatorFacetTest.class
+                    AggregatorFacetTest.class,
+                    ProjectFactoryMock.class,
+                    SimpleTestableClass.class,
+                    UIExecutionContextMock.class,
+                    UIInputMock.class
                     )
+            .addAsResource("org/jboss/errai/forge/test/SimpleTestClass.java",
+                    "org/jboss/errai/forge/test/SimpleTestClass.java")
             .addAsAddonDependencies(
                     AddonDependencyEntry.create("org.jboss.forge.furnace.container:cdi"),
                     AddonDependencyEntry.create(DEPENDENCY),
                     AddonDependencyEntry.create(ADDON_GROUP + ":projects"),
+                    AddonDependencyEntry.create(ADDON_GROUP + ":parser-java"),
                     AddonDependencyEntry.create(ADDON_GROUP + ":facets"),
-                    AddonDependencyEntry.create(ADDON_GROUP + ":maven")
+                    AddonDependencyEntry.create(ADDON_GROUP + ":maven"),
+                    AddonDependencyEntry.create(ADDON_GROUP + ":ui")
             );
 
     return archive;
@@ -73,6 +98,56 @@ public abstract class ForgeTest {
   protected Project initializeJavaProject() {
     final Project project = projectFactory.createTempProject();
 
+    return project;
+  }
+  
+  protected void assertResourceAndFileContentsSame(final String resourcePath, final File file)
+          throws FileNotFoundException, IOException {
+    assertTrue(file.getAbsolutePath() + " was not created.", file.exists());
+    try (final InputStreamReader expectedReader = new InputStreamReader(
+            ClassLoader.getSystemResourceAsStream(resourcePath));
+            final InputStreamReader observedReader = new InputStreamReader(new FileInputStream(file))) {
+      assertFileContentsSame(expectedReader, observedReader);
+    }
+  }
+
+  protected void assertFileContentsSame(final InputStreamReader expectedReader, final InputStreamReader observedReader) throws IOException {
+    final StringBuilder[] builders = new StringBuilder[] { new StringBuilder(), new StringBuilder()};
+    final InputStreamReader[] inputReaders = new InputStreamReader[] {expectedReader, observedReader};
+    for (int i = 0; i < inputReaders.length; i++) {
+      final InputStreamReader reader = inputReaders[i];
+      final char[] chars = new char[256];
+      int read;
+      while ((read = reader.read(chars)) > -1) {
+        builders[i].append(chars, 0, read);
+      }
+    }
+    
+    try {
+      assertEquals(builders[0].toString(), builders[1].toString());
+    }
+    catch (final AssertionError e) {
+      System.out.println("EXPECTED");
+      System.out.println(builders[0].toString());
+
+      System.out.println("OBSERVED");
+      System.out.println(builders[1].toString());
+      
+      throw e;
+    }
+  }
+
+  protected Project createErraiTestProject() {
+    final Project project = initializeJavaProject();
+    final ProjectConfig projectConfig = facetFactory.install(project, ProjectConfig.class);
+  
+    projectConfig.setProjectProperty(ProjectProperty.ERRAI_VERSION, "3.0-SNAPSHOT");
+    projectConfig.setProjectProperty(ProjectProperty.MODULE_LOGICAL, "org.jboss.errai.ForgeTest");
+    projectConfig.setProjectProperty(ProjectProperty.MODULE_FILE, new File(project.getRootDirectory()
+            .getUnderlyingResourceObject(), "src/main/java/org/jboss/errai/ForgeTest.gwt.xml"));
+    projectConfig.setProjectProperty(ProjectProperty.MODULE_NAME, "test");
+    projectConfig.setProjectProperty(ProjectProperty.INSTALLED_FEATURES, new SerializableSet());
+  
     return project;
   }
 

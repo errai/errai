@@ -46,6 +46,10 @@ public class VersionOracle {
     versionMap.put(DependencyArtifact.War.toString(), "2.2");
     versionMap.put(DependencyArtifact.JbossPlugin.toString(), "7.1.1.Final");
     versionMap.put(DependencyArtifact.GwtPlugin.toString(), "2.5.1");
+    versionMap.put(DependencyArtifact.Surefire.toString(), "2.2");
+    
+    // Dependencies for test generation
+    versionMap.put(DependencyArtifact.GwtMockito.toString(), "1.1.3");
   }
   
   public VersionOracle(DependencyFacet facet) {

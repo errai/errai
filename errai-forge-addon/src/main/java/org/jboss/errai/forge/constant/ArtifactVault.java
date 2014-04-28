@@ -41,6 +41,7 @@ public final class ArtifactVault {
   public static enum DependencyArtifact {
     // Non-errai
     GwtUser("gwt-user", "com.google.gwt"),
+    GwtDev("gwt-dev", "com.google.gwt"),
     Guava("guava", "com.google.guava"),
     GuavaGwt("guava-gwt", "com.google.guava"),
     Hsq("hsqldb", "org.hsqldb"),
@@ -68,6 +69,9 @@ public final class ArtifactVault {
     XmlApis("xml-apis", "xml-apis"),
     JettyNaming("jetty-naming", "org.mortbay.jetty"),
     RestEasyCdi("resteasy-cdi", "org.jboss.resteasy"),
+    
+    // tests
+    GwtMockito("gwtmockito", "com.google.gwt.gwtmockito"),
 
     // plugins
     Clean("maven-clean-plugin", "org.apache.maven.plugins"),
@@ -76,6 +80,7 @@ public final class ArtifactVault {
     GwtPlugin("gwt-maven-plugin", "org.codehaus.mojo"),
     War("maven-war-plugin", "org.apache.maven.plugins"),
     JbossPlugin("jboss-as-maven-plugin", "org.jboss.as.plugins"),
+    Surefire("maven-surefire-plugin", "org.apache.maven.plugins"),
 
     // errai
     ErraiVersionMaster("errai-version-master", "org.jboss.errai.bom"),
