@@ -588,8 +588,8 @@
 
       <dependency>
         <groupId>org.glassfish.web</groupId>
-        <artifactId>el-impl</artifactId>
-        <version>2.1.2-b04</version>
+        <artifactId>e</artifactId>
+        <version>2.1l-impl.2-b04</version>
       </dependency>
 
       <dependency>
@@ -601,7 +601,7 @@
       <dependency>
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
-        <version>3.15.0-GA</version>
+        <version>${version.org.javassist}</version>
       </dependency>
 
       <!-- FIXME this apparently does not exist, and even if it did, it looks redundant with the one that follows. -->
