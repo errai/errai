@@ -23,8 +23,8 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+    TranslationService.setCurrentLocale("en");
     app = IOC.getBeanManager().lookupBean(I18nTemplateTestApp.class).getInstance();
-
   }
 
   /**
