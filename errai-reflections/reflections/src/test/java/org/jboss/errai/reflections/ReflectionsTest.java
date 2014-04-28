@@ -173,45 +173,63 @@ public class ReflectionsTest {
 
   @Test
   public void collect() {
-    Predicate<String> filter = new FilterBuilder().include("org.jboss.errai.reflections.TestModel\\$.*");
-    Reflections testModelReflections = new Reflections(new ConfigurationBuilder()
-        .filterInputsBy(filter)
-        .setScanners(
-            new SubTypesScanner().filterResultsBy(filter),
-            new TypeAnnotationsScanner().filterResultsBy(filter))
-        .setUrls(asList(ClasspathHelper.forClass(TestModel.class))));
-
-    testModelReflections.scan();
-
     String path = getUserDir() + "/target/test-classes" + "/META-INF/reflections/testModel-reflections.xml";
-    testModelReflections.save(path);
-
-    reflections = Reflections.collect();
-    reflections.scan();
-
-    testAll();
+    try {
+      Predicate<String> filter = new FilterBuilder().include("org.jboss.errai.reflections.TestModel\\$.*");
+      Reflections testModelReflections = new Reflections(new ConfigurationBuilder()
+          .filterInputsBy(filter)
+          .setScanners(
+              new SubTypesScanner().filterResultsBy(filter),
+              new TypeAnnotationsScanner().filterResultsBy(filter))
+          .setUrls(asList(ClasspathHelper.forClass(TestModel.class))));
+  
+      testModelReflections.scan();
+      testModelReflections.save(path);
+      reflections = Reflections.collect();
+      reflections.scan();
+      testAll();
+    } 
+    finally {
+      new File(path).delete();
+    }
   }
 
   @Test
   public void collectInputStream() {
-    final Iterable<Vfs.File> xmls = Vfs.findFiles(Arrays.asList(ClasspathHelper.forClass(ReflectionsTest.class)), new Predicate<Vfs.File>() {
-      public boolean apply(Vfs.File input) {
-        return input.getName().endsWith(".xml");
-      }
-    });
+    
+    String path = getUserDir() + "/target/test-classes" + "/META-INF/reflections/testModel-reflections.xml";
+    try {
+      Predicate<String> filter = new FilterBuilder().include("org.jboss.errai.reflections.TestModel\\$.*");
+      Reflections testModelReflections = new Reflections(new ConfigurationBuilder()
+              .filterInputsBy(filter)
+              .setScanners(new SubTypesScanner().filterResultsBy(filter),
+                      new TypeAnnotationsScanner().filterResultsBy(filter))
+              .setUrls(asList(ClasspathHelper.forClass(TestModel.class))));
 
-    reflections = new Reflections(new ConfigurationBuilder());
-    for (Vfs.File xml : xmls) {
-      try {
-        reflections.collect(xml.openInputStream());
-        reflections.scan();
+      testModelReflections.scan();
+      testModelReflections.save(path);
+
+      final Iterable<Vfs.File> xmls = Vfs.findFiles(Arrays.asList(ClasspathHelper.forClass(ReflectionsTest.class)),
+              new Predicate<Vfs.File>() {
+                public boolean apply(Vfs.File input) {
+                  return input.getName().endsWith(".xml");
+                }
+              });
+
+      reflections = new Reflections(new ConfigurationBuilder());
+      for (Vfs.File xml : xmls) {
+        try {
+          reflections.collect(xml.openInputStream());
+          reflections.scan();
+        } catch (IOException e) {
+          throw new RuntimeException("", e);
+        }
       }
-      catch (IOException e) {
-        throw new RuntimeException("", e);
-      }
+
+      testAll();
+    } finally {
+      new File(path).delete();
     }
-
-    testAll();
   }
 
 //  @Test @Ignore
@@ -270,8 +288,7 @@ public class ReflectionsTest {
 
     Set<String> resources = reflections.getStore().get(ResourcesScanner.class).keySet();
     assertThat(resources, are(
-        "resource1-reflections.xml", "resource2-reflections.xml", "testModel-reflections.xml"
-    ));
+        "resource1-reflections.xml", "resource2-reflections.xml"));
   }
 
   //
