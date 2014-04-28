@@ -350,11 +350,6 @@
           <artifactId>weld-servlet-core</artifactId>
           <scope>compile</scope>
         </dependency>
-        <dependency>
-          <groupId>org.glassfish.web</groupId>
-          <artifactId>el-impl</artifactId>
-          <scope>runtime</scope>
-        </dependency>
 
         <!-- GWT and GWT Extensions -->
         <dependency>
