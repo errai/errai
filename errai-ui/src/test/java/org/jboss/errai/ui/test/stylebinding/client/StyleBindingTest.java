@@ -76,27 +76,33 @@ public class StyleBindingTest extends AbstractErraiCDITest {
   }
   
   public void testDestroyingBeanCleansUpPropertyChangeHandler() {
-    StyleBindingsRegistry registry = new StyleBindingsRegistry() {
-      @Override
-      public void updateStyles(Object beanInst) {
-        fail("updateStyles should not be called after bean was destroyed");
-      }
-    };
-    
-    final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
-    final StyleBoundTemplate instance = bean.getInstance();
-    TestModel model = instance.getTestModel();
-    model.setTestB("");
-    
-    assertEquals("", instance.getTestB().getText());
-    assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
-
-    IOC.getBeanManager().destroyBean(instance);
-    StyleBindingsRegistry.set(registry);
-    
-    model.setTestB("0");
-    assertEquals("", instance.getTestB().getText());
-    assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
+    final StyleBindingsRegistry oldReg = StyleBindingsRegistry.get();
+    try {
+      StyleBindingsRegistry registry = new StyleBindingsRegistry() {
+        @Override
+        public void updateStyles(Object beanInst) {
+          fail("updateStyles should not be called after bean was destroyed");
+        }
+      };
+      
+      final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+      final StyleBoundTemplate instance = bean.getInstance();
+      TestModel model = instance.getTestModel();
+      model.setTestB("");
+      
+      assertEquals("", instance.getTestB().getText());
+      assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
+  
+      IOC.getBeanManager().destroyBean(instance);
+      StyleBindingsRegistry.set(registry);
+      
+      model.setTestB("0");
+      assertEquals("", instance.getTestB().getText());
+      assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
+    }
+    finally {
+      StyleBindingsRegistry.set(oldReg);
+    }
   }
   
 }
