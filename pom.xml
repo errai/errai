@@ -649,13 +649,13 @@
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>jaxrs-api</artifactId>
-        <version>2.3.6.Final</version>
+        <version>${version.org.jboss.resteasy}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jaxrs</artifactId>
-        <version>2.3.6.Final</version>
+        <version>${version.org.jboss.resteasy}</version>
       </dependency>
 
       <dependency>
