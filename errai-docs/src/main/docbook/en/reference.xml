@@ -1498,6 +1498,15 @@ public class HelloWorldService implements MessageCallback {
 <title>Do not remove the regular ErraiBus servlet mappings!</title>
 <simpara>When configuring ErraiBus to use WebSockets on JBoss AS, you <emphasis>do not</emphasis> remove the existing servlet mappings for the bus. The WebSocket servlet is in <emphasis>addition to</emphasis> your current bus servlet. This is because ErraiBus <emphasis>always</emphasis> negotiates WebSocket sessions over the COMET channel.</simpara>
 </important>
+<important>
+<title>Important dependency</title>
+<simpara>Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your server. If you&#8217;re using Maven simply add the following dependency to your pom.xml file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-bus-jboss7-websocket&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+</important>
 </section>
 </section>
 <section id="sid-59146643">
@@ -5685,7 +5694,7 @@ public class ItemPage extends VerticalPanel {
 <title>Declaring a Link with TransitionAnchor</title>
 <simpara>The easiest way to declare a link between pages is to inject an instance of <literal><phrase role="code">TransitionAnchor&lt;P&gt;</phrase></literal> , where <literal><phrase role="code">P</phrase></literal> is the class of the target page.</simpara>
 <simpara>Here is an example declaring an anchor link from the templated welcome page to the item list page. The first code sample would go in WelcomePage.java while the second would go in the WelcomePage.html, the associated html template.</simpara>
-<programlisting language="java" linenumbering="unnumbered">@Page(startingPage=true)
+<programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 @Templated
 public class WelcomePage extends Composite {
 
@@ -5701,7 +5710,7 @@ public class WelcomePage extends Composite {
 <title>Declaring a Manual Link</title>
 <simpara>Sometimes it is necessary to manually transition between pages (such as in response to an event being fired). To declare a manual link from one page to another, inject an instance of <literal><phrase role="code">TransitionTo&lt;P&gt;</phrase></literal> , where <literal><phrase role="code">P</phrase></literal> is the class of the target page.</simpara>
 <simpara>This code declares a manual transition from the welcome page to the item list page:</simpara>
-<programlisting language="java" linenumbering="unnumbered">@Page(startingPage=true)
+<programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
 
   @Inject TransitionTo&lt;ItemListPage&gt; startButtonClicked;
@@ -5713,7 +5722,7 @@ public class WelcomePage extends Composite {
 <section id="sid-54493676_ErraiUINavigation-FollowingaManualLink">
 <title>Following a Manual Link</title>
 <simpara>To follow a manual link, simply call the <literal><phrase role="code">go()</phrase></literal> method on an injected <literal><phrase role="code">TransitionTo</phrase></literal> object. For example:</simpara>
-<programlisting language="java" linenumbering="unnumbered">@Page(startingPage=true)
+<programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
 
   @Inject TransitionTo&lt;ItemListPage&gt; startButtonClicked;

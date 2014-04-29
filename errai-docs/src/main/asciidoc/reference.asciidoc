@@ -1261,6 +1261,21 @@ This will tell the bus to enable web sockets support. The [code]+websocket-path-
 When configuring ErraiBus to use WebSockets on JBoss AS, you _do not_ remove the existing servlet mappings for the bus. The WebSocket servlet is in _addition to_ your current bus servlet. This is because ErraiBus _always_ negotiates WebSocket sessions over the COMET channel.
 ====
 
+[IMPORTANT]
+.Important dependency
+====
+Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your server. If you're using Maven simply add the following dependency to your pom.xml file:
+
+[source, xml]
+----
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-bus-jboss7-websocket</artifactId>
+  <version>${errai.version}</version>
+</dependency>
+----
+====
+
 [[sid-59146643]]
 
 === Bus Lifecycle
