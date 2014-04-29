@@ -6280,16 +6280,15 @@ Any widget can be a page. This includes Errai UI [code]+@Templated+ classes! Sim
 
 [[sid-54493676_ErraiUINavigation-TheStartingPage]]
 
-===== The Starting Page
+===== The Default (Starting) Page
 
-Each application must have exactly one _starting page_ . This requirement is enforced at compile time. The starting page is displayed when there is no fragment ID present in the browser's location bar.
+Each application must have exactly one _default page_ . This requirement is enforced at compile time. This default page is displayed when there is no fragment ID present in the browser's location bar.
 
-Use the [code]+startingPage+ attribute to declare the starting page, like this:
-
+Use the [code]+role = DefaultPage.class+ attribute to declare the default starting page, like this:
 
 [source, java]
 ----
-@Page(startingPage=true)
+@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
   // Anything goes...
 }
