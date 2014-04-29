@@ -6396,7 +6396,7 @@ Here is an example declaring an anchor link from the templated welcome page to t
 
 [source, java]
 ----
-@Page(startingPage=true)
+@Page(role = DefaultPage.class)
 @Templated
 public class WelcomePage extends Composite {
 
@@ -6426,7 +6426,7 @@ This code declares a manual transition from the welcome page to the item list pa
 
 [source, java]
 ----
-@Page(startingPage=true)
+@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
 
   @Inject TransitionTo<ItemListPage> startButtonClicked;
@@ -6447,7 +6447,7 @@ To follow a manual link, simply call the [code]+go()+ method on an injected [cod
 
 [source, java]
 ----
-@Page(startingPage=true)
+@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
 
   @Inject TransitionTo<ItemListPage> startButtonClicked;
@@ -8231,18 +8231,6 @@ For those not using maven, here is the dependency tree of Errai project jars.
 ** org.mortbay.jetty:jetty:jar:6.1.25:provided
 *** org.mortbay.jetty:jetty-util:jar:6.1.25:provided
 *** org.mortbay.jetty:servlet-api:jar:2.5-20081211:provided
-** org.apache.tomcat:catalina:jar:6.0.20:provided
-*** org.apache.tomcat:servlet-api:jar:6.0.20:provided
-*** org.apache.tomcat:juli:jar:6.0.20:provided
-*** org.apache.tomcat:annotations-api:jar:6.0.20:provided
-** com.sun.grizzly:grizzly-comet:jar:1.9.19-beta2:provided
-*** com.sun.grizzly:grizzly-http:jar:1.9.19-beta2:provided
-**** com.sun.grizzly:grizzly-rcm:jar:1.9.19-beta2:provided
-**** com.sun.grizzly:grizzly-portunif:jar:1.9.19-beta2:provided
-** com.sun.grizzly:grizzly-nio-framework:jar:1.9.19-beta2:provided
-*** com.sun.grizzly:grizzly-framework:jar:1.9.19-beta2:provided
-**** com.sun.grizzly:grizzly-utils:jar:1.9.19-beta2:provided
-***** com.sun.grizzly:grizzly-lzma:jar:1.9.19-beta2:provided
 ** org.jboss:jboss-vfs:jar:3.0.1.GA:provided
 ** junit:junit:jar:4.10:compile
 *** org.hamcrest:hamcrest-core:jar:1.1:compile

@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-04-22</date>
+    <date>2014-04-29</date>
     
     
     
@@ -5584,10 +5584,10 @@ public class ItemListPage extends Composite {
 <simpara>Any widget can be a page. This includes Errai UI <literal><phrase role="code">@Templated</phrase></literal> classes! Simply annotate any Errai UI templated class with <literal><phrase role="code">@Page</phrase></literal> , and it will become a page that can be navigated to.</simpara>
 </important>
 <section id="sid-54493676_ErraiUINavigation-TheStartingPage">
-<title>The Starting Page</title>
-<simpara>Each application must have exactly one <emphasis>starting page</emphasis> . This requirement is enforced at compile time. The starting page is displayed when there is no fragment ID present in the browser&#8217;s location bar.</simpara>
-<simpara>Use the <literal><phrase role="code">startingPage</phrase></literal> attribute to declare the starting page, like this:</simpara>
-<programlisting language="java" linenumbering="unnumbered">@Page(startingPage=true)
+<title>The Default (Starting) Page</title>
+<simpara>Each application must have exactly one <emphasis>default page</emphasis> . This requirement is enforced at compile time. This default page is displayed when there is no fragment ID present in the browser&#8217;s location bar.</simpara>
+<simpara>Use the <literal><phrase role="code">role = DefaultPage.class</phrase></literal> attribute to declare the default starting page, like this:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
   // Anything goes...
 }</programlisting>
@@ -7691,108 +7691,6 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
   
     <listitem>
       <simpara>org.mortbay.jetty:servlet-api:jar:2.5-20081211:provided</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>org.apache.tomcat:catalina:jar:6.0.20:provided</simpara>
-      
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>org.apache.tomcat:servlet-api:jar:6.0.20:provided</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>org.apache.tomcat:juli:jar:6.0.20:provided</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>org.apache.tomcat:annotations-api:jar:6.0.20:provided</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-comet:jar:1.9.19-beta2:provided</simpara>
-      
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-http:jar:1.9.19-beta2:provided</simpara>
-      
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-rcm:jar:1.9.19-beta2:provided</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-portunif:jar:1.9.19-beta2:provided</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-
-      
-    </listitem>
-  
-</itemizedlist>
-
-
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-nio-framework:jar:1.9.19-beta2:provided</simpara>
-      
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-framework:jar:1.9.19-beta2:provided</simpara>
-      
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-utils:jar:1.9.19-beta2:provided</simpara>
-      
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>com.sun.grizzly:grizzly-lzma:jar:1.9.19-beta2:provided</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-
-      
-    </listitem>
-  
-</itemizedlist>
-
-
       
     </listitem>
   
