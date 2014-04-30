@@ -1205,7 +1205,7 @@ Make sure to deploy the required Netty dependencies to your server. If you start
 
 ==== Deploying with JBoss AS 7.1.2 (or higher)
 
-It is currently necessary to use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance(s) to use the native connector by changing the [code]+domain/configuration/standalone.xml+ or [code]+domain/configuration/domain.xml+ file as follows:
+This is an alternative approach to the sideband server described in the previous chapter. Make sure to *NOT* configure both! It is currently necessary to use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance(s) to use the native connector by changing the [code]+domain/configuration/standalone.xml+ or [code]+domain/configuration/domain.xml+ file as follows:
 
 [source, xml]
 ----
