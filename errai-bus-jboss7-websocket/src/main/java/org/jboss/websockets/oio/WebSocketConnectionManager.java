@@ -47,7 +47,7 @@ public class WebSocketConnectionManager {
         response.setHeader("Upgrade", "WebSocket");
         response.setHeader("Connection", "Upgrade");
 
-        if (protocolName != null)
+        if (protocolName != null && request.getHeader(WebSocketHeaders.SEC_WEBSOCKET_PROTOCOL.name()) != null)
           WebSocketHeaders.SEC_WEBSOCKET_PROTOCOL.set(response, protocolName);
         else {
           WebSocketHeaders.SEC_WEBSOCKET_PROTOCOL.set(response, null);
