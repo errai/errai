@@ -136,6 +136,7 @@ public abstract class WebSocketServlet extends HttpServlet implements HttpEventS
           OioWebSocket oioWebSocket = WebSocketConnectionManager.establish(protocolName, requestBridge, responseBridge,
                   new ClosingStrategy() {
                     public void doClose() throws IOException {
+                      onSocketClosed((WebSocket) request.getAttribute(SESSION_WEBSOCKET_HANDLE));
                       event.close();
                     }
                   });
@@ -150,6 +151,7 @@ public abstract class WebSocketServlet extends HttpServlet implements HttpEventS
       case END:
         break;
       case ERROR:
+        onSocketClosed((WebSocket) request.getAttribute(SESSION_WEBSOCKET_HANDLE));
         event.close();
         break;
       case EVENT:
