@@ -208,22 +208,22 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
       socket = new WebSocket(websocketAddr);
 
       socket.onmessage = function (event) {
-          thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::handleReceived(Ljava/lang/String;)(event.data);
+        thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::handleReceived(Ljava/lang/String;)(event.data);
       };
 
       socket.onopen = function (event) {
-          thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::attachWebSocketChannel(Ljava/lang/Object;)(socket);
+        thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::attachWebSocketChannel(Ljava/lang/Object;)(socket);
       };
+      
       socket.onclose = function (event) {
-          thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::notifyDisconnected()();
-
-          // should probably do something here.
+        thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::log(Ljava/lang/String;)("websocket closed with code: " + event.code);
+        thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::notifyDisconnected()();
       };
 
       socket.onerror = function (event) {
-          if (event.srcElement.readyState != WebSocket.OPEN) {
-              thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::notifyDisconnected()();
-          }
+        if (event.srcElement.readyState != WebSocket.OPEN) {              
+          thisRef.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::notifyDisconnected()();
+        }
       }
       return socket;
     } 
@@ -246,6 +246,10 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
       return socket.readyState == WebSocket.OPEN;
   }-*/;
 
+  private void log(final String message) {
+    logger.info(message);
+  }
+  
   private void notifyDisconnected() {
     logger.info("websocket disconnected");
 
