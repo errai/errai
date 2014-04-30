@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-04-29</date>
+    <date>2014-04-30</date>
     
     
     
@@ -1467,11 +1467,17 @@ public class HelloWorldService implements MessageCallback {
 </important>
 </section>
 <section id="sid-53380177_WebSockets-DeployingwithJBossAS7">
-<title>Deploying with JBoss AS 7</title>
-<simpara>It is currently necessary use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance to use the native connector by changing the <literal><phrase role="code">domain/configuration/domain.xml</phrase></literal> file, and change the line:</simpara>
+<title>Deploying with JBoss AS 7.1.2 (or higher)</title>
+<simpara>It is currently necessary to use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance(s) to use the native connector by changing the <literal><phrase role="code">domain/configuration/standalone.xml</phrase></literal> or <literal><phrase role="code">domain/configuration/domain.xml</phrase></literal> file as follows:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="false"&gt;</programlisting>
 <simpara>to:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="true"&gt;</programlisting>
+<important>
+<title>Verify that the native APR connector is being used</title>
+<simpara>To verify that the native connectors are being used check your console for the following log message:
+<literal><phrase role="code">INFO [org.apache.coyote.http11.Http11AprProtocol] (MSC service thread 1-6) Starting Coyote HTTP/1.1 on http-/127.0.0.1:8080</phrase></literal></simpara>
+<simpara>The important part is <literal><phrase role="code">org.apache.coyote.http11.Http11AprProtocol</phrase></literal>. You should <emphasis role="strong">NOT</emphasis> be seeing <literal><phrase role="code">org.apache.coyote.http11.Http11Protocol</phrase></literal>. You might have to install the Tomcat native library if not already available on your system.</simpara>
+</important>
 <simpara>You will then need to configure the servlet in your application&#8217;s <literal><phrase role="code">web.xml</phrase></literal> which will provide WebSocket upgrade support within AS7.</simpara>
 <simpara>Add the following to the <literal><phrase role="code">web.xml</phrase></literal> :</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;context-param&gt;
@@ -1501,11 +1507,11 @@ public class HelloWorldService implements MessageCallback {
 <important>
 <title>Important dependency</title>
 <simpara>Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your server. If you&#8217;re using Maven simply add the following dependency to your pom.xml file:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
-  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-  &lt;artifactId&gt;errai-bus-jboss7-websocket&lt;/artifactId&gt;
-  &lt;version&gt;${errai.version}&lt;/version&gt;
-&lt;/dependency&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">	&lt;dependency&gt;
+  		&lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  		&lt;artifactId&gt;errai-bus-jboss7-websocket&lt;/artifactId&gt;
+  		&lt;version&gt;${errai.version}&lt;/version&gt;
+	&lt;/dependency&gt;</programlisting>
 </important>
 </section>
 </section>

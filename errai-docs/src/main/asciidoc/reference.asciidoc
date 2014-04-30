@@ -1203,10 +1203,9 @@ Make sure to deploy the required Netty dependencies to your server. If you start
 
 [[sid-53380177_WebSockets-DeployingwithJBossAS7]]
 
-==== Deploying with JBoss AS 7
+==== Deploying with JBoss AS 7.1.2 (or higher)
 
-It is currently necessary use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance to use the native connector by changing the [code]+domain/configuration/domain.xml+ file, and change the line:
-
+It is currently necessary to use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance(s) to use the native connector by changing the [code]+domain/configuration/standalone.xml+ or [code]+domain/configuration/domain.xml+ file as follows:
 
 [source, xml]
 ----
@@ -1219,6 +1218,15 @@ to:
 ----
 <subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="true">
 ----
+
+[IMPORTANT]
+.Verify that the native APR connector is being used
+====
+To verify that the native connectors are being used check your console for the following log message:
+[code]+INFO [org.apache.coyote.http11.Http11AprProtocol] (MSC service thread 1-6) Starting Coyote HTTP/1.1 on http-/127.0.0.1:8080+
+
+The important part is [code]+org.apache.coyote.http11.Http11AprProtocol+. You should *NOT* be seeing [code]+org.apache.coyote.http11.Http11Protocol+. You might have to install the Tomcat native library if not already available on your system.
+====
 
 You will then need to configure the servlet in your application's [code]+web.xml+ which will provide WebSocket upgrade support within AS7.
 
@@ -1268,11 +1276,11 @@ Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your ser
 
 [source, xml]
 ----
-<dependency>
-  <groupId>org.jboss.errai</groupId>
-  <artifactId>errai-bus-jboss7-websocket</artifactId>
-  <version>${errai.version}</version>
-</dependency>
+	<dependency>
+  		<groupId>org.jboss.errai</groupId>
+  		<artifactId>errai-bus-jboss7-websocket</artifactId>
+  		<version>${errai.version}</version>
+	</dependency>
 ----
 ====
 
