@@ -515,11 +515,14 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
             + "&clientId=" + URL.encodePathSegment(messageBus.getClientId()) + extraParmsString.toString()
     );
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
+    // this has no effect on same origin requests but ensures the cookie and auth
+    // headers are sent when using CORS.
+    builder.setIncludeCredentials(true);
 
     final RxInfo rxInfo = new RxInfo(System.currentTimeMillis(), waitChannel);
 
     try {
-       logger.trace("[bus] TX: " + payload);
+      logger.trace("[bus] TX: " + payload);
       final Request request = builder.sendRequest(payload, new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {

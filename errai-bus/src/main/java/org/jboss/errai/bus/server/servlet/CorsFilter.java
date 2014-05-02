@@ -24,6 +24,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -68,7 +69,8 @@ public class CorsFilter implements Filter {
           FilterChain chain) throws IOException, ServletException {
 
     HttpServletResponse r = (HttpServletResponse) response;
-    r.addHeader("Access-Control-Allow-Origin", "*");
+    String origin = ((HttpServletRequest) request).getHeader("origin");
+    r.addHeader("Access-Control-Allow-Origin", origin);
     r.addHeader("Access-Control-Allow-Headers",
             "Accept,Accept-Encoding,Accept-Language,Cache-Control,Connection,Content-Length,Content-Type," +
             "Cookie,Host,Pragma,Referer,RemoteQueueID,User-Agent");
