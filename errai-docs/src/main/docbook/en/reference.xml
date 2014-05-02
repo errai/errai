@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-05-01</date>
+    <date>2014-05-02</date>
     
     
     
@@ -196,6 +196,7 @@ public class App {
       <simpara>In the <emphasis>Find</emphasis> dialog enter the phrase <emphasis>Maven</emphasis> and hit enter.</simpara>
       
 <figure>
+<title>Find Dialog</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/EclipseM2eStep2.PNG"/>
@@ -1529,12 +1530,12 @@ public class HelloWorldService implements MessageCallback {
     </listitem>
   
     <listitem>
-      <simpara>By calling <literal><phrase role="code"><indexterm><primary>ClientMessageBus) ErraiBus.get(</primary></indexterm>ClientMessageBus) ErraiBus.get(.stop()</phrase></literal> , the bus disconnects from the server</simpara>
+      <simpara>By calling <literal>((ClientMessageBus) ErraiBus.get()).stop()</literal> , the bus disconnects from the server</simpara>
       
     </listitem>
   
 </orderedlist>
-<simpara>To resume server communication after a call to <literal><phrase role="code">ClientMessageBus.stop()</phrase></literal> or after communication with the server has exceeded the bus' retry timeout, call <literal><phrase role="code"><indexterm><primary>ClientMessageBus) ErraiBus.get(</primary></indexterm>ClientMessageBus) ErraiBus.get(.init()</phrase></literal> . You can use a <literal><phrase role="code">BusLifecycleListener</phrase></literal> to monitor the success or failure of this attempt. See the next section for details.</simpara>
+<simpara>To resume server communication after a call to <literal><phrase role="code">ClientMessageBus.stop()</phrase></literal> or after communication with the server has exceeded the bus' retry timeout, call <literal>((ClientMessageBus) ErraiBus.get()).init()</literal> . You can use a <literal><phrase role="code">BusLifecycleListener</phrase></literal> to monitor the success or failure of this attempt. See the next section for details.</simpara>
 </section>
 <section id="sid-59146643_BusLifecycle-ObservingBusLifecycleStateandCommunicationStatus">
 <title>Observing Bus Lifecycle State and Communication Status</title>
@@ -5068,9 +5069,6 @@ public class QuickHandlerComponent extends Composite {
   
 </itemizedlist>
 
-<formalpara>
-<title>Login.java</title>
-<para>
 <programlisting language="java" linenumbering="unnumbered">@Dependent
 @Templated
 public class LoginForm extends AbstractForm { // <co id="CO1-1"/>
@@ -5111,8 +5109,6 @@ public class LoginForm extends AbstractForm { // <co id="CO1-1"/>
   }
 
 }</programlisting>
-</para>
-</formalpara>
 <simpara>The key things that you should take from this example:</simpara>
 <calloutlist>
   
@@ -5147,9 +5143,6 @@ public class LoginForm extends AbstractForm { // <co id="CO1-1"/>
 <section id="_using_the_correct_elements_in_the_template">
 <title>Using the Correct Elements in the Template</title>
 <simpara>The most likely way to go wrong is to accidentally use the wrong types of elements in your template. It is very important that you use a proper <literal>from</literal> element with <literal>input</literal> elements <emphasis role="strong">with the exception of the submit button</emphasis>. Here is an html template that could accompany the <literal>LoginForm.java</literal> example above:</simpara>
-<formalpara>
-<title>LoginForm.html</title>
-<para>
 <programlisting language="html" linenumbering="unnumbered">&lt;div&gt;
   &lt;form data-field="form"&gt;
     &lt;input type="text" name="username" data-field="username"&gt;
@@ -5157,8 +5150,6 @@ public class LoginForm extends AbstractForm { // <co id="CO1-1"/>
     &lt;button data-field="login"&gt;Sign In&lt;/button&gt;
   &lt;/form&gt;
 &lt;/div&gt;</programlisting>
-</para>
-</formalpara>
 <simpara>To reiterate, notice that the <literal>username</literal> and <literal>password</literal> fields are legitimate <literal>input</literal> elements. This is because we want these values to be submitted when <literal>AbstractForm.submit()</literal> is called (so that the browser notices them). However, we do not want there to be any way to submit the form other than calling <literal>AbstractForm.submit()</literal>, so the <literal>button</literal> element is notably missing the <literal>type="submit"</literal> attribute pair.</simpara>
 </section>
 </section>
