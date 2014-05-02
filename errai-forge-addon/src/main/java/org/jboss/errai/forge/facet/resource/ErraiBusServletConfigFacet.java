@@ -27,8 +27,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
+import org.jboss.errai.forge.xml.ElementFactory;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,22 +44,22 @@ public class ErraiBusServletConfigFacet extends AbstractXmlResourceFacet {
   public static final String webXmlRootExpression = "/web-app";
 
   @Override
-  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException, XPathExpressionException {
-    final Element servlet = doc.createElement("servlet");
-    servlet.appendChild(doc.createElement("servlet-name")).setTextContent("ErraiServlet");
-    servlet.appendChild(doc.createElement("servlet-class")).setTextContent(
+    final Element servlet = elemFactory.createElement("servlet");
+    servlet.appendChild(elemFactory.createElement("servlet-name")).setTextContent("ErraiServlet");
+    servlet.appendChild(elemFactory.createElement("servlet-class")).setTextContent(
             "org.jboss.errai.bus.server.servlet.DefaultBlockingServlet");
 
-    final Node initParam = servlet.appendChild(doc.createElement("init-param"));
-    initParam.appendChild(doc.createElement("param-name")).setTextContent("auto-discover-services");
-    initParam.appendChild(doc.createElement("param-value")).setTextContent("true");
+    final Node initParam = servlet.appendChild(elemFactory.createElement("init-param"));
+    initParam.appendChild(elemFactory.createElement("param-name")).setTextContent("auto-discover-services");
+    initParam.appendChild(elemFactory.createElement("param-value")).setTextContent("true");
 
-    servlet.appendChild(doc.createElement("load-on-startup")).setTextContent("1");
+    servlet.appendChild(elemFactory.createElement("load-on-startup")).setTextContent("1");
 
-    final Element servletMapping = doc.createElement("servlet-mapping");
-    servletMapping.appendChild(doc.createElement("servlet-name")).setTextContent("ErraiServlet");
-    servletMapping.appendChild(doc.createElement("url-pattern")).setTextContent("*.erraiBus");
+    final Element servletMapping = elemFactory.createElement("servlet-mapping");
+    servletMapping.appendChild(elemFactory.createElement("servlet-name")).setTextContent("ErraiServlet");
+    servletMapping.appendChild(elemFactory.createElement("url-pattern")).setTextContent("*.erraiBus");
 
     final Map<XPathExpression, Collection<Node>> retVal = new HashMap<XPathExpression, Collection<Node>>(1);
     final Collection<Node> nodes = new ArrayList<Node>(2);
@@ -72,9 +72,9 @@ public class ErraiBusServletConfigFacet extends AbstractXmlResourceFacet {
   }
 
   @Override
-  protected Map<XPathExpression, Collection<Node>> getElementsToVerify(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Collection<Node>> getElementsToVerify(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException, XPathExpressionException {
-    final Map<XPathExpression, Collection<Node>> retVal = getElementsToInsert(xPath, doc);
+    final Map<XPathExpression, Collection<Node>> retVal = getElementsToInsert(xPath, elemFactory);
 
     /*
      * Remove the param-value for auto-discover-services for the purpose of
@@ -100,7 +100,7 @@ public class ErraiBusServletConfigFacet extends AbstractXmlResourceFacet {
   }
 
   @Override
-  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final Document doc) {
+  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final ElementFactory elemFactory) {
     return new HashMap<XPathExpression, Node>(0);
   }
 
@@ -110,8 +110,8 @@ public class ErraiBusServletConfigFacet extends AbstractXmlResourceFacet {
   }
 
   @Override
-  protected Map<XPathExpression, Node> getRemovalMap(XPath xPath, Document doc) throws ParserConfigurationException,
-          XPathExpressionException {
+  protected Map<XPathExpression, Node> getRemovalMap(final XPath xPath, final ElementFactory elemFactory)
+          throws ParserConfigurationException, XPathExpressionException {
     return new HashMap<XPathExpression, Node>(0);
   }
 

@@ -20,23 +20,21 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Properties;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ModuleVault.Module;
+import org.jboss.errai.forge.xml.XmlParser;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -48,7 +46,7 @@ import org.xml.sax.SAXException;
 @FacetConstraint({ ProjectConfig.class })
 public class ModuleCoreFacet extends AbstractModuleFacet {
 
-  private final TransformerFactory transFactory = TransformerFactory.newInstance();
+  private Properties xmlProperties = new Properties();
 
   final static String emptyModuleContents =
           "<?xml version='1.0' encoding='UTF-8'?>\n"
@@ -102,17 +100,14 @@ public class ModuleCoreFacet extends AbstractModuleFacet {
     return super.install();
   }
 
-  public String getModuleName() throws ParserConfigurationException, SAXException, IOException {
-    final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-    final Document doc = docBuilder.parse(getModuleFile());
+  public String getModuleName() throws ParserConfigurationException, SAXException, IOException,
+          TransformerConfigurationException, XPathExpressionException {
+    final XmlParser xmlParser = xmlParserFactory.newXmlParser(getModuleFile(), xmlProperties);
+    final XPath xPath = xPathFactory.newXPath();
+    final Map<String, String> moduleAttributes = xmlParser.getAttributes(xPath.compile("/module"));
 
-    final NodeList moduleTags = doc.getElementsByTagName("module");
-    if (moduleTags.getLength() != 1) {
-      throw new IllegalStateException(String.format("The gwt module, %s, is malformed.", getModuleFile()));
-    }
-
-    String name = ((Element) moduleTags.item(0)).getAttribute("rename-to");
-    if (name.equals("")) {
+    String name = (moduleAttributes != null) ? moduleAttributes.get("rename-to") : null;
+    if (name == null) {
       name = getProject().getFacet(ProjectConfig.class).getProjectProperty(ProjectProperty.MODULE_LOGICAL,
               String.class);
     }
@@ -120,31 +115,20 @@ public class ModuleCoreFacet extends AbstractModuleFacet {
     return name;
   }
 
-  public void setModuleName(String moduleName) throws SAXException, IOException, ParserConfigurationException,
-          TransformerException {
-    final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-    final Document doc = docBuilder.parse(getModuleFile());
-
-    final NodeList moduleTags = doc.getElementsByTagName("module");
-    if (moduleTags.getLength() != 1) {
-      throw new RuntimeException(String.format("The GWT module %s is malformed: %d <module> tags found.",
-              getModuleFile(), moduleTags.getLength()));
-
-    }
+  public void setModuleName(final String moduleName) throws SAXException, IOException, ParserConfigurationException,
+          TransformerException, XPathExpressionException {
+    final XmlParser xmlParser = xmlParserFactory.newXmlParser(getModuleFile(), xmlProperties);
+    final XPath xPath = xPathFactory.newXPath();
+    final Map<String, String> moduleAttributes = xmlParser.getAttributes(xPath.compile("/module"));
 
     if (moduleName != null && !moduleName.equals("")) {
-      ((Element) moduleTags.item(0)).setAttribute("rename-to", moduleName);
+      moduleAttributes.put("rename-to", moduleName);
     }
     else {
-      ((Element) moduleTags.item(0)).removeAttribute("rename-to");
+      moduleAttributes.remove("rename-to");
     }
 
-    final Transformer transformer = transFactory.newTransformer();
-    final DOMSource source = new DOMSource(doc);
-    final StreamResult streamResult = new StreamResult(getModuleFile());
-
-    transformer.setOutputProperties(xmlProperties);
-    transformer.transform(source, streamResult);
+    xmlParser.close();
   }
 
 }

@@ -27,8 +27,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
+import org.jboss.errai.forge.xml.ElementFactory;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -45,18 +45,19 @@ public class CdiWebXmlFacet extends AbstractXmlResourceFacet {
   public final String autoDiscoverParamExpression = erraiServletExpression + autoDiscoverParamSubExpression;
 
   @Override
-  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final Document doc) {
+  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath,
+          final ElementFactory elemFactory) {
     return new HashMap<XPathExpression, Collection<Node>>(0);
   }
 
   @Override
-  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException, XPathExpressionException {
     final XPathExpression key = xPath.compile(autoDiscoverParamExpression);
 
-    final Element value = doc.createElement("init-param");
-    value.appendChild(doc.createElement("param-name")).setTextContent("auto-discover-services");
-    value.appendChild(doc.createElement("param-value")).setTextContent("false");
+    final Element value = elemFactory.createElement("init-param");
+    value.appendChild(elemFactory.createElement("param-name")).setTextContent("auto-discover-services");
+    value.appendChild(elemFactory.createElement("param-value")).setTextContent("false");
 
     final Map<XPathExpression, Node> replacements = new HashMap<XPathExpression, Node>(1);
     replacements.put(key, value);
@@ -70,14 +71,14 @@ public class CdiWebXmlFacet extends AbstractXmlResourceFacet {
   }
 
   @Override
-  protected Map<XPathExpression, Node> getRemovalMap(XPath xPath, Document doc) throws ParserConfigurationException,
-          XPathExpressionException {
+  protected Map<XPathExpression, Node> getRemovalMap(final XPath xPath, final ElementFactory elemFactory)
+          throws ParserConfigurationException, XPathExpressionException {
     assert xPath.compile(erraiServletExpression).evaluate(erraiServletExpression, XPathConstants.NODE) != null;
     final XPathExpression key = xPath.compile(autoDiscoverParamExpression);
 
-    final Element value = doc.createElement("init-param");
-    value.appendChild(doc.createElement("param-name")).setTextContent("auto-discover-services");
-    value.appendChild(doc.createElement("param-value")).setTextContent("true");
+    final Element value = elemFactory.createElement("init-param");
+    value.appendChild(elemFactory.createElement("param-name")).setTextContent("auto-discover-services");
+    value.appendChild(elemFactory.createElement("param-value")).setTextContent("true");
 
     final Map<XPathExpression, Node> replacements = new HashMap<XPathExpression, Node>(1);
     replacements.put(key, value);
