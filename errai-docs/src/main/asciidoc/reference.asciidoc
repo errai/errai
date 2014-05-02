@@ -5639,7 +5639,6 @@ Here is a sample `@Templated` login form class. This form has:
 * a `password` field
 * a button that with a click handler that attempts to login asynchronously
 
-.Login.java
 [source, java]
 ----
 @Dependent
@@ -5698,7 +5697,6 @@ When a user successfully logs in via this example, the web browser should prompt
 
 The most likely way to go wrong is to accidentally use the wrong types of elements in your template. It is very important that you use a proper `from` element with `input` elements *with the exception of the submit button*. Here is an html template that could accompany the `LoginForm.java` example above:
 
-.LoginForm.html
 [source, html]
 ----
 <div>
