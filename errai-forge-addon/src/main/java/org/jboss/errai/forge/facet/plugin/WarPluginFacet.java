@@ -26,6 +26,7 @@ import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.DefaultVault.DefaultValue;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
+import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
@@ -56,7 +57,7 @@ public class WarPluginFacet extends AbstractProfilePluginFacet {
 
   public static String getWarSourceDirectory(final Project project) {
     final MavenFacet coreFacet = project.getFacet(MavenFacet.class);
-    final Profile profile = getProfile(MAIN_PROFILE, coreFacet.getModel().getProfiles());
+    final Profile profile = MavenModelUtil.getProfileById(MAIN_PROFILE, coreFacet.getModel().getProfiles());
 
     if (profile != null && profile.getBuild() != null
             && profile.getBuild().getPluginsAsMap().containsKey(DependencyArtifact.War.toString())) {

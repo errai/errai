@@ -31,6 +31,7 @@ import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.util.MavenConverter;
+import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.errai.forge.util.VersionOracle;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.plugins.Configuration;
@@ -78,13 +79,13 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
   public boolean install() {
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     Model pom = coreFacet.getModel();
-    Profile profile = getProfile(profileId, pom.getProfiles());
+    Profile profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
     final VersionOracle oracle = new VersionOracle(getProject().getFacet(DependencyFacet.class));
 
     if (profile == null) {
       addDependenciesToProfile(profileId, Collections.<DependencyBuilder> emptyList(), oracle);
       pom = coreFacet.getModel();
-      profile = getProfile(profileId, pom.getProfiles());
+      profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
     }
 
     if (profile.getBuild() == null) {
@@ -144,7 +145,7 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     final Model pom = coreFacet.getModel();
 
-    final Profile profile = getProfile(profileId, pom.getProfiles());
+    final Profile profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
     if (profile == null || profile.getBuild() == null)
       return false;
 
@@ -190,7 +191,7 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     final Model pom = coreFacet.getModel();
 
-    final Profile profile = getProfile(profileId, pom.getProfiles());
+    final Profile profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
     if (profile == null)
       return false;
 

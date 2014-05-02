@@ -17,7 +17,6 @@
 package org.jboss.errai.forge.facet.base;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -26,6 +25,7 @@ import org.jboss.errai.forge.constant.ArtifactVault;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.util.MavenConverter;
+import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.errai.forge.util.VersionOracle;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.AbstractFacet;
@@ -50,25 +50,6 @@ public abstract class AbstractBaseFacet extends AbstractFacet<Project> implement
   }
 
   /**
-   * Get a Maven {@link Profile} by name from a {@link List}.
-   * 
-   * @param name
-   *          The name of the {@link Profile} to search for.
-   * @param profiles
-   *          A {@link List} of {@link Profile} objects to search.
-   * @return The {@link Profile} in the given {@link List} matching the provided
-   *         name, or {@literal null} if none was found.
-   */
-  protected static Profile getProfile(final String name, final List<Profile> profiles) {
-    for (final Profile profile : profiles) {
-      if (profile.getId().equals(name))
-        return profile;
-    }
-
-    return null;
-  }
-
-  /**
    * Add dependencies to a Maven profile.
    * 
    * @param name
@@ -87,7 +68,7 @@ public abstract class AbstractBaseFacet extends AbstractFacet<Project> implement
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     final Model pom = coreFacet.getModel();
 
-    Profile profile = getProfile(name, pom.getProfiles());
+    Profile profile = MavenModelUtil.getProfileById(name, pom.getProfiles());
 
     if (profile == null) {
       profile = new Profile();

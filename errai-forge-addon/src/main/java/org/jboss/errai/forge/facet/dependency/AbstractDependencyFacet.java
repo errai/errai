@@ -33,6 +33,7 @@ import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.util.MavenConverter;
+import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.errai.forge.util.VersionOracle;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
@@ -79,7 +80,7 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
     final Model pom = coreFacet.getModel();
     final Map<String, Collection<DependencyBuilder>> blacklistProfileDependencies = new HashMap<String, Collection<DependencyBuilder>>();
     for (String profileId : ArtifactVault.getBlacklistProfiles()) {
-      final Profile profile = getProfile(profileId, pom.getProfiles());
+      final Profile profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
       for (final DependencyArtifact artifact : ArtifactVault.getBlacklistedArtifacts(profileId)) {
         final DependencyBuilder dep = getDependency(artifact);
         if (depFacet.hasEffectiveDependency(dep)
@@ -210,7 +211,7 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     Model pom = coreFacet.getModel();
     for (final String profName : profileDependencies.keySet()) {
-      final Profile profile = getProfile(profName, pom.getProfiles());
+      final Profile profile = MavenModelUtil.getProfileById(profName, pom.getProfiles());
       if (profile == null) {
         return false;
       }
@@ -234,7 +235,7 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
      */
     pom = coreFacet.getModel();
     for (final String profileId : ArtifactVault.getBlacklistProfiles()) {
-      final Profile profile = getProfile(profileId, pom.getProfiles());
+      final Profile profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
       for (final DependencyArtifact artifact : ArtifactVault.getBlacklistedArtifacts(profileId)) {
         final DependencyBuilder dep = getDependency(artifact);
         if (depFacet.hasEffectiveDependency(dep) && !hasProvidedDependency(profile, dep))
