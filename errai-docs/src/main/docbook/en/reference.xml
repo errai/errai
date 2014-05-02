@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-04-30</date>
+    <date>2014-05-01</date>
     
     
     
@@ -1468,7 +1468,7 @@ public class HelloWorldService implements MessageCallback {
 </section>
 <section id="sid-53380177_WebSockets-DeployingwithJBossAS7">
 <title>Deploying with JBoss AS 7.1.2 (or higher)</title>
-<simpara>It is currently necessary to use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance(s) to use the native connector by changing the <literal><phrase role="code">domain/configuration/standalone.xml</phrase></literal> or <literal><phrase role="code">domain/configuration/domain.xml</phrase></literal> file as follows:</simpara>
+<simpara>This is an alternative approach to the sideband server described in the previous chapter. Make sure to <emphasis role="strong">NOT</emphasis> configure both! It is currently necessary to use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance(s) to use the native connector by changing the <literal><phrase role="code">domain/configuration/standalone.xml</phrase></literal> or <literal><phrase role="code">domain/configuration/domain.xml</phrase></literal> file as follows:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="false"&gt;</programlisting>
 <simpara>to:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="true"&gt;</programlisting>
@@ -2943,7 +2943,7 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
 <title>Global RPC exception handler</title>
 <simpara>In a scenario where many different remote calls potentially throw the same exception types (e.g. exceptions related to authentication or authorization) it can be easier to register a global exception handler instead of providing error callbacks at each RPC invocation. This global exception handler is called in case an exception occurs in the process of a remote call that has no error callback associated with it. So, it will handle an otherwise uncaught exception.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@UncaughtException
-private void onUncaughtException(Throwable t) {
+private void onUncaughtException(Throwable caught) {
   try {
     throw caught;
   }
@@ -3046,7 +3046,7 @@ public class MyBean {
 </section>
 <section id="_asynchronous_handling_of_rpcs_on_the_server">
 <title>Asynchronous handling of RPCs on the server</title>
-<simpara>If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service has to be contacted) it might be preferrable to start a separate thread in the RPC service method or leverage an existing thread from a dedicated thread pool that will provide the result at a later point. In this case the RPC endpoint method can return immediately and the thread handling the incoming request doesn&#8217;t need to stay active until the result is available.</simpara>
+<simpara>If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service needs to be contacted or a long running query needs to be executed) it might be preferable to release the request-processing thread so it can perform other work and provide the result in a different execution context farther in the future. So, the RPC endpoint method can return immediately and the thread handling the incoming request doesn&#8217;t need to stay active until the result is available. Computing and setting the result can be done in a different thread (i.e. from a smaller thread pool provided by a library).</simpara>
 <simpara>Errai provides a special return type <literal><phrase role="code">CallableFuture</phrase></literal> to indicate to the RPC system that the result of the remote method call will be provided asynchronously (after the remote method call has returned).</simpara>
 <simpara>Here&#8217;s an example returning a result of type String:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Remote
@@ -3065,7 +3065,7 @@ public class LongRunningServiceImpl implements LongRunningService {
       public void run() {
         try {
           Thread.sleep(5000);
-          future.setValue("foobar");
+          future.setValue("result");
         }
         catch (Throwable t) {
           t.printStackTrace();

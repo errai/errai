@@ -3260,7 +3260,7 @@ In a scenario where many different remote calls potentially throw the same excep
 [source, java]
 ----
 @UncaughtException
-private void onUncaughtException(Throwable t) {
+private void onUncaughtException(Throwable caught) {
   try {
     throw caught;
   }
@@ -3409,7 +3409,7 @@ The remote methods will get executed only after [code]+sendBatch()+ was called. 
 
 === Asynchronous handling of RPCs on the server
 
-If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service has to be contacted) it might be preferrable to start a separate thread in the RPC service method or leverage an existing thread from a dedicated thread pool that will provide the result at a later point. In this case the RPC endpoint method can return immediately and the thread handling the incoming request doesn't need to stay active until the result is available.
+If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service needs to be contacted or a long running query needs to be executed) it might be preferable to release the request-processing thread so it can perform other work and provide the result in a different execution context farther in the future. So, the RPC endpoint method can return immediately and the thread handling the incoming request doesn't need to stay active until the result is available. Computing and setting the result can be done in a different thread (i.e. from a smaller thread pool provided by a library).
 
 Errai provides a special return type [code]+CallableFuture+ to indicate to the RPC system that the result of the remote method call will be provided asynchronously (after the remote method call has returned).
 
@@ -3437,7 +3437,7 @@ public class LongRunningServiceImpl implements LongRunningService {
       public void run() {
         try {
           Thread.sleep(5000);
-          future.setValue("foobar");
+          future.setValue("result");
         }
         catch (Throwable t) {
           t.printStackTrace();
