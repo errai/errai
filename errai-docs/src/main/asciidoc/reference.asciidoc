@@ -3249,7 +3249,7 @@ MessageBuilder.createCall(
   MyRemoteService.class).isEveryoneHappy();
 ----
 
-As remote exceptions need to be serialized to be sent to the client, the [code]+@Portable+ annotation needs to be present on the corresponding exception class (see <<sid-5931328>, Marshalling>). Further the exception class needs to be part of the client-side code. For more details on [code]+ErrorCallbacks+ see <<sid-5931306, Handling Errors>> .
+As remote exceptions need to be serialized to be sent to the client, the [code]+@Portable+ annotation needs to be present on the corresponding exception class (see <<sid-5931328, Marshalling>>). Further the exception class needs to be part of the client-side code. For more details on [code]+ErrorCallbacks+ see <<sid-5931306, Handling Errors>> .
 
 [[sid-5931313_RemoteProcedureCalls%28RPC%29-GlobalRPCexceptionhandler]]
 
@@ -3577,7 +3577,7 @@ Note that all JAX-RS annotations ( [code]+@Path+ , [code]+@GET+ , [code]+@Consum
 
 This section assumes you have already set up the CustomerService JAX-RS endpoint as described in the previous section.
 
-To create a request on the client, all that needs to be done is to invoke [code]+RestClient.create()+ , thereby providing the JAX-RS interface, a response callback and to invoke the corresponding interface method:
+To create a request on the client, all that needs to be done is to invoke [code]+RestClient.create()+, thereby providing the JAX-RS interface, a response callback and to invoke the corresponding interface method:
 
 .App.java
 ====
@@ -3596,13 +3596,13 @@ Button create = new Button("Create", new ClickHandler() {
 
 ====
 
-For details on the callback mechanism see <<sid-19398997_ErraiJAX-RS-HandlingResponses,Handling Responses>> .
+For details on the callback mechanism see <<sid-19398997_ErraiJAX-RS-HandlingResponses,Handling Responses>>.
 
 [[sid-19398997_ErraiJAX-RS-ProxyInjection]]
 
 ==== Proxy Injection
 
-Injectable proxies can be used as an alternative to calling [code]+RestClient.create()+ .
+Injectable proxies can be used as an alternative to calling [code]+RestClient.create()+.
 
 
 [source, java]

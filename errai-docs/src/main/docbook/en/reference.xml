@@ -1530,12 +1530,12 @@ public class HelloWorldService implements MessageCallback {
     </listitem>
   
     <listitem>
-      <simpara>By calling <literal>((ClientMessageBus) ErraiBus.get()).stop()</literal> , the bus disconnects from the server</simpara>
+      <simpara>By calling <literal>((ClientMessageBus) ErraiBus.get()).stop()</literal>, the bus disconnects from the server</simpara>
       
     </listitem>
   
 </orderedlist>
-<simpara>To resume server communication after a call to <literal><phrase role="code">ClientMessageBus.stop()</phrase></literal> or after communication with the server has exceeded the bus' retry timeout, call <literal>((ClientMessageBus) ErraiBus.get()).init()</literal> . You can use a <literal><phrase role="code">BusLifecycleListener</phrase></literal> to monitor the success or failure of this attempt. See the next section for details.</simpara>
+<simpara>To resume server communication after a call to <literal><phrase role="code">ClientMessageBus.stop()</phrase></literal> or after communication with the server has exceeded the bus' retry timeout, call <literal>((ClientMessageBus) ErraiBus.get()).init()</literal>. You can use a <literal><phrase role="code">BusLifecycleListener</phrase></literal> to monitor the success or failure of this attempt. See the next section for details.</simpara>
 </section>
 <section id="sid-59146643_BusLifecycle-ObservingBusLifecycleStateandCommunicationStatus">
 <title>Observing Bus Lifecycle State and Communication Status</title>
@@ -1591,7 +1591,7 @@ public class SignupServiceShadow implements SignupService {
 <simpara>Errai includes a bus monitoring application, which allows you to monitor all of the message exchange activity on the bus in order to help track down any potential problems It allows you to inspect individual messages to examine their state and structure.</simpara>
 <simpara>To utilize the bus monitor, you&#8217;ll need to include the _errai-tools _ package as part of your application&#8217;s dependencies. When you run your application in development mode, you will simply need to add the following JVM options to your run configuration in order to launch the monitor: <literal><phrase role="code">-Derrai.tools.bus_monitor_attach=true</phrase></literal></simpara>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>ErraiBus Monitor</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/5931386/MonitorOverview.png"/>
@@ -1602,7 +1602,7 @@ public class SignupServiceShadow implements SignupService {
 <simpara>The monitor provides you a real-time perspective on what&#8217;s going on inside the bus. The left side of the main screen lists the services that are currently available, and the right side is the service-explorer, which will show details about the service.</simpara>
 <simpara>To see what&#8217;s going on with a specific service, simply double-click on the service or highlight the service, then click "Monitor Service&#8230;". This will bring up the service activity monitor.</simpara>
 <figure>
-<title>TODO InformalFigure image title empty</title>
+<title>ErraiBus Monitor details</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/5931386/MonitorOverview2.png"/>
@@ -2939,7 +2939,7 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
     }
   },
   MyRemoteService.class).isEveryoneHappy();</programlisting>
-<simpara>As remote exceptions need to be serialized to be sent to the client, the <literal><phrase role="code">@Portable</phrase></literal> annotation needs to be present on the corresponding exception class (see <link linkend="sid-5931328&gt;">Marshalling&gt;). Further the exception class needs to be part of the client-side code. For more details on <literal><phrase role="code">ErrorCallbacks</phrase></literal> see &lt;&lt;sid-5931306, Handling Errors</link> .</simpara>
+<simpara>As remote exceptions need to be serialized to be sent to the client, the <literal><phrase role="code">@Portable</phrase></literal> annotation needs to be present on the corresponding exception class (see <link linkend="sid-5931328">Marshalling</link>). Further the exception class needs to be part of the client-side code. For more details on <literal><phrase role="code">ErrorCallbacks</phrase></literal> see <link linkend="sid-5931306">Handling Errors</link> .</simpara>
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-GlobalRPCexceptionhandler">
 <title>Global RPC exception handler</title>
 <simpara>In a scenario where many different remote calls potentially throw the same exception types (e.g. exceptions related to authentication or authorization) it can be easier to register a global exception handler instead of providing error callbacks at each RPC invocation. This global exception handler is called in case an exception occurs in the process of a remote call that has no error callback associated with it. So, it will handle an otherwise uncaught exception.</simpara>
@@ -3271,7 +3271,7 @@ public interface CustomerService {
 <section id="sid-19398997_ErraiJAX-RS-CreatingRequests">
 <title>Creating Requests</title>
 <simpara>This section assumes you have already set up the CustomerService JAX-RS endpoint as described in the previous section.</simpara>
-<simpara>To create a request on the client, all that needs to be done is to invoke <literal><phrase role="code">RestClient.create()</phrase></literal> , thereby providing the JAX-RS interface, a response callback and to invoke the corresponding interface method:</simpara>
+<simpara>To create a request on the client, all that needs to be done is to invoke <literal><phrase role="code">RestClient.create()</phrase></literal>, thereby providing the JAX-RS interface, a response callback and to invoke the corresponding interface method:</simpara>
 <example>
 <title>App.java</title>
 <programlisting language="java" linenumbering="unnumbered">...
@@ -3286,7 +3286,7 @@ Button create = new Button("Create", new ClickHandler() {
 <simpara>For details on the callback mechanism see <link linkend="sid-19398997_ErraiJAX-RS-HandlingResponses">Handling Responses</link> .</simpara>
 <section id="sid-19398997_ErraiJAX-RS-ProxyInjection">
 <title>Proxy Injection</title>
-<simpara>Injectable proxies can be used as an alternative to calling <literal><phrase role="code">RestClient.create()</phrase></literal> .</simpara>
+<simpara>Injectable proxies can be used as an alternative to calling <literal><phrase role="code">RestClient.create()</phrase></literal>.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Inject
 private Caller&lt;CustomerService&gt; customerService;</programlisting>
 <simpara>To create a request, the callback objects need to be provided to the <literal><phrase role="code">call</phrase></literal> method before the corresponding interface method is invoked.</simpara>
