@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-05-02</date>
+    <date>2014-05-05</date>
     
     
     
@@ -3283,7 +3283,7 @@ Button create = new Button("Create", new ClickHandler() {
 });
 ...</programlisting>
 </example>
-<simpara>For details on the callback mechanism see <link linkend="sid-19398997_ErraiJAX-RS-HandlingResponses">Handling Responses</link> .</simpara>
+<simpara>For details on the callback mechanism see <link linkend="sid-19398997_ErraiJAX-RS-HandlingResponses">Handling Responses</link>.</simpara>
 <section id="sid-19398997_ErraiJAX-RS-ProxyInjection">
 <title>Proxy Injection</title>
 <simpara>Injectable proxies can be used as an alternative to calling <literal><phrase role="code">RestClient.create()</phrase></literal>.</simpara>
@@ -4979,7 +4979,7 @@ This text will be ignored.</programlisting>
 </important>
 <section id="sid-51806600_ErraiUI-Concepts">
 <title>Concepts</title>
-<simpara>Each of the three scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with <literal><phrase role="code">@EventHandler("my-data-field")</phrase></literal> ( <emphasis>event handler methods</emphasis> ) to handle events on the corresponding <literal><phrase role="code">@DataField("my-data-field")</phrase></literal> in the same component. Event handler methods annotated with a bare <literal><phrase role="code">@EventHandler</phrase></literal> annotation (no annotation parameter) are wired to receive events on the @Templated component itself.</simpara>
+<simpara>Each of the three scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with <literal><phrase role="code">@EventHandler("my-data-field")</phrase></literal> (<emphasis>event handler methods</emphasis>) to handle events on the corresponding <literal><phrase role="code">@DataField("my-data-field")</phrase></literal> in the same component. Event handler methods annotated with a bare <literal><phrase role="code">@EventHandler</phrase></literal> annotation (no annotation parameter) are wired to receive events on the @Templated component itself.</simpara>
 </section>
 <section id="sid-51806600_ErraiUI-GWTeventsonWidgets">
 <title>GWT events on Widgets</title>
@@ -5019,7 +5019,7 @@ public class ElementHandlerComponent extends Composite {
    &lt;a id="link" href="/page"&gt;this is a hyperlink&lt;/a&gt;
    &lt;div data-field="div"&gt; Some content &lt;/div&gt;
 &lt;/div&gt;</programlisting>
-<simpara>The <literal><phrase role="code">@SinkNative</phrase></literal> annotation specifies (as a bit mask) which native events the method should handle; this sink behaves the same in Errai UI as it would with <literal><phrase role="code">DOM.sinkEvents(Element e, int bits)</phrase></literal> . Note that a <literal><phrase role="code">@DataField</phrase></literal> reference in the component class is optional.</simpara>
+<simpara>The <literal><phrase role="code">@SinkNative</phrase></literal> annotation specifies (as a bit mask) which native events the method should handle; this sink behaves the same in Errai UI as it would with <literal><phrase role="code">DOM.sinkEvents(Element e, int bits)</phrase></literal>. Note that a <literal><phrase role="code">@DataField</phrase></literal> reference in the component class is optional.</simpara>
 <important>
 <simpara>Only one @EventHandler may be specified for a given template element when @SinkNative is used to handle native DOM events.</simpara>
 </important>
@@ -5156,7 +5156,7 @@ public class LoginForm extends AbstractForm { // <co id="CO1-1"/>
 <section id="sid-51806600_ErraiUI-DataBinding">
 <title>Data Binding</title>
 <simpara>A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks require a significant amount of boilerplate code which can be alleviated by Errai. Errai&#8217;s <link linkend="sid-51282340">data binding module</link> provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when used together with Errai UI.</simpara>
-<simpara>In the following example, all <literal><phrase role="code">@DataFields</phrase></literal> annotated with <literal><phrase role="code">@Bound</phrase></literal> have their contents bound to properties of the data model (a <literal><phrase role="code">User</phrase></literal> object). The model object is injected and annotated with <literal><phrase role="code">@Model</phrase></literal> , which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected <literal><phrase role="code">DataBinder</phrase></literal> instance annotated with <literal><phrase role="code">@AutoBound</phrase></literal> , see <link linkend="sid-51282340_DataBinding-DeclarativeBinding">Declarative Binding</link> for details.</simpara>
+<simpara>In the following example, all <literal><phrase role="code">@DataFields</phrase></literal> annotated with <literal><phrase role="code">@Bound</phrase></literal> have their contents bound to properties of the data model (a <literal><phrase role="code">User</phrase></literal> object). The model object is injected and annotated with <literal><phrase role="code">@Model</phrase></literal>, which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected <literal><phrase role="code">DataBinder</phrase></literal> instance annotated with <literal><phrase role="code">@AutoBound</phrase></literal> , see <link linkend="sid-51282340_DataBinding-DeclarativeBinding">Declarative Binding</link> for details.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class LoginForm extends Composite {
 
@@ -5180,7 +5180,7 @@ public class LoginForm extends Composite {
 <simpara>Now the user object and the <literal><phrase role="code">username</phrase></literal> and <literal><phrase role="code">password</phrase></literal> fields in the UI are automatically kept in sync. No event handling code needs to be written to update the user object in response to input field changes and no code needs to be written to update the UI fields when the model object changes. So, with the above annotations in place, it will always be true that <literal><phrase role="code">user.getUsername().equals(username.getText())</phrase></literal> and <literal><phrase role="code">user.getPassword().equals(password.getText())</phrase></literal> .</simpara>
 <section id="sid-51806600_ErraiUI-Default%2CSimple%2CandChainedPropertyBindings">
 <title>Default, Simple, and Chained Property Bindings</title>
-<simpara>By default, bindings are determined by matching field names to property names on the model object. In the example above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model ( <literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal> ). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
+<simpara>By default, bindings are determined by matching field names to property names on the model object. In the example above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model ( <literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal>). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
 <simpara>The following example illustrates all three scenarios:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Bindable
 public class Address {
@@ -5316,7 +5316,7 @@ public class ComponentOne extends Composite {
 <simpara>Templating would not be complete without the ability to inherit from parent templates, and Errai UI also makes this possible using simple Java inheritance. The only additional requirement is that Composite components extending from a parent Composite component must also be annotated with @Templated, and the path to the template file must also be specified in the child component&#8217;s annotation. Child components may specify <literal><phrase role="code">@DataField</phrase></literal> references that were omitted in the parent class, and they may also override <literal><phrase role="code">@DataField</phrase></literal> references (by using the same <literal><phrase role="code">data-field</phrase></literal> name) that were already specified in the parent component.</simpara>
 <section id="sid-51806600_ErraiUI-Template">
 <title>Template</title>
-<simpara>Extension templating is particularly useful for creating reusable page layouts with some shared content (navigation menus, side-bars, footers, etc&#8230;,) where certain sections will be filled with unique content for each page that extends from the base template; this is commonly seen when combined with the MVP design pattern traditionally used in GWT applications.</simpara>
+<simpara>Extension templating is particularly useful for creating reusable page layouts with some shared content (navigation menus, side-bars, footers, etc.) where certain sections will be filled with unique content for each page that extends from the base template; this is commonly seen when combined with the MVP design pattern traditionally used in GWT applications.</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;div class="container"&gt;
    &lt;div id="header"&gt; Default header &lt;/div&gt;
    &lt;div id="content"&gt; Default content &lt;/div&gt;
@@ -5580,18 +5580,18 @@ public class NavBar extends Composite {
 public class ItemListPage extends Composite {
   // Anything goes...
 }</programlisting>
-<simpara>By default, the name of a page is the simple name of the class that declares it. In the above example, the <literal><phrase role="code">ItemListPage</phrase></literal> will fill the navigation panel whenever the browser&#8217;s location bar ends with <literal><phrase role="code">#ItemListPage</phrase></literal> . If you prefer a different page name, use the <literal><phrase role="code">@Page</phrase></literal> annotation&#8217;s <literal><phrase role="code">path</phrase></literal> attribute:</simpara>
+<simpara>By default, the name of a page is the simple name of the class that declares it. In the above example, the <literal><phrase role="code">ItemListPage</phrase></literal> will fill the navigation panel whenever the browser&#8217;s location bar ends with <literal><phrase role="code">#ItemListPage</phrase></literal>. If you prefer a different page name, use the <literal><phrase role="code">@Page</phrase></literal> annotation&#8217;s <literal><phrase role="code">path</phrase></literal> attribute:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(path="items")
 public class ItemListPage extends Composite {
   // Anything goes...
 }</programlisting>
 <important>
 <title>Navigation and Errai UI</title>
-<simpara>Any widget can be a page. This includes Errai UI <literal><phrase role="code">@Templated</phrase></literal> classes! Simply annotate any Errai UI templated class with <literal><phrase role="code">@Page</phrase></literal> , and it will become a page that can be navigated to.</simpara>
+<simpara>Any widget can be a page. This includes Errai UI <literal><phrase role="code">@Templated</phrase></literal> classes! Simply annotate any Errai UI templated class with <literal><phrase role="code">@Page</phrase></literal>, and it will become a page that can be navigated to.</simpara>
 </important>
 <section id="sid-54493676_ErraiUINavigation-TheStartingPage">
 <title>The Default (Starting) Page</title>
-<simpara>Each application must have exactly one <emphasis>default page</emphasis> . This requirement is enforced at compile time. This default page is displayed when there is no fragment ID present in the browser&#8217;s location bar.</simpara>
+<simpara>Each application must have exactly one <emphasis>default page</emphasis>. This requirement is enforced at compile time. This default page is displayed when there is no fragment ID present in the browser&#8217;s location bar.</simpara>
 <simpara>Use the <literal><phrase role="code">role = DefaultPage.class</phrase></literal> attribute to declare the default starting page, like this:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
@@ -5601,7 +5601,7 @@ public class WelcomePage extends Composite {
 </section>
 <section id="sid-54493676_ErraiUINavigation-PageLifecycle">
 <title>Page Lifecycle</title>
-<simpara>There are four annotations related to page lifecycle events: <literal><phrase role="code">@PageShowing</phrase></literal> , <literal><phrase role="code">@PageShown</phrase></literal> , <literal><phrase role="code">@PageHiding</phrase></literal> , and <literal><phrase role="code">@PageHidden</phrase></literal> . These annotations designate methods so a page widget can be notified when it is displayed or hidden:</simpara>
+<simpara>There are four annotations related to page lifecycle events: <literal><phrase role="code">@PageShowing</phrase></literal>, <literal><phrase role="code">@PageShown</phrase></literal>, <literal><phrase role="code">@PageHiding</phrase></literal>, and <literal><phrase role="code">@PageHidden</phrase></literal>. These annotations designate methods so a page widget can be notified when it is displayed or hidden:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page
 public class ItemPage extends VerticalPanel {
 
@@ -5679,9 +5679,9 @@ public class ItemPage extends VerticalPanel {
 
   // Anything goes...
 }</programlisting>
-<simpara>This page would be reachable at a URL like <literal><phrase role="code">+ . Before the page was displayed, the Errai UI Navigation framework would write the [code]+int</phrase></literal> value <literal><phrase role="code">4</phrase></literal> into the <literal><phrase role="code">itemId</phrase></literal> field.</simpara>
+<simpara>This page would be reachable at a URL like <literal>http://www.company.com/store/#ItemPage;itemId=4</literal>. Before the page was displayed, the Errai UI Navigation framework would write the <literal><phrase role="code">int</phrase></literal> value <literal><phrase role="code">4</phrase></literal> into the <literal><phrase role="code">itemId</phrase></literal> field.</simpara>
 <simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal> ; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal> , or by including the state information in the fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a fragment ID properly.)</simpara>
-<simpara>A page widget can have any number of <literal><phrase role="code">@PageState</phrase></literal> fields. The fields can be of any primitive or boxed primitive type (except <literal><phrase role="code">char</phrase></literal> or <literal><phrase role="code">Character</phrase></literal> ), <literal><phrase role="code">String</phrase></literal> , or a <literal><phrase role="code">Collection</phrase></literal> , <literal><phrase role="code">List</phrase></literal> , or <literal><phrase role="code">Set</phrase></literal> of the allowable scalar types. Nested collections are not supported.</simpara>
+<simpara>A page widget can have any number of <literal><phrase role="code">@PageState</phrase></literal> fields. The fields can be of any primitive or boxed primitive type (except <literal><phrase role="code">char</phrase></literal> or <literal><phrase role="code">Character</phrase></literal> ), <literal><phrase role="code">String</phrase></literal>, or a <literal><phrase role="code">Collection</phrase></literal>, <literal><phrase role="code">List</phrase></literal>, or <literal><phrase role="code">Set</phrase></literal> of the allowable scalar types. Nested collections are not supported.</simpara>
 <simpara><literal><phrase role="code">@PageState</phrase></literal> fields can be private, protected, default access, or public. They are always updated by direct field access; never via a setter method. The updates occur just before the <literal><phrase role="code">@PageShowing</phrase></literal> method is invoked.</simpara>
 <simpara>In addition to receiving page state information via direct writes to <literal><phrase role="code">@PageState</phrase></literal> fields, you can also receive the whole Multimap in the <literal><phrase role="code">@PageShowing</phrase></literal> and <literal><phrase role="code">@PageShown</phrase></literal> methods through a parameter of type <literal><phrase role="code">HistoryToken</phrase></literal> . Whether or not a lifecycle method has such a parameter, the <literal><phrase role="code">@PageState</phrase></literal> fields will still be written as usual.</simpara>
 <simpara>Page state values are represented in the URL much like HTML form parameters: as key=value pairs separated by the ampersand ( <literal><phrase role="code">&amp;</phrase></literal> ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a <literal><phrase role="code">@PageState</phrase></literal> field is absent from the state information passed to the page, the framework writes a default value: <literal><phrase role="code">null</phrase></literal> for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the <literal><phrase role="code">HistoryToken</phrase></literal> class.</simpara>
@@ -5689,7 +5689,7 @@ public class ItemPage extends VerticalPanel {
 </section>
 <section id="sid-54493676_ErraiUINavigation-DeclaringaLinkwithTransitionAnchor">
 <title>Declaring a Link with TransitionAnchor</title>
-<simpara>The easiest way to declare a link between pages is to inject an instance of <literal><phrase role="code">TransitionAnchor&lt;P&gt;</phrase></literal> , where <literal><phrase role="code">P</phrase></literal> is the class of the target page.</simpara>
+<simpara>The easiest way to declare a link between pages is to inject an instance of <literal><phrase role="code">TransitionAnchor&lt;P&gt;</phrase></literal>, where <literal><phrase role="code">P</phrase></literal> is the class of the target page.</simpara>
 <simpara>Here is an example declaring an anchor link from the templated welcome page to the item list page. The first code sample would go in WelcomePage.java while the second would go in the WelcomePage.html, the associated html template.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 @Templated
@@ -5714,7 +5714,7 @@ public class WelcomePage extends Composite {
 
 }</programlisting>
 <simpara>You do not need to implement the <literal><phrase role="code">TransitionTo</phrase></literal> interface yourself; the framework creates the appropriate instance for you.</simpara>
-<simpara>As with <literal><phrase role="code">TransitionAnchor</phrase></literal> , the only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal> .</simpara>
+<simpara>As with <literal><phrase role="code">TransitionAnchor</phrase></literal>, the only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal> .</simpara>
 </section>
 <section id="sid-54493676_ErraiUINavigation-FollowingaManualLink">
 <title>Following a Manual Link</title>
@@ -5781,7 +5781,7 @@ public class OverallPageStrucutre extends Composite {
 <section id="sid-54493676_ErraiUINavigation-OverridingthedefaultNagivatingPaneltype">
 <title>Overriding the default Nagivating Panel type</title>
 <simpara>By default Errai uses <literal><phrase role="code">com.google.gwt.user.client.ui.SimplePanel</phrase></literal> as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a <literal><phrase role="code">com.google.gwt.user.client.ui.SimpleLayoutPanel</phrase></literal> that manages child size state.</simpara>
-<simpara>To provide your own implementation of the navigation panel you must implement <literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal> . For example:</simpara>
+<simpara>To provide your own implementation of the navigation panel you must implement <literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal>. For example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class NavigatingPanel implements NavigatingContainer {
 
   SimplePanel panel = new SimpleLayoutPanel();
@@ -5807,7 +5807,7 @@ public class OverallPageStrucutre extends Composite {
   }
 
 }</programlisting>
-<simpara>Then in your GWT module descriptor you need to override the default navigation panel ( <literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal> ) by adding:</simpara>
+<simpara>Then in your GWT module descriptor you need to override the default navigation panel ( <literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal>) by adding:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;replace-with class="com.company.application.client.NavigatingPanel"&gt;
   &lt;when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/&gt;
 &lt;/replace-with&gt;</programlisting>
@@ -6728,14 +6728,14 @@ public class HandlerLevelAdjuster {
 </section>
 <section id="sid-74908675_Logging-FormatString">
 <title>Format String</title>
-<simpara>The Errai log handlers use <literal><phrase role="code">ErraiSimpleFormatter</phrase></literal> to format log output. The format string is similar to that used in by <literal><phrase role="code">java.util.SimpleFormatter</phrase></literal> (for precise differences please see the javadocs for <literal><phrase role="code">ErraiSimpleFormatter</phrase></literal> and <literal><phrase role="code">StringFormat</phrase></literal> ).</simpara>
-<simpara>As with handler settings, these can be configured in Java or Javascript. To do so in Java, use <literal><phrase role="code">ErraiSimpleFormmater.setSimpleFormatString(String)</phrase></literal> . In Javascript, just set the variable <literal><phrase role="code">erraiSimpleFormatString</phrase></literal> to the desired value.</simpara>
+<simpara>The Errai log handlers use <literal><phrase role="code">ErraiSimpleFormatter</phrase></literal> to format log output. The format string is similar to that used in by <literal><phrase role="code">java.util.SimpleFormatter</phrase></literal> (for precise differences please see the javadocs for <literal><phrase role="code">ErraiSimpleFormatter</phrase></literal> and <literal><phrase role="code">StringFormat</phrase></literal>).</simpara>
+<simpara>As with handler settings, these can be configured in Java or Javascript. To do so in Java, use <literal><phrase role="code">ErraiSimpleFormmater.setSimpleFormatString(String)</phrase></literal>. In Javascript, just set the variable <literal><phrase role="code">erraiSimpleFormatString</phrase></literal> to the desired value.</simpara>
 </section>
 </section>
 <section id="sid-74908675_Logging-ServerSideSetup">
 <title>Server-Side Setup</title>
 <simpara>On the server you are free to use any logging back-end that has slf4j bindings (or to make your own). Just make sure to add dependencies for the slf4j-api artifact and the slf4j binding you choose. <emphasis>Note:</emphasis> Some application servers provide their own slf4j bindings (such as JBoss AS), in which case you should add your binding dependency as provided scope.</simpara>
-<simpara>To learn more about how to setup slf4j for your server-side code, see <ulink url="http://www.slf4j.org/">their website</ulink> .</simpara>
+<simpara>To learn more about how to setup slf4j for your server-side code, see <ulink url="http://www.slf4j.org/">their website</ulink>.</simpara>
 </section>
 <section id="sid-74908675_Logging-ExampleUsage">
 <title>Example Usage</title>
@@ -6902,12 +6902,12 @@ public class NamedLogExample {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>errai.marshalling.use_static_marshallers</emphasis> when set to <literal><phrase role="code">false</phrase></literal> , Errai will not use the precompiled server-side marshallers even if the generated <literal><phrase role="code">ServerMarshallingFactoryImpl</phrase></literal> class is found on the classpath. This is useful when using Dev Mode in conjunction with an external server such as JBoss AS 7 or EAP 6.</simpara>
+      <simpara><emphasis>errai.marshalling.use_static_marshallers</emphasis> when set to <literal><phrase role="code">false</phrase></literal>, Errai will not use the precompiled server-side marshallers even if the generated <literal><phrase role="code">ServerMarshallingFactoryImpl</phrase></literal> class is found on the classpath. This is useful when using Dev Mode in conjunction with an external server such as JBoss AS 7 or EAP 6.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.marshalling.force_static_marshallers</emphasis> when set to <literal><phrase role="code">true</phrase></literal> , Errai will not use dynamic marshallers. If the generated <literal><phrase role="code">ServerMarshallingFactoryImpl</phrase></literal> cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.</simpara>
+      <simpara><emphasis>errai.marshalling.force_static_marshallers</emphasis> when set to <literal><phrase role="code">true</phrase></literal>, Errai will not use dynamic marshallers. If the generated <literal><phrase role="code">ServerMarshallingFactoryImpl</phrase></literal> cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.</simpara>
       
     </listitem>
   
@@ -7076,12 +7076,12 @@ public class NamedLogExample {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>errai.auto_discover_services</emphasis> A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. <emphasis>This property must be set to true if and only if Errai CDI is not on the classpath</emphasis> . The default value is <literal><phrase role="code">false</phrase></literal> .</simpara>
+      <simpara><emphasis>errai.auto_discover_services</emphasis> A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. <emphasis>This property must be set to true if and only if Errai CDI is not on the classpath</emphasis> . The default value is <literal><phrase role="code">false</phrase></literal>.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.auto_load_extensions</emphasis> A boolean indicating whether or not the Errai bootstrapper should automatically scan for extensions. The default value is <literal><phrase role="code">true</phrase></literal> .</simpara>
+      <simpara><emphasis>errai.auto_load_extensions</emphasis> A boolean indicating whether or not the Errai bootstrapper should automatically scan for extensions. The default value is <literal><phrase role="code">true</phrase></literal>.</simpara>
       
     </listitem>
   
@@ -7223,26 +7223,25 @@ errai.async.worker.timeout=5</programlisting>
 <section id="sid-19398997_ErraiJAX-RS-Dependencies">
 <title>Compile-time dependency</title>
 <simpara>To use Errai JAX-RS, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-jaxrs-client&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-jaxrs-client&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+  &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;</programlisting>
 <simpara>Or if you are not using Maven for dependency management, add <literal><phrase role="code">errai-jaxrs-client-${errai.version}.jar</phrase></literal> to your classpath.</simpara>
 <simpara>If you intend to use Errai&#8217;s JSON format on the wire you will need to add Errai&#8217;s JAX-RS JSON provider to your classpath and make sure it gets deployed to the server.</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-jaxrs-provider&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-    &lt;/dependency&gt;
-</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-jaxrs-provider&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
 <simpara>Or manually add <literal><phrase role="code">errai-jaxrs-provider-${errai.version}.jar</phrase></literal> in case you&#8217;re not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link> ) .</simpara>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-GWTModule">
 <title>GWT Module</title>
 <simpara>Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.enterprise.Jaxrs"/&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.enterprise.Jaxrs"/&gt;</programlisting>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-Configuration">
 <title>Configuration</title>
@@ -7330,17 +7329,17 @@ errai.async.worker.timeout=5</programlisting>
 <section id="sid-54493688_ErraiJPA-Compiletimedependency">
 <title>Compile-time Dependencies</title>
 <simpara>To use Errai JPA, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-jpa-client&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-    &lt;/dependency&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-jpa-client&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
 <simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-jpa-client-${errai.version}.jar</phrase></literal> , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.</simpara>
 </section>
 <section id="sid-54493688_ErraiJPA-GWTModuleDescriptor">
 <title>GWT Module Descriptor</title>
 <simpara>Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> file:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">   &lt;inherits name="org.jboss.errai.jpa.JPA"/&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered"> &lt;inherits name="org.jboss.errai.jpa.JPA"/&gt;</programlisting>
 </section>
 </section>
 <section id="sid-54493688_ErraiJPA-METAINF%2Fpersistence.xml">
@@ -7348,16 +7347,16 @@ errai.async.worker.timeout=5</programlisting>
 <section id="sid-71467090_ErraiJPADataSync-Dependencies">
 <title>Compile-time Dependencies</title>
 <simpara>First, ensure your <literal><phrase role="code">pom.xml</phrase></literal> includes a dependency on the Data Sync module. This module must be packaged in your application&#8217;s WAR file, so include it with the default scope (compile):</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
-    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-    &lt;artifactId&gt;errai-jpa-datasync&lt;/artifactId&gt;
-    &lt;version&gt;${errai.version}&lt;/version&gt;
-  &lt;/dependency&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-jpa-datasync&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
 </section>
 <section id="_gwt_module_descriptor">
 <title>GWT Module Descriptor</title>
 <simpara>Then, ensure your project&#8217;s <literal><phrase role="code">*.gwt.xml</phrase></literal> module descriptor includes a dependency on the Data Sync GWT module:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.jpa.sync.DataSync"/&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.jpa.sync.DataSync"/&gt;</programlisting>
 </section>
 </section>
 <section id="_errai_data_binding">
@@ -7365,11 +7364,11 @@ errai.async.worker.timeout=5</programlisting>
 <section id="sid-51282340_DataBinding-Compiletimedependency">
 <title>Compile-time Dependencies</title>
 <simpara>To use Errai&#8217;s data binding module, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-data-binding&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-    &lt;/dependency&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-data-binding&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
 <simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-data-binding-${errai.version}.jar</phrase></literal> to your classpath.</simpara>
 </section>
 <section id="sid-51282340_DataBinding-GWTmoduledescriptor">
@@ -7416,18 +7415,18 @@ proxyLoader.loadBindableProxies();</programlisting>
 <section id="sid-54493676_ErraiUINavigation-Compiletimedependency">
 <title>Compile-time Dependencies</title>
 <simpara>To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add these dependencies:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-navigation&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-      &lt;artifactId&gt;errai-cdi-client&lt;/artifactId&gt;
-      &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-navigation&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+  &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-cdi-client&lt;/artifactId&gt;
+  &lt;version&gt;${errai.version}&lt;/version&gt;
+  &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;</programlisting>
 <simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-navigation-${errai.version}.jar</phrase></literal> to the compile-time classpath of a project that&#8217;s already set up for Errai UI templating.</simpara>
 </section>
 <section id="sid-54493676_ErraiUINavigation-GWTModuleDescriptor">
@@ -7441,23 +7440,23 @@ proxyLoader.loadBindableProxies();</programlisting>
 <section id="sid-65274252_ErraiCordova%28MobileSupport%29-Mavenbuild">
 <title>Compile-time Dependencies</title>
 <simpara>Using Errai Cordova requires the following compile-time dependency:</simpara>
-<programlisting language="xml" linenumbering="unnumbered">  &lt;dependency&gt;
-    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-    &lt;artifactId&gt;errai-cordova&lt;/artifactId&gt;
-    &lt;version&gt;${errai.verison}&lt;/version&gt;
-  &lt;/dependency&gt;</programlisting>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+  &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+  &lt;artifactId&gt;errai-cordova&lt;/artifactId&gt;
+  &lt;version&gt;${errai.verison}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
 </section>
 <section id="_cordova_maven_plugin">
 <title>Cordova Maven Plugin</title>
 <simpara>Errai Cordova allows you build an Errai app to natively run on a device. In order to make this as easy as possible we have a maven plugin that will create a native binary that you can install on a device. It will put the html and javascript of you application in a <ulink url="http://cordova.apache.org/">cordova</ulink> application.</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;build&gt;
  ...
-    &lt;plugins&gt;
-      &lt;plugin&gt;
-        &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
-        &lt;artifactId&gt;cordova-maven-plugin&lt;/artifactId&gt;
-        &lt;version&gt;${errai.version}&lt;/version&gt;
-      &lt;/plugin&gt;</programlisting>
+	&lt;plugins&gt;
+	  &lt;plugin&gt;
+	    &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+	    &lt;artifactId&gt;cordova-maven-plugin&lt;/artifactId&gt;
+	    &lt;version&gt;${errai.version}&lt;/version&gt;
+	  &lt;/plugin&gt;</programlisting>
 </section>
 <section id="sid-65274252_ErraiCordova%28MobileSupport%29-App.gwt.xml">
 <title>GWT Module Descriptor</title>
