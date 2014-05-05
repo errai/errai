@@ -98,8 +98,8 @@ public abstract class EnvUtil {
     if (_isDevMode != null) return _isDevMode;
 
     for (final StackTraceElement el : new Throwable().getStackTrace()) {
-      if (el.getClassName().startsWith("com.google.gwt.dev.shell.OophmSessionHandler") || 
-          el.getClassName().startsWith("com.google.gwt.dev.codeserver.CodeServer")) {
+      if (el.getClassName().startsWith("com.google.gwt.dev.shell.OophmSessionHandler") ||
+          el.getClassName().startsWith("com.google.gwt.dev.codeserver")) {
         return _isDevMode = Boolean.TRUE;
       }
     }
