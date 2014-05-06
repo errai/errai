@@ -121,7 +121,7 @@ public class Navigation {
                   + "\" in URL history token. Falling back to default page.");
           toPage = navGraph.getPage(""); // guaranteed at compile time to exist
         }
-        navigate(new Request<IsWidget>(toPage, token));
+        navigate(new Request<IsWidget>(toPage, token), false);
       }
     });
 
@@ -205,7 +205,7 @@ public class Navigation {
 
   private <W extends IsWidget> void navigate(PageNode<W> toPageInstance, Multimap<String, String> state) {
     HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
-    navigate(new Request<W>(toPageInstance, token));
+    navigate(new Request<W>(toPageInstance, token), true);
   }
 
   /**
@@ -213,7 +213,7 @@ public class Navigation {
    * the given PageNode from the given state token, then makes its widget
    * visible in the content area.
    */
-  private <W extends IsWidget> void navigate(Request<W> request) {
+  private <W extends IsWidget> void navigate(Request<W> request, boolean fireEvent) {
     if (locked) {
       queuedRequests.add(request);
       return;
@@ -239,12 +239,12 @@ public class Navigation {
       // This is the page which has to be displayed and the browser's history
       // can be updated.
       redirectDepth = 0;
-      History.newItem(request.state.toString(), false);
+      History.newItem(request.state.toString(), fireEvent);
     }
     else {
       // Process all navigation requests captured in the lifecycle methods.
       while (queuedRequests.size() != 0) {
-        navigate(queuedRequests.poll());
+        navigate(queuedRequests.poll(), fireEvent);
       }
     }
 

@@ -35,6 +35,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   private Navigation navigation;
   private NavigationGraph navGraph;
   private HandlerRegistration historyHandlerRegistration;
+  private int historyHandlerInvocations;
 
   @Override
   public String getModuleName() {
@@ -258,6 +259,30 @@ public class NavigationTest extends AbstractErraiCDITest {
     navigation.goToWithRole(DefaultPage.class);
 
     assertEquals(panel, navigation.getContentPanel().asWidget().getParent());
+  }
+
+  /**
+   * Test if a history event is fired when navigation is done.
+   */
+  public void testHistoryEventFired() {
+    final PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
+
+    historyHandlerInvocations = 0;
+    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<String> event) {
+        historyHandlerInvocations++;
+        // the first invocation is triggered by the init vote
+        if (historyHandlerInvocations == 1) {
+          page.getLinkToIsWidget().click();
+        } else {
+          historyHandlerRegistration.removeHandler();
+          finishTest();
+        }
+      }
+    });
+
+    delayTestFinish(5000);
   }
 
   /**
