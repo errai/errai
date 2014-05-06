@@ -121,7 +121,9 @@ public class Navigation {
                   + "\" in URL history token. Falling back to default page.");
           toPage = navGraph.getPage(""); // guaranteed at compile time to exist
         }
-        navigate(new Request<IsWidget>(toPage, token), false);
+        if (currentPage == null || !toPage.name().equals(currentPage.name())) {
+          navigate(new Request<IsWidget>(toPage, token), false);
+        }
       }
     });
 
@@ -221,19 +223,14 @@ public class Navigation {
 
     redirectDepth++;
     if (redirectDepth >= MAXIMUM_REDIRECTS) {
-      throw new RuntimeException(
-              "Maximum redirect limit of " + MAXIMUM_REDIRECTS + " reached. " +
-                      "Do you have a redirect loop?");
+      throw new RuntimeException("Maximum redirect limit of " + MAXIMUM_REDIRECTS + " reached. "
+              + "Do you have a redirect loop?");
     }
 
-    locked = true;
-    try {
-      maybeShowPage(request.pageNode, request.state);
-    }
-    finally {
-      locked = false;
-    }
+    maybeShowPage(request, fireEvent);
+  }
 
+  private <W extends IsWidget> void handleQueuedRequests(Request<W> request, boolean fireEvent) {
     if (queuedRequests.isEmpty()) {
       // No new navigation requests were recorded in the lifecycle methods.
       // This is the page which has to be displayed and the browser's history
@@ -268,11 +265,10 @@ public class Navigation {
     IsWidget currentContent = navigatingContainer.getWidget();
 
     // Note: Optimized out in production mode
-    if (currentPage != null &&
-            (currentContent == null || currentWidget.asWidget() != currentContent)) {
+    if (currentPage != null && (currentContent == null || currentWidget.asWidget() != currentContent)) {
       // This could happen if someone was manipulating the DOM behind our backs
-      GWT.log("Current content widget vanished or changed. " +
-              "Not delivering pageHiding event to " + currentPage + ".");
+      GWT.log("Current content widget vanished or changed. " + "Not delivering pageHiding event to " + currentPage
+              + ".");
     }
 
     if (currentPage != null && currentWidget != null && currentWidget.asWidget() == currentContent) {
@@ -288,15 +284,15 @@ public class Navigation {
   }
 
   /**
-   * Call navigation and page related lifecycle methods. If the
-   * {@link Access} is fired successfully, load the new page.
+   * Call navigation and page related lifecycle methods. If the {@link Access}
+   * is fired successfully, load the new page.
    */
-  private <W extends IsWidget> void maybeShowPage(final PageNode<W> toPage, final HistoryToken state) {
-    toPage.produceContent(new CreationalCallback<W>() {
+  private <W extends IsWidget> void maybeShowPage(final Request<W> request, final boolean fireEvent) {
+    request.pageNode.produceContent(new CreationalCallback<W>() {
       @Override
       public void callback(final W widget) {
         if (widget == null) {
-          throw new NullPointerException("Target page " + toPage + " returned a null content widget");
+          throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
         }
         maybeAttachContentPanel();
 
@@ -304,19 +300,27 @@ public class Navigation {
         accessEvent.fireAsync(widget, new LifecycleCallback() {
 
           @Override
-          public void callback(boolean success) {
+          public void callback(final boolean success) {
             if (success) {
-              hideCurrentPage();
-              toPage.pageShowing(widget, state);
-              
-              // Fire IOC lifecycle event to indicate that the state of the bean has changed
-              // TODO make this smarter and only fire state change event when fields actually changed
-              stateChangeEvent.fireAsync(widget);
-              
-              setCurrentPage(toPage);
-              currentWidget = widget;
-              navigatingContainer.setWidget(widget);
-              toPage.pageShown(widget, state);
+              locked = true;
+              try {
+                hideCurrentPage();
+                request.pageNode.pageShowing(widget, request.state);
+
+                // Fire IOC lifecycle event to indicate that the state of the bean has changed.
+                // TODO make this smarter and only fire state change event when fields actually changed.
+                stateChangeEvent.fireAsync(widget);
+
+                setCurrentPage(request.pageNode);
+                currentWidget = widget;
+                navigatingContainer.setWidget(widget);
+                request.pageNode.pageShown(widget, request.state);
+              }
+              finally {
+                locked = false;
+              }
+
+              handleQueuedRequests(request, fireEvent);
             }
           }
         });

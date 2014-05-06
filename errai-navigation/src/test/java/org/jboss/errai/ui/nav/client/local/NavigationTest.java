@@ -49,6 +49,12 @@ public class NavigationTest extends AbstractErraiCDITest {
     navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
     navGraph = navigation.getNavGraph();
   }
+  
+  @Override
+  protected void gwtTearDown() throws Exception {
+    navigation.cleanUp();
+    super.gwtTearDown();
+  }
 
   public void testMissingPage() throws Exception {
     try {
