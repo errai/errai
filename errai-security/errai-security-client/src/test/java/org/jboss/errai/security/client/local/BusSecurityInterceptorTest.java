@@ -25,9 +25,6 @@ import javax.enterprise.inject.Default;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.VoidCallback;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.res.Counter;
 import org.jboss.errai.security.client.local.res.CountingMessageCallback;
@@ -40,6 +37,7 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.junit.Test;
 
 /**
@@ -60,19 +58,19 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     provider = IOC.getBeanManager().lookupBean(ActiveUserCache.class, defaultAnno).getInstance();
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        MessageBuilder.createCall(new VoidCallback(), AuthenticationService.class).logout();
-      }
-    });
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    IOC.getBeanManager().lookupBean(Navigation.class).getInstance().cleanUp();
+    super.gwtTearDown();
   }
 
   @Test
   public void testAuthInterceptorNotLoggedInHomogenous() throws Exception {
     asyncTest();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         // Invalidate cache
@@ -131,7 +129,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   public void testAuthInterceptorNotLoggedInHeterogenous() throws Exception {
     asyncTest();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         // Invalidate cache
@@ -161,7 +159,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         createCall(new RemoteCallback<User>() {
@@ -194,7 +192,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         createCall(new RemoteCallback<User>() {
@@ -227,7 +225,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         // Invalidate cache
@@ -294,7 +292,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         // Invalidate cache
@@ -327,7 +325,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<User>() {
@@ -395,7 +393,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<User>() {
@@ -429,7 +427,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<User>() {
@@ -463,7 +461,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<User>() {
@@ -495,13 +493,12 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   public void testSecureCallbackNotLoggedIn() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createMessage("SecureMessageCallback")
         .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .defaultErrorHandling()
         .repliesTo(new CountingMessageCallback(counter))
         .sendNowWith(ErraiBus.get());
 
@@ -509,7 +506,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
           @Override
           public void run() {
             assertEquals(0, counter.getCount());
-            assertEquals(1, errorCounter.getCount());
+            assertEquals(1, BusSecurityInterceptorTest.this.counter);
           }
         });
       }
@@ -520,23 +517,22 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   public void testSecureClassNotLoggedIn() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        MessageBuilder.createMessage("methodInSecureClass")
-        .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
             assertEquals(0, counter.getCount());
-            assertEquals(1, errorCounter.getCount());
+            assertEquals(1, BusSecurityInterceptorTest.this.counter);
           }
         });
+
+        MessageBuilder.createMessage("methodInSecureClass")
+        .signalling()
+        .defaultErrorHandling()
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
       }
     });
   }
@@ -545,23 +541,22 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   public void testSecureMethodNotLoggedIn() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        MessageBuilder.createMessage("secureMethod")
-        .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
             assertEquals(0, counter.getCount());
-            assertEquals(1, errorCounter.getCount());
+            assertEquals(1, BusSecurityInterceptorTest.this.counter);
           }
         });
+
+        MessageBuilder.createMessage("secureMethod")
+        .signalling()
+        .defaultErrorHandling()
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
       }
     });
   }
@@ -570,23 +565,21 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   public void testInsecureMethodInClassWithSecureMethodNotLoggedIn() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        MessageBuilder.createMessage("insecureMethod")
-        .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
             assertEquals(1, counter.getCount());
-            assertEquals(0, errorCounter.getCount());
           }
         });
+
+        MessageBuilder.createMessage("insecureMethod")
+        .signalling()
+        .defaultErrorHandling()
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
       }
     });
   }
@@ -595,23 +588,22 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   public void testCommandMethodInSecureClassNotLoggedIn() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        MessageBuilder.createMessage("commandMethodInSecureClass")
-        .command("command")
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
-            assertEquals(1, counter.getCount());
-            assertEquals(0, errorCounter.getCount());
+            assertEquals(0, counter.getCount());
+            assertEquals(1, BusSecurityInterceptorTest.this.counter);
           }
         });
+
+        MessageBuilder.createMessage("commandMethodInSecureClass")
+        .command("command")
+        .defaultErrorHandling()
+        .repliesTo(new CountingMessageCallback(counter))
+        .sendNowWith(ErraiBus.get());
       }
     });
   }
@@ -620,21 +612,20 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
   public void testSecureCommandMethodNotLoggedIn() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createMessage("secureCommandMethod")
         .command("command")
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
+        .defaultErrorHandling()
         .repliesTo(new CountingMessageCallback(counter))
         .sendNowWith(ErraiBus.get());
 
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
-            assertEquals(1, counter.getCount());
-            assertEquals(0, errorCounter.getCount());
+            assertEquals(0, counter.getCount());
+            assertEquals(1, BusSecurityInterceptorTest.this.counter);
           }
         });
       }

@@ -143,7 +143,7 @@ public class Navigation {
    * Package private for testability.
    */
   @PreDestroy
-  void cleanUp() {
+  public void cleanUp() {
     historyHandlerRegistration.removeHandler();
   }
 
@@ -302,7 +302,6 @@ public class Navigation {
       
       @Override
       public void run() {
-
         final Access<W> accessEvent = new AccessImpl<W>();
         accessEvent.fireAsync(widget, new LifecycleCallback() {
 
