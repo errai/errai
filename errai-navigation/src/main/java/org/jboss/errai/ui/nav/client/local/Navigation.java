@@ -15,6 +15,7 @@ import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.ioc.client.lifecycle.impl.AccessImpl;
+import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
@@ -271,10 +272,6 @@ public class Navigation {
               + ".");
     }
 
-    if (currentPage != null && currentWidget != null && currentWidget.asWidget() == currentContent) {
-      currentPage.pageHiding(currentWidget);
-    }
-
     // Ensure clean contentPanel regardless of currentPage being null
     navigatingContainer.clear();
 
@@ -295,6 +292,16 @@ public class Navigation {
           throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
         }
         maybeAttachContentPanel();
+        pageHiding(widget, request, fireEvent);
+      }
+    });
+  }
+
+  private <W extends IsWidget> void pageHiding(final W widget, final Request<W> request, final boolean fireEvent) {
+    final NavigationControl control = new NavigationControl(new Runnable() {
+      
+      @Override
+      public void run() {
 
         final Access<W> accessEvent = new AccessImpl<W>();
         accessEvent.fireAsync(widget, new LifecycleCallback() {
@@ -319,13 +326,20 @@ public class Navigation {
               finally {
                 locked = false;
               }
-
+              
               handleQueuedRequests(request, fireEvent);
             }
           }
         });
       }
     });
+
+    if (currentPage != null && currentWidget != null && currentWidget.asWidget() == navigatingContainer.getWidget()) {
+      currentPage.pageHiding(currentWidget, control);
+    }
+    else {
+      control.proceed();
+    }
   }
 
   /**

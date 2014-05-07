@@ -6,12 +6,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
+
 /**
- * Indicates that the target method should be called when the {@code @Page}
- * widget it belongs to is about to be removed from the navigation content
- * panel.
+ * Indicates that the target method should be called when the {@code @Page} widget it belongs to is
+ * about to be removed from the navigation content panel.
  * <p>
- * The target method must not take any parameters.
+ * The target method is permitted an optional parameter of type {@link NavigationControl}. If the
+ * parameter is present, the page navigation will not be carried out until
+ * {@link NavigationControl#proceed()} is invoked. This is useful for interrupting page navigations
+ * and then resuming at a later time (for example, to prompt the user to save their work before
+ * transitioning to a new page).
  * <p>
  * The target method's return type will must be {@code void}.
  * <p>

@@ -14,11 +14,14 @@ import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingPageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingUniquePageRole;
+import org.jboss.errai.ui.nav.client.local.testpages.PageA;
 import org.jboss.errai.ui.nav.client.local.testpages.PageIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithNavigationControl;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -289,6 +292,20 @@ public class NavigationTest extends AbstractErraiCDITest {
     });
 
     delayTestFinish(5000);
+  }
+
+  public void testNavigationControl() throws Exception {
+    final PageWithNavigationControl page = IOC.getBeanManager().lookupBean(PageWithNavigationControl.class)
+            .getInstance();
+
+    navigation.goTo(PageWithNavigationControl.class, ArrayListMultimap.<String, String>create());
+    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
+
+    navigation.goTo(PageA.class, ArrayListMultimap.<String, String>create());
+    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
+
+    page.control.proceed();
+    assertEquals(PageA.class, navigation.getCurrentPage().contentType());
   }
 
   /**

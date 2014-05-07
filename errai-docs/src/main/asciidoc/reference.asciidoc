@@ -6319,7 +6319,7 @@ Pages are looked up as CDI beans, so you can inject other CDI beans into fields 
 
 [[sid-54493676_ErraiUINavigation-PageLifecycle]]
 
-===== Page Lifecycle
+==== Page Lifecycle
 
 There are four annotations related to page lifecycle events: [code]+@PageShowing+, [code]+@PageShown+, [code]+@PageHiding+, and [code]+@PageHidden+. These annotations designate methods so a page widget can be notified when it is displayed or hidden:
 
@@ -6371,11 +6371,13 @@ Page Lifecycle:
 
 The [code]+@PageShowing+ and [code]+@PageShown+ methods are permitted one optional parameter of type [code]+HistoryToken+ ---more on this in the next section.
 
+The [code]+@PageHiding+ method is also permitted one optional parameter of type [code]+NavigationControl+. If the parameter is present, the page navigation will not be carried out until `NavigationControl.proceed()` is invoked. This is useful for interrupting page navigations and then resuming at a later time (for example, to prompt the user to save their work before transitioning to a new page).
+
 The lifespan of a Page instance is governed by CDI scope: Dependent and implict-scoped page beans are instantiated each time the user navigates to them, whereas Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.
 
 [[sid-54493676_ErraiUINavigation-PageStateParameters]]
 
-===== Page State Parameters
+==== Page State Parameters
 
 A page widget will often represent a view on on instance of a class of things. For example, there might be an ItemPage that displays a particular item available at a store. In cases like this, it's important that the bookmarkable navigation URL includes not only the name of the page but also an identifier for the particular item being displayed.
 

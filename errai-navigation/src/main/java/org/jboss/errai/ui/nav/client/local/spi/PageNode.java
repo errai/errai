@@ -3,6 +3,7 @@ package org.jboss.errai.ui.nav.client.local.spi;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -87,7 +88,7 @@ public interface PageNode<W extends IsWidget> {
    *          panel) that was previously used in the call to
    *          {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
    */
-  public void pageHiding(W widget);
+  public void pageHiding(W widget, NavigationControl control);
 
   /**
    * Called by the framework after this page has been removed from the

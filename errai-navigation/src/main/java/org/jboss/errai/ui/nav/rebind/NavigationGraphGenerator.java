@@ -62,6 +62,7 @@ import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
@@ -243,8 +244,18 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     BlockBuilder<?> method = pageImplBuilder.publicMethod(
                     void.class,
                     createMethodNameFromAnnotation(PageHiding.class),
-                    Parameter.of(pageClass, "widget")).body();
-    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHiding.class, false);
+                    Parameter.of(pageClass, "widget"),
+                    Parameter.of(NavigationControl.class, "control")).body();
+    final MetaMethod pageHidingMethod = checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass,
+            PageHiding.class, NavigationControl.class, "control");
+
+    /*
+     * If the user did not provide a control parameter, we must proceed for them after the method is invoked.
+     */
+    if (pageHidingMethod == null || pageHidingMethod.getParameters().length != 1) {
+      method.append(Stmt.loadVariable("control").invoke("proceed"));
+    }
+
     method.finish();
   }
 
@@ -262,7 +273,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
             void.class,
             createMethodNameFromAnnotation(PageHidden.class),
             Parameter.of(pageClass, "widget")).body();
-    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHidden.class, false);
+    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHidden.class, HistoryToken.class, "state");
 
     if (pageClass.getAnnotation(Singleton.class) == null
             && pageClass.getAnnotation(ApplicationScoped.class) == null
@@ -287,14 +298,18 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    *          the class to search for annotated methods in
    * @param annotation
    *          the annotation to search for in pageClass
-   * @param methodCanTakeParameters
-   *          true if the method is allowed a parameter of type PageState
+   * @param optionalParamType
+   *          the type of the single method parameter or null if no parameter
+   * @param optionalParamName
+   *          the name of the variable of the optional parameter or null if no parameter.
+   * @return
+   *          The meta-method for which code was generated
    * @throws UnsupportedOperationException
    *           if the annotated methods in pageClass violate any of the rules
    */
-  private void checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder,
+  private MetaMethod checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder,
       BlockBuilder<?> methodToAppendTo, MetaClass pageClass, Class<? extends Annotation> annotation,
-      boolean methodCanTakeParameters) {
+      Class<?> optionalParamType, String optionalParamName) {
     List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(annotation);
     if (annotatedMethods.size() > 1) {
       throw new UnsupportedOperationException(
@@ -316,11 +331,11 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       // assemble parameters for private method invoker (first param is the widget instance)
       PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, metaMethod, new Modifier[] {});
 
-      if (methodCanTakeParameters) {
+      if (optionalParamType != null) {
         for (int i = 1; i < paramValues.length; i++) {
           MetaParameter paramSpec = metaMethod.getParameters()[i - 1];
-          if (paramSpec.getType().equals(MetaClassFactory.get(HistoryToken.class))) {
-            paramValues[i] = Stmt.loadVariable("state");
+          if (paramSpec.getType().equals(MetaClassFactory.get(optionalParamType))) {
+            paramValues[i] = Stmt.loadVariable(optionalParamName);
           }
           else {
             throw new UnsupportedOperationException(
@@ -341,7 +356,11 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       }
 
       methodToAppendTo.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(metaMethod), paramValues));
+
+      return annotatedMethods.get(0);
     }
+
+    return null;
   }
 
   private String createAnnotionName(Class<? extends Annotation> annotation) {
@@ -457,7 +476,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       ));
     }
 
-    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, true);
+    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, HistoryToken.class, "state");
 
     method.finish();
   }
