@@ -22,13 +22,11 @@ import java.util.Set;
 
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.ObserverMethod;
 
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.server.util.ServiceParser;
-import org.jboss.errai.bus.server.util.ServiceTypeParser;
 import org.jboss.errai.cdi.server.TypeRegistry;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.slf4j.Logger;
@@ -40,6 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Heiko Braun <hbraun@redhat.com>
  */
+@SuppressWarnings("rawtypes")
 public class ShutdownEventObserver implements ObserverMethod {
   private static final Logger log = LoggerFactory.getLogger(ShutdownEventObserver.class);
 
@@ -78,9 +77,7 @@ public class ShutdownEventObserver implements ObserverMethod {
 
   @Override
   public void notify(Object o) {
-
     log.info("Shutting down CDI-to-ErraiBus event bridge");
-
     // unsubscribe bean endpoints
     for (Class<?> delegateClass : managedTypes.getDelegateClasses()) {
       for (ServiceParser svcParser : managedTypes.getDelegateServices(delegateClass)) {

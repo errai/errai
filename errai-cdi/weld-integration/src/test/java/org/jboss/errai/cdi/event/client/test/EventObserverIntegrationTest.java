@@ -47,7 +47,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
         // assert that client received all events
         EventObserverIntegrationTest.this.verifyQualifiedEvents(module.getReceivedQualifiedEvents(), true);
         EventObserverIntegrationTest.this.verifySuperTypeEvents(module.getReceivedSuperTypeEvents());
-
+        
         finishTest();
       }
     };

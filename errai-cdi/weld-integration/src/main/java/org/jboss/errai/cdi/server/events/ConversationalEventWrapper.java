@@ -25,11 +25,11 @@ import java.util.Set;
  */
 public class ConversationalEventWrapper {
   private Object eventObject;
-  private Class eventType;
+  private Class<?> eventType;
   private Set<String> qualifierStrings;
   private MessageBus bus;
 
-  public ConversationalEventWrapper(Object eventObject, Class eventType, Set<String> qualifierStrings, MessageBus bus) {
+  public ConversationalEventWrapper(Object eventObject, Class<?> eventType, Set<String> qualifierStrings, MessageBus bus) {
     this.eventObject = eventObject;
     this.eventType = eventType;
     this.qualifierStrings = qualifierStrings;
@@ -40,7 +40,7 @@ public class ConversationalEventWrapper {
     return eventObject;
   }
 
-  public Class getEventType() {
+  public Class<?> getEventType() {
     return eventType;
   }
 
