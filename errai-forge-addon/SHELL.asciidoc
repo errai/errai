@@ -6,11 +6,11 @@ This guide explains how to install and use the Errai Forge Addon in the shell. Y
 
 == Getting Started
 
-=== Installing Forge 2.4.1.Final
+=== Installing Forge 2.5.0.Final
 
-===== 1. Download link:$$https://repository.jboss.org/nexus/service/local/artifact/maven/redirect?r=releases&g=org.jboss.forge&a=forge-distribution&v=2.4.1.Final&e=zip&c=offline$$[Forge 2.4.1.Final]
+===== 1. Download link:$$https://repository.jboss.org/nexus/service/local/artifact/maven/redirect?r=releases&g=org.jboss.forge&a=forge-distribution&v=2.5.0.Final&e=zip&c=offline$$[Forge 2.5.0.Final]
 
-.. Download the zip file for Forge 2.4.1.Final in the link above.
+.. Download the zip file for Forge 2.5.0.Final in the link above.
 
 .. Unzip the file in your home directory.
 
@@ -20,7 +20,7 @@ This guide explains how to install and use the Errai Forge Addon in the shell. Y
 +
 [code]
 ----
-PATH=$PATH:$HOME/forge-distribution-2.4.1.Final/bin
+PATH=$PATH:$HOME/forge-distribution-2.5.0.Final/bin
 ----
 
 ===== 3. Install the Core Addons
