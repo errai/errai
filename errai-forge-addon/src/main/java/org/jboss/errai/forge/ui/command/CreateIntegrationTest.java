@@ -35,6 +35,7 @@ import org.apache.maven.model.Resource;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.aggregate.CoreFacet;
+import org.jboss.errai.forge.facet.aggregate.ErraiCdiFacet;
 import org.jboss.errai.forge.facet.dependency.WeldIntegrationTestDependencyFacet;
 import org.jboss.errai.forge.facet.plugin.SurefirePluginFacet;
 import org.jboss.errai.forge.facet.resource.AbstractFileResourceFacet;
@@ -53,7 +54,7 @@ import org.jboss.forge.addon.ui.input.UIInput;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 
-@FacetConstraint({ CoreFacet.class })
+@FacetConstraint({ CoreFacet.class, ErraiCdiFacet.class })
 public class CreateIntegrationTest extends CreateTestCommand {
   
   @Inject
