@@ -148,6 +148,46 @@ The `errai-remove-features` command works similarly to `errai-add-features` exce
 * That are not depended on by any other Errai features.
 ====
 
+==== Generating Test Classes
+
+The Errai Forge Addon can generate GWT Mockito tests for unit testing and GWTTestCase tests for integration testing.
+
+For unit tests run the following:
+
+[code]
+----
+[errai-forge-demo]$ errai-add-unit-test --testableClassName org.jboss.errai.MyClass --testClassName org.jboss.errai.unittest.MyIntegrationTest
+----
+
+* `testableClassName` is the fully-qualified name of the Java class being tested.
+
+* `testClassName` is the fully-qualified name of the test class being generated.
+
+[NOTE]
+.Unit Test Package
+====
+GWT Mockito uses a special classloader that is not compatible with the test setup for integration tests. To work around this, the unit test command generates a custom test-runner that whitelists certain packages *including the package of your unit test*.
+
+It is important that your GWT Mockito tests and GWTTestCase tests be in *different* packages.
+====
+
+For integration tests run the following:
+
+[code]
+----
+[errai-forge-demo]$ errai-add-integration-test --testClassSimpleName MyIntegrationTest --testPackageName org.jboss.errai.integrationtest
+----
+
+* `testClassSimpleName` is the simple name of the test class being generated.
+
+* `testPackageName` is the root package for the test GWT module.
+
+[NOTE]
+.Requires Errai CDI
+====
+Integration tests require Errai CDI. You will not be able to run this command until you add Errai CDI you your project with the `errai-add-features` command.
+====
+
 === Running Your Project
 
 You've now setup everything you need to start developing a project with Errai. To verify that everything has worked correctly, you can exit Forge and run the following command from within your new project's main directory:
