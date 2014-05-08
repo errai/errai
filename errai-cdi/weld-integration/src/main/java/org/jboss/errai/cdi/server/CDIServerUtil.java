@@ -46,7 +46,7 @@ public class CDIServerUtil {
 
   @SuppressWarnings("unchecked")
   public static <T> T lookupRPCBean(final BeanManager beanManager,
-                                    final Class beanClass,
+                                    final Class<?> beanClass,
                                     final Annotation[] annotations) {
     final Bean<?> bean;
 

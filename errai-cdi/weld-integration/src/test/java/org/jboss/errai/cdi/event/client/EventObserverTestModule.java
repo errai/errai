@@ -29,6 +29,7 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
   private final Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
 
   private int busReadyEventsReceived = 0;
+  private int startEventsReceived = 0;
   private Runnable verifier;
   private boolean destroyed;
 
@@ -42,6 +43,10 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
 
   public int getBusReadyEventsReceived() {
     return busReadyEventsReceived;
+  }
+  
+  public int getStartEventsReceived() {
+    return startEventsReceived;
   }
 
   public Map<String, List<String>> getReceivedQualifiedEvents() {
@@ -68,12 +73,20 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
    */
   public void start() {
     System.out.println("Firing StartEvent");
+    startEventsReceived = 0;
     startEvent.fire(new StartEvent());
   }
 
 //  private void onObject(@Observes Object foo) {
 //    
 //  }
+  
+  private void onStart(@Observes StartEvent event) {
+    startEventsReceived++;
+    if (startEventsReceived > 1) {
+      throw new RuntimeException("Received too many start events (did the server mirror it back?)");
+    }
+  }
   
   private void onEvent(@Observes String event) {
     System.out.println("Observed unqualified");
