@@ -2658,7 +2658,7 @@ Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on h
 
 == Marshalling
 
-Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You are be able to map both application-specific domain model, as well as preexisting model, including model from third-party libraries using the custom definitions API.
+Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You can use it with your own application-specific domain models as well as preexisting models, including classes from third-party libraries using configuration files or the custom definitions API.
 
 [TIP]
 .Plugin Tip
@@ -2670,15 +2670,15 @@ If you used the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai For
 
 === Mapping Your Domain
 
-All classes that you intend to be marshalled between the client and the server must be exposed to the marshalling framework. There are several ways you can do it and this section will take you through the different approaches you can take to fit your needs.
+All classes that you intend to be marshalled between the client and the server must be exposed to the marshalling framework explicitly. There are several ways to do that, and this section will take you through the different approaches.
 
 [[sid-5931328_Marshalling-@Portableand@NonPortable]]
 
 ==== @Portable and @NonPortable
 
-To make a Java class eligible for serialization with Errai Marshalling, mark it with the [code]+org.jboss.errai.common.client.api.annotations.Portable+ annotation. This tells the marshalling system to generate marshalling and demarshalling code for the annotated class and all of its nested classes.
+The easiest way to make a Java class eligible for serialization with Errai Marshalling is to mark it with the [code]+org.jboss.errai.common.client.api.annotations.Portable+ annotation. This tells the marshalling system to generate marshalling and demarshalling code for the annotated class and all of its nested classes.
 
-The mapping strategy that will be used depends on how much information you provide about your model up-front. If you simply annotate a domain type with [code]+@Portable+ and do nothing else, the marshalling system will use and exhaustive strategy to determine how to construct and deconstruct instances of that type and its nested types.
+The mapping strategy that will be used depends on how much information you provide about your model up-front. If you simply annotate a domain type with [code]+@Portable+ and do nothing else, the marshalling system will use an exhaustive strategy to determine how to serialize and deserialize instances of that type and its nested types.
 
 The Errai marshalling system works by enumerating all of the Portable types it can find (by any of the three methods discussed in this section of the reference guide), eliminating all the non-portable types it can find (via [code]+@NonPortable+ annotations and entries in [code]+ErraiApp.properties+), then enumerating the marshallable properties that make up each remaining portable entity type. The rules that Errai uses for enumerating the properties of a portable entity type are as follows:
 
@@ -2689,20 +2689,23 @@ Note that the existence of methods called [code]+getFoo()+, [code]+setFoo()+, or
 
 When reading a field [code]+foo+, Errai Marshalling will call the method [code]+getFoo()+ in preference to direct field access if the [code]+getFoo()+ method exists.
 
-Similarly, when writing a field [code]+foo+, Errai Marshalling will call the method [code]+setFoo()+ in preference to direct field access if the [code]+setFoo()+ method exists.
+When writing a field [code]+foo+, Errai Marshalling gives first preference to a parameter of the _mapping constructor_ (defined below) annotated with [code]+@MapsTo("foo")+. Failing this, Errai Marshalling will the method [code]+setFoo()+ if it exists. As a last resort, Errai Marshalling will use direct field access to write the value of [code]+foo+. 
 
-The above rules are sufficient for marshalling an existing entity to a JSON representation, but for de-marshalling, Errai must also know how to obtain an instance of a type. The rules that Errai uses for deciding how to create an instance of a [code]+@Portable+ type are as follows:
+Each field is mapped independently according to the above priority rules. Portable classes can rely on a mix of constructor, setter/getter, and field access.
 
-* If the entity has a public constructor where every argument is annotated with [code]+@MapsTo+, and those parameters cover all properties of the entity type, then Errai uses this constructor to create the object, passing in all of the property values.
-* Otherwise, if the entity has a public static method where every argument is annotated with [code]+@MapsTo+, and those parameters cover all properties of the entity type, then Errai uses this method to create the object. Note that when using this mechanism you are free to create and return a subtype of the marshalled type, or resolve one from a cache.
-* If the entity has a public no-arguments constructor (or no explicit constructors at all), it will be created via that constructor, and the properties will be written to the new object one at a time. Each property will be written by its setter method, or by direct field access if a setter method is not available.
+For de-marshalling a [code]+@Portable+ type, Errai must know how to obtain a new instance of that type. To do this, it selects a _mapping constructor_ (which could literally be a constructor, but could also be a static factory method) using the following rules:
 
+* If the entity has a constructor where every argument is annotated with [code]+@MapsTo+, then this is the mapping constructor. The constructor doesn't have to be public.
+* Otherwise, if the entity has a public static method whose return type matches the entity type and every argument is annotated with [code]+@MapsTo+, then it is the mapping constructor. Unlike a constructor, such a method is free to return an instance of a subtype of the marshalled type, or resolve an instance from a cache. In this case, do keep in mind that left-over properties not covered by the method's [code]+@MapsTo+ parameters will still be written by setters and direct field access.
+* Otherwise, if the entity has a public no-arguments constructor (including the one the Java compiler provides in the absence of explicit constructors), it is the mapping constructor.
 
+If no suitable mapping constructor can be found on a type marked [code]+@Portable+, it is a compile-time error.
+ 
 Now let's take a look at some common examples of how this works.
 
 [[sid-5931328_Marshalling-Example%3AASimpleEntity]]
 
-===== Example: A Simple Entity
+===== Example: A Common Mutable Bean
 
 [source, java]
 ----
@@ -2711,37 +2714,37 @@ public class Person {
   private String name;
   private int age;
 
-  public Person() {
-  }
-
-  public Person(String name, int age) {
-    this.name = name;
-    this.age = age;
-  }
-
   public String getName() {
     return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public int getAge() {
     return age;
   }
+  
+  public void setAge(int age) {
+    this.age = age;
+  }
 }
 ----
 
-This is a pretty vanilla domain object. Note the default, public, no-argument constructor. In this case, it will be necessary to have one explicitly declared. But notice we have no setters. In this case, the marshaler will rely on private field access to write the values on each side of the marshalling transaction. For simple domain objects, this is both nice and convenient. But you may want to make the class immutable and have a constructor enforce invariance. See the next section for that.
+This class is a straightforward mutable bean. Errai will read and write the name and age properties via the setter and getter methods. It will create new instances of the type using the default no-args public constructor that the Java compiler generated implicitly. 
+
 
 [[sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaPublicConstructor]]
 
 ===== Example: An Immutable Entity with a Public Constructor
 
-Immutability is almost always a good practice, and the marshalling system provides you a straight forward way to tell it how to marshal and de-marshal objects which enforce an immutable contract. Let's modify our example from the previous section.
-
+It's always good to aim for truly immutabile value types wherever practical, and Errai's marshalling system does not force you to compromise on this ideal.
 
 [source, java]
 ----
 @Portable
-public class Person {
+public final class Person {
   private final String name;
   private final int age;
 
@@ -2760,9 +2763,8 @@ public class Person {
 }
 ----
 
-Here we have set both of the class fields final. By doing so, we had to remove our default constructor. But that's okay, because we have annotated the remaining constructor's parameters using the [code]+org.jboss.errai.marshalling.client.api.annotations.MapsTo+ annotation.
+Both fields are final, so they cannot be written by setter methods or by direct field access. But that's okay, because we have given Errai a way to set them using the annotated constructor parameters.
 
-By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property [code]+name+. Which in this case, defaults to the name of the corresponding field. This may not always be the case as will be explored in the section on custom definitions. But for now that's a safe assumption.
 
 [[sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaFactoryMethod]]
 
@@ -2856,7 +2858,7 @@ One final note: as a nested type of [code]+Person+ (which is marked [code]+@Port
 
 ==== Manual Mapping
 
-Some classes may be out of your control, making it impossible to annotate them for auto-discovery by the marshalling framework. For cases such as this, there are two approaches which can be undertaken to include these classes in your application.
+Some classes may be out of your control, making it impossible to annotate them for auto-discovery by the marshalling framework. For cases such as this, there are two approaches to include these classes in your application.
 
 The first approach is the easiest, but is contingent on whether or not the class is directly exposed to the GWT compiler. That means, the classes must be part of a GWT module and within the GWT client packages. See the GWT documentation on link:$$http://code.google.com/webtoolkit/doc/latest/DevGuideCodingBasicsClient.html$$[Client-Side Code] for information on this.
 
