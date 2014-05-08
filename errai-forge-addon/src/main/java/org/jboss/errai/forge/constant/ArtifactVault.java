@@ -63,6 +63,7 @@ public final class ArtifactVault {
     JbossInterceptors("jboss-interceptors-api_1.1_spec", "org.jboss.spec.javax.interceptor"),
     JbossTransaction("jboss-transaction-api_1.1_spec", "org.jboss.spec.javax.transaction"),
     WeldServletCore("weld-servlet-core", "org.jboss.weld.servlet"),
+    WeldSeCore("weld-se-core", "org.jboss.weld.se"),
     WeldCore("weld-core", "org.jboss.weld"),
     WeldApi("weld-api", "org.jboss.weld"),
     WeldSpi("weld-spi", "org.jboss.weld"),

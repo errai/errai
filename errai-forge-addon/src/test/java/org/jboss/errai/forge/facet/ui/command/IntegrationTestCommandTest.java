@@ -35,6 +35,7 @@ import org.jboss.errai.forge.facet.ui.command.res.UIExecutionContextMock;
 import org.jboss.errai.forge.facet.ui.command.res.UIInputMock;
 import org.jboss.errai.forge.test.base.ForgeTest;
 import org.jboss.errai.forge.ui.command.CreateIntegrationTest;
+import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.forge.addon.dependencies.Dependency;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
@@ -104,7 +105,7 @@ public class IntegrationTestCommandTest extends ForgeTest {
   }
   
   @Test
-  public void checkDependenciesAreAdded() throws Exception {
+  public void checkTestScopedDependenciesAreAdded() throws Exception {
     final MavenDependencyFacet depFacet = project.getFacet(MavenDependencyFacet.class);
     
     final DependencyBuilder junitDependency = DependencyBuilder.create("junit:junit");
@@ -123,8 +124,8 @@ public class IntegrationTestCommandTest extends ForgeTest {
   }
   
   @Test
-  public void checkDependenciesAreOnlyAddedOnce() throws Exception {
-    checkDependenciesAreAdded();
+  public void checkTestScopedDependenciesAreOnlyAddedOnce() throws Exception {
+    checkTestScopedDependenciesAreAdded();
     
     final MavenDependencyFacet depFacet = project.getFacet(MavenDependencyFacet.class);
     final List<Dependency> dependencies = depFacet.getDependencies();
@@ -135,7 +136,7 @@ public class IntegrationTestCommandTest extends ForgeTest {
   }
   
   @Test
-  public void addIntegrationTestProfileAndSurfireConfiguration() throws Exception {
+  public void addIntegrationTestProfile() throws Exception {
     final MavenFacet mavenFacet = project.getFacet(MavenFacet.class);
     Model pom = mavenFacet.getModel();
 
@@ -144,15 +145,21 @@ public class IntegrationTestCommandTest extends ForgeTest {
     testableInstance.execute(context);
     pom = mavenFacet.getModel();
 
-    assertEquals(1, pom.getProfiles().size());
-    final Profile profile = pom.getProfiles().get(0);
+    final Profile testProfile = MavenModelUtil.getProfileById("integration-test", pom.getProfiles());
     
-    assertEquals("integration-test", profile.getId());
-    assertNotNull(profile.getBuild());
-    assertEquals(1, profile.getBuild().getPlugins().size());
-    assertEquals("maven-surefire-plugin", profile.getBuild().getPlugins().get(0).getArtifactId());
+    assertNotNull("No integration-test profile was found.", testProfile);
+    assertNotNull(testProfile.getBuild());
+
+    assertEquals(1, testProfile.getBuild().getPlugins().size());
+    assertEquals("maven-surefire-plugin", testProfile.getBuild().getPlugins().get(0).getArtifactId());
+
+    final List<org.apache.maven.model.Dependency> dependencies = testProfile.getDependencies();
+
+    assertEquals(2, dependencies.size());
+    hasDependency(dependencies, "org.jboss.weld.se:weld-se-core");
+    hasDependency(dependencies, "org.jboss.weld.servlet:weld-servlet-core");
   }
-  
+
   @Test
   public void addTestSourceDirectoryAsResourceInTestPorfile() throws Exception {
     testableInstance.execute(context);
@@ -161,10 +168,10 @@ public class IntegrationTestCommandTest extends ForgeTest {
     final Model pom = mavenFacet.getModel();
 
     assertNotNull(pom.getProfiles());
-    assertEquals(1, pom.getProfiles().size());
 
-    final Profile testProfile = pom.getProfiles().get(0);
-    assertEquals("integration-test", testProfile.getId());
+    final Profile testProfile = MavenModelUtil.getProfileById("integration-test", pom.getProfiles());
+
+    assertNotNull("No integration-test profile was found.", testProfile);
     assertNotNull(testProfile.getBuild().getTestResources());
     assertEquals(2, testProfile.getBuild().getTestResources().size());
     
@@ -178,15 +185,16 @@ public class IntegrationTestCommandTest extends ForgeTest {
   
   @Test
   public void checkIntegrationTestProfileAndSurefireConfigurationOnlyRunOnce() throws Exception {
-    addIntegrationTestProfileAndSurfireConfiguration();
+    addIntegrationTestProfile();
     
     testableInstance.execute(context);
     
     final MavenFacet mavenFacet = project.getFacet(MavenFacet.class);
     final Model pom = mavenFacet.getModel();
     
-    assertEquals(1, pom.getProfiles().size());
-    assertEquals(1, pom.getProfiles().get(0).getBuild().getPlugins().size());
+    final Profile testProfile = MavenModelUtil.getProfileById("integration-test", pom.getProfiles());
+    assertNotNull("No integration-test profile was found.", testProfile);
+    assertEquals(1, testProfile.getBuild().getPlugins().size());
   }
 
   @Test
@@ -209,10 +217,9 @@ public class IntegrationTestCommandTest extends ForgeTest {
   }
   
   @Test
-  public void copyWebXmlFromWebInf() throws Exception {
+  public void writeWebXml() throws Exception {
     facetFactory.install(project, ErraiMessagingFacet.class);
     final WebXmlFacet webXmlFacet = project.getFacet(WebXmlFacet.class);
-    final File originalWebXml = webXmlFacet.getAbsoluteFilePath();
     
     testableInstance.execute(context);
     
@@ -220,8 +227,25 @@ public class IntegrationTestCommandTest extends ForgeTest {
     
     assertTrue(copiedWebXml.exists());
     
-    try (final InputStreamReader originalStream = new InputStreamReader(new FileInputStream(originalWebXml));
+    try (final InputStreamReader originalStream = new InputStreamReader(
+            ClassLoader.getSystemResourceAsStream("org/jboss/errai/forge/test/web.xml"));
             final InputStreamReader copiedStream = new InputStreamReader(new FileInputStream(copiedWebXml))) {
+      assertFileContentsSame(originalStream, copiedStream);
+    }
+  }
+
+  @Test
+  public void writeJettyEnvXml() throws Exception {
+    testableInstance.execute(context);
+
+    final File copiedJettyEnvXml = new File(project.getRootDirectory().getUnderlyingResourceObject(),
+            "war/WEB-INF/jetty-env.xml");
+
+    assertTrue(copiedJettyEnvXml.exists());
+
+    try (final InputStreamReader originalStream = new InputStreamReader(
+            ClassLoader.getSystemResourceAsStream("org/jboss/errai/forge/test/jetty-env.xml"));
+            final InputStreamReader copiedStream = new InputStreamReader(new FileInputStream(copiedJettyEnvXml))) {
       assertFileContentsSame(originalStream, copiedStream);
     }
   }
@@ -242,5 +266,15 @@ public class IntegrationTestCommandTest extends ForgeTest {
             final InputStreamReader copiedStream = new InputStreamReader(new FileInputStream(copiedBeansXml))) {
       assertFileContentsSame(originalStream, copiedStream);
     }
+  }
+
+  private void hasDependency(final List<org.apache.maven.model.Dependency> dependencies, final String coordinate) {
+    for (final org.apache.maven.model.Dependency dep : dependencies) {
+      if ((dep.getGroupId() + ":" + dep.getArtifactId()).equals(coordinate)) {
+        return;
+      }
+    }
+
+    fail(coordinate + " was not found in the given dependencies.");
   }
 }

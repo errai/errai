@@ -64,6 +64,10 @@ public class SurefirePluginFacet extends AbstractProfilePluginFacet {
                       .addChild(create().setName("value").setText("false"))
                )
               .addChild(create().setName("property")
+                      .addChild(create().setName("name").setText("errai.hosted_mode_testing"))
+                      .addChild(create().setName("value").setText("true"))
+               )
+              .addChild(create().setName("property")
                       .addChild(create().setName("name").setText("errai.devel.nocache"))
                       .addChild(create().setName("value").setText("true"))
                ),

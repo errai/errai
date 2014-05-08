@@ -19,8 +19,6 @@ package org.jboss.errai.forge.facet.ui.command;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Set;
 
@@ -29,8 +27,8 @@ import org.jboss.errai.forge.facet.ui.command.res.SimpleTestableClass;
 import org.jboss.errai.forge.facet.ui.command.res.UIExecutionContextMock;
 import org.jboss.errai.forge.facet.ui.command.res.UIInputMock;
 import org.jboss.errai.forge.test.base.ForgeTest;
-import org.jboss.errai.forge.ui.command.CreateUnitTest;
 import org.jboss.errai.forge.ui.command.CreateTestCommand;
+import org.jboss.errai.forge.ui.command.CreateUnitTest;
 import org.jboss.forge.addon.dependencies.Dependency;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.projects.facets.MavenDependencyFacet;

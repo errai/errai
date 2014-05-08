@@ -35,16 +35,17 @@ import org.apache.maven.model.Resource;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.aggregate.CoreFacet;
+import org.jboss.errai.forge.facet.dependency.WeldIntegrationTestDependencyFacet;
 import org.jboss.errai.forge.facet.plugin.SurefirePluginFacet;
 import org.jboss.errai.forge.facet.resource.AbstractFileResourceFacet;
 import org.jboss.errai.forge.facet.resource.BeansXmlFacet;
 import org.jboss.errai.forge.facet.resource.ErraiAppPropertiesFacet;
-import org.jboss.errai.forge.facet.resource.WebXmlFacet;
 import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.forge.addon.facets.FacetFactory;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
+import org.jboss.forge.addon.projects.ProjectFacet;
 import org.jboss.forge.addon.projects.ProjectFactory;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIExecutionContext;
@@ -66,6 +67,8 @@ public class CreateIntegrationTest extends CreateTestCommand {
   
   private final TemplateWriter testClassTemplateWriter;
   private final TemplateWriter testModuleTemplateWriter;
+  private final TemplateWriter testWebXmlTemplateWriter;
+  private final TemplateWriter testJettyEnvTemplateWriter;
   
   public CreateIntegrationTest() {
     testClassTemplateWriter = new TemplateWriter(
@@ -77,6 +80,10 @@ public class CreateIntegrationTest extends CreateTestCommand {
     testModuleTemplateWriter = new TemplateWriter(
             "/org/jboss/errai/forge/ui/command/TestTemplate.gwt.xml",
             "$$_projectLogicalModuleName_$$");
+
+    testWebXmlTemplateWriter = new TemplateWriter("/org/jboss/errai/forge/ui/command/test-web.xml");
+
+    testJettyEnvTemplateWriter = new TemplateWriter("/org/jboss/errai/forge/ui/command/test-jetty-env.xml");
   }
   
   public CreateIntegrationTest(final ProjectFactory projectFactory, final FacetFactory facetFactory,
@@ -111,7 +118,7 @@ public class CreateIntegrationTest extends CreateTestCommand {
     setupTestProfile(project);
     produceTestFile(project);
     produceTestModuleFile(project);
-    copyConfigurationsFiles(project);
+    produceConfigurationsFiles(project);
 
     return Results.success();
   }
@@ -124,12 +131,21 @@ public class CreateIntegrationTest extends CreateTestCommand {
   
   private void setupTestProfile(final Project project) {
     installSurefirePluginFacet(project);
+    installIntegrationTestDependencies(project);
     addTestResources(project);
   }
 
   private void installSurefirePluginFacet(final Project project) {
-    if (!project.hasFacet(SurefirePluginFacet.class)) {
-      facetFactory.install(project, SurefirePluginFacet.class);
+    installFacet(project, SurefirePluginFacet.class);
+  }
+
+  private void installIntegrationTestDependencies(final Project project) {
+    installFacet(project, WeldIntegrationTestDependencyFacet.class);
+  }
+
+  private void installFacet(final Project project, final Class<? extends ProjectFacet> facetType) {
+    if (!project.hasFacet(facetType)) {
+      facetFactory.install(project, facetType);
     }
   }
 
@@ -212,10 +228,12 @@ public class CreateIntegrationTest extends CreateTestCommand {
       .writeTemplate(testModuleFile);
   }
 
-  private void copyConfigurationsFiles(final Project project) throws IOException {
+  private void produceConfigurationsFiles(final Project project) throws IOException {
     final File projectRootDirectory = project.getRootDirectory().getUnderlyingResourceObject();
 
-    copyConfigurationFile(project, WebXmlFacet.class, new File(projectRootDirectory, "war/WEB-INF/web.xml"));
+    testWebXmlTemplateWriter.writeTemplate(new File(projectRootDirectory, "war/WEB-INF/web.xml"));
+    testJettyEnvTemplateWriter.writeTemplate(new File(projectRootDirectory, "war/WEB-INF/jetty-env.xml"));
+
     copyConfigurationFile(project, BeansXmlFacet.class, new File(projectRootDirectory, "war/WEB-INF/beans.xml"));
     copyConfigurationFile(project, ErraiAppPropertiesFacet.class, new File(projectRootDirectory, "src/test/resources/ErraiApp.properties"));
   }

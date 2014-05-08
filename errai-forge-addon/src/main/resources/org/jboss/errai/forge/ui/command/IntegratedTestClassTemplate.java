@@ -3,6 +3,7 @@ package $$_testClassPackage_$$;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.container.IOC;
 
 public class $$_testClassSimpleName_$$ extends AbstractErraiCDITest {
 
@@ -14,6 +15,12 @@ public class $$_testClassSimpleName_$$ extends AbstractErraiCDITest {
   @Override
   public String getModuleName() {
     return "$$_moduleLogicalName_$$";
+  }
+
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    beanManager = IOC.getBeanManager();
   }
 
   /*
