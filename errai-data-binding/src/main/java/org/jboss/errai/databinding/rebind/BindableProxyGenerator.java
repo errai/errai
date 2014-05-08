@@ -20,7 +20,9 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Cast;
@@ -66,11 +68,13 @@ public class BindableProxyGenerator {
   private final MetaClass bindable;
   private final String agentField;
   private final TreeLogger logger;
+  private final Set<MetaMethod> proxiedAccessorMethods;
 
   public BindableProxyGenerator(MetaClass bindable, TreeLogger logger) {
     this.bindable = bindable;
     this.agentField = inferSafeAgentFieldName();
     this.logger = logger;
+    this.proxiedAccessorMethods = new HashSet<MetaMethod>();
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -166,6 +170,8 @@ public class BindableProxyGenerator {
       classBuilder.publicMethod(getterMethod.getReturnType(), getterMethod.getName())
           .append(target().invoke(getterMethod.getName()).returnValue())
           .finish();
+      
+      proxiedAccessorMethods.add(getterMethod);
     }
   }
 
@@ -236,6 +242,8 @@ public class BindableProxyGenerator {
               agent().invoke("updateWidgetsAndFireEvent", property, Variable.get(oldValName), Variable.get(property)))
           .append(returnValueOfSetter)
           .finish();
+      
+      proxiedAccessorMethods.add(setterMethod);
     }
   }
 
@@ -248,7 +256,7 @@ public class BindableProxyGenerator {
   private void generateNonAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     for (MetaMethod method : bindable.getMethods()) {
       String methodName = method.getName();
-      if (!methodName.startsWith("get") && !methodName.startsWith("set") && !methodName.startsWith("is")
+      if (!proxiedAccessorMethods.contains(method)  
           && !methodName.equals("hashCode") && !methodName.equals("equals") && !methodName.equals("toString")
           && method.isPublic() && !method.isFinal() && !method.isStatic()) {
 

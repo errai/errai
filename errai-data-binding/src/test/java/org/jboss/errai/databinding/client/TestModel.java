@@ -151,6 +151,14 @@ public class TestModel {
       child.activate();
     }
   }
+  
+  public void setActivateStatus(boolean value) {
+    this.active = value;
+  }
+  
+  public boolean getActivateStatus(String ignore) {
+    return this.active;
+  }
 
   public TestModel activate(boolean activate) {
     this.active = activate;
