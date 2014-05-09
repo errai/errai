@@ -5443,7 +5443,7 @@ Three things are merged or modified when Errai UI creates a new Composite compon
 . DOM Elements are merged from the component to the template
 
 
-. Template element inner text and inner HTML are preserved when the given [code]+@DataField+[code]+Widget+ implements [code]+HasText+ or [code]+HasHTML+
+. Template element inner text and inner HTML are preserved when the given [code]+@DataField Widget+ implements [code]+HasText+ or [code]+HasHTML+
 
 
 [[sid-51806600_ErraiUI-Example]]
@@ -5645,7 +5645,7 @@ Here is a sample `@Templated` login form class. This form has:
 ----
 @Dependent
 @Templated
-public class LoginForm extends AbstractForm { // <1>
+public class LoginForm extends AbstractForm { <1>
   
   @Inject
   private Caller<AuthenticationService> authenticationServiceCaller;
@@ -5659,15 +5659,15 @@ public class LoginForm extends AbstractForm { // <1>
   private PasswordTextBox password;
 
   @DataField
-  private final FormElement form = DOM.createForm(); // <2>
+  private final FormElement form = DOM.createForm(); <2>
 
   @Inject
   @DataField
-  private Button login; // <3>
+  private Button login; <3>
   
   @Override
   protected FormElement getFormElement() {
-    return form; // <4>
+    return form; <4>
   }
 
   @EventHandler("login")
@@ -5677,7 +5677,7 @@ public class LoginForm extends AbstractForm { // <1>
       @Override
       public void callback(User response) {
         // Now that we're logged in, submit the form
-        submit(); // <5>
+        submit(); <5>
       }
     }).login(username.getText(), password.getText());
   }
@@ -6754,7 +6754,7 @@ The simplest way to begin experimenting with Errai Security is to add Users and 
 public class PicketLinkDefaultUsers {
 
   @Inject
-  private PartitionManager partitionManager; // <1>
+  private PartitionManager partitionManager; <1>
 
   /**
    * <p>Loads some users during the first construction.</p>
@@ -6776,7 +6776,7 @@ public class PicketLinkDefaultUsers {
     hacker.setFirstName("Hacker");
     hacker.setLastName("anonymous");
     
-    identityManager.add(john); // <2>
+    identityManager.add(john); <2>
     identityManager.add(hacker);
     final Password defaultPassword = new Password("123");
     identityManager.updateCredential(john, defaultPassword);
@@ -6788,7 +6788,7 @@ public class PicketLinkDefaultUsers {
     identityManager.add(roleDeveloper);
     identityManager.add(roleAdmin);
 
-    relationshipManager.add(new Grant(john, roleDeveloper)); // <3>
+    relationshipManager.add(new Grant(john, roleDeveloper)); <3>
     relationshipManager.add(new Grant(john, roleAdmin));
   }
 
@@ -6922,7 +6922,7 @@ MessageBuilder.createCall(new RemoteCallback<Void>() {
     public void callback(Void response) {
       // ...
     }
-  }, new ErrorCallback<Message>() { // <1>
+  }, new ErrorCallback<Message>() { <1>
 
     @Override
     public boolean error(Message message, Throwable t) {
