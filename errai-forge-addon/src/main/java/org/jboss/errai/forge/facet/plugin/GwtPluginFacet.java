@@ -34,11 +34,13 @@ import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
 /**
  * This facet configures the gwt-maven-plugin in the build section of the pom
  * file.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @FacetConstraint({ CoreBuildFacet.class, GwtHostPageFacet.class })
 public class GwtPluginFacet extends AbstractPluginFacet {
+
+  private boolean isInitialized;
 
   public GwtPluginFacet() {
     pluginArtifact = DependencyArtifact.GwtPlugin;
@@ -83,18 +85,23 @@ public class GwtPluginFacet extends AbstractPluginFacet {
             });
   }
 
-  private void init() {
+  private void maybeInit() {
+    if (isInitialized)
+      return;
+
     for (final ConfigurationElement elem : configurations) {
       if (elem.getName().equals("hostedWebapp")) {
         ConfigurationElementBuilder.class.cast(elem).setText(WarPluginFacet.getWarSourceDirectory(getProject()));
         break;
       }
     }
+
+    isInitialized = true;
   }
-  
+
   @Override
   public Collection<ConfigurationElement> getConfigurations() {
-    init();
+    maybeInit();
     return super.getConfigurations();
   }
 

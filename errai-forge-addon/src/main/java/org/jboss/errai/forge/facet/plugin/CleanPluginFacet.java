@@ -19,6 +19,7 @@ package org.jboss.errai.forge.facet.plugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
@@ -29,15 +30,20 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
 import org.jboss.forge.addon.maven.plugins.Execution;
+import org.jboss.forge.addon.maven.plugins.PluginElement;
 
 /**
  * This facet configures the maven-clean-plugin in the build section of the
  * projects pom file.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @FacetConstraint({ CoreBuildFacet.class })
 public class CleanPluginFacet extends AbstractPluginFacet {
+
+  private static final String WAR_SRC_PLACEHOLDER = "${warSrc}";
+
+  private boolean isInitialized;
 
   public CleanPluginFacet() {
     pluginArtifact = DependencyArtifact.Clean;
@@ -50,11 +56,11 @@ public class CleanPluginFacet extends AbstractPluginFacet {
                         .addChild(ConfigurationElementBuilder.create().setName("directory").setText("${basedir}"))
                         .addChild(ConfigurationElementBuilder.create().setName("includes")
                                 .addChild(ConfigurationElementBuilder.create().setName("include")
-                                        .setText("src/main/webapp/WEB-INF/deploy/"))
+                                        .setText(WAR_SRC_PLACEHOLDER + "/WEB-INF/deploy/"))
                                 .addChild(ConfigurationElementBuilder.create().setName("include")
-                                        .setText("src/main/webapp/WEB-INF/lib/"))
+                                        .setText(WAR_SRC_PLACEHOLDER + "/WEB-INF/lib/"))
                                 .addChild(ConfigurationElementBuilder.create().setName("include")
-                                        .setText("src/main/webapp/WEB-INF/classes/"))
+                                        .setText(WAR_SRC_PLACEHOLDER + "/WEB-INF/classes/"))
                                 .addChild(ConfigurationElementBuilder.create().setName("include")
                                         .setText("**/gwt-unitCache/**"))
                                 .addChild(ConfigurationElementBuilder.create().setName("include")
@@ -64,18 +70,37 @@ public class CleanPluginFacet extends AbstractPluginFacet {
     });
   }
 
-  private void init() {
+  private void maybeInit() {
+    if (isInitialized)
+      return;
+
     final String moduleName = getProject().getFacet(ProjectConfig.class).getProjectProperty(
             ProjectProperty.MODULE_NAME,
             String.class);
+
+    addGwtModuleInclude(moduleName);
+    convertWarSrcPlaceholder(WarPluginFacet.getWarSourceDirectory(getProject()));
+
+    isInitialized = true;
+  }
+
+  private void addGwtModuleInclude(final String moduleName) {
     ((ConfigurationElementBuilder) configurations.iterator().next().getChildByName("includes"))
             .addChild(ConfigurationElementBuilder.create().setName("include")
-                    .setText("src/main/webapp/" + moduleName + "/"));
+                    .setText(WAR_SRC_PLACEHOLDER + "/" + moduleName + "/"));
   }
-  
+
+  private void convertWarSrcPlaceholder(final String warSrcDirectory) {
+    final List<PluginElement> includes = configurations.iterator().next().getChildByName("includes").getChildren();
+    for (final PluginElement include : includes) {
+      final ConfigurationElementBuilder includeAsBuilder = (ConfigurationElementBuilder) include;
+      includeAsBuilder.setText(includeAsBuilder.getText().replace(WAR_SRC_PLACEHOLDER, warSrcDirectory));
+    }
+  }
+
   @Override
   public Collection<ConfigurationElement> getConfigurations() {
-    init();
+    maybeInit();
     return super.getConfigurations();
   }
 }
