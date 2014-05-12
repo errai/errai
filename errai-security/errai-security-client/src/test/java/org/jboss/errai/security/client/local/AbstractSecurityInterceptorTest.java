@@ -130,7 +130,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
   }
   
   protected void afterLogout(final Runnable test) {
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       
       @Override
       public void run() {
