@@ -15,6 +15,15 @@ cd Project
 cordova platform add ios
 cordova platform add android
 cordova plugin add org.apache.cordova.device
+cordova plugin add org.apache.cordova.battery-status
+cordova plugin add org.apache.cordova.camera
+cordova plugin add org.apache.cordova.device-motion
+cordova plugin add org.apache.cordova.device-orientation
+cordova plugin add org.apache.cordova.console
+cordova plugin org.apache.cordova.contacts
+cordova plugin org.apache.cordova.dialogs
+cordova plugin org.apache.cordova.file
+cordova plugin org.apache.cordova.file-transfer
 
 cp ../AndroidManifest.xml platforms/android/CordovaLib/
 
