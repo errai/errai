@@ -29,14 +29,14 @@ import com.google.gwt.user.client.ui.IsWidget;
 /**
  * Listens for page navigation events and redirects if the logged in user lacks
  * sufficient roles.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleListener<W> {
 
   private final String[] roles;
 
-  public PageRoleLifecycleListener(final String... rolesRequiredByPage) {
+  public PageRoleLifecycleListener(final String[] rolesRequiredByPage) {
     this.roles = rolesRequiredByPage;
   }
 

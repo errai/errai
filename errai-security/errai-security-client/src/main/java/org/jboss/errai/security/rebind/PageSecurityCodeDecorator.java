@@ -62,7 +62,7 @@ public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
                       MetaClassFactory.parameterizedAs(LifecycleListener.class,
                               MetaClassFactory.typeParametersOf(ctx.getInjector().getInjectedType())),
                               Stmt.newObject(PageRoleLifecycleListener.class,
-                                                      (Object[]) annotation.roles())));
+                                                      (Object) annotation.roles())));
       ctx.getTargetInjector().addStatementToEndOfInjector(
               Stmt.loadVariable("context")
                       .invoke("addInitializationCallback",
