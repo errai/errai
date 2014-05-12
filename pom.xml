@@ -313,7 +313,7 @@
       <dependency>
         <groupId>com.googlecode.gwtphonegap</groupId>
         <artifactId>gwtphonegap</artifactId>
-        <version>2.4.0.0</version>
+        <version>3.4.0.0-m1</version>
       </dependency>
 
       <dependency>
