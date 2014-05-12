@@ -83,8 +83,7 @@ class CordovaMojo extends GroovyMojo {
 
         def www = "${project.build.directory}/${project.build.finalName}"
 
-        [androidDir, iosDir].each { dir ->
-            clean(dir)
+        [androidDir, iosDir].each { dir ->            
             copy(dir, www)
         }
 
