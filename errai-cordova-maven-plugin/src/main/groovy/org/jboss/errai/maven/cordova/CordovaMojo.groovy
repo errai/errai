@@ -145,7 +145,7 @@ class CordovaMojo extends GroovyMojo {
     }
 
     def void copy(dir, www) {
-        ant.copy(todir: dir) {
+        ant.copy(todir: dir, overwrite: 'true') {
             fileset(dir: www, excludes: '**/*.class, **/*.jar, **/*.java')
         }
     }
