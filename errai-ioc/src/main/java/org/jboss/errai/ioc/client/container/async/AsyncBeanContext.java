@@ -12,6 +12,7 @@ import org.jboss.errai.common.client.util.CreationalCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 
 /**
@@ -171,7 +172,15 @@ public class AsyncBeanContext {
             runnableIterable.next().run();
           }
           catch (Throwable t) {
-            t.printStackTrace();
+            if (GWT.isProdMode() || !(t instanceof AssertionError)) {
+              t.printStackTrace();
+            }
+            else {
+              /*
+               * Don't swallow assertion errors when running tests.
+               */
+              throw (AssertionError) t;
+            }
           }
           runnableIterable.remove();
         }
