@@ -106,6 +106,6 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
   protected void asyncTest(final Runnable runnable) {
     asyncTest();
-    Container.$(runnable);
+    InitVotes.registerOneTimeInitCallback(runnable);
   }
 }
