@@ -17,6 +17,7 @@
 package org.jboss.errai.validation.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -53,6 +54,10 @@ public class TestModel {
   @NotNull
   @Valid
   private List<TestModel> list = new ArrayList<TestModel>();
+
+  @NotNull
+  @Valid
+  private HashSet<TestModel> set = new HashSet<TestModel>();
 
   public int getNumVal() {
     return numVal;
@@ -96,5 +101,18 @@ public class TestModel {
   public void addToList(TestModel l) {
     this.list.add(l);
   }
+  
+  public HashSet<TestModel> getSet() {
+    return set;
+  }
+
+  public void setSet(HashSet<TestModel> set) {
+    this.set = set;
+  }
+  
+  public void addToSet(TestModel l) {
+    this.set.add(l);
+  }
+
 
 }
