@@ -140,7 +140,7 @@ public class Navigation {
   }
 
   /**
-   * Package private for testability.
+   * Public for testability.
    */
   @PreDestroy
   public void cleanUp() {
