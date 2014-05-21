@@ -94,6 +94,28 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
     violations = validator.validate(model);
     assertEquals("Expected two constraint violations", 2, violations.size());
   }
+  
+  public void testValidationOfListOfBindableTypes() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    TestModel model = new TestModel();
+    model.setNumVal(101);
+    model.setStringVal("val");
+    model = DataBinder.forModel(model).getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
+    
+    model.addToList(new TestModel());
+    // the list now contains one invalid element
+    violations = validator.validate(model);
+    assertEquals("Expected two constraint violations", 2, violations.size());
+    
+    model.getList().get(0).setNumVal(101);
+    model.getList().get(0).setStringVal("val");
+    // the list now contains one valid element
+    violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
+  }
 
   public void testValidationOfBindableTypeWithInjectedValidator() {
     ModuleWithInjectedValidator module =
