@@ -8,6 +8,8 @@ import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
+import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
+import org.jboss.errai.ui.nav.client.local.res.TestNavigationErrorHandler;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
@@ -49,10 +51,11 @@ public class NavigationTest extends AbstractErraiCDITest {
   protected void gwtSetUp() throws Exception {
     disableBus = true;
     super.gwtSetUp();
-    navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
+    navigation = IOC.getBeanManager().lookupBean(Navigation.class)
+            .getInstance();
     navGraph = navigation.getNavGraph();
   }
-  
+
   @Override
   protected void gwtTearDown() throws Exception {
     navigation.cleanUp();
@@ -63,10 +66,56 @@ public class NavigationTest extends AbstractErraiCDITest {
     try {
       navGraph.getPage("page that does not exist");
       fail("Did not get an exception for a missing page");
-    }
-    catch (IllegalArgumentException ex) {
+    } catch (PageNotFoundException ex) {
       assertTrue(ex.getMessage().contains("page that does not exist"));
     }
+  }
+
+  public void testDefaultErrorHandlerWithMissingPage() throws Exception {
+    navigation.goTo("page_b"); // navigate to a known non-default page before
+                               // test because the expected behavior is that it
+                               // navigates back to the default page
+
+    navigation.goTo("page that does not exist");
+    assertEquals("did not navigate to default page", PageA.class,
+            navigation.currentPage.contentType());
+
+  }
+
+  public void testErrorHandlerWithMissingPageThroughGoTo() throws Exception {
+    TestNavigationErrorHandler newNavigationHandler = new TestNavigationErrorHandler();
+    navigation.setErrorHandler(newNavigationHandler);
+
+    navigation.goTo("page that does not exist");
+    assertEquals("did not enter new handler", 1, newNavigationHandler.count);
+  }
+
+  public void testErrorHandlerWithMissingPageThroughHistoryNewItem()
+          throws Exception {
+    TestNavigationErrorHandler newNavigationHandler = new TestNavigationErrorHandler();
+    navigation.setErrorHandler(newNavigationHandler);
+
+    History.newItem("page that does not exist");
+    assertEquals("did not enter new handler", 1, newNavigationHandler.count);
+  }
+
+  public void testMissingPageRole() throws Exception {
+    navigation.goTo("page_b"); // navigate to a known non-default page before
+    // test because the expected behavior is that it
+    // navigates back to the default page
+
+    navigation.goToWithRole(MissingPageRole.class);
+    assertEquals("did not navigate to default page", PageA.class,
+            navigation.currentPage.contentType());
+  }
+
+  public void testMissingPageRoleWithTestErrorHandler() throws Exception {
+    TestNavigationErrorHandler newNavigationHandler = new TestNavigationErrorHandler();
+    navigation.setErrorHandler(newNavigationHandler);
+
+    navigation.goToWithRole(MissingPageRole.class);
+    assertEquals("Did not go through test error handler", 1,
+            newNavigationHandler.count);
   }
 
   public void testPageWithDefaultName() throws Exception {
@@ -93,7 +142,9 @@ public class NavigationTest extends AbstractErraiCDITest {
       }
     });
 
-    assertNotNull("CreationalCallback should have been invoked before produceContent returned!", workaround[0]);
+    assertNotNull(
+            "CreationalCallback should have been invoked before produceContent returned!",
+            workaround[0]);
 
     CircularRef1 cr1 = workaround[0];
     TransitionTo<CircularRef2> transitionToCR2 = cr1.getLink();
@@ -102,7 +153,8 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testUrlUpdatesWithPageChange() throws Exception {
-    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of("intThing", "42"));
+    navigation.goTo(PageWithExtraState.class,
+            ImmutableMultimap.of("intThing", "42"));
     assertEquals("#PageWithExtraState;intThing=42", Window.Location.getHash());
   }
 
@@ -112,33 +164,35 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testGetPageByRole() throws Exception {
-    final Collection<PageNode<?>> pageByRole = navGraph.getPagesByRole(PageWithRole.AdminPage.class);
+    final Collection<PageNode<?>> pageByRole = navGraph
+            .getPagesByRole(PageWithRole.AdminPage.class);
     assertNotNull(pageByRole);
     assertFalse(pageByRole.isEmpty());
 
     assertTrue(pageByRole.size() == 2);
     for (PageNode<?> pageNode : pageByRole) {
-      assertTrue(pageNode.name() + " is not a page annotated with the admin role",
-              pageNode.name().matches("Page.?WithRole"));
+      assertTrue(pageNode.name()
+              + " is not a page annotated with the admin role", pageNode.name()
+              .matches("Page.?WithRole"));
     }
   }
 
   public void testGetMissingPageByRole() throws Exception {
-    final Collection<PageNode<? extends IsWidget>> pagesByRole = navGraph.getPagesByRole(MissingPageRole.class);
-    
+    final Collection<PageNode<? extends IsWidget>> pagesByRole = navGraph
+            .getPagesByRole(MissingPageRole.class);
+
     assertNotNull(pagesByRole);
     assertTrue(pagesByRole.isEmpty());
   }
-  
+
   public void testGetMissingPageByUniqueRole() throws Exception {
     Throwable thrown = null;
     try {
-    navGraph.getPageByRole(MissingUniquePageRole.class);
-    }
-    catch (Throwable e) {
+      navGraph.getPageByRole(MissingUniquePageRole.class);
+    } catch (Throwable e) {
       thrown = e;
     }
-    
+
     assertNotNull("Expected an exception to be thrown.", thrown);
     assertEquals(MissingPageRoleException.class, thrown.getClass());
   }
@@ -150,69 +204,85 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testIsWidgetPage() {
-    final PageIsWidget page = IOC.getBeanManager().lookupBean(PageIsWidget.class).getInstance();
+    final PageIsWidget page = IOC.getBeanManager()
+            .lookupBean(PageIsWidget.class).getInstance();
 
-    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-        historyHandlerRegistration.removeHandler();
-        assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
-        assertEquals(page.asWidget(), ((SimplePanel) navigation.getContentPanel().asWidget()).getWidget());
-        finishTest();
-      }
-    });
+    historyHandlerRegistration = History
+            .addValueChangeHandler(new ValueChangeHandler<String>() {
+              @Override
+              public void onValueChange(ValueChangeEvent<String> event) {
+                historyHandlerRegistration.removeHandler();
+                assertEquals(PageIsWidget.class, navigation.getCurrentPage()
+                        .contentType());
+                assertEquals(page.asWidget(), ((SimplePanel) navigation
+                        .getContentPanel().asWidget()).getWidget());
+                finishTest();
+              }
+            });
 
     delayTestFinish(5000);
-    navigation.goTo(PageIsWidget.class, ImmutableMultimap.<String, String> of());
+    navigation
+            .goTo(PageIsWidget.class, ImmutableMultimap.<String, String> of());
   }
 
   public void testIsWidgetPageTransition() {
-    final PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
-    final PageIsWidget targetPage = IOC.getBeanManager().lookupBean(PageIsWidget.class).getInstance();
+    final PageWithLinkToIsWidget page = IOC.getBeanManager()
+            .lookupBean(PageWithLinkToIsWidget.class).getInstance();
+    final PageIsWidget targetPage = IOC.getBeanManager()
+            .lookupBean(PageIsWidget.class).getInstance();
 
-    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-        historyHandlerRegistration.removeHandler();
-        assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
-        assertEquals(targetPage.asWidget(), ((SimplePanel) navigation.getContentPanel().asWidget()).getWidget());
-        finishTest();
-      }
-    });
+    historyHandlerRegistration = History
+            .addValueChangeHandler(new ValueChangeHandler<String>() {
+              @Override
+              public void onValueChange(ValueChangeEvent<String> event) {
+                historyHandlerRegistration.removeHandler();
+                assertEquals(PageIsWidget.class, navigation.getCurrentPage()
+                        .contentType());
+                assertEquals(targetPage.asWidget(), ((SimplePanel) navigation
+                        .getContentPanel().asWidget()).getWidget());
+                finishTest();
+              }
+            });
 
     delayTestFinish(5000);
     page.getTransitionToIsWidget().go();
   }
 
   public void testIsWidgetAnchorTransition() {
-    final PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
-    final PageIsWidget targetPage = IOC.getBeanManager().lookupBean(PageIsWidget.class).getInstance();
+    final PageWithLinkToIsWidget page = IOC.getBeanManager()
+            .lookupBean(PageWithLinkToIsWidget.class).getInstance();
+    final PageIsWidget targetPage = IOC.getBeanManager()
+            .lookupBean(PageIsWidget.class).getInstance();
 
-    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-        historyHandlerRegistration.removeHandler();
-        assertEquals(PageIsWidget.class, navigation.getCurrentPage().contentType());
-        assertEquals(targetPage.asWidget(), ((SimplePanel) navigation.getContentPanel().asWidget()).getWidget());
-        finishTest();
-      }
-    });
+    historyHandlerRegistration = History
+            .addValueChangeHandler(new ValueChangeHandler<String>() {
+              @Override
+              public void onValueChange(ValueChangeEvent<String> event) {
+                historyHandlerRegistration.removeHandler();
+                assertEquals(PageIsWidget.class, navigation.getCurrentPage()
+                        .contentType());
+                assertEquals(targetPage.asWidget(), ((SimplePanel) navigation
+                        .getContentPanel().asWidget()).getWidget());
+                finishTest();
+              }
+            });
 
     delayTestFinish(5000);
     page.getLinkToIsWidget().click();
   }
 
   public void testNotAttachedToRootPanel() {
-    assertNull("Navigation Content Panel should not yet have a parent", navigation.getContentPanel().asWidget()
-            .getParent());
+    assertNull("Navigation Content Panel should not yet have a parent",
+            navigation.getContentPanel().asWidget().getParent());
   }
 
   public void testAutomaticRootPanelAttachment() {
     runPostAttachTests(new Runnable() {
       @Override
       public void run() {
-        assertEquals("Navigation Panel was not automatically attached", RootPanel.get(), navigation.getContentPanel()
-                .asWidget().getParent());
+        assertEquals("Navigation Panel was not automatically attached",
+                RootPanel.get(), navigation.getContentPanel().asWidget()
+                        .getParent());
       }
     }, 30000, 500);
   }
@@ -223,8 +293,10 @@ public class NavigationTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         RootPanel.get().add(navigation.getContentPanel());
-        assertEquals("Navigation Panel should still be attached to the RootPanel", RootPanel.get(), navigation
-                .getContentPanel().asWidget().getParent());
+        assertEquals(
+                "Navigation Panel should still be attached to the RootPanel",
+                RootPanel.get(), navigation.getContentPanel().asWidget()
+                        .getParent());
       }
     }, 30000, 500);
   }
@@ -237,30 +309,31 @@ public class NavigationTest extends AbstractErraiCDITest {
         SimplePanel newParent = new SimplePanel();
         newParent.add(navigation.getContentPanel());
 
-        assertEquals("Navigation panel should be child of newParent", newParent, navigation.getContentPanel()
-                .asWidget().getParent());
-        assertEquals("Navigation panel shoudl not be attached to the RootPanel", -1,
+        assertEquals("Navigation panel should be child of newParent",
+                newParent, navigation.getContentPanel().asWidget().getParent());
+        assertEquals(
+                "Navigation panel shoudl not be attached to the RootPanel", -1,
                 RootPanel.get().getWidgetIndex(navigation.getContentPanel()));
       }
     }, 30000, 500);
   }
 
   public void testManuallyAttachToRootPanelBefore() {
-    assertNull("Navigation content panel should not yet be attached", navigation.getContentPanel().asWidget()
-            .getParent());
+    assertNull("Navigation content panel should not yet be attached",
+            navigation.getContentPanel().asWidget().getParent());
     RootPanel.get().add(navigation.getContentPanel());
 
     // Force navigation to run Navigation#maybeAttachContentPanel()
     navigation.goToWithRole(DefaultPage.class);
 
-    assertEquals("RootPanel should still be parent", RootPanel.get(), navigation.getContentPanel().asWidget()
-            .getParent());
+    assertEquals("RootPanel should still be parent", RootPanel.get(),
+            navigation.getContentPanel().asWidget().getParent());
 
   }
 
   public void testManuallyAttachToOtherPanelBefore() {
-    assertNull("Navigation content panel should not yet be attached", navigation.getContentPanel().asWidget()
-            .getParent());
+    assertNull("Navigation content panel should not yet be attached",
+            navigation.getContentPanel().asWidget().getParent());
     SimplePanel panel = new SimplePanel();
     panel.add(navigation.getContentPanel());
 
@@ -274,35 +347,41 @@ public class NavigationTest extends AbstractErraiCDITest {
    * Test if a history event is fired when navigation is done.
    */
   public void testHistoryEventFired() {
-    final PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
+    final PageWithLinkToIsWidget page = IOC.getBeanManager()
+            .lookupBean(PageWithLinkToIsWidget.class).getInstance();
 
     historyHandlerInvocations = 0;
-    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-        historyHandlerInvocations++;
-        // the first invocation is triggered by the init vote
-        if (historyHandlerInvocations == 1) {
-          page.getLinkToIsWidget().click();
-        } else {
-          historyHandlerRegistration.removeHandler();
-          finishTest();
-        }
-      }
-    });
+    historyHandlerRegistration = History
+            .addValueChangeHandler(new ValueChangeHandler<String>() {
+              @Override
+              public void onValueChange(ValueChangeEvent<String> event) {
+                historyHandlerInvocations++;
+                // the first invocation is triggered by the init vote
+                if (historyHandlerInvocations == 1) {
+                  page.getLinkToIsWidget().click();
+                }
+                else {
+                  historyHandlerRegistration.removeHandler();
+                  finishTest();
+                }
+              }
+            });
 
     delayTestFinish(5000);
   }
 
   public void testNavigationControl() throws Exception {
-    final PageWithNavigationControl page = IOC.getBeanManager().lookupBean(PageWithNavigationControl.class)
-            .getInstance();
+    final PageWithNavigationControl page = IOC.getBeanManager()
+            .lookupBean(PageWithNavigationControl.class).getInstance();
 
-    navigation.goTo(PageWithNavigationControl.class, ArrayListMultimap.<String, String>create());
-    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
+    navigation.goTo(PageWithNavigationControl.class,
+            ArrayListMultimap.<String, String> create());
+    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage()
+            .contentType());
 
-    navigation.goTo(PageA.class, ArrayListMultimap.<String, String>create());
-    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
+    navigation.goTo(PageA.class, ArrayListMultimap.<String, String> create());
+    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage()
+            .contentType());
 
     page.control.proceed();
     assertEquals(PageA.class, navigation.getCurrentPage().contentType());
@@ -321,7 +400,8 @@ public class NavigationTest extends AbstractErraiCDITest {
    *          The interval in milliseconds at which to poll the content panel
    *          while waiting for bootstrapping
    */
-  private void runPostAttachTests(final Runnable test, final int timeout, final int interval) {
+  private void runPostAttachTests(final Runnable test, final int timeout,
+          final int interval) {
     delayTestFinish(timeout + 2 * interval);
     final long startTime = System.currentTimeMillis();
 
@@ -334,10 +414,10 @@ public class NavigationTest extends AbstractErraiCDITest {
         }
         else {
           try {
-            assertEquals(RootPanel.get(), navigation.getContentPanel().asWidget().getParent());
+            assertEquals(RootPanel.get(), navigation.getContentPanel()
+                    .asWidget().getParent());
 
-          }
-          catch (AssertionFailedError e) {
+          } catch (AssertionFailedError e) {
             return;
           }
           test.run();

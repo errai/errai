@@ -12,6 +12,7 @@ import org.jboss.errai.ui.nav.client.local.PageRole;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
+import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -55,10 +56,11 @@ public abstract class NavigationGraph {
     @SuppressWarnings("unchecked")
     PageNode<W> page = (PageNode<W>) pagesByName.get(name);
     if (page == null) {
-      throw new IllegalArgumentException("Page not found: \"" + name + "\"");
+      throw new PageNotFoundException("Page not found: \"" + name + "\"");
     }
     return page;
   }
+  
 
   /**
    * Returns an instance of the given page type. If the page is an
@@ -78,7 +80,7 @@ public abstract class NavigationGraph {
         return page;
       }
     }
-    throw new IllegalArgumentException("No page with a widget type of " + type.getName() + " exists");
+    throw new PageNotFoundException("No page with a widget type of " + type.getName() + " exists");
   }
 
   /**
