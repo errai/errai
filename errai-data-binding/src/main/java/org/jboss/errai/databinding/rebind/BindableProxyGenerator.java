@@ -20,6 +20,7 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -332,20 +333,29 @@ public class BindableProxyGenerator {
       if (readMethod != null && writeMethod != null) {
         MetaClass type = readMethod.getReturnType();
         if (!DataBindingUtil.isBindableType(type)) {
-          // If we find a List or Set we copy its elements and unwrap them if necessary
-          // TODO refactor this into a generic solution supporting all collection and map types
-          if (type.isAssignableTo(List.class) || type.isAssignableTo(Set.class)) {
+          // If we find a collection we copy its elements and unwrap them if necessary
+          // TODO support map types
+          if (type.isAssignableTo(Collection.class)) {
             String colVarName = property + "Clone";
             String elemVarName = property + "Elem";
-            if (type.isInterface() || type.isAbstract()) {
+            
+            if ((type.isInterface() || type.isAbstract()) && 
+                    (type.isAssignableTo(List.class) || type.isAssignableTo(Set.class))) {
               MetaClass clazz = (type.isAssignableTo(Set.class)) 
                       ? MetaClassFactory.get(HashSet.class) : MetaClassFactory.get(ArrayList.class); 
               block.addStatement(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(clazz)));
             }
             else {
-              block.addStatement(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(type.getErased())));
+              if (!type.isInterface() && !type.isAbstract()) {
+                block.addStatement(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(type.getErased())));
+              }
+              else {
+                logger.log(TreeLogger.WARN, "Bean validation on collection " + property + " in class " + bindable + 
+                        " won't work. Change to either List or Set or use a concrete type instead.");
+                continue;
+              }
             }
-            // Check if the list element is proxied and unwrap if necessary
+            // Check if the collection element is proxied and unwrap if necessary
             block.addStatement(
               Stmt.nestedCall(target().invoke(readMethod)).foreach(elemVarName, Object.class)
                .append (

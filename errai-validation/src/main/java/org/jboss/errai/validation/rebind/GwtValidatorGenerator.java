@@ -56,12 +56,11 @@ class GwtValidatorGenerator {
 
     ValidationScanner() {
       super(new ConfigurationBuilder().setUrls(ClasspathHelper.forClassLoader())
-      // Override default scanners
-              .setScanners(
-                      new FilterTypeAnnotationsScanner(new SimplePackageFilter(PropertiesUtil.getPropertyValues(
-                              BLACKLIST_PROPERTY, "\\s"))),
-                      new FilterFieldAnnotationsScanner(new SimplePackageFilter(PropertiesUtil.getPropertyValues(
-                              BLACKLIST_PROPERTY, "\\s")))));
+        .setScanners(
+            new FilterTypeAnnotationsScanner(
+                    new SimplePackageFilter(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, "\\s"))),
+            new FilterFieldAnnotationsScanner(
+                    new SimplePackageFilter(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, "\\s")))));
       scan();
     }
 
