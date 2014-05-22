@@ -4,20 +4,24 @@ import org.jboss.errai.ui.nav.client.local.PageRole;
 
 /**
  * Defines an error handler used for page navigation errors.
+ * 
  * @author Divya Dadlani <ddadlani@redhat.com>
  */
 public interface PageNavigationErrorHandler {
-  
+
   /**
-   * @param exception The exception that occurs, triggering the error handler code.
-   * @param pageName The name of the page which we tried to navigate to.
+   * @param exception
+   *          The exception that occurs, triggering the error handler code.
+   * @param pageName
+   *          The name of the page which we tried to navigate to.
    */
   public void handleError(Exception exception, String pageName);
-  
-  
+
   /**
-   * @param exception The exception that occurs, triggering the error handler code.
-   * @param pageRole The role of the page which we tried to navigate to.
+   * @param exception
+   *          The exception that occurs, triggering the error handler code.
+   * @param pageRole
+   *          The role of the page which we tried to navigate to.
    */
   public void handleError(Exception exception, Class<? extends PageRole> pageRole);
 }
