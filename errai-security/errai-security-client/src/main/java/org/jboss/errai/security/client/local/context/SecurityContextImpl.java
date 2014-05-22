@@ -37,15 +37,31 @@ import org.jboss.errai.security.shared.event.LoggedOutEvent;
 import org.jboss.errai.security.shared.service.NonCachingUserService;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.TransitionToRole;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.jboss.errai.ui.nav.client.local.api.LoginPage;
+import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.slf4j.Logger;
+
+import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @ApplicationScoped
 public class SecurityContextImpl implements SecurityContext {
+
+  /**
+   * This page exists so that pages with the {@link LoginPage} and {@link SecurityError} roles must
+   * exist at compile-time.
+   */
+  @Page
+  public static class SecurityRolesConstraintPage extends SimplePanel {
+    @Inject TransitionToRole<LoginPage> loginTransition;
+    @Inject TransitionToRole<SecurityError> securityErrorTransition;
+  }
 
   @Inject
   private Event<LoggedInEvent> loginEvent;
