@@ -138,7 +138,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       else if (pageName.equals("")) {
         throw new GenerationException(
             "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
-                " page with startingPage=true is permitted to have an empty path.");
+                " page with the role DefaultPage is permitted to have an empty path.");
       }
 
       final String fieldName = StringUtils.uncapitalize(pageClass.getName());
