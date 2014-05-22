@@ -15,6 +15,7 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.TransitionToRole;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,9 +36,7 @@ public class ValidationRulesTest {
   @Test
   public void shouldThrowExceptionWhenMoreThenOneDefaultPage() {
     // given
-    mockStatic(ClassScanner.class);
-    List<MetaClass> result = createMetaClassList(StartPage1.class, StartPage2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
+    mockClassScanner(StartPage1.class, StartPage2.class);
 
     // when
     try {
@@ -64,9 +63,7 @@ public class ValidationRulesTest {
   @Test
   public void shouldThrowExceptionMoreUniquePages() {
     // given
-    mockStatic(ClassScanner.class);
-    List<MetaClass> result = createMetaClassList(Page1.class, Page2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
+    mockClassScanner(Page1.class, Page2.class);
 
     // when
     try {
@@ -83,9 +80,7 @@ public class ValidationRulesTest {
   @Test
   public void shouldThrowExceptionWhenNoStartPageDefined() {
     // given
-    mockStatic(ClassScanner.class);
-    List<MetaClass> result = createMetaClassList(Page2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
+    mockClassScanner(Page2.class);
 
     // when
     try {
@@ -96,6 +91,18 @@ public class ValidationRulesTest {
       assertTrue(message.contains("DefaultPage"));
     }
     verify(ClassScanner.class);
+  }
+
+  @Test(expected = GenerationException.class)
+  public void shouldThrowExceptionWhenTransitionToForRoleWithNoPage() throws Exception {
+    mockClassScanner(StartPage1.class, PageWithTransitionToMyUniquePageRole.class);
+    generator.generate(null, null);
+    fail("GenerationException should have been thrown because no PageWithTransitionToMyUniquePageRole was defined.");
+  }
+
+  private void mockClassScanner(Class<?>... pages) {
+    mockStatic(ClassScanner.class);
+    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(createMetaClassList(pages));
   }
 
   @Page(role = DefaultPage.class)
@@ -111,4 +118,9 @@ public class ValidationRulesTest {
 
   @Page(role = ValidationRulesTest.MyUniquePageRole.class)
   private static class Page2 extends SimplePanel {}
+
+  @Page
+  private static class PageWithTransitionToMyUniquePageRole extends SimplePanel {
+    private TransitionToRole<MyUniquePageRole> transition;
+  }
 }

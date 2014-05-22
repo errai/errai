@@ -61,6 +61,7 @@ import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.TransitionToRole;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
@@ -158,10 +159,11 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     }
     ctor.finish();
 
-    renderNavigationToDotFile(pageNames);
-
     validateDefaultPagePresent(pages, pageRoles);
     validateUnique(pageRoles);
+    validateExistingRolesPresent(pages, pageRoles);
+
+    renderNavigationToDotFile(pageNames, pageRoles);
 
     return classBuilder.toJavaString();
   }
@@ -185,6 +187,27 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       final Collection<MetaClass> pages = pageRoles.get(pageRole);
       if (UniquePageRole.class.isAssignableFrom(pageRole) && pages.size() > 1) {
         createValidationError(pages, pageRole);
+      }
+    }
+  }
+
+  private void validateExistingRolesPresent(final Collection<MetaClass> pages,
+          final Multimap<Class<?>, MetaClass> pageRoles) {
+    for (final MetaClass page : pages) {
+      for (final MetaField field : getAllFields(page)) {
+        if (field.getType().getErased().equals(MetaClassFactory.get(TransitionToRole.class))) {
+          final MetaType uniquePageRole = field.getType().getParameterizedType().getTypeParameters()[0];
+          try {
+            getPageWithRole(uniquePageRole, pageRoles);
+          }
+          catch (IllegalStateException e) {
+            // give a more descriptive error message.
+            throw new GenerationException("No @Page with the UniquePageRole " + uniquePageRole.getName()
+                    + " exists to satisfy TransitionToRole<" + uniquePageRole.getName()
+                    + "> in " + page.getFullyQualifiedName() + "."
+                    + "\nThere must be exactly 1 @Page with this role.", e);
+          }
+        }
       }
     }
   }
@@ -486,7 +509,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    * {@code .errai} cache directory.
    *
    */
-  private void renderNavigationToDotFile(BiMap<String, MetaClass> pages) {
+  @SuppressWarnings("unchecked")
+  private void renderNavigationToDotFile(BiMap<String, MetaClass> pages, Multimap<Class<?>, MetaClass> pageRoles) {
     final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath(), "navgraph.gv");
     PrintWriter out = null;
     try {
@@ -495,6 +519,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       final MetaClass transitionToType = MetaClassFactory.get(TransitionTo.class);
       final MetaClass transitionAnchorType = MetaClassFactory.get(TransitionAnchor.class);
       final MetaClass transitionAnchorFactoryType = MetaClassFactory.get(TransitionAnchorFactory.class);
+      final MetaClass transtionToRoleType = MetaClassFactory.get(TransitionToRole.class);
       for (Map.Entry<String, MetaClass> entry : pages.entrySet()) {
         String pageName = entry.getKey();
         MetaClass pageClass = entry.getValue();
@@ -510,11 +535,22 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         out.println();
 
         for (MetaField field : getAllFields(pageClass)) {
-          if (field.getType().getErased().equals(transitionToType)
-                  || field.getType().getErased().equals(transitionAnchorType)
-                  || field.getType().getErased().equals(transitionAnchorFactoryType)) {
-            MetaType targetPageType = field.getType().getParameterizedType().getTypeParameters()[0];
-            String targetPageName = pages.inverse().get(targetPageType);
+          final MetaClass erasedFieldType = field.getType().getErased();
+          if (erasedFieldType.equals(transitionToType)
+                  || erasedFieldType.equals(transitionAnchorType)
+                  || erasedFieldType.equals(transitionAnchorFactoryType)
+                  || erasedFieldType.equals(transtionToRoleType)) {
+
+            final MetaType targetPageType;
+            if (erasedFieldType.equals(transtionToRoleType)) {
+              final MetaType uniquePageRoleType = field.getType().getParameterizedType().getTypeParameters()[0];
+              targetPageType = getPageWithRole(uniquePageRoleType, pageRoles);
+            }
+            else {
+              targetPageType = field.getType().getParameterizedType().getTypeParameters()[0];
+            }
+
+            final String targetPageName = pages.inverse().get(targetPageType);
 
             // entry for the link between nodes
             out.println("\"" + pageName + "\" -> \"" + targetPageName + "\" [label=\"" + field.getName() + "\"]");
@@ -531,6 +567,23 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         out.close();
       }
     }
+  }
+
+  private MetaType getPageWithRole(final MetaType uniquePageRole, final Multimap<Class<?>, MetaClass> pageRoles) {
+    for (final Class<?> pageRole : pageRoles.keySet()) {
+      if (UniquePageRole.class.isAssignableFrom(pageRole) && uniquePageRole.getName().equals(pageRole.getSimpleName())) {
+        final Collection<MetaClass> matchingPages = pageRoles.get(pageRole);
+        if (matchingPages.size() == 1) {
+          return matchingPages.iterator().next();
+        }
+        else {
+          throw new IllegalStateException("Expected exactly 1 page with the role, " + uniquePageRole.getName()
+                  + ", but found " + matchingPages.size());
+        }
+      }
+    }
+
+    throw new IllegalStateException("No page with the role " + uniquePageRole.getName() + " was found.");
   }
 
   private static List<MetaField> getAllFields(MetaClass c) {
