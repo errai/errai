@@ -161,6 +161,12 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-codegen</artifactId>
+        <type>test-jar</type>      
+        <version>${project.version}</version>      
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
         <artifactId>errai-common</artifactId>
         <version>${project.version}</version>
       </dependency>
