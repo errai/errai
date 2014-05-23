@@ -890,6 +890,23 @@
         <version>8.0.0.Final</version>        
       </dependency>
 
+      <dependency>
+        <groupId>org.lesscss</groupId>
+        <artifactId>lesscss</artifactId>
+        <version>1.3.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.7.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.enhancer.engines.htmlextractor</artifactId>
+        <version>0.10.0</version>      
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
