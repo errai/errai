@@ -1,11 +1,14 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 
+import com.google.common.collect.Maps;
 /**
  * @author Mike Brock
  */
@@ -44,23 +47,34 @@ public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
    *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
-  public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManagerImpl beanManager,
-                                          final Class<T> type,
-                                          final Class<?> beanType,
-                                          final Annotation[] qualifiers,
-                                          final String name,
-                                          final boolean concrete,
-                                          final AsyncBeanProvider<T> callback,
-                                          final T instance,
+    public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManagerImpl beanManager, final Class<T> type, final Class<?> beanType, final Annotation[] qualifiers, final String name,
+            final boolean concrete, final AsyncBeanProvider<T> callback, final T instance,
                                           final Class<Object> beanActivatorType) {
-
     return new AsyncSingletonBean<T>(
         beanManager, type, beanType, qualifiers, name, concrete, callback, instance, beanActivatorType);
-  }
-
-  @Override
-  public void getInstance(final CreationalCallback<T> callback, final AsyncCreationalContext context) {
-    callback.callback(instance);
+    }
+    
+    //ensures that even when having multiple async beans only one instance is created global
+    private static final Map<Class<?>, SingletonBeanProvider<?>> lazySingletons = new HashMap<Class<?>, SingletonBeanProvider<?>>();
+    
+    @Override
+    public synchronized void getInstance(CreationalCallback<T> callback, final AsyncCreationalContext context) {
+        SingletonBeanProvider<T> singletonBeanProvider = (SingletonBeanProvider<T>)lazySingletons.get(beanType);
+        if (singletonBeanProvider == null) {
+            singletonBeanProvider = new SingletonBeanProvider<T>(){
+                @Override
+                protected void getNewInstance(CreationalCallback<T> callback) {
+                    newInstance(callback);
+                };
+            };
+            lazySingletons.put(beanType, singletonBeanProvider);
+        }
+        singletonBeanProvider.getInstance(callback);
+    }
+    
+    @Override
+    public void getInstance(CreationalCallback<T> callback) {
+        getInstance(callback, null);
   }
 
   @Override
