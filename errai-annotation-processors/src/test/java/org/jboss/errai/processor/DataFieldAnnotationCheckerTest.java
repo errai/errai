@@ -50,6 +50,14 @@ public class DataFieldAnnotationCheckerTest extends AbstractProcessorTest {
 
     assertSuccessfulCompilation(diagnostics);
   }
+  
+  @Test
+  public void shouldCompileCleanlyWhenAllRulesAreFollowedInSubTemplate() throws FileNotFoundException {
+    final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
+            "org/jboss/errai/processor/testcase/DataFieldNoWarningsSubtemplate.java");
+
+    assertSuccessfulCompilation(diagnostics);
+  }
 
   @Test
   public void shouldPrintWarningOnDataFieldInNonTemplatedClass() throws FileNotFoundException {
