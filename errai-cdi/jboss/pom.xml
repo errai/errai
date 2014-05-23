@@ -22,8 +22,7 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-client-local-class-hider</artifactId>
-      <version>${parent.version}</version>
+      <artifactId>errai-client-local-class-hider</artifactId>      
     </dependency>
 
     <!-- JBoss -->
