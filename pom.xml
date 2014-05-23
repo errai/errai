@@ -753,6 +753,12 @@
       </dependency>
 
       <dependency>
+        <groupId>de.benediktmeurer.gwt-slf4j</groupId>
+        <artifactId>gwt-slf4j</artifactId>
+        <version>0.0.2</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.sonatype.sisu</groupId>
         <artifactId>sisu-inject-plexus</artifactId>
         <version>2.3.0</version>

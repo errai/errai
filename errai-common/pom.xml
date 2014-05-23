@@ -65,8 +65,7 @@
     
     <dependency>
       <groupId>de.benediktmeurer.gwt-slf4j</groupId>
-      <artifactId>gwt-slf4j</artifactId>
-      <version>0.0.2</version>
+      <artifactId>gwt-slf4j</artifactId>      
     </dependency>
 
     <dependency>
