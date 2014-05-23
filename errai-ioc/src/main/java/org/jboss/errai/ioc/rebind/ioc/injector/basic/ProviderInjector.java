@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ioc.client.LazySingleton;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -54,6 +55,7 @@ public class ProviderInjector extends TypeInjector {
     this.testMock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
+    this.lazySingleton=type.getAnnotation(LazySingleton.class)!=null;
 
     GeneratorContext genCtx = context.getProcessingContext().getGeneratorContext();
     final Collection<MetaClass> toDisable = new ArrayList<MetaClass>(ClassScanner.getSubTypesOf(type, genCtx));

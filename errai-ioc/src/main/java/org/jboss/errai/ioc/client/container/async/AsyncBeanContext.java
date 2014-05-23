@@ -21,6 +21,8 @@ import com.google.gwt.user.client.Timer;
 public class AsyncBeanContext {
   private String comment;
   private Logger logger = LoggerFactory.getLogger(getClass());
+  private static String DUMMY_STRING = "INIT_PLACEHOLDER_DUMMY_STRING";
+
 
   private static final CreationalCallback<?> DUMMY = new CreationalCallback<Object>() {
     @Override
@@ -29,7 +31,7 @@ public class AsyncBeanContext {
 
     @Override
     public String toString() {
-      return "INIT_PLACEHOLDER";
+            return DUMMY_STRING;
     }
   };
 
@@ -65,22 +67,24 @@ public class AsyncBeanContext {
 
   private Object constructedObject;
 
+    int TIME_OUT_TIMER = 10000;
+    
   private final Timer timeOut = new Timer() {
     @Override
     public void run() {
       timeOut.cancel();
-      logger.warn("FAILED FOR: " + comment);
-
-      logger.warn("unsatisfied dependencies:");
-      for (final CreationalCallback callback : allDependencies) {
-        logger.warn(" --unsatisfied-> " + callback.toString());
-      }
-    }
-  };
-
+      logger.error("AsyncBeanContext timed out after (" + TIME_OUT_TIMER + "ms): " + comment);
+            
+      logger.error("All dependencies: " + allDependencies);
+      logger.error( "Contruct dependencies: " + constructDependencies);
+     }
+    };
+    
+    public static boolean asyncTesting = false;
+    
   public AsyncBeanContext() {
     allDependencies.add(DUMMY);
-    timeOut.schedule(10000);
+    timeOut.schedule(TIME_OUT_TIMER);
   }
 
   public void setConstructedObject(final Object constructedObject) {
@@ -167,13 +171,20 @@ public class AsyncBeanContext {
         finishFireState = FireState.FIRED;
 
         final Iterator<Runnable> runnableIterable = onFinishRunnables.iterator();
+        
         while (runnableIterable.hasNext()) {
-          try {
+           try {
             runnableIterable.next().run();
           }
           catch (Throwable t) {
             if (GWT.isProdMode() || !(t instanceof AssertionError)) {
-              t.printStackTrace();
+            	if (t.getCause() != null) {
+                     // log("!!critical error with runnable", t.getCause());
+                     GWT.getUncaughtExceptionHandler().onUncaughtException(t.getCause());
+                 }
+        		else 
+                    // log("!!critical error with runnable", t);
+                    GWT.getUncaughtExceptionHandler().onUncaughtException(t);
             }
             else {
               /*
