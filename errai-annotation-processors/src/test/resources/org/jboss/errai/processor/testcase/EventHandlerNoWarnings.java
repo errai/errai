@@ -5,15 +5,19 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.dom.client.Element;
 
 @Templated
 public class EventHandlerNoWarnings extends Composite {
 
   @DataField TextBox myTextBox;
+  
+  @DataField Element someBasicElement;
 
   /** Correct usage for events on a child widget: event handler refers to existing field in this class. */
   @EventHandler("myTextBox")
@@ -31,6 +35,12 @@ public class EventHandlerNoWarnings extends Composite {
   @SinkNative(Event.ONMOUSEOVER)
   @EventHandler("image-with-sinknative")
   void onMouseOver(Event e) {
+    // no op
+  }
+  
+  /** Correct usage of SinkNative: event handler refers to existing element in template. */
+  @EventHandler("someBasicElement")
+  void onBasicElementClick(ClickEvent e) {
     // no op
   }
 }

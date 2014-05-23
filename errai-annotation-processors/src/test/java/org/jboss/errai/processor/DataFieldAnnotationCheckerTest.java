@@ -58,5 +58,6 @@ public class DataFieldAnnotationCheckerTest extends AbstractProcessorTest {
 
     assertCompilationMessage(diagnostics, Kind.WARNING, 9, 3, "no effect");
   }
+  
 
 }

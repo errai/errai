@@ -29,12 +29,13 @@ public class DataFieldAnnotationChecker extends AbstractProcessor {
     final Types types = processingEnv.getTypeUtils();
     final Elements elements = processingEnv.getElementUtils();
     final TypeMirror gwtWidgetType = elements.getTypeElement(TypeNames.GWT_WIDGET).asType();
+    final TypeMirror gwtElementType = elements.getTypeElement(TypeNames.GWT_ELEMENT).asType();
     
     for (TypeElement annotation : annotations) {
       for (Element target : roundEnv.getElementsAnnotatedWith(annotation)) {
-        if (!types.isAssignable(target.asType(), gwtWidgetType)) {
+        if (!types.isAssignable(target.asType(), gwtWidgetType) && !types.isAssignable(target.asType(), gwtElementType)) {
           processingEnv.getMessager().printMessage(
-                  Kind.ERROR, "Fields anotated with @DataField must be assignable to Widget", target);
+                  Kind.ERROR, "Fields anotated with @DataField must be assignable to Widget or Element", target);
         }
         
         Element enclosingClassElement = target.getEnclosingElement();
