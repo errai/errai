@@ -61,4 +61,14 @@ public interface LifecycleEvent<T> {
    */
   public void veto();
 
+  /**
+   * This method should only be called from within
+   * {@link LifecycleListener#observeEvent(LifecycleEvent)}. The instance is set immediately before
+   * calling listeners and unset immediately after.
+   *
+   * @return The instance for which this event has been fired or {@code null} if this event is not
+   *         actively being fired.
+   */
+  public T getInstance();
+
 }

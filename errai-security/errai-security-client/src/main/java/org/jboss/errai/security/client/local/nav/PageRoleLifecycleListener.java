@@ -46,11 +46,10 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
             || !securityContext.getCachedUser().hasAllRoles(roles)) {
       event.veto();
 
-      // FIXME Need to cash the page we were trying to go to, not the one we're currently on!
       if (!securityContext.hasCachedUser())
-        securityContext.redirectToLoginPage();
+        securityContext.redirectToLoginPage(event.getInstance().getClass());
       else
-        securityContext.redirectToSecurityErrorPage();
+        securityContext.redirectToSecurityErrorPage(event.getInstance().getClass());
     }
   }
 

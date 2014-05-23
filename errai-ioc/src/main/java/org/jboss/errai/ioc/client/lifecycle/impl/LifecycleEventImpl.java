@@ -21,20 +21,24 @@ public abstract class LifecycleEventImpl<T> implements LifecycleEvent<T> {
 
   @Override
   public void fireAsync(final T instance, final LifecycleCallback callback) {
-    this.instance = instance;
     IOC.getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class)
             .getInstance(new CreationalCallback<LifecycleListenerRegistrar>() {
 
               @Override
               public void callback(LifecycleListenerRegistrar registrar) {
                 isVetoed = false;
+                @SuppressWarnings("unchecked")
                 final Iterable<LifecycleListener<T>> listeners = registrar
                         .getListeners((Class<? extends LifecycleEvent<T>>) getEventType(), instance);
+
+                LifecycleEventImpl.this.instance = instance;
                 for (final LifecycleListener<T> listener : listeners) {
                   if (isVetoed)
                     break;
                   listener.observeEvent(LifecycleEventImpl.this);
                 }
+                LifecycleEventImpl.this.instance = null;
+
                 final boolean outcome = !isVetoed;
                 if (outcome && getEventType().equals(Destruction.class)) {
                   registrar.endInstanceLifecycle(instance);
@@ -56,5 +60,9 @@ public abstract class LifecycleEventImpl<T> implements LifecycleEvent<T> {
    * {@link Access} rather than {@link AccessImpl}).
    */
   public abstract Class<?> getEventType();
+
+  public T getInstance() {
+    return instance;
+  }
 
 }
