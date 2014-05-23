@@ -18,22 +18,19 @@
 
     <dependency>
       <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-api</artifactId>
-      <version>${picketlink.version}</version>
+      <artifactId>picketlink-api</artifactId>      
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-impl</artifactId>
-      <version>${picketlink.version}</version>
+      <artifactId>picketlink-impl</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <scope>provided</scope>
-      <version>${servlet.api.version}</version>
+      <scope>provided</scope>      
     </dependency>
 
     <dependency>

@@ -918,12 +918,6 @@
         <artifactId>org.apache.stanbol.enhancer.engines.htmlextractor</artifactId>
         <version>0.10.0</version>      
       </dependency>
-
-      <dependency>
-        <groupId>org.apache.deltaspike.core</groupId>
-        <artifactId>deltaspike-core-api</artifactId>
-        <version>0.4</version>      
-      </dependency>
     </dependencies>
 
   </dependencyManagement>
