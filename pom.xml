@@ -876,6 +876,20 @@
         <artifactId>asm</artifactId>
         <version>4.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.jboss.as</groupId>
+        <artifactId>jboss-as-dist</artifactId>
+        <version>7.1.1.Final</version>  
+        <type>zip</type>            
+      </dependency>
+
+      <dependency>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-cli</artifactId>
+        <version>8.0.0.Final</version>        
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
