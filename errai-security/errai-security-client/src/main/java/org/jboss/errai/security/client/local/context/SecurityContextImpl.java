@@ -39,12 +39,16 @@ import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionToRole;
-import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
+import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+import org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.slf4j.Logger;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
@@ -54,13 +58,17 @@ import com.google.gwt.user.client.ui.SimplePanel;
 public class SecurityContextImpl implements SecurityContext {
 
   /**
-   * This page exists so that pages with the {@link LoginPage} and {@link SecurityError} roles must
-   * exist at compile-time.
+   * This page exists so that the existence of pages with {@link LoginPage} and
+   * {@link SecurityError} roles can be enforced at compile-time. Currently the
+   * {@link NavigationGraphGenerator} only scans {@link Page} annotated classes for transitions. For
+   * performance reasons, this is preferrable to scanning the whole classpath.
    */
   @Page
   public static class SecurityRolesConstraintPage extends SimplePanel {
-    @Inject TransitionToRole<LoginPage> loginTransition;
-    @Inject TransitionToRole<SecurityError> securityErrorTransition;
+    @SuppressWarnings("unused")
+    @Inject private TransitionToRole<LoginPage> loginTransition;
+    @SuppressWarnings("unused")
+    @Inject private TransitionToRole<SecurityError> securityErrorTransition;
   }
 
   @Inject
@@ -81,7 +89,7 @@ public class SecurityContextImpl implements SecurityContext {
   @Inject
   private Caller<NonCachingUserService> userServiceCaller;
 
-  private String lastPageCache;
+  private Class<? extends IsWidget> lastPageCache;
 
   @PostConstruct
   private void setup() {
@@ -123,33 +131,35 @@ public class SecurityContextImpl implements SecurityContext {
   }
 
   @Override
-  public void navigateToPage(final Class<? extends UniquePageRole> roleClass, final String lastPage) {
-    final String pageName;
-    if (lastPage != null) {
-      pageName = lastPage;
-    }
-    // Edge case: first page load of app.
-    else if (navigation.getCurrentPage() != null) {
-      pageName = navigation.getCurrentPage().name();
+  public void redirectToLoginPage() {
+    redirectToLoginPage(getCurrentPage());
+  }
+
+  private Class<? extends IsWidget> getCurrentPage() {
+    if (navigation.getCurrentPage() != null) {
+      return navigation.getCurrentPage().contentType();
     }
     else {
-      pageName = null;
+      // Guaranteed to exist at compile-time.
+      return navigation.getPagesByRole(DefaultPage.class).iterator().next().contentType();
     }
-
-    if (pageName != null) {
-      lastPageCache = pageName;
-    }
-    navigation.goToWithRole(roleClass);
   }
 
   @Override
-  public void navigateToPage(final Class<? extends UniquePageRole> roleClass) {
-    navigateToPage(roleClass, null);
+  public void redirectToLoginPage(final Class<? extends IsWidget> fromPage) {
+    lastPageCache = fromPage;
+    navigation.goToWithRole(LoginPage.class);
   }
 
   @Override
-  public String getLastCachedPageName() {
-    return lastPageCache;
+  public void redirectToSecurityErrorPage() {
+    redirectToSecurityErrorPage(getCurrentPage());
+  }
+
+  @Override
+  public void redirectToSecurityErrorPage(final Class<? extends IsWidget> fromPage) {
+    lastPageCache = fromPage;
+    navigation.goToWithRole(SecurityError.class);
   }
 
   @Override
@@ -170,15 +180,23 @@ public class SecurityContextImpl implements SecurityContext {
       loginEvent.fire(new LoggedInEvent(user));
     }
   }
+  
+  @Override
+  public void navigateBackOrToPage(final Class<? extends IsWidget> pageType) {
+    if (lastPageCache != null) {
+      navigation.goTo(lastPageCache, ImmutableMultimap.<String, String>of());
+      lastPageCache = null;
+    }
+    else {
+      navigation.goTo(pageType, ImmutableListMultimap.<String, String>of());
+    }
+  }
 
   @Override
   public void navigateBackOrHome() {
-    if (lastPageCache != null) {
-      navigation.goTo(lastPageCache);
-    }
-    else {
-      navigation.goToWithRole(DefaultPage.class);
-    }
+    // Guaranteed to exist at compile-time.
+    final PageNode<? extends IsWidget> defaultPageNode = navigation.getPagesByRole(DefaultPage.class).iterator().next();
+    navigateBackOrToPage(defaultPageNode.contentType());
   }
 
   @Override

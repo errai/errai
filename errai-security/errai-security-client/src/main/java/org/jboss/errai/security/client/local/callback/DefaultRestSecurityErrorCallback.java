@@ -89,10 +89,10 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
     if (wrapped.error(message, throwable)) {
       try {
         if (throwable instanceof UnauthenticatedException) {
-          context.navigateToPage(LoginPage.class);
+          context.redirectToLoginPage();
         }
         else if (throwable instanceof UnauthorizedException) {
-          context.navigateToPage(SecurityError.class);
+          context.redirectToSecurityErrorPage();
         }
         else {
           return true;
