@@ -20,104 +20,102 @@
     <!-- ERRAI Libraries -->
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-common</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-common</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-bus</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-bus</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-ioc</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-ioc</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-tools</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-tools</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jaxrs-client</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-jaxrs-client</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jaxrs-provider</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-jaxrs-provider</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-cdi-client</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-cdi-client</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-weld-integration</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-weld-integration</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-javax-enterprise</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-javax-enterprise</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-uibinder</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-uibinder</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-data-binding</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-data-binding</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-validation</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-validation</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jpa-client</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-jpa-client</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-config</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-config</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-ui</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-ui</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-navigation</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-navigation</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-js</artifactId>
-      <version>${project.version}</version>
+      <artifactId>errai-js</artifactId>      
+    </dependency>
+
+     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-client</artifactId>      
+    </dependency>
+
+     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-server</artifactId>      
+    </dependency>
+
+     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-picketlink</artifactId>      
     </dependency>
   </dependencies>
 
