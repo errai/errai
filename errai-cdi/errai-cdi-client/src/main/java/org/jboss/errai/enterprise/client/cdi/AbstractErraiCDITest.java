@@ -17,6 +17,8 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
+
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
@@ -106,6 +108,17 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
   protected void asyncTest(final Runnable runnable) {
     asyncTest();
-    InitVotes.registerOneTimeInitCallback(runnable);
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+
+      @Override
+      public void run() {
+        new Timer() {
+          @Override
+          public void run() {
+            runnable.run();
+          }
+        }.schedule(100);
+      }
+    });
   }
 }
