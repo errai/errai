@@ -1,12 +1,12 @@
 package org.jboss.errai.ui.nav.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -19,6 +19,7 @@ import org.jboss.errai.ui.nav.client.local.TransitionToRole;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -100,9 +101,36 @@ public class ValidationRulesTest {
     fail("GenerationException should have been thrown because no PageWithTransitionToMyUniquePageRole was defined.");
   }
 
+  @Test
+  public void doNotValidateIfOnlyBlacklistedPages() throws Exception {
+    overrideBlacklistedClassNames(BlacklistedPage.class.getCanonicalName());
+    mockClassScanner(BlacklistedPage.class);
+
+    try {
+      generator.generate(null, null);
+    }
+    catch (GenerationException e) {
+      fail("Validation should not have ocurred.");
+    }
+  }
+
   private void mockClassScanner(Class<?>... pages) {
-    mockStatic(ClassScanner.class);
+    PowerMockito.mockStatic(ClassScanner.class);
     when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(createMetaClassList(pages));
+  }
+
+  private void overrideBlacklistedClassNames(final String... names) throws SecurityException, NoSuchFieldException,
+          IllegalArgumentException, IllegalAccessException {
+    final Field blacklistedField = NavigationGraphGenerator.class.getDeclaredField("BLACKLISTED_PAGES");
+
+    blacklistedField.setAccessible(true);
+
+    // Change the field to not be final so that we can overwrite it.
+    final Field fieldModifiers = Field.class.getDeclaredField("modifiers");
+    fieldModifiers.setAccessible(true);
+    fieldModifiers.setInt(blacklistedField, fieldModifiers.getInt(blacklistedField) & ~Modifier.FINAL);
+
+    blacklistedField.set(null, Arrays.asList(names));
   }
 
   @Page(role = DefaultPage.class)
@@ -122,5 +150,9 @@ public class ValidationRulesTest {
   @Page
   private static class PageWithTransitionToMyUniquePageRole extends SimplePanel {
     private TransitionToRole<MyUniquePageRole> transition;
+  }
+
+  @Page
+  private static class BlacklistedPage extends SimplePanel {
   }
 }
