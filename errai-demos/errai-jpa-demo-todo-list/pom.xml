@@ -269,7 +269,6 @@
           <failOnMissingWebXml>false</failOnMissingWebXml>
           <warName>${project.artifactId}</warName>
           <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
-          <warSourceExcludes>WEB-INF/web.xml</warSourceExcludes>
         </configuration>
       </plugin>
       <plugin>
@@ -286,7 +285,7 @@
                 <include>src/main/webapp/WEB-INF/deploy/**</include>
                 <include>src/main/webapp/WEB-INF/classes/**</include>
                 <include>src/main/webapp/WEB-INF/lib/**</include>
-                <include>src/main/webapp/App/**</include>
+                <include>src/main/webapp/TodoList/**</include>
                 <include>**/gwt-unitCache/**</include>
                 <include>**/*.JUnit/**</include>
                 <include>monitordb.*</include>
