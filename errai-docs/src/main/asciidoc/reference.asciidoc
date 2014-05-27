@@ -6265,7 +6265,11 @@ Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on h
 
 === How it Works
 
-Errai Navigation has three main parts: the [code]+@Page+ annotation marks any widget as a page; the [code]+TransitionTo<P>+ interface is an injectable type that provides a link to another page; and the [code]+Navigation+ singleton offers control over the navigation system as a whole.
+Errai Navigation has these main parts:
+
+* The [code]+@Page+ annotation marks any widget as a page.
+* The [code]+TransitionTo<P>+, [code]+TransitionAnchor<P>+, and [code]+TransitionToRole<R>+ classes are injectable types that provide links to other pages.
+* The [code]+Navigation+ singleton offers control over the navigation system as a whole.
 
 The [code]+Navigation+ singleton owns a GWT Panel called the _navigation panel_ . This panel always contains a widget corresponding to the the fragment ID (the part after the # symbol) in the browser's location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser's location bar is updated to reflect the new current page.
 
@@ -6319,6 +6323,13 @@ public class WelcomePage extends Composite {
 
 Pages are looked up as CDI beans, so you can inject other CDI beans into fields or a constructor. Pages can also have [code]+@PostConstruct+ and [code]+@PreDestroy+ CDI methods.
 
+===== Page Roles
+
+`DefaultPage` is just one example of a page role. A page role is simply an interface used to mark `@Page` types. The main uses for page roles:
+
+* Using the `Navigation` singleton, you can look up all pages that have a specific role.
+* If a role is unique (as is the case with `DefaultPage`) then it should extend `UniquePageRole`, making it possible to navigate to the page by its role.
+
 [[sid-54493676_ErraiUINavigation-PageLifecycle]]
 
 ==== Page Lifecycle
@@ -6343,7 +6354,7 @@ public class ItemPage extends VerticalPanel {
 }
 ----
 
-Page Lifecycle:
+===== Lifecycle Phases
 
 . The fragment identifier in the URL changes
 
@@ -6370,10 +6381,13 @@ Page Lifecycle:
 
 . The [code]+@PageShown+ method of the new page is invoked.
 
+===== Optional Parameters
 
-The [code]+@PageShowing+ and [code]+@PageShown+ methods are permitted one optional parameter of type [code]+HistoryToken+ ---more on this in the next section.
+The [code]+@PageShowing+ and [code]+@PageShown+ methods are permitted one optional parameter of type [code]+HistoryToken+ -- more on this in the next section.
 
 The [code]+@PageHiding+ method is also permitted one optional parameter of type [code]+NavigationControl+. If the parameter is present, the page navigation will not be carried out until `NavigationControl.proceed()` is invoked. This is useful for interrupting page navigations and then resuming at a later time (for example, to prompt the user to save their work before transitioning to a new page).
+
+===== Page Instance Lifespan
 
 The lifespan of a Page instance is governed by CDI scope: Dependent and implict-scoped page beans are instantiated each time the user navigates to them, whereas Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.
 
@@ -6482,6 +6496,12 @@ public class WelcomePage extends Composite {
   }
 }
 ----
+
+==== Declaring a Link By UniquePageRole
+
+For convenience, it is also possible to transition to a page by its role using an injected `TransitionToRole<R>` where `R` is an interface extending `UniquePageRole`. This type is used exactly as the `TransitionTo`: just inject a parameterized instance and invoke the `go()` method.
+
+By injecting a `TransitionToRole` into a `@Page`, Errai will verify the existence of a single page with this role at compile-time.
 
 [[sid-54493676_ErraiUINavigation-InstallingtheNavigationPanelintotheUserInterface]]
 
