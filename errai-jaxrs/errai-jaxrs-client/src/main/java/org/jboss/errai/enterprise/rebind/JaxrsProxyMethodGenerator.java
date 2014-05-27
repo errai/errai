@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -46,6 +47,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
@@ -313,6 +315,7 @@ public class JaxrsProxyMethodGenerator {
   private Statement generateInterceptorLogic(List<Class<?>> interceptors) {
     JaxrsResourceMethodParameters jaxrsParams =
         JaxrsResourceMethodParameters.fromMethod(resourceMethod.getMethod(), "parameters");
+    
     Statement callContext =
         ProxyUtil.generateProxyMethodCallContext(context, RestCallContext.class, declaringClass,
             resourceMethod.getMethod(), generateInterceptedRequest(), interceptors)
@@ -333,6 +336,34 @@ public class JaxrsProxyMethodGenerator {
                       .finish())
               )
               .append(Stmt.loadVariable("this").invoke("proceed"))
+            .finish()
+            .publicOverridesMethod("proceed", Parameter.of(ResponseCallback.class, "interceptorCallback", true), 
+                    Parameter.of(ErrorCallback.class, "interceptorErrorCallback", true))
+              .append(
+                  Stmt.declareVariable(ErrorCallback.class).asFinal().named("providedErrorCallback").initializeWith(
+                      Stmt.loadStatic(declaringClass, "this").loadField("errorCallback")))
+              .append(
+                  Stmt.loadVariable("errorCallback").assignValue(Stmt.newObject(ErrorCallback.class).extend()
+                      .publicOverridesMethod("error", Parameter.of(Object.class, "message"),
+                          Parameter.of(Throwable.class, "throwable"))
+                      .append(
+                          Stmt.loadVariable("interceptorErrorCallback").invoke("error", Variable.get("message"),
+                              Variable.get("throwable")))
+                      .append(
+                          Stmt.if_(
+                              BooleanExpressionBuilder.create(
+                                  Stmt.loadVariable("providedErrorCallback"), BooleanOperator.NotEquals, Stmt
+                                      .loadLiteral(null)))
+                              .append(
+                                  Stmt.loadVariable("providedErrorCallback").invoke("error",
+                                      Variable.get("message"),
+                                      Variable.get("throwable")))
+                              .finish())
+                      .append(Stmt.load(true).returnValue())
+                      .finish()
+                      .finish())
+              )
+              .append(Stmt.loadVariable("this").invoke("proceed", Variable.get("interceptorCallback")))
             .finish()
             .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
               .append(new StringStatement("super.setParameters(parameters)"))
@@ -372,9 +403,9 @@ public class JaxrsProxyMethodGenerator {
    * @return statement representing the request
    */
   private Statement generateInterceptedRequest() {
-    return generateRequest(Stmt.nestedCall(
-        new StringStatement("getRequestBuilder()", MetaClassFactory.get(RequestBuilder.class))),
-        Stmt.loadStatic(declaringClass, "this"));
+    return generateRequest(
+            Stmt.nestedCall(new StringStatement("getRequestBuilder()", MetaClassFactory.get(RequestBuilder.class))),
+            Stmt.loadStatic(declaringClass, "this"));
   }
 
   /**
@@ -395,8 +426,9 @@ public class JaxrsProxyMethodGenerator {
    * 
    * @return statement representing the request
    */
-  private Statement generateRequest(final ContextualStatementBuilder requestBuilder,
-      final ContextualStatementBuilder proxy) {
+  private Statement generateRequest(final ContextualStatementBuilder requestBuilder, 
+          final ContextualStatementBuilder proxy) {
+    
     Statement sendRequest = null;
     if (resourceMethod.getParameters().getEntityParameter() == null) {
       sendRequest = proxy.invoke("sendRequest", requestBuilder, null, responseDemarshallingCallback());

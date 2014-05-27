@@ -22,11 +22,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallBypassingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorOne;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorTwo;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorUsingResponseAndErrorCallback;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorUsingResponseCallback;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallListParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallParameterManipulatingInterceptor;
@@ -74,4 +76,9 @@ public interface InterceptedCallTestService {
   @Path("/6")
   @InterceptedCall(RestCallInterceptorUsingResponseCallback.class)
   public String interceptedGetWithResponseCallback(@QueryParam("result") String result);
+  
+  @GET
+  @Path("/7")
+  @InterceptedCall(RestCallInterceptorUsingResponseAndErrorCallback.class)
+  public Response interceptedGetWithResponseAndErrorCallback(@QueryParam("result") String result);
 }

@@ -84,4 +84,11 @@ public class InterceptedCallIntegrationTest extends AbstractErraiJaxrsTest {
         new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
         .interceptedGetWithResponseCallback("result");
   }
+  
+  @Test
+  public void testInterceptedRestCallWithResponseAndErrorCallback() {
+    call(InterceptedCallTestService.class,
+        new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
+        .interceptedGetWithResponseAndErrorCallback("result");
+  }
 }
