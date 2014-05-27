@@ -61,7 +61,7 @@ public class SecurityContextImpl implements SecurityContext {
    * This page exists so that the existence of pages with {@link LoginPage} and
    * {@link SecurityError} roles can be enforced at compile-time. Currently the
    * {@link NavigationGraphGenerator} only scans {@link Page} annotated classes for transitions. For
-   * performance reasons, this is preferrable to scanning the whole classpath.
+   * performance reasons, this is preferable to scanning the whole classpath.
    */
   @Page
   public static class SecurityRolesConstraintPage extends SimplePanel {
@@ -96,7 +96,7 @@ public class SecurityContextImpl implements SecurityContext {
     performLoginStatusChangeActions(userCache.getUser());
     InitVotes.waitFor(SecurityContext.class);
     InitVotes.registerOneTimeDependencyCallback(ClientMessageBus.class, new Runnable() {
-      
+
       @Override
       public void run() {
         if (((ClientMessageBusImpl) ErraiBus.get()).getState() == BusState.CONNECTED) {
@@ -180,7 +180,7 @@ public class SecurityContextImpl implements SecurityContext {
       loginEvent.fire(new LoggedInEvent(user));
     }
   }
-  
+
   @Override
   public void navigateBackOrToPage(final Class<? extends IsWidget> pageType) {
     if (lastPageCache != null) {

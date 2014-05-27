@@ -78,8 +78,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
- * Generates the GeneratedNavigationGraph class based on {@code @Page} and {@code @DefaultPage}
- * annotations.
+ * Generates the GeneratedNavigationGraph class based on {@code @Page} annotations.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
