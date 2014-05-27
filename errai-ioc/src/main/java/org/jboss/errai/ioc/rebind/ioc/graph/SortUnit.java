@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph;
 
-import com.google.gwt.dev.util.collect.IdentityHashSet;
-import org.jboss.errai.codegen.meta.MetaClass;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +23,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+
+import com.google.gwt.dev.util.collect.IdentityHashSet;
 
 /**
  * A sort unit is a logical sorting element for the IOC container on which to order operations in order to correctly
@@ -181,31 +182,40 @@ public class SortUnit implements Comparable<SortUnit> {
 
   @Override
   public String toString() {
-    return _toString(new HashSet<SortUnit>());
+    return _toString(new HashSet<SortUnit>(), 0);
   }
 
-  private String _toString(Set<SortUnit> visited) {
-    return "(depth:" + getDepth() + ")" + type.toString()
-            + " => " + _renderDependencyTree(visited, this);
+  private String _toString(Set<SortUnit> visited, final int indent) {
+    return "\n" + spaces(indent) + "(depth:" + getDepth() + ")" + type.toString()
+            + " => " + _renderDependencyTree(visited, this, indent + 1);
   }
 
   private static String _renderDependencyTree(final Set<SortUnit> visited,
-                                              final SortUnit visit) {
+                                              final SortUnit visit,
+                                              final int indent) {
     if (visited.contains(visit)) {
-      return "<CYCLE ON: " + visit.getType().getFullyQualifiedName() + ">";
+      return "\n" + spaces(indent) + "<CYCLE ON: " + visit.getType().getFullyQualifiedName() + ">";
     }
     visited.add(visit);
 
     final StringBuilder sb = new StringBuilder("[");
     final Iterator<SortUnit> iter = visit.getDependencies().iterator();
     while (iter.hasNext()) {
-      sb.append(iter.next()._toString(visited));
+      sb.append(iter.next()._toString(visited, indent));
       if (iter.hasNext()) {
-        sb.append(", ");
+        sb.append(",");
       }
     }
 
     return sb.append("]").toString();
+  }
+
+  private static String spaces(int indent) {
+    StringBuilder sb = new StringBuilder(indent * 2);
+    for (int i = 0; i < indent; i++) {
+      sb.append("  ");
+    }
+    return sb.toString();
   }
 
   private boolean _hasCycle(final Set<SortUnit> visited) {

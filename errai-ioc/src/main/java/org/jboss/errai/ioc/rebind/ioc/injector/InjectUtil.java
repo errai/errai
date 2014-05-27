@@ -552,7 +552,7 @@ public class InjectUtil {
           ctx.getProxiedInjector(clazz, qualifyingMetadata);
       return proxyInjector;
     }
-    else if (ctx.hasTopLevelType(clazz)) {
+    else if (ctx.hasTopLevelType(clazz) || ctx.typeContainsGraphCycles(clazz)) {
       proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
       return proxyInjector;
@@ -659,7 +659,7 @@ public class InjectUtil {
   private static Statement recordInlineReference(final Statement beanCreationStmt,
                                                  final InjectionContext ctx,
                                                  final MetaParameter parm) {
-    
+
     final String varName = InjectUtil.getUniqueVarName();
 
     ctx.getProcessingContext()
