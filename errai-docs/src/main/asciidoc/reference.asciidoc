@@ -2409,6 +2409,30 @@ public class Document {
 
 As such, when [code]+Document+ events are fired, they will be limited in scope to the initiating conversational contents which are implicitly inferred by the caller. So only the client which fired the [code]+Subscription+ event will receive the fired [code]+Document+ event.
 
+==== Local Events
+
+The simplest way to stop a CDI Event from being broadcast over the wire is to avoid annotating the type with `@Portable`. But in some cases you may wish to send a type over the network with Errai RPC or the Message Bus, but only fire it locally as a CDI Event.
+
+This can be accomplished by annotating a type with `@LocalEvent`, as in this example:
+
+[source, java]
+----
+@Portable @LocalEvent
+public DocumentChange {
+  private String diff;
+
+  public String getDiff() {
+    return diff;
+  }
+
+  public void setDiff(String diff) {
+    this.diff = diff;
+  }
+}
+----
+
+Because of the `@Portable` annotation instances of `DocumentChange` can be sent over the wire via RPC calls or bus messages, but because of the `@LocalEvent` annotation they will not be sent over the network if fired via a CDI Event.
+
 [[sid-21758054_Events-ClientServerEventExample]]
 
 ==== Client-Server Event Example
