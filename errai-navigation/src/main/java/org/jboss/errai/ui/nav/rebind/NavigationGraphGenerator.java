@@ -87,6 +87,12 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   private static final String GENERATED_CLASS_NAME = "GeneratedNavigationGraph";
 
+  /*
+   * These pages should not cause @Page validation if no other pages exist.
+   */
+  private static final Collection<String> BLACKLISTED_PAGES = Arrays
+          .asList("org.jboss.errai.security.client.local.context.SecurityContextImpl.SecurityRolesConstraintPage");
+
   @Override
   public String generate(TreeLogger logger, GeneratorContext context,
           String typeName) throws UnableToCompleteException {
@@ -108,63 +114,84 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class, context);
-    for (MetaClass pageClass : pages) {
-      if (!pageClass.isAssignableTo(IsWidget.class)) {
-        throw new GenerationException(
-            "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must implement IsWidget");
-      }
-      Page annotation = pageClass.getAnnotation(Page.class);
-      String pageName = getPageName(pageClass);
-      List<Class<? extends PageRole>> annotatedPageRoles = Arrays.asList(annotation.role());
 
-      MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
-      if (prevPageWithThisName != null) {
-        throw new GenerationException(
-            "Page names must be unique, but " + prevPageWithThisName + " and " + pageClass +
-                " are both named [" + pageName + "]");
-      }
-      Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
-      if (annotatedPageRoles.contains(DefaultPage.class)) {
-        // need to assign the page impl to a variable and add it to the map twice
-        ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
-        pageImplStmt = Variable.get("defaultPage");
+    /*
+     * This prevents @Page validation logic from aborting compilation if a user has errai security
+     * but is not using errai-navigation.
+     */
+    final boolean hasNonBlacklistedPages = containsNonBlacklistedPages(pages);
+
+    if (hasNonBlacklistedPages) {
+      for (MetaClass pageClass : pages) {
+        if (!pageClass.isAssignableTo(IsWidget.class)) {
+          throw new GenerationException(
+              "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must implement IsWidget");
+        }
+        Page annotation = pageClass.getAnnotation(Page.class);
+        String pageName = getPageName(pageClass);
+        List<Class<? extends PageRole>> annotatedPageRoles = Arrays.asList(annotation.role());
+
+        MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
+        if (prevPageWithThisName != null) {
+          throw new GenerationException(
+              "Page names must be unique, but " + prevPageWithThisName + " and " + pageClass +
+                  " are both named [" + pageName + "]");
+        }
+        Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
+        if (annotatedPageRoles.contains(DefaultPage.class)) {
+          // need to assign the page impl to a variable and add it to the map twice
+          ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
+          pageImplStmt = Variable.get("defaultPage");
+          ctor.append(
+              Stmt.nestedCall(Refs.get("pagesByName"))
+                  .invoke("put", "", pageImplStmt));
+          ctor.append(
+                  Stmt.nestedCall(Refs.get("pagesByRole"))
+                          .invoke("put", DefaultPage.class, pageImplStmt));
+        }
+        else if (pageName.equals("")) {
+          throw new GenerationException(
+              "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
+                  " page with the role DefaultPage is permitted to have an empty path.");
+        }
+
+        final String fieldName = StringUtils.uncapitalize(pageClass.getName());
+        ctor.append(Stmt.declareFinalVariable(fieldName, PageNode.class, pageImplStmt));
         ctor.append(
             Stmt.nestedCall(Refs.get("pagesByName"))
-                .invoke("put", "", pageImplStmt));
-        ctor.append(
+                .invoke("put", pageName, Refs.get(fieldName)));
+
+        for (Class<? extends PageRole> annotatedPageRole : annotatedPageRoles) {
+          pageRoles.put(annotatedPageRole, pageClass);
+          // DefaultPage is already added above.
+          if (!annotatedPageRole.equals(DefaultPage.class))
+            ctor.append(
                 Stmt.nestedCall(Refs.get("pagesByRole"))
-                        .invoke("put", DefaultPage.class, pageImplStmt));
-      }
-      else if (pageName.equals("")) {
-        throw new GenerationException(
-            "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
-                " page with the role DefaultPage is permitted to have an empty path.");
-      }
-
-      final String fieldName = StringUtils.uncapitalize(pageClass.getName());
-      ctor.append(Stmt.declareFinalVariable(fieldName, PageNode.class, pageImplStmt));
-      ctor.append(
-          Stmt.nestedCall(Refs.get("pagesByName"))
-              .invoke("put", pageName, Refs.get(fieldName)));
-
-      for (Class<? extends PageRole> annotatedPageRole : annotatedPageRoles) {
-        pageRoles.put(annotatedPageRole, pageClass);
-        // DefaultPage is already added above.
-        if (!annotatedPageRole.equals(DefaultPage.class))
-          ctor.append(
-              Stmt.nestedCall(Refs.get("pagesByRole"))
-                .invoke("put", annotatedPageRole, Refs.get(fieldName)));
+                  .invoke("put", annotatedPageRole, Refs.get(fieldName)));
+        }
       }
     }
     ctor.finish();
 
-    validateDefaultPagePresent(pages, pageRoles);
-    validateUnique(pageRoles);
-    validateExistingRolesPresent(pages, pageRoles);
+    if (hasNonBlacklistedPages) {
+      validateDefaultPagePresent(pages, pageRoles);
+      validateUnique(pageRoles);
+      validateExistingRolesPresent(pages, pageRoles);
 
-    renderNavigationToDotFile(pageNames, pageRoles);
+      renderNavigationToDotFile(pageNames, pageRoles);
+    }
 
     return classBuilder.toJavaString();
+  }
+
+  private boolean containsNonBlacklistedPages(final Collection<MetaClass> pages) {
+    for (final MetaClass page : pages) {
+      if (!BLACKLISTED_PAGES.contains(page.getCanonicalName())) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private String getPageName(MetaClass pageClass) {
