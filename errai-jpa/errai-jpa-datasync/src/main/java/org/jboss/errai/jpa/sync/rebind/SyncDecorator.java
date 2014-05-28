@@ -124,7 +124,7 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
       String val = param.val().trim();
       if (val.startsWith("{") && val.endsWith("}")) {
         String fieldName = val.substring(1, val.length() - 1);
-        MetaField field = ctx.getEnclosingType().getField(fieldName);
+        MetaField field = ctx.getEnclosingType().getInheritedField(fieldName);
         fieldValueStmt =
             InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext(), Stmt.loadVariable(ctx.getInjector()
                 .getInstanceVarName()), field);
