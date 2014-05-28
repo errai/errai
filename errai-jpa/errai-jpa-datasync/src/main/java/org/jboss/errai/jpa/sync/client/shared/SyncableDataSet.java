@@ -50,11 +50,17 @@ public class SyncableDataSet<E> {
 
   @SuppressWarnings("unchecked")
   private Class<E> getResultType(EntityManager em) {
+    // We support this so users don't have to specify the query return type when using @Sync.
+    if (resultTypeFqcn.equals("java.lang.Object")) {
+      return (Class<E>) Object.class;
+    }
+    
     for (EntityType<?> et : em.getMetamodel().getEntities()) {
       if (et.getJavaType().getName().equals(resultTypeFqcn)) {
         return ((EntityType<E>) et).getJavaType();
       }
     }
+
     throw new IllegalStateException("Result type " + resultTypeFqcn + " is not known to the EntityManager.");
   }
 
