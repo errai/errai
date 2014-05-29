@@ -48,7 +48,6 @@ public class TemplatedAnnotationChecker extends AbstractProcessor {
         try {
           FileObject resource = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH, packageElement.getQualifiedName(), templateRef);
           CharSequence charContent = resource.getCharContent(true);
-//          System.out.println("Contents of template: " + charContent);
         } catch (IllegalArgumentException e) {
           // unfortunately, Eclipse just throws IAE when we try to read files from CLASS_PATH
           // so the best we can do is ignore this error and skip validating the template reference
