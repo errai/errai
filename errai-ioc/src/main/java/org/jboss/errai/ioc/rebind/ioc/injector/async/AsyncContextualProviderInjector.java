@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.async;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
@@ -12,6 +14,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.ioc.client.LazySingleton;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -20,7 +23,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock
@@ -38,6 +40,7 @@ public class AsyncContextualProviderInjector extends TypeInjector {
     this.testMock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, providerType);
+    this.lazySingleton=type.getAnnotation(LazySingleton.class)!=null;
 
     setRendered(true);
   }

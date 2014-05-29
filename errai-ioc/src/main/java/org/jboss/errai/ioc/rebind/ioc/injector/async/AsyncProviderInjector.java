@@ -9,6 +9,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.ioc.client.LazySingleton;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -39,6 +40,7 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
 
     this.testMock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
+    this.lazySingleton=type.getAnnotation(LazySingleton.class)!=null;
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
     setRendered(true);
   }

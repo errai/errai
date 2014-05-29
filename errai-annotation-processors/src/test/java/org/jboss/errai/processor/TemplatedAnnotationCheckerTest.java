@@ -51,5 +51,14 @@ public class TemplatedAnnotationCheckerTest extends AbstractProcessorTest {
     assertCompilationMessage(diagnostics, Kind.ERROR, Diagnostic.NOPOS, Diagnostic.NOPOS,
             "Could not access associated template TemplatedMissingTemplate.html");
   }
+  
+  
+  @Test
+  public void shouldCompileCleanlyWhenAllRulesAreFollowedInSubTemplate() throws FileNotFoundException {
+    final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
+            "org/jboss/errai/processor/testcase/DataFieldNoWarningsSubtemplate.java");
+
+    assertSuccessfulCompilation(diagnostics);
+  }
 
 }

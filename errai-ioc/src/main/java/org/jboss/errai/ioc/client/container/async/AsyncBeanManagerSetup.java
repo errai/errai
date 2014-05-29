@@ -43,4 +43,13 @@ public interface AsyncBeanManagerSetup {
                String name,
                boolean concreteType,
                Class<Object> beanActivatorType);
+  void addBean(Class<Object> type,
+               Class<?> beanType,
+               AsyncBeanProvider<Object> callback,
+               Object instance,boolean lazySingleton,
+               Annotation[] qualifiers,
+               String name,
+               boolean concreteType,
+               Class<Object> beanActivatorType);
+
 }
