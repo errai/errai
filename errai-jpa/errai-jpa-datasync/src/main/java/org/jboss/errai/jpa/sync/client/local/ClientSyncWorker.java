@@ -57,6 +57,8 @@ import com.google.gwt.user.client.Timer;
  */
 public class ClientSyncWorker<E> {
 
+  private static final int SYNC_PERIOD_MILLIS = 5000;
+
   private static final Logger logger = LoggerFactory.getLogger(ClientSyncWorker.class);
 
   private final List<DataSyncCallback<E>> callbacks = new ArrayList<DataSyncCallback<E>>();
@@ -89,13 +91,43 @@ public class ClientSyncWorker<E> {
     }
   };
 
-  private final ClientSyncManager manager;
+  private final RemoteCallback<List<SyncResponse<E>>> timerSchedulingRemoteCallback = new RemoteCallback<List<SyncResponse<E>>>() {
+
+    @Override
+    public void callback(final List<SyncResponse<E>> responses) {
+      try {
+        ClientSyncWorker.this.onCompletion.callback(responses);
+      }
+      finally {
+        scheduleTimerIfNotStopped(SYNC_PERIOD_MILLIS);
+      }
+    }
+  };
+
+  @SuppressWarnings("rawtypes")
+  private final ErrorCallback<?> timerSchedulingErrorCallback = new ErrorCallback() {
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean error(Object message, Throwable throwable) {
+      boolean retVal = true;
+      try {
+        retVal = ClientSyncWorker.this.onError.error(message, throwable);
+      }
+      finally {
+        scheduleTimerIfNotStopped(SYNC_PERIOD_MILLIS);
+      }
+
+      return retVal;
+    }
+  };
 
   private final String queryName;
 
   private final Class<E> queryResultType;
 
-  private final ErrorCallback<?> onError;
+  @SuppressWarnings("rawtypes")
+  private final ErrorCallback onError;
 
   /**
    * A callback that provides parameters for the query used by a {@link ClientSyncWorker}.
@@ -155,16 +187,24 @@ public class ClientSyncWorker<E> {
   public ClientSyncWorker(final ClientSyncManager manager, final String queryName, final Class<E> queryResultType,
       final ErrorCallback<?> onError) {
 
-    this.manager = Assert.notNull(manager);
+    Assert.notNull(manager);
     this.queryName = Assert.notNull(queryName);
     this.queryResultType = Assert.notNull(queryResultType);
     this.onError = onError;
 
     timer = new Timer() {
+
       @Override
       public void run() {
-        manager.coldSync(ClientSyncWorker.this.queryName, ClientSyncWorker.this.queryResultType, queryParams,
-            onCompletion, ClientSyncWorker.this.onError);
+        try {
+          manager.coldSync(ClientSyncWorker.this.queryName, ClientSyncWorker.this.queryResultType, queryParams,
+                  timerSchedulingRemoteCallback, timerSchedulingErrorCallback);
+        }
+        catch (Throwable t) {
+          if (!manager.isSyncInProgress()) {
+            scheduleTimerIfNotStopped(SYNC_PERIOD_MILLIS);
+          }
+        }
       }
     };
   }
@@ -198,8 +238,7 @@ public class ClientSyncWorker<E> {
     started = true;
 
     // let's sync immediately so we don't have to wait 5 seconds before the first sync
-    manager.coldSync(queryName, queryResultType, queryParams, onCompletion, onError);
-    timer.scheduleRepeating(5000);
+    timer.run();
   }
 
   /**
@@ -241,14 +280,7 @@ public class ClientSyncWorker<E> {
 
     // Let's give control back so that other parts of the framework have a chance to update fields
     // of the managed bean before we start the first synchronization
-    new Timer() {
-      @Override
-      public void run() {
-        manager.coldSync(queryName, queryResultType, queryParams, onCompletion, onError);
-      }
-    }.schedule(500);
-    
-    timer.scheduleRepeating(5000);
+    timer.schedule(500);
   }
 
   /**
@@ -263,10 +295,18 @@ public class ClientSyncWorker<E> {
 
     stopped = true;
     callbacks.clear();
-    
+
     if (beanlifecycleListener != null && managedBeanInstance != null) {
       IOC.unregisterLifecycleListener(managedBeanInstance, beanlifecycleListener);
     }
     timer.cancel();
+  }
+
+  private void scheduleTimerIfNotStopped(final int delayMillis) {
+    if (!started)
+      throw new IllegalStateException("This worker was never started");
+
+    if (!stopped)
+      timer.schedule(delayMillis);
   }
 }
