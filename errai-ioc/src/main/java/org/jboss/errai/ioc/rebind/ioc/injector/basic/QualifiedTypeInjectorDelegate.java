@@ -73,6 +73,11 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   public boolean isTestMock() {
     return delegate.isTestMock();
   }
+  
+  @Override
+  public boolean isLazySingleton(){
+      return delegate.isLazySingleton();
+  }
 
   @Override
   public boolean isSingleton() {

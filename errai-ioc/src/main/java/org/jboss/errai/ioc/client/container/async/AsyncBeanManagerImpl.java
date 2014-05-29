@@ -367,4 +367,19 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     namedBeans.clear();
     beanMap.clear();
   }
+  @Override
+  public void addBean(Class<Object> type, Class<?> beanType, AsyncBeanProvider<Object> callback, Object instance, boolean lazySingleton, Annotation[] qualifiers, String name, boolean concreteType, final Class<Object> beanActivatorType) {
+      if (concreteType) {
+          concreteBeans.add(type.getName());
+        }
+  
+        if (instance != null || lazySingleton) {
+          registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType, beanActivatorType);
+        }
+        else {
+          registerDependentBean(type, beanType, callback, qualifiers, name, concreteType,beanActivatorType);
+        }
+      
+  }
+
 }

@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import java.util.Map;
+
 import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -9,8 +11,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
-import java.util.Map;
 
 /**
  * Defines an injector which is responsible for providing instance references of beans to the code generating
@@ -80,6 +80,13 @@ public interface Injector {
    * @return true if the injector handles a singleton bean.
    */
   boolean isSingleton();
+
+  /**
+   * Checks if the injector for a lazySingleton bean.
+   *
+   * @return true if the injector handles a lazySingleton bean.
+   */
+  boolean isLazySingleton();
 
   /**
    * Check if the injector if of the dependent scope.

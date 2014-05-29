@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.ioc.client.LazySingleton;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -76,6 +77,8 @@ public class TypeInjector extends AbstractInjector {
     this.testMock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
+    this.lazySingleton=type.getAnnotation(LazySingleton.class)!=null;
+    
 
     this.instanceVarName = InjectUtil.getNewInjectorName().concat("_").concat(type.getName());
 
