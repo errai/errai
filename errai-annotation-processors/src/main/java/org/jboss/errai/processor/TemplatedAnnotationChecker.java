@@ -81,8 +81,8 @@ public class TemplatedAnnotationChecker extends AbstractProcessor {
     			templateRef = split[0];
     		}
     	}else{
-    		templateRef = paramValue.getValue().toString();
-    	}
+        templateRef = paramValue.getValue().toString();
+      }
     }
     if (templateRef.equals("")) {
       templateRef = target.getSimpleName() + ".html";
