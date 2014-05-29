@@ -97,16 +97,19 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc-bus-support</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-tools</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Scoped -->
