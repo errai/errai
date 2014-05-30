@@ -1,9 +1,13 @@
 package org.jboss.errai.demo.todo.shared;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
-
-import javax.persistence.*;
 
 @Portable @Bindable @Entity
 @NamedQueries({
