@@ -42,7 +42,74 @@ public class UserCookieEncoder {
    * @see UserCookieEncoder#toCookieValue(User)
    */
   public static User fromCookieValue(String userString) {
-    return (User) Marshalling.fromJSON(userString);
+    return (User) Marshalling.fromJSON(unquoteIfNeeded(userString));
+  }
+
+  /**
+   * Unquotes a cookie value if it has been quoted and escaped by the Jetty web server.
+   * <p>
+   * This method is based on (originally copied from) the org.mortbay.util.QuotedStringTokenizer.unquote method from
+   * Jetty 6.1.25.
+   * 
+   * @param s
+   *          the cookie value that may or may not be quoted.
+   * @return an unquoted version of the string, or the given input string if it was not quoted.
+   */
+  public static String unquoteIfNeeded(String s) {
+    if (s == null) {
+      return null;
+    }
+    if (s.length() < 2) {
+      return s;
+    }
+
+    final char first = s.charAt(0);
+    final char last = s.charAt(s.length() - 1);
+    if (first != last || (first != '"' && first != '\'')) {
+      return s;
+    }
+
+    StringBuilder b = new StringBuilder(s.length() - 2);
+    boolean escape = false;
+    for (int i = 1; i < s.length() - 1; i++) {
+      char c = s.charAt(i);
+
+      if (escape) {
+        escape = false;
+        switch (c) {
+        case 'n':
+          b.append('\n');
+          break;
+        case 'r':
+          b.append('\r');
+          break;
+        case 't':
+          b.append('\t');
+          break;
+        case 'f':
+          b.append('\f');
+          break;
+        case 'b':
+          b.append('\b');
+          break;
+        case 'u':
+          b.append((char) Integer.parseInt(s.substring(i, i + 4), 16));
+          i += 4;
+          break;
+        default:
+          b.append(c);
+        }
+      }
+      else if (c == '\\') {
+        escape = true;
+        continue;
+      }
+      else {
+        b.append(c);
+      }
+    }
+
+    return b.toString();
   }
 
 }

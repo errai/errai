@@ -50,4 +50,9 @@ public class RoleImpl implements Role {
   public int hashCode() {
     return name.hashCode();
   }
+
+  @Override
+  public String toString() {
+    return name;
+  }
 }
