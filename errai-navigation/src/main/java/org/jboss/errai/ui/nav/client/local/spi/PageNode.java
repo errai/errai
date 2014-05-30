@@ -1,5 +1,8 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
@@ -80,8 +83,7 @@ public interface PageNode<W extends IsWidget> {
    * Called by the framework when this page node is about to be removed
    * from the navigation content panel.
    * <p>
-   * If this method returns null or throws an exception when called, framework
-   * behaviour is undefined.
+   * If this method throws an exception when called, framework behaviour is undefined.
    *
    * @param widget
    *          the widget instance (which is currently in the navigation content
@@ -94,8 +96,7 @@ public interface PageNode<W extends IsWidget> {
    * Called by the framework after this page has been removed from the
    * navigation content panel.
    * <p>
-   * If this method returns null or throws an exception when called, framework
-   * behaviour is undefined.
+   * If this method throws an exception when called, framework behaviour is undefined.
    *
    * @param widget
    *          the widget instance (which was in the navigation content
@@ -103,5 +104,15 @@ public interface PageNode<W extends IsWidget> {
    *          {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
    */
   public void pageHidden(W widget);
+
+  /**
+   * Used by the framework to destroy {@link Dependent} scoped beans after a page is no longer
+   * needed. For {@link ApplicationScoped} beans this method is a noop.
+   *
+   * @param widget
+   *          The widget instance that will be destroyed if it is a dependent-scoped bean. Never
+   *          null.
+   */
+  public void destroy(W widget);
 
 }

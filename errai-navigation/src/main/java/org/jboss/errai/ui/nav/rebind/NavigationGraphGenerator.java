@@ -277,6 +277,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     appendPageShowingMethod(pageImplBuilder, pageClass);
     appendPageShownMethod(pageImplBuilder, pageClass);
 
+    appendDestroyMethod(pageImplBuilder, pageClass);
+
     return pageImplBuilder.finish();
   }
 
@@ -323,12 +325,30 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
             createMethodNameFromAnnotation(PageHidden.class),
             Parameter.of(pageClass, "widget")).body();
     checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHidden.class, HistoryToken.class, "state");
+    method.finish();
+  }
 
-    if (pageClass.getAnnotation(Singleton.class) == null
-            && pageClass.getAnnotation(ApplicationScoped.class) == null
+  /**
+   * Appends a method that destroys the IOC bean associated with a page node if the bean is
+   * dependent scope.
+   *
+   * @param pageImplBuilder
+   *          The class builder for the implementation of PageNode we are adding the method to.
+   * @param pageClass
+   *          The "content type" (Widget subclass) of the page. This is the type the user annotated
+   *          with {@code @Page}.
+   */
+  private void appendDestroyMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(
+            void.class,
+            "destroy",
+            Parameter.of(pageClass, "widget")).body();
+
+    if (pageClass.getAnnotation(Singleton.class) == null && pageClass.getAnnotation(ApplicationScoped.class) == null
             && pageClass.getAnnotation(EntryPoint.class) == null) {
       method.append(Stmt.loadVariable("bm").invoke("destroyBean", Stmt.loadVariable("widget")));
     }
+
     method.finish();
   }
 
@@ -535,7 +555,6 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    * {@code .errai} cache directory.
    *
    */
-  @SuppressWarnings("unchecked")
   private void renderNavigationToDotFile(BiMap<String, MetaClass> pages, Multimap<Class<?>, MetaClass> pageRoles) {
     final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath(), "navgraph.gv");
     PrintWriter out = null;

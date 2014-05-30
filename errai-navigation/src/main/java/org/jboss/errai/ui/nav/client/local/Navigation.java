@@ -293,6 +293,7 @@ public class Navigation {
 
     if (currentPage != null && currentWidget != null) {
       currentPage.pageHidden(currentWidget);
+      currentPage.destroy(currentWidget);
     }
   }
 
@@ -343,6 +344,9 @@ public class Navigation {
               }
 
               handleQueuedRequests(request, fireEvent);
+            }
+            else {
+              request.pageNode.destroy(widget);
             }
           }
         });
