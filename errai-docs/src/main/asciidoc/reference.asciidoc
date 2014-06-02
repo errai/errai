@@ -6638,6 +6638,42 @@ Then in your GWT module descriptor you need to override the default navigation p
 </replace-with>
 ----
 
+==== Handling Navigation Errors
+
+When a user enters a url for an Errai page that does not exist an error is logged and the app navigates to the `DefaultPage`. It is possible to override this behaviour by setting an error handler on `Navigation`.
+
+Here is an example of a class that registers a navigation error handler that redirects the user to a special `PageNotFound` page:
+
+[source, java]
+----
+@ApplicationScoped
+public class NavigationErrorHandlerSetter {
+
+  @Inject
+  private Navigation navigation;
+
+  @PostConstruct
+  public void setErrorHandler() {
+    navigation.setErrorHandler(new PageNavigationErrorHandler() {
+
+      @Override
+      public void handleError(Exception exception, String pageName) {
+        navigation.goTo("PageNotFound");
+      }
+
+      @Override
+      public void handleError(Exception exception, Class<? extends PageRole> pageRole) { <1>
+        navigation.goTo("PageNotFound");
+      }
+    });
+  }
+
+}
+----
+
+<1> Note that this method signature is for errors that occur from calls to `Navigation.goToWithRole(Class<? extends UniquePageRole>)`. These kinds of errors can be avoided at compile-time by injecting `TransitionToRole` instances into your `@Page` classes instead of directly calling that method.
+
+
 [[sid-54493676_ErraiUINavigation-ViewingtheGeneratedNavigationGraph]]
 
 ==== Viewing the Generated Navigation Graph
