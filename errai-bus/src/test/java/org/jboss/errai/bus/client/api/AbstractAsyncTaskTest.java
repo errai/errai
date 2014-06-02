@@ -68,7 +68,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   public static final Runnable BLOW_UP = new Runnable() {
     @Override
     public void run() {
-      throw new RuntimeException();
+      throw new RuntimeException("This exception is intentionally thrown as part of a test.");
     };
   };
 
