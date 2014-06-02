@@ -15,7 +15,6 @@ import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.demo.todo.shared.TodoListUser;
-import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.local.Sync;
 import org.jboss.errai.jpa.sync.client.local.SyncParam;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponses;
@@ -48,14 +47,6 @@ public class TodoListPage extends Composite {
 
   @Inject private EntityManager em;
   @Inject private Caller<TodoListService> todoListService;
-
-  /*
-   * This ensures that the ClientSyncManager is initialized before this bean. This is necessary
-   * because the @Sync annotation calls ClientSyncManager.getInstance() which will fail if the bean
-   * manager has not yet created the ClientSyncManager.
-   */
-  @SuppressWarnings("unused")
-  @Inject private ClientSyncManager syncManager;
 
   private User user; // filled in by @PageShowing method
   @SuppressWarnings("unused")
