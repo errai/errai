@@ -53,4 +53,12 @@ public interface AsyncTask {
    * @return true if this task has been cancelled; false otherwise.
    */
   public boolean isCancelled();
+
+  /**
+   * Returns true if this task is no longer scheduled to run, either because it executed
+   * (successfully or with an error) or {@link #cancel(boolean)} was called.
+   *
+   * @return true if this task is no longer scheduled to run.
+   */
+  public boolean isFinished();
 }

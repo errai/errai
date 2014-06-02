@@ -17,10 +17,11 @@
 package org.jboss.errai.common.client.api.tasks;
 
 
+import org.jboss.errai.common.client.util.TimeUnit;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.common.client.util.TimeUnit;
 
 /**
  * The client-side implementation of {@link TaskManager}.
@@ -131,7 +132,8 @@ public class ClientTaskManager implements TaskManager {
       return timer.isCancelled();
     }
 
-    private boolean isFinished() {
+    @Override
+    public boolean isFinished() {
       return finished;
     }
 

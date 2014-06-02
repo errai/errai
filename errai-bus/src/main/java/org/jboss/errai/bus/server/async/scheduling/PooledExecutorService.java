@@ -27,7 +27,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
@@ -259,6 +258,11 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     @Override
+    public boolean isFinished() {
+      return fired || isCancelled();
+    }
+
+    @Override
     public void run() {
       synchronized (this) {
         fired = true;
@@ -305,6 +309,11 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     @Override
+    public boolean isFinished() {
+      return fired || isCancelled();
+    }
+
+    @Override
     public void run() {
       synchronized (this) {
         fired = true;
@@ -325,6 +334,7 @@ public class PooledExecutorService implements TaskProvider {
   private static final class RepeatingTimedTask extends TimedTask {
     private final Runnable runnable;
     private volatile Thread runningOn;
+    private volatile boolean finished;
 
     private RepeatingTimedTask(Runnable runnable, long initialMillis, long intervalMillis) {
       this.interruptHook = new InterruptHandle() {
@@ -351,6 +361,10 @@ public class PooledExecutorService implements TaskProvider {
       }
     }
 
+    @Override
+    public boolean isFinished() {
+      return finished || isCancelled();
+    }
 
     @Override
     public void run() {
@@ -360,8 +374,10 @@ public class PooledExecutorService implements TaskProvider {
       }
       finally {
         runningOn = null;
-        if ((cancelled || nextRuntime == -1) && exitHandler != null)
+        if ((cancelled || nextRuntime == -1) && exitHandler != null) {
           exitHandler.run();
+          finished = true;
+        }
       }
     }
   }

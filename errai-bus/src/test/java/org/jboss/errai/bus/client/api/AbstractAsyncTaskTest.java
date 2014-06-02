@@ -182,6 +182,44 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
     delayTestFinish(5000);
   }
 
+  public void testIsFinishedAfterTaskFinishes() throws Exception {
+    final CountingRunnable countingRunnable = new CountingRunnable();
+    final AsyncTask task = getTaskUnderTest(countingRunnable);
+
+    runAfterTaskFinished(new Runnable() {
+      @Override
+      public void run() {
+        assertEquals(countingRunnable.runCount, 1);
+        assertTrue(task.isFinished());
+        finishTest();
+      }
+    });
+    delayTestFinish(5000);
+  }
+
+  public void testIsFinishedAfterTaskCancelled() throws Exception {
+    final CountingRunnable countingRunnable = new CountingRunnable();
+    final AsyncTask task = getTaskUnderTest(countingRunnable);
+
+    task.cancel(false);
+
+    assertEquals(countingRunnable.runCount, 0);
+    assertTrue(task.isFinished());
+  }
+
+  public void testIsFinishedAfterTaskFailure() throws Exception {
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable(BLOW_UP));
+
+    runAfterTaskFinished(new Runnable() {
+      @Override
+      public void run() {
+        assertTrue(task.isFinished());
+        finishTest();
+      }
+    });
+    delayTestFinish(5000);
+  }
+
   public void testAsyncTaskRefInjection() throws Exception {
     CountingRunnable runnable = new CountingRunnable();
     AsyncTask task = getTaskUnderTest(runnable);
