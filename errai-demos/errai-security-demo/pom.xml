@@ -55,7 +55,8 @@
     <url>http://www.jboss.org</url>
   </organization>
   <properties>
-    <errai.jboss.home>${project.build.directory}/jboss-as-7.1.1.Final</errai.jboss.home>
+    <wildfly.version>8.1.0.Final</wildfly.version>
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
     <gwt.version>2.5.1</gwt.version>
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -264,9 +265,9 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>org.jboss.as</groupId>
-                  <artifactId>jboss-as-dist</artifactId>
-                  <version>7.1.1.Final</version>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-dist</artifactId>
+                  <version>${wildfly.version}</version>
                   <type>zip</type>
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.directory}</outputDirectory>
@@ -325,9 +326,9 @@
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.jboss.as.plugins</groupId>
-            <artifactId>jboss-as-maven-plugin</artifactId>
-            <version>7.1.1.Final</version>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <version>${wildfly.version}</version>
             <extensions>false</extensions>
           </plugin>
         </plugins>

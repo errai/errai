@@ -51,7 +51,7 @@
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
     <jetty.version>6.1.25</jetty.version>    
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
-    <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
+    <wildfly.plugin.version>1.0.1.Final</wildfly.plugin.version>
     <maven.compiler.target>1.6</maven.compiler.target>
     <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
     <picketlink.version>2.6.0.CR3</picketlink.version>
@@ -61,7 +61,7 @@
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.compiler.source>1.6</maven.compiler.source>
     <argLine></argLine>
-    <!-- Set this property to the full path to your JBoss/Wildfly/EAP installation to run DevMode -->
+    <!-- Set this property to the full path to your Wildfly installation to run DevMode -->
     <errai.jboss.home></errai.jboss.home>
   </properties>
   <dependencyManagement>
@@ -318,9 +318,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.jboss.as.plugins</groupId>
-        <artifactId>jboss-as-maven-plugin</artifactId>
-        <version>${jboss-as-maven-plugin.version}</version>
+        <groupId>org.wildfly.plugins</groupId>
+        <artifactId>wildfly-maven-plugin</artifactId>
+        <version>${wildfly.plugin.version}</version>
         <configuration>
           <filename>${project.artifactId}.${project.packaging}</filename>
         </configuration>
@@ -369,7 +369,7 @@
           <runTarget>${errai.dev.context}/index.html</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.javaopts=-XX:MaxPermSize=256m -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>
@@ -383,9 +383,9 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.jboss.as.plugins</groupId>
-            <artifactId>jboss-as-maven-plugin</artifactId>
-            <version>7.1.1.Final</version>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <version>${wildfly.plugin.version}</version>
           </plugin>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
