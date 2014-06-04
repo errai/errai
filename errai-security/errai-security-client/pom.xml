@@ -30,9 +30,25 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-navigation</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.spec.javax.interceptor</groupId>
+      <artifactId>jboss-interceptors-api_1.2_spec</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>javax.el-api</artifactId>
+          <groupId>javax.el</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -206,18 +222,6 @@
   <profiles>
     <profile>
       <id>integration-test</id>
-      
-      <dependencies>
-        <dependency>
-          <groupId>javax.el</groupId>
-          <artifactId>el-api</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.spec.javax.interceptor</groupId>
-          <artifactId>jboss-interceptors-api_1.2_spec</artifactId>          
-        </dependency>
-      </dependencies>
-      
       <build>
         <plugins>
           <plugin>
