@@ -41,6 +41,7 @@ import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.security.shared.api.RequiredRolesProvider;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 
@@ -48,8 +49,8 @@ import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
  * Indicates that the service or element can only be accessed / shown by logged-in users who belong
  * to all of the given security roles.
  * <p>
- * This annotation can appear anywhere the {@link Service} annotation can
- * appear or where {@link org.jboss.errai.ui.shared.api.annotations.DataField}
+ * This annotation can appear anywhere {@link Service} or
+ * {@link org.jboss.errai.ui.shared.api.annotations.DataField} can appear.
  *
  * @see Service
  * @see org.jboss.errai.ui.shared.api.annotations.DataField
@@ -61,12 +62,18 @@ import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 public @interface RestrictedAccess {
 
   /**
-   * The set of roles that the calling user must belong to in order to invoke
-   * the target service.
+   * The set of simple roles that the calling user must belong to in order to access the target
+   * resource.
    */
   @Nonbinding
   String[] roles() default {};
-  
+
+  /**
+   * The types of providers used to generated provided roles required to access the target resource.
+   */
+  @Nonbinding
+  Class<? extends RequiredRolesProvider>[] providers() default {};
+
   /**
    * This CSS class name is applied to {@link DataField} annotated elements when
    * a user lacks authorization.

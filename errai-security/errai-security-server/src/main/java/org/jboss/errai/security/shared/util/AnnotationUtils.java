@@ -16,10 +16,13 @@
  */
 package org.jboss.errai.security.shared.util;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -28,25 +31,32 @@ public class AnnotationUtils {
 
   /**
    * Merge roles from multiple {@link RestrictedAccess}.
-   * 
+   *
    * @param accessRestrictions {@link RestrictedAccess} annotations with roles to be merged.
-   * 
-   * @return An array of unique role names.
+   *
+   * @return All of the unique roles from the given annotations (including from providers).
    */
-  public static String[] mergeRoles(final RestrictedAccess... accessRestrictions) {
-    final Set<String> roles = new HashSet<String>();
+  public static Set<Role> mergeRoles(final RequiredRolesExtractor roleExtractor,
+          final RestrictedAccess... accessRestrictions) {
+    return mergeRoles(roleExtractor, Arrays.asList(accessRestrictions));
+  }
 
-    for (int i = 0; i < accessRestrictions.length; i++) {
-      if (accessRestrictions[i] == null)
-        continue;
+  /**
+   * Merge roles from multiple {@link RestrictedAccess}.
+   *
+   * @param accessRestrictions {@link RestrictedAccess} annotations with roles to be merged.
+   *
+   * @return All of the unique roles from the given annotations (including from providers).
+   */
+  public static Set<Role> mergeRoles(final RequiredRolesExtractor roleExtractor, final Iterable<RestrictedAccess> accessRestrictions) {
+    final Set<Role> roles = new HashSet<Role>();
 
-      final String[] values = accessRestrictions[i].roles();
-      for (int j = 0; j < values.length; j++) {
-        roles.add(values[j]);
+    for (final RestrictedAccess annotation : accessRestrictions) {
+      if (annotation != null) {
+        roles.addAll(roleExtractor.extractAllRoles(annotation));
       }
     }
 
-    return roles.toArray(new String[roles.size()]);
+    return roles;
   }
-
 }

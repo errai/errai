@@ -17,14 +17,17 @@
 package org.jboss.errai.security.client.local.style;
 
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
+import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 import org.jboss.errai.ui.shared.api.style.AnnotationStyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
@@ -42,10 +45,12 @@ import com.google.gwt.user.client.Element;
 public class RoleStyleBindingProvider {
 
   private final ActiveUserCache userCache;
+  private final RequiredRolesExtractor roleExtractor;
 
   @Inject
-  public RoleStyleBindingProvider(final ActiveUserCache userProvider) {
+  public RoleStyleBindingProvider(final ActiveUserCache userProvider, final RequiredRolesExtractor roleExtractor) {
     this.userCache = userProvider;
+    this.roleExtractor = roleExtractor;
   }
 
   @PostConstruct
@@ -54,7 +59,9 @@ public class RoleStyleBindingProvider {
       @Override
       public void invokeBinding(final Element element, final Annotation annotation) {
         final User user = userCache.getUser();
-        if (User.ANONYMOUS.equals(userCache.getUser()) || !user.hasAllRoles(((RestrictedAccess) annotation).roles())) {
+        final Set<Role> extractedRoles = roleExtractor.extractAllRoles((RestrictedAccess) annotation);
+
+        if (User.ANONYMOUS.equals(user) || !user.getRoles().containsAll(extractedRoles)) {
           element.addClassName(RestrictedAccess.CSS_CLASS_NAME);
         }
         else {

@@ -109,8 +109,19 @@ public class StyleBindingsRegistry {
   public static StyleBindingsRegistry get() {
     return INSTANCE;
   }
-  
+
   public static void set(StyleBindingsRegistry registry) {
     INSTANCE = registry;
+  }
+
+  public static void reset() {
+    if (INSTANCE != null) {
+      INSTANCE.elementBindings.clear();
+      INSTANCE.houseKeepingMap.clear();
+      INSTANCE.mapping.clear();
+      INSTANCE.styleBindings.clear();
+    }
+
+    set(new StyleBindingsRegistry());
   }
 }

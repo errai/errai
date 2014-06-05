@@ -16,43 +16,20 @@
  */
 package org.jboss.errai.security.shared.api;
 
-import org.jboss.errai.common.client.api.annotations.MapsTo;
-import org.jboss.errai.common.client.api.annotations.Portable;
+import java.util.Set;
+
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 
 /**
- * Role represents the role a user belongs to. Also commonly known as a "group."
+ * Implementations of this type can supply {@link Role Roles} at runtime that are required for
+ * resources protected by {@link RestrictedAccess}. The roles returned can be any implementation of
+ * the {@link Role} interface that satisfies the interface contract.
  *
- * @author edewit@redhat.com
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-@Portable
-public class RoleImpl implements Role {
-  private final String name;
-
-  public RoleImpl(@MapsTo("role") String name) {
-    this.name = name;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof RoleImpl)) return false;
-
-    RoleImpl role = (RoleImpl) o;
-    return name.equals(role.name);
-  }
-
-  @Override
-  public int hashCode() {
-    return name.hashCode();
-  }
-
-  @Override
-  public String toString() {
-    return name;
-  }
+public interface RequiredRolesProvider {
+  /**
+   * @return The set of {@link Role Roles} required to access a particular resource. Never <code>null</code>.
+   */
+  Set<Role> getRoles();
 }

@@ -17,6 +17,7 @@
 package org.jboss.errai.security.client.local.interceptors;
 
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -27,9 +28,11 @@ import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.client.local.api.SecurityContext;
+import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
 
 /**
@@ -37,7 +40,7 @@ import org.jboss.errai.security.shared.util.AnnotationUtils;
  * interceptor throws an {@link UnauthenticatedException} if the user is not
  * logged in, and a {@link UnauthorizedException} if the user does not have the
  * required roles.
- * 
+ *
  * @author edewit@redhat.com
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -47,25 +50,28 @@ public class ClientSecurityRoleInterceptor implements
 RemoteCallInterceptor<RemoteCallContext> {
 
   private final SecurityContext securityContext;
+  private final RequiredRolesExtractor roleExtractor;
 
   @Inject
-  public ClientSecurityRoleInterceptor(final SecurityContext securityContext) {
+  public ClientSecurityRoleInterceptor(final SecurityContext securityContext, final RequiredRolesExtractor roleExtractor) {
     this.securityContext = securityContext;
+    this.roleExtractor = roleExtractor;
   }
 
   @Override
   public void aroundInvoke(final RemoteCallContext callContext) {
     securityCheck(
             AnnotationUtils.mergeRoles(
+                    roleExtractor,
                     getRestrictedAccessAnnotation(callContext.getTypeAnnotations()),
                     getRestrictedAccessAnnotation(callContext.getAnnotations())),
                     callContext);
   }
 
-  private void securityCheck(final String[] requiredRoleNames, final RemoteCallContext callContext) {
+  private void securityCheck(final Set<Role> requiredRoleNames, final RemoteCallContext callContext) {
     if (securityContext.isUserCacheValid()) {
       if (securityContext.hasCachedUser()) {
-        if (securityContext.getCachedUser().hasAllRoles(requiredRoleNames)) {
+        if (securityContext.getCachedUser().getRoles().containsAll(requiredRoleNames)) {
           callContext.proceed(new RemoteCallback<Object>() {
 
             @Override

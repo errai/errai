@@ -34,12 +34,13 @@ import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListener;
+import org.jboss.errai.security.client.local.roles.ClientRequiredRolesExtractorImpl;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.nav.client.local.Page;
 
 /**
  * Register page lifecycle listeners when {@linkplain Page pages} are created.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @CodeDecorator
@@ -62,7 +63,8 @@ public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
                       MetaClassFactory.parameterizedAs(LifecycleListener.class,
                               MetaClassFactory.typeParametersOf(ctx.getInjector().getInjectedType())),
                               Stmt.newObject(PageRoleLifecycleListener.class,
-                                                      (Object) annotation.roles())));
+                                      annotation,
+                                      Stmt.newObject(ClientRequiredRolesExtractorImpl.class))));
       ctx.getTargetInjector().addStatementToEndOfInjector(
               Stmt.loadVariable("context")
                       .invoke("addInitializationCallback",

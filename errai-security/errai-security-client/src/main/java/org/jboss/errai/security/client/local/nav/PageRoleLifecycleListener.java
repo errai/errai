@@ -16,10 +16,15 @@
  */
 package org.jboss.errai.security.client.local.nav;
 
+import java.util.Set;
+
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.security.client.local.api.SecurityContext;
+import org.jboss.errai.security.shared.api.Role;
+import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -31,19 +36,22 @@ import com.google.gwt.user.client.ui.IsWidget;
  */
 public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleListener<W> {
 
-  private final String[] roles;
+  private final RestrictedAccess annotation;
+  private final RequiredRolesExtractor roleExtractor;
 
-  public PageRoleLifecycleListener(final String[] rolesRequiredByPage) {
-    this.roles = rolesRequiredByPage;
+  public PageRoleLifecycleListener(final RestrictedAccess annotation, final RequiredRolesExtractor roleExtractor) {
+    this.annotation = annotation;
+    this.roleExtractor = roleExtractor;
   }
 
   @Override
   public void observeEvent(final LifecycleEvent<W> event) {
     // There is no good way to inject the context within the bootstrapper.
     final SecurityContext securityContext = SecurityContextHoldingSingleton.getSecurityContext();
+    final Set<Role> roles = roleExtractor.extractAllRoles(annotation);
 
     if (!securityContext.isUserCacheValid() || !securityContext.hasCachedUser()
-            || !securityContext.getCachedUser().hasAllRoles(roles)) {
+            || !securityContext.getCachedUser().getRoles().containsAll(roles)) {
       event.veto();
 
       if (!securityContext.hasCachedUser())

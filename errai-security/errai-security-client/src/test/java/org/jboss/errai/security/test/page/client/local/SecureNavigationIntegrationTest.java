@@ -33,10 +33,12 @@ import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.test.page.client.res.RequireAuthenticationPage;
+import org.jboss.errai.security.test.page.client.res.RequiresProvidedRolesPage;
 import org.jboss.errai.security.test.page.client.res.RequiresRoleBasedPage;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.user.client.Timer;
 
 public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
@@ -194,8 +196,24 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
         // Now login and try to go to the page we were denied from.
         activeUserCache.setUser(user);
         securityContext.navigateBackOrHome();
-        
+
         assertEquals(RequireAuthenticationPage.class, navigation.getCurrentPage().contentType());
+        finishTest();
+      }
+    });
+  }
+
+  public void testRolesFromProviderAreRequired() throws Exception {
+    runNavTest(new Runnable() {
+
+      @Override
+      public void run() {
+        final User user = new UserImpl("testuser");
+        activeUserCache.setUser(user);
+
+        navigation.goTo(RequiresProvidedRolesPage.class, ImmutableMultimap.<String, String>of());
+
+        assertEquals(TestSecurityErrorPage.class, navigation.getCurrentPage().contentType());
         finishTest();
       }
     });

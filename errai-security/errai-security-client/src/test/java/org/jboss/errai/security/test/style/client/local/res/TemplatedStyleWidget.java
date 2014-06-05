@@ -32,7 +32,7 @@ public class TemplatedStyleWidget extends Composite {
   @Inject
   @DataField
   private Anchor control;
-  
+
   @Inject
   @DataField
   @RestrictedAccess
@@ -59,6 +59,11 @@ public class TemplatedStyleWidget extends Composite {
   @RestrictedAccess
   private Anchor customStyledUserAnchor;
 
+  @Inject
+  @DataField
+  @RestrictedAccess(providers = { TestAnchorRoleProvider.class })
+  private Anchor anchorWithProvidedRoles;
+
   public Anchor getUserAnchor() {
     return userAnchor;
   }
@@ -82,10 +87,13 @@ public class TemplatedStyleWidget extends Composite {
   public Anchor getCustomStyledUserAnchor() {
     return customStyledUserAnchor;
   }
-  
+
   @CustomBinding
   private void testBindingStyleUpdate(Style style) {
     style.setColor("red");
   }
 
+  public Anchor getAnchorWithProvidedRoles() {
+    return anchorWithProvidedRoles;
+  }
 }

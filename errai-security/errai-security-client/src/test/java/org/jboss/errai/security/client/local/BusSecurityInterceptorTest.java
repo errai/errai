@@ -26,11 +26,13 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.res.Counter;
+import org.jboss.errai.security.client.local.res.CountingRemoteCallback;
 import org.jboss.errai.security.client.local.res.ErrorCountingCallback;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.client.shared.AdminService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
 import org.jboss.errai.security.client.shared.DiverseService;
+import org.jboss.errai.security.client.shared.SecureRoleProvidedService;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -199,7 +201,6 @@ public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterce
     afterLogout(new Runnable() {
       @Override
       public void run() {
-        // Invalidate cache
         provider.setUser(User.ANONYMOUS);
         assertTrue(provider.isValid());
 
@@ -346,6 +347,28 @@ public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterce
           public void run() {
             assertEquals(1, counter.getCount());
             assertEquals(0, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  public void testRolesFromProviderAreRequiredWithInterceptor() throws Exception {
+    asyncTest();
+    final Counter successCounter = new Counter();
+    final Counter errorCounter = new Counter();
+    afterLogin("john", "123", new RemoteCallback<User>() {
+      @Override
+      public void callback(User response) {
+        MessageBuilder.createCall(new CountingRemoteCallback(successCounter),
+                new ErrorCountingCallback(errorCounter, UnauthorizedException.class), SecureRoleProvidedService.class)
+                .secureService();
+
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(0, successCounter.getCount());
+            assertEquals(1, errorCounter.getCount());
           }
         });
       }
