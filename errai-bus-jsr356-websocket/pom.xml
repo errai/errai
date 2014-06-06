@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>errai-parent</artifactId>
+		<groupId>org.jboss.errai</groupId>
+		<version>3.1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>pom</packaging>
+	<artifactId>errai-bus-jsr356-websocket-parent</artifactId>
+  <name>Errai::Bus::JSR-356 websocket::parent</name>
+
+	<description>parent of all jsr356 compliant variants of solutions for the Errai-Bus websocket</description>
+
+	<modules>
+		<module>errai-bus-jsr356-websocket-non-jee</module>
+		<module>errai-bus-jsr356-websocket-cdi-weld</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.spec</groupId>
+				<artifactId>jboss-javaee-7.0</artifactId>
+				<version>1.0.0.Final</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.errai</groupId>
+				<artifactId>errai-bus-jsr356-websocket-non-jee</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

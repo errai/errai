@@ -110,6 +110,7 @@
     <module>errai-cordova-maven-plugin</module>
     <module>errai-ioc-bus-support</module>
     <module>errai-bus-jboss7-websocket</module>
+	<module>errai-bus-jsr356-websocket</module>
     <module>errai-jboss-as-support</module>
     <module>errai-otec</module>
     <module>errai-security</module>
@@ -118,7 +119,7 @@
     <module>errai-demos</module>
     <module>errai-client-local-class-hider</module>
     <module>errai-annotation-processors</module>
-    <!--module>errai-forge-addon</module-->
+	  <!--module>errai-forge-addon</module-->
   </modules>
 
   <dependencies>
@@ -307,6 +308,17 @@
         <artifactId>errai-client-local-class-hider</artifactId>      
         <version>${project.version}</version>
       </dependency>
+
+	  <dependency>
+	 	<groupId>org.jboss.errai</groupId>
+		<artifactId>errai-bus-jsr356-websocket-cdi-weld</artifactId>
+		<version>${project.version}</version>
+	  </dependency>
+	  <dependency>
+		<groupId>org.jboss.errai</groupId>
+		<artifactId>errai-bus-jsr356-websocket-non-jee</artifactId>
+		<version>${project.version}</version>
+	  </dependency>
 
       <dependency>
         <groupId>org.jboss.errai.reflections</groupId>

@@ -1285,6 +1285,66 @@ Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your ser
 ----
 ====
 
+==== JSR-356 websocket
+
+Errai provides two kinds of implmentations for JSR-356 compliant websocket ErraiBus.
+
+. Non-JEE: A simple JSR-356 implementation, indended eg. for Tomcat 7 / 8
+. CDI-Weld: Provides the possibility to use the builtin scopes (javax.enterprise.context.RequestScoped, javax.enterprise.context.SessionScoped, javax.enterprise.context.ConversationScoped. This implementation is intended eg. for JBoss Wildfly AS.
+
+
+First, define the project dependency in [code]+pom.xml+ :
+[source, xml]
+----
+<!-- For Non full JEE environment -->
+<dependency>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-bus-jsr356-websocket-non-jee</artifactId>
+	<version>${errai.version}</version>
+</dependency>
+
+<!-- For JEE environment with Weld-->
+<dependency>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-bus-jsr356-websocket-cdi-weld</artifactId>
+	<version>${errai.version}</version>
+</dependency>
+----
+
+[IMPORTANT]
+.Dependency on Weld!
+====
+Since the specification is missing, to bring JSR-356 websocket to work with CDI builtin scopes. the [code]+<artifactId>errai-bus-jsr356-websocket-cdi-weld</artifactId>+ variant depends directly to JBoss Weld. If you use a non Weld middleware, you should use [code]+<artifactId>errai-bus-jsr356-websocket-non-jee</artifactId>+
+====
+
+To tell the ErraiBus, that websocket should be used define the following in the [code]+web.xml+
+[source, xml]
+----
+<context-param>
+	<param-name>websockets-enabled</param-name>
+	<param-value>true</param-value>
+</context-param>
+----
+
+[IMPORTANT]
+.Do not remove the regular ErraiBus servlet mappings!
+====
+When configuring ErraiBus to use JSR-356 WebSocket, you _do not_ remove the existing servlet mappings for the bus. This is because ErraiBus _always_ negotiates WebSocket sessions over the COMET channel.
+====
+
+
+You can define filter for the JSR-356 websocket. They will be executed for each received ErraiBus message on the server side. Filter interface: [code]+org.jboss.errai.bus.server.websocket.jsr356.filter.WebsocketFilter+. When you use the [code]+<artifactId>errai-bus-jsr356-websocket-cdi-weld</artifactId>+ variant, filter are cdi'fied.
+They must be configured at the [code]+web.xml+ in a comma separated manner:
+[source, xml]
+----
+<context-param>
+	<param-name>errai-jsr-356-websocket-filter</param-name>
+	<param-value>foo.bar.FooFilter,foo.bar.BarFilter</param-value>
+</context-param>
+----
+
+
+
 [[sid-59146643]]
 
 === Bus Lifecycle

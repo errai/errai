@@ -1,0 +1,120 @@
+package org.jboss.errai.bus.server.servlet.websocket;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.protocols.BusCommand;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
+import org.jboss.errai.bus.server.io.QueueChannel;
+import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
+import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.util.LocalContext;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJString;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+
+/**
+ * @author : Michel Werren
+ */
+public class NegotiationHandler {
+
+  private static final Logger LOGGER = LoggerFactory
+          .getLogger(NegotiationHandler.class.getName());
+
+  public static QueueSession establishNegotiation(EJValue val,
+          QueueChannel queueChannel, ErraiService service) throws IOException {
+    QueueSession session = null;
+    final EJObject ejObject = val.isObject();
+    if (ejObject == null) {
+      return null;
+    }
+
+    final String commandType = ejObject.get(MessageParts.CommandType.name())
+            .isString().stringValue();
+
+    // this client apparently wants to connect.
+    if (BusCommand.Associate.name().equals(commandType)) {
+      final String sessionKey = ejObject
+              .get(MessageParts.ConnectionSessionKey.name()).isString()
+              .stringValue();
+
+      // has this client already attempted a connection, and is in a wait verify
+      // state
+      if (sessionKey != null
+              && (session = service.getBus().getSessionBySessionId(sessionKey)) != null) {
+        final LocalContext localCometSession = LocalContext.get(session);
+
+        if (localCometSession
+                .hasAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS)
+                && WebSocketServerHandler.WEBSOCKET_ACTIVE
+                        .equals(localCometSession.getAttribute(String.class,
+                                WebSocketServerHandler.SESSION_ATTR_WS_STATUS))) {
+
+          // set the session queue into direct channel mode.
+          final MessageQueue queue = service.getBus().getQueueBySession(
+                  sessionKey);
+          queue.setDeliveryHandler(DirectDeliveryHandler
+                  .createFor(queueChannel));
+          LOGGER.debug("set direct delivery handler on session: {}",
+                  session.getSessionId());
+          return session;
+        }
+
+        // check the activation key matches.
+        final EJString activationKey = ejObject.get(
+                MessageParts.WebSocketToken.name()).isString();
+        if (activationKey == null
+                || !WebSocketTokenManager.verifyOneTimeToken(session,
+                        activationKey.stringValue())) {
+
+          // nope. go away!
+          final String error = "bad negotiation key";
+          LOGGER.debug("activation key not match for session: {}",
+                  session.getSessionId());
+          sendMessage(queueChannel,
+                  NegotiationMessage.getFailedNegotiation(error));
+        }
+        else {
+          // the key matches. now we send the reverse challenge to prove this
+          // client is actually
+          // already talking to the bus over the COMET channel.
+          final String reverseToken = WebSocketTokenManager
+                  .getNewOneTimeToken(session);
+          localCometSession.setAttribute(
+                  WebSocketServerHandler.SESSION_ATTR_WS_STATUS,
+                  WebSocketServerHandler.WEBSOCKET_AWAIT_ACTIVATION);
+
+          // send the challenge.
+          LOGGER.debug("reverse challange for session: {}",
+                  session.getSessionId());
+          sendMessage(queueChannel,
+                  NegotiationMessage.getReverseChallenge(reverseToken));
+          return null;
+        }
+        sendMessage(queueChannel, NegotiationMessage.getSuccessfulNegotiation());
+      }
+      else {
+        final String error = "bad session id";
+        LOGGER.debug("bad session id");
+        sendMessage(queueChannel,
+                NegotiationMessage.getFailedNegotiation(error));
+      }
+    }
+    else {
+      final String error = "bad command";
+      LOGGER.debug("bad command");
+      sendMessage(queueChannel, NegotiationMessage.getFailedNegotiation(error));
+    }
+    return null;
+  }
+
+  public static void sendMessage(final QueueChannel channel,
+          final String message) throws IOException {
+    channel.write(message);
+  }
+}
