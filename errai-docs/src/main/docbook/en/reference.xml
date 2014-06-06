@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-06-02</date>
+    <date>2014-06-06</date>
     
     
     
@@ -1456,7 +1456,7 @@ public class HelloWorldService implements MessageCallback {
 <section id="sid-53380177">
 <title>WebSockets</title>
 <simpara>ErraiBus has support for WebSocket-based communication. When WebSockets are enabled, capable web browsers will attempt to upgrade their COMET-based communication with the server-side bus to use a WebSocket channel.</simpara>
-<simpara>There are two different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration.</simpara>
+<simpara>There are three different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration and the third is to rely in JSR-356 support in WildFly.</simpara>
 <section id="sid-53380177_WebSockets-Configuringthesidebandserver">
 <title>Configuring the sideband server</title>
 <simpara>Activating the sideband server is as simple as adding the following to the <literal><phrase role="code">ErraiService.properties</phrase></literal> file:</simpara>
@@ -1514,6 +1514,55 @@ public class HelloWorldService implements MessageCallback {
   		&lt;version&gt;${errai.version}&lt;/version&gt;
 	&lt;/dependency&gt;</programlisting>
 </important>
+</section>
+<section id="_jsr_356_websocket_support">
+<title>JSR-356 WebSocket support</title>
+<simpara>Errai provides two implementations for this:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>errai-bus-jsr356-websocket: A simple JSR-356 implementation, that does not rely on CDI or Weld.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>errai-bus-jsr356-websocket-weld: Provides the possibility to use the builtin CDI scopes (javax.enterprise.context.RequestScoped, javax.enterprise.context.SessionScoped, javax.enterprise.context.ConversationScoped). This implementation uses WELD and is intended for JBoss WildFly 8 or higher.</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<simpara>Make sure to add the following project dependency:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;!-- For JSR-356 without depending on Weld --&gt;
+&lt;dependency&gt;
+	&lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+	&lt;artifactId&gt;errai-bus-jsr356-websocket&lt;/artifactId&gt;
+	&lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- For JEE environment with Weld--&gt;
+&lt;dependency&gt;
+	&lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+	&lt;artifactId&gt;errai-bus-jsr356-websocket-weld&lt;/artifactId&gt;
+	&lt;version&gt;${errai.version}&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+<important>
+<title>Dependency on Weld!</title>
+<simpara>The JSR-356 specification is not addressing the integration with builtin CDI scopes which is what the <literal><phrase role="code">&lt;artifactId&gt;errai-bus-jsr356-websocket-weld&lt;/artifactId&gt;</phrase></literal> module provides. It therefore depends directly to JBoss Weld. If you use a non Weld-based middleware, you can use <literal><phrase role="code">&lt;artifactId&gt;errai-bus-jsr356-websocket&lt;/artifactId&gt;</phrase></literal> instead.</simpara>
+</important>
+<simpara>To configure ErraiBus that WebSocket communication should be used, define the following in your <literal><phrase role="code">web.xml</phrase></literal></simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;context-param&gt;
+	&lt;param-name&gt;websockets-enabled&lt;/param-name&gt;
+	&lt;param-value&gt;true&lt;/param-value&gt;
+&lt;/context-param&gt;</programlisting>
+<important>
+<title>Do not remove the regular ErraiBus servlet mappings!</title>
+<simpara>When configuring ErraiBus to use JSR-356 WebSocket, you <emphasis>do not</emphasis> remove the existing servlet mappings for the bus. This is because ErraiBus <emphasis>always</emphasis> negotiates WebSocket sessions over the COMET channel.</simpara>
+</important>
+<simpara>You can also define filters when using the JSR-356 WebSocket implementation. These filters will be executed for each received ErraiBus message on the server. Your filters need to implement <literal><phrase role="code">org.jboss.errai.bus.server.websocket.jsr356.filter.WebSocketFilter</phrase></literal> and must be configured in your appliations&#8217;s <literal><phrase role="code">web.xml</phrase></literal> as an ordered comma separated list:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;context-param&gt;
+	&lt;param-name&gt;errai-jsr-356-websocket-filter&lt;/param-name&gt;
+	&lt;param-value&gt;foo.bar.FooFilter,foo.bar.BarFilter&lt;/param-value&gt;
+&lt;/context-param&gt;</programlisting>
 </section>
 </section>
 <section id="sid-59146643">

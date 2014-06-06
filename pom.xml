@@ -70,8 +70,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <gwt.version>2.5.1</gwt.version>
     <gwt.maven.version>2.5.1</gwt.maven.version>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
     <guice.version>3.0</guice.version>
     <guava.version>14.0.1</guava.version>
     <appengine.version>1.7.6</appengine.version>
@@ -109,7 +107,7 @@
     <module>errai-cordova</module>
     <module>errai-cordova-maven-plugin</module>
     <module>errai-ioc-bus-support</module>
-    <module>errai-bus-jboss7-websocket</module>
+    <module>errai-bus-websocket</module>    
     <module>errai-jboss-as-support</module>
     <module>errai-otec</module>
     <module>errai-security</module>
@@ -307,7 +305,16 @@
         <artifactId>errai-client-local-class-hider</artifactId>      
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-bus-jsr356-websocket-weld</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-bus-jsr356-websocket</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.jboss.errai.reflections</groupId>
         <artifactId>reflections</artifactId>

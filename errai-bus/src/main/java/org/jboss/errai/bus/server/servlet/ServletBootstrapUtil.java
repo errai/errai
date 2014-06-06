@@ -96,7 +96,7 @@ public final class ServletBootstrapUtil {
       }
 
       final String pathElement = ServletInitAttribs.WEBSOCKETS_PATH_ELEMENT
-              .getInitOrContextValue(config, "in.erraiBusWebSocket");
+              .getInitOrContextValue(config, "in.erraiBusWS");
 
       final String webSocketsEnabled = ServletInitAttribs.WEBSOCKETS_ENABLED.getInitOrContextValue(config);
 

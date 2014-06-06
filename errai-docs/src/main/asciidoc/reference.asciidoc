@@ -1180,14 +1180,13 @@ Note that the only difference between the example in the previous section and th
 
 ErraiBus has support for WebSocket-based communication. When WebSockets are enabled, capable web browsers will attempt to upgrade their COMET-based communication with the server-side bus to use a WebSocket channel.
 
-There are two different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration.
+There are three different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration and the third is to rely in JSR-356 support in WildFly.
 
 [[sid-53380177_WebSockets-Configuringthesidebandserver]]
 
 ==== Configuring the sideband server
 
 Activating the sideband server is as simple as adding the following to the [code]+ErraiService.properties+ file:
-
 
 [source, java]
 ----
@@ -1233,7 +1232,6 @@ You will then need to configure the servlet in your application's [code]+web.xml
 
 Add the following to the [code]+web.xml+ :
 
-
 [source, xml]
 ----
 <context-param>
@@ -1248,7 +1246,6 @@ Add the following to the [code]+web.xml+ :
 ----
 
 This will tell the bus to enable web sockets support. The [code]+websocket-path-element+ specified the path element within a URL which the client bus should request in order to negotiate a websocket connection. For instance, specifying [code]+in.erraiBusWS+ as we have in the snippit above, will result in attempted negotiation at [code]+http://<your_server>:<your_port>/<context_path>/in.erraiBusWS+. For this to have any meaningful result, we must add a servlet mapping that will match this pattern:
-
 
 [source, xml]
 ----
@@ -1284,6 +1281,61 @@ Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your ser
 	</dependency>
 ----
 ====
+
+==== JSR-356 WebSocket support
+
+Errai provides two implementations for this:
+
+. errai-bus-jsr356-websocket: A simple JSR-356 implementation, that does not rely on CDI or Weld.
+. errai-bus-jsr356-websocket-weld: Provides the possibility to use the builtin CDI scopes (javax.enterprise.context.RequestScoped, javax.enterprise.context.SessionScoped, javax.enterprise.context.ConversationScoped). This implementation uses WELD and is intended for JBoss WildFly 8 or higher.
+
+Make sure to add the following project dependency:
+[source, xml]
+----
+<!-- For JSR-356 without depending on Weld -->
+<dependency>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-bus-jsr356-websocket</artifactId>
+	<version>${errai.version}</version>
+</dependency>
+
+<!-- For JEE environment with Weld-->
+<dependency>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-bus-jsr356-websocket-weld</artifactId>
+	<version>${errai.version}</version>
+</dependency>
+----
+
+[IMPORTANT]
+.Dependency on Weld!
+====
+The JSR-356 specification is not addressing the integration with builtin CDI scopes which is what the [code]+<artifactId>errai-bus-jsr356-websocket-weld</artifactId>+ module provides. It therefore depends directly to JBoss Weld. If you use a non Weld-based middleware, you can use [code]+<artifactId>errai-bus-jsr356-websocket</artifactId>+ instead.
+====
+
+To configure ErraiBus that WebSocket communication should be used, define the following in your [code]+web.xml+
+[source, xml]
+----
+<context-param>
+	<param-name>websockets-enabled</param-name>
+	<param-value>true</param-value>
+</context-param>
+----
+
+[IMPORTANT]
+.Do not remove the regular ErraiBus servlet mappings!
+====
+When configuring ErraiBus to use JSR-356 WebSocket, you _do not_ remove the existing servlet mappings for the bus. This is because ErraiBus _always_ negotiates WebSocket sessions over the COMET channel.
+====
+
+You can also define filters when using the JSR-356 WebSocket implementation. These filters will be executed for each received ErraiBus message on the server. Your filters need to implement [code]+org.jboss.errai.bus.server.websocket.jsr356.filter.WebSocketFilter+ and must be configured in your appliations's [code]+web.xml+ as an ordered comma separated list:
+[source, xml]
+----
+<context-param>
+	<param-name>errai-jsr-356-websocket-filter</param-name>
+	<param-value>foo.bar.FooFilter,foo.bar.BarFilter</param-value>
+</context-param>
+----
 
 [[sid-59146643]]
 
