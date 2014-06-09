@@ -34,7 +34,8 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  * SecurityRoleInterceptor server side implementation of the
  * SecurityRoleInterceptor does the same, but throws an exception instead of
  * 'redirecting' the user.
- * 
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  * @author edewit@redhat.com
  */
 @RestrictedAccess
@@ -95,6 +96,10 @@ public class ServerSecurityRoleInterceptor {
       if (annotation != null) {
         return annotation;
       }
+    }
+
+    if (aClass.isAnnotationPresent(RestrictedAccess.class)) {
+      return aClass.getAnnotation(RestrictedAccess.class);
     }
 
     return null;
