@@ -109,7 +109,10 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
 
     final RemoteCallback remoteCallback = getRemoteCallback();
     try {
-      requestBuilder.sendRequest(body, new RequestCallback() {
+      // Allow overriding of request body in client-side interceptors
+      String requestBody = 
+              (requestBuilder.getRequestData() != null) ? requestBuilder.getRequestData() : body;
+      requestBuilder.sendRequest(requestBody, new RequestCallback() {
         @Override
         public void onError(Request request, Throwable throwable) {
           handleError(throwable, request, null);
