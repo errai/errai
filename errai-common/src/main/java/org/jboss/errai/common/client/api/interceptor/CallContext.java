@@ -56,6 +56,13 @@ abstract class CallContext {
    */
   public abstract String getMethodName();
 
+    /**
+     * Returns the return type of the intercepted method.
+     *
+     * @return the return type of the method for which the interceptor was invoked.
+     */
+    public abstract Class getReturnType();
+
   /**
    * Returns the annotations of the intercepted method.
    *
