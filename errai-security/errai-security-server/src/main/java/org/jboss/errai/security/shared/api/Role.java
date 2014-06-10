@@ -17,8 +17,10 @@
 package org.jboss.errai.security.shared.api;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.security.shared.api.identity.User;
 
 /**
  * <p>
@@ -27,9 +29,14 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  *
  * <p>
  * The default implementation of this role in Errai is {@link RoleImpl}, but a different
- * implementation may be used so long as it is {@link Portable} and overrides the
- * {@link Object#equals(Object)} method. Errai Security guarantees that all security access checks
- * are performed by comparing user and resource roles with the {@link Object#equals(Object)} method.
+ * implementation may be used so long as:
+ * <ul>
+ * <li>It is {@link Portable}.
+ * <li>It overrides the {@link Object#equals(Object)} method (used to compare roles between
+ * {@link User} and a resource).
+ * <li>It overrides the {@link Object#hashCode()} method so that equal roles have the same hash.
+ * (This is important if you use the default {@link User} implementation, which stores roles in a
+ * {@link HashSet}.)
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
