@@ -155,4 +155,18 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       return null;
     }
   }
+
+  @Override
+  public User postJacksonIntercepted(String jackson) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      User user = mapper.readValue(jackson, User.class);
+      user.setJacksonRep(mapper.writeValueAsString(user));
+      return user;
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
 }
