@@ -57,7 +57,8 @@ public class User {
   private Integer age;
   private boolean alive = true;
   private Date date;
-
+  private String jacksonRep;
+  
   public User() {}
 
   public User(Long id, String firstName, String lastName, Integer age, Gender gender, User parent) {
@@ -186,6 +187,14 @@ public class User {
     this.friendsMap = friendsMap;
   }
 
+  public String getJacksonRep() {
+    return jacksonRep;
+  }
+
+  public void setJacksonRep(String jacksonRep) {
+    this.jacksonRep = jacksonRep;
+  }
+  
   @Override
   public int hashCode() {
     final int prime = 31;

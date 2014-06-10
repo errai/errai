@@ -111,6 +111,21 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
           }
         }).postJackson(jackson);
   }
+  
+  public void testJacksonMarshallingInInterceptor() {
+    delayTestFinish(5000);
+
+    call(JacksonTestService.class,
+        new RemoteCallback<User>() {
+          @Override
+          public void callback(User user) {
+            assertNotNull(user);
+            assertEquals(user.getFirstName(), "intercepted");
+            assertEquals(user.getLastName(), "last");
+            finishTest();
+          }
+        }).postJacksonIntercepted("");
+  }
 
   @Test
   public void testJacksonMarshallingOfList() {
