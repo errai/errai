@@ -7005,7 +7005,48 @@ Client-side interceptors are used for caching so that generally only calls to `l
 
 === RestrictedAccess
 
-The annotation `@RestrictedAccess` is the only annotation necessary to secure a resource or UI element. In general, `@RestrictedAccess` blocks a resource from users who are not logged in; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.
+The annotation `@RestrictedAccess` is the only annotation necessary to secure a resource or UI element. In general, `@RestrictedAccess` blocks a resource from users who are either not logged in or who lack required roles. Roles are defined through the `@RestrictedAccess` annotation in one of the following two ways.
+
+==== Simple Roles as Strings
+
+Simple roles are roles that can be directly mapped to Strings (the String value being the role name). Simple roles are defined by defining an array of Strings in the `roles` parameter of `@RestrictedAccess`. Two simple roles are equivalent if they have the same name.
+
+Here is an example usage of `@RestrictedAccess` with two simple roles, "user" and "admin":
+
+[source,java]
+----
+@RestrictedAccess(roles = { "user", "admin" })
+----
+
+==== Provided Roles
+
+Conceptually, a provided can be used to implement a more complex security system. In practice, a provided role is some concrete type that implements the `Role` interface and overrides `Object.equals(Object)`. Provided roles are declared on a resource by creating a `RequiredRolesProvider` that produces these roles and assigning the type to the `providers` parameter of `@RestrictedAccess`.
+
+Here is an sample of a `RequireRolesProvider` and its usage with `@RestrictedAccess`. This example defines equivalent roles to the above example using simple roles.
+
+[source,java]
+----
+@Dependent <1>
+public class AdminRolesProvider implements RequiredRolesProvider {
+
+  @Override
+  public Set<Role> getRoles() {
+    return new HashSet<Role>(Arrays.asList(
+      new RoleImpl("user"), <2>
+      new RoleImpl("admin")
+    ));
+  }
+}
+----
+
+[source,java]
+----
+@RestrictedAccess(providers = { AdminRolesProvider.class })
+----
+
+<1> The role provider implementation must be a CDI bean so that it can be looked up dynamically on the client and server.
+
+<2> `RoleImpl` is the internal implementation used for simple roles. A `RoleImpl` equals another role if they are both instances of `RoleImpl` and have matching names.
 
 ==== RPC Services
 
@@ -7039,6 +7080,12 @@ public interface MixedService {
   public void adminService();
 }
 ----
+
+.Using Role Providers with RPC Services
+[NOTE]
+====
+If a `RequiredRolesProvider` is used on an RPC interface, the provider type must be located in a shared package. Security checks for RPCs are performed on the client and the server, so placing the type in a client- or server-only package will result in run-time errors.
+====
 
 ===== Error Callbacks
 
