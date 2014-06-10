@@ -32,18 +32,20 @@ abstract class CallContext {
   /**
    * Provides access to the intercepted method's parameters.
    * 
-   * @return Array of method parameters in declaration order. An empty array if the intercepted method has no
-   *         parameters.
+   * @return Array of method parameters in declaration order. An empty array if
+   *         the intercepted method has no parameters.
    */
   public Object[] getParameters() {
     return parameters;
   }
 
   /**
-   * Overrides the parameters that are passed to the method for which the interceptor was invoked.
+   * Overrides the parameters that are passed to the method for which the
+   * interceptor was invoked.
    * 
    * @param parameters
-   *          the parameters to use when invoking the intercepted method. Must not be null.
+   *          the parameters to use when invoking the intercepted method. Must
+   *          not be null.
    */
   public void setParameters(Object[] parameters) {
     this.parameters = Assert.notNull(parameters);
@@ -57,12 +59,21 @@ abstract class CallContext {
   public abstract String getMethodName();
 
   /**
+   * Returns the return type of the intercepted method.
+   * 
+   * @return the return type of the method for which the interceptor was
+   *         invoked.
+   */
+  @SuppressWarnings("rawtypes")
+  public abstract Class getReturnType();
+
+  /**
    * Returns the annotations of the intercepted method.
-   *
+   * 
    * @return the annotations of the method of which the interceptor was invoked.
    */
   public abstract Annotation[] getAnnotations();
-  
+
   /**
    * Get the annotations of the intercepted type.
    * 
@@ -71,15 +82,18 @@ abstract class CallContext {
   public abstract Annotation[] getTypeAnnotations();
 
   /**
-   * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all
-   * interceptors have been executed.
+   * Proceeds to the next interceptor in the chain or with the execution of the
+   * intercepted method if all interceptors have been executed.
    * <p>
-   * This method can also be called to proceed with an asynchronous call (e.g. when intercepting a remote procedure
-   * call), but only if the call's result is not required in the interceptor logic. If access to the result of an
-   * asynchronous method call is needed in the interceptor, one of the overloaded versions of this method accepting a
-   * {@link RemoteCallback} has to be used instead.
+   * This method can also be called to proceed with an asynchronous call (e.g.
+   * when intercepting a remote procedure call), but only if the call's result
+   * is not required in the interceptor logic. If access to the result of an
+   * asynchronous method call is needed in the interceptor, one of the
+   * overloaded versions of this method accepting a {@link RemoteCallback} has
+   * to be used instead.
    * 
-   * @return the return value of the intercepted method. Always null for asynchronous methods.
+   * @return the return value of the intercepted method. Always null for
+   *         asynchronous methods.
    */
   public abstract Object proceed();
 }
