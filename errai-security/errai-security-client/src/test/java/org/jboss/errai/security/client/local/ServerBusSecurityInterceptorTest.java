@@ -19,11 +19,19 @@ package org.jboss.errai.security.client.local;
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.*;
 
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.security.client.local.res.Counter;
 import org.jboss.errai.security.client.local.res.CountingMessageCallback;
 import org.jboss.errai.security.shared.api.identity.User;
 
 public class ServerBusSecurityInterceptorTest extends BusSecurityInterceptorTest {
+
+  private int counter;
+  private Subscription errorSubscription;
 
   @Override
   protected void postLogout() {
@@ -33,6 +41,27 @@ public class ServerBusSecurityInterceptorTest extends BusSecurityInterceptorTest
   @Override
   protected void postLogin(final User user) {
     provider.invalidateCache();
+  }
+
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    counter = 0;
+    errorSubscription = ErraiBus.get().subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+      @Override
+      public void callback(Message message) {
+        final Throwable throwable = message.get(Throwable.class, MessageParts.Throwable);
+        if (throwable instanceof org.jboss.errai.security.shared.exception.SecurityException) {
+          counter++;
+        }
+      }
+    });
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    errorSubscription.remove();
+    super.gwtTearDown();
   }
 
   public void testSecureCallbackNotLoggedIn() throws Exception {
