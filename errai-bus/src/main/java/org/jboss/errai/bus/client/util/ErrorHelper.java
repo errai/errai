@@ -19,6 +19,7 @@ package org.jboss.errai.bus.client.util;
 import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.MessageCallbackFailure;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
@@ -59,6 +60,15 @@ public class ErrorHelper {
     else {
 
       if (e != null) {
+        /*
+         * Some code calling this method properly set the value, where others incorrectly set it to
+         * null (because they do not check the cause). This check is here for the case that the
+         * exception has not been correctly set so that it is still marshaled to the client.
+         */
+        if (!message.hasResource("Exception") || message.getResource(Object.class, "Exception") == null) {
+          message.setResource("Exception", maybeUnwrap(e));
+        }
+
         StringBuilder a =
             new StringBuilder("<tt><br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append(
                 "<br/>");
@@ -92,6 +102,14 @@ public class ErrorHelper {
         sendClientError(bus, message, errorMessage, "No additional details.");
       }
     }
+  }
+
+  private static Throwable maybeUnwrap(Throwable e) {
+    while ((e instanceof MessageDeliveryFailure || e instanceof MessageCallbackFailure) && e.getCause() != null) {
+      e = e.getCause();
+    }
+
+    return e;
   }
 
   /**
