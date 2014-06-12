@@ -16,37 +16,50 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.RpcBatch;
 import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
-import java.lang.annotation.Annotation;
-
 /**
  * Base class of all RPC proxies managed by the shared {@see
  * RemoteServiceProxyFactory}. The concrete implementations of this class are
  * generated at compile time.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractRpcProxy implements RpcStub {
 
+  private static final ErrorCallback defaultErrorCallback = new ErrorCallback() {
+    @Override
+    public boolean error(Object message, Throwable throwable) {
+      invokeDefaultErrorHandlers(throwable);
+      return false;
+    }
+  };
+
   protected RemoteCallback remoteCallback;
-  protected ErrorCallback errorCallback;
+  protected ErrorCallback errorCallback = defaultErrorCallback;
   protected Annotation[] qualifiers;
   protected RpcBatch batch;
 
   @Override
   public void setErrorCallback(ErrorCallback errorCallback) {
-    this.errorCallback = errorCallback;
+    if (errorCallback == null) {
+      errorCallback = defaultErrorCallback;
+    }
+    else {
+      this.errorCallback = errorCallback;
+    }
   }
 
   @Override
@@ -74,7 +87,7 @@ public abstract class AbstractRpcProxy implements RpcStub {
     }
   }
 
-  protected void invokeDefaultErrorHandlers(final Throwable throwable) {
+  protected static void invokeDefaultErrorHandlers(final Throwable throwable) {
     MessageBuilder.createMessage(DefaultErrorCallback.CLIENT_ERROR_SUBJECT).signalling()
             .with(MessageParts.Throwable, throwable).defaultErrorHandling().sendNowWith(ErraiBus.get());
   }
