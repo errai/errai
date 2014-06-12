@@ -42,21 +42,20 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
 
   public long TIME_LIMIT = 60000;
   protected Timer timer;
-  protected int counter;
 
   @Override
   protected void gwtSetUp() throws Exception {
-    counter = 0;
     final UncaughtExceptionHandler oldHandler = GWT.getUncaughtExceptionHandler();
     GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
       @Override
       public void onUncaughtException(Throwable t) {
-        if (!(t instanceof SecurityException)) {
+        /*
+         * Lest we forget: passing null to the default uncaught exception handler makes the test
+         * immediately finish successfully.
+         */
+        if (!(t instanceof SecurityException) && t != null) {
           // let's not swallow assertion errors
           oldHandler.onUncaughtException(t);
-        }
-        else {
-          counter++;
         }
       }
     });
