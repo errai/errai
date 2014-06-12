@@ -43,6 +43,18 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 
 /**
+ * <p>
+ * These test cases are run in two modes:
+ * <ul>
+ * <li>ClientBusSecurityInterceptorTests runs these tests with a valid user cache, causing the
+ * client-side security interceptors to be triggered.
+ * <li>ServerBusSecurityInterceptorTests runs these tests with an invalid user cache, causing RPCs
+ * to bypass the client-side security checks.
+ *
+ * <p>
+ * Note that the client side tests use the ClientInteceptorTestAssistant so that calls not blocked
+ * by the client interceptor do not go to the server (making the tests compeletly independent).
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest {

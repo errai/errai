@@ -20,6 +20,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.*;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.security.client.local.res.ClientInterceptorTestAssistant;
 import org.jboss.errai.security.client.local.res.Counter;
 import org.jboss.errai.security.client.shared.AdminService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
@@ -34,6 +35,12 @@ public class ClientBusSecurityInterceptorTest extends BusSecurityInterceptorTest
 
   @Override
   protected void postLogin(User user) {
+  }
+
+  @Override
+  protected void gwtSetUp() throws Exception {
+    ClientInterceptorTestAssistant.active = true;
+    super.gwtSetUp();
   }
 
   public void testAuthInterceptorRedirectsWithNoErrorHandler() throws Exception {
