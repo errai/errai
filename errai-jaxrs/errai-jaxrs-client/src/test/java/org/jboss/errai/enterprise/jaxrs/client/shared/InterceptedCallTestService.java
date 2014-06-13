@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallBypassingInterceptor;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallErrorInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorOne;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorTwo;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorUsingResponseAndErrorCallback;
@@ -81,4 +82,9 @@ public interface InterceptedCallTestService {
   @Path("/7")
   @InterceptedCall(RestCallInterceptorUsingResponseAndErrorCallback.class)
   public Response interceptedGetWithResponseAndErrorCallback(@QueryParam("result") String result);
+  
+  @GET
+  @Path("/8")
+  @InterceptedCall(RestCallErrorInterceptor.class)
+  public String interceptedGetForClientError(String result);
 }

@@ -352,12 +352,23 @@ public class JaxrsProxyMethodGenerator {
                       .append(
                           Stmt.if_(
                               BooleanExpressionBuilder.create(
+                                 StringStatement.of("getResult()", Object.class), BooleanOperator.NotEquals, Stmt
+                                      .loadLiteral(null)))
+                              .append(
+                                  Stmt.loadVariable("remoteCallback").invoke("callback",
+                                          StringStatement.of("getResult()", Object.class)))
+                              .append(Stmt.load(false).returnValue())
+                              .finish()
+                          .elseif_(
+                              BooleanExpressionBuilder.create(
                                   Stmt.loadVariable("providedErrorCallback"), BooleanOperator.NotEquals, Stmt
                                       .loadLiteral(null)))
                               .append(
-                                  Stmt.loadVariable("providedErrorCallback").invoke("error",
+                                  Stmt.nestedCall(
+                                    Stmt.loadVariable("providedErrorCallback").invoke("error",
                                       Variable.get("message"),
                                       Variable.get("throwable")))
+                                  .returnValue())
                               .finish())
                       .append(Stmt.load(true).returnValue())
                       .finish()

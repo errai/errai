@@ -69,4 +69,9 @@ public class InterceptedCallTestServiceImpl implements InterceptedCallTestServic
   public Response interceptedGetWithResponseAndErrorCallback(String result) {
     return Response.ok(result).build();
   }
+
+  @Override
+  public String interceptedGetForClientError(String result) {
+    return "request should not have reached server";
+  }
 }
