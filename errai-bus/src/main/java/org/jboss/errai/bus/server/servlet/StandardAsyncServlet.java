@@ -75,20 +75,18 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     asyncContext.addListener(new AsyncListener() {
         @Override
         public void onComplete(final AsyncEvent event) throws IOException {
-          synchronized (queue.getActivationLock()) {
-            queue.setActivationCallback(null);
-            asyncContext.complete();
-          }
+          clearActivationCallback(queue);
         }
 
         @Override
         public void onTimeout(final AsyncEvent event) throws IOException {
-          onComplete(event);
+          clearActivationCallback(queue);
+          asyncContext.complete();
         }
 
         @Override
         public void onError(final AsyncEvent event) throws IOException {
-          queue.setActivationCallback(null);
+          clearActivationCallback(queue);
         }
 
         @Override
@@ -165,6 +163,12 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       else if (!message.contains("expired")) {
         writeExceptionToOutputStream(response, e);
       }
+    }
+  }
+  
+  private void clearActivationCallback(final MessageQueue queue) {
+    synchronized (queue.getActivationLock()) {
+      queue.setActivationCallback(null);
     }
   }
 }
