@@ -28,9 +28,9 @@ public class AnnotationUtils {
 
   /**
    * Merge roles from multiple {@link RestrictedAccess}.
-   * 
+   *
    * @param accessRestrictions {@link RestrictedAccess} annotations with roles to be merged.
-   * 
+   *
    * @return An array of unique role names.
    */
   public static String[] mergeRoles(final RestrictedAccess... accessRestrictions) {
