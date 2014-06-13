@@ -30,14 +30,18 @@ public abstract class RemoteCallContext extends CallContext {
   /**
    * Returns the result of the intercepted remote call.
    * 
-   * @return intercepted method result
+   * @return intercepted method result, may be null.
    */
   public Object getResult() {
     return result;
   }
 
   /**
-   * Sets the result of the intercepted remote call.
+   * Sets the result of the intercepted remote call. When invoked from an
+   * {@link ErrorCallback} it will prevent the error from bubbling up and
+   * instead cause the {@link RemoteCallback} specified in the previous
+   * interceptor or at the actual remote call site to be invoked with the
+   * provided result.
    * 
    * @param result
    *          The result to return to the caller of the intercepted method.
@@ -47,27 +51,30 @@ public abstract class RemoteCallContext extends CallContext {
   }
 
   /**
-   * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all interceptors
-   * have been executed.
+   * Proceeds to the next interceptor in the chain or with the execution of the
+   * intercepted method if all interceptors have been executed.
    * 
    * @param callback
-   *          The remote callback that receives the return value from the call. This callback is guaranteed to be
-   *          invoked before the callback provided on the actual call site. Cannot be null.
+   *          The remote callback that receives the return value from the call.
+   *          This callback is guaranteed to be invoked before the callback
+   *          provided on the actual call site. Cannot be null.
    */
   public abstract void proceed(RemoteCallback<?> callback);
 
   /**
-   * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all interceptors
-   * have been executed.
+   * Proceeds to the next interceptor in the chain or with the execution of the
+   * intercepted method if all interceptors have been executed.
    * 
    * @param callback
-   *          The remote callback that receives the return value from the call. This callback is guaranteed to be
-   *          invoked before the callback provided on the actual call site. Cannot be null.
+   *          The remote callback that receives the return value from the call.
+   *          This callback is guaranteed to be invoked before the callback
+   *          provided on the actual call site. Cannot be null.
    * 
    * @param errorCallback
-   *          The error callback that receives transmission errors and exceptions thrown by the remote service. This
-   *          error callback is guaranteed to be invoked before the error callback provided on the actual call site.
-   *          Cannot be null.
+   *          The error callback that receives transmission errors and
+   *          exceptions thrown by the remote service. This error callback is
+   *          guaranteed to be invoked before the error callback provided on the
+   *          actual call site. Cannot be null.
    */
   public abstract void proceed(RemoteCallback<?> callback, ErrorCallback<?> errorCallback);
 }
