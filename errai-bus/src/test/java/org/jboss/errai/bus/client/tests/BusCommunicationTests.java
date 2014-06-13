@@ -558,8 +558,11 @@ public class BusCommunicationTests extends AbstractErraiTest {
           @Override
           public void callback(final Message message) {
             final String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
-            assertTrue("Throwable should contain non-existing service name. Observed message: " + errorMessage,
-                errorMessage.contains("non-existing"));
+            final String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
+            assertTrue("Throwable should contain non-existing service name."
+                    + "\n\tObserved errorMessage: " + errorMessage
+                    + "\n\tObserved additionalDetails: " + additionalDetails,
+                (errorMessage + additionalDetails).contains("non-existing"));
             finishTest();
           }
         }));
