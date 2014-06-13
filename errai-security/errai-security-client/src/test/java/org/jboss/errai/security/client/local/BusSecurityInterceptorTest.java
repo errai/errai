@@ -34,7 +34,9 @@ import org.jboss.errai.security.client.shared.AdminTypeUserMethodService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
 import org.jboss.errai.security.client.shared.DiverseService;
 import org.jboss.errai.security.client.shared.SecureRoleProvidedService;
+import org.jboss.errai.security.client.shared.UserMethodSharedImplService;
 import org.jboss.errai.security.client.shared.UserTypeAdminMethodService;
+import org.jboss.errai.security.client.shared.UserTypeSharedImplService;
 import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
@@ -440,6 +442,64 @@ public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterce
           public void run() {
             assertEquals(0, successCounter.getCount());
             assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  public void testOnlyRolesFromRequestedInterfaceMethodRequired() throws Exception {
+    asyncTest();
+
+    final Counter successCounter = new Counter();
+    final Counter errorCounter = new Counter();
+
+    afterLogin("john", "123", new RemoteCallback<User>() {
+      @Override
+      public void callback(User response) {
+        // Preconditions
+        assertEquals(1, response.getRoles().size());
+        assertEquals(new RoleImpl("user"), response.getRoles().iterator().next());
+
+        MessageBuilder
+                .createCall(new CountingRemoteCallback(successCounter),
+                        new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                        UserMethodSharedImplService.class).someUserService();
+
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, successCounter.getCount());
+            assertEquals(0, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  public void testOnlyRolesFromRequestedInterfaceTypeRequired() throws Exception {
+    asyncTest();
+
+    final Counter successCounter = new Counter();
+    final Counter errorCounter = new Counter();
+
+    afterLogin("john", "123", new RemoteCallback<User>() {
+      @Override
+      public void callback(User response) {
+        // Preconditions
+        assertEquals(1, response.getRoles().size());
+        assertEquals(new RoleImpl("user"), response.getRoles().iterator().next());
+
+        MessageBuilder
+                .createCall(new CountingRemoteCallback(successCounter),
+                        new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                        UserTypeSharedImplService.class).someUserService();
+
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, successCounter.getCount());
+            assertEquals(0, errorCounter.getCount());
           }
         });
       }
