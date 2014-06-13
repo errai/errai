@@ -70,6 +70,14 @@ public class ClientInterceptorTestAssistant implements RemoteCallInterceptor<Rem
       @Override
       public void proceed(RemoteCallback<?> callback) {
       }
+
+      @SuppressWarnings("rawtypes")
+      @Override
+      public Class getReturnType() {
+        return context.getReturnType();
+      }
+      
+      
     };
 
     interceptor.aroundInvoke(contextWrapper);
