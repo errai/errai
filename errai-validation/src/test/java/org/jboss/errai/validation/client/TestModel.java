@@ -58,6 +58,9 @@ public class TestModel {
   @NotNull
   @Valid
   private HashSet<TestModel> set = new HashSet<TestModel>();
+  
+  // Serves as a regression test for ERRAI-763
+  private HashSet<TestModel> nullList;
 
   public int getNumVal() {
     return numVal;
@@ -112,6 +115,14 @@ public class TestModel {
   
   public void addToSet(TestModel l) {
     this.set.add(l);
+  }
+  
+  public HashSet<TestModel> getNullList() {
+    return nullList;
+  }
+
+  public void setNullList(HashSet<TestModel> nullList) {
+    this.nullList = nullList;
   }
 
 }
