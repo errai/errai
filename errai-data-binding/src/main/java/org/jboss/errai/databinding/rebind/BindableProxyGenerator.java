@@ -35,6 +35,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -339,15 +340,17 @@ public class BindableProxyGenerator {
             String colVarName = property + "Clone";
             String elemVarName = property + "Elem";
             
+            BlockBuilder<ElseBlockBuilder> colBlock = If.isNotNull(Stmt.nestedCall(target().invoke(readMethod)));
+            
             if ((type.isInterface() || type.isAbstract()) && 
                     (type.isAssignableTo(List.class) || type.isAssignableTo(Set.class))) {
               MetaClass clazz = (type.isAssignableTo(Set.class)) 
                       ? MetaClassFactory.get(HashSet.class) : MetaClassFactory.get(ArrayList.class); 
-              block.addStatement(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(clazz)));
+                colBlock.append(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(clazz)));
             }
             else {
               if (!type.isInterface() && !type.isAbstract()) {
-                block.addStatement(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(type.getErased())));
+                colBlock.append(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(type.getErased())));
               }
               else {
                 logger.log(TreeLogger.WARN, "Bean validation on collection " + property + " in class " + bindable + 
@@ -356,7 +359,7 @@ public class BindableProxyGenerator {
               }
             }
             // Check if the collection element is proxied and unwrap if necessary
-            block.addStatement(
+            colBlock.append(
               Stmt.nestedCall(target().invoke(readMethod)).foreach(elemVarName, Object.class)
                .append (
                  If.instanceOf(Refs.get(elemVarName), BindableProxy.class)
@@ -370,7 +373,8 @@ public class BindableProxyGenerator {
              )
              .finish());
             
-            block.addStatement(Stmt.loadVariable(cloneVar).invoke(writeMethod, Refs.get(colVarName)));
+            colBlock.append(Stmt.loadVariable(cloneVar).invoke(writeMethod, Refs.get(colVarName)));
+            block.addStatement(colBlock.finish());
           }
           else {
             block.addStatement(Stmt.loadVariable(cloneVar).invoke(writeMethod,target().invoke(readMethod)));
