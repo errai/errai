@@ -194,6 +194,11 @@
         <artifactId>errai-security-picketlink</artifactId>
         <version>${version.org.jboss.errai}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-security-keycloak</artifactId>
+        <version>${version.org.jboss.errai}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>

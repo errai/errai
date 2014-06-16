@@ -1,0 +1,122 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-security</artifactId>
+    <version>3.1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>errai-security-keycloak</artifactId>
+  <name>Errai::Security::Keycloak</name>
+  <description>Provides a default Keycloak implementation for the AuthenticationService.</description>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.errai.bom</groupId>
+        <artifactId>errai-version-master</artifactId>
+        <type>pom</type>
+        <scope>import</scope>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-server</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-adapter-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-servlet-oauth-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.deltaspike.core</groupId>
+      <artifactId>deltaspike-core-api</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+  <resources>
+    <resource>
+      <directory>src/main/resources</directory>
+    </resource>
+  </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+              <forkMode>always</forkMode>
+              <argLine>-Xmx1500m ${argLine}</argLine>
+
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/target/test-classes/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+              </additionalClasspathElements>
+              <useSystemClassLoader>false</useSystemClassLoader>
+              <useManifestOnlyJar>true</useManifestOnlyJar>
+
+              <includes>
+                <include>**/*Test.java</include>
+                <include>**/*Tests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

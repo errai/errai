@@ -17,9 +17,54 @@
     <!--<servlet-name>ErraiServlet</servlet-name>-->
     <!--<url-pattern>*.erraiBus</url-pattern>-->
   <!--</servlet-mapping>-->
+  
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <filter>
+    <filter-name>ErraiLoginRedirectFilter</filter-name>
+    <init-param>
+      <param-name>redirectLocation</param-name>
+      <param-value>/index.jsp</param-value>
+    </init-param>
+  </filter>
 
   <servlet-mapping>
     <servlet-name>javax.ws.rs.core.Application</servlet-name>
     <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
+
+  <filter-mapping>
+    <filter-name>ErraiUserExtractionFilter</filter-name>
+    <url-pattern>/index.jsp</url-pattern>
+    <url-pattern>/index.html</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>ErraiLoginRedirectFilter</filter-name>
+    <url-pattern>/app-login</url-pattern>
+  </filter-mapping>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Login</web-resource-name>
+      <url-pattern>/app-login</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <login-config>
+    <auth-method>KEYCLOAK</auth-method>
+    <realm-name>demo</realm-name>
+  </login-config>
+  
+  <security-role>
+    <role-name>user</role-name>
+  </security-role>
+  <security-role>
+    <role-name>admin</role-name>
+  </security-role>
 </web-app>

@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.security.Properties;
 import org.jboss.errai.security.client.local.storage.SecurityProperties;
 
 import com.google.gwt.core.ext.GeneratorContext;
@@ -30,7 +31,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 @GenerateAsync(SecurityProperties.class)
 public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
 
-  public static final String USER_COOKIE_ENABLED_PROP = "errai.security.user_cookie_enabled";
+  public static final String USER_COOKIE_ENABLED_PROP = Properties.USER_COOKIE_ENABLED;
 
   private static final String PACKAGE_NAME = SecurityProperties.class.getPackage().getName();
   private static final String CLASS_NAME = SecurityProperties.class.getSimpleName() + "Impl";

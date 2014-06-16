@@ -131,6 +131,10 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-keycloak</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-security-picketlink</artifactId>
     </dependency>
     <dependency>
@@ -296,10 +300,10 @@
           <noServer>false</noServer>
           <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
           <disableCastChecking>true</disableCastChecking>
-          <runTarget>${errai.dev.context}/index.html</runTarget>
+          <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx512m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.home=${errai.jboss.home} -Derrai.jboss.javaopts="-XX:MaxPermSize=128M -Xmx512M" -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>
@@ -328,7 +332,7 @@
           <plugin>
             <groupId>org.wildfly.plugins</groupId>
             <artifactId>wildfly-maven-plugin</artifactId>
-            <version>${wildfly.version}</version>
+            <version>1.0.2.Final</version>
             <extensions>false</extensions>
           </plugin>
         </plugins>

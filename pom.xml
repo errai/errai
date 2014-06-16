@@ -302,6 +302,11 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-security-keycloak</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
         <artifactId>errai-client-local-class-hider</artifactId>      
         <version>${project.version}</version>
       </dependency>
