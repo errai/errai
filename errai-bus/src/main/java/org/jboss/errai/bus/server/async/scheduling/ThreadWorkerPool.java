@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server.async.scheduling;
 
-import javax.swing.plaf.metal.MetalBorders;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.LockSupport;
