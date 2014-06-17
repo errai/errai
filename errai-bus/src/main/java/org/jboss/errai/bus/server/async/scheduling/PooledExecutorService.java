@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.async.scheduling;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.locks.LockSupport.parkUntil;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -29,8 +30,10 @@ import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.slf4j.Logger;
 
 public class PooledExecutorService implements TaskProvider {
+  private final static Logger log = getLogger(PooledExecutorService.class);
   private final BlockingQueue<TimedTask> queue;
 
   /**
@@ -376,8 +379,8 @@ public class PooledExecutorService implements TaskProvider {
           }
         }
         catch (InterruptedException e) {
-          e.printStackTrace();
-          // just fall through.
+          // This will happen during container shutdown, so logging as debug is sufficient.
+          log.debug("Scheduler thread interrupted", e);
         }
         catch (Throwable t) {
           t.printStackTrace();
