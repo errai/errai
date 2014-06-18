@@ -18,6 +18,7 @@ package org.jboss.errai.ui.test.binding.client.res;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -31,8 +32,9 @@ import org.jboss.errai.ui.test.common.client.TestModel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 
+@Singleton
 @Templated("BindingTemplate.html")
-public class BindingItemWidget extends Composite implements HasModel<TestModel> {
+public class SingletonBindingItemWidget extends Composite implements HasModel<TestModel> {
 
   @Inject @Bound @DataField
   private TextBox name;

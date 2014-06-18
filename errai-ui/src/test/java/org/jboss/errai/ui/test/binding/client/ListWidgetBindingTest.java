@@ -17,6 +17,7 @@
 package org.jboss.errai.ui.test.binding.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -26,10 +27,14 @@ import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.client.local.spi.InvalidBeanScopeException;
 import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.test.binding.client.res.AppScopedBindingItemWidget;
+import org.jboss.errai.ui.test.binding.client.res.AppScopedBindingListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
+import org.jboss.errai.ui.test.binding.client.res.SingletonBindingListWidget;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
@@ -153,6 +158,26 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertEquals(panel.getElement().getNodeName(), "TABLE");
   }
 
+  @Test
+  public void testAppScopedWidgetInListCausesError() {
+    List<TestModel> list = new ArrayList<TestModel>();
+    AppScopedBindingListWidget listWidget = new AppScopedBindingListWidget();
+    try {
+      listWidget.setItems(list);
+      fail("Did not throw InvalidBeanScopeException");
+    } catch (InvalidBeanScopeException e) {}
+  }
+  
+  @Test
+  public void testSingletonWidgetInListCausesError() {
+    List<TestModel> list = new ArrayList<TestModel>();
+    SingletonBindingListWidget listWidget = new SingletonBindingListWidget();
+    try {
+      listWidget.setItems(list);
+      fail("Did not throw InvalidBeanScopeException");
+    } catch (InvalidBeanScopeException e) {}
+  }
+  
   @Test
   public void testListBindingAndAddItem() {
     List<TestModel> modelList = new ArrayList<TestModel>();
@@ -350,7 +375,9 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     listWidget.setItems(modelList);
     assertEquals("Expected five widgets", 5, listWidget.getWidgetCount());
 
+    BindingItemWidget widget = listWidget.getWidget(2);
     listWidget.getItems().remove(itemToRemove);
+    assertEquals(1, widget.getNum());
     assertItemsRendered(listWidget);
   }
 
@@ -374,8 +401,21 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
     assertEquals("Expected six widgets", 6, listWidget.getWidgetCount());
+    
+    List<BindingItemWidget> testWidgetsRemoved = new ArrayList<BindingItemWidget>();
+    
+    for(int i = 0; i < listWidget.getWidgetCount(); i++) {
+      testWidgetsRemoved.add(listWidget.getWidget(i));
+    }
 
     listWidget.getItems().removeAll(removeList);
+    
+    for(int i = 0; i < listWidget.getWidgetCount(); i++) {
+      if ((i == 1) || (i == 4))
+        assertEquals("Widget " + i + " failed", 1, testWidgetsRemoved.get(i).getNum());
+      else
+        assertEquals("Widget " + i + " failed", 0, testWidgetsRemoved.get(i).getNum());
+    }
     assertItemsRendered(listWidget);
   }
 
@@ -393,7 +433,9 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     listWidget.setItems(modelList);
     assertEquals("Expected five widgets", 5, listWidget.getWidgetCount());
 
+    BindingItemWidget widget = listWidget.getWidget(2);
     listWidget.getItems().remove(2);
+    assertEquals(1, widget.getNum());
     assertItemsRendered(listWidget);
   }
   
