@@ -22,9 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.inject.Singleton;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.util.CreationalCallback;
