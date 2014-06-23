@@ -7369,6 +7369,123 @@ If you do enable the Errai Security cookie, it is possible to use a form-based l
 
 . Make sure this is in your ErraiApp.properties file: `errai.security.user_cookie_enabled=true`
 
+=== Using Keycloak for Authentication
+
+link:$$http://keycloak.jboss.org/$$[Keycloak] is is a new project that provides integrated SSO and IDM for browser apps and RESTful web services. By using Keycloak it is possible to outsource the responsibility of authentication and account management from your application entirely. Errai Security provides an optional `errai-security-keycloak` jar that provides an implementation of the `AuthenticationService` that works with Keycloak.
+
+==== How It Works (Overview)
+
+From the perspective of a visitor, here is what happens when she attempts to log in:
+
+* The visitor is redirected to a Keycloak login page.
+
+* The visitor submits her credentials through the Keycloak login page.
+
+* Assuming the credentials are valid, the visitor is redirected back to the web app, where she is now logged in.
+
+===== Keycloak Token
+
+Behind the scenes, when the visitor successfully submits credentials she is redirected back to the web app with a Keycloak Access Token, which contains information that is configurable from within Keycloak. A servlet filter is used to extract the token from the request and assign it to the `AuthenticationService` implementation. At this point the User is now logged in to your application.
+
+==== Setup
+
+To add Keycloak integration to your application:
+
+. Setup a Keycloak server. Please consult the link:$$http://keycloak.jboss.org/docs.html$$[Keycloak documentation] for details on how this is achieved.
+
+  .. As part of your setup you should create a new realm for your application.
+
+  .. Add roles and users to your realm.
+
+  .. In your new realm you should create a new application (you can also use OAuth).
+
+  .. After creating your application select it from the list and make sure to adjust the following settings as appropriate:
+
+    * **Redirect URI** -- You should use this to whitelist pages that will be redirected to after a successful login.
+
+    * **Claims** -- You will need to explicitly enable any information about users that your application requires access to.
+
+    * **Scope** -- Move any roles that users in your app *may* possess to the "Assigne Roles". (Note: moving the roles to "Assigned Roles" does not mean *all* users will have this role. It does mean that these roles will be visible to your app for users that do have them.)
+
+  .. After adjusting the settings for your app, go to the *Installation* tab and select "keycloak.json" in the *Format Option* list. Copy this into a "keycloak.json" file in your `WEB-INF` directory.
+
+. Add the `errai-security-keycloak` jar to your project. In maven, the dependency is `org.jboss.errai:errai-security-keycloak`.
+
+. Configure the `ErraiUserExtractionFilter` in your `web.xml`. All that is necessary is adding a filter-mapping for your GWT host page like so:
++
+[source,xml]
+----
+  <filter-mapping>
+    <filter-name>ErraiUserExtractionFilter</filter-name>
+    <url-pattern>/index.html</url-pattern>
+  </filter-mapping>
+----
+
+. Configure the `ErraiLoginRedirectFilter` in your `web.xml`.
+
+  .. Create a filter-mapping of this filter onto a path that will act as a url to the Keycloak login page. For example, if your deployed app is called `my-app` and you wanted `<server-uri>/my-app/app-login` as your login url then you would add the following:
++
+[source,xml]
+----
+  <filter-mapping>
+    <filter-name>ErraiLoginRedirectFilter</filter-name>
+    <url-pattern>/app-login</url-pattern>
+  </filter-mapping>
+----
+
+  .. Add a security-constraint to login url. This is what actually causes the redirection to Keycloak. All the filter does is redirect back to your app (which happens after the login completes). For the previous example, the constraint would look like this:
++
+[source,xml]
+----
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Login</web-resource-name>
+      <url-pattern>/app-login</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+----
+
+  .. Optionally configure the URL that the `ErraiLoginRedirectFilter` redirects to. You can do this with the `redirectLocation` param, which takes a path relative to the app context:
++
+[source,xml]
+----
+  <filter>
+    <filter-name>ErraiLoginRedirectFilter</filter-name>
+    <init-param>
+      <param-name>redirectLocation</param-name>
+      <param-value>/index.jsp</param-value>
+    </init-param>
+  </filter>
+----
+
+. Set the login method to use Keycloak in you `web.xml`:
++
+[source,xml]
+----
+  <login-config>
+    <auth-method>KEYCLOAK</auth-method>
+    <realm-name>example</realm-name>
+  </login-config>
+----
+
+. Add roles available to users in your application to the `web.xml`. Here is an example declaration of a "user" role:
++
+[source,xml]
+----
+  <security-role>
+    <role-name>user</role-name>
+  </security-role>
+----
+
+.All users must have at least one role
+[IMPORTANT]
+====
+With this configuration all users must have at least a single role, or else they will not be redirected propertly. Unfortunately, there is no way to define a security-constraint that only requires authentication. The simplest solution is to add a default role to your realm.
+====
+
 [[sid-74908675]]
 
 == Logging

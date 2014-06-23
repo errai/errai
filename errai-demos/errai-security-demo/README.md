@@ -66,6 +66,42 @@ This demo has to users:
 * **username**: hacker
 * **password**: 123
 
+### Keycloak Integration
+
+This demo also features Keycloak integration. To preview this you will need a Keycloak server. You can download a fully-configured in the [Keycloak appliance zip file](http://sourceforge.net/projects/keycloak/files/1.0-beta-3/keycloak-appliance-dist-all-1.0-beta-3.zip/download). To run this server, unzip the file, `cd` into the directory, then run `keycloak/bin/standalone.sh`.
+
+The following instructions assume you are using the Keycloak server from the link above.
+
+1. Start the Keycloak server.
+
+1. Go to the [Keycloak Administrative Console](http://localhost:8080/auth/admin/) (the username and password are both *admin*).
+
+1. Select the *Applications* tab and click *Add Application* and fill in the following:
+
+  * **Name** : errai-security-demo
+
+  * **Access Type** : public
+
+  * **Redirect URI** : http://localhost:8080/errai-security-demo/\*
+
+1. After saving, click on the new application in the menu and make sure the following are set:
+
+  * In the *Claims* tab allow *Username*, *Name*, *Email*.
+
+  * In the *Scope* tab move the *user* and *admin* roles from *Available Roles* to *Assigned Roles*.
+
+1. In the *Users* tab click *Add User*.
+
+  * Fill in the *Username*, *Email*, *First Name*, and *Last Name* with any values.
+
+  * After saving go to the *Credentials* tab and set a password.
+
+  * Go to the *Role Mappings* tab. Add add *atleast one* role the *Assigned Roles*.
+
+1. While the Keycloak server is running, run `mvn clean package wildfly:deploy` which will build the demo and deploy it to the running Wildfly server.
+
+1. Go to the errai-security-demo [login page](http://localhost:8080/errai-security-demo/#LoginForm). If the Keycloak setup has worked, you should see a link to log in with Keycloak beside the login button. Click this link to login as the user you created.
+
 ## Troubleshooting
 
 Here are some resources that may help if you encounter difficulties:
