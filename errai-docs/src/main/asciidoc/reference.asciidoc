@@ -7411,12 +7411,12 @@ To add Keycloak integration to your application:
 
 . Add the `errai-security-keycloak` jar to your project. In maven, the dependency is `org.jboss.errai:errai-security-keycloak`.
 
-. Configure the `ErraiUserExtractionFilter` in your `web.xml`. All that is necessary is adding a filter-mapping for your GWT host page like so:
+. Configure the `ErraiUserCookieFilter` in your `web.xml`. All that is necessary is adding a filter-mapping for your GWT host page like so:
 +
 [source,xml]
 ----
   <filter-mapping>
-    <filter-name>ErraiUserExtractionFilter</filter-name>
+    <filter-name>ErraiUserCookieFilter</filter-name>
     <url-pattern>/index.html</url-pattern>
   </filter-mapping>
 ----

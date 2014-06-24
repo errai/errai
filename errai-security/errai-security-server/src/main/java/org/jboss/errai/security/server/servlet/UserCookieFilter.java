@@ -1,9 +1,8 @@
-package org.jboss.errai.security.keycloak;
+package org.jboss.errai.security.server.servlet;
 
 import static org.jboss.errai.security.Properties.USER_COOKIE_ENABLED;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -18,39 +17,33 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.security.server.properties.ErraiAppProperties;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
- * Loads information for Keycloak user into the {@link KeycloakAuthenticationService}. This filter
- * should be used on the host page of Errai an application.
+ * Sets the Errai user cookie if the {@link org.jboss.errai.security.Properties#USER_COOKIE_ENABLED}
+ * property is set to true. This filter should be used on the host page of Errai an application.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@WebFilter(filterName="ErraiUserExtractionFilter")
-public class UserExtractionFilter implements Filter {
+@WebFilter(filterName="ErraiUserCookieFilter")
+public class UserCookieFilter implements Filter {
 
   static {
     MappingContextSingleton.get();
   }
 
   @Inject
-  private KeycloakAuthenticationService keycloakAuthService;
+  private AuthenticationService keycloakAuthService;
 
-  private Properties properties = new Properties();
+  @Inject
+  @ErraiAppProperties
+  private Properties properties;
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
-    final InputStream erraiAppPropertiesStream = ClassLoader.getSystemResourceAsStream("ErraiApp.properties");
-    try {
-      if (erraiAppPropertiesStream != null) {
-        properties.load(erraiAppPropertiesStream);
-        erraiAppPropertiesStream.close();
-      }
-    }
-    catch (IOException e) {
-      throw new ServletException("An error occurred reading the ErraiApp.properties stream.", e);
-    }
   }
 
   @Override
@@ -69,7 +62,7 @@ public class UserExtractionFilter implements Filter {
   }
 
   /**
-   * Add an Errai User cookie to the respone if the property has been enabled.
+   * Add an Errai User cookie to the response if the property has been enabled.
    *
    * @param user
    *          The user to encode.
