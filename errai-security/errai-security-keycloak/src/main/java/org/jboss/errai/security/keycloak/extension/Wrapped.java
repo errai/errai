@@ -21,8 +21,7 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  */
 @Documented
 @Retention(RUNTIME)
-@Target({ TYPE, FIELD, PARAMETER })
+@Target({ TYPE, FIELD, PARAMETER, METHOD })
 @Qualifier
 public @interface Wrapped {
-
 }

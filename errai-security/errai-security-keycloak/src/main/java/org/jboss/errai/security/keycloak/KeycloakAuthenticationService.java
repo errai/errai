@@ -31,11 +31,9 @@ import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.security.keycloak.extension.Wrapped;
+import org.jboss.errai.security.keycloak.extension.Filtered;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -87,8 +85,8 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   private static final long serialVersionUID = 1L;
 
   @Inject
-  @Wrapped
-  private Instance<AuthenticationService> authServiceInstance;
+  @Filtered
+  private AuthenticationService wrappedAuthService;
 
   private User keycloakUser;
 
@@ -97,30 +95,16 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   @Override
   public User login(final String username, final String password) {
     if (!keycloakIsLoggedIn()) {
-      return performLoginWithWrappedService(username, password);
+      return wrappedAuthService.login(username, password);
     }
     else {
       throw new AlreadyLoggedInException("Already logged in through Keycloak.");
     }
   }
 
-  private User performLoginWithWrappedService(final String username, final String password) {
-    if (!authServiceInstance.isUnsatisfied()) {
-      return authServiceInstance.get().login(username, password);
-    }
-    else {
-      throw new FailedAuthenticationException(
-              "Must provide a non-keycloak AuthenticationService to use the login method.");
-    }
-  }
-
   @Override
   public boolean isLoggedIn() {
-    return keycloakIsLoggedIn() || wrappedIsLoggedIn();
-  }
-
-  private boolean wrappedIsLoggedIn() {
-    return !authServiceInstance.isUnsatisfied() && authServiceInstance.get().isLoggedIn();
+    return keycloakIsLoggedIn() || wrappedAuthService.isLoggedIn();
   }
 
   private boolean keycloakIsLoggedIn() {
@@ -132,8 +116,8 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
     if (keycloakIsLoggedIn()) {
       keycloakLogout();
     }
-    else if (wrappedIsLoggedIn()) {
-      authServiceInstance.get().logout();
+    else if (wrappedAuthService.isLoggedIn()) {
+      wrappedAuthService.logout();
     }
   }
 
@@ -146,8 +130,8 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
     if (keycloakIsLoggedIn()) {
       return getKeycloakUser();
     }
-    else if (wrappedIsLoggedIn()) {
-      return authServiceInstance.get().getUser();
+    else if (wrappedAuthService.isLoggedIn()) {
+      return wrappedAuthService.getUser();
     }
     else {
       return User.ANONYMOUS;
@@ -231,8 +215,8 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
    * @param keycloakSecurityContext The context used to generate the logged in Keycloak {@link User}.
    */
   void setSecurityContext(final KeycloakSecurityContext keycloakSecurityContext) {
-    if (wrappedIsLoggedIn() && keycloakSecurityContext != null) {
-      throw new AlreadyLoggedInException("Logged in as " + authServiceInstance.get().getUser());
+    if (wrappedAuthService.isLoggedIn() && keycloakSecurityContext != null) {
+      throw new AlreadyLoggedInException("Logged in as " + wrappedAuthService.getUser());
     }
     this.keycloakSecurityContext = keycloakSecurityContext;
     keycloakUser = null;
