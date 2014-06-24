@@ -54,7 +54,7 @@
     <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
     <maven.compiler.target>1.6</maven.compiler.target>
     <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
-    <picketlink.version>2.6.0.CR3</picketlink.version>
+    <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <skipTests>true</skipTests>
