@@ -8,9 +8,6 @@ import javax.enterprise.inject.Instance;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.errai.marshalling.client.Marshalling;
-import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.security.server.mock.MockFilterConfig;
 import org.jboss.errai.security.server.mock.MockHttpServletRequest;
 import org.jboss.errai.security.server.mock.MockHttpSession;
@@ -81,7 +78,7 @@ public abstract class BaseSecurityFilterTest {
   @Before
   public void setup() {
     filterConfig = new MockFilterConfig(new MockServletContext());
-    filterConfig.setContextPath(contextPath);
+    ((MockServletContext) filterConfig.getServletContext()).setContextPath(contextPath);
 
     // useful minimum configuration. tests may overwrite these values before calling filter.init().
     filterConfig.initParams.put(HOST_PAGE_INIT_PARAM, "/dont/care/host");

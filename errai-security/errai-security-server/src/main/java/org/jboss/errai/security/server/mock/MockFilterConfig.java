@@ -5,15 +5,17 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.enterprise.inject.Alternative;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
+@Alternative
 public class MockFilterConfig implements FilterConfig {
 
-  private final MockServletContext owningContext;
+  private final ServletContext owningContext;
   public Map<String, String> initParams = new HashMap<String, String>();
 
-  public MockFilterConfig(MockServletContext owningContext) {
+  public MockFilterConfig(ServletContext owningContext) {
     this.owningContext = owningContext;
   }
 
@@ -36,9 +38,4 @@ public class MockFilterConfig implements FilterConfig {
   public Enumeration<String> getInitParameterNames() {
     return Collections.enumeration(initParams.keySet());
   }
-
-  public void setContextPath(String contextPath) {
-    owningContext.setContextPath(contextPath);
-  }
-
 }

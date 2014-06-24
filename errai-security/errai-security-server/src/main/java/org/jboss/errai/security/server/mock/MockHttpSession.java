@@ -5,10 +5,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.enterprise.inject.Alternative;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 
+@Alternative
 @SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
 
