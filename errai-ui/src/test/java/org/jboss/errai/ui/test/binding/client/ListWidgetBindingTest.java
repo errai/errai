@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -337,9 +338,19 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
     assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
-
+    
+    List <BindingItemWidget> testWidgetsCleared = new ArrayList<BindingItemWidget>();
+    for (int i = 0; i < listWidget.getWidgetCount(); i++) {
+      testWidgetsCleared.add(listWidget.getWidget(i));
+    }
     listWidget.getItems().clear();
     assertEquals("Expected zero widgets", 0, listWidget.getWidgetCount());
+    
+    Iterator<BindingItemWidget> itr = testWidgetsCleared.iterator();
+    while(itr.hasNext()) {
+      //BindingItemWidget.getNum() is incremented in a pre-destroy method
+      assertEquals(1, itr.next().getNum());
+    }
   }
 
   @Test
