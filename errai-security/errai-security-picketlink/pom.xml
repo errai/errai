@@ -11,7 +11,7 @@
   <description>Provides a default PicketLink implementation for the Authentication.</description>
 
   <properties>
-    <picketlink.version>2.6.0.CR3</picketlink.version>
+    <picketlink.version>2.6.0.Final</picketlink.version>
   </properties>
 
   <dependencyManagement>
