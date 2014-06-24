@@ -311,7 +311,21 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemsCleared(List<M> oldList) {
+    AsyncBeanManager bm = IOC.getAsyncBeanManager();
+    Integer widgetCount = panel.getWidgetCount();
+    
+    Collection<Widget> widgets = new ArrayList<Widget>(widgetCount);
+    for (int i = 0; i < widgetCount; i++) {
+      widgets.add(panel.getWidget(i));
+    }
+    
     panel.clear();
+    
+    Iterator<Widget> itr = widgets.iterator();
+    while(itr.hasNext()) {
+      Widget w = (Widget) itr.next();
+      bm.destroyBean(w);
+    }
   }
 
   @Override
