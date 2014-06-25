@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.security.server.properties.ErraiAppProperties;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
-import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
 /**
@@ -51,8 +50,7 @@ public class UserCookieFilter implements Filter {
           throws IOException, ServletException {
     final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-    final User keycloakUser = keycloakAuthService.getUser();
-    maybeSetUserCookie(keycloakUser, httpResponse);
+    maybeSetUserCookie(httpResponse);
 
     chain.doFilter(request, response);
   }
@@ -70,12 +68,12 @@ public class UserCookieFilter implements Filter {
    *          The response to add a cookie to.
    * @return True iff the cookie was added.
    */
-  private boolean maybeSetUserCookie(final User user, final HttpServletResponse response) {
+  private boolean maybeSetUserCookie(final HttpServletResponse response) {
     if (properties.containsKey(USER_COOKIE_ENABLED)) {
       final Boolean userCookieEnabled = (Boolean) properties.get(USER_COOKIE_ENABLED);
       if (userCookieEnabled) {
         final Cookie userCookie = new Cookie(UserCookieEncoder.USER_COOKIE_NAME,
-                UserCookieEncoder.toCookieValue(user));
+                UserCookieEncoder.toCookieValue(keycloakAuthService.getUser()));
         response.addCookie(userCookie);
         return true;
       }

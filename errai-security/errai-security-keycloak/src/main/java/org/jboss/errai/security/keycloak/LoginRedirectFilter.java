@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -20,7 +19,7 @@ import org.keycloak.KeycloakSecurityContext;
  * Used for forcing Keycloak logins in applications that wish to allow unauthenticated access to the
  * GWT host page. By adding this filter and a security constraint to a URL, a request to that URL
  * will redirect to a Keycloak login. After a successful login, this filter will redirect to a
- * path specified by the {@value #REDIRECT_PARAM_NAME} filter initParm.
+ * path specified by the {@value #REDIRECT_PARAM_NAME} filter initParam.
  *
  * <p>
  * The {@link #REDIRECT_PARAM_NAME} is relative to the application context.
@@ -35,15 +34,12 @@ public class LoginRedirectFilter implements Filter {
   private String redirectLocation;
 
   @Inject
-  private ServletContext servletContext;
-
-  @Inject
   private KeycloakAuthenticationService keycloakAuthService;
 
   @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
     final String redirectParam = filterConfig.getInitParameter(REDIRECT_PARAM_NAME);
-    redirectLocation = servletContext.getContextPath();
+    redirectLocation = filterConfig.getServletContext().getContextPath();
     if (redirectParam != null) {
       redirectLocation += redirectParam;
     }
