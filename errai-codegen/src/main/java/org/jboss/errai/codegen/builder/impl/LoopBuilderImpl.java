@@ -187,7 +187,8 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
     // infer the loop variable type
     MetaClass loopVarType = MetaClassFactory.get(Object.class);
     MetaParameterizedType parameterizedType = collection.getType().getParameterizedType();
-    if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
+    if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0 && 
+            parameterizedType.getTypeParameters()[0] instanceof MetaClass) {
       loopVarType = (MetaClass) parameterizedType.getTypeParameters()[0];
     }
     else if (collection.getType().getComponentType() != null) {
