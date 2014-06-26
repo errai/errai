@@ -21,12 +21,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.errai.security.shared.api.UserCookieEncoder;
-import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.picketlink.idm.model.basic.User;
@@ -35,7 +32,7 @@ public class FormBasedLoginTest extends BaseSecurityFilterTest {
 
   /**
    * Turns the request field into a login request as recognized by our form-based login scheme.
-   * 
+   *
    * @param username
    *          the username the auth scheme should see
    * @param password
@@ -107,27 +104,6 @@ public class FormBasedLoginTest extends BaseSecurityFilterTest {
     verify(response).sendRedirect(contextPath + hostPageUri);
 
     verify(filterChain, never()).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
-  }
-
-  @Test
-  public void successfulFormBasedLoginShouldGetUserCookieInResponse() throws Exception {
-    final UserImpl user = new UserImpl("this is the username we logged in with");
-
-    setRequestAsLogin(user.getIdentifier(), "password");
-
-    when(authService.getUser()).thenReturn(user);
-    authFilter.init(filterConfig);
-    authFilter.doFilter(request, response, filterChain);
-
-    verify(response, never()).sendError(anyInt());
-    verify(response, never()).sendError(anyInt(), anyString());
-
-    ArgumentCaptor<Cookie> cookieMonster = ArgumentCaptor.forClass(Cookie.class);
-    verify(response).addCookie(cookieMonster.capture());
-    Cookie cookie = cookieMonster.getValue();
-    assertEquals(UserCookieEncoder.USER_COOKIE_NAME, cookie.getName());
-    assertTrue("Cookie value is missing username: " + cookie.getValue(),
-            cookie.getValue().contains(user.getIdentifier()));
   }
 
   @Test

@@ -7353,21 +7353,35 @@ public class NavBar extends Composite {
 }
 ----
 
+=== Form Based Login
+
+If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. The `errai-security-server` jar contains a servlet filter for encoding the currently authenticated user as a cookie in the http response. Here are the steps for setting this up:
+
+. Create a login page using an html form that posts to a servlet-filter. If you are using Errai Security with PicketLink you will want to use the `org.picketlink.authentication.web.AuthenticationFilter` servlet-filter. Otherwise, you will need to implement one yourself that authenticates the user by calling `AuthenticationService.login(String, String)` method.
+
+. Add this filter-mapping for setting the Errai Security user cookie:
++
+[source,xml]
+----
+  <filter-mapping>
+    <filter-name>ErraiUserCookieFilter</filter-name>
+    <url-mapping>/gwt-host-page.html</url-mapping>
+  </filter-mapping>
+----
++
+The mapped URL should be that of your GWT Host Page.
++
+[IMPORTANT]
+.This mapping must come after the filter that authenticates the user
+====
+If this filter maps to the same URL as the filter for authentication, this filter must come after the authentication filter or else it will set the cookie before the user has logged in.
+====
+
+. Make sure this is in your ErraiApp.properties file: `errai.security.user_cookie_enabled=true`
+
 === Using an Alternative to PicketLink
 
 All Errai Security authentication is implemented with Errai Remote Procedure Calls to the `AuthenticationService`. A default implementation of this interface using PicketLink is provided in the `errai-security-picketlink` jar. But it is possible to use a different sever-side security framework by providing your own custom implementation of `AuthenticationService` and annotating it with `@Service`. In that case your project should not depend on `errai-security-picketlink`.
-
-==== Form Based Login
-
-If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. Here are the steps required:
-
-. Create a login page using an html form that posts to a Java servlet.
-
-. On the servlet attempt to login with the `AuthenticationService`. If a user's login request is successful, use the `org.jboss.errai.security.shared.api.UserCookieEncoder` to create a cookie.
-
-. Set the cookie in the HTTP response and redirect the user to your Errai app.
-
-. Make sure this is in your ErraiApp.properties file: `errai.security.user_cookie_enabled=true`
 
 === Using Keycloak for Authentication
 
@@ -7405,7 +7419,7 @@ To add Keycloak integration to your application:
 
     * **Claims** -- You will need to explicitly enable any information about users that your application requires access to.
 
-    * **Scope** -- Move any roles that users in your app *may* possess to the "Assigne Roles". (Note: moving the roles to "Assigned Roles" does not mean *all* users will have this role. It does mean that these roles will be visible to your app for users that do have them.)
+    * **Scope** -- Move any roles that users in your app *may* possess to the "Assigned Roles". (Note: moving the roles to "Assigned Roles" does not mean *all* users will have this role. It does mean that these roles will be visible to your app for users that do have them.)
 
   .. After adjusting the settings for your app, go to the *Installation* tab and select "keycloak.json" in the *Format Option* list. Copy this into a "keycloak.json" file in your `WEB-INF` directory.
 

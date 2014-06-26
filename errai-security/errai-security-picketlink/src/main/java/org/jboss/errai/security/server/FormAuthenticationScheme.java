@@ -22,15 +22,11 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 import javax.servlet.FilterConfig;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
-import org.jboss.errai.security.shared.api.UserCookieEncoder;
-import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.picketlink.authentication.web.HTTPAuthenticationScheme;
 import org.picketlink.credential.DefaultLoginCredentials;
 
@@ -45,9 +41,6 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
   public static final String HTTP_FORM_SECURITY_CHECK_URI = "/uf_security_check";
   public static final String HTTP_FORM_USERNAME_PARAM = "uf_username";
   public static final String HTTP_FORM_PASSWORD_PARAM = "uf_password";
-
-  @Inject
-  private AuthenticationService authenticationService;
 
   /**
    * URI of the GWT host page, relative to the servlet container root (so it starts with '/' and includes the context
@@ -128,11 +121,6 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
 
   @Override
   public boolean postAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Cookie erraiUserCacheCookie = new Cookie(
-            UserCookieEncoder.USER_COOKIE_NAME,
-            UserCookieEncoder.toCookieValue(authenticationService.getUser()));
-    response.addCookie(erraiUserCacheCookie);
-
     StringBuilder redirectTarget = new StringBuilder(hostPageUri);
     String extraParams = extractParameters(request);
     if (extraParams.length() > 0) {
