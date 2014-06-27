@@ -195,6 +195,7 @@
         </dependency>
 
         <!-- GWT and GWT Extensions -->
+        <!-- Must come after errai-common is inherited for patched JUnitShell -->
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-user</artifactId>
