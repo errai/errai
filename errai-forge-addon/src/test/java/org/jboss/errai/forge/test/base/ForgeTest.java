@@ -52,6 +52,8 @@ public abstract class ForgeTest {
 
   public static final String DEPENDENCY = "org.jboss.errai.forge:errai-forge-addon";
   public static final String ADDON_GROUP = "org.jboss.forge.addon";
+  // TODO Programmatically lookup the Errai version this test is running in.
+  public static final String ERRAI_TEST_VERSION = "3.1.0-SNAPSHOT";
 
   @Inject
   protected ProjectFactory projectFactory;
@@ -141,7 +143,7 @@ public abstract class ForgeTest {
     final Project project = initializeJavaProject();
     final ProjectConfig projectConfig = facetFactory.install(project, ProjectConfig.class);
   
-    projectConfig.setProjectProperty(ProjectProperty.ERRAI_VERSION, "3.0-SNAPSHOT");
+    projectConfig.setProjectProperty(ProjectProperty.ERRAI_VERSION, ERRAI_TEST_VERSION);
     projectConfig.setProjectProperty(ProjectProperty.MODULE_LOGICAL, "org.jboss.errai.ForgeTest");
     projectConfig.setProjectProperty(ProjectProperty.MODULE_FILE, new File(project.getRootDirectory()
             .getUnderlyingResourceObject(), "src/main/java/org/jboss/errai/ForgeTest.gwt.xml"));
