@@ -98,6 +98,8 @@ The following instructions assume you are using the Keycloak server from the lin
 
   * Go to the *Role Mappings* tab. Add add *atleast one* role the *Assigned Roles*.
 
+1. Uncomment the login-method tag in `errai-security-demo/src/main/webapp/WEB-INF/web.xml`.
+
 1. While the Keycloak server is running, run `mvn clean package wildfly:deploy` which will build the demo and deploy it to the running Wildfly server.
 
 1. Go to the errai-security-demo [login page](http://localhost:8080/errai-security-demo/#LoginForm). If the Keycloak setup has worked, you should see a link to log in with Keycloak beside the login button. Click this link to login as the user you created.
