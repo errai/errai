@@ -48,7 +48,7 @@
     <apache.maven.repo.metadata.version>3.0</apache.maven.repo.metadata.version>
     <apache.maven.settings>3.0</apache.maven.settings>    
     <cal10n.version>0.7.4</cal10n.version>
-    <cdi.api.version>1.0-SP4</cdi.api.version>
+    <cdi.api.version>1.2</cdi.api.version>
     <commons.logging.version>1.1.1</commons.logging.version>
     <commons.codec.version>1.4</commons.codec.version>
     <el.api.version>2.2</el.api.version>
