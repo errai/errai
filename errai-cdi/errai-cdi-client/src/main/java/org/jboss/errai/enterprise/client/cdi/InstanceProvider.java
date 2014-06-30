@@ -95,5 +95,10 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
         return bean.getInstance();
       }
     }
+
+	@Override
+	public void destroy(final Object instance) {
+	  IOC.getBeanManager().destroyBean(instance);
+	}
   }
 }
