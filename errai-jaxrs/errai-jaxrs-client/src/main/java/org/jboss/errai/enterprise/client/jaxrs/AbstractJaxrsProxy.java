@@ -138,8 +138,10 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
             ErrorCallback<?> errorCallback = getErrorCallback();
             if (errorCallback instanceof RestErrorCallback && hasExceptionMapper()) {
               throwable = unmarshallException(response);
-            } else {
+            } else if (response.getText() != null && !response.getStatusText().equals("")) {
               throwable = new ResponseException(response.getStatusText(), response);
+            } else {
+              throwable = new ResponseException("Response returned with status=" + response.getStatusCode(), response);
             }
             handleError(throwable, request, response);
           }

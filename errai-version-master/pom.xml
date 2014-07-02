@@ -52,9 +52,9 @@
     <commons.logging.version>1.1.1</commons.logging.version>
     <commons.codec.version>1.4</commons.codec.version>
     <el.api.version>2.2</el.api.version>
-    <guava.version>13.0.1</guava.version>
+    <guava.version>17.0</guava.version>
     <guice.version>3.0</guice.version>
-    <gwt.version>2.5.1</gwt.version>
+    <gwt.version>2.6.1</gwt.version>
     <javassist.version>3.15.0-GA</javassist.version>
     <javax.inject.version>1</javax.inject.version>
     <javax.persitence.api.version>1.0</javax.persitence.api.version>

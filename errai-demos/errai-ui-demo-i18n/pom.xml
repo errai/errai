@@ -61,7 +61,7 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
-    <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.6.1</maven.gwt.plugin.version>
     <jetty.version>6.1.25</jetty.version>
     <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
   </properties>

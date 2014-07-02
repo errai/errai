@@ -27,7 +27,6 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
 import org.junit.Test;
 
 import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestPermissionException;
 import com.google.gwt.http.client.Response;
 
 /**
@@ -90,12 +89,11 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             try {
               throw throwable;
             }
-            catch (RequestPermissionException e) {
-              assertEquals("http://somewhere.zzz/invalidpath/test/method", e.getURL());
+            catch (ResponseException e) {
               finishTest();
             }
             catch (Throwable t) {
-              fail("Expected RequestPermissionException");
+              fail("Expected ResponseException. Observed: " + t);
             }
             return false;
           }
