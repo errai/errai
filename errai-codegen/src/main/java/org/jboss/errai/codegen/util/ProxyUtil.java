@@ -187,13 +187,13 @@ public abstract class ProxyUtil {
     for (final Class<?> interceptor : interceptors) {
       interceptorStack.append(If.cond(Bool.equals(
               Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
-              .append(Stmt.loadVariable("status").invoke("setProceeding", false))
               .append(Stmt.declareFinalVariable("ctx", callContextType, Stmt.loadVariable("this")))
               .append(
                   Stmt.declareVariable(CreationalCallback.class).asFinal().named("icc")
                       .initializeWith(
                           Stmt.newObject(CreationalCallback.class).extend()
                               .publicOverridesMethod("callback", Parameter.of(Object.class, "beanInstance", true))
+                              .append(Stmt.loadVariable("status").invoke("setProceeding", false))
                               .append(
                                   Stmt.castTo(interceptor, Stmt.loadVariable("beanInstance")).invoke("aroundInvoke",
                                       Variable.get("ctx")))
