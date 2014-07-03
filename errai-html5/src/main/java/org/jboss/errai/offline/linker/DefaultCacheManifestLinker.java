@@ -61,16 +61,29 @@ import com.google.gwt.dev.util.collect.HashSet;
  * 
  * </li>
  * 
- * <li>Add {@code manifest="YOURMODULENAME/appcache.manifest"} to the
+ * <li>Add {@code manifest="YOURMODULENAME/errai.appcache"} to the
  * {@code <html>} tag in your host page e.g.,
- * {@code <html manifest="mymodule/appcache.manifest">} <br>
+ * {@code <html manifest="mymodule/errai.appcache">} <br>
  * <br>
  * </li>
  * 
+ * <li>Add a mime-mapping to your web.xml file (you can skip this step if you
+ * deploy the errai-javaee-all.jar as part of your application):
+ * 
+ * <pre>
+ * {@code <mime-mapping>
+ *   <extension>manifest</extension>
+ *   <mime-type>text/cache-manifest</mime-type>
+ * </mime-mapping>
+ * }
+ * </pre>
+ * 
+ * </li>
+ * 
  * <li>Make sure the errai-common.jar file is deployed as part of your
- * application. It contains a servlet that is responsible for providing the
- * correct user-agent specific manifest file in response to requests for
- * YOURMODULENAME/appcache.manifest</li>
+ * application. It contains a servlet that will provide the correct user-agent
+ * specific manifest file in response to requests to
+ * YOURMODULENAME/errai.appcache</li>
  * </ol>
  * 
  * <p>
@@ -84,7 +97,7 @@ import com.google.gwt.dev.util.collect.HashSet;
  * public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
  *   {@code @Override}
  *   protected String[] otherCachedFiles() {
- *     return new String[] {"/MyApp.html","/css/MyApp.css"};
+ *     return new String[] {"/my-app/index.html","/my-app/css/application.css"};
  *   }
  * }
  * </pre>
@@ -147,21 +160,22 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     }
 
     if (onePermutation) {
-      // Create an artifact representing the cache manifest for the current permutation
+      // Create an artifact representing the cache manifest for the current
+      // permutation
       toReturn.add(createPermutationCacheManifestArtifact(context, logger, artifacts));
     }
     else {
-      
+
       // Group permutations per user agent
       final Multimap<String, PermutationCacheManifestArtifact> permutations = ArrayListMultimap.create();
       for (PermutationCacheManifestArtifact pcma : artifacts.find(PermutationCacheManifestArtifact.class)) {
         permutations.put(pcma.props.get("user.agent"), pcma);
       }
-      
+
       for (String userAgent : permutations.keySet()) {
         // Create a cache manifest file for every user agent
         toReturn.add(emitUserAgentCacheManifestFile(userAgent, permutations.get(userAgent), artifacts, logger));
-        
+
       }
 
       logger.log(TreeLogger.INFO,
@@ -214,7 +228,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
    * provided artifacts.
    * 
    * @param userAgent
-   *         the user agent name
+   *          the user agent name
    * @param artifacts
    *          the user agent specific cache manifest artifacts
    * @param globalArtifacts
@@ -240,7 +254,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
 
     // Add generated resources
     Set<String> cacheableGeneratedResources = new HashSet<String>();
-    
+
     // Add permutation independent resources
     if (globalArtifacts != null) {
       for (Artifact<?> a : globalArtifacts) {
@@ -253,7 +267,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
         }
       }
     }
-    
+
     // Add permutation specific resources
     if (artifacts != null) {
       for (PermutationCacheManifestArtifact artifact : artifacts) {
@@ -266,10 +280,9 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     // Build manifest
     StringBuilder sb = new StringBuilder();
     sb.append("CACHE MANIFEST\n");
-    sb.append("# Unique id #" + (new Date()).getTime() + "." + Math.random() + "\n");
     // we have to generate this unique id because the resources can change but
     // the hashed cache.html files can remain the same.
-    sb.append("# Note: must change this every time for cache to invalidate\n");
+    sb.append("# Unique id #" + (new Date()).getTime() + "." + Math.random() + "\n");
     sb.append("\n");
     sb.append("CACHE:\n");
     sb.append("# Static app files\n");
@@ -285,7 +298,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     sb.append("*\n");
 
     // Create the user agent specific manifest as a new artifact and return it
-    return emitString(logger, sb.toString(), MANIFEST + "." + userAgent);
+    return emitString(logger, sb.toString(), userAgent + "." + MANIFEST);
   }
 
   /**
