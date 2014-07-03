@@ -18,8 +18,10 @@ import org.jboss.errai.ioc.client.lifecycle.impl.AccessImpl;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.api.PageNavigationErrorHandler;
 import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
+import org.jboss.errai.ui.nav.client.local.pushstate.PushStateUtil;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
@@ -82,8 +84,6 @@ public class Navigation {
 
   private final NavigatingContainer navigatingContainer = GWT.create(NavigatingContainer.class);
 
-  private final NavigationGraph navGraph = GWT.create(NavigationGraph.class);
-
   protected PageNode<IsWidget> currentPage;
 
   protected IsWidget currentWidget;
@@ -91,6 +91,9 @@ public class Navigation {
   private HandlerRegistration historyHandlerRegistration;
 
   private PageNavigationErrorHandler navigationErrorHandler = new DefaultNavigationErrorHandler(this);
+  
+  @Inject
+  private Logger logger;
 
   /**
    * Indicates that a navigation request is currently processed.
@@ -105,7 +108,13 @@ public class Navigation {
   private int redirectDepth = 0;
 
   @Inject
+  private NavigationGraph navGraph;
+  
+  @Inject
   private StateChange<Object> stateChangeEvent;
+  
+  @Inject
+  private HistoryTokenFactory historyTokenFactory;
 
   @PostConstruct
   private void init() {
@@ -115,16 +124,25 @@ public class Navigation {
     historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
       public void onValueChange(final ValueChangeEvent<String> event) {
-        HistoryToken token = HistoryToken.parse(event.getValue());
-        PageNode<IsWidget> toPage = null;
-
         try {
+          logger.debug("URL value changed to " + event.getValue());
+          if (needsApplicationContext()) {
+            String context = inferAppContext(event.getValue());
+            logger.info("No application context defined. Inferring application context as "
+                    + context
+                    + ". Change this value by setting the variable \"erraiApplicationWebContext\" in your GWT host page"
+                    + ", or calling Navigation.setAppContext.");
+            setAppContext(context);
+          }
+          HistoryToken token = historyTokenFactory.parseURL(event.getValue());
+          PageNode<IsWidget> toPage = null;
+
           toPage = navGraph.getPage(token.getPageName());
           if (currentPage == null || !toPage.name().equals(currentPage.name())) {
             navigate(new Request<IsWidget>(toPage, token), false);
           }
         } catch (Exception e) {
-          navigationErrorHandler.handleError(e, token.getPageName());
+          navigationErrorHandler.handleInvalidPageNameError(e, event.getValue());
         }
       }
     });
@@ -138,6 +156,18 @@ public class Navigation {
       }
     });
 
+  }
+
+  protected String inferAppContext(String url) {
+    if (!(url.startsWith("/"))) 
+      url = "/" + url;
+    
+    int indexOfNextSlash = url.indexOf("/", 1);
+    
+    if (indexOfNextSlash < 0)
+      return "";
+    else
+      return url.substring(0, indexOfNextSlash);
   }
 
   /**
@@ -190,7 +220,7 @@ public class Navigation {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance);
     } catch (Exception e) {
-      navigationErrorHandler.handleError(e, toPage);
+      navigationErrorHandler.handleInvalidPageNameError(e, toPage);
     }
   }
 
@@ -226,7 +256,8 @@ public class Navigation {
   }
 
   private <W extends IsWidget> void navigate(PageNode<W> toPageInstance, Multimap<String, String> state) {
-    HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
+    HistoryToken token = historyTokenFactory.createHistoryToken(toPageInstance.name(), state);
+    logger.debug("Navigating to " + toPageInstance.name() + " at url: " + token.toString());
     navigate(new Request<W>(toPageInstance, token), true);
   }
 
@@ -399,4 +430,53 @@ public class Navigation {
   private void setCurrentPage(PageNode currentPage) {
     this.currentPage = currentPage;
   }
+
+  private boolean needsApplicationContext() {
+    return (currentPage == null) && (PushStateUtil.isPushStateActivated()) && (getAppContextFromHostPage() == null);
+  }
+
+  /**
+   * Sets the application context used in pushstate URL paths. This application context should match the deployed
+   * application context in your web.xml
+   * 
+   * @param path The context path. Never null.
+   */
+  public static native void setAppContext(String path) /*-{
+    if (path == null) {
+      $wnd.erraiApplicationWebContext = undefined;
+    }
+    else {
+      $wnd.erraiApplicationWebContext = path;
+    }
+  }-*/;
+
+  /**
+   * Gets the application context used in pushstate URL paths. This application context should match the deployed
+   * application context in your web.xml
+   * 
+   * @return The application context. This may return the empty String (but never null). If non-empty, the return value
+   *         always ends with a slash.
+   */
+  public static String getAppContext() {
+    if (PushStateUtil.isPushStateActivated())
+      return getAppContextFromHostPage();
+    else
+      return "";
+  }
+  
+  private static native String getAppContextFromHostPage() /*-{
+   if ($wnd.erraiApplicationWebContext === undefined) {
+      return null; 
+   } 
+   else if ($wnd.erraiApplicationWebContext.length === 0) {
+     return "";
+   }
+   else {
+       if ($wnd.erraiApplicationWebContext.substr(-1) !== "/") {
+         return $wnd.erraiApplicationWebContext + "/";
+       }
+       return $wnd.erraiApplicationWebContext;
+     } 
+  }-*/;
+  
 }

@@ -26,7 +26,14 @@
 <link rel="apple-touch-icon" sizes="114x114"
 	href="<%= contextPath %>/images/apple-touch-icon-114x114.png">
     
-    <script type="text/javascript" language="javascript" src="<%= contextPath %>/app/app.nocache.js"></script>    
+    <script type="text/javascript" language="javascript" src="<%= contextPath %>/app/app.nocache.js"></script>
+    <script type="text/javascript">
+        var erraiSimpleFormatString = "%1$tc %2$s%n%4$s: %5$s%6$s%n";
+        // This parameter is only used if Push State is enabled.
+        var erraiApplicationWebContext="<%= contextPath %>";
+		//	Comment the line below to disable Errai PushState
+        var erraiPushStateEnabled = true;
+    </script>
 </head>
 
 <body>

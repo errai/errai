@@ -113,6 +113,12 @@ public class ValidationRulesTest {
       fail("Validation should not have ocurred.");
     }
   }
+  
+  @Test(expected = GenerationException.class)
+  public void shouldThrowExceptionForDefaultPageWithPathParam() throws Exception {
+    mockClassScanner(DefaultPageWithPathParam.class);
+    generator.generate(null, null);
+  }
 
   private void mockClassScanner(Class<?>... pages) {
     PowerMockito.mockStatic(ClassScanner.class);
@@ -155,4 +161,8 @@ public class ValidationRulesTest {
   @Page
   private static class BlacklistedPage extends SimplePanel {
   }
+  
+  @Page(role = DefaultPage.class, path = "{var}/text")
+  private static class DefaultPageWithPathParam extends SimplePanel {}
+  
 }

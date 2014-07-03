@@ -43,6 +43,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
   private final SyncBeanManager beanManager = IOC.getBeanManager();
   private Navigation navigation;
   private HandlerRegistration historyHandlerRegistration;
+  private HistoryTokenFactory htFactory;
 
   @Override
   public String getModuleName() {
@@ -56,6 +57,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     disableBus = true;
     super.gwtSetUp();
     navigation = beanManager.lookupBean(Navigation.class).getInstance();
+    htFactory = beanManager.lookupBean(HistoryTokenFactory.class).getInstance();
   }
 
   @Override
@@ -309,7 +311,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals(1, page.beforeShowCallCount);
     assertEquals(1, page.afterShowCallCount);
 
-    HistoryToken expectedToken = HistoryToken.of("PageWithPageShowingHistoryTokenMethod", ImmutableMultimap.of("state", "footastic"));
+    HistoryToken expectedToken = htFactory.createHistoryToken("PageWithPageShowingHistoryTokenMethod", ImmutableMultimap.of("state", "footastic"));
     assertEquals(expectedToken, page.mostRecentStateToken);
   }
 

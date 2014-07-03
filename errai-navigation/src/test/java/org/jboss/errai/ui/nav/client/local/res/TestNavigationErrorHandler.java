@@ -7,14 +7,19 @@ public class TestNavigationErrorHandler implements PageNavigationErrorHandler {
   public int count;
 
   @Override
-  public void handleError(Exception exception, String pageName) {
+  public void handleInvalidPageNameError(Exception exception, String pageName) {
     count++;
   }
 
   @Override
   public void handleError(Exception exception, Class<? extends PageRole> pageRole) {
-    handleError(exception, "");
+    handleInvalidPageNameError(exception, "");
 
+  }
+
+  @Override
+  public void handleInvalidURLError(Exception exception, String urlPath) {
+    count++;    
   }
 
 }

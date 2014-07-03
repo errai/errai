@@ -92,12 +92,14 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-navigation</artifactId>
+      <scope>provided</scope>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cordova</artifactId>
+      <scope>provided</scope>
       <version>${project.version}</version>
     </dependency>
 

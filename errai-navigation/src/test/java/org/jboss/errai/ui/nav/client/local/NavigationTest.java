@@ -9,6 +9,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
+import org.jboss.errai.ui.nav.client.local.pushstate.PushStateUtil;
 import org.jboss.errai.ui.nav.client.local.res.TestNavigationErrorHandler;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -25,8 +26,11 @@ import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableMultimap.Builder;
+import com.google.common.collect.Multimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -37,10 +41,12 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class NavigationTest extends AbstractErraiCDITest {
 
+  private static final int TIMEOUT = 30000;
   private Navigation navigation;
   private NavigationGraph navGraph;
   private HandlerRegistration historyHandlerRegistration;
   private int historyHandlerInvocations;
+  private HistoryTokenFactory htFactory;
 
   @Override
   public String getModuleName() {
@@ -53,6 +59,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     super.gwtSetUp();
     navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
     navGraph = navigation.getNavGraph();
+    htFactory = IOC.getBeanManager().lookupBean(HistoryTokenFactory.class).getInstance();
+    History.newItem("", false);
   }
 
   @Override
@@ -120,9 +128,9 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testPageWithProvidedName() throws Exception {
-    PageNode<?> pageB = navGraph.getPage("page_b");
+    PageNode<?> pageB = navGraph.getPage("PageB");
     assertNotNull(pageB);
-    assertEquals("page_b", pageB.name());
+    assertEquals("PageB", pageB.name());
   }
 
   public void testCircularReferences() throws Exception {
@@ -187,7 +195,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testGetPageWithDefaultRole() {
-    final PageNode pageByRole = navGraph.getPageByRole(DefaultPage.class);
+    final PageNode<?> pageByRole = navGraph.getPageByRole(DefaultPage.class);
     assertNotNull(pageByRole);
     assertEquals("PageA", pageByRole.name());
   }
@@ -257,7 +265,7 @@ public class NavigationTest extends AbstractErraiCDITest {
         assertEquals("Navigation Panel was not automatically attached", RootPanel.get(), navigation.getContentPanel()
                 .asWidget().getParent());
       }
-    }, 30000, 500);
+    }, TIMEOUT, 500);
   }
 
   public void testAddNavToRootPanel() {
@@ -269,7 +277,7 @@ public class NavigationTest extends AbstractErraiCDITest {
         assertEquals("Navigation Panel should still be attached to the RootPanel", RootPanel.get(), navigation
                 .getContentPanel().asWidget().getParent());
       }
-    }, 30000, 500);
+    }, TIMEOUT, 500);
   }
 
   public void testAddNavPanelToOtherPanel() {
@@ -285,7 +293,7 @@ public class NavigationTest extends AbstractErraiCDITest {
         assertEquals("Navigation panel shoudl not be attached to the RootPanel", -1,
                 RootPanel.get().getWidgetIndex(navigation.getContentPanel()));
       }
-    }, 30000, 500);
+    }, TIMEOUT, 500);
   }
 
   public void testManuallyAttachToRootPanelBefore() {
@@ -388,5 +396,52 @@ public class NavigationTest extends AbstractErraiCDITest {
       }
     }.scheduleRepeating(interval);
   }
+  
+  public void testURLWithExtraKeyValuePairs() throws Exception {
+    String url = "page/123/string;var3=4";
+    HistoryToken encodedToken = htFactory.parseURL(url);
+    assertEquals("Unexpected state map contents: " + encodedToken.getState(), "123", encodedToken.getState()
+            .get("var1").iterator().next());
+    assertEquals("Unexpected state map contents: " + encodedToken.getState(), "string",
+            encodedToken.getState().get("var2").iterator().next());
+    assertEquals("Unexpected state map contents: " + encodedToken.getState(), "4", encodedToken.getState().get("var3")
+            .iterator().next());
+  }
 
+  public void testPageStateWithOneExtraParam() throws Exception {
+    String pageName = "PageWithPathParameters";
+    Builder<String, String> builder = ImmutableMultimap.builder();
+    builder.put("var1", "123");
+    builder.put("var2", "string");
+    builder.put("var3", "4");
+    
+    Multimap<String, String> pageStateMap = builder.build();
+    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4", decodedToken);
+  }
+  
+  public void testPageStateWithMultipleExtraParams() throws Exception {
+    String pageName = "PageWithPathParameters";
+    Builder<String, String> builder = ImmutableMultimap.builder();
+    builder.put("var1", "123");
+    builder.put("var2", "string");
+    builder.put("var3", "4");
+    builder.put("var4", "thing");
+    
+    Multimap<String, String> pageStateMap = builder.build();
+    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
+  }
+  
+  public void testForEmptyContextWithoutPushState() throws Exception {
+    runPostAttachTests(new Runnable() {
+
+      @Override
+      public void run() {
+        assertFalse(PushStateUtil.isPushStateActivated());
+        assertEquals("", Navigation.getAppContext());
+      }
+      
+    }, TIMEOUT, 500);
+  }
 }

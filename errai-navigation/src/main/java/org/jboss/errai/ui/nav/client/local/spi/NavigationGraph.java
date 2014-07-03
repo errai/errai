@@ -1,7 +1,9 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -70,7 +72,7 @@ public abstract class NavigationGraph {
     // TODO this could be made more efficient if we had a pagesByWidgetType map
     for (Entry<String, PageNode<? extends IsWidget>> e : pagesByName.entrySet()) {
       if (e.getValue().contentType().equals(type)) {
-        @SuppressWarnings({ "unchecked", "UnnecessaryLocalVariable" })
+        @SuppressWarnings({ "unchecked" })
         PageNode<W> page = (PageNode<W>) e.getValue();
         return page;
       }
@@ -110,7 +112,6 @@ public abstract class NavigationGraph {
     return pagesByName.isEmpty();
   }
 
-  @SuppressWarnings("UnusedDeclaration")
   protected static final class PageNodeCreationalCallback<W extends IsWidget> implements
           CreationalCallback<PageNode<W>> {
 
@@ -120,4 +121,13 @@ public abstract class NavigationGraph {
     }
 
   }
+  
+  /**
+   * @return Returns a collection of all {@link PageNode PageNodes} in the navigation graph.
+   */
+  public Collection<PageNode<? extends IsWidget>> getAllPages() {
+    Collection<PageNode<? extends IsWidget>> values = pagesByName.values();
+    return Collections.unmodifiableCollection(new HashSet<PageNode<? extends IsWidget>>(values));
+  }
+  
 }

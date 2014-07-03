@@ -15,7 +15,7 @@ public interface PageNavigationErrorHandler {
    * @param pageName
    *          The name of the page which we tried to navigate to.
    */
-  public void handleError(Exception exception, String pageName);
+  public void handleInvalidPageNameError(Exception exception, String pageName);
 
   /**
    * @param exception
@@ -24,4 +24,13 @@ public interface PageNavigationErrorHandler {
    *          The role of the page which we tried to navigate to.
    */
   public void handleError(Exception exception, Class<? extends PageRole> pageRole);
+
+  /**
+   * 
+   * @param exception
+   *          The exception that occurs, triggering the error handler code.
+   * @param urlPath
+   *          The URL path which we tried to navigate to.
+   */
+  public void handleInvalidURLError(Exception exception, String urlPath);
 }

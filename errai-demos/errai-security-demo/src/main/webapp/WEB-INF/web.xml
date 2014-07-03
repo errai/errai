@@ -22,6 +22,12 @@
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
 
+  <!--  This error page rule responds with the GWT Host page for pushstate Errai Navigation URLs -->
+  <error-page>
+    <error-code>404</error-code>
+    <location>/</location>
+  </error-page>
+  
   <filter>
     <filter-name>ErraiLoginRedirectFilter</filter-name>
     <init-param>
@@ -38,7 +44,6 @@
   <filter-mapping>
     <filter-name>ErraiUserCookieFilter</filter-name>
     <url-pattern>/index.jsp</url-pattern>
-    <url-pattern>/index.html</url-pattern>
   </filter-mapping>
   
   <filter-mapping>

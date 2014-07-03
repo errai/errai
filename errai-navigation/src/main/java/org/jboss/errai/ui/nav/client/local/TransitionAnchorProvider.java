@@ -19,12 +19,14 @@ import com.google.gwt.user.client.ui.IsWidget;
 public class TransitionAnchorProvider implements ContextualTypeProvider<TransitionAnchor<?>> {
 
   @Inject Navigation navigation;
+  
+  @Inject HistoryTokenFactory htFactory;
 
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public TransitionAnchor provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     Class<IsWidget> toPageType = (Class<IsWidget>) typeargs[0];
-    return new TransitionAnchor<IsWidget>(navigation, toPageType);
+    return new TransitionAnchor<IsWidget>(navigation, toPageType, htFactory);
   }
 
 }

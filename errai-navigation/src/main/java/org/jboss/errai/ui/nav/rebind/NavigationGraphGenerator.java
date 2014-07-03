@@ -62,6 +62,8 @@ import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.TransitionToRole;
+import org.jboss.errai.ui.nav.client.local.URLPattern;
+import org.jboss.errai.ui.nav.client.local.URLPatternMatcher;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
@@ -140,6 +142,10 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
         if (annotatedPageRoles.contains(DefaultPage.class)) {
           // need to assign the page impl to a variable and add it to the map twice
+          URLPattern pattern = URLPatternMatcher.generatePattern(annotation.path());
+          if(pattern.getParamList().size() > 0) {
+            throw new GenerationException("Default Page must not contain any path parameters.");
+          }
           ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
           pageImplStmt = Variable.get("defaultPage");
           ctor.append(
@@ -195,8 +201,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   }
 
   private String getPageName(MetaClass pageClass) {
-    final Page annotation = pageClass.getAnnotation(Page.class);
-    return annotation.path().equals("") ? pageClass.getName() : annotation.path();
+    return pageClass.getName();
   }
 
   private void validateDefaultPagePresent(Collection<MetaClass> pages, Multimap<Class<?>, MetaClass> pageRoles) {
@@ -263,6 +268,10 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     pageImplBuilder
         .publicMethod(String.class, "name")
             .append(Stmt.loadLiteral(pageName).returnValue()).finish()
+        .publicMethod(String.class, "toString")
+            .append(Stmt.loadLiteral(pageName).returnValue()).finish()
+        .publicMethod(String.class, "getURL")
+            .append(Stmt.loadLiteral(getPageURL(pageClass, pageName)).returnValue()).finish()
         .publicMethod(Class.class, "contentType")
             .append(Stmt.loadLiteral(pageClass).returnValue()).finish()
         .publicMethod(void.class, "produceContent", Parameter.of(CreationalCallback.class, "callback"))
@@ -280,6 +289,20 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     appendDestroyMethod(pageImplBuilder, pageClass);
 
     return pageImplBuilder.finish();
+  }
+
+  private String getPageURL(MetaClass pageClass, String pageName) {
+    Page pageAnnotation = pageClass.getAnnotation(Page.class);
+    String path = pageAnnotation.path();
+    
+    if (path.equals("")) {
+      return pageName;
+    }
+    
+    if (path.startsWith("/"))
+      path = path.substring(1);
+    
+    return path;
   }
 
   /**
