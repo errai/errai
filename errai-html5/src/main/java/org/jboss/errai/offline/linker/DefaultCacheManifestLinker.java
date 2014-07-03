@@ -17,9 +17,13 @@
 package org.jboss.errai.offline.linker;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.Linker;
 import com.google.gwt.core.ext.LinkerContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -63,17 +67,10 @@ import com.google.gwt.dev.util.collect.HashSet;
  * <br>
  * </li>
  * 
- * <li>Add a mime-mapping to your web.xml file:*
- * 
- * <pre>
- * {@code <mime-mapping>
- *   <extension>manifest</extension>
- *   <mime-type>text/cache-manifest</mime-type>
- * </mime-mapping>
- * }
- * </pre>
- * 
- * </li>
+ * <li>Make sure the errai-common.jar file is deployed as part of your
+ * application. It contains a servlet that is responsible for providing the
+ * correct user-agent specific manifest file in response to requests for
+ * YOURMODULENAME/appcache.manifest</li>
  * </ol>
  * 
  * <p>
@@ -87,7 +84,7 @@ import com.google.gwt.dev.util.collect.HashSet;
  * public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
  *   {@code @Override}
  *   protected String[] otherCachedFiles() {
- *     return new String[] {"/MyApp.html","/MyApp.css"};
+ *     return new String[] {"/MyApp.html","/css/MyApp.css"};
  *   }
  * }
  * </pre>
@@ -97,7 +94,6 @@ import com.google.gwt.dev.util.collect.HashSet;
 @Shardable
 @LinkerOrder(Order.POST)
 public class DefaultCacheManifestLinker extends AbstractLinker {
-
   private static final String MANIFEST = "appcache.manifest";
 
   @Transferable
@@ -106,10 +102,12 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
 
     private Set<String> cachedFiles = new HashSet<String>();
     private String name;
+    private Map<String, String> props;
 
-    public PermutationCacheManifestArtifact(Class<? extends Linker> linker, String name) {
+    public PermutationCacheManifestArtifact(Class<? extends Linker> linker, String name, Map<String, String> props) {
       super(linker);
       this.name = name;
+      this.props = props;
     }
 
     @Override
@@ -153,8 +151,17 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
       toReturn.add(createPermutationCacheManifestArtifact(context, logger, artifacts));
     }
     else {
+      
+      // Group permutations per user agent
+      final Multimap<String, PermutationCacheManifestArtifact> permutations = ArrayListMultimap.create();
       for (PermutationCacheManifestArtifact pcma : artifacts.find(PermutationCacheManifestArtifact.class)) {
-        toReturn.add(emitPermutationCacheManifestFile(pcma, artifacts, logger));
+        permutations.put(pcma.props.get("user.agent"), pcma);
+      }
+      
+      for (String userAgent : permutations.keySet()) {
+        // Create a cache manifest file for every user agent
+        toReturn.add(emitUserAgentCacheManifestFile(userAgent, permutations.get(userAgent), artifacts, logger));
+        
       }
 
       logger.log(TreeLogger.INFO,
@@ -165,8 +172,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
   }
 
   /**
-   * Override this method to force the linker to also include more files in the
-   * manifest.
+   * Override this method to include additional files in the manifest.
    */
   protected String[] otherCachedFiles() {
     return null;
@@ -185,8 +191,9 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
   private Artifact<?> createPermutationCacheManifestArtifact(LinkerContext context, TreeLogger logger,
           ArtifactSet artifacts) {
 
-    String strongName = artifacts.find(SelectionInformation.class).first().getStrongName();
-    PermutationCacheManifestArtifact cacheArtifact = new PermutationCacheManifestArtifact(this.getClass(), strongName);
+    SelectionInformation si = artifacts.find(SelectionInformation.class).first();
+    PermutationCacheManifestArtifact cacheArtifact = new PermutationCacheManifestArtifact(this.getClass(),
+            si.getStrongName(), si.getPropMap());
 
     if (artifacts != null) {
       for (Artifact<?> artifact : artifacts) {
@@ -203,22 +210,25 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
   }
 
   /**
-   * Emits the cache manifest file for the permutation represented by the
-   * provided artifact.
+   * Emits the cache manifest file for the user agent represented by the
+   * provided artifacts.
    * 
-   * @param artifact
-   *          the permutation specific cache manifest artifact
+   * @param userAgent
+   *         the user agent name
    * @param artifacts
-   *          all artifacts passed to this linker
+   *          the user agent specific cache manifest artifacts
+   * @param globalArtifacts
+   *          all artifacts known to this linker
    * @param logger
    *          the tree logger to record to
    * @return a synthetic artifact representing the cache manifest file for the
-   *         permutation
+   *         user agent
    * 
    * @throws UnableToCompleteException
    */
-  private Artifact<?> emitPermutationCacheManifestFile(PermutationCacheManifestArtifact artifact,
-          ArtifactSet artifacts, TreeLogger logger) throws UnableToCompleteException {
+  private Artifact<?> emitUserAgentCacheManifestFile(String userAgent,
+          Collection<PermutationCacheManifestArtifact> artifacts, ArtifactSet globalArtifacts, TreeLogger logger)
+          throws UnableToCompleteException {
 
     // Add static external resources
     StringBuilder staticResoucesSb = new StringBuilder();
@@ -228,15 +238,27 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
       staticResoucesSb.append("\n");
     }
 
+    // Add generated resources
+    Set<String> cacheableGeneratedResources = new HashSet<String>();
+    
     // Add permutation independent resources
-    if (artifacts != null) {
-      for (Artifact<?> a : artifacts) {
+    if (globalArtifacts != null) {
+      for (Artifact<?> a : globalArtifacts) {
         if (a instanceof EmittedArtifact) {
           EmittedArtifact ea = (EmittedArtifact) a;
           String pathName = ea.getPartialPath();
-          if (shouldBeCached(pathName) && !isPermutationSpecific(artifacts, pathName)) {
-            artifact.addCachedFile(pathName);
+          if (shouldBeCached(pathName) && !isPermutationSpecific(globalArtifacts, pathName)) {
+            cacheableGeneratedResources.add(pathName);
           }
+        }
+      }
+    }
+    
+    // Add permutation specific resources
+    if (artifacts != null) {
+      for (PermutationCacheManifestArtifact artifact : artifacts) {
+        for (String cachedFile : artifact.cachedFiles) {
+          cacheableGeneratedResources.add(cachedFile);
         }
       }
     }
@@ -253,17 +275,17 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     sb.append("# Static app files\n");
     sb.append(staticResoucesSb.toString());
     sb.append("\n# Generated permutation specific app files");
-    for (String cachedFile : artifact.cachedFiles) {
+    for (String resource : cacheableGeneratedResources) {
       sb.append("\n");
-      sb.append(cachedFile);
+      sb.append(resource);
     }
     sb.append("\n\n");
     sb.append("# All other resources require the user to be online.\n");
     sb.append("NETWORK:\n");
     sb.append("*\n");
 
-    // Create the permutation-specific manifest as a new artifact and return it
-    return emitString(logger, sb.toString(), MANIFEST + "." + artifact.name);
+    // Create the user agent specific manifest as a new artifact and return it
+    return emitString(logger, sb.toString(), MANIFEST + "." + userAgent);
   }
 
   /**
