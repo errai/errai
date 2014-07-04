@@ -23,6 +23,9 @@ import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
 
 import com.google.common.collect.Lists;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.user.client.Cookies;
 
 /**
  * API for communicating with REST endpoints based on JAX-RS interfaces.
@@ -171,11 +174,26 @@ public class RestClient {
 
   /**
    * Activates/Deactivates jackson conform JSON marshalling.
-   * 
+   *
    * @param active
    *          true if jackson marshalling should be activated, otherwise false.
    */
   public static native void setJacksonMarshallingActive(boolean active) /*-{
     $wnd.erraiJaxRsJacksonMarshallingActive = active;
   }-*/;
+
+  /**
+   * Set a cookie for the domain and path returned by {@link #getApplicationRoot()}.
+   *
+   * @param cookieName The name of the cookie to set.
+   * @param cookieValue The value of the cookie to set.
+   */
+  public static void setCookie(final String cookieName, final String cookieValue) {
+    final AnchorElement anchorElement = Document.get().createAnchorElement();
+    anchorElement.setHref(RestClient.getApplicationRoot());
+    final String path = anchorElement.getPropertyString("pathname");
+    final String domain = anchorElement.getPropertyString("domain");
+
+    Cookies.setCookie(cookieName, cookieValue, null, domain, path, false);
+  }
 }
