@@ -51,11 +51,13 @@ public class ClientLocalClassHidingAgent {
 
     return map;
   }
+  
   public static void premain(String agentArgs, Instrumentation inst) {
     Map<String, String> options = parseOptionsWithDefaults(agentArgs);
     boolean debug = Boolean.parseBoolean(options.get("debugAgent"));
     Pattern hideClassesPattern = Pattern.compile(options.get("classPattern"));
 
-    inst.addTransformer(new BoringClassGenerator(hideClassesPattern, debug));
+    inst.addTransformer(new ClientLocalClassHider(hideClassesPattern, debug));
+    inst.addTransformer(new GwtLinkerClassHider(debug));
   }
 }

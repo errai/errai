@@ -16,36 +16,23 @@
 
 package org.jboss.errai;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.RETURN;
-import static org.objectweb.asm.Opcodes.V1_5;
-
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.regex.Pattern;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-
 /**
  * A class file "transformer" that ignores the original class definition,
- * instead generating a class that is completely boring: a trivial public
- * subclass of java.lang.Object which is in the expected package and has the
- * expected name.
+ * instead generating a class that is completely empty.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class BoringClassGenerator implements ClassFileTransformer {
+public class ClientLocalClassHider implements ClassFileTransformer {
 
   private final Pattern hiddenClassNamePattern;
   private final boolean debug;
 
-  public BoringClassGenerator(Pattern hiddenClassNamePattern, boolean debug) {
+  public ClientLocalClassHider(Pattern hiddenClassNamePattern, boolean debug) {
     this.hiddenClassNamePattern = hiddenClassNamePattern;
     this.debug = debug;
 
@@ -85,31 +72,6 @@ public class BoringClassGenerator implements ClassFileTransformer {
       System.out.println("client-local-class-hider: hiding " + className);
     }
 
-    ClassWriter cw = new ClassWriter(0);
-    MethodVisitor mv;
-
-    cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
-
-    cw.visitSource("FakeClass__GENERATED_BY_JBoss_ClientLocalClassHider.java", null);
-
-    {
-      mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
-      mv.visitCode();
-      Label l0 = new Label();
-      mv.visitLabel(l0);
-      mv.visitLineNumber(15, l0);
-      mv.visitVarInsn(ALOAD, 0);
-      mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V");
-      mv.visitInsn(RETURN);
-      Label l1 = new Label();
-      mv.visitLabel(l1);
-      mv.visitLocalVariable("this", "L" + className + ";", null, l0, l1, 0);
-      mv.visitMaxs(1, 1);
-      mv.visitEnd();
-    }
-
-    cw.visitEnd();
-
-    return cw.toByteArray();
+    return EmtpyClassGenerator.generateEmptyClass(className);
   }
 }

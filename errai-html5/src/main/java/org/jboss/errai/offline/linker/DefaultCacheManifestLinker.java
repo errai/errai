@@ -156,16 +156,14 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     ArtifactSet toReturn = new ArtifactSet(artifacts);
     if (toReturn.find(SelectionInformation.class).isEmpty()) {
       logger.log(TreeLogger.INFO, "devmode: generating empty " + MANIFEST);
-      artifacts = null;
+      toReturn.add(emitString(logger, "# Empty in DevMode", MANIFEST));
     }
-
-    if (onePermutation) {
+    else if (onePermutation) {
       // Create an artifact representing the cache manifest for the current
       // permutation
       toReturn.add(createPermutationCacheManifestArtifact(context, logger, artifacts));
     }
     else {
-
       // Group permutations per user agent
       final Multimap<String, PermutationCacheManifestArtifact> permutations = ArrayListMultimap.create();
       for (PermutationCacheManifestArtifact pcma : artifacts.find(PermutationCacheManifestArtifact.class)) {
