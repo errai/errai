@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-06-06</date>
+    <date>2014-07-07</date>
     
     
     
@@ -99,7 +99,7 @@ public class App {
     Window.alert("Hello World!");
   }
 }</programlisting>
-<simpara>For this code to run properly, you must use the the Errai Forge Addon <emphasis>Add Errai Features</emphasis> command to install <emphasis>Errai IOC</emphasis>.</simpara>
+<simpara>For this code to run properly, you must use the Errai Forge Addon <emphasis>Add Errai Features</emphasis> command to install <emphasis>Errai IOC</emphasis>.</simpara>
 <simpara>Create new subfolder, <emphasis>client/local</emphasis>, under the folder containing your GWT module file. Then create a file, <emphasis>App.java</emphasis>, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).</simpara>
 <tip>
 <formalpara>
@@ -516,7 +516,7 @@ public class App {
 </tip>
 <simpara>Errai CDI as its namesake implies is based on, and is in fact, a partial implementation of the CDI (Contexts and Dependency Injection) specification. Errai CDI covers <emphasis>most</emphasis> of the programming model but omits the CDI SPI, instead replacing it with it a custom set of APIs which are more appropriate for the client programming model of Errai.</simpara>
 <simpara>These differences aside, using Errai CDI in conjunction with CDI on the server will provide you with a uniform programming model across the client and server code of your application.</simpara>
-<simpara>This guide does not assume any past experience with CDI. However, you may wish to consider reading the the <ulink url="http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/">Weld Documentation</ulink> in addition to this guide.</simpara>
+<simpara>This guide does not assume any past experience with CDI. However, you may wish to consider reading the <ulink url="http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/">Weld Documentation</ulink> in addition to this guide.</simpara>
 <section id="sid-54493502_AGentleIntroductiontoCDI-YourFirstBean">
 <title>Your First Bean</title>
 <simpara>A bean in CDI is merely a POJO (Plain Old Java Object), for the most part. In the context of CDI, any plain, default constructable class is a member of the <emphasis>dependent scope</emphasis> . Don&#8217;t worry too much about what that means for now. Let&#8217;s just go ahead and make one:</simpara>
@@ -1878,7 +1878,7 @@ public class MyLocalService implements MessageCallback {
 </section>
 <section id="sid-20938800_ClientComponents-RequestDispatcher">
 <title>RequestDispatcher</title>
-<simpara>The type <literal><phrase role="code">org.jboss.errai.bus.client.framework.RequestDispatcher</phrase></literal> is globally injectable into any bean. Injecting this type will provide a <literal><phrase role="code">RequestDispatcher</phrase></literal> instance capable of delivering any messages provided to it, to the the <literal><phrase role="code">MessageBus</phrase></literal>.</simpara>
+<simpara>The type <literal><phrase role="code">org.jboss.errai.bus.client.framework.RequestDispatcher</phrase></literal> is globally injectable into any bean. Injecting this type will provide a <literal><phrase role="code">RequestDispatcher</phrase></literal> instance capable of delivering any messages provided to it, to the <literal><phrase role="code">MessageBus</phrase></literal>.</simpara>
 <example>
 <title>Injecting a RequestDispatcher</title>
 <programlisting language="java" linenumbering="unnumbered">@Inject RequestDispatcher dispatcher;</programlisting>
@@ -1983,7 +1983,7 @@ public class MyLocalService implements MessageCallback {
 <simpara>A problem commonly associated with building large applications in the browser is ensuring that things happen in the proper order when code starts executing. Errai IOC provides you tools which permit you to ensure things happen before initialization, and forcing things to happen after initialization of all of the Errai services.</simpara>
 <section id="sid-21758082_LifecycleTools-ControllingStartup">
 <title>Controlling Startup</title>
-<simpara>In order to prevent initialization of the the bus and it&#8217;s services so that you can do necessary configuration, especially if you are writing extensions to the Errai framework itself, you can create an implicit startup dependency on your bean by injecting an <literal><phrase role="code">org.jboss.errai.ioc.client.api.InitBallot&lt;?&gt;</phrase></literal>.</simpara>
+<simpara>In order to prevent initialization of the bus and it&#8217;s services so that you can do necessary configuration, especially if you are writing extensions to the Errai framework itself, you can create an implicit startup dependency on your bean by injecting an <literal><phrase role="code">org.jboss.errai.ioc.client.api.InitBallot&lt;?&gt;</phrase></literal>.</simpara>
 <example>
 <title>Using an InitBallot to Control Startup</title>
 <programlisting language="java" linenumbering="unnumbered">@Singleton
@@ -5660,7 +5660,7 @@ public class NavBar extends Composite {
   
 </itemizedlist>
 
-<simpara>The <literal><phrase role="code">Navigation</phrase></literal> singleton owns a GWT Panel called the <emphasis>navigation panel</emphasis> . This panel always contains a widget corresponding to the the fragment ID (the part after the # symbol) in the browser&#8217;s location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser&#8217;s location bar is updated to reflect the new current page.</simpara>
+<simpara>The <literal><phrase role="code">Navigation</phrase></literal> singleton owns a GWT Panel called the <emphasis>navigation panel</emphasis> . This panel always contains a widget corresponding to the fragment ID (the part after the # symbol) in the browser&#8217;s location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser&#8217;s location bar is updated to reflect the new current page.</simpara>
 <section id="sid-54493676_ErraiUINavigation-DeclaringaPage">
 <title>Declaring a Page</title>
 <simpara>To declare a page, annotate any subclass of Widget with the <literal><phrase role="code">@Page</phrase></literal> annotation:</simpara>
@@ -6379,7 +6379,43 @@ public class PicketLinkDefaultUsers {
 </section>
 <section id="_restrictedaccess">
 <title>RestrictedAccess</title>
-<simpara>The annotation <literal>@RestrictedAccess</literal> is the only annotation necessary to secure a resource or UI element. In general, <literal>@RestrictedAccess</literal> blocks a resource from users who are not logged in; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.</simpara>
+<simpara>The annotation <literal>@RestrictedAccess</literal> is the only annotation necessary to secure a resource or UI element. In general, <literal>@RestrictedAccess</literal> blocks a resource from users who are either not logged in or who lack required roles. Roles are defined through the <literal>@RestrictedAccess</literal> annotation in one of the following two ways.</simpara>
+<section id="_simple_roles_as_strings">
+<title>Simple Roles as Strings</title>
+<simpara>Simple roles are roles that can be directly mapped to Strings (the String value being the role name). Simple roles are defined by defining an array of Strings in the <literal>roles</literal> parameter of <literal>@RestrictedAccess</literal>. Two simple roles are equivalent if they have the same name.</simpara>
+<simpara>Here is an example usage of <literal>@RestrictedAccess</literal> with two simple roles, "user" and "admin":</simpara>
+<programlisting language="java" linenumbering="unnumbered">@RestrictedAccess(roles = { "user", "admin" })</programlisting>
+</section>
+<section id="_provided_roles">
+<title>Provided Roles</title>
+<simpara>Conceptually, a provided can be used to implement a more complex security system. In practice, a provided role is some concrete type that implements the <literal>Role</literal> interface and overrides <literal>Object.equals(Object)</literal>. Provided roles are declared on a resource by creating a <literal>RequiredRolesProvider</literal> that produces these roles and assigning the type to the <literal>providers</literal> parameter of <literal>@RestrictedAccess</literal>.</simpara>
+<simpara>Here is an sample of a <literal>RequireRolesProvider</literal> and its usage with <literal>@RestrictedAccess</literal>. This example defines equivalent roles to the above example using simple roles.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Dependent <co id="CO4-1"/>
+public class AdminRolesProvider implements RequiredRolesProvider {
+
+  @Override
+  public Set&lt;Role&gt; getRoles() {
+    return new HashSet&lt;Role&gt;(Arrays.asList(
+      new RoleImpl("user"), <co id="CO4-2"/>
+      new RoleImpl("admin")
+    ));
+  }
+}</programlisting>
+<programlisting language="java" linenumbering="unnumbered">@RestrictedAccess(providers = { AdminRolesProvider.class })</programlisting>
+<calloutlist>
+  
+  <callout arearefs="CO4-1">
+    <para>The role provider implementation must be a CDI bean so that it can be looked up dynamically on the client and server.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO4-2">
+    <para><literal>RoleImpl</literal> is the internal implementation used for simple roles. A <literal>RoleImpl</literal> equals another role if they are both instances of <literal>RoleImpl</literal> and have matching names.</para>
+    
+  </callout>
+  
+</calloutlist>
+</section>
 <section id="_rpc_services">
 <title>RPC Services</title>
 <simpara>To secure an Errai RPC service, simply annotate the RPC interface (either the entire type or just a method) with one of the security annotations.</simpara>
@@ -6418,6 +6454,10 @@ public interface MixedService {
   
 </itemizedlist>
 
+<note>
+<title>Using Role Providers with RPC Services</title>
+<simpara>If a <literal>RequiredRolesProvider</literal> is used on an RPC interface, the provider type must be located in a shared package. Security checks for RPCs are performed on the client and the server, so placing the type in a client- or server-only package will result in run-time errors.</simpara>
+</note>
 <section id="_error_callbacks">
 <title>Error Callbacks</title>
 <simpara>When access to a secured RPC service is denied an <literal>UnauthenticatedException</literal> or <literal>UnauthorizedException</literal> is thrown. This error is then transmitted back to the client, where it can be caught with an <literal>ErrorCallback</literal> (provided when the RPC is invoked).</simpara>
@@ -6428,7 +6468,7 @@ public interface MixedService {
     public void callback(Void response) {
       // ...
     }
-  }, new ErrorCallback&lt;Message&gt;() { <co id="CO4-1"/>
+  }, new ErrorCallback&lt;Message&gt;() { <co id="CO5-1"/>
 
     @Override
     public boolean error(Message message, Throwable t) {
@@ -6448,7 +6488,7 @@ public interface MixedService {
   }, MixedService.class).adminService();</programlisting>
 <calloutlist>
   
-  <callout arearefs="CO4-1">
+  <callout arearefs="CO5-1">
     <para>This <literal>ErrorCallback</literal> is parameterized with the type <literal>Message</literal> because it is an Errai Bus RPC. In the next section we will demonstrate the use of a JAX-RS RPC.</para>
     
   </callout>
@@ -6703,26 +6743,29 @@ public class NavBar extends Composite {
 }</programlisting>
 </section>
 </section>
-<section id="_using_an_alternative_to_picketlink">
-<title>Using an Alternative to PicketLink</title>
-<simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. A default implementation of this interface using PicketLink is provided in the <literal>errai-security-picketlink</literal> jar. But it is possible to use a different sever-side security framework by providing your own custom implementation of <literal>AuthenticationService</literal> and annotating it with <literal>@Service</literal>. In that case your project should not depend on <literal>errai-security-picketlink</literal>.</simpara>
 <section id="_form_based_login">
 <title>Form Based Login</title>
-<simpara>If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. Here are the steps required:</simpara>
+<simpara>If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. The <literal>errai-security-server</literal> jar contains a servlet filter for encoding the currently authenticated user as a cookie in the http response. Here are the steps for setting this up:</simpara>
 <orderedlist numeration="arabic">
   
     <listitem>
-      <simpara>Create a login page using an html form that posts to a Java servlet.</simpara>
+      <simpara>Create a login page using an html form that posts to a servlet-filter. If you are using Errai Security with PicketLink you will want to use the <literal>org.picketlink.authentication.web.AuthenticationFilter</literal> servlet-filter. Otherwise, you will need to implement one yourself that authenticates the user by calling <literal>AuthenticationService.login(String, String)</literal> method.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>On the servlet attempt to login with the <literal>AuthenticationService</literal>. If a user&#8217;s login request is successful, use the <literal>org.jboss.errai.security.shared.api.UserCookieEncoder</literal> to create a cookie.</simpara>
+      <simpara>Add this filter-mapping for setting the Errai Security user cookie:</simpara>
       
-    </listitem>
-  
-    <listitem>
-      <simpara>Set the cookie in the HTTP response and redirect the user to your Errai app.</simpara>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;ErraiUserCookieFilter&lt;/filter-name&gt;
+    &lt;url-mapping&gt;/gwt-host-page.html&lt;/url-mapping&gt;
+  &lt;/filter-mapping&gt;</programlisting>
+<simpara>The mapped URL should be that of your GWT Host Page.</simpara>
+<important>
+<title>This mapping must come after the filter that authenticates the user</title>
+<simpara>If this filter maps to the same URL as the filter for authentication, this filter must come after the authentication filter or else it will set the cookie before the user has logged in.</simpara>
+</important>
+
       
     </listitem>
   
@@ -6732,6 +6775,197 @@ public class NavBar extends Composite {
     </listitem>
   
 </orderedlist>
+</section>
+<section id="_using_an_alternative_to_picketlink">
+<title>Using an Alternative to PicketLink</title>
+<simpara>All Errai Security authentication is implemented with Errai Remote Procedure Calls to the <literal>AuthenticationService</literal>. A default implementation of this interface using PicketLink is provided in the <literal>errai-security-picketlink</literal> jar. But it is possible to use a different sever-side security framework by providing your own custom implementation of <literal>AuthenticationService</literal> and annotating it with <literal>@Service</literal>. In that case your project should not depend on <literal>errai-security-picketlink</literal>.</simpara>
+</section>
+<section id="_using_keycloak_for_authentication">
+<title>Using Keycloak for Authentication</title>
+<simpara><ulink url="http://keycloak.jboss.org/">Keycloak</ulink> is is a new project that provides integrated SSO and IDM for browser apps and RESTful web services. By using Keycloak it is possible to outsource the responsibility of authentication and account management from your application entirely. Errai Security provides an optional <literal>errai-security-keycloak</literal> jar that provides an implementation of the <literal>AuthenticationService</literal> that works with Keycloak.</simpara>
+<section id="_how_it_works_overview">
+<title>How It Works (Overview)</title>
+<simpara>From the perspective of a visitor, here is what happens when she attempts to log in:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>The visitor is redirected to a Keycloak login page.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>The visitor submits her credentials through the Keycloak login page.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Assuming the credentials are valid, the visitor is redirected back to the web app, where she is now logged in.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<section id="_keycloak_token">
+<title>Keycloak Token</title>
+<simpara>Behind the scenes, when the visitor successfully submits credentials she is redirected back to the web app with a Keycloak Access Token, which contains information that is configurable from within Keycloak. A servlet filter is used to extract the token from the request and assign it to the <literal>AuthenticationService</literal> implementation. At this point the User is now logged in to your application.</simpara>
+</section>
+</section>
+<section id="_setup">
+<title>Setup</title>
+<simpara>To add Keycloak integration to your application:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Setup a Keycloak server. Please consult the <ulink url="http://keycloak.jboss.org/docs.html">Keycloak documentation</ulink> for details on how this is achieved.</simpara>
+      
+<orderedlist numeration="loweralpha">
+  
+    <listitem>
+      <simpara>As part of your setup you should create a new realm for your application.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add roles and users to your realm.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>In your new realm you should create a new application (you can also use OAuth).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>After creating your application select it from the list and make sure to adjust the following settings as appropriate:</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara><emphasis role="strong">Redirect URI</emphasis>&#8201;&#8212;&#8201;You should use this to whitelist pages that will be redirected to after a successful login.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis role="strong">Claims</emphasis>&#8201;&#8212;&#8201;You will need to explicitly enable any information about users that your application requires access to.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis role="strong">Scope</emphasis>&#8201;&#8212;&#8201;Move any roles that users in your app <emphasis role="strong">may</emphasis> possess to the "Assigned Roles". (Note: moving the roles to "Assigned Roles" does not mean <emphasis role="strong">all</emphasis> users will have this role. It does mean that these roles will be visible to your app for users that do have them.)</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>After adjusting the settings for your app, go to the <emphasis role="strong">Installation</emphasis> tab and select "keycloak.json" in the <emphasis role="strong">Format Option</emphasis> list. Copy this into a "keycloak.json" file in your <literal>WEB-INF</literal> directory.</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add the <literal>errai-security-keycloak</literal> jar to your project. In maven, the dependency is <literal>org.jboss.errai:errai-security-keycloak</literal>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Configure the <literal>ErraiUserCookieFilter</literal> in your <literal>web.xml</literal>. All that is necessary is adding a filter-mapping for your GWT host page like so:</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;ErraiUserCookieFilter&lt;/filter-name&gt;
+    &lt;url-pattern&gt;/index.html&lt;/url-pattern&gt;
+  &lt;/filter-mapping&gt;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Configure the <literal>ErraiLoginRedirectFilter</literal> in your <literal>web.xml</literal>.</simpara>
+      
+<orderedlist numeration="loweralpha">
+  
+    <listitem>
+      <simpara>Create a filter-mapping of this filter onto a path that will act as a url to the Keycloak login page. For example, if your deployed app is called <literal>my-app</literal> and you wanted <literal>&lt;server-uri&gt;/my-app/app-login</literal> as your login url then you would add the following:</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;ErraiLoginRedirectFilter&lt;/filter-name&gt;
+    &lt;url-pattern&gt;/app-login&lt;/url-pattern&gt;
+  &lt;/filter-mapping&gt;</programlisting>
+<orderedlist numeration="loweralpha">
+  
+    <listitem>
+      <simpara>Add a security-constraint to login url. This is what actually causes the redirection to Keycloak. All the filter does is redirect back to your app (which happens after the login completes). For the previous example, the constraint would look like this:</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+      &lt;web-resource-name&gt;Login&lt;/web-resource-name&gt;
+      &lt;url-pattern&gt;/app-login&lt;/url-pattern&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint&gt;
+      &lt;role-name&gt;*&lt;/role-name&gt;
+    &lt;/auth-constraint&gt;
+  &lt;/security-constraint&gt;</programlisting>
+<orderedlist numeration="loweralpha">
+  
+    <listitem>
+      <simpara>Optionally configure the URL that the <literal>ErraiLoginRedirectFilter</literal> redirects to. You can do this with the <literal>redirectLocation</literal> param, which takes a path relative to the app context:</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<programlisting language="xml" linenumbering="unnumbered">  &lt;filter&gt;
+    &lt;filter-name&gt;ErraiLoginRedirectFilter&lt;/filter-name&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;redirectLocation&lt;/param-name&gt;
+      &lt;param-value&gt;/index.jsp&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  &lt;/filter&gt;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Set the login method to use Keycloak in you <literal>web.xml</literal>:</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">  &lt;login-config&gt;
+    &lt;auth-method&gt;KEYCLOAK&lt;/auth-method&gt;
+    &lt;realm-name&gt;example&lt;/realm-name&gt;
+  &lt;/login-config&gt;</programlisting>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add roles available to users in your application to the <literal>web.xml</literal>. Here is an example declaration of a "user" role:</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">  &lt;security-role&gt;
+    &lt;role-name&gt;user&lt;/role-name&gt;
+  &lt;/security-role&gt;</programlisting>
+
+      
+    </listitem>
+  
+</orderedlist>
+<important>
+<title>All users must have at least one role</title>
+<simpara>With this configuration all users must have at least a single role, or else they will not be redirected propertly. Unfortunately, there is no way to define a security-constraint that only requires authentication. The simplest solution is to add a default role to your realm.</simpara>
+</important>
 </section>
 </section>
 </chapter>
@@ -7036,6 +7270,73 @@ public class NamedLogExample {
 <title>Deployment to an Application Server</title>
 <simpara>We provide integration with the <ulink url="http://jboss.org/jbossas">JBoss Application Server</ulink>, but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI (<literal><phrase role="code">java:/BeanManager</phrase></literal>).</simpara>
 </section>
+</section>
+<section id="Offline-Mode">
+<title>Errai Offline Mode Configuration</title>
+<simpara>Errai provides special support for HTML5&#8217;s application caching mechanism that allows applications to work offline. If you&#8217;re
+not familiar with the HTML5 application cache you can find all the details <ulink url="https://developer.mozilla.org/en-US/docs/Web/HTML/Using_the_application_cache">here</ulink>.</simpara>
+<simpara>As GWT compiles separate browser specific JavaScript permutations for every application, it is not enough to manually create a cache manifest file and simply list all generated JavaScript files. This would cause every browser to download and cache JavaScript files that it doesn&#8217;t need in the first place (i.e. Safari would download and cache JavaScript files that were generated for Internet Explorer only). Errai solves this problem by using a custom linker to generate user-agent specific cache manifest files.</simpara>
+<simpara>The following steps are necessary to activate this linker:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Define the linker in your gwt.xml module descriptor:</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<programlisting language="xml" linenumbering="unnumbered">&lt;define-linker name="offline" class="org.jboss.errai.offline.linker.DefaultCacheManifestLinker" /&gt;
+&lt;add-linker name="offline" /&gt;</programlisting>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Add the manifest (<literal>your_module_name</literal>/errai.appcache) to the <literal>html</literal> tag in your host page:</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<programlisting language="xml" linenumbering="unnumbered">&lt;html manifest="your_module_name/errai.appcache"&gt;</programlisting>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Add a mime-mapping to your web.xml file (you can skip this step if you deploy the errai-javaee-all.jar as part of your application):</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<programlisting language="xml" linenumbering="unnumbered">&lt;mime-mapping&gt;
+&lt;extension&gt;manifest&lt;/extension&gt;
+&lt;mime-type&gt;text/cache-manifest&lt;/mime-type&gt;
+&lt;/mime-mapping&gt;</programlisting>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Make sure the errai-common.jar file is deployed as part of your application. It contains a servlet that will provide the correct user-agent specific manifest file in response to requests to your_module_name/errai.appcache</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>To obtain manifests that contain other files in addition to those generated by the <literal>DefaultCacheManifestLinker</literal>, create a subclass that overrides <literal>otherCachedFiles()</literal>, and use this subclass as a linker instead:</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+<programlisting language="java" linenumbering="unnumbered">@Shardable
+@LinkerOrder(Order.POST)
+public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
+  @Override
+  protected String[] otherCachedFiles() {
+    return new String[] {"/my-app/index.html","/my-app/css/application.css"};
+  }
+}</programlisting>
 </section>
 <section id="sid-5931354">
 <title>ErraiApp.properties</title>

@@ -107,7 +107,7 @@ public class App {
 }
 ----
 
-For this code to run properly, you must use the the Errai Forge Addon _Add Errai Features_ command to install _Errai IOC_.
+For this code to run properly, you must use the Errai Forge Addon _Add Errai Features_ command to install _Errai IOC_.
 
 Create new subfolder, _client/local_, under the folder containing your GWT module file. Then create a file, _App.java_, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).
 
@@ -316,7 +316,7 @@ Errai CDI as its namesake implies is based on, and is in fact, a partial impleme
 
 These differences aside, using Errai CDI in conjunction with CDI on the server will provide you with a uniform programming model across the client and server code of your application.
 
-This guide does not assume any past experience with CDI. However, you may wish to consider reading the the link:$$http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/$$[Weld Documentation] in addition to this guide.
+This guide does not assume any past experience with CDI. However, you may wish to consider reading the link:$$http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/$$[Weld Documentation] in addition to this guide.
 
 [[sid-54493502_AGentleIntroductiontoCDI-YourFirstBean]]
 
@@ -1752,7 +1752,7 @@ The type [code]+org.jboss.errai.bus.client.framework.MessageBus+ is globally inj
 
 ===== RequestDispatcher
 
-The type [code]+org.jboss.errai.bus.client.framework.RequestDispatcher+ is globally injectable into any bean. Injecting this type will provide a [code]+RequestDispatcher+ instance capable of delivering any messages provided to it, to the the [code]+MessageBus+.
+The type [code]+org.jboss.errai.bus.client.framework.RequestDispatcher+ is globally injectable into any bean. Injecting this type will provide a [code]+RequestDispatcher+ instance capable of delivering any messages provided to it, to the [code]+MessageBus+.
 
 .Injecting a RequestDispatcher
 ====
@@ -1876,7 +1876,7 @@ A problem commonly associated with building large applications in the browser is
 
 ===== Controlling Startup
 
-In order to prevent initialization of the the bus and it's services so that you can do necessary configuration, especially if you are writing extensions to the Errai framework itself, you can create an implicit startup dependency on your bean by injecting an [code]+org.jboss.errai.ioc.client.api.InitBallot<?>+.
+In order to prevent initialization of the bus and it's services so that you can do necessary configuration, especially if you are writing extensions to the Errai framework itself, you can create an implicit startup dependency on your bean by injecting an [code]+org.jboss.errai.ioc.client.api.InitBallot<?>+.
 
 .Using an InitBallot to Control Startup
 ====
@@ -4857,7 +4857,6 @@ DataBinder<Customer> dataBinder = DataBinder.forModel(existingCustomerObject, In
 
 Bindings can be created by calling the [code]+bind+ method on a [code]+DataBinder+ instance, thereby specifying which widgets should be bound to which properties of the model. It is possible to use property chains for bindings, given that all nested properties are of bindable types. When binding to [code]+customer.address.streetName+, for example, both [code]+customer+ and [code]+address+ have to be of a type annotated with [code]+@Bindable+.
 
-
 [source, java]
 ----
 public class CustomerView {
@@ -6347,7 +6346,7 @@ Errai Navigation has these main parts:
 * The [code]+TransitionTo<P>+, [code]+TransitionAnchor<P>+, and [code]+TransitionToRole<R>+ classes are injectable types that provide links to other pages.
 * The [code]+Navigation+ singleton offers control over the navigation system as a whole.
 
-The [code]+Navigation+ singleton owns a GWT Panel called the _navigation panel_ . This panel always contains a widget corresponding to the the fragment ID (the part after the # symbol) in the browser's location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser's location bar is updated to reflect the new current page.
+The [code]+Navigation+ singleton owns a GWT Panel called the _navigation panel_ . This panel always contains a widget corresponding to the fragment ID (the part after the # symbol) in the browser's location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser's location bar is updated to reflect the new current page.
 
 [[sid-54493676_ErraiUINavigation-DeclaringaPage]]
 
@@ -6508,7 +6507,6 @@ The easiest way to declare a link between pages is to inject an instance of [cod
 
 Here is an example declaring an anchor link from the templated welcome page to the item list page. The first code sample would go in WelcomePage.java while the second would go in the WelcomePage.html, the associated html template.
 
-
 [source, java]
 ----
 @Page(role = DefaultPage.class)
@@ -6519,7 +6517,6 @@ public class WelcomePage extends Composite {
 
 }
 ----
-
 
 [source, xml]
 ----
@@ -6537,7 +6534,6 @@ You can inject any number of links into a page. The only restriction is that the
 Sometimes it is necessary to manually transition between pages (such as in response to an event being fired). To declare a manual link from one page to another, inject an instance of [code]+TransitionTo<P>+ , where [code]+P+ is the class of the target page.
 
 This code declares a manual transition from the welcome page to the item list page:
-
 
 [source, java]
 ----
@@ -7743,6 +7739,59 @@ Here are some additional JVM arguments that can be passed to the JBossLauncher:
 ==== Deployment to an Application Server
 
 We provide integration with the link:$$http://jboss.org/jbossas$$[JBoss Application Server], but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ([code]+java:/BeanManager+).
+
+
+[[Offline-Mode]]
+
+=== Errai Offline Mode Configuration
+
+Errai provides special support for HTML5's application caching mechanism that enables applications to work offline. If you're 
+not familiar with the HTML5 application cache you can find all the details link:$$https://developer.mozilla.org/en-US/docs/Web/HTML/Using_the_application_cache$$[here].
+
+As GWT compiles separate browser-specific JavaScript permutations for your application, it is not enough to manually create a cache manifest file and simply list all generated JavaScript files. This would cause every browser to download and cache JavaScript files that it doesn't need in the first place (i.e. Safari would download and cache JavaScript files that were generated for Internet Explorer only). Errai solves this problem by using a custom linker to generate user-agent specific cache manifest files.
+
+The following steps are necessary to activate this linker:
+
+* Define the linker in your gwt.xml module descriptor:
+
+[source, xml]
+----
+<define-linker name="offline" class="org.jboss.errai.offline.linker.DefaultCacheManifestLinker" />
+<add-linker name="offline" />
+----
+
+* Add the manifest (`your_module_name`/errai.appcache) to the `html` tag in your host page:
+
+[source, xml]
+----
+<html manifest="your_module_name/errai.appcache">  
+----
+
+* Add a mime-mapping to your web.xml file (you can skip this step if you deploy the errai-javaee-all.jar as part of your application):
+
+[source, xml]
+----
+<mime-mapping>
+  <extension>manifest</extension>
+  <mime-type>text/cache-manifest</mime-type>
+</mime-mapping>
+----
+  
+* Make sure the `errai-common.jar` file is deployed as part of your application. It contains a servlet that will provide the correct user-agent specific manifest file in response to requests to your_module_name/errai.appcache
+
+* To obtain manifests that contain other files in addition to those generated by the `DefaultCacheManifestLinker`, create a subclass that overrides `otherCachedFiles()`, and use this subclass as a linker instead:
+
+[source, java]
+----
+@Shardable
+@LinkerOrder(Order.POST)
+public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
+  @Override
+  protected String[] otherCachedFiles() {
+    return new String[] {"/my-app/index.html","/my-app/css/application.css"};
+  }
+}
+----
 
 [[sid-5931354]]
 
