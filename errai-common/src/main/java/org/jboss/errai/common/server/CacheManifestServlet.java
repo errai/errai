@@ -34,7 +34,19 @@ public class CacheManifestServlet extends HttpServlet {
 
     String module = matcher.group(1);
     String userAgent = getUserAgent(req);
-    String userAgentManifestPath = "/" + module + "/" + userAgent + "." + "appcache.manifest";
+    String userAgentManifestPath = null;
+
+    String referrer = req.getHeader("referer");
+    if (referrer != null && referrer.contains("gwt.codesvr")) {
+      // Serve an empty manifest in development mode. This is not reliable as
+      // some browser won't send the referer header when requesting the
+      // manifest. In that case we simply return a 404 (the manifest is not
+      // needed in dev mode anyway but we try to avoid the error, if possible).
+      userAgentManifestPath = "/" + module + "/dev.appcache.manifest";
+    }
+    else {
+      userAgentManifestPath = "/" + module + "/" + userAgent + "." + "appcache.manifest";
+    }
 
     resp.setHeader("Cache-Control", "no-cache");
     resp.setHeader("Pragma", "no-cache");

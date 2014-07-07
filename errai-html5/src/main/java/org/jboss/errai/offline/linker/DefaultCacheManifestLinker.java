@@ -156,7 +156,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     ArtifactSet toReturn = new ArtifactSet(artifacts);
     if (toReturn.find(SelectionInformation.class).isEmpty()) {
       logger.log(TreeLogger.INFO, "devmode: generating empty " + MANIFEST);
-      toReturn.add(emitString(logger, "# Empty in DevMode", MANIFEST));
+      toReturn.add(emitString(logger, "# Empty in DevMode\n", "dev." + MANIFEST));
     }
     else if (onePermutation) {
       // Create an artifact representing the cache manifest for the current
