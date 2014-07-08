@@ -58,7 +58,10 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
             System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
             assertTrue(retriesPerSecond < 3);
 
-            if (elapsedClockTime > 16000) finishTest();
+            if (elapsedClockTime > 16000) {
+              finishTest();
+              cancel();
+            }
           }
         }.scheduleRepeating(2000);
       }
@@ -104,7 +107,10 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
             // get canceled when you call stop().
             assertTrue("Retries per second is now " + retriesPerSecond, retriesPerSecond < 3);
 
-            if (elapsedClockTime > 16000) finishTest();
+            if (elapsedClockTime > 16000) {
+              finishTest();
+              cancel();
+            }
           }
         }.scheduleRepeating(2000);
       }
