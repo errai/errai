@@ -1,6 +1,12 @@
 package org.jboss.errai.common.server;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,6 +15,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.jboss.errai.common.client.api.Assert;
 
 /**
  * This servlet provides a cache manifest file specific to the requesting user
@@ -22,6 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(urlPatterns = "*.appcache")
 public class CacheManifestServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
+  private static final String MANIFEST_FILE_EXTENSION = ".appcache.manifest";
+
+  // Lazily populated cache for user agent names for which a manifest file
+  // exists, on a per module basis
+  private Map<String, Set<String>> manifestsPerModule = new ConcurrentHashMap<String, Set<String>>();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -33,9 +46,7 @@ public class CacheManifestServlet extends HttpServlet {
     }
 
     String module = matcher.group(1);
-    String userAgent = getUserAgent(req);
     String userAgentManifestPath = null;
-
     String referrer = req.getHeader("referer");
     if (referrer != null && referrer.contains("gwt.codesvr")) {
       // Serve an empty manifest in development mode. This is not reliable as
@@ -45,7 +56,7 @@ public class CacheManifestServlet extends HttpServlet {
       userAgentManifestPath = "/" + module + "/dev.appcache.manifest";
     }
     else {
-      userAgentManifestPath = "/" + module + "/" + userAgent + "." + "appcache.manifest";
+      userAgentManifestPath = "/" + module + "/" + getUserAgentManifestName(req, module);
     }
 
     resp.setHeader("Cache-Control", "no-cache");
@@ -54,36 +65,88 @@ public class CacheManifestServlet extends HttpServlet {
     req.getRequestDispatcher(userAgentManifestPath).forward(req, resp);
   }
 
-  private String getUserAgent(HttpServletRequest req) {
+  private String getUserAgentManifestName(HttpServletRequest req, String module) {
     String userAgentHeader = req.getHeader("user-agent").toLowerCase();
 
+    String agentPrefix = "";
     // Do not change the order of these checks. To verify this, compile a
     // nocache.js file in pretty mode and compare the corresponding client-side
-    // logic provided by GWT.
-    if (userAgentHeader.contains("opera")) {
-      return "opera";
+    // logic provided by GWT. Tested with GWT 2.5 and 2.6.
+    if (userAgentHeader.contains("opera") && manifestExists("opera", module)) {
+      agentPrefix = "opera";
     }
-    else if (userAgentHeader.contains("webkit")) {
-      return "safari";
+    else if (userAgentHeader.contains("webkit") && manifestExists("safari", module)) {
+      agentPrefix = "safari";
     }
-    else if (userAgentHeader.contains("msie 10")) {
-      // We don't have a separate permutation for IE 10
-      return "ie9";
+    else if (userAgentHeader.contains("msie 10") && manifestExists("ie10", module)) {
+      agentPrefix = "ie10";
     }
-    else if (userAgentHeader.contains("msie 9")) {
-      return "ie9";
+    else if (userAgentHeader.contains("msie 10") && manifestExists("ie9", module)) {
+      agentPrefix = "ie9";
     }
-    else if (userAgentHeader.contains("msie 8")) {
-      return "ie8";
+    else if (userAgentHeader.contains("msie 9") && manifestExists("ie9", module)) {
+      agentPrefix = "ie9";
     }
-    else if (userAgentHeader.contains("msie")) {
-      return "ie6";
+    else if (userAgentHeader.contains("msie 8") && manifestExists("ie8", module)) {
+      agentPrefix = "ie8";
     }
-    else if (userAgentHeader.contains("gecko")) {
-      return "gecko1_8";
+    else if (userAgentHeader.contains("msie") && manifestExists("ie6", module)) {
+      agentPrefix = "ie6";
+    }
+    else if (userAgentHeader.contains("msie") && manifestExists("ie8", module)) {
+      agentPrefix = "ie8";
+    }
+    else if (userAgentHeader.contains("gecko") && manifestExists("gecko1_8", module)) {
+      agentPrefix = "gecko1_8";
     }
 
-    return "";
+    return agentPrefix + MANIFEST_FILE_EXTENSION;
   }
 
+  /**
+   * Returns the set of user agent names for which a manifest file exists in the
+   * provided module.
+   * 
+   * @param module
+   *          the name of the GWT module. Not null.
+   * @return the user agent names for which a manifest file exists.
+   */
+  private Set<String> getManifestsForModule(String module) {
+    Assert.notNull(module);
+
+    Set<String> manifests = manifestsPerModule.get(module);
+    if (manifests == null) {
+      String path = getServletContext().getRealPath(module);
+      File[] manifestFiles = new File(path).listFiles(new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+          return name.endsWith(MANIFEST_FILE_EXTENSION);
+        }
+      });
+
+      manifests = new HashSet<String>();
+      for (File manifestFile : manifestFiles) {
+        String name = manifestFile.getName();
+        manifests.add(name.replace(MANIFEST_FILE_EXTENSION, ""));
+      }
+
+      manifestsPerModule.put(module, manifests);
+    }
+
+    return manifests;
+  }
+
+  /**
+   * Checks if a user agent specific manifest file exists for the provided
+   * module.
+   * 
+   * @param userAgent
+   *          the user agent
+   * @param module
+   *          the GWT module name
+   * @return true if the manifest exists, otherwise false.
+   */
+  private boolean manifestExists(String userAgent, String module) {
+    return getManifestsForModule(module).contains(userAgent);
+  }
 }
