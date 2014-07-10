@@ -68,30 +68,6 @@
     <dependencies>
       <dependency>
         <groupId>org.jboss.errai.bom</groupId>
-        <artifactId>errai-version-master</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-parent</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <!-- Question: should a project have to import this too? Could errai-bom should import it recursively? -->
-      <dependency>
-        <groupId>org.jboss.spec</groupId>
-        <artifactId>jboss-javaee-6.0</artifactId>
-        <version>3.0.2.Final</version> <!-- FIXME should use a property here I think -->
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.errai.bom</groupId>
         <artifactId>errai-bom</artifactId>
         <version>${project.version}</version>
         <type>pom</type>
@@ -109,7 +85,6 @@
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-idm-simple-schema</artifactId>
-      <version>${picketlink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -190,13 +165,11 @@
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-api</artifactId>
-      <version>${picketlink.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-impl</artifactId>
-      <version>${picketlink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>

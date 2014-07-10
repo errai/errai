@@ -10,18 +10,6 @@
   <name>Errai::Security::Keycloak</name>
   <description>Provides a default Keycloak implementation for the AuthenticationService.</description>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.jboss.errai.bom</groupId>
-        <artifactId>errai-version-master</artifactId>
-        <type>pom</type>
-        <scope>import</scope>
-        <version>${project.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>

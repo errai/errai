@@ -204,9 +204,9 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
+                  <!-- Do not put verison here. Managed version will be used. -->
                   <groupId>org.apache.geronimo.specs</groupId>
                   <artifactId>geronimo-interceptor_1.1_spec</artifactId>
-                  <version>1.0</version>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
                   <outputDirectory>target/generated-sources/javax/interceptor/super</outputDirectory>

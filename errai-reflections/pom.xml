@@ -54,6 +54,7 @@
       <extension>
         <groupId>org.jvnet.wagon-svn</groupId>
         <artifactId>wagon-svn</artifactId>
+        <!-- XXX This should be managed somehow. -->
         <version>1.9</version>
       </extension>
     </extensions>

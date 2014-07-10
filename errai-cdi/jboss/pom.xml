@@ -51,26 +51,6 @@
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
     </dependency>
-
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.jboss.remoting</groupId>
-        <artifactId>jboss-remoting</artifactId>
-        <version>4.0.0.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.xnio</groupId>
-        <artifactId>xnio-api</artifactId>
-        <version>3.2.0.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.xnio</groupId>
-        <artifactId>xnio-nio</artifactId>
-        <version>3.2.0.Final</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>

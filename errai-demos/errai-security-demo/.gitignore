@@ -9,3 +9,4 @@ src/main/gwt-unitCache/
 rebel.xml
 .forge_settings
 src/main/webapp/WEB-INF/lib/
+/target/

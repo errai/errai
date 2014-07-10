@@ -61,35 +61,6 @@
         <module>weld-integration</module>        
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- Project Dependencies -->
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-bus</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-ioc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-codegen</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-tools</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <build>
         <plugins>
             <plugin>
