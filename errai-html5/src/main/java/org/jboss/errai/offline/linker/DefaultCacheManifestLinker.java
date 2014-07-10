@@ -341,6 +341,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
    */
   private boolean shouldBeCached(String file) {
     return !(file.endsWith("symbolMap") || file.endsWith(".xml.gz") || file.endsWith("rpc.log")
-            || file.endsWith("gwt.rpc") || file.endsWith("manifest.txt") || file.startsWith("rpcPolicyManifest"));
+            || file.endsWith("gwt.rpc") || file.endsWith("manifest.txt") || file.startsWith("rpcPolicyManifest") 
+            || file.startsWith("deferredjs") || file.startsWith("hosted") || file.startsWith("junit") );
   }
 }
