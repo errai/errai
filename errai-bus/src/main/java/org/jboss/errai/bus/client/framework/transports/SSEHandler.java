@@ -49,12 +49,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   private boolean stopped;
   private boolean connected;
 
-  /**
-   * The number of reconnect attempts that have been made since a message was
-   * received over the SSE channel.
-   */
   private int retries;
-
   private boolean configured;
   private boolean hosed;
 
@@ -159,7 +154,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       var errorHandler = function (e) {
           $wnd.console.log("SSE channel error (according to the browser)");
           $wnd.console.log(e);
-          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::verifyConnected()();
+          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
       };
 
       var openHandler = function () {
@@ -186,7 +181,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
     // in case we were in the middle of something already
     pingTimeout.cancel();
-
+    
     transmit(Collections.singletonList(MessageBuilder.createMessage()
         .toSubject("ServerEchoService")
         .signalling().done().repliesToSubject(SSE_AGENT_SERVICE).getMessage()));
@@ -220,8 +215,17 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     disconnect(sseChannel);
 
     if (!stopped) {
-      retries++;
-      start();
+      final int retryDelay = Math.min((retries * 1000) + 1, 10000);
+      LogUtil.log("attempting SSE reconnection in " + retryDelay + "ms -- attempt: " + (++retries));
+      
+      new Timer() {
+        @Override
+        public void run() {
+          if (!stopped) {
+            start();
+          }
+        }
+      }.schedule(retryDelay);
     }
   }
 
