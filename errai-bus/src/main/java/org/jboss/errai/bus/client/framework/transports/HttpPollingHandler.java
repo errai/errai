@@ -172,9 +172,17 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     }
   }
 
-  //TODO: reimplement throttling
   @Override
   public void transmit(final List<Message> txMessages) {
+    if (txRetries > 0) {
+      heldMessages.addAll(txMessages);
+    }
+    else {
+      transmit(txMessages, false);
+    }
+  }
+  
+  public void transmit(final List<Message> txMessages, boolean isRetry) {
     if (txMessages.isEmpty()) {
       return;
     }
@@ -183,7 +191,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
     final List<Message> toSend = new ArrayList<Message>();
 
-    boolean canDefer = true;
+    boolean canDefer = !isRetry;
     final Map<String, String> specialParms;
     if (txMessages.size() == 1 && txMessages.get(0).hasResource(EXTRA_URI_PARMS_RESOURCE)) {
       toSend.add(txMessages.get(0));
@@ -365,9 +373,10 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         case 502: // bad gateway--could happen if long poll request was proxied to a down server
         case 503: // temporary overload (probably on a proxy)
         case 504: // gateway timeout--same possibilities as 502
-          logger.info("attempting Rx reconnection -- attempt: " + (rxRetries + 1));
+          logger.info("attempting Rx reconnection in " + retryDelay + "ms -- attempt: " + (rxRetries + 1));
           rxRetries++;
 
+          throttleTimer.cancel();
           new Timer() {
             @Override
             public void run() {
@@ -733,20 +742,22 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
             return;
           }
 
-          logger.info("attempting Tx reconnection -- attempt: " + (txRetries + 1));
+          logger.info("attempting Tx reconnection in " + retryDelay + "ms -- attempt: " + (txRetries + 1));
           txRetries++;
 
+          throttleTimer.cancel();
           new Timer() {
             @Override
             public void run() {
               undeliveredMessages.removeAll(toSend);
-              transmit(toSend);
+              transmit(toSend, true);
             }
           }.schedule(retryDelay);
 
           return;
         }
         case 200:
+          txRetries = 0;
           notifyConnected();
           undeliveredMessages.removeAll(toSend);
           schedulePolling();
