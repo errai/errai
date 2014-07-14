@@ -16,11 +16,15 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.WildflyDist;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
+import org.jboss.errai.forge.util.VersionOracle;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.plugins.ConfigurationBuilder;
@@ -28,6 +32,7 @@ import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
 import org.jboss.forge.addon.maven.plugins.Execution;
 import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
+import org.jboss.forge.addon.projects.facets.DependencyFacet;
 
 /**
  * This facet configures the maven-dependency-plugin in the build section of the pom file.
@@ -36,6 +41,8 @@ import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
  */
 @FacetConstraint({ CoreBuildFacet.class })
 public class DependencyPluginFacet extends AbstractPluginFacet {
+
+  private boolean isInitialized;
 
   public DependencyPluginFacet() {
     pluginArtifact = DependencyArtifact.Dependency;
@@ -47,22 +54,40 @@ public class DependencyPluginFacet extends AbstractPluginFacet {
                     .addConfigurationElement(ConfigurationElementBuilder.create().setName("artifactItems")
                             .addChild(ConfigurationElementBuilder.create().setName("artifactItem")
                                     .addChild(ConfigurationElementBuilder.create()
-                                            .setName("groupId").setText("org.jboss.as"))
+                                            .setName("groupId").setText(WildflyDist.getGroupId()))
                                     .addChild(ConfigurationElementBuilder.create()
-                                            .setName("artifactId").setText("jboss-as-dist"))
-                                    .addChild(ConfigurationElementBuilder.create()
-                                            .setName("version").setText("7.1.1.Final"))
+                                            .setName("artifactId").setText(WildflyDist.getArtifactId()))
                                     .addChild(ConfigurationElementBuilder.create()
                                             .setName("type").setText("zip"))
                                     .addChild(ConfigurationElementBuilder.create()
                                             .setName("overWrite").setText("false"))
                                     .addChild(ConfigurationElementBuilder.create()
                                             .setName("outputDirectory").setText("${project.build.directory}"))
-                                    
+
                              )
                     )
             )
     });
   }
-  
+
+  @Override
+  public Collection<ConfigurationElement> getConfigurations() {
+    maybeInit();
+    return super.getConfigurations();
+  }
+
+  private void maybeInit() {
+    if (!isInitialized) {
+      final Execution execution = executions.iterator().next();
+      final ConfigurationElement artifactItems = execution.getConfig().getConfigurationElement("artifactItems");
+      final ConfigurationElementBuilder artifactItem = (ConfigurationElementBuilder) artifactItems.getChildren().get(0);
+
+      final VersionOracle versionOracle = new VersionOracle(getProject().getFacet(DependencyFacet.class));
+      artifactItem.addChild(ConfigurationElementBuilder.create()
+              .setName("version")
+              .setText(versionOracle.resolveVersion(WildflyDist)));
+      isInitialized = true;
+    }
+  }
+
 }

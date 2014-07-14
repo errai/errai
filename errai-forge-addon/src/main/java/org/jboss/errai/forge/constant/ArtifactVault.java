@@ -62,6 +62,7 @@ public final class ArtifactVault {
     JaxrsApi("jaxrs-api", "org.jboss.resteasy"),
     JbossInterceptors("jboss-interceptors-api_1.1_spec", "org.jboss.spec.javax.interceptor"),
     JbossTransaction("jboss-transaction-api_1.1_spec", "org.jboss.spec.javax.transaction"),
+    WildflyDist("wildfly-dist", "org.wildfly"),
     WeldServletCore("weld-servlet-core", "org.jboss.weld.servlet"),
     WeldSeCore("weld-se-core", "org.jboss.weld.se"),
     WeldCore("weld-core", "org.jboss.weld"),
@@ -80,7 +81,7 @@ public final class ArtifactVault {
     Compiler("maven-compiler-plugin", "org.apache.maven.plugins"),
     GwtPlugin("gwt-maven-plugin", "org.codehaus.mojo"),
     War("maven-war-plugin", "org.apache.maven.plugins"),
-    JbossPlugin("jboss-as-maven-plugin", "org.jboss.as.plugins"),
+    WildflyPlugin("wildfly-maven-plugin", "org.wildfly.plugins"),
     Surefire("maven-surefire-plugin", "org.apache.maven.plugins"),
 
     // errai
@@ -148,6 +149,7 @@ public final class ArtifactVault {
     /**
      * Returns the string {@code groupId} + ":" + {@code artifactId}.
      */
+    @Override
     public String toString() {
       return String.format("%s:%s", groupId, artifactId);
     }

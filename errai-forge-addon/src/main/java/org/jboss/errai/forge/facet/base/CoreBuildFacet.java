@@ -35,14 +35,14 @@ import org.jboss.forge.addon.projects.Project;
 /**
  * This facet configures the source folders, build output directory, and pom
  * properties for a project.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @FacetConstraint({ ProjectConfig.class })
 public class CoreBuildFacet extends AbstractBaseFacet {
 
   public static final String DEV_CONTEXT = "${project.artifactId}";
-  public static final String JBOSS_HOME = "${project.build.directory}/jboss-as-7.1.1.Final";
+  public static final String JBOSS_HOME = "${project.build.directory}/wildfly-8.1.0.Final";
 
   private String getErraiVersion() {
     return getFaceted().getFacet(ProjectConfig.class).getProjectProperty(ProjectProperty.ERRAI_VERSION, String.class);

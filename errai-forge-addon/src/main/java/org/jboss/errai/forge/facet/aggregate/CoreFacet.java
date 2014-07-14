@@ -27,7 +27,7 @@ import org.jboss.errai.forge.facet.plugin.CleanPluginFacet;
 import org.jboss.errai.forge.facet.plugin.CompilerPluginFacet;
 import org.jboss.errai.forge.facet.plugin.DependencyPluginFacet;
 import org.jboss.errai.forge.facet.plugin.GwtPluginFacet;
-import org.jboss.errai.forge.facet.plugin.JbossPluginFacet;
+import org.jboss.errai.forge.facet.plugin.WildflyPluginFacet;
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
 import org.jboss.errai.forge.facet.resource.ErraiAppPropertiesFacet;
 import org.jboss.forge.addon.facets.FacetFactory;
@@ -56,7 +56,7 @@ public class CoreFacet extends BaseAggregatorFacet {
   @SuppressWarnings({ "unchecked" })
   public static final Class<? extends ProjectFacet>[] coreFacets = new Class[] { 
       CleanPluginFacet.class, CompilerPluginFacet.class, DependencyPluginFacet.class, GwtPluginFacet.class,
-      JbossPluginFacet.class, WarPluginFacet.class, ModuleCoreFacet.class, ErraiAppPropertiesFacet.class };
+      WildflyPluginFacet.class, WarPluginFacet.class, ModuleCoreFacet.class, ErraiAppPropertiesFacet.class };
 
   @Override
   public String getFeatureName() {
