@@ -36,6 +36,7 @@ import org.jboss.forge.addon.maven.plugins.MavenPluginBuilder;
 import org.jboss.forge.addon.maven.plugins.PluginElement;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
+import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
 
 /**
@@ -54,6 +55,8 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
    * The Maven artifact of the plugin to be installed.
    */
   protected DependencyArtifact pluginArtifact;
+
+  private boolean isInitialized;
 
   public DependencyArtifact getPluginArtifact() {
     return pluginArtifact;
@@ -315,6 +318,26 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
 
       return retVal;
     }
+  }
+
+  /**
+   * This method is invoked exactly once after a project has been set for this facet. Subclasses should override this to
+   * perform tasks that require access to the project (such as requiring other facets).
+   */
+  protected void init() {
+  }
+
+  private void maybeInit() {
+    if (!isInitialized) {
+      init();
+      isInitialized = true;
+    }
+  }
+
+  @Override
+  public void setFaceted(final Project origin) {
+    super.setFaceted(origin);
+    maybeInit();
   }
 
 }

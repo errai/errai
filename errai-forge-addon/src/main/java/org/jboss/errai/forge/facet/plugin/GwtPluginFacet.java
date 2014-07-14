@@ -18,8 +18,6 @@ package org.jboss.errai.forge.facet.plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
@@ -39,8 +37,6 @@ import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
  */
 @FacetConstraint({ CoreBuildFacet.class, GwtHostPageFacet.class })
 public class GwtPluginFacet extends AbstractPluginFacet {
-
-  private boolean isInitialized;
 
   public GwtPluginFacet() {
     pluginArtifact = DependencyArtifact.GwtPlugin;
@@ -85,24 +81,13 @@ public class GwtPluginFacet extends AbstractPluginFacet {
             });
   }
 
-  private void maybeInit() {
-    if (isInitialized)
-      return;
-
+  @Override
+  protected void init() {
     for (final ConfigurationElement elem : configurations) {
       if (elem.getName().equals("hostedWebapp")) {
         ConfigurationElementBuilder.class.cast(elem).setText(WarPluginFacet.getWarSourceDirectory(getProject()));
         break;
       }
     }
-
-    isInitialized = true;
   }
-
-  @Override
-  public Collection<ConfigurationElement> getConfigurations() {
-    maybeInit();
-    return super.getConfigurations();
-  }
-
 }

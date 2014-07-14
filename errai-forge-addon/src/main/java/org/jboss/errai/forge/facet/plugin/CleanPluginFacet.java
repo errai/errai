@@ -18,7 +18,6 @@ package org.jboss.errai.forge.facet.plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.forge.config.ProjectConfig;
@@ -42,8 +41,6 @@ import org.jboss.forge.addon.maven.plugins.PluginElement;
 public class CleanPluginFacet extends AbstractPluginFacet {
 
   private static final String WAR_SRC_PLACEHOLDER = "${warSrc}";
-
-  private boolean isInitialized;
 
   public CleanPluginFacet() {
     pluginArtifact = DependencyArtifact.Clean;
@@ -70,18 +67,14 @@ public class CleanPluginFacet extends AbstractPluginFacet {
     });
   }
 
-  private void maybeInit() {
-    if (isInitialized)
-      return;
-
+  @Override
+  protected void init() {
     final String moduleName = getProject().getFacet(ProjectConfig.class).getProjectProperty(
             ProjectProperty.MODULE_NAME,
             String.class);
 
     addGwtModuleInclude(moduleName);
     convertWarSrcPlaceholder(WarPluginFacet.getWarSourceDirectory(getProject()));
-
-    isInitialized = true;
   }
 
   private void addGwtModuleInclude(final String moduleName) {
@@ -96,11 +89,5 @@ public class CleanPluginFacet extends AbstractPluginFacet {
       final ConfigurationElementBuilder includeAsBuilder = (ConfigurationElementBuilder) include;
       includeAsBuilder.setText(includeAsBuilder.getText().replace(WAR_SRC_PLACEHOLDER, warSrcDirectory));
     }
-  }
-
-  @Override
-  public Collection<ConfigurationElement> getConfigurations() {
-    maybeInit();
-    return super.getConfigurations();
   }
 }

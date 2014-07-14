@@ -21,8 +21,6 @@ import static org.jboss.errai.forge.constant.DefaultVault.DefaultValue.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-
 import org.apache.maven.model.PluginExecution;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
@@ -44,8 +42,6 @@ import org.jboss.forge.addon.projects.Project;
  */
 @FacetConstraint({ CoreBuildFacet.class })
 public class WarPluginFacet extends AbstractProfilePluginFacet {
-
-  private boolean isInitialized;
 
   public WarPluginFacet() {
     pluginArtifact = DependencyArtifact.War;
@@ -76,17 +72,8 @@ public class WarPluginFacet extends AbstractProfilePluginFacet {
   }
 
   @Override
-  public Collection<ConfigurationElement> getConfigurations() {
-    maybeInit();
-    return super.getConfigurations();
-  }
-
-  private void maybeInit() {
-    if (isInitialized)
-      return;
-
+  protected void init() {
     configurations.add(ConfigurationElementBuilder.create().setName(WarSourceDirectory.getValueName())
             .setText(getWarSourceDirectory(getProject())));
-    isInitialized = true;
   }
 }

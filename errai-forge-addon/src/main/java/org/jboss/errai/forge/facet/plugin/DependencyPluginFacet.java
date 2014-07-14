@@ -20,8 +20,6 @@ import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.Wi
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.errai.forge.util.VersionOracle;
@@ -41,8 +39,6 @@ import org.jboss.forge.addon.projects.facets.DependencyFacet;
  */
 @FacetConstraint({ CoreBuildFacet.class })
 public class DependencyPluginFacet extends AbstractPluginFacet {
-
-  private boolean isInitialized;
 
   public DependencyPluginFacet() {
     pluginArtifact = DependencyArtifact.Dependency;
@@ -71,23 +67,14 @@ public class DependencyPluginFacet extends AbstractPluginFacet {
   }
 
   @Override
-  public Collection<ConfigurationElement> getConfigurations() {
-    maybeInit();
-    return super.getConfigurations();
-  }
+  protected void init() {
+    final Execution execution = executions.iterator().next();
+    final ConfigurationElement artifactItems = execution.getConfig().getConfigurationElement("artifactItems");
+    final ConfigurationElementBuilder artifactItem = (ConfigurationElementBuilder) artifactItems.getChildren().get(0);
 
-  private void maybeInit() {
-    if (!isInitialized) {
-      final Execution execution = executions.iterator().next();
-      final ConfigurationElement artifactItems = execution.getConfig().getConfigurationElement("artifactItems");
-      final ConfigurationElementBuilder artifactItem = (ConfigurationElementBuilder) artifactItems.getChildren().get(0);
-
-      final VersionOracle versionOracle = new VersionOracle(getProject().getFacet(DependencyFacet.class));
-      artifactItem.addChild(ConfigurationElementBuilder.create()
-              .setName("version")
-              .setText(versionOracle.resolveVersion(WildflyDist)));
-      isInitialized = true;
-    }
+    final VersionOracle versionOracle = new VersionOracle(getProject().getFacet(DependencyFacet.class));
+    artifactItem.addChild(ConfigurationElementBuilder.create().setName("version")
+            .setText(versionOracle.resolveVersion(WildflyDist)));
   }
 
 }
