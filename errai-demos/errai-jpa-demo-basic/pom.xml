@@ -531,7 +531,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.5.1</version>
+        <version>${maven.gwt.plugin.version}</version>
         <configuration>
           <strict>true</strict>
           <logLevel>INFO</logLevel>
