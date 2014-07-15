@@ -36,7 +36,6 @@ import org.jboss.forge.addon.maven.plugins.MavenPluginBuilder;
 import org.jboss.forge.addon.maven.plugins.PluginElement;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
-import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
 
 /**
@@ -90,6 +89,7 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
 
   @Override
   public boolean install() {
+    maybeInit();
     final MavenPluginFacet pluginFacet = getProject().getFacet(MavenPluginFacet.class);
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
     final VersionOracle oracle = new VersionOracle(depFacet);
@@ -132,6 +132,7 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
 
   @Override
   public boolean isInstalled() {
+    maybeInit();
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     final Model pom = coreFacet.getModel();
     if (pom.getBuild() == null)
@@ -240,6 +241,7 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
 
   @Override
   public boolean uninstall() {
+    maybeInit();
     final MavenPluginFacet pluginFacet = getProject().getFacet(MavenPluginFacet.class);
     pluginFacet.removePlugin(DependencyBuilder.create(getPluginArtifact().toString()).getCoordinate());
 
@@ -327,17 +329,10 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
   protected void init() {
   }
 
-  private void maybeInit() {
+  protected final void maybeInit() {
     if (!isInitialized) {
       init();
       isInitialized = true;
     }
   }
-
-  @Override
-  public void setFaceted(final Project origin) {
-    super.setFaceted(origin);
-    maybeInit();
-  }
-
 }

@@ -230,8 +230,7 @@ public class AbstractPluginFacetTest extends BasePluginFacetTest {
 
     final InitHavingPlugin facet = facetFactory.create(project, InitHavingPlugin.class);
 
-    assertEquals(1 , facet.getInitCallCount());
-    assertEquals(project, facet.getInitProject());
+    assertEquals(0 , facet.getInitCallCount());
 
     facetFactory.install(project, facet);
     assertTrue(facet.isInstalled());

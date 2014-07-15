@@ -77,6 +77,7 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
 
   @Override
   public boolean install() {
+    maybeInit();
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     Model pom = coreFacet.getModel();
     Profile profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
@@ -142,6 +143,7 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
 
   @Override
   public boolean isInstalled() {
+    maybeInit();
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     final Model pom = coreFacet.getModel();
 
@@ -150,16 +152,8 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
       return false;
 
     Plugin plugin = profile.getBuild().getPluginsAsMap().get(getPluginArtifact().toString());
-    if (plugin == null) {
-      plugin = new Plugin();
-      plugin.setGroupId(pluginArtifact.getGroupId());
-      plugin.setArtifactId(pluginArtifact.getArtifactId());
-      
-      final VersionOracle oracle = new VersionOracle(getFaceted().getFacet(DependencyFacet.class));
-      plugin.setVersion(oracle.resolveVersion(pluginArtifact));
-      
-      profile.getBuild().addPlugin(plugin);
-    }
+    if (plugin == null)
+      return false;
 
     outer: for (final DependencyBuilder dep : getDependencies()) {
       for (final Dependency pluginDep : plugin.getDependencies()) {
