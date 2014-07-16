@@ -6264,7 +6264,7 @@ public class NavBar extends Composite {
 
 === Extended styling with LESS
 
-Errai also supports link:$$http://lesscss.org$$[LESS] stylesheets. To get started using these you'll have to create a LESS stylesheet and place it on the classpath of your project. Errai will convert the LESS stylesheet to css preform optimisations on it and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:
+Errai also supports link:$$http://lesscss.org$$[LESS] stylesheets. To get started using these you'll have to create a LESS stylesheet and place it on the classpath of your project. Errai will convert the LESS stylesheet to css, perform optimisations on it, and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:
 
 
 [source, java]
@@ -6275,7 +6275,7 @@ public class MyComponent extends Component {
 
   ...
 
-  @PostCreate
+  @PostConstruct
   private void init() {
     textBox.setStyleName(lessStyle.get("input"));
   }
