@@ -2,6 +2,7 @@ package org.jboss.errai.ui.rebind.less;
 
 import com.google.gwt.core.ext.PropertyOracle;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 import java.io.File;
@@ -29,17 +30,19 @@ public class LessStylesheetContext {
       final URL resource = LessStyleGenerator.class.getResource("/" + sheet);
       final File cssFile = convertToCss(resource);
 
-      final StylesheetOptimizer stylesheetOptimizer = optimize(cssFile);
-      optimizedStylesheets.add(stylesheetOptimizer);
+      if (cssFile != null) {
+        final StylesheetOptimizer stylesheetOptimizer = optimize(cssFile);
+        optimizedStylesheets.add(stylesheetOptimizer);
+      }
     }
   }
 
   private File convertToCss(URL resource) {
-    final File cssFile;
+    File cssFile = null;
     try {
       cssFile = new LessConverter(logger, oracle).convert(resource);
     } catch (IOException e) {
-      throw new RuntimeException("could not read less stylesheet", e);
+      logger.log(Type.WARN, "Could not compile the less file \"" + resource.toExternalForm() + "\"", e);
     }
     return cssFile;
   }
