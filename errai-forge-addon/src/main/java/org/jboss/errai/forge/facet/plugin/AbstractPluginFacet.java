@@ -24,7 +24,7 @@ import org.jboss.errai.forge.constant.ArtifactVault;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
-import org.jboss.errai.forge.util.VersionOracle;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.Dependency;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.plugins.Configuration;
@@ -36,7 +36,6 @@ import org.jboss.forge.addon.maven.plugins.MavenPluginBuilder;
 import org.jboss.forge.addon.maven.plugins.PluginElement;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
-import org.jboss.forge.addon.projects.facets.DependencyFacet;
 
 /**
  * This is a base class for facets that add Maven plugins to the build section
@@ -91,10 +90,9 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
   public boolean install() {
     maybeInit();
     final MavenPluginFacet pluginFacet = getProject().getFacet(MavenPluginFacet.class);
-    final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
-    final VersionOracle oracle = new VersionOracle(depFacet);
+    final VersionFacet versionFacet = getProject().getFacet(VersionFacet.class);
     final Dependency pluginDep = DependencyBuilder.create(getPluginArtifact().toString()).setVersion(
-            oracle.resolveVersion(getPluginArtifact()));
+            versionFacet.resolveVersion(getPluginArtifact()));
     final MavenPluginBuilder plugin;
 
     if (pluginFacet.hasPlugin(pluginDep.getCoordinate())) {
@@ -117,7 +115,7 @@ public abstract class AbstractPluginFacet extends AbstractBaseFacet {
         if (dep.getGroupId().equals(ArtifactVault.ERRAI_GROUP_ID))
           dep.setVersion(Property.ErraiVersion.invoke());
         else
-          dep.setVersion(oracle.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
+          dep.setVersion(versionFacet.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
       }
       plugin.addPluginDependency(dep);
     }

@@ -28,6 +28,7 @@ import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.DefaultVault.DefaultValue;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
@@ -38,7 +39,7 @@ import org.jboss.forge.addon.projects.Project;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@FacetConstraint({ ProjectConfig.class })
+@FacetConstraint({ ProjectConfig.class, VersionFacet.class })
 public class CoreBuildFacet extends AbstractBaseFacet {
 
   public static final String DEV_CONTEXT = "${project.artifactId}";

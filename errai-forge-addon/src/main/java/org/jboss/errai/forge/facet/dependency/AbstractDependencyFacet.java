@@ -34,7 +34,7 @@ import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.util.MavenConverter;
 import org.jboss.errai.forge.util.MavenModelUtil;
-import org.jboss.errai.forge.util.VersionOracle;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
@@ -44,21 +44,21 @@ import org.jboss.forge.addon.projects.facets.DependencyFacet;
  * subclasses must provide values for
  * {@link AbstractDependencyFacet#coreDependencies} and
  * {@link AbstractDependencyFacet#profileDependencies}.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
 
   /**
    * Dependencies to be added to the build in the Maven pom file. Versions of
-   * these dependencies will be assigned from a {@link VersionOracle} if
+   * these dependencies will be assigned from a {@link VersionFacet} if
    * unspecified.
    */
   protected Collection<DependencyBuilder> coreDependencies;
   /**
    * Dependencies to be added to the build of Maven profiles with names matching
    * the keys of this map. Versions of these dependencies will be assigned from
-   * a {@link VersionOracle} if unspecified. Profiles that do not already exist
+   * a {@link VersionFacet} if unspecified. Profiles that do not already exist
    * will be created.
    */
   protected Map<String, Collection<DependencyBuilder>> profileDependencies = new HashMap<String, Collection<DependencyBuilder>>();
@@ -67,14 +67,14 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
   public boolean install() {
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
-    final VersionOracle oracle = new VersionOracle(depFacet);
+    final VersionFacet versionFacet = getProject().getFacet(VersionFacet.class);
 
     for (DependencyBuilder dep : coreDependencies) {
-      depFacet.addDirectDependency(getDependencyWithVersion(dep, oracle));
+      depFacet.addDirectDependency(getDependencyWithVersion(dep, versionFacet));
     }
 
     for (Entry<String, Collection<DependencyBuilder>> entry : profileDependencies.entrySet()) {
-      addDependenciesToProfile(entry.getKey(), entry.getValue(), oracle);
+      addDependenciesToProfile(entry.getKey(), entry.getValue(), versionFacet);
     }
 
     final Model pom = coreFacet.getModel();
@@ -86,7 +86,7 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
         if (depFacet.hasEffectiveDependency(dep)
                 && !hasProvidedDependency(profile, dep)) {
           final org.jboss.forge.addon.dependencies.Dependency existing = depFacet.getEffectiveDependency(dep);
-          if (!oracle.isManaged(dep))
+          if (!versionFacet.isManaged(dep))
             dep.setVersion(existing.getCoordinate().getVersion());
           dep.setScopeType("provided");
           if (!blacklistProfileDependencies.containsKey(profileId))
@@ -97,7 +97,7 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
     }
 
     for (Entry<String, Collection<DependencyBuilder>> entry : blacklistProfileDependencies.entrySet()) {
-      addDependenciesToProfile(entry.getKey(), entry.getValue(), oracle);
+      addDependenciesToProfile(entry.getKey(), entry.getValue(), versionFacet);
     }
 
     return true;
@@ -201,9 +201,9 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
   @Override
   public boolean isInstalled() {
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
-    final VersionOracle oracle = new VersionOracle(depFacet);
+    final VersionFacet versionFacet = getProject().getFacet(VersionFacet.class);
     for (final DependencyBuilder dep : coreDependencies) {
-      if (!depFacet.hasDirectDependency(getDependencyWithVersion(dep, oracle))) {
+      if (!depFacet.hasDirectDependency(getDependencyWithVersion(dep, versionFacet))) {
         return false;
       }
     }
@@ -246,12 +246,12 @@ public abstract class AbstractDependencyFacet extends AbstractBaseFacet {
     return true;
   }
 
-  private DependencyBuilder getDependencyWithVersion(final DependencyBuilder dep, final VersionOracle oracle) {
-    if (!oracle.isManaged(dep)) {
+  private DependencyBuilder getDependencyWithVersion(final DependencyBuilder dep, final VersionFacet versionFacet) {
+    if (!versionFacet.isManaged(dep)) {
       if (dep.getGroupId().equals(ArtifactVault.ERRAI_GROUP_ID))
         dep.setVersion(Property.ErraiVersion.invoke());
       else
-        dep.setVersion(oracle.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
+        dep.setVersion(versionFacet.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
     }
 
     return dep;

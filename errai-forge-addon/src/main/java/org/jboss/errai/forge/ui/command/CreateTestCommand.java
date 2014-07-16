@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
-import org.jboss.errai.forge.util.VersionOracle;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.maven.projects.facets.MavenDependencyFacet;
@@ -85,11 +85,11 @@ public abstract class CreateTestCommand extends AbstractProjectCommand {
   protected void addTestScopedDependency(final Project project, final DependencyArtifact artifact) {
     final DependencyBuilder depBuilder = DependencyBuilder.create(artifact.toString());
     final MavenDependencyFacet dependencyFacet = project.getFacet(MavenDependencyFacet.class);
-    final VersionOracle versionOracle = new VersionOracle(dependencyFacet);
-    
+    final VersionFacet versionFacet = project.getFacet(VersionFacet.class);
+
     if (!dependencyFacet.hasDirectDependency(depBuilder)) {
-      if (!versionOracle.isManaged(depBuilder)) {
-        depBuilder.setVersion(versionOracle.resolveVersion(GwtMockito));
+      if (!versionFacet.isManaged(depBuilder)) {
+        depBuilder.setVersion(versionFacet.resolveVersion(GwtMockito));
       }
       dependencyFacet.addDirectDependency(depBuilder);
     }

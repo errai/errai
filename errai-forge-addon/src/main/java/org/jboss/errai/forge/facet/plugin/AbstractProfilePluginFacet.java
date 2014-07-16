@@ -32,13 +32,12 @@ import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.util.MavenConverter;
 import org.jboss.errai.forge.util.MavenModelUtil;
-import org.jboss.errai.forge.util.VersionOracle;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.plugins.Configuration;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.MavenPluginAdapter;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
-import org.jboss.forge.addon.projects.facets.DependencyFacet;
 
 /**
  * A base class for facets that install Maven plugins within the given profile
@@ -81,10 +80,10 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     Model pom = coreFacet.getModel();
     Profile profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
-    final VersionOracle oracle = new VersionOracle(getProject().getFacet(DependencyFacet.class));
+    final VersionFacet versionFacet = getProject().getFacet(VersionFacet.class);
 
     if (profile == null) {
-      addDependenciesToProfile(profileId, Collections.<DependencyBuilder> emptyList(), oracle);
+      addDependenciesToProfile(profileId, Collections.<DependencyBuilder> emptyList(), versionFacet);
       pom = coreFacet.getModel();
       profile = MavenModelUtil.getProfileById(profileId, pom.getProfiles());
     }
@@ -102,7 +101,7 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
       if (ArtifactVault.ERRAI_GROUP_ID.equals(plugin.getGroupId()))
         plugin.setVersion(Property.ErraiVersion.invoke());
       else
-        plugin.setVersion(oracle.resolveVersion(plugin.getGroupId(), plugin.getArtifactId()));
+        plugin.setVersion(versionFacet.resolveVersion(plugin.getGroupId(), plugin.getArtifactId()));
       profile.getBuild().addPlugin(plugin);
     }
 
@@ -119,7 +118,7 @@ public abstract class AbstractProfilePluginFacet extends AbstractPluginFacet {
           depBuilder.setVersion(Property.ErraiVersion.invoke());
         }
         else {
-          depBuilder.setVersion(new VersionOracle(getProject().getFacet(DependencyFacet.class)).resolveVersion(
+          depBuilder.setVersion(getProject().getFacet(VersionFacet.class).resolveVersion(
                   depBuilder.getGroupId(), depBuilder.getCoordinate().getArtifactId()));
         }
       }

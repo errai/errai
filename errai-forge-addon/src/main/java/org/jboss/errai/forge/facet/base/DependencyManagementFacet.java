@@ -21,12 +21,12 @@ import java.util.Collection;
 
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
-import org.jboss.errai.forge.util.VersionOracle;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
 
-@FacetConstraint({ CoreBuildFacet.class })
+@FacetConstraint({ CoreBuildFacet.class, VersionFacet.class })
 public class DependencyManagementFacet extends AbstractBaseFacet {
 
   protected Collection<DependencyBuilder> dependencies = new ArrayList<DependencyBuilder>();
@@ -43,11 +43,11 @@ public class DependencyManagementFacet extends AbstractBaseFacet {
   @Override
   public boolean install() {
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
-    final VersionOracle oracle = new VersionOracle(depFacet);
+    final VersionFacet versionFacet = getProject().getFacet(VersionFacet.class);
 
     for (final DependencyBuilder dep : dependencies) {
       if (dep.getCoordinate().getVersion() == null || dep.getCoordinate().getVersion().equals("")) {
-        dep.setVersion(oracle.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
+        dep.setVersion(versionFacet.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
       }
       if (!depFacet.hasDirectManagedDependency(dep)) {
         depFacet.addDirectManagedDependency(dep);
