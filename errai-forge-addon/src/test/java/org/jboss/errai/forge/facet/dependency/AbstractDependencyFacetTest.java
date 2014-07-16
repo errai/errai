@@ -531,9 +531,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     pom.addProperty(Property.ErraiVersion.getName(), ForgeTest.ERRAI_TEST_VERSION);
     coreFacet.setModel(pom);
 
-    depFacet.addDirectManagedDependency(DependencyBuilder.create("org.jboss.errai:errai-parent")
-            .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
-    depFacet.addDirectManagedDependency(DependencyBuilder.create("org.jboss.errai.bom:errai-version-master")
+    depFacet.addDirectManagedDependency(DependencyBuilder.create("org.jboss.errai.bom:errai-bom")
             .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
     depFacet.addDirectManagedDependency(DependencyBuilder.create(DependencyArtifact.ErraiJboss.toString())
             .setVersion(Property.ErraiVersion.invoke()));

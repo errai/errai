@@ -16,9 +16,12 @@
  */
 package org.jboss.errai.forge.facet.base;
 
+import static org.jboss.errai.forge.config.ProjectProperty.ERRAI_VERSION;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.util.VersionFacet;
@@ -29,15 +32,22 @@ import org.jboss.forge.addon.projects.facets.DependencyFacet;
 @FacetConstraint({ CoreBuildFacet.class, VersionFacet.class })
 public class DependencyManagementFacet extends AbstractBaseFacet {
 
-  protected Collection<DependencyBuilder> dependencies = new ArrayList<DependencyBuilder>();
-
-  public DependencyManagementFacet() {
+  private Collection<DependencyBuilder> createDependencies() {
+    final Collection<DependencyBuilder> dependencies = new ArrayList<DependencyBuilder>();
     dependencies.add(DependencyBuilder.create(DependencyArtifact.ErraiBom.toString())
             .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
-    dependencies.add(DependencyBuilder.create(DependencyArtifact.ErraiVersionMaster.toString())
-            .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
-    dependencies.add(DependencyBuilder.create(DependencyArtifact.ErraiParent.toString())
-            .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
+
+    final String erraiVersion = getProject().getFacet(ProjectConfig.class).getProjectProperty(ERRAI_VERSION,
+            String.class);
+
+    if (erraiVersion.startsWith("3.0")) {
+      dependencies.add(DependencyBuilder.create(DependencyArtifact.ErraiVersionMaster.toString())
+              .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
+      dependencies.add(DependencyBuilder.create(DependencyArtifact.ErraiParent.toString())
+              .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
+    }
+
+    return dependencies;
   }
 
   @Override
@@ -45,7 +55,7 @@ public class DependencyManagementFacet extends AbstractBaseFacet {
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
     final VersionFacet versionFacet = getProject().getFacet(VersionFacet.class);
 
-    for (final DependencyBuilder dep : dependencies) {
+    for (final DependencyBuilder dep : createDependencies()) {
       if (dep.getCoordinate().getVersion() == null || dep.getCoordinate().getVersion().equals("")) {
         dep.setVersion(versionFacet.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
       }
@@ -61,7 +71,7 @@ public class DependencyManagementFacet extends AbstractBaseFacet {
   public boolean uninstall() {
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
 
-    for (final DependencyBuilder dep : dependencies) {
+    for (final DependencyBuilder dep : createDependencies()) {
       if (depFacet.hasDirectManagedDependency(dep)) {
         depFacet.removeManagedDependency(dep);
       }
@@ -74,7 +84,7 @@ public class DependencyManagementFacet extends AbstractBaseFacet {
   public boolean isInstalled() {
     final DependencyFacet depFacet = getProject().getFacet(DependencyFacet.class);
 
-    for (final DependencyBuilder dep : dependencies) {
+    for (final DependencyBuilder dep : createDependencies()) {
       if (!depFacet.hasDirectManagedDependency(dep)) {
         return false;
       }
