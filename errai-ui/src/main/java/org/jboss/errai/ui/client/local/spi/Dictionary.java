@@ -3,16 +3,17 @@ package org.jboss.errai.ui.client.local.spi;
 import java.util.*;
 
 /**
- * Dictionary to keep the translations.
+ * Dictionary that holds translation key/value pairs for all supported locales.
+ * 
  * @author edewit@redhat.com
  */
 public class Dictionary {
   private Map<String, Map<String, String>> translations = new HashMap<String, Map<String, String>>();
 
   public Map<String, String> get(String locale) {
-    final Map<String, String> translation = translations.get(locale);
-    if (translation != null) {
-      return new HashMap<String, String>(translation);
+    final Map<String, String> translationValues = translations.get(locale);
+    if (translationValues != null) {
+      return translationValues;
     }
     return Collections.emptyMap();
   }

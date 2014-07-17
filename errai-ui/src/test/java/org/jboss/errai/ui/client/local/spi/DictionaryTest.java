@@ -38,19 +38,4 @@ public class DictionaryTest {
     treeSet.add(CH);
     assertEquals(treeSet, dictionary.getSupportedLocals());
   }
-
-  @Test
-  public void shouldReturnReadonlyCollections() {
-    // given
-    Dictionary dictionary = new Dictionary();
-    dictionary.put(NL, WELCOME_KEY, "Goedendag");
-
-    // when
-    dictionary.get(NL).put("try to", "break");
-    dictionary.getSupportedLocals().add(CH);
-
-    // then
-    assertEquals(1, dictionary.get(NL).size());
-    assertEquals(1, dictionary.getSupportedLocals().size());
-  }
 }
