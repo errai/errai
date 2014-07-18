@@ -7,16 +7,23 @@ import org.jboss.errai.ui.client.local.spi.LessStyleMapping;
 import org.jboss.errai.ui.test.less.client.res.PageTemplate;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * @author edewit@redhat.com
  */
 public class LessIntegrationTest extends AbstractErraiCDITest {
-  
+
+  private LessStyle lessStyle;
+  private PageTemplate template;
+
   @Override
   protected void gwtSetUp() throws Exception {
+    disableBus = true;
     GWT.create(LessStyleMapping.class);
-    super.gwtSetUp();    
+    super.gwtSetUp();
+    lessStyle = IOC.getBeanManager().lookupBean(LessStyle.class).getInstance();
+    template = IOC.getBeanManager().lookupBean(PageTemplate.class).getInstance();
   }
 
   @Override
@@ -25,12 +32,21 @@ public class LessIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testIntegrateLessFileInHead() {
-    final LessStyle lessStyle = IOC.getBeanManager().lookupBean(LessStyle.class).getInstance();
-    final PageTemplate template = IOC.getBeanManager().lookupBean(PageTemplate.class).getInstance();
-
     assertNotNull(template.getBox());
     final String expected = "Eoxl56A";
     assertEquals(expected, lessStyle.get("box"));
     assertEquals(expected, template.getBox().getClassName());
+  }
+
+  public void testStyleRuleOrderPreserved() throws Exception {
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        RootPanel.get().add(template);
+        assertEquals("The width from simple-override.less should have been used for this element.", 200, template
+                .getBox().getClientWidth());
+        finishTest();
+      }
+    });
   }
 }

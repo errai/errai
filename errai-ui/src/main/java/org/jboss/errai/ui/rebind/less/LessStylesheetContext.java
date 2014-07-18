@@ -1,50 +1,53 @@
 package org.jboss.errai.ui.rebind.less;
 
-import com.google.gwt.core.ext.PropertyOracle;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.TreeLogger.Type;
-import com.google.gwt.core.ext.UnableToCompleteException;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.gwt.core.ext.PropertyOracle;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
+ * Compiles and optimizes LESS/CSS files. Compiled stylesheets are associated with
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  * @author edewit@redhat.com
  */
 public class LessStylesheetContext {
-  private Set<StylesheetOptimizer> optimizedStylesheets = new HashSet<StylesheetOptimizer>();
+  private Set<StylesheetOptimizer> optimizedStylesheets = new LinkedHashSet<StylesheetOptimizer>();
   private final TreeLogger logger;
   private final PropertyOracle oracle;
 
   public LessStylesheetContext(TreeLogger logger, PropertyOracle oracle) {
     this.oracle = oracle;
     this.logger = logger;
-    init();
   }
 
-  private void init() {
-    final Collection<String> lessStyles = new LessStylesheetScanner().getLessResources();
-    for (String sheet : lessStyles) {
-      final URL resource = LessStyleGenerator.class.getResource("/" + sheet);
-      final File cssFile = convertToCss(resource);
-
-      if (cssFile != null) {
-        final StylesheetOptimizer stylesheetOptimizer = optimize(cssFile);
-        optimizedStylesheets.add(stylesheetOptimizer);
-      }
+  /**
+   * Compile and optimize LESS/CSS stylsheets.
+   *
+   * @param stylesheets URLs to the stylesheets to be compiled and optimized.
+   */
+  public void compileLessStylesheets(final Collection<URL> stylesheets) throws IOException {
+    for (final URL stylesheet : stylesheets) {
+      compileLessStylesheet(stylesheet);
     }
   }
 
-  private File convertToCss(URL resource) {
-    File cssFile = null;
-    try {
-      cssFile = new LessConverter(logger, oracle).convert(resource);
-    } catch (IOException e) {
-      logger.log(Type.WARN, "Could not compile the less file \"" + resource.toExternalForm() + "\"", e);
-    }
-    return cssFile;
+  private void compileLessStylesheet(final URL stylesheet) throws IOException {
+    final File cssFile = convertToCss(stylesheet);
+    final StylesheetOptimizer stylesheetOptimizer = optimize(cssFile);
+    optimizedStylesheets.add(stylesheetOptimizer);
+  }
+
+  private File convertToCss(URL resource) throws IOException {
+    return new LessConverter(logger, oracle).convert(resource);
   }
 
   private StylesheetOptimizer optimize(File cssFile) {
