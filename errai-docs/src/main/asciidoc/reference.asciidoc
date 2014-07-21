@@ -6264,7 +6264,26 @@ public class NavBar extends Composite {
 
 === Extended styling with LESS
 
-Errai also supports link:$$http://lesscss.org$$[LESS] stylesheets. To get started using these you'll have to create a LESS stylesheet and place it on the classpath of your project. Errai will convert the LESS stylesheet to css, perform optimisations on it, and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:
+Errai also supports link:$$http://lesscss.org$$[LESS] stylesheets. To get started using these you'll have to create a LESS stylesheet and place it on the classpath of your project and declare their ordering with the `StyleDescriptor` annotation. Every application should have 0 or 1 classes annotated with `StyleDescriptor` like the following example:
+
+[source, java]
+----
+package org.jboss.errai.example;
+
+@StyleDescriptor({ "/main.less", "other.css" })
+public class MyStyleDescriptor {
+}
+----
+
+The two files listed above, `main.less` and `other.css`, will be compiled into a single stylesheet by Errai. The relative path for `other.css` will be loaded relative to the package `org.jboss.errai.example`.
+
+[NOTE]
+.Do Not Declare Imported Stylesheets
+====
+It is only necessary to declare top-level stylesheets with the `StyleDescriptor`. If a CSS or LESS resource is only meant to be imported by another LESS stylesheet, then it need only be on the classpath.
+====
+
+Errai will convert the LESS stylesheet to css, perform optimisations on it, and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:
 
 
 [source, java]
@@ -9342,6 +9361,12 @@ Here are the steps you'll need to take to get your project running after you upd
 * Errai's custom jetty launcher (org.jboss.errai.cdi.erver.gwt.JettyLauncher) is no longer needed and has been deleted. Simply remove the corresponding -server parameter from your GWT launch configuration if you still use it.
 
 * The whole artifact errai-cdi-jetty has been deleted and is no longer required. Delete the JAR file from your project or remove the corresponding dependency in your pom.xml
+
+=== Upgrading to Errai 3.1 from 3.0
+
+Here are the steps you'll need to take to get your project running after you update:
+
+* If you are using Errai to compile LESS/CSS files you will need to declare a `StyleDescriptor` listing the resources to compile in the desired order. This change was made to provide a deterministic and configurable order of styles in the generated CSS.
 
 [[sid-5833087]]
 
