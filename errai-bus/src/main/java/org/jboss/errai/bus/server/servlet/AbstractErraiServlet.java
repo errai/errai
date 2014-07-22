@@ -150,7 +150,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     writeToOutputStream(stream, b.toString());
 
     stream.write(']');
-    stream.close();
   }
 
   protected void sendDisconnectWithReason(OutputStream stream, final String reason) throws IOException {
