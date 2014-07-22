@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
@@ -24,6 +26,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+
 import java.io.IOException;
 
 /**
@@ -71,6 +76,8 @@ import java.io.IOException;
  */
 
 public class ChaosMonkeyServlet extends DefaultBlockingServlet {
+  
+  private static final Logger log = getLogger(ChaosMonkeyServlet.class);
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -104,20 +111,25 @@ public class ChaosMonkeyServlet extends DefaultBlockingServlet {
    */
   @Override
   protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-      throws ServletException, IOException {
+      throws ServletException {
 
-    if (Math.random() > 0.7d) {
-      httpServletResponse.setStatus(404);
-      httpServletResponse.getWriter().println("The chaos monkey strikes again!");
-      httpServletResponse.flushBuffer();
+    try {
+      if (Math.random() > 0.7d) {
+        httpServletResponse.setStatus(404);
+        httpServletResponse.getWriter().println("The chaos monkey strikes again!");
+        httpServletResponse.flushBuffer();
+      }
+      else if (Math.random() < 0.3d) {
+        httpServletResponse.setStatus(401);
+        httpServletResponse.getWriter().println("The chaos monkey strikes again!");
+        httpServletResponse.flushBuffer();
+      }
+      else {
+        super.doGet(httpServletRequest, httpServletResponse);
+      }
     }
-    else if (Math.random() < 0.3d) {
-      httpServletResponse.setStatus(401);
-      httpServletResponse.getWriter().println("The chaos monkey strikes again!");
-      httpServletResponse.flushBuffer();
-    }
-    else {
-      super.doGet(httpServletRequest, httpServletResponse);
+    catch (IOException ioe) {
+      log.debug("Chaos Monkey ran into problem", ioe);
     }
   }
 
@@ -136,20 +148,25 @@ public class ChaosMonkeyServlet extends DefaultBlockingServlet {
    *     - if the request for the POST could not be handled
    */
   @Override
-  protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-      throws ServletException, IOException {
-    if (Math.random() > 0.7d) {
-      httpServletResponse.setStatus(404);
-      httpServletResponse.getWriter().println("The chaos monkey strikes again!");
-      httpServletResponse.flushBuffer();
-    }
-    else if (Math.random() < 0.3d) {
-      httpServletResponse.setStatus(401);
-      httpServletResponse.getWriter().println("The chaos monkey strikes again!");
-      httpServletResponse.flushBuffer();
-    }
-    else {
-      super.doPost(httpServletRequest, httpServletResponse);
+  protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException {
+    
+    try {
+      if (Math.random() > 0.7d) {
+        httpServletResponse.setStatus(404);
+        httpServletResponse.getWriter().println("The chaos monkey strikes again!");
+        httpServletResponse.flushBuffer();
+      }
+      else if (Math.random() < 0.3d) {
+        httpServletResponse.setStatus(401);
+        httpServletResponse.getWriter().println("The chaos monkey strikes again!");
+        httpServletResponse.flushBuffer();
+      }
+      else {
+        super.doPost(httpServletRequest, httpServletResponse);
+      }
+    } 
+    catch (IOException ioe) {
+      log.debug("Chaos Monkey ran into problem", ioe);
     }
   }
 
