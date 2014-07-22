@@ -160,7 +160,44 @@ If you are using errai-tutorial, you should see a page with a complaint form.
 
 If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".
 
-That's it! You've got your first Errai Application up and running. In the next section we'll setup your IDE.
+That's it! You've got your first Errai Application up and running. In the next section we'll learn how to run super devmode. Otherwise, skip to the section afterwards to setup your IDE.
+
+==== Running your app in Super Devmode
+
+Regular Devmode requires a special browser plugin to run client-side code in a as Java. Super Devmode is an alternative method that compiles code to javascript to be run natively in any browser. With browsers that support source-mapping, it is possible to debug with lines from your original source code within the browser.
+
+To run super devmode you will need to open two terminals in your project. In the first enter:
+
+----
+mvn clean gwt:run
+----
+
+This will launch a classic devmode server for hosting server-side resources. In the second enter:
+
+----
+mvn gwt:run-codeserver
+----
+
+This will launch the super devmode codeserver that hosts compiled GWT code. When the super devmode codeserver is finished compiling your GWT module, it will display a message like this:
+
+----
+The code server is ready.
+Next, visit: http://localhost:9876
+----
+
+Go to the displayed link and copy the two bookmarks *Dev Mode On* and *Dev Mode Off*.
+
+After completing the above, you may run your application as follows:
+
+1. Go to the classic devmode window and click *Copy Link*.
+
+2. Paste the link in to the browser, but **remove** the query paramters (i.e. `?gwt.codesvr=...`).
+
+3. Go to the link. You may see prompts saying that your GWT module needs to be recompiled.
+
+4. Click the *Dev Mode On* bookmark you copied previously. You should see a prompt to compile your GWT module. Click *Compile* to do so.
+
+5. Once the super devmode server has completed, your application should be running.
 
 [[sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse]]
 
