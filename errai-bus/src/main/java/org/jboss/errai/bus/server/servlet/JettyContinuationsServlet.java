@@ -17,6 +17,14 @@
 package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.QueueUnavailableException;
@@ -26,18 +34,14 @@ import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
+import org.slf4j.Logger;
 
 /**
  * The <tt>JettyContinuationsServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using Jetty Continuations.
  */
 public class JettyContinuationsServlet extends AbstractErraiServlet {
+  private static final Logger log = getLogger(JettyContinuationsServlet.class);
   /**
    * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
    * a response
@@ -75,8 +79,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
    *     - if the request for the POST could not be handled
    */
   @Override
-  protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-      throws ServletException, IOException {
+  protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException {
 
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest));
@@ -86,19 +89,24 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     try {
       service.store(createCommandMessage(session, httpServletRequest));
     }
+    catch (IOException ioe) {
+      log.debug("Problem when storing message", ioe);
+    }
     catch (QueueUnavailableException e) {
-      if (!session.isValid()) {
+      try {
         sendDisconnectDueToSessionExpiry(httpServletResponse);
+      } catch (IOException ioe) {
+        log.debug("Failed to inform client that session expired", ioe);
       }
+      return;
     }
 
     pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest));
   }
 
-  private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
-                               HttpServletResponse httpServletResponse, boolean wait) throws IOException {
-    final OutputStream stream = httpServletResponse.getOutputStream();
-
+  private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest, 
+          HttpServletResponse httpServletResponse, boolean wait) {
+    
     try {
       final MessageQueue queue = service.getBus().getQueue(session);
       if (queue == null) {
@@ -127,7 +135,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         }
       }
 
-      pollQueue(queue, stream, httpServletResponse);
+      pollQueue(queue, httpServletResponse.getOutputStream(), httpServletResponse);
     }
     catch (RetryRequest r) {
       /**
@@ -135,6 +143,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
        */
 
       throw r;
+    }
+    catch (final IOException io) {
+      log.debug("Problem when polling for new messages", io);
     }
     catch (final Throwable t) {
       t.printStackTrace();
@@ -153,7 +164,12 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
                }
        b.append("\"}").toString();
 
-      writeToOutputStream(stream, b.toString());
+       try {
+         writeToOutputStream(httpServletResponse.getOutputStream(), b.toString());
+       }
+       catch (final IOException io) {
+         log.debug("Failed to write error to output stream", io);
+       }
     }
   }
 
