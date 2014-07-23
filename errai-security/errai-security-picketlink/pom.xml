@@ -44,20 +44,8 @@
       <artifactId>jboss-logging</artifactId>
       <scope>test</scope>
     </dependency>
-    
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skipTests>true</skipTests>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  
   <profiles>
     <profile>
       <id>integration-test</id>
@@ -67,22 +55,16 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
-              <forkMode>always</forkMode>
-              <argLine>-Xmx1500m ${argLine}</argLine>
-
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/target/test-classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
-              <useManifestOnlyJar>true</useManifestOnlyJar>
-
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <skipTests>true</skipTests>
             </configuration>
           </plugin>
         </plugins>

@@ -166,9 +166,8 @@
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <skipTests>false</skipTests>
               <forkMode>always</forkMode>
               <argLine>-Xmx1500m ${argLine}</argLine>
 
@@ -178,7 +177,7 @@
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
+
               <useManifestOnlyJar>true</useManifestOnlyJar>
 
               <systemProperties>
@@ -191,31 +190,12 @@
                   <value>${project.build.directory}</value>
                 </property>
 
-                <!-- Do not accidently package server test marshallers when 
-                  building Errai -->
-                <property>
-                  <name>errai.marshalling.server.classOutput.enabled</name>
-                  <value>false</value>
-                </property>
-
-
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>org.jboss.errai.bus.do_long_poll</name>
-                  <value>false</value>
-                </property>
-
                 <!-- Disable caching of generated code -->
                 <property>
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
               </systemProperties>
-
-              <includes>
-                <include>**/*Test.java</include>
-                <include>**/*Tests.java</include>
-              </includes>
             </configuration>
           </plugin>
         </plugins>

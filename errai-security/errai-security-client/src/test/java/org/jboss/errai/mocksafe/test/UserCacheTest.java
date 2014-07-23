@@ -16,9 +16,11 @@
  */
 package org.jboss.errai.mocksafe.test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,7 +40,6 @@ import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.event.LoggedInEvent;
 import org.jboss.errai.security.shared.event.LoggedOutEvent;
 import org.jboss.errai.security.shared.service.NonCachingUserService;
-import org.jboss.errai.security.util.GwtMockitoRunnerExtension;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 
-@RunWith(GwtMockitoRunnerExtension.class)
+import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.gwtmockito.WithPackagesToLoadViaStandardClassLoader;
+
+@RunWith(GwtMockitoTestRunner.class)
+@WithPackagesToLoadViaStandardClassLoader({ "org.jboss.errai.mocksafe.test", "com.google.gwtmockito" })
 public class UserCacheTest {
 
   @Mock

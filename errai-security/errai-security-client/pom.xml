@@ -234,16 +234,25 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
-              <forkMode>always</forkMode>
-              <argLine>-Xmx1500m ${argLine}</argLine>
-
+              <useSystemClassLoader>true</useSystemClassLoader>
+              <useManifestOnlyJar>true</useManifestOnlyJar>
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/target/test-classes/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
+              <includes>
+                <include>**/mocksafe/**/*Test.java</include>
+                <include>**/mocksafe/**/*Tests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <forkMode>always</forkMode>
+              <argLine>-Xmx1500m ${argLine}</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
 
               <systemProperties>
@@ -256,18 +265,10 @@
                   <value>${project.build.directory}</value>
                 </property>
 
-                <!-- Do not accidently package server test marshallers when 
-                  building Errai -->
-                <property>
-                  <name>errai.marshalling.server.classOutput.enabled</name>
-                  <value>false</value>
-                </property>
-
-
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
-                  <name>org.jboss.errai.bus.do_long_poll</name>
-                  <value>false</value>
+                  <name>errai.hosted_mode_testing</name>
+                  <value>true</value>
                 </property>
 
                 <!-- Disable caching of generated code -->
@@ -276,11 +277,9 @@
                   <value>true</value>
                 </property>
               </systemProperties>
-
-              <includes>
-                <include>**/*Test.java</include>
-                <include>**/*Tests.java</include>
-              </includes>
+              <excludes>
+                <exclude>**/mocksafe/**</exclude>
+              </excludes>
             </configuration>
           </plugin>
         </plugins>

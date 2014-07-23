@@ -116,19 +116,11 @@
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <skipTests>false</skipTests>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
-
               <!-- This is required because the BasicIOCTest is run in "simulated client" mode, which
                    prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
-
               <argLine>-Xmx1500m -XX:MaxPermSize=500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 
               <systemProperties>
@@ -140,24 +132,8 @@
                   <name>log4j.output.dir</name>
                   <value>${project.build.directory}</value>
                 </property>
-
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>org.jboss.errai.bus.do_long_poll</name>
-                  <value>false</value>
-                </property>
-
-                <!-- Do not accidently package server test marshallers when 
-                  building Errai -->
-                <property>
-                  <name>errai.marshalling.server.classOutput.enabled</name>
-                  <value>false</value>
-                </property>
               </systemProperties>
 
-              <includes>
-                <include>**/*Test.java</include>
-              </includes>
               <excludes>
                 <exclude>**/IOCTests.java</exclude>
               </excludes>

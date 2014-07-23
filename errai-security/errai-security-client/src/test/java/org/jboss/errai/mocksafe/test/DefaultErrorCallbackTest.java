@@ -34,7 +34,6 @@ import org.jboss.errai.security.client.local.callback.DefaultBusSecurityErrorCal
 import org.jboss.errai.security.client.local.callback.DefaultRestSecurityErrorCallback;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
-import org.jboss.errai.security.util.GwtMockitoRunnerExtension;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
@@ -44,8 +43,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import com.google.gwt.http.client.Request;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 
-@RunWith(GwtMockitoRunnerExtension.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class DefaultErrorCallbackTest {
 
   @Mock

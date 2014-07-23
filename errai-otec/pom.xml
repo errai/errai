@@ -58,6 +58,12 @@
               <skipTests>false</skipTests>
             </configuration>
           </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
       <properties>

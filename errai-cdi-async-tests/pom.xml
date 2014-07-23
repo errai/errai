@@ -71,7 +71,7 @@
             </configuration>
           </plugin>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
               <additionalClasspathElements>
@@ -79,6 +79,7 @@
                 </additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
+              <useSystemClassLoader>false</useSystemClassLoader>
               <useManifestOnlyJar>false</useManifestOnlyJar>
               <forkMode>pertest</forkMode>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
@@ -97,8 +98,11 @@
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
                 </property>
-
               </systemProperties>
+              <includes>
+                <include>**/*Test.java</include>
+                <include>**/*Tests.java</include>
+              </includes>
             </configuration>
           </plugin>          
         </plugins>

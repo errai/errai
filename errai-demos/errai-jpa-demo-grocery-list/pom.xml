@@ -492,36 +492,6 @@
             <directory>src/test/resources</directory>
           </testResource>
         </testResources>
-        <plugins>
-          <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.5</version>
-            <configuration>
-              <skipTests>false</skipTests>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/
-                                </additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useManifestOnlyJar>false</useManifestOnlyJar>
-              <forkMode>pertest</forkMode>
-              <!-- Note: to run the test in a real browser, set -DargLine='-Dgwt.args="-runStyle Manual:1"' -->
-              <argLine>-Xmx1500m ${argLine}</argLine>
-              <systemProperties>
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>errai.hosted_mode_testing</name>
-                  <value>true</value>
-                </property>
-                <property>
-                  <name>gwt.args</name>
-                  <value>-war src/main/webapp</value>
-                </property>
-              </systemProperties>
-            </configuration>
-          </plugin>
-        </plugins>
       </build>
 
       <dependencies>

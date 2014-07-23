@@ -55,21 +55,11 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
         <configuration>
           <skipTests>false</skipTests>
           <additionalClasspathElements>
-            <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+            <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>
+            <additionalClasspathElement>${basedir}/target/classes</additionalClasspathElement>
+            <additionalClasspathElement>${basedir}/src/main/java</additionalClasspathElement>
+            <additionalClasspathElement>${basedir}/src/test/java</additionalClasspathElement>
           </additionalClasspathElements>
-          <useSystemClassLoader>false</useSystemClassLoader>
-
-          <systemProperties>
-            <property>
-              <name>java.io.tmpdir</name>
-              <value>${project.build.directory}</value>
-            </property>
-            <property>
-              <name>log4j.output.dir</name>
-              <value>${project.build.directory}</value>
-            </property>
-          </systemProperties>
         </configuration>
       </plugin>
       
@@ -86,4 +76,32 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
      </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/target/classes</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/main/java</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/test/java</additionalClasspathElement>
+              </additionalClasspathElements>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
