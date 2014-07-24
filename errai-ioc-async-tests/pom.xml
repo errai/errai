@@ -107,6 +107,17 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-firefox-driver</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -144,7 +155,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
          prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
 
-              <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+              <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 
               <systemProperties>
                 <property>

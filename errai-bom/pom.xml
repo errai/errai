@@ -33,6 +33,7 @@
   <!-- !!! The only single place for Errai project to define versions is here !!! -->
   <!-- Keep versions property names in alphabetical order, please -->
   <properties>
+    <apache.commons.lang.version>3.2.1</apache.commons.lang.version>
     <apache.geronimo.spec.1.1.interceptor.version>1.0</apache.geronimo.spec.1.1.interceptor.version>
     <apache.httpcomponents.httpcore.version>4.2.1</apache.httpcomponents.httpcore.version>
     <apache.maven.artifact.version>3.0.5</apache.maven.artifact.version>
@@ -106,6 +107,7 @@
     <plexus.utils.version>1.5.5</plexus.utils.version>
     <powermock.version>1.5</powermock.version>
     <quartz.version>2.1.6</quartz.version>
+    <selenium.version>2.42.2</selenium.version>
     <servlet.api.version>3.0.1</servlet.api.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <weld.spi.version>2.0.SP1</weld.spi.version>
@@ -370,6 +372,12 @@
       </dependency>
       
       <!-- Third Party Dependencies -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${apache.commons.lang.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.apache.geronimo.specs</groupId>
         <artifactId>geronimo-interceptor_1.1_spec</artifactId>
@@ -1081,6 +1089,27 @@
         <groupId>com.google.gwt.gwtmockito</groupId>
         <artifactId>gwtmockito</artifactId>
         <version>${gwt.gwtmockito.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-remote-driver</artifactId>
+        <version>${selenium.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-java</artifactId>
+        <version>${selenium.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-firefox-driver</artifactId>
+        <version>${selenium.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

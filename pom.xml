@@ -75,7 +75,8 @@
     <validation.api.version>1.0.0.GA</validation.api.version>    
     <mvel.version>2.1.7.Final</mvel.version>
     <weld.version>2.0.5.Final</weld.version>
-    <argLine></argLine>
+    <gwtArgs></gwtArgs>
+    <argLine>-Dgwt.args="${gwtArgs}"</argLine>
   </properties>
 
   <modules>
@@ -551,6 +552,11 @@
           <artifactId>jacoco-gwt-maven-plugin</artifactId>
           <version>0.5.4.201202141554</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>selenium-maven-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -596,6 +602,43 @@
         <argLine>-XX:CompileThreshold=1000 -Djava.awt.headless=true</argLine>
       </properties>
     </profile>
+
+    <profile>
+      <id>firefox-test</id>
+      <properties>
+        <gwtArgs>-prod -userAgents gecko1_8 -runStyle Selenium:127.0.0.1:4444/*firefox</gwtArgs>
+        <argLine>-Dgwt.args="${gwtArgs}"</argLine>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>selenium-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>start</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>start-server</goal>
+                </goals>
+                <configuration>
+                  <background>true</background>
+                </configuration>
+              </execution>
+                
+              <execution>
+                <id>stop</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>stop-server</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
 
     <profile>
       <id>integration-test</id>

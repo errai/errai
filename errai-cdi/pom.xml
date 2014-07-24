@@ -92,7 +92,7 @@
               <failIfNoTests>false</failIfNoTests>
               <trimStackTrace>false</trimStackTrace>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail. -->
-              <argLine>-Xmx1500m ${argLine} -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true
+              <argLine>-Xmx1500m ${argLine} -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Derrai.hosted_mode_testing=true
                 -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
               <systemProperties>
                 <property>
