@@ -182,7 +182,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     }
   }
   
-  public void transmit(final List<Message> txMessages, boolean isRetry) {
+  private void transmit(final List<Message> txMessages, boolean isRetry) {
     if (txMessages.isEmpty()) {
       return;
     }
