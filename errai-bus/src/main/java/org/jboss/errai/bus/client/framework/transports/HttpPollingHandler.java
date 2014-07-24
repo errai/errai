@@ -179,7 +179,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     }
   }
   
-  public void transmit(final List<Message> txMessages, boolean isRetry) {
+  private void transmit(final List<Message> txMessages, boolean isRetry) {
     if (txMessages.isEmpty()) {
       return;
     }
@@ -733,11 +733,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
             return;
           }
 
-<<<<<<< HEAD
           LogUtil.log("attempting Tx reconnection -- attempt: " + (txRetries + 1));
-=======
-          logger.info("attempting Tx reconnection in " + retryDelay + "ms -- attempt: " + (txRetries + 1));
->>>>>>> 96efd92... Fixed/Introduced backoff logic for SSE
           txRetries++;
 
           throttleTimer.cancel();
