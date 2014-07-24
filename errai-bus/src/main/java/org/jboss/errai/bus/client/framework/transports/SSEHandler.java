@@ -34,7 +34,11 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 
 /**
+ * An ErraiBus transport handler using server-sent events. It relies on 
+ * {@link HttpPollingHandler} for transmitting messages.
+ * 
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class SSEHandler implements TransportHandler, TransportStatistics {
   private static final String SSE_AGENT_SERVICE = "SSEAgent";
@@ -100,7 +104,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     }
 
     this.sseEntryPoint = URL.encode(clientMessageBus.getApplicationLocation(clientMessageBus.getInServiceEntryPoint()))
-        + "?z=0000&sse=1&clientId=" + URL.encodePathSegment(clientMessageBus.getClientId());
+        + "?&sse=1&clientId=" + URL.encodePathSegment(clientMessageBus.getClientId());
 
   }
 
@@ -111,7 +115,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       logger.info("did not start SSE handler: already started.");
       return;
     }
-    sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint);
+    sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint + "&z=" + retries);
   }
 
   @Override
@@ -218,6 +222,12 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     disconnect(sseChannel);
 
     if (!stopped) {
+      if (retries == 0) {
+        transmit(Collections.singletonList(MessageBuilder.createMessage()
+              .toSubject("ServerEchoService")
+              .signalling().done().repliesToSubject(SSE_AGENT_SERVICE).getMessage()));
+      }
+      
       final int retryDelay = Math.min((retries * 1000) + 1, 10000);
       logger.info("attempting SSE reconnection in " + retryDelay + "ms -- attempt: " + (++retries));
       
