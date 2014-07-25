@@ -80,6 +80,7 @@
   </properties>
 
   <modules>
+    <module>errai-bom</module>
     <module>errai-common</module>
     <module>errai-javax-enterprise</module>
     <module>errai-ioc</module>
@@ -111,7 +112,6 @@
     <module>errai-otec</module>
     <module>errai-security</module>
     <module>errai-cdi-async-databinding-tests</module>
-    <module>errai-bom</module>
     <module>errai-demos</module>
     <module>errai-client-local-class-hider</module>
     <module>errai-annotation-processors</module>
