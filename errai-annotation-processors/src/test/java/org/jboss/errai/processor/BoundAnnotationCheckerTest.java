@@ -56,10 +56,10 @@ public class BoundAnnotationCheckerTest extends AbstractProcessorTest {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/BoundNotAWidget.java");
 
-    assertCompilationMessage(diagnostics, Kind.ERROR, 19, 24, "@Bound must target a type assignable to Widget");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 22, 18, "@Bound must target a type assignable to Widget");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 29, 46, "@Bound must target a type assignable to Widget");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 34, 45, "@Bound must target a type assignable to Widget");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 19, 24, "@Bound must target a type assignable to Widget or Element");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 22, 18, "@Bound must target a type assignable to Widget or Element");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 29, 46, "@Bound must target a type assignable to Widget or Element");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 34, 45, "@Bound must target a type assignable to Widget or Element");
   }
 
   @Test
