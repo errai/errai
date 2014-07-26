@@ -1,6 +1,9 @@
 package org.jboss.errai.processor;
 
-import static org.jboss.errai.processor.AnnotationProcessors.*;
+import static org.jboss.errai.processor.AnnotationProcessors.getAnnotation;
+import static org.jboss.errai.processor.AnnotationProcessors.getEnclosingTypeElement;
+import static org.jboss.errai.processor.AnnotationProcessors.hasAnnotation;
+import static org.jboss.errai.processor.AnnotationProcessors.propertyNameOfMethod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +42,7 @@ public class BoundAnnotationChecker extends AbstractProcessor {
     final Types types = processingEnv.getTypeUtils();
     final Elements elements = processingEnv.getElementUtils();
     final TypeMirror gwtWidgetType = elements.getTypeElement(TypeNames.GWT_WIDGET).asType();
+    final TypeMirror gwtElementType = elements.getTypeElement(TypeNames.GWT_ELEMENT).asType();
 
     Map<TypeElement, List<Element>> classesWithBoundThings = new HashMap<TypeElement, List<Element>>();
     for (TypeElement annotation : annotations) {
@@ -50,9 +54,9 @@ public class BoundAnnotationChecker extends AbstractProcessor {
         else {
           targetType = target.asType();
         }
-        if (!types.isAssignable(targetType, gwtWidgetType)) {
+        if (!types.isAssignable(targetType, gwtWidgetType) && !types.isAssignable(targetType, gwtElementType)) {
           processingEnv.getMessager().printMessage(
-                  Kind.ERROR, "@Bound must target a type assignable to Widget", target); // FIXME actually HasText or HasValue
+                  Kind.ERROR, "@Bound must target a type assignable to Widget or Element", target);
         }
 
         TypeElement enclosingClass = getEnclosingTypeElement(target);
