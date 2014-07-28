@@ -6,6 +6,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.test.binding.client.res.BindingDateConverter;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
+import org.jboss.errai.ui.test.binding.client.res.TemplateFragmentWithoutFragmentId;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
@@ -70,5 +71,19 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     assertEquals("Model (lastUpdate) was not updated using custom converter!",
         BindingDateConverter.TEST_DATE, model.getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", phoneNumberBox.getValue(), model.getPhoneNumber());
+  }
+
+  /**
+   * Regression test for ERRAI-779
+   */
+  @Test
+  public void testTemplateFragmentContainingWordBodyIsParsedWithoutError() throws Exception {
+    try {
+      final TemplateFragmentWithoutFragmentId templated = IOC.getBeanManager()
+              .lookupBean(TemplateFragmentWithoutFragmentId.class).getInstance();
+    }
+    catch (Exception e) {
+      fail("Loading templated instance caused an error: " + e.getMessage());
+    }
   }
 }
