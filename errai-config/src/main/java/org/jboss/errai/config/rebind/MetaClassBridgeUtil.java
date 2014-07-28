@@ -102,7 +102,7 @@ public abstract class MetaClassBridgeUtil {
         }
       }
 
-      cache.pushCacheAll(classesToPush);
+      cache.updateCache(classesToPush);
     }
     tOCache.populatedFrom = context;
 
