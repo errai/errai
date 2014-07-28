@@ -118,6 +118,11 @@ public class JavaReflectionMethod extends MetaMethod {
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
+  
+  @Override
+  public String getDeclaringClassName() {
+    return declaringClass.getName();
+  }
 
   @Override
   public boolean isAbstract() {

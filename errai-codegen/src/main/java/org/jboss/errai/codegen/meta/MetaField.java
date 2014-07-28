@@ -72,7 +72,7 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(MetaField.class.getName()).append(":");
-    sb.append(getDeclaringClass().getFullyQualifiedName()).append(".");
+    sb.append(getDeclaringClassName()).append(".");
 
     Annotation[] annos = getAnnotations();
     if (annos != null) {
@@ -171,6 +171,11 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
     @Override
     public MetaClass getDeclaringClass() {
       return componentType;
+    }
+    
+    @Override
+    public String getDeclaringClassName() {
+      return componentType.getFullyQualifiedName();
     }
 
     @Override

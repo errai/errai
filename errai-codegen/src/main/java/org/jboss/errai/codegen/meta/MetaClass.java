@@ -242,5 +242,7 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract MetaField getInheritedField(String name);
 
   public abstract BeanDescriptor getBeanDescriptor();
+  
+  public abstract int hashContent();
 
 }

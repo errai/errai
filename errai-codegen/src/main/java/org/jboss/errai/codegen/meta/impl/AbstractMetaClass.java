@@ -534,9 +534,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return genericSuperClass;
   }
 
-  
-
-
   @Override
   public synchronized Class<?> asClass() {
     if (_asClassCache != null) {
@@ -573,14 +570,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _asClassCache = cls;
   }
 
-
   @Override
   public synchronized MetaClass asBoxed() {
     if (_boxedCache != null)
       return _boxedCache;
     return _boxedCache = GenUtil.getPrimitiveWrapper(this);
   }
-
 
   @Override
   public synchronized MetaClass asUnboxed() {
@@ -589,12 +584,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _unboxedCache = GenUtil.getUnboxedFromWrapper(this);
   }
 
-
   @Override
   public synchronized boolean isPrimitiveWrapper() {
     return _isPrimitiveWrapper != null ? _isPrimitiveWrapper : (_isPrimitiveWrapper = GenUtil.isPrimitiveWrapper(this));
   }
-
 
   @Override
   public synchronized String getInternalName() {
@@ -737,7 +730,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private String contentString;
-  private int hashContent() {
+  
+  @Override
+  public int hashContent() {
     if (contentString == null) {
       StringBuilder sb = new StringBuilder();
       if (getAnnotations() != null) {
@@ -751,11 +746,14 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       for (MetaField f : getFields()) {
         sb.append(f.toString());
       }
+      for (MetaField f : getDeclaredFields()) {
+        sb.append(f.toString());
+      }
       for (MetaMethod m : getMethods()) {
         sb.append(m.toString());
       }
-      for (MetaMethod sm : getStaticMethods()) {
-        sb.append(sm.toString());
+      for (MetaMethod m : getDeclaredMethods()) {
+        sb.append(m.toString());
       }
       for (MetaClass i : getInterfaces()) {
         sb.append(i.getFullyQualifiedNameWithTypeParms());
@@ -763,7 +761,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       for (MetaClass dc : getDeclaredClasses()) {
         sb.append(dc.getFullyQualifiedNameWithTypeParms());
       }
-      sb.append(getSuperClass().getFullyQualifiedNameWithTypeParms());
+      if (getSuperClass() != null) {
+        sb.append(getSuperClass().getFullyQualifiedNameWithTypeParms());
+      }
       contentString = sb.toString();
     }
     
