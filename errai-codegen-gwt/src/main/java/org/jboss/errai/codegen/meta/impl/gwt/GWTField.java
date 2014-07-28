@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+
 import org.jboss.errai.codegen.meta.AnnotationParser;
 
 /**
@@ -77,6 +78,11 @@ public class GWTField extends MetaField {
   @Override
   public MetaClass getDeclaringClass() {
     return GWTClass.newInstance(oracle, field.getEnclosingType());
+  }
+  
+  @Override
+  public String getDeclaringClassName() {
+    return field.getEnclosingType().getName();
   }
 
   @Override

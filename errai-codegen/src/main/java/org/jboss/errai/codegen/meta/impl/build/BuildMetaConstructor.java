@@ -139,6 +139,11 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
+  
+  @Override
+  public String getDeclaringClassName() {
+    return declaringClass.getName();
+  }
 
   @Override
   public boolean isAbstract() {

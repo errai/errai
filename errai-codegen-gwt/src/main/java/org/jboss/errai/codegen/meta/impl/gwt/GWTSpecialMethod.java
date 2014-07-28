@@ -86,6 +86,11 @@ public class GWTSpecialMethod extends MetaMethod {
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
+  
+  @Override
+  public String getDeclaringClassName() {
+    return declaringClass.getName();
+  }
 
   @Override
   public MetaType getGenericReturnType() {

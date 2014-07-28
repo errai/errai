@@ -76,6 +76,11 @@ public class JavaReflectionField extends MetaField {
   public MetaClass getDeclaringClass() {
     return MetaClassFactory.get(field.getDeclaringClass());
   }
+  
+  @Override
+  public String getDeclaringClassName() {
+    return field.getDeclaringClass().getName();
+  }
 
   @Override
   public boolean isAbstract() {

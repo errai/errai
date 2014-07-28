@@ -23,6 +23,8 @@ public interface MetaClassMember extends HasAnnotations {
   public String getName();
 
   public MetaClass getDeclaringClass();
+  
+  public String getDeclaringClassName();
 
   public abstract boolean isAbstract();
 
