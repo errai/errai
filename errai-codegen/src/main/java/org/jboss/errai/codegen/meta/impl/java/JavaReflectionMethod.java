@@ -178,9 +178,5 @@ public class JavaReflectionMethod extends MetaMethod {
   public Method asMethod() {
     return method;
   }
-
-  @Override
-  public String toString() {
-    return getName() + "(" + Arrays.toString(parameters) + ")";
-  }
+  
 }
