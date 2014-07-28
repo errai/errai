@@ -29,7 +29,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.codegen.meta.*;
+import org.jboss.errai.codegen.meta.BeanDescriptor;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
 import org.mvel2.util.ReflectionUtil;
@@ -443,18 +453,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return enclosedMetaObject;
   }
 
-  private String _hashString;
-
-  private String hashString() {
-    if (_hashString == null) {
-      _hashString = MetaClass.class.getName().concat(":").concat(getFullyQualifiedName());
-      if (getParameterizedType() != null) {
-        _hashString += getParameterizedType().toString();
-      }
-    }
-    return _hashString;
-  }
-
 
   @Override
   public boolean isAssignableFrom(final MetaClass clazz) {
@@ -536,15 +534,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return genericSuperClass;
   }
 
-  @Override
-  public boolean equals(final Object o) {
-    return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
-  }
-
-  @Override
-  public int hashCode() {
-    return hashString().hashCode();
-  }
+  
 
 
   @Override
@@ -744,6 +734,61 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       c = c.getComponentType();
     }
     return _outerComponentCache = c;
+  }
+
+  private String contentString;
+  private int hashContent() {
+    if (contentString == null) {
+      StringBuilder sb = new StringBuilder();
+      if (getAnnotations() != null) {
+        for (Annotation a : getAnnotations()) {
+          sb.append(a.toString());
+        }
+      }
+      for (MetaMethod c : getConstructors()) {
+        sb.append(c.toString());
+      }
+      for (MetaField f : getFields()) {
+        sb.append(f.toString());
+      }
+      for (MetaMethod m : getMethods()) {
+        sb.append(m.toString());
+      }
+      for (MetaMethod sm : getStaticMethods()) {
+        sb.append(sm.toString());
+      }
+      for (MetaClass i : getInterfaces()) {
+        sb.append(i.getFullyQualifiedNameWithTypeParms());
+      }
+      for (MetaClass dc : getDeclaredClasses()) {
+        sb.append(dc.getFullyQualifiedNameWithTypeParms());
+      }
+      sb.append(getSuperClass().getFullyQualifiedNameWithTypeParms());
+      contentString = sb.toString();
+    }
+    
+    return contentString.hashCode();
+  }
+  
+  private String _hashString;
+  public String hashString() {
+    if (_hashString == null) {
+      _hashString = MetaClass.class.getName().concat(":").concat(getFullyQualifiedName());
+      if (getParameterizedType() != null) {
+        _hashString += getParameterizedType().toString();
+      }
+    }
+    return _hashString;
+  }
+  
+  @Override
+  public int hashCode() {
+    return hashString().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
   @Override
