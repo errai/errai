@@ -28,8 +28,10 @@ public class URLPatternMatcherProvider {
       patternMatcher.add(page.getURL(), page.name());
     }
     
-    PageNode<?> defaultPageNode = navGraph.getPageByRole(DefaultPage.class);
-    patternMatcher.setAsDefaultPage(defaultPageNode.name());
+    if (!navGraph.isEmpty()) {
+      PageNode<?> defaultPageNode = navGraph.getPageByRole(DefaultPage.class);
+      patternMatcher.setAsDefaultPage(defaultPageNode.name());
+    }
     return patternMatcher;
   }
   
