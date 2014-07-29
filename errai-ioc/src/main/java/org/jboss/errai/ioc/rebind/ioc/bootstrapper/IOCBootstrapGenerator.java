@@ -511,7 +511,7 @@ public class IOCBootstrapGenerator {
 
     for (final MetaClass clazz : allNewOrUpdatedClasses) {
       if (isPseudoDependentScoped(injectionContext, translatablePackages, clazz))
-        newPsuedoDependentScoped.put(clazz.getName(), clazz);
+        newPsuedoDependentScoped.put(clazz.getFullyQualifiedName(), clazz);
     }
     return newPsuedoDependentScoped;
   }
@@ -529,7 +529,7 @@ public class IOCBootstrapGenerator {
     }
     else {
       for (final MetaClass clazz : allNewOrUpdatedClasses) {
-        cachedPseudoDependentScoped.remove(clazz.getName());
+        cachedPseudoDependentScoped.remove(clazz.getFullyQualifiedName());
       }
       cachedPseudoDependentScoped.putAll(newPsuedoDependentScoped);
       cachedPseudoDependentScoped.keySet().removeAll(removedClasses);

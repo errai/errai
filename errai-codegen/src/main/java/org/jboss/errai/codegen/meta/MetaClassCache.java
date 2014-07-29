@@ -81,13 +81,14 @@ public class MetaClassCache implements CacheStore {
   }
 
   public void pushCache(final MetaClass clazz) {
-    // Don't bother with hash for individual cache pushes (all classes will get hashcodes generated in updateCache)
-    PRIMARY_CLASS_CACHE.put(clazz.getFullyQualifiedName(), new CacheEntry(clazz, CacheEntry.PLACE_HOLDER));
+    pushCache(clazz.getFullyQualifiedName(), clazz);
   }
 
   public void pushCache(final String fqcn, final MetaClass clazz) {
-    // Don't bother with hash for individual cache pushes (all classes will get hashcodes generated in updateCache)
     PRIMARY_CLASS_CACHE.put(fqcn, new CacheEntry(clazz, CacheEntry.PLACE_HOLDER));
+    if (!backupClassCache.containsKey(clazz.getFullyQualifiedName())) {
+      invalidated.add(fqcn);
+    }
   }
 
   public MetaClass get(String fqcn) {
