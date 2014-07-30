@@ -69,10 +69,6 @@ public class ArrayLiteral extends LiteralValue<Object> {
 
     final Object val = getValue();
 
-    if (Array.getLength(val) == 0) {
-      return buf.append("[0]").toString();
-    }
-
     for (int i = 0; i < dimensions; i++) {
       buf.append("[]");
     }
