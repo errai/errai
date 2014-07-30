@@ -111,9 +111,6 @@ public class IOCBootstrapGenerator {
   private final TreeLogger logger;
   private static final Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
-  // production mode cache only -- used so work is only done in one permutation
-  private static volatile String _bootstrapperCache;
-
   private static Map<String, MetaClass> cachedPseudoDependentScoped;
   private static final Object generatorLock = new Object();
 
@@ -131,10 +128,6 @@ public class IOCBootstrapGenerator {
     synchronized (generatorLock) {
       EnvUtil.recordEnvironmentState();
 
-      if (_bootstrapperCache != null && EnvUtil.isProdMode()) {
-        return _bootstrapperCache;
-      }
-
       final String gen;
 
       log.info("generating IOC bootstrapping class...");
@@ -149,7 +142,7 @@ public class IOCBootstrapGenerator {
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
           + "(" + injectionContext.getAllKnownInjectionTypes().size() + " beans processed)");
 
-      return _bootstrapperCache = gen;
+      return gen;
     }
   }
 

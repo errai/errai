@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import java.util.Set;
 
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -66,6 +67,12 @@ public class IOCGenerator extends AbstractAsyncGenerator {
         translatablePackages, false);
 
     return iocBootstrapGenerator.generate(packageName, className);
+  }
+
+  @Override
+  protected boolean isCacheValid() {
+    return hasGenerationCache() &&
+            (EnvUtil.isProdMode() || MetaClassFactory.noChangedClasses());
   }
 
 }
