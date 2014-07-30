@@ -85,9 +85,11 @@ public class MetaClassCache implements CacheStore {
   }
 
   public void pushCache(final String fqcn, final MetaClass clazz) {
-    PRIMARY_CLASS_CACHE.put(fqcn, new CacheEntry(clazz, CacheEntry.PLACE_HOLDER));
-    if (!backupClassCache.containsKey(clazz.getFullyQualifiedName())) {
-      invalidated.add(fqcn);
+    if (!PRIMARY_CLASS_CACHE.containsKey(fqcn)) {
+      PRIMARY_CLASS_CACHE.put(fqcn, new CacheEntry(clazz, CacheEntry.PLACE_HOLDER));
+      if (!backupClassCache.containsKey(clazz.getFullyQualifiedName())) {
+        invalidated.add(fqcn);
+      }
     }
   }
 
