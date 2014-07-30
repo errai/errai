@@ -33,12 +33,11 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.util.PropertiesUtil;
 import org.jboss.errai.reflections.Reflections;
-import org.jboss.errai.reflections.scanners.override.FilterFieldAnnotationsScanner;
-import org.jboss.errai.reflections.scanners.override.FilterTypeAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
 import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
-import org.jboss.errai.reflections.util.SimplePackageFilter;
-
+import org.jboss.errai.reflections.util.SimplePackageFilePathPredicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.gwt.thirdparty.guava.common.collect.Sets;
@@ -47,7 +46,7 @@ import com.google.gwt.validation.client.GwtValidation;
 /**
  * Generates the GWT {@link Validator} interface based on validation
  * annotations.
- * 
+ *
  * @author Johannes Barop <jb@barop.de>
  */
 class GwtValidatorGenerator {
@@ -55,12 +54,12 @@ class GwtValidatorGenerator {
   class ValidationScanner extends Reflections {
 
     ValidationScanner() {
-      super(new ConfigurationBuilder().setUrls(ClasspathHelper.forClassLoader())
+      super(new ConfigurationBuilder()
+        .setUrls(ClasspathHelper.forClassLoader())
+        .filterInputsBy(new SimplePackageFilePathPredicate(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, "\\s")))
         .setScanners(
-            new FilterTypeAnnotationsScanner(
-                    new SimplePackageFilter(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, "\\s"))),
-            new FilterFieldAnnotationsScanner(
-                    new SimplePackageFilter(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, "\\s")))));
+            new FieldAnnotationsScanner(),
+            new TypeAnnotationsScanner()));
       scan();
     }
 

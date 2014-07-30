@@ -42,7 +42,7 @@ public class ValidationBlacklistTest extends AbstractErraiIOCTest {
     catch (IllegalArgumentException e) {
       return;
     }
-    fail("There shoudl not be a validator for beans in blacklisted packages.");
+    fail("There should not be a validator for beans in blacklisted packages.");
   }
 
 }
