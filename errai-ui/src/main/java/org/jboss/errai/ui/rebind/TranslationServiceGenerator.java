@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +55,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
@@ -62,7 +64,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.reflections.Configuration;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.scanners.ResourcesScanner;
-import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -74,6 +75,8 @@ import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -102,6 +105,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   private static final String GENERATED_CLASS_NAME = "TranslationServiceImpl";
   private static Pattern LOCALE_IN_FILENAME_PATTERN = Pattern.compile("([^_]*)_(\\w\\w)?(_\\w\\w)?\\.json");
+
+  private static final Logger log = LoggerFactory.getLogger(TranslationServiceGenerator.class);
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
@@ -145,7 +150,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         name = fieldVal.toString();
       }
       catch (Exception e) {
-        // TODO log this
+        log.warn("There was an error while processing a TranslationKey", e);
       }
 
       // Figure out the translation key value (for the null locale).
@@ -169,18 +174,20 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     // Scan for all @Bundle annotations.
     final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class, context);
-    
+
     Set<String> bundlePaths = new HashSet<String>();
     for (MetaClass bundleAnnotatedClass : bundleAnnotatedClasses) {
       String bundlePath = getMessageBundlePath(bundleAnnotatedClass);
       bundlePaths.add(bundlePath);
     }
-    
+
     // Now get all files in the message bundle (all localized versions)
+    final Collection<URL> scannableUrls = getScannableUrls(bundleAnnotatedClasses);
+    log.info("Preparing to scan for i18n bundle files.");
     MessageBundleScanner scanner = new MessageBundleScanner(
             new ConfigurationBuilder()
                 .filterInputsBy(new FilterBuilder().include(".*json"))
-                .setUrls(ClasspathHelper.forClassLoader())
+                .setUrls(scannableUrls)
                 .setScanners(new MessageBundleResourceScanner(bundlePaths)));
 
     // For each one, generate the code to load the translation and put that generated
@@ -222,9 +229,56 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     return classBuilder.toJavaString();
   }
 
+  private Collection<URL> getScannableUrls(final Collection<MetaClass> bundleAnnotatedClasses) {
+    final Collection<URL> urls = new HashSet<URL>();
+
+    addUrlsFromBundleAnnotations(bundleAnnotatedClasses, urls);
+    addUrlsFromErraiAppProperties(urls);
+
+    return urls;
+  }
+
+  private void addUrlsFromErraiAppProperties(final Collection<URL> urls) {
+    urls.addAll(MetaDataScanner.getConfigUrls());
+  }
+
+  private void addUrlsFromBundleAnnotations(final Collection<MetaClass> bundleAnnotatedClasses, final Collection<URL> urls) {
+    final Set<String> completedPaths = new HashSet<String>();
+
+    for (final MetaClass bundleClass : bundleAnnotatedClasses) {
+      final String bundlePath = bundleClass.asClass().getAnnotation(Bundle.class).value();
+      if (bundlePath != null && !completedPaths.contains(bundlePath)) {
+        final URL resource = bundleClass.asClass().getResource(bundlePath);
+        final URL classpathElement;
+        final String pathRoot = getPathRoot(bundleClass, resource);
+        try {
+          classpathElement = new File(pathRoot).toURI().toURL();
+        } catch (MalformedURLException e) {
+          // TODO log this
+          continue;
+        }
+        urls.add(classpathElement);
+        completedPaths.add(bundlePath);
+      }
+    }
+  }
+
+  private String getPathRoot(final MetaClass bundleClass, final URL resource) {
+    final String fullPath = resource.getPath();
+    final String resourcePath = bundleClass.getAnnotation(Bundle.class).value();
+
+    final String relativePath;
+    if (resourcePath.startsWith("/"))
+      relativePath = resourcePath;
+    else
+      relativePath = bundleClass.getPackageName().replace('.', File.separatorChar);
+
+    return fullPath.substring(0, fullPath.indexOf(relativePath));
+  }
+
   /**
    * Records all of the i18n keys found in the given bundle.
-   * 
+   *
    * @param discoveredI18nMap
    * @param locale
    * @param bundlePath
