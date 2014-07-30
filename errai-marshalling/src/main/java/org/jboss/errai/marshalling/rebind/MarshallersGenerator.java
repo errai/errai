@@ -215,6 +215,11 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   private final String packageName = MarshallerFactory.class.getPackage().getName();
 
   @Override
+  protected boolean isCacheValid() {
+    return false;
+  }
+
+  @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
     logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");

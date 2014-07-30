@@ -556,4 +556,8 @@ public final class MetaClassFactory {
   public static boolean isKnownType(String fqcn) {
     return getMetaClassCache().isKnownType(fqcn);
   }
+
+  public static boolean noChangedClasses() {
+    return getAllNewOrUpdatedClasses().isEmpty() && getAllRemovedClasses().isEmpty();
+  }
 }
