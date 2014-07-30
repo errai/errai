@@ -397,14 +397,14 @@ public class InjectionContext {
     final SimplePackageFilter whitelistFilter = new SimplePackageFilter(whitelist);
     final String fullName = type.getFullyQualifiedName();
     
-    return implicitFilter.matches(fullName) || whitelistFilter.matches(fullName);
+    return implicitFilter.apply(fullName) || whitelistFilter.apply(fullName);
   }
 
   public boolean isBlacklisted(final MetaClass type) {
     final SimplePackageFilter blacklistFilter = new SimplePackageFilter(blacklist);
     final String fullName = type.getFullyQualifiedName();
     
-    return blacklistFilter.matches(fullName);
+    return blacklistFilter.apply(fullName);
   }
 
   public List<Injector> getInjectors(final MetaClass type) {
