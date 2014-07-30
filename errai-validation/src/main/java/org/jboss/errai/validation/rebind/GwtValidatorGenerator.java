@@ -48,6 +48,7 @@ import com.google.gwt.validation.client.GwtValidation;
  * annotations.
  *
  * @author Johannes Barop <jb@barop.de>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 class GwtValidatorGenerator {
 
@@ -80,6 +81,11 @@ class GwtValidatorGenerator {
     // look for beans that use @Valid but no other constraints.
     addBeansAnnotatedWithValid(beans);
     final Set<Class<?>> groups = extractValidationGroups(validationConfig);
+    
+    if (beans.isEmpty() || groups.isEmpty()) {
+      // Nothing to validate
+      return null;
+    }
 
     ClassStructureBuilder<?> builder = ClassBuilder.define("Gwt" + Validator.class.getSimpleName()).publicScope()
             .interfaceDefinition().implementsInterface(Validator.class).body();

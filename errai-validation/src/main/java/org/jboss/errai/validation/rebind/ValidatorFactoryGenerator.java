@@ -23,6 +23,7 @@ import javax.validation.ValidatorFactory;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.util.Stmt;
@@ -58,18 +59,28 @@ public class ValidatorFactoryGenerator extends Generator {
       ClassStructureBuilder<?> builder = ClassBuilder
             .define(packageName + "." + className, AbstractGwtValidatorFactory.class)
             .publicScope()
-            .body()
-            .publicMethod(AbstractGwtValidator.class, "createValidator")
-            .append(
+            .body();
+      
+      BlockBuilder<?> methodBuilder = builder.publicMethod(AbstractGwtValidator.class, "createValidator");
+      if (validatorInterface == null) {
+        methodBuilder.append(
                 Stmt.nestedCall(
-                    Stmt.newObject(BeanValidator.class, Cast.to(AbstractGwtValidator.class,
-                        Stmt.invokeStatic(GWT.class, "create", validatorInterface.getClassDefinition()))
-                        )
+                    Stmt.newObject(BeanValidator.class, Stmt.loadLiteral(null))
+                 )
+                 .returnValue()
+            ).finish();
+      }
+      else {
+        methodBuilder.append(
+            Stmt.nestedCall(
+                Stmt.newObject(BeanValidator.class, Cast.to(AbstractGwtValidator.class,
+                    Stmt.invokeStatic(GWT.class, "create", validatorInterface.getClassDefinition()))
                     )
-                    .returnValue()
-            )
-            .finish();
-      builder.getClassDefinition().addInnerClass(new InnerClass(validatorInterface.getClassDefinition()));
+                )
+                .returnValue()
+        ).finish();
+        builder.getClassDefinition().addInnerClass(new InnerClass(validatorInterface.getClassDefinition()));
+      }
 
       String gen = builder.toJavaString();
       printWriter.append(gen);
