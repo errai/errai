@@ -140,7 +140,10 @@ public class IOCBootstrapGenerator {
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
 
+      log.debug("setting up injection context...");
+      final long injectionStart = System.currentTimeMillis();
       final InjectionContext injectionContext = setupContexts(packageName, className);
+      log.debug("injection context setup in " + (System.currentTimeMillis() - injectionStart) + "ms");
 
       gen = generateBootstrappingClassSource(injectionContext);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
@@ -269,7 +272,10 @@ public class IOCBootstrapGenerator {
 
     final IOCConfigProcessor processorFactory = new IOCConfigProcessor(injectionContext);
 
+    log.debug("Processing IOC extensions...");
+    long start = System.currentTimeMillis();
     processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
+    log.debug("Extensions processed in " + (System.currentTimeMillis() - start) + "ms");
 
     final IOCProcessingContext processingContext = injectionContext.getProcessingContext();
     final ClassStructureBuilder<?> classBuilder = processingContext.getBootstrapBuilder();
@@ -290,9 +296,15 @@ public class IOCBootstrapGenerator {
     @SuppressWarnings("unchecked")
     final BlockBuilder builder = new BlockBuilderImpl(classBuilder.getClassDefinition().getInstanceInitializer(), null);
 
+    log.debug("Running before tasks...");
+    start = System.currentTimeMillis();
     _doRunnableTasks(beforeTasks, builder);
+    log.debug("Tasks run in " + (System.currentTimeMillis() - start) + "ms");
 
+    log.debug("Process dependency graph...");
+    start = System.currentTimeMillis();
     processorFactory.process(processingContext);
+    log.debug("Processed dependency graph in " + (System.currentTimeMillis() - start) + "ms");
 
     int i = 0;
     int beanDeclareMethodCount = 0;
@@ -330,7 +342,10 @@ public class IOCBootstrapGenerator {
       PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs ? "jsni" : "reflection", classBuilder, m);
     }
 
+    log.debug("Running after tasks...");
+    start = System.currentTimeMillis();
     _doRunnableTasks(afterTasks, blockBuilder);
+    log.debug("Tasks run in " + (System.currentTimeMillis() - start) + "ms");
 
     blockBuilder.append(loadVariable(processingContext.getContextVariableReference()).returnValue());
 
