@@ -56,7 +56,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
           generatedCode = getGeneratedCache();
         }
         else {
-          log.debug("Calling generate on " + AbstractAsyncGenerator.this.getClass().getName());
+          log.info("Running generator " + AbstractAsyncGenerator.this.getClass().getName());
           generatedCode = generate(logger, context);
           setGeneratedCache(generatedCode);
         }
