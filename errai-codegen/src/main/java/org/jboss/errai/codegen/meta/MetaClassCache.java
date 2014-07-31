@@ -140,6 +140,10 @@ public class MetaClassCache implements CacheStore {
   public boolean isKnownType(String fqcn) {
     return PRIMARY_CLASS_CACHE.containsKey(fqcn);
   }
+  
+  public boolean isNewOrUpdated(String fqcn) {
+    return invalidated.contains(fqcn);
+  }
 
   private class CacheEntry {
     final MetaClass cachedClass;

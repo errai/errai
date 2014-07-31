@@ -544,6 +544,10 @@ public final class MetaClassFactory {
   public static Collection<MetaClass> getAllNewOrUpdatedClasses() {
     return getMetaClassCache().getAllNewOrUpdated();
   }
+  
+  public static boolean isNewOrUpdated(String fqcn) {
+    return getMetaClassCache().isNewOrUpdated(fqcn);
+  }
 
   public static Set<String> getAllRemovedClasses() {
     return getMetaClassCache().getAllRemovedClasses();
