@@ -276,7 +276,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     if (resourcePath.startsWith("/"))
       relativePath = resourcePath;
     else
-      relativePath = bundleClass.getPackageName().replace('.', File.separatorChar);
+      // Do NOT use File.separatorChar here: Url.getPath() always uses forward-slashes
+      relativePath = bundleClass.getPackageName().replace('.', '/');
 
     return fullPath.substring(0, fullPath.indexOf(relativePath));
   }
