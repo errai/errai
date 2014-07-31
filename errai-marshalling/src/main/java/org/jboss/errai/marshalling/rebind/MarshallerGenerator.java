@@ -18,6 +18,8 @@ package org.jboss.errai.marshalling.rebind;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -53,6 +55,10 @@ public class MarshallerGenerator extends IncrementalGenerator {
   private static final Logger log = LoggerFactory.getLogger(MarshallerGenerator.class);
   private final String packageName = MarshallerFramework.class.getPackage().getName();
   
+  // We're keeping this cache of portable types to compare their contents and
+  // find out if they have changed since the last refresh.
+  private static Map<String, MetaClass> cachedPortableTypes = new ConcurrentHashMap<String, MetaClass>();
+  
   /*
    * A version id. Increment this as needed, when structural changes are made to
    * the generated output, specifically with respect to it's effect on the
@@ -69,7 +75,8 @@ public class MarshallerGenerator extends IncrementalGenerator {
     String className = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
     String marshallerTypeName = packageName + "." + className;
     
-    if (!MetaClassFactory.isNewOrUpdated(fullyQualifiedTypeName)) {
+    MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
+    if (cachedType != null && cachedType.hashContent() == type.hashContent()) {
       log.debug("Reusing cached marshaller for "  + fullyQualifiedTypeName);
       return new RebindResult(RebindMode.USE_ALL_CACHED, marshallerTypeName);
     }
@@ -78,6 +85,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter != null) {
       generateMarshaller(context, type, className, marshallerTypeName, logger, printWriter);
+      cachedPortableTypes.put(fullyQualifiedTypeName, type);
       return new RebindResult(RebindMode.USE_ALL_NEW, marshallerTypeName);
     }
     else {
