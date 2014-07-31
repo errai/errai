@@ -246,15 +246,20 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     final Set<String> completedPaths = new HashSet<String>();
 
     for (final MetaClass bundleClass : bundleAnnotatedClasses) {
-      final String bundlePath = bundleClass.asClass().getAnnotation(Bundle.class).value();
+      final String bundlePath = getMessageBundlePath(bundleClass);
       if (bundlePath != null && !completedPaths.contains(bundlePath)) {
-        final URL resource = bundleClass.asClass().getResource(bundlePath);
+        final URL resource = getClass().getClassLoader().getResource(bundlePath);
+        if (resource == null) {
+          throw new GenerationException("Failed to load bundle " + bundlePath + 
+                  " defined on class " + bundleClass.getFullyQualifiedName());
+        }
+        
         final URL classpathElement;
         final String pathRoot = getPathRoot(bundleClass, resource);
         try {
           classpathElement = new File(pathRoot).toURI().toURL();
         } catch (MalformedURLException e) {
-          // TODO log this
+          log.warn("Failed to construct URL for i18n bundle defined in " + bundleClass);
           continue;
         }
         urls.add(classpathElement);
