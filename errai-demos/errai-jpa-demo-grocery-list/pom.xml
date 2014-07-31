@@ -680,7 +680,7 @@
         <configuration>
           <strict>false</strict>
           <logLevel>INFO</logLevel>
-          <runTarget>index.html</runTarget>
+          <runTarget>/</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:+UseNUMA</extraJvmArgs>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>                

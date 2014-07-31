@@ -339,7 +339,7 @@
           <noServer>false</noServer>
           <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
           <disableCastChecking>true</disableCastChecking>
-          <runTarget>${errai.dev.context}/index.html</runTarget>
+          <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.javaopts=-XX:MaxPermSize=256m -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
