@@ -4,13 +4,20 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.io.File;
+import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import javax.enterprise.util.Nonbinding;
+import javax.inject.Named;
+import javax.inject.Qualifier;
+
 import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -35,24 +42,24 @@ import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.AnnotationComparator;
 import org.jboss.errai.ioc.client.QualifierEqualityFactory;
 import org.jboss.errai.ioc.client.QualifierUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Named;
-import javax.inject.Qualifier;
-import java.io.File;
-import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock
  */
 public class QualifierEqualityFactoryGenerator extends Generator {
+  
+  private static final Logger log = LoggerFactory.getLogger(QualifierEqualityFactoryGenerator.class);
+  
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
@@ -61,19 +68,21 @@ public class QualifierEqualityFactoryGenerator extends Generator {
       final String packageName = classType.getPackage().getName();
       final String className = classType.getSimpleSourceName() + "Impl";
 
-      logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
+      log.info("Generating QualifierEqualityFactory...");
 
+      final long start = System.currentTimeMillis();
+      
       // Generate class source code
       generateQualifierEqualityFactory(packageName, className, logger, context);
+
+      log.info("Generated QualifierEqualityFactory in " + (System.currentTimeMillis() - start) + "ms");
 
       // return the fully qualified name of the class generated
       return packageName + "." + className;
     }
     catch (Throwable e) {
-      // record sendNowWith logger that Map generation threw an exception
-      e.printStackTrace();
-      logger.log(TreeLogger.ERROR, "Error generating extensions", e);
-      throw new RuntimeException("error generating", e);
+      log.error("Error generating QualifierEqualityFactory", e);
+      throw new UnableToCompleteException();
     }
   }
 
@@ -246,7 +255,6 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     hashCodeOfBuilder.finish();
 
-    // finish method;
     final AnonymousClassStructureBuilder classStructureBuilder = isEqualBuilder.finish();
 
     return classStructureBuilder.finish();
