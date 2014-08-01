@@ -41,6 +41,9 @@ import com.google.gwt.core.ext.RebindMode;
 import com.google.gwt.core.ext.RebindResult;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JPackage;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * Generator used to generate marshallers for custom portable types
@@ -80,7 +83,8 @@ public class MarshallerGenerator extends IncrementalGenerator {
     if (printWriter == null) {
       return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);      
     }
-    else if (cachedType != null && cachedType.hashContent() == type.hashContent()) {
+    else if (cachedType != null && cachedType.hashContent() == type.hashContent() 
+            && context.isGeneratorResultCachingEnabled()) {
       log.debug("Reusing cached marshaller for "  + fullyQualifiedTypeName);
       return new RebindResult(RebindMode.USE_ALL_CACHED, marshallerTypeName);
     }
