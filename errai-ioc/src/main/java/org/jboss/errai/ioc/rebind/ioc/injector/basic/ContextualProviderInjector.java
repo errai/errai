@@ -1,19 +1,16 @@
 /*
  * Copyright 2013 JBoss, by Red Hat, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package org.jboss.errai.ioc.rebind.ioc.injector.basic;
 
 import org.jboss.errai.codegen.Statement;
@@ -32,11 +29,12 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {
+
   private final Injector providerInjector;
 
   public ContextualProviderInjector(final MetaClass type,
-                                    final MetaClass providerType,
-                                    final InjectionContext context) {
+      final MetaClass providerType,
+      final InjectionContext context) {
     super(type, context);
     this.providerInjector = context.getInjectorFactory().getTypeInjector(providerType, context);
     context.registerInjector(providerInjector);
@@ -75,7 +73,11 @@ public class ContextualProviderInjector extends TypeInjector {
         throw new RuntimeException("illegal task type: " + injectableInstance.getEnclosingType());
     }
 
-    final MetaType[] typeArgs = pType.getTypeParameters();
+    MetaType[] typeArgs = pType.getTypeParameters();
+    if (typeArgs == null) {
+      typeArgs = new MetaType[0];
+    }
+
     final MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
 
     for (int i = 0; i < typeArgs.length; i++) {
@@ -83,8 +85,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
       if (argType instanceof MetaClass) {
         typeArgsClasses[i] = (MetaClass) argType;
-      }
-      else if (argType instanceof MetaParameterizedType) {
+      } else if (argType instanceof MetaParameterizedType) {
         typeArgsClasses[i] = (MetaClass) ((MetaParameterizedType) argType).getRawType();
       }
     }
@@ -94,10 +95,9 @@ public class ContextualProviderInjector extends TypeInjector {
     if (providerInjector.isSingleton() && providerInjector.isRendered()) {
       return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("provide", typeArgsClasses,
           qualifiers.length != 0 ? qualifiers : null);
-    }
-    else {
+    } else {
       return Stmt.nestedCall(providerInjector.getBeanInstance(injectableInstance))
-              .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
+        .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
   }
 
@@ -110,6 +110,5 @@ public class ContextualProviderInjector extends TypeInjector {
 
     return parmTypesSatisfied;
   }
-  
-  
+
 }
