@@ -70,29 +70,25 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
   @Override
   public RebindResult generateIncrementally(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
-    String fullyQualifiedTypeName = distillTargetTypeName(typeName);
-    MetaClass type = MetaClassFactory.get(fullyQualifiedTypeName);
-    String className = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
-    String marshallerTypeName = packageName + "." + className;
+    final String fullyQualifiedTypeName = distillTargetTypeName(typeName);
+    final MetaClass type = MetaClassFactory.get(fullyQualifiedTypeName);
+    final String className = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
+    final String marshallerTypeName = packageName + "." + className;
+    final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
     
-    MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
-    if (cachedType != null && cachedType.hashContent() == type.hashContent()) {
+    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+    if (printWriter == null) {
+      return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);      
+    }
+    else if (cachedType != null && cachedType.hashContent() == type.hashContent()) {
       log.debug("Reusing cached marshaller for "  + fullyQualifiedTypeName);
       return new RebindResult(RebindMode.USE_ALL_CACHED, marshallerTypeName);
     }
-    
-    log.debug("Generating marshaller for "  + fullyQualifiedTypeName);
-    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    if (printWriter != null) {
+    else {
+      log.debug("Generating marshaller for "  + fullyQualifiedTypeName);
       generateMarshaller(context, type, className, marshallerTypeName, logger, printWriter);
       cachedPortableTypes.put(fullyQualifiedTypeName, type);
       return new RebindResult(RebindMode.USE_ALL_NEW, marshallerTypeName);
-    }
-    else {
-      // This should never happen as the generated marshaller factory keeps a
-      // map of marshaller instances. Therefore, GWT.create should never be
-      // invoked twice for the same marshaller.
-      return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);
     }
   }
 
