@@ -29,13 +29,16 @@ import javax.interceptor.InvocationContext;
 import org.jboss.errai.security.client.shared.ServiceInterface;
 import org.jboss.errai.security.res.Service;
 import org.jboss.errai.security.server.ServerSecurityRoleInterceptor;
+import org.jboss.errai.security.shared.api.RequiredRolesProvider;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
+import org.jboss.errai.security.shared.roles.SharedRequiredRolesExtractorImpl;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,12 +47,23 @@ import org.junit.Test;
  */
 public class SecurityRoleInterceptorTest {
   private AuthenticationService authenticationService;
+  private RequiredRolesExtractor roleExtractor;
   private ServerSecurityRoleInterceptor interceptor;
 
   @Before
   public void setUp() throws Exception {
     authenticationService = mock(AuthenticationService.class);
-    interceptor = new ServerSecurityRoleInterceptor(authenticationService);
+    roleExtractor = new SharedRequiredRolesExtractorImpl() {
+      @Override
+      protected RequiredRolesProvider getProviderInstance(Class<? extends RequiredRolesProvider> providerType) {
+        return null;
+      }
+
+      @Override
+      protected void destroyProviderInstance(RequiredRolesProvider instance) {
+      }
+    };
+    interceptor = new ServerSecurityRoleInterceptor(authenticationService, roleExtractor);
   }
 
   @Test

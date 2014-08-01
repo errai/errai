@@ -1,6 +1,6 @@
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import org.jboss.errai.ui.nav.client.local.PageRole;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 
-public class MissingPageRole implements PageRole {
+public class MissingPageRole implements UniquePageRole {
 }

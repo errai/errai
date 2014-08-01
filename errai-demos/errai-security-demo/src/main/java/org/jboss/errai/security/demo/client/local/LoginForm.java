@@ -41,13 +41,14 @@ import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * A {@link LoginPage} that uses the {@link AuthenticationService}.
- * 
+ *
  * The primary of method of logging in users in Errai Security is the injecting
  * a {@link Caller}, used to build an RPC to {@link AuthenticationService}.
  * Caching is automatically handled so that after logging in or out, subsequent
@@ -68,6 +69,9 @@ public class LoginForm extends AbstractForm {
   private SecurityContext securityContext;
 
   @Inject
+  private KeycloakActivator keycloakActivator;
+
+  @Inject
   @DataField
   private TextBox username;
 
@@ -84,6 +88,11 @@ public class LoginForm extends AbstractForm {
 
   @DataField
   private Element alert = DOM.createDiv();
+
+  @Inject
+  @DataField
+  @Keycloak
+  private Anchor keycloakAnchor;
 
   @Override
   protected FormElement getFormElement() {
@@ -112,7 +121,7 @@ public class LoginForm extends AbstractForm {
       }
     }).login(username.getText(), password.getText());
   }
-  
+
   @PageShowing
   private void isLoggedIn() {
     authServiceCaller.call(new RemoteCallback<User>() {

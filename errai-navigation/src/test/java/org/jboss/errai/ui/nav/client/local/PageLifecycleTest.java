@@ -1,13 +1,19 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.lifecycleTracer;
+import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.*;
 
 import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.lifecycle.api.Access;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
+import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListenerGenerator;
+import org.jboss.errai.ui.nav.client.local.testpages.ApplicationScopedLifecycleCountingPage;
 import org.jboss.errai.ui.nav.client.local.testpages.ApplicationScopedPage;
+import org.jboss.errai.ui.nav.client.local.testpages.DependentLifecycleCountingPage;
 import org.jboss.errai.ui.nav.client.local.testpages.EntryPointPage;
 import org.jboss.errai.ui.nav.client.local.testpages.ExplicitlyDependentScopedPage;
 import org.jboss.errai.ui.nav.client.local.testpages.ImplicitlyDependentScopedPage;
@@ -37,6 +43,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
   private final SyncBeanManager beanManager = IOC.getBeanManager();
   private Navigation navigation;
   private HandlerRegistration historyHandlerRegistration;
+  private HistoryTokenFactory htFactory;
 
   @Override
   public String getModuleName() {
@@ -50,6 +57,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     disableBus = true;
     super.gwtSetUp();
     navigation = beanManager.lookupBean(Navigation.class).getInstance();
+    htFactory = beanManager.lookupBean(HistoryTokenFactory.class).getInstance();
   }
 
   @Override
@@ -203,6 +211,72 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals(0, EntryPointPage.getPreDestroyCallCount());
   }
 
+  public void testDependentScopedPageIsDestroyedAfterIOCLifecycleRedirect() throws Exception {
+    assertEquals(0, DependentLifecycleCountingPage.creationCounter);
+    assertEquals(0, DependentLifecycleCountingPage.destructionCounter);
+
+    // Creates a listener to veto navigation to DependentLifecycleCountingPages.
+    IOC.registerLifecycleListener(DependentLifecycleCountingPage.class,
+            new LifecycleListenerGenerator<DependentLifecycleCountingPage>() {
+
+              @Override
+              public LifecycleListener<DependentLifecycleCountingPage> newInstance() {
+                return new LifecycleListener<DependentLifecycleCountingPage>() {
+
+                  @Override
+                  public void observeEvent(LifecycleEvent<DependentLifecycleCountingPage> event) {
+                    if (event.getInstance() instanceof DependentLifecycleCountingPage) {
+                      event.veto();
+                    }
+                  }
+
+                  @Override
+                  public boolean isObserveableEventType(
+                          Class<? extends LifecycleEvent<DependentLifecycleCountingPage>> eventType) {
+                    return Access.class.equals(eventType);
+                  }
+                };
+              }
+            });
+
+    navigation.goTo(DependentLifecycleCountingPage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(1, DependentLifecycleCountingPage.creationCounter);
+    assertEquals(1, DependentLifecycleCountingPage.destructionCounter);
+  }
+
+  public void testApplicationScopedPageIsNotDestroyedAfterIOCLifecycleRedirect() throws Exception {
+    final int creations = ApplicationScopedLifecycleCountingPage.creationCounter;
+    final int destructions = ApplicationScopedLifecycleCountingPage.destructionCounter;
+
+    // Creates a listener to veto navigation to DependentLifecycleCountingPages.
+    IOC.registerLifecycleListener(ApplicationScopedLifecycleCountingPage.class,
+            new LifecycleListenerGenerator<ApplicationScopedLifecycleCountingPage>() {
+
+              @Override
+              public LifecycleListener<ApplicationScopedLifecycleCountingPage> newInstance() {
+                return new LifecycleListener<ApplicationScopedLifecycleCountingPage>() {
+
+                  @Override
+                  public void observeEvent(LifecycleEvent<ApplicationScopedLifecycleCountingPage> event) {
+                    if (event.getInstance() instanceof ApplicationScopedLifecycleCountingPage) {
+                      event.veto();
+                    }
+                  }
+
+                  @Override
+                  public boolean isObserveableEventType(
+                          Class<? extends LifecycleEvent<ApplicationScopedLifecycleCountingPage>> eventType) {
+                    return Access.class.equals(eventType);
+                  }
+                };
+              }
+            });
+
+    navigation.goTo(ApplicationScopedLifecycleCountingPage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(creations, ApplicationScopedLifecycleCountingPage.creationCounter);
+    assertEquals(destructions, ApplicationScopedLifecycleCountingPage.destructionCounter);
+  }
+
   public void testPageWithInheritedLifecycleMethods() throws Exception {
     PageWithInheritedLifecycleMethods page = beanManager.lookupBean(PageWithInheritedLifecycleMethods.class).getInstance();
     page.beforePageShowCallCount = 0;
@@ -237,7 +311,7 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals(1, page.beforeShowCallCount);
     assertEquals(1, page.afterShowCallCount);
 
-    HistoryToken expectedToken = HistoryToken.of("PageWithPageShowingHistoryTokenMethod", ImmutableMultimap.of("state", "footastic"));
+    HistoryToken expectedToken = htFactory.createHistoryToken("PageWithPageShowingHistoryTokenMethod", ImmutableMultimap.of("state", "footastic"));
     assertEquals(expectedToken, page.mostRecentStateToken);
   }
 

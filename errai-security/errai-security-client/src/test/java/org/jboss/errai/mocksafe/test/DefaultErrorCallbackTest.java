@@ -1,7 +1,23 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2014, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.mocksafe.test;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -18,7 +34,6 @@ import org.jboss.errai.security.client.local.callback.DefaultBusSecurityErrorCal
 import org.jboss.errai.security.client.local.callback.DefaultRestSecurityErrorCallback;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
-import org.jboss.errai.security.util.GwtMockitoRunnerExtension;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
@@ -28,8 +43,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import com.google.gwt.http.client.Request;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 
-@RunWith(GwtMockitoRunnerExtension.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class DefaultErrorCallbackTest {
 
   @Mock
@@ -48,14 +64,14 @@ public class DefaultErrorCallbackTest {
   public void testBusAuthenticationErrorNavigatesToLoginPage() throws Exception {
     busErrorCallback.handleError(new UnauthenticatedException());
 
-    verify(securityContext).navigateToPage(LoginPage.class);
+    verify(securityContext).redirectToLoginPage();
   }
 
   @Test
   public void testBusAuthorizationErrorNavigatesToSecurityErrorPage() throws Exception {
     busErrorCallback.handleError(new UnauthorizedException());
 
-    verify(securityContext).navigateToPage(SecurityError.class);
+    verify(securityContext).redirectToSecurityErrorPage();
   }
 
   @Test
@@ -68,7 +84,7 @@ public class DefaultErrorCallbackTest {
   @Test
   public void testBusErrorCallbackThrowsErrorWhenNoLoginPageExists() throws Exception {
     final MissingPageRoleException toBeThrown = new MissingPageRoleException(LoginPage.class);
-    doThrow(toBeThrown).when(securityContext).navigateToPage(LoginPage.class);
+    doThrow(toBeThrown).when(securityContext).redirectToLoginPage();
 
     try {
       busErrorCallback.handleError(new UnauthenticatedException());
@@ -76,7 +92,7 @@ public class DefaultErrorCallbackTest {
     }
     catch (RuntimeException ex) {
       // Precondition
-      verify(securityContext).navigateToPage(LoginPage.class);
+      verify(securityContext).redirectToLoginPage();
 
       assertSame(toBeThrown, ex.getCause());
     }
@@ -85,7 +101,7 @@ public class DefaultErrorCallbackTest {
   @Test
   public void testBusErrorCallbackThrowsErrorWhenNoSecurityErrorPageExists() throws Exception {
     final MissingPageRoleException toBeThrown = new MissingPageRoleException(SecurityError.class);
-    doThrow(toBeThrown).when(securityContext).navigateToPage(SecurityError.class);
+    doThrow(toBeThrown).when(securityContext).redirectToSecurityErrorPage();
 
     try {
       busErrorCallback.handleError(new UnauthorizedException());
@@ -93,7 +109,7 @@ public class DefaultErrorCallbackTest {
     }
     catch (RuntimeException ex) {
       // Precondition
-      verify(securityContext).navigateToPage(SecurityError.class);
+      verify(securityContext).redirectToSecurityErrorPage();
 
       assertSame(toBeThrown, ex.getCause());
     }
@@ -106,7 +122,7 @@ public class DefaultErrorCallbackTest {
     final boolean retVal = restErrorCallback.error(mock(Request.class), new UnauthenticatedException());
 
     assertFalse(retVal);
-    verify(securityContext).navigateToPage(LoginPage.class);
+    verify(securityContext).redirectToLoginPage();
   }
 
   @Test
@@ -116,7 +132,7 @@ public class DefaultErrorCallbackTest {
     final boolean retVal = restErrorCallback.error(mock(Request.class), new UnauthorizedException());
 
     assertFalse(retVal);
-    verify(securityContext).navigateToPage(SecurityError.class);
+    verify(securityContext).redirectToSecurityErrorPage();
   }
 
   @Test
@@ -133,7 +149,7 @@ public class DefaultErrorCallbackTest {
   public void testRestErrorCallbackThrowsErrorWhenNoSecurityErrorPageExists() throws Exception {
     final MissingPageRoleException toBeThrown = new MissingPageRoleException(SecurityError.class);
 
-    doThrow(toBeThrown).when(securityContext).navigateToPage(SecurityError.class);
+    doThrow(toBeThrown).when(securityContext).redirectToSecurityErrorPage();
     when(wrapped.error(any(Request.class), any(Throwable.class))).thenReturn(true);
 
     try {
@@ -142,7 +158,7 @@ public class DefaultErrorCallbackTest {
     }
     catch (RuntimeException ex) {
       // Precondition
-      verify(securityContext).navigateToPage(SecurityError.class);
+      verify(securityContext).redirectToSecurityErrorPage();
 
       assertSame(toBeThrown, ex.getCause());
     }
@@ -152,7 +168,7 @@ public class DefaultErrorCallbackTest {
   public void testRestErrorCallbackThrowsErrorWhenNoLoginPageExists() throws Exception {
     final MissingPageRoleException toBeThrown = new MissingPageRoleException(LoginPage.class);
 
-    doThrow(toBeThrown).when(securityContext).navigateToPage(LoginPage.class);
+    doThrow(toBeThrown).when(securityContext).redirectToLoginPage();
     when(wrapped.error(any(Request.class), any(Throwable.class))).thenReturn(true);
 
     try {
@@ -161,7 +177,7 @@ public class DefaultErrorCallbackTest {
     }
     catch (RuntimeException ex) {
       // Precondition
-      verify(securityContext).navigateToPage(LoginPage.class);
+      verify(securityContext).redirectToLoginPage();
 
       assertSame(toBeThrown, ex.getCause());
     }

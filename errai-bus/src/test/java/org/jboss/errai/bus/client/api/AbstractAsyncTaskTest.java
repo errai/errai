@@ -68,7 +68,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   public static final Runnable BLOW_UP = new Runnable() {
     @Override
     public void run() {
-      throw new RuntimeException();
+      throw new RuntimeException("This exception is intentionally thrown as part of a test.");
     };
   };
 
@@ -176,6 +176,44 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
       @Override
       public void run() {
         assertEquals(1, cr.getRunCount());
+        finishTest();
+      }
+    });
+    delayTestFinish(5000);
+  }
+
+  public void testIsFinishedAfterTaskFinishes() throws Exception {
+    final CountingRunnable countingRunnable = new CountingRunnable();
+    final AsyncTask task = getTaskUnderTest(countingRunnable);
+
+    runAfterTaskFinished(new Runnable() {
+      @Override
+      public void run() {
+        assertEquals(countingRunnable.runCount, 1);
+        assertTrue(task.isFinished());
+        finishTest();
+      }
+    });
+    delayTestFinish(5000);
+  }
+
+  public void testIsFinishedAfterTaskCancelled() throws Exception {
+    final CountingRunnable countingRunnable = new CountingRunnable();
+    final AsyncTask task = getTaskUnderTest(countingRunnable);
+
+    task.cancel(false);
+
+    assertEquals(countingRunnable.runCount, 0);
+    assertTrue(task.isFinished());
+  }
+
+  public void testIsFinishedAfterTaskFailure() throws Exception {
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable(BLOW_UP));
+
+    runAfterTaskFinished(new Runnable() {
+      @Override
+      public void run() {
+        assertTrue(task.isFinished());
         finishTest();
       }
     });

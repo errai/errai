@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+
 import org.jboss.errai.codegen.meta.*;
 import org.jboss.errai.codegen.util.GenUtil;
 
@@ -72,6 +73,11 @@ public class GWTConstructor extends MetaConstructor {
   @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
+  }
+  
+  @Override
+  public String getDeclaringClassName() {
+    return declaringClass.getName();
   }
 
   @Override

@@ -1,4 +1,4 @@
-= Errai Forge 2.1 Addon
+= Errai Forge 2 Addon
 
 === What is Forge
 
@@ -12,7 +12,7 @@ Currently the Errai Forge Addon has two uses:
 
 * Adding or removing Errai features to Maven projects.
 
-Using Forge 2.1 and the Errai Forge Addon, it is now simpler than ever to get an Errai project started.
+Using Forge 2 and the Errai Forge Addon, it is now simpler than ever to get an Errai project started.
 
 === How can I use the Errai Forge Addon?
 

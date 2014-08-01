@@ -16,8 +16,7 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,6 +97,33 @@ public class AbstractPluginFacetTest extends BasePluginFacetTest {
                               .addConfigurationElement(
                                       ConfigurationElementBuilder.create().setName("leaf").setText("leafText"))) });
       dependencies = Collections.emptyList();
+    }
+  }
+
+  @Dependent
+  public static class InitHavingPlugin extends AbstractPluginFacet {
+    private int initCalls;
+    private Project initProject;
+
+    public InitHavingPlugin() {
+      pluginArtifact = DependencyArtifact.Clean;
+      configurations = Collections.emptyList();
+      executions = Collections.emptyList();
+      dependencies = Collections.emptyList();
+    }
+
+    public Project getInitProject() {
+      return initProject;
+    }
+
+    @Override
+    protected void init() {
+      initCalls++;
+      initProject = getProject();
+    }
+
+    public int getInitCallCount() {
+      return initCalls;
     }
   }
 
@@ -196,6 +222,23 @@ public class AbstractPluginFacetTest extends BasePluginFacetTest {
 
     final MavenPluginFacet pluginFacet = project.getFacet(MavenPluginFacet.class);
     assertFalse(pluginFacet.hasPlugin(DependencyBuilder.create(facet.getPluginArtifact().toString()).getCoordinate()));
+  }
+
+  @Test
+  public void initShouldBeCalledExactlyOnce() throws Exception {
+    final Project project = initializeJavaProject();
+
+    final InitHavingPlugin facet = facetFactory.create(project, InitHavingPlugin.class);
+
+    assertEquals(0 , facet.getInitCallCount());
+
+    facetFactory.install(project, facet);
+    assertTrue(facet.isInstalled());
+    assertEquals(1 , facet.getInitCallCount());
+
+    facet.uninstall();
+    assertFalse(facet.isInstalled());
+    assertEquals(1 , facet.getInitCallCount());
   }
 
   private void checkPlugin(Project project, AbstractPluginFacet facet) {

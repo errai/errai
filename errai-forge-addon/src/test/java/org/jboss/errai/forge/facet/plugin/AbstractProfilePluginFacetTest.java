@@ -16,6 +16,7 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -49,15 +50,19 @@ import org.junit.Test;
 public class AbstractProfilePluginFacetTest extends BasePluginFacetTest {
 
   public static abstract class BaseTestAbstractProfilePluginFacet extends AbstractProfilePluginFacet {
+    @Override
     public DependencyArtifact getPluginArtifact() {
       return pluginArtifact;
     }
+    @Override
     public Collection<ConfigurationElement> getConfigurations() {
       return configurations;
     }
+    @Override
     public Collection<DependencyBuilder> getDependencies() {
       return dependencies;
     }
+    @Override
     public Collection<PluginExecution> getPluginExecutions() {
       return executions;
     }
@@ -120,6 +125,33 @@ public class AbstractProfilePluginFacetTest extends BasePluginFacetTest {
               .addConfigurationElement(ConfigurationElementBuilder.create().setName("leaf").setText("leafText")));
       exec.setConfiguration(adapter.getConfiguration());
       executions = Arrays.asList(new PluginExecution[] { exec });
+    }
+  }
+
+  @Dependent
+  public static class InitHavingPlugin extends BaseTestAbstractProfilePluginFacet {
+    private int initCalls;
+    private Project initProject;
+
+    public InitHavingPlugin() {
+      pluginArtifact = DependencyArtifact.Clean;
+      configurations = Collections.emptyList();
+      executions = Collections.emptyList();
+      dependencies = Collections.emptyList();
+    }
+
+    public Project getInitProject() {
+      return initProject;
+    }
+
+    @Override
+    protected void init() {
+      initCalls++;
+      initProject = getProject();
+    }
+
+    public int getInitCallCount() {
+      return initCalls;
     }
   }
 
@@ -210,6 +242,23 @@ public class AbstractProfilePluginFacetTest extends BasePluginFacetTest {
     checkPlugin(project, facet, AbstractBaseFacet.MAIN_PROFILE);
 
     assertTrue(testFacet.isInstalled());
+  }
+
+  @Test
+  public void initShouldBeCalledExactlyOnce() throws Exception {
+    final Project project = initializeJavaProject();
+
+    final InitHavingPlugin facet = facetFactory.create(project, InitHavingPlugin.class);
+
+    assertEquals(0 , facet.getInitCallCount());
+
+    facetFactory.install(project, facet);
+    assertTrue(facet.isInstalled());
+    assertEquals(1 , facet.getInitCallCount());
+
+    facet.uninstall();
+    assertFalse(facet.isInstalled());
+    assertEquals(1 , facet.getInitCallCount());
   }
 
   protected void checkPlugin(Project project, AbstractProfilePluginFacet facet, String profileId) {

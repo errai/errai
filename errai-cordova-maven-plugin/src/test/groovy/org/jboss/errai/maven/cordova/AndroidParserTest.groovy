@@ -28,26 +28,26 @@ class AndroidParserTest extends GroovyTestCase {
 
         strings = new File(dir, 'strings.xml')
         strings.createNewFile()
-        strings << '''
+        strings.write('''
             <test>
                 <string name="app_name">HelloCordova</string>
             </test>
-        '''
+        ''')
 
         manifest = new File(dir, 'AndroidManifest.xml')
-        manifest << '<manifest package="test"/>'
+        manifest.write('<manifest package="test"/>')
 
         androidConfig = new File(dir, 'config.xml')
-        androidConfig <<
+        androidConfig.write(
         '''
             <cordova>
                 <access origin="http://google.com" />
                 <preference name="fullscreen" value="true" />
             </cordova>
-        '''
+        ''')
 
         configFile = File.createTempFile('test', 'xml')
-        configFile <<
+        configFile.write(
         '''
             <widget id="org.jboss.test">
                 <name>The configured name of the app</name>
@@ -56,7 +56,7 @@ class AndroidParserTest extends GroovyTestCase {
                 <preference name="fullscreen" value="false" />
                 <preference name="target-device" value="universal" />
             </widget>
-        '''
+        ''')
 
         parser = new AndroidParser(new File('/tmp/src'))
     }

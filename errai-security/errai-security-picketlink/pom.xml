@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-security</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>errai-security-picketlink</artifactId>
   <name>Errai::Security::PicketLink</name>
@@ -18,22 +18,19 @@
 
     <dependency>
       <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-api</artifactId>
-      <version>${picketlink.version}</version>
+      <artifactId>picketlink-api</artifactId>      
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-impl</artifactId>
-      <version>${picketlink.version}</version>
+      <artifactId>picketlink-impl</artifactId>      
     </dependency>
 
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <scope>provided</scope>
-      <version>${servlet.api.version}</version>
+      <scope>provided</scope>      
     </dependency>
 
     <dependency>
@@ -47,20 +44,8 @@
       <artifactId>jboss-logging</artifactId>
       <scope>test</scope>
     </dependency>
-    
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skipTests>true</skipTests>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  
   <profiles>
     <profile>
       <id>integration-test</id>
@@ -70,22 +55,23 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
-              <forkMode>always</forkMode>
-              <argLine>-Xmx1500m ${argLine}</argLine>
-
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/target/test-classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
-              <useManifestOnlyJar>true</useManifestOnlyJar>
-
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>selenium-maven-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
             </configuration>
           </plugin>
         </plugins>

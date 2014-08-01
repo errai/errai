@@ -19,14 +19,17 @@ package org.jboss.errai.security.client.local;
 import junit.framework.AssertionFailedError;
 
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.security.shared.exception.SecurityException;
+import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
-import org.jboss.errai.security.shared.exception.SecurityException;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -38,6 +41,7 @@ import com.google.gwt.user.client.Timer;
 abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
 
   public long TIME_LIMIT = 60000;
+  protected Timer timer;
 
   @Override
   protected void gwtSetUp() throws Exception {
@@ -45,7 +49,11 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
     GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
       @Override
       public void onUncaughtException(Throwable t) {
-        if (!(t instanceof SecurityException)) {
+        /*
+         * Lest we forget: passing null to the default uncaught exception handler makes the test
+         * immediately finish successfully.
+         */
+        if (!(t instanceof SecurityException) && t != null) {
           // let's not swallow assertion errors
           oldHandler.onUncaughtException(t);
         }
@@ -66,6 +74,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
 
   @Override
   protected void gwtTearDown() throws Exception {
+    timer.cancel();
     ((ClientMessageBusImpl) ErraiBus.get()).removeAllUncaughtExceptionHandlers();
     super.gwtTearDown();
   }
@@ -89,7 +98,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
     delayTestFinish((int) (2 * duration));
     final long startTime = System.currentTimeMillis();
     final int interval = 500;
-    new Timer() {
+    timer = new Timer() {
       @Override
       public void run() {
         final long buffer = 4 * interval;
@@ -114,7 +123,25 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
           finishTest();
         }
       }
-    }.scheduleRepeating(interval);
+    };
+    timer.scheduleRepeating(interval);
+    timer.run();
+  }
+  
+  protected void afterLogout(final Runnable test) {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<Void>() {
+
+          @Override
+          public void callback(Void response) {
+            test.run();
+          }
+        }, AuthenticationService.class).logout();
+      }
+    });
   }
 
 }

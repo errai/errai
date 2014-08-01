@@ -31,6 +31,7 @@ import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ModuleVault.Module;
 import org.jboss.errai.forge.facet.resource.AbstractXmlResourceFacet;
+import org.jboss.errai.forge.xml.ElementFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -74,17 +75,17 @@ public abstract class AbstractModuleFacet extends AbstractXmlResourceFacet {
   }
 
   @Override
-  protected Map<XPathExpression, Node> getRemovalMap(final XPath xPath, final Document doc) {
+  protected Map<XPathExpression, Node> getRemovalMap(final XPath xPath, final ElementFactory elemFactory) {
     return new HashMap<XPathExpression, Node>(0);
   }
 
   @Override
-  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException, XPathExpressionException {
     final XPathExpression parentExpression = xPath.compile(xPathRootExpression);
     final Collection<Node> nodes = new ArrayList<Node>(modules.size());
     for (final Module module : modules) {
-      final Element inherits = doc.createElement("inherits");
+      final Element inherits = elemFactory.createElement("inherits");
       inherits.setAttribute("name", module.getLogicalName());
       nodes.add(inherits);
     }
@@ -96,7 +97,7 @@ public abstract class AbstractModuleFacet extends AbstractXmlResourceFacet {
   }
 
   @Override
-  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException {
     return new HashMap<XPathExpression, Node>(0);
   }

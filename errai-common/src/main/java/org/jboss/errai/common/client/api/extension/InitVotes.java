@@ -76,7 +76,8 @@ public final class InitVotes {
     synchronized (lock) {
       logger.info("init polling system reset ...");
 
-      cancelFailTimer();
+      idempotentStopFailTimer();
+      idempotentStopDelayTimer();
       _clearOneTimeRunnables(preInitCallbacks);
       _clearOneTimeRunnables(initCallbacks);
       for (final Map.Entry<String, List<Runnable>> entry : dependencyCallbacks.entrySet()) {
@@ -181,7 +182,7 @@ public final class InitVotes {
       @Override
       public void run() {
         if (armed && waitForSet.isEmpty()) {
-          cancelFailTimer();
+          idempotentStopFailTimer();
           finishInit();
           _initWait = false;
         }
@@ -297,9 +298,7 @@ public final class InitVotes {
 
       armed = true;
       _initWait = false;
-      if (initTimeout != null && !initTimeout.isCancelled()) {
-        initTimeout.cancel(true);
-      }
+      idempotentStopFailTimer();
 
       initTimeout = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, timeoutMillis, new Runnable() {
         @Override
@@ -308,9 +307,7 @@ public final class InitVotes {
             if (waitForSet.isEmpty() || !armed)
               return;
 
-            if (initDelay != null) {
-              initDelay.cancel(true);
-            }
+            idempotentStopDelayTimer();
 
             final Set<String> failedTopics = Collections.unmodifiableSet(new HashSet<String>(waitForSet));
             _fireFailedInit(failedTopics);
@@ -336,16 +333,24 @@ public final class InitVotes {
   private static void finishInit() {
     synchronized (lock) {
       armed = false;
-      cancelFailTimer();
+      idempotentStopFailTimer();
 
       _runAllRunnables(initCallbacks);
     }
   }
 
-  private static void cancelFailTimer() {
+  private static void idempotentStopFailTimer() {
     synchronized (lock) {
-      if (initTimeout != null && !initTimeout.isCancelled()) {
+      if (initTimeout != null && !initTimeout.isFinished()) {
         initTimeout.cancel(true);
+      }
+    }
+  }
+
+  private static void idempotentStopDelayTimer() {
+    synchronized (lock) {
+      if (initDelay != null && !initDelay.isFinished()) {
+        initDelay.cancel(true);
       }
     }
   }

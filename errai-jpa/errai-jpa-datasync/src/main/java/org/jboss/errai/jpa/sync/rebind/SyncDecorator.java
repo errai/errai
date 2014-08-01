@@ -1,7 +1,6 @@
 package org.jboss.errai.jpa.sync.rebind;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +23,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
+import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -66,19 +66,17 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
     statements.add(Stmt.declareFinalVariable("objectClass", Class.class, Stmt.loadLiteral(Object.class)));
 
     statements.add(Stmt.declareFinalVariable(
-            "syncWorker",
-            ClientSyncWorker.class,
-            Stmt.invokeStatic(ClientSyncWorker.class, "create", syncAnnotation.query(),
-                    Stmt.loadVariable("objectClass"), null)));
-
-    statements.add(Stmt.loadVariable("syncWorker").invoke("addSyncCallback", createSyncCallback(ctx)));
+            "syncWorkerHolder",
+            parameterizedAs(RefHolder.class, typeParametersOf(ClientSyncWorker.class)),
+            Stmt.newObject(parameterizedAs(RefHolder.class, typeParametersOf(ClientSyncWorker.class)))
+            ));
 
     ctx.getTargetInjector().addStatementToEndOfInjector(
         Stmt.loadVariable("context").invoke("addInitializationCallback",
                   Refs.get(ctx.getInjector().getInstanceVarName()),
                   createInitCallback(ctx.getEnclosingType(), "obj", syncAnnotation, ctx)));
 
-    Statement destruction = Stmt.loadVariable("syncWorker").invoke("stop");
+    Statement destruction = Stmt.loadVariable("syncWorkerHolder").invoke("get").invoke("stop");
     ctx.getTargetInjector().addStatementToEndOfInjector(
             Stmt.loadVariable("context").invoke(
                     "addDestructionCallback",
@@ -124,7 +122,7 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
       String val = param.val().trim();
       if (val.startsWith("{") && val.endsWith("}")) {
         String fieldName = val.substring(1, val.length() - 1);
-        MetaField field = ctx.getEnclosingType().getField(fieldName);
+        MetaField field = ctx.getEnclosingType().getInheritedField(fieldName);
         fieldValueStmt =
             InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext(), Stmt.loadVariable(ctx.getInjector()
                 .getInstanceVarName()), field);
@@ -138,10 +136,20 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
 
     method.append(Stmt.declareFinalVariable("paramsCallback", 
         QueryParamInitCallback.class, queryParamCallback.finish().finish()));
-    
+
+    method.append(
+        Stmt.loadVariable("syncWorkerHolder").invoke("set",
+        Stmt.invokeStatic(ClientSyncWorker.class, "create", syncAnnotation.query(),
+            Stmt.loadVariable("objectClass"), null)));
+
+    method.append(
+        Stmt.loadVariable("syncWorkerHolder").invoke("get").invoke("addSyncCallback", createSyncCallback(ctx)));
+
+
     return method
-        .append(Stmt.loadVariable("syncWorker").invoke("start", 
-            Refs.get(ctx.getInjector().getInstanceVarName()), 
+        .append(Stmt.loadVariable("syncWorkerHolder").invoke("get")
+          .invoke("start",
+            Refs.get(ctx.getInjector().getInstanceVarName()),
             Stmt.loadVariable("paramsCallback")))
         .finish()
         .finish();

@@ -18,11 +18,16 @@ package org.jboss.errai.config.rebind;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ThreadUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -35,14 +40,52 @@ import com.google.gwt.core.ext.TreeLogger;
  */
 public abstract class AbstractAsyncGenerator extends Generator implements AsyncCodeGenerator {
 
+  private static final Map<Class<? extends AbstractAsyncGenerator>, String> cacheMap = new ConcurrentHashMap<Class<? extends AbstractAsyncGenerator>, String>();
+
+  private static Logger log = LoggerFactory.getLogger(AbstractAsyncGenerator.class);
+
   @Override
   public Future<String> generateAsync(final TreeLogger logger, final GeneratorContext context) {
     return ThreadUtil.submit(new Callable<String>() {
       @Override
       public String call() throws Exception {
-        return generate(logger, context);
+        final String generatedCode;
+
+        if (isCacheValid()) {
+          log.info("Using cached output from " + AbstractAsyncGenerator.this.getClass().getName());
+          generatedCode = getGeneratedCache();
+        }
+        else {
+          log.info("Running generator " + AbstractAsyncGenerator.this.getClass().getName());
+          generatedCode = generate(logger, context);
+          setGeneratedCache(generatedCode);
+        }
+
+        return generatedCode;
       }
     });
+  }
+
+  /**
+   * @return True iff there is a cached output for this generator. Useful for subclasses that must override {@link #isCacheValid()}.
+   */
+  protected final boolean hasGenerationCache() {
+    return cacheMap.containsKey(getClass());
+  }
+
+  protected final String getGeneratedCache() {
+    return cacheMap.get(getClass());
+  }
+
+  private final void setGeneratedCache(final String generated) {
+    cacheMap.put(getClass(), generated);
+  }
+
+  /**
+   * @return True iff this generator does not need to be run again this refresh.
+   */
+  protected boolean isCacheValid() {
+    return hasGenerationCache() && MetaClassFactory.noChangedClasses();
   }
 
   /**

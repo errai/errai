@@ -107,7 +107,7 @@ public class App {
 }
 ----
 
-For this code to run properly, you must use the the Errai Forge Addon _Add Errai Features_ command to install _Errai IOC_.
+For this code to run properly, you must use the Errai Forge Addon _Add Errai Features_ command to install _Errai IOC_.
 
 Create new subfolder, _client/local_, under the folder containing your GWT module file. Then create a file, _App.java_, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).
 
@@ -160,7 +160,44 @@ If you are using errai-tutorial, you should see a page with a complaint form.
 
 If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".
 
-That's it! You've got your first Errai Application up and running. In the next section we'll setup your IDE.
+That's it! You've got your first Errai Application up and running. In the next section we'll learn how to run super devmode. Otherwise, skip to the section afterwards to setup your IDE.
+
+==== Running your app in Super Devmode
+
+Regular Devmode requires a special browser plugin to run client-side code in a as Java. Super Devmode is an alternative method that compiles code to javascript to be run natively in any browser. With browsers that support source-mapping, it is possible to debug with lines from your original source code within the browser.
+
+To run super devmode you will need to open two terminals in your project. In the first enter:
+
+----
+mvn clean gwt:run
+----
+
+This will launch a classic devmode server for hosting server-side resources. In the second enter:
+
+----
+mvn gwt:run-codeserver
+----
+
+This will launch the super devmode codeserver that hosts compiled GWT code. When the super devmode codeserver is finished compiling your GWT module, it will display a message like this:
+
+----
+The code server is ready.
+Next, visit: http://localhost:9876
+----
+
+Go to the displayed link and copy the two bookmarks *Dev Mode On* and *Dev Mode Off*.
+
+After completing the above, you may run your application as follows:
+
+1. Go to the classic devmode window and click *Copy Link*.
+
+2. Paste the link in to the browser, but **remove** the query paramters (i.e. `?gwt.codesvr=...`).
+
+3. Go to the link. You may see prompts saying that your GWT module needs to be recompiled.
+
+4. Click the *Dev Mode On* bookmark you copied previously. You should see a prompt to compile your GWT module. Click *Compile* to do so.
+
+5. Once the super devmode server has completed, your application should be running.
 
 [[sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse]]
 
@@ -191,6 +228,7 @@ image::author/download/attachments/54493220/EclipseM2eStep1.PNG[]
 
 2. In the _Find_ dialog enter the phrase _Maven_ and hit enter.
 +
+.Find Dialog
 image::author/download/attachments/54493220/EclipseM2eStep2.PNG[]
 
 3. Find the _Maven Integration for Eclipse_ plugin and click the _Install_ button for that entry.
@@ -293,7 +331,7 @@ If everything is correct, click _Apply_.
 .Server Debug Configuration
 image::author/download/attachments/54493220/ServerDebugConfig.PNG[width=650]
 
-6. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>> !
+6. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>>!
 
 [[sid-54493502]]
 
@@ -315,7 +353,7 @@ Errai CDI as its namesake implies is based on, and is in fact, a partial impleme
 
 These differences aside, using Errai CDI in conjunction with CDI on the server will provide you with a uniform programming model across the client and server code of your application.
 
-This guide does not assume any past experience with CDI. However, you may wish to consider reading the the link:$$http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/$$[Weld Documentation] in addition to this guide.
+This guide does not assume any past experience with CDI. However, you may wish to consider reading the link:$$http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/$$[Weld Documentation] in addition to this guide.
 
 [[sid-54493502_AGentleIntroductiontoCDI-YourFirstBean]]
 
@@ -344,7 +382,7 @@ Scopes, put simply, are the context within which beans live. Some scopes are sho
 
 It turns out that CDI includes a set of default scopes which represent these very things.
 
-We'll start by taking a look at the _application scope_ , which is lovingly represented by the annotation [code]+@ApplicationScoped+ . An application-scoped bean is a bean which will live for the entire duration of the application. In this sense, it is essentially like a singleton. And it's generally okay to think of it in that way.
+We'll start by taking a look at the _application scope_, which is lovingly represented by the annotation [code]+@ApplicationScoped+. An application-scoped bean is a bean which will live for the entire duration of the application. In this sense, it is essentially like a singleton. And it's generally okay to think of it in that way.
 
 So let's declare an application-scoped bean:
 
@@ -374,7 +412,7 @@ public class Bar {
 }
 ----
 
-We have added a field of the type [code]+Foo+ which we declared earlier, and we have annotated it with [code]+javax.inject.Inject+ . This tells the container to inject an instance of [code]+Foo+ into our bean. Since our [code]+Foo+ bean is of the dependent scope, the bean manager will actually create a _new_ instance of [code]+Foo+ and pass it in.
+We have added a field of the type [code]+Foo+ which we declared earlier, and we have annotated it with [code]+javax.inject.Inject+. This tells the container to inject an instance of [code]+Foo+ into our bean. Since our [code]+Foo+ bean is of the dependent scope, the bean manager will actually create a _new_ instance of [code]+Foo+ and pass it in.
 
 This scope of the newly instantiated [code]+Foo+ is _dependent_ on the scope that it was injected into. In this case, the application scope. On the other hand, if we were to turn around an inject [code]+Bar+ into [code]+Foo+ , the behaviour is quite different.
 
@@ -478,7 +516,7 @@ Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on h
 
 === Messaging API Basics
 
-The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the [code]+MessageBuilder+ .
+The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the [code]+MessageBuilder+.
 
 Components that want to receive messages need to implement the [code]+MessageCallback+ interface.
 
@@ -603,7 +641,7 @@ The above example shows a service which sends a message in response to receiving
 . We indicate that we do not want to provide an [code]+ErrorCallback+ to deal with errors for this message.
 
 
-. We transmit the message by providing an instance of the [code]+RequestDispatcher+ .
+. We transmit the message by providing an instance of the [code]+RequestDispatcher+.
 
 
 [[sid-5931280_MessagingAPIBasics-ReceivingMessagesontheClientBus%2FClientServices]]
@@ -650,7 +688,7 @@ In the above example, we declare a new client service called [code]+"BroadcastRe
 
 On the client or the server, you can create a local receiver which only receives messages that originated on the local bus. A local server-side service only receives messages that originate on that server, and a local client-side service only receives messages that originated on that client.
 
-To create a local receiver using the declarative API, use the [code]+@Local+ annotation in conjunction with [code]+@Service+ :
+To create a local receiver using the declarative API, use the [code]+@Local+ annotation in conjunction with [code]+@Service+:
 
 
 [source, java]
@@ -732,7 +770,7 @@ And the conversational code on the server (for service _ObjectService_ ):
     .noErrorHandling().reply();
 ----
 
-In the above examples, assuming that the latter example is inside a service called " [code]+ObjectService+ " and is referencing the incoming message that was sent in the former example, the message created will automatically reference the [code]+ReplyTo+ subject that was provided by the sender, and send the message back to the subject desired by the client on the client that sent the message.
+In the above examples, assuming that the latter example is inside a service called "[code]+ObjectService+" and is referencing the incoming message that was sent in the former example, the message created will automatically reference the [code]+ReplyTo+ subject that was provided by the sender, and send the message back to the subject desired by the client on the client that sent the message.
 
 [[sid-5931291]]
 
@@ -782,7 +820,7 @@ You can obtain the [code]+SessionID+ directly from a [code]+Message+ by getting 
    String sessionId = sess.getSessionId();
 ----
 
-You can extract the [code]+SessionID+ from a message so that you may use it for routing by obtaining the [code]+QueueSession+ resource from the [code]+Message+ . For example:
+You can extract the [code]+SessionID+ from a message so that you may use it for routing by obtaining the [code]+QueueSession+ resource from the [code]+Message+. For example:
 
 
 [source, java]
@@ -888,9 +926,9 @@ The [code]+TransportError+ interface represents the details of an an error from 
 
 === Asynchronous Message Tasks
 
-In some applications, it may be necessary or desirable to delay transmission of, or continually stream data to a remote client or group of clients (or from a client to the server). In cases like this, you can utilize the [code]+replyRepeating()+ , [code]+replyDelayed()+ , [code]+sendRepeating()+ and [code]+sendDelayed()+ methods in the [code]+MessageBuilder+ .
+In some applications, it may be necessary or desirable to delay transmission of, or continually stream data to a remote client or group of clients (or from a client to the server). In cases like this, you can utilize the [code]+replyRepeating()+ , [code]+replyDelayed()+ , [code]+sendRepeating()+ and [code]+sendDelayed()+ methods in the [code]+MessageBuilder+.
 
-Delayed TasksSending a task with a delay is straight forward. Simply utilize the appropriate method (either [code]+replyDelayed()+ or [code]+sendDelayed()+ ).
+Delayed TasksSending a task with a delay is straight forward. Simply utilize the appropriate method (either [code]+replyDelayed()+ or [code]+sendDelayed()+).
 
 
 [source, java]
@@ -937,7 +975,7 @@ A repeating task is sent using one of the MessageBuilder's [code]+repeatXXX()+ m
      .sendRepeatingWith(requestDispatcher, TimeUnit.SECONDS, 1); //sends a message every 1 second
 ----
 
-The above example sends a message very 1 second with a message part called [code]+"time"+ , containing a formatted time string. Note the use of the [code]+withProvided()+ method; a provided message part is calculated at the time of transmission as opposed to when the message is constructed.
+The above example sends a message very 1 second with a message part called [code]+"time"+, containing a formatted time string. Note the use of the [code]+withProvided()+ method; a provided message part is calculated at the time of transmission as opposed to when the message is constructed.
 
 Cancelling an Asynchronous TaskA delayed or repeating task can be cancelled by calling the [code]+cancel()+ method of the [code]+AsyncTask+ instance which is returned when creating a task. Reference to the AsyncTask object can be retained and cancelled by any other thread.
 
@@ -1171,7 +1209,7 @@ public class HelloWorldService implements MessageCallback {
 }
 ----
 
-Note that the only difference between the example in the previous section and this is the use of the [code]+createConversation()+ method with [code]+MessageBuilder+ .
+Note that the only difference between the example in the previous section and this is the use of the [code]+createConversation()+ method with [code]+MessageBuilder+.
 
 [[sid-53380177]]
 
@@ -1179,7 +1217,7 @@ Note that the only difference between the example in the previous section and th
 
 ErraiBus has support for WebSocket-based communication. When WebSockets are enabled, capable web browsers will attempt to upgrade their COMET-based communication with the server-side bus to use a WebSocket channel.
 
-There are two different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration.
+There are three different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration and the third is to rely in JSR-356 support in WildFly.
 
 [[sid-53380177_WebSockets-Configuringthesidebandserver]]
 
@@ -1187,13 +1225,12 @@ There are two different ways the bus can enable WebSockets. The first uses a sid
 
 Activating the sideband server is as simple as adding the following to the [code]+ErraiService.properties+ file:
 
-
 [source, java]
 ----
 errai.bus.enable_web_socket_server=true
 ----
 
-The default port for the sideband server is [code]+8085+ . You can change this by specifying a port with the [code]+errai.bus.web_socket_port+ property in the [code]+ErraiService.properties+ file.
+The default port for the sideband server is [code]+8085+. You can change this by specifying a port with the [code]+errai.bus.web_socket_port+ property in the [code]+ErraiService.properties+ file.
 
 [IMPORTANT]
 .Netty Dependencies
@@ -1203,10 +1240,9 @@ Make sure to deploy the required Netty dependencies to your server. If you start
 
 [[sid-53380177_WebSockets-DeployingwithJBossAS7]]
 
-==== Deploying with JBoss AS 7
+==== Deploying with JBoss AS 7.1.2 (or higher)
 
-It is currently necessary use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance to use the native connector by changing the [code]+domain/configuration/domain.xml+ file, and change the line:
-
+This is an alternative approach to the sideband server described in the previous chapter. Make sure to *NOT* configure both! It is currently necessary to use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance(s) to use the native connector by changing the [code]+domain/configuration/standalone.xml+ or [code]+domain/configuration/domain.xml+ file as follows:
 
 [source, xml]
 ----
@@ -1220,10 +1256,18 @@ to:
 <subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="true">
 ----
 
+[IMPORTANT]
+.Verify that the native APR connector is being used
+====
+To verify that the native connectors are being used check your console for the following log message:
+[code]+INFO [org.apache.coyote.http11.Http11AprProtocol] (MSC service thread 1-6) Starting Coyote HTTP/1.1 on http-/127.0.0.1:8080+
+
+The important part is [code]+org.apache.coyote.http11.Http11AprProtocol+. You should *NOT* be seeing [code]+org.apache.coyote.http11.Http11Protocol+. You might have to install the Tomcat native library if not already available on your system.
+====
+
 You will then need to configure the servlet in your application's [code]+web.xml+ which will provide WebSocket upgrade support within AS7.
 
 Add the following to the [code]+web.xml+ :
-
 
 [source, xml]
 ----
@@ -1238,8 +1282,7 @@ Add the following to the [code]+web.xml+ :
 </context-param>
 ----
 
-This will tell the bus to enable web sockets support. The [code]+websocket-path-element+ specified the path element within a URL which the client bus should request in order to negotiate a websocket connection. For instance, specifying [code]+in.erraiBusWS+ as we have in the snippit above, will result in attempted negotiation at [code]+http://<your_server>:<your_port>/<context_path>/in.erraiBusWS+ . For this to have any meaningful result, we must add a servlet mapping that will match this pattern:
-
+This will tell the bus to enable web sockets support. The [code]+websocket-path-element+ specified the path element within a URL which the client bus should request in order to negotiate a websocket connection. For instance, specifying [code]+in.erraiBusWS+ as we have in the snippit above, will result in attempted negotiation at [code]+http://<your_server>:<your_port>/<context_path>/in.erraiBusWS+. For this to have any meaningful result, we must add a servlet mapping that will match this pattern:
 
 [source, xml]
 ----
@@ -1268,13 +1311,68 @@ Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your ser
 
 [source, xml]
 ----
-<dependency>
-  <groupId>org.jboss.errai</groupId>
-  <artifactId>errai-bus-jboss7-websocket</artifactId>
-  <version>${errai.version}</version>
-</dependency>
+	<dependency>
+  		<groupId>org.jboss.errai</groupId>
+  		<artifactId>errai-bus-jboss7-websocket</artifactId>
+  		<version>${errai.version}</version>
+	</dependency>
 ----
 ====
+
+==== JSR-356 WebSocket support
+
+Errai provides two implementations for this:
+
+. errai-bus-jsr356-websocket: A simple JSR-356 implementation, that does not rely on CDI or Weld.
+. errai-bus-jsr356-websocket-weld: Provides the possibility to use the builtin CDI scopes (javax.enterprise.context.RequestScoped, javax.enterprise.context.SessionScoped, javax.enterprise.context.ConversationScoped). This implementation uses WELD and is intended for JBoss WildFly 8 or higher.
+
+Make sure to add the following project dependency:
+[source, xml]
+----
+<!-- For JSR-356 without depending on Weld -->
+<dependency>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-bus-jsr356-websocket</artifactId>
+	<version>${errai.version}</version>
+</dependency>
+
+<!-- For JEE environment with Weld-->
+<dependency>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-bus-jsr356-websocket-weld</artifactId>
+	<version>${errai.version}</version>
+</dependency>
+----
+
+[IMPORTANT]
+.Dependency on Weld!
+====
+The JSR-356 specification is not addressing the integration with builtin CDI scopes which is what the [code]+<artifactId>errai-bus-jsr356-websocket-weld</artifactId>+ module provides. It therefore depends directly to JBoss Weld. If you use a non Weld-based middleware, you can use [code]+<artifactId>errai-bus-jsr356-websocket</artifactId>+ instead.
+====
+
+To configure ErraiBus that WebSocket communication should be used, define the following in your [code]+web.xml+
+[source, xml]
+----
+<context-param>
+	<param-name>websockets-enabled</param-name>
+	<param-value>true</param-value>
+</context-param>
+----
+
+[IMPORTANT]
+.Do not remove the regular ErraiBus servlet mappings!
+====
+When configuring ErraiBus to use JSR-356 WebSocket, you _do not_ remove the existing servlet mappings for the bus. This is because ErraiBus _always_ negotiates WebSocket sessions over the COMET channel.
+====
+
+You can also define filters when using the JSR-356 WebSocket implementation. These filters will be executed for each received ErraiBus message on the server. Your filters need to implement [code]+org.jboss.errai.bus.server.websocket.jsr356.filter.WebSocketFilter+ and must be configured in your appliations's [code]+web.xml+ as an ordered comma separated list:
+[source, xml]
+----
+<context-param>
+	<param-name>errai-jsr-356-websocket-filter</param-name>
+	<param-value>foo.bar.FooFilter,foo.bar.BarFilter</param-value>
+</context-param>
+----
 
 [[sid-59146643]]
 
@@ -1291,10 +1389,10 @@ The application can affect bus communication through two mechanisms:
 . By setting a global JavaScript variable [code]+erraiBusRemoteCommunicationEnabled = false+ before the GWT scripts load, bus communication with the server is permanently disabled
 
 
-. By calling [code]+((ClientMessageBus) ErraiBus.get()).stop()+ , the bus disconnects from the server
+. By calling `((ClientMessageBus) ErraiBus.get()).stop()`, the bus disconnects from the server
 
 
-To resume server communication after a call to [code]+ClientMessageBus.stop()+ or after communication with the server has exceeded the bus' retry timeout, call [code]+((ClientMessageBus) ErraiBus.get()).init()+ . You can use a [code]+BusLifecycleListener+ to monitor the success or failure of this attempt. See the next section for details.
+To resume server communication after a call to [code]+ClientMessageBus.stop()+ or after communication with the server has exceeded the bus' retry timeout, call `((ClientMessageBus) ErraiBus.get()).init()`. You can use a [code]+BusLifecycleListener+ to monitor the success or failure of this attempt. See the next section for details.
 
 [[sid-59146643_BusLifecycle-ObservingBusLifecycleStateandCommunicationStatus]]
 
@@ -1378,14 +1476,14 @@ Errai includes a bus monitoring application, which allows you to monitor all of 
 
 To utilize the bus monitor, you'll need to include the _errai-tools _ package as part of your application's dependencies. When you run your application in development mode, you will simply need to add the following JVM options to your run configuration in order to launch the monitor: [code]+-Derrai.tools.bus_monitor_attach=true+
 
-.TODO InformalFigure image title empty
+.ErraiBus Monitor
 image::author/download/attachments/5931386/MonitorOverview.png[]
 
 The monitor provides you a real-time perspective on what's going on inside the bus. The left side of the main screen lists the services that are currently available, and the right side is the service-explorer, which will show details about the service.
 
 To see what's going on with a specific service, simply double-click on the service or highlight the service, then click "Monitor Service...". This will bring up the service activity monitor.
 
-.TODO InformalFigure image title empty
+.ErraiBus Monitor details
 image::author/download/attachments/5931386/MonitorOverview2.png[]
 
 The service activity monitor will display a list of all the messages that were transmitted on the bus since the monitor became active. You do not need to actually have each specific monitor window open in order to actively monitor the bus activity. All activity on the bus is recorded.
@@ -1439,7 +1537,7 @@ public class MyLittleClass {
 }
 ----
 
-In this example, we create a simple class which declares a dependency using [code]+@Inject+ for the interface [code]+TimeService+ . In this particular case, we use constructor injection to establish the contract between the container and the component. We can similarly use field injection to the same effect:
+In this example, we create a simple class which declares a dependency using [code]+@Inject+ for the interface [code]+TimeService+. In this particular case, we use constructor injection to establish the contract between the container and the component. We can similarly use field injection to the same effect:
 
 
 [source, java]
@@ -1548,7 +1646,7 @@ Top-level providers are regular beans, so they can inject dependencies particula
 
 === Wiring server side components
 
-By default, Errai uses Google Guice to wire server-side components. When deploying services on the server-side, it is currently possible to obtain references to the [code]+MessageBus+ , [code]+RequestDispatcher+ , the [code]+ErraiServiceConfigurator+ , and [code]+ErraiService+ by declaring them as injection dependencies in Service classes, extension components, and session providers.
+By default, Errai uses Google Guice to wire server-side components. When deploying services on the server-side, it is currently possible to obtain references to the [code]+MessageBus+, [code]+RequestDispatcher+, the [code]+ErraiServiceConfigurator+, and [code]+ErraiService+ by declaring them as injection dependencies in Service classes, extension components, and session providers.
 
 Alternatively, supports CDI based wiring of server-side components. See the chapter on Errai CDI for more information.
 
@@ -1556,7 +1654,7 @@ Alternatively, supports CDI based wiring of server-side components. See the chap
 
 === Scopes
 
-Out of the box, the IOC container supports three bean scopes, [code]+@Dependent+ , [code]+@Singleton+ and [code]+@EntryPoint+ . The singleton and entry-point scopes are roughly the same semantics.
+Out of the box, the IOC container supports three bean scopes, [code]+@Dependent+, [code]+@Singleton+ and [code]+@EntryPoint+. The singleton and entry-point scopes are roughly the same semantics.
 
 [[sid-24674461]]
 
@@ -1564,7 +1662,7 @@ Out of the box, the IOC container supports three bean scopes, [code]+@Dependent+
 
 In Errai IOC, all client types are valid bean types if they are default constructable or can have construction dependencies satisfied. These unqualified beans belong to the dependent pseudo-scope. See: link:$$http://docs.jboss.org/weld/reference/latest/en-US/html/scopescontexts.html#d0e1997$$[Dependent Psuedo-Scope from CDI Documentation]
 
-Additionally, beans may be qualified as [code]+@ApplicationScoped+ , [code]+@Singleton+ or [code]+@EntryPoint+ . Although [code]+@ApplicationScoped+ and [code]+@Singleton+ are supported for completeness and conformance, within the client they effectively result in behavior that is identical.
+Additionally, beans may be qualified as [code]+@ApplicationScoped+, [code]+@Singleton+ or [code]+@EntryPoint+. Although [code]+@ApplicationScoped+ and [code]+@Singleton+ are supported for completeness and conformance, within the client they effectively result in behavior that is identical.
 
 .Example dependent scoped bean
 ====
@@ -1600,7 +1698,7 @@ public void MyClientBean {
 [IMPORTANT]
 .Availability of dependent beans in the client-side BeanManager
 ====
-As is mentioned in the <<sid-21627016_Client-SideBeanManager-AvailabilityOfBeans,bean manager documentation>> , only beans that are _explicitly_ scoped will be made available to the bean manager for lookup. So while it is not necessary for regular injection, you must annotate your dependent scoped beans with [code]+@Dependent+ if you wish to dynamically lookup these beans at runtime.
+As is mentioned in the <<sid-21627016_Client-SideBeanManager-AvailabilityOfBeans,bean manager documentation>>, only beans that are _explicitly_ scoped will be made available to the bean manager for lookup. So while it is not necessary for regular injection, you must annotate your dependent scoped beans with [code]+@Dependent+ if you wish to dynamically lookup these beans at runtime.
 ====
 
 [[sid-20938794]]
@@ -1691,7 +1789,7 @@ The type [code]+org.jboss.errai.bus.client.framework.MessageBus+ is globally inj
 
 ===== RequestDispatcher
 
-The type [code]+org.jboss.errai.bus.client.framework.RequestDispatcher+ is globally injectable into any bean. Injecting this type will provide a [code]+RequestDispatcher+ instance capable of delivering any messages provided to it, to the the [code]+MessageBus+ .
+The type [code]+org.jboss.errai.bus.client.framework.RequestDispatcher+ is globally injectable into any bean. Injecting this type will provide a [code]+RequestDispatcher+ instance capable of delivering any messages provided to it, to the [code]+MessageBus+.
 
 .Injecting a RequestDispatcher
 ====
@@ -1737,7 +1835,7 @@ public void MyClientBean {
 
 ====
 
-The above code shows the injection of a proxy for the RPC remote interface, [code]+MyRpcInterface+ . For more information on defining RPC proxies see <<sid-5931313, Remote Procedure Calls (RPC)>>.
+The above code shows the injection of a proxy for the RPC remote interface, [code]+MyRpcInterface+. For more information on defining RPC proxies see <<sid-5931313, Remote Procedure Calls (RPC)>>.
 
 [[sid-20938800_ClientComponents-Sender%3C%3F%3E]]
 
@@ -1775,7 +1873,7 @@ The [code]+Sender.send()+ method is overloaded. The variant demonstrated above t
 * [code]+send(T, MessageCallback, ErrorCallback)+
 
 
-The reply-to service can also be specified declaratively using the [code]+@ReplyTo+ annotation. This allows the app to receive conversational replies even when using the [code]+send()+ variants that do not take a [code]+MessageCallback+ :
+The reply-to service can also be specified declaratively using the [code]+@ReplyTo+ annotation. This allows the app to receive conversational replies even when using the [code]+send()+ variants that do not take a [code]+MessageCallback+:
 
 
 [source, java]
@@ -1815,7 +1913,7 @@ A problem commonly associated with building large applications in the browser is
 
 ===== Controlling Startup
 
-In order to prevent initialization of the the bus and it's services so that you can do necessary configuration, especially if you are writing extensions to the Errai framework itself, you can create an implicit startup dependency on your bean by injecting an [code]+org.jboss.errai.ioc.client.api.InitBallot<?>+ .
+In order to prevent initialization of the bus and it's services so that you can do necessary configuration, especially if you are writing extensions to the Errai framework itself, you can create an implicit startup dependency on your bean by injecting an [code]+org.jboss.errai.ioc.client.api.InitBallot<?>+.
 
 .Using an InitBallot to Control Startup
 ====
@@ -1884,11 +1982,11 @@ For delayed one-time execution of methods [code]+type = TimerType.DELAYED+ can b
 
 === Client-Side Bean Manager
 
-It may be necessary at times to manually obtain instances of beans managed by Errai IOC from outside the container managed scope or creating a hard dependency from your bean. Errai IOC provides a simple client-side bean manager for handling these scenarios: [code]+org.jboss.errai.ioc.client.container.ClientBeanManager+ .
+It may be necessary at times to manually obtain instances of beans managed by Errai IOC from outside the container managed scope or creating a hard dependency from your bean. Errai IOC provides a simple client-side bean manager for handling these scenarios: [code]+org.jboss.errai.ioc.client.container.ClientBeanManager+.
 
 As you might expect, you can inject a bean manager instance into any of your managed beans. If you use Errai IOC in its default mode you will need to inject the synchronous bean manager ( [code]+org.jboss.errai.ioc.client.container.SyncBeanManager+ ).
 
-If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager ( [code]+org.jboss.errai.ioc.client.container.async.AsyncBeanManager+ ) instead. Asynchronous IOC brings support for link:$$http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html$$[code splitting] . That means that any bean annotated with [code]+@LoadAsync+ can be compiled into a separate JavaScript file that's downloaded when the bean is first needed on the client. [code]+@LoadAsync+ also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same JavaScript file.
+If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager ([code]+org.jboss.errai.ioc.client.container.async.AsyncBeanManager+) instead. Asynchronous IOC brings support for link:$$http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html$$[code splitting] . That means that any bean annotated with [code]+@LoadAsync+ can be compiled into a separate JavaScript file that's downloaded when the bean is first needed on the client. [code]+@LoadAsync+ also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same JavaScript file.
 
 .Injecting the client-side bean manager
 ====
@@ -2017,7 +2115,7 @@ public class MyApp {
 }
 ----
 
-This code is unaware of the implementation of [code]+View+ , which maintains good separation of concerns. However, this of course creates an ambiguous dependency on the [code]+View+ interface as it has two matching subtypes in this case. Thus, we must configure the container to specify which alternative to use. Also note, that the beans in both cases have been annotated with [code]+javax.enterprise.inject.Alternative+ .
+This code is unaware of the implementation of [code]+View+, which maintains good separation of concerns. However, this of course creates an ambiguous dependency on the [code]+View+ interface as it has two matching subtypes in this case. Thus, we must configure the container to specify which alternative to use. Also note, that the beans in both cases have been annotated with [code]+javax.enterprise.inject.Alternative+.
 
 In your [code]+ErraiApp.properties+ for the module, you can simply specify which active alternative should be used:
 
@@ -2074,7 +2172,7 @@ public class MockUserManagementImpl implements UserManagement {
 
 In this case, the container will replace the [code]+UserManagementImpl+ with the [code]+MockUserManagementImpl+ automatically when running the unit tests.
 
-The [code]+@TestMock+ annotation can also be used to specify alternative providers during test execution. For example, it can be used to mock a [code]+Caller<T>+ . [code]+Callers+ are used to invoke RPC or JAX-RS endpoints. During tests you might want to replace theses callers with mock implementations. For details on providers see <<sid-5931407, Container Wiring>> .
+The [code]+@TestMock+ annotation can also be used to specify alternative providers during test execution. For example, it can be used to mock a [code]+Caller<T>+. [code]+Callers+ are used to invoke RPC or JAX-RS endpoints. During tests you might want to replace theses callers with mock implementations. For details on providers see <<sid-5931407, Container Wiring>>.
 
 
 [source, java]
@@ -2184,7 +2282,7 @@ public MyManagedBean {
 
 ====
 
-In this example we pass the instance of [code]+AnotherBean,+ created as a dependency of [code]+SimpleBean,+ to the bean manager for destruction. Because this bean was created at the same time as its parent, its destruction will also result in the destruction of [code]+SimpleBean+ ; thus, this action will result in the [code]+@PreDestroy+[code]+cleanUp()+ method of [code]+SimpleBean+ being invoked.
+In this example we pass the instance of [code]+AnotherBean,+ created as a dependency of [code]+SimpleBean,+ to the bean manager for destruction. Because this bean was created at the same time as its parent, its destruction will also result in the destruction of [code]+SimpleBean+; thus, this action will result in the [code]+@PreDestroy+[code]+cleanUp()+ method of [code]+SimpleBean+ being invoked.
 
 [[sid-22872238_BeanLifecycle-Disposers]]
 
@@ -2274,7 +2372,7 @@ Errai CDI based applications use the same annotation-driven programming model as
 
 ==== Other features
 
-The CDI container in Errai is built around the <<sid-5931402,Errai IOC module>> , and thus is a superset of the existing functionality in Errai IOC. Thus, all features and APIs documented in Errai IOC are accessible and usable with this Errai CDI programming model.
+The CDI container in Errai is built around the <<sid-5931402,Errai IOC module>>, and thus is a superset of the existing functionality in Errai IOC. Thus, all features and APIs documented in Errai IOC are accessible and usable with this Errai CDI programming model.
 
 [[sid-21758054]]
 
@@ -2359,7 +2457,7 @@ public class AccountService {
 
 ==== Conversational events
 
-A server can address a single client in response to an event annotating event types as [code]+@Conversational+ . Consider a service that responds to a subscription event.
+A server can address a single client in response to an event annotating event types as [code]+@Conversational+. Consider a service that responds to a subscription event.
 
 .SubscriptionService.java
 ====
@@ -2399,6 +2497,30 @@ public class Document {
 ====
 
 As such, when [code]+Document+ events are fired, they will be limited in scope to the initiating conversational contents which are implicitly inferred by the caller. So only the client which fired the [code]+Subscription+ event will receive the fired [code]+Document+ event.
+
+==== Local Events
+
+The simplest way to stop a CDI Event from being broadcast over the wire is to avoid annotating the type with `@Portable`. But in some cases you may wish to send a type over the network with Errai RPC or the Message Bus, but only fire it locally as a CDI Event.
+
+This can be accomplished by annotating a type with `@LocalEvent`, as in this example:
+
+[source, java]
+----
+@Portable @LocalEvent
+public DocumentChange {
+  private String diff;
+
+  public String getDiff() {
+    return diff;
+  }
+
+  public void setDiff(String diff) {
+    this.diff = diff;
+  }
+}
+----
+
+Because of the `@Portable` annotation instances of `DocumentChange` can be sent over the wire via RPC calls or bus messages, but because of the `@LocalEvent` annotation they will not be sent over the network if fired via a CDI Event.
 
 [[sid-21758054_Events-ClientServerEventExample]]
 
@@ -2605,7 +2727,7 @@ For more information on CDI producers, see the link:$$http://docs.jboss.org/cdi/
 
 === Safe dynamic lookup
 
-As an alternative to using the bean manager to dynamically create beans, this can be accomplished in a type-safe way by injecting a [code]+javax.enterprise.inject.Instance<T>+ .
+As an alternative to using the bean manager to dynamically create beans, this can be accomplished in a type-safe way by injecting a [code]+javax.enterprise.inject.Instance<T>+.
 
 For instance, assume you have a dependent-scoped bean [code]+Bar+ and consider the following:
 
@@ -2621,7 +2743,7 @@ public class Foo {
 }
 ----
 
-In this example, calling [code]+barInstance.get()+ returns a new instance of the dependent-scoped bean [code]+Bar+ .
+In this example, calling [code]+barInstance.get()+ returns a new instance of the dependent-scoped bean [code]+Bar+.
 
 [[sid-5931501]]
 
@@ -2649,7 +2771,7 @@ Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on h
 
 == Marshalling
 
-Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You are be able to map both application-specific domain model, as well as preexisting model, including model from third-party libraries using the custom definitions API.
+Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You can use it with your own application-specific domain models as well as preexisting models, including classes from third-party libraries using configuration files or the custom definitions API.
 
 [TIP]
 .Plugin Tip
@@ -2661,39 +2783,42 @@ If you used the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai For
 
 === Mapping Your Domain
 
-All classes that you intend to be marshalled between the client and the server must be exposed to the marshalling framework. There are several ways you can do it and this section will take you through the different approaches you can take to fit your needs.
+All classes that you intend to be marshalled between the client and the server must be exposed to the marshalling framework explicitly. There are several ways to do that, and this section will take you through the different approaches.
 
 [[sid-5931328_Marshalling-@Portableand@NonPortable]]
 
 ==== @Portable and @NonPortable
 
-To make a Java class eligible for serialization with Errai Marshalling, mark it with the [code]+org.jboss.errai.common.client.api.annotations.Portable+ annotation. This tells the marshalling system to generate marshalling and demarshalling code for the annotated class and all of its nested classes.
+The easiest way to make a Java class eligible for serialization with Errai Marshalling is to mark it with the [code]+org.jboss.errai.common.client.api.annotations.Portable+ annotation. This tells the marshalling system to generate marshalling and demarshalling code for the annotated class and all of its nested classes.
 
-The mapping strategy that will be used depends on how much information you provide about your model up-front. If you simply annotate a domain type with [code]+@Portable+ and do nothing else, the marshalling system will use and exhaustive strategy to determine how to construct and deconstruct instances of that type and its nested types.
+The mapping strategy that will be used depends on how much information you provide about your model up-front. If you simply annotate a domain type with [code]+@Portable+ and do nothing else, the marshalling system will use an exhaustive strategy to determine how to serialize and deserialize instances of that type and its nested types.
 
-The Errai marshalling system works by enumerating all of the Portable types it can find (by any of the three methods discussed in this section of the reference guide), eliminating all the non-portable types it can find (via [code]+@NonPortable+ annotations and entries in [code]+ErraiApp.properties+ ), then enumerating the marshallable properties that make up each remaining portable entity type. The rules that Errai uses for enumerating the properties of a portable entity type are as follows:
+The Errai marshalling system works by enumerating all of the Portable types it can find (by any of the three methods discussed in this section of the reference guide), eliminating all the non-portable types it can find (via [code]+@NonPortable+ annotations and entries in [code]+ErraiApp.properties+), then enumerating the marshallable properties that make up each remaining portable entity type. The rules that Errai uses for enumerating the properties of a portable entity type are as follows:
 
-* If an entity type has a field called [code]+foo+ , then that entity has a property called [code]+foo+ unless the field is marked [code]+static+ or [code]+transient+ .
-
-
-Note that the existence of methods called [code]+getFoo()+ , [code]+setFoo()+ , or both, _does not_ mean that the entity has a property called [code]+foo+ . Errai Marshalling always works from fields when discovering properties.
-
-When reading a field [code]+foo+ , Errai Marshalling will call the method [code]+getFoo()+ in preference to direct field access if the [code]+getFoo()+ method exists.
-
-Similarly, when writing a field [code]+foo+ , Errai Marshalling will call the method [code]+setFoo()+ in preference to direct field access if the [code]+setFoo()+ method exists.
-
-The above rules are sufficient for marshalling an existing entity to a JSON representation, but for de-marshalling, Errai must also know how to obtain an instance of a type. The rules that Errai uses for deciding how to create an instance of a [code]+@Portable+ type are as follows:
-
-* If the entity has a public constructor where every argument is annotated with [code]+@MapsTo+ , and those parameters cover all properties of the entity type, then Errai uses this constructor to create the object, passing in all of the property values.
-* Otherwise, if the entity has a public static method where every argument is annotated with [code]+@MapsTo+ , and those parameters cover all properties of the entity type, then Errai uses this method to create the object. Note that when using this mechanism you are free to create and return a subtype of the marshalled type, or resolve one from a cache.
-* If the entity has a public no-arguments constructor (or no explicit constructors at all), it will be created via that constructor, and the properties will be written to the new object one at a time. Each property will be written by its setter method, or by direct field access if a setter method is not available.
+* If an entity type has a field called [code]+foo+, then that entity has a property called [code]+foo+ unless the field is marked [code]+static+ or [code]+transient.
 
 
+Note that the existence of methods called [code]+getFoo()+, [code]+setFoo()+, or both, _does not_ mean that the entity has a property called [code]+foo+. Errai Marshalling always works from fields when discovering properties.
+
+When reading a field [code]+foo+, Errai Marshalling will call the method [code]+getFoo()+ in preference to direct field access if the [code]+getFoo()+ method exists.
+
+When writing a field [code]+foo+, Errai Marshalling gives first preference to a parameter of the _mapping constructor_ (defined below) annotated with [code]+@MapsTo("foo")+. Failing this, Errai Marshalling will the method [code]+setFoo()+ if it exists. As a last resort, Errai Marshalling will use direct field access to write the value of [code]+foo+. 
+
+Each field is mapped independently according to the above priority rules. Portable classes can rely on a mix of constructor, setter/getter, and field access.
+
+For de-marshalling a [code]+@Portable+ type, Errai must know how to obtain a new instance of that type. To do this, it selects a _mapping constructor_ (which could literally be a constructor, but could also be a static factory method) using the following rules:
+
+* If the entity has a constructor where every argument is annotated with [code]+@MapsTo+, then this is the mapping constructor. The constructor doesn't have to be public.
+* Otherwise, if the entity has a public static method whose return type matches the entity type and every argument is annotated with [code]+@MapsTo+, then it is the mapping constructor. Unlike a constructor, such a method is free to return an instance of a subtype of the marshalled type, or resolve an instance from a cache. In this case, do keep in mind that left-over properties not covered by the method's [code]+@MapsTo+ parameters will still be written by setters and direct field access.
+* Otherwise, if the entity has a public no-arguments constructor (including the one the Java compiler provides in the absence of explicit constructors), it is the mapping constructor.
+
+If no suitable mapping constructor can be found on a type marked [code]+@Portable+, it is a compile-time error.
+ 
 Now let's take a look at some common examples of how this works.
 
 [[sid-5931328_Marshalling-Example%3AASimpleEntity]]
 
-===== Example: A Simple Entity
+===== Example: A Common Mutable Bean
 
 [source, java]
 ----
@@ -2702,37 +2827,37 @@ public class Person {
   private String name;
   private int age;
 
-  public Person() {
-  }
-
-  public Person(String name, int age) {
-    this.name = name;
-    this.age = age;
-  }
-
   public String getName() {
     return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public int getAge() {
     return age;
   }
+  
+  public void setAge(int age) {
+    this.age = age;
+  }
 }
 ----
 
-This is a pretty vanilla domain object. Note the default, public, no-argument constructor. In this case, it will be necessary to have one explicitly declared. But notice we have no setters. In this case, the marshaler will rely on private field access to write the values on each side of the marshalling transaction. For simple domain objects, this is both nice and convenient. But you may want to make the class immutable and have a constructor enforce invariance. See the next section for that.
+This class is a straightforward mutable bean. Errai will read and write the name and age properties via the setter and getter methods. It will create new instances of the type using the default no-args public constructor that the Java compiler generated implicitly. 
+
 
 [[sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaPublicConstructor]]
 
 ===== Example: An Immutable Entity with a Public Constructor
 
-Immutability is almost always a good practice, and the marshalling system provides you a straight forward way to tell it how to marshal and de-marshal objects which enforce an immutable contract. Let's modify our example from the previous section.
-
+It's always good to aim for truly immutabile value types wherever practical, and Errai's marshalling system does not force you to compromise on this ideal.
 
 [source, java]
 ----
 @Portable
-public class Person {
+public final class Person {
   private final String name;
   private final int age;
 
@@ -2751,9 +2876,8 @@ public class Person {
 }
 ----
 
-Here we have set both of the class fields final. By doing so, we had to remove our default constructor. But that's okay, because we have annotated the remaining constructor's parameters using the [code]+org.jboss.errai.marshalling.client.api.annotations.MapsTo+ annotation.
+Both fields are final, so they cannot be written by setter methods or by direct field access. But that's okay, because we have given Errai a way to set them using the annotated constructor parameters.
 
-By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property [code]+name+ . Which in this case, defaults to the name of the corresponding field. This may not always be the case as will be explored in the section on custom definitions. But for now that's a safe assumption.
 
 [[sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaFactoryMethod]]
 
@@ -2841,13 +2965,13 @@ public class Person {
 
 In this example, we have a nested [code]+Builder+ class that implements the Builder Pattern and calls the private [code]+Person+ constructor. Hand-written code will always use the builder to create [code]+Person+ instances, but the [code]+@MapsTo+ annotations on the private [code]+Person+ constructor tell Errai Marshalling to bypass the builder and construct instances of Person directly.
 
-One final note: as a nested type of [code]+Person+ (which is marked [code]+@Portable+ ), the builder itself would normally be portable. However, we do not intend to move instances of [code]+Person.Builder+ across the network, so we mark [code]+Person.Builder+ as [code]+@NonPortable+ .
+One final note: as a nested type of [code]+Person+ (which is marked [code]+@Portable+), the builder itself would normally be portable. However, we do not intend to move instances of [code]+Person.Builder+ across the network, so we mark [code]+Person.Builder+ as [code]+@NonPortable+.
 
 [[sid-5931328_Marshalling-ManualMapping]]
 
 ==== Manual Mapping
 
-Some classes may be out of your control, making it impossible to annotate them for auto-discovery by the marshalling framework. For cases such as this, there are two approaches which can be undertaken to include these classes in your application.
+Some classes may be out of your control, making it impossible to annotate them for auto-discovery by the marshalling framework. For cases such as this, there are two approaches to include these classes in your application.
 
 The first approach is the easiest, but is contingent on whether or not the class is directly exposed to the GWT compiler. That means, the classes must be part of a GWT module and within the GWT client packages. See the GWT documentation on link:$$http://code.google.com/webtoolkit/doc/latest/DevGuideCodingBasicsClient.html$$[Client-Side Code] for information on this.
 
@@ -2859,7 +2983,7 @@ The first approach is the easiest, but is contingent on whether or not the class
 
 If you have client-exposed classes that cannot be annotated with the [code]+@Portable+ annotation, you may manually map these classes so that the marshaller framework will comprehend and produce marshallers for them and their nested types.
 
-To do this, specify them in _ErraiApp.properties_ , using the [code]+errai.marshalling.serializableTypes+ attribute with a whitespace separated list of classes to make portable.
+To do this, specify them in _ErraiApp.properties_, using the [code]+errai.marshalling.serializableTypes+ attribute with a whitespace separated list of classes to make portable.
 
 .Example ErraiApp.properties defining portable classes.
 ====
@@ -2892,7 +3016,7 @@ errai.marshalling.nonserializableTypes=org.foo.client.UserEntity$Builder \
 
 ===== Aliased Mappings of Existing Interface Contracts
 
-The marshalling framework supports and promotes the concept of marshalling by interface contract, where possible. For instance, the framework ships with a marshaller which can marshall data to and from the [code]+java.util.List+ interface. Instead of having custom marshallers for classes such as [code]+ArrayList+ and [code]+LinkedList+ , by default, these implementations are merely aliased to the [code]+java.util.List+ marshaller.
+The marshalling framework supports and promotes the concept of marshalling by interface contract, where possible. For instance, the framework ships with a marshaller which can marshall data to and from the [code]+java.util.List+ interface. Instead of having custom marshallers for classes such as [code]+ArrayList+ and [code]+LinkedList+, by default, these implementations are merely aliased to the [code]+java.util.List+ marshaller.
 
 There are two distinct ways to go about doing this. The most straightforward is to specify which marshaller to alias when declaring your class is [code]+@Portable+ .
 
@@ -2922,7 +3046,7 @@ The list of classes is whitespace-separated so that it may be split across lines
 
 The example above shows the equivalent mapping for the [code]+MyListImpl+ class from the previous example, as well as a mapping of a class to the [code]+java.util.Map+ marshaller.
 
-The syntax of the mapping is as follows: [code]++<class_to_map>++_->_[code]+<contract_to_map_to>+ .
+The syntax of the mapping is as follows: [code]++<class_to_map>++_->_[code]+<contract_to_map_to>+.
 
 [IMPORTANT]
 .Aliases do not inherit fields!
@@ -3004,7 +3128,7 @@ public MySuperCustomEntityMapping extends MappingDefinition {
 }
 ----
 
-And that's it. This describes to the marshalling framework how it should go about constructing and deconstructing [code]+MySuperCustomEntity+ .
+And that's it. This describes to the marshalling framework how it should go about constructing and deconstructing [code]+MySuperCustomEntity+.
 
 Paying attention to our annotating comments, let's describe what we've done here.
 
@@ -3200,8 +3324,7 @@ For calling the remote service, the callback objects need to be provided to the 
 remoteService.call(callback).isEveryoneHappy();
 ----
 
-The Errai IOC GWT module needs to be inherited to make use of caller injection. To do this, the following line needs to be added to the application's [code]+\*.gwt.xml+ file. It is important that this line comes [code]+after+ the Errai Bus module:
-
+The Errai IOC GWT module needs to be inherited to make use of caller injection. To do this, the following line needs to be added to the application's [code]+*.gwt.xml+ file. It is important that this line comes [code]+after+ the Errai Bus module:
 
 [source, xml]
 ----
@@ -3240,7 +3363,7 @@ MessageBuilder.createCall(
   MyRemoteService.class).isEveryoneHappy();
 ----
 
-As remote exceptions need to be serialized to be sent to the client, the [code]+@Portable+ annotation needs to be present on the corresponding exception class (see <<sid-5931328>, Marshalling>). Further the exception class needs to be part of the client-side code. For more details on [code]+ErrorCallbacks+ see <<sid-5931306, Handling Errors>> .
+As remote exceptions need to be serialized to be sent to the client, the [code]+@Portable+ annotation needs to be present on the corresponding exception class (see <<sid-5931328, Marshalling>>). Further the exception class needs to be part of the client-side code. For more details on [code]+ErrorCallbacks+ see <<sid-5931306, Handling Errors>>.
 
 [[sid-5931313_RemoteProcedureCalls%28RPC%29-GlobalRPCexceptionhandler]]
 
@@ -3252,7 +3375,7 @@ In a scenario where many different remote calls potentially throw the same excep
 [source, java]
 ----
 @UncaughtException
-private void onUncaughtException(Throwable t) {
+private void onUncaughtException(Throwable caught) {
   try {
     throw caught;
   }
@@ -3273,7 +3396,7 @@ Client-side remote call interceptors provide the ability to manipulate or bypass
 
 ==== Annotating the Remote Interface
 
-To have a remote call intercepted, either an interface method or the remote interface type has to be annotated with [code]+@InterceptedCall+ . If the type is annotated, all interface methods will be intercepted.
+To have a remote call intercepted, either an interface method or the remote interface type has to be annotated with [code]+@InterceptedCall+. If the type is annotated, all interface methods will be intercepted.
 
 
 [source, java]
@@ -3318,7 +3441,7 @@ The [code]+RemoteCallContext+ passed to the [code]+aroundInvoke+ method provides
 
 Calling [code]+proceed+ executes the next interceptor in the chain or the actual remote call if all interceptors have already been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of [code]+proceed+ accepting a [code]+RemoteCallback+ has to be used instead.
 
-The result of the remote call can be manipulated by calling [code]+RemoteCallContext.setResult()+ .
+The result of the remote call can be manipulated by calling [code]+RemoteCallContext.setResult()+.
 
 Not calling [code]+proceed+ in the interceptor bypasses the actual remote call, passing [code]+RestCallContext.getResult()+ to the [code]+RemoteCallBack+ provided at the call site.
 
@@ -3401,7 +3524,7 @@ The remote methods will get executed only after [code]+sendBatch()+ was called. 
 
 === Asynchronous handling of RPCs on the server
 
-If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service has to be contacted) it might be preferrable to start a separate thread in the RPC service method or leverage an existing thread from a dedicated thread pool that will provide the result at a later point. In this case the RPC endpoint method can return immediately and the thread handling the incoming request doesn't need to stay active until the result is available.
+If computing the result of an RPC call takes a significant amount of time (i.e. because a third party service needs to be contacted or a long running query needs to be executed) it might be preferable to release the request-processing thread so it can perform other work and provide the result in a different execution context farther in the future. So, the RPC endpoint method can return immediately and the thread handling the incoming request doesn't need to stay active until the result is available. Computing and setting the result can be done in a different thread (i.e. from a smaller thread pool provided by a library).
 
 Errai provides a special return type [code]+CallableFuture+ to indicate to the RPC system that the result of the remote method call will be provided asynchronously (after the remote method call has returned).
 
@@ -3429,7 +3552,7 @@ public class LongRunningServiceImpl implements LongRunningService {
       public void run() {
         try {
           Thread.sleep(5000);
-          future.setValue("foobar");
+          future.setValue("result");
         }
         catch (Throwable t) {
           t.printStackTrace();
@@ -3559,7 +3682,7 @@ The above class implements the shared interface. Since it performs database and/
 [IMPORTANT]
 .Save typing and reduce duplication
 ====
-Note that all JAX-RS annotations ( [code]+@Path+ , [code]+@GET+ , [code]+@Consumes+ , and so on) can be inherited from the interface. You do not need to repeat these annotations in your resource implementation classes.
+Note that all JAX-RS annotations ( [code]+@Path+, [code]+@GET+, [code]+@Consumes+, and so on) can be inherited from the interface. You do not need to repeat these annotations in your resource implementation classes.
 ====
 
 [[sid-19398997_ErraiJAX-RS-CreatingRequests]]
@@ -3568,7 +3691,7 @@ Note that all JAX-RS annotations ( [code]+@Path+ , [code]+@GET+ , [code]+@Consum
 
 This section assumes you have already set up the CustomerService JAX-RS endpoint as described in the previous section.
 
-To create a request on the client, all that needs to be done is to invoke [code]+RestClient.create()+ , thereby providing the JAX-RS interface, a response callback and to invoke the corresponding interface method:
+To create a request on the client, all that needs to be done is to invoke [code]+RestClient.create()+, thereby providing the JAX-RS interface, a response callback and to invoke the corresponding interface method:
 
 .App.java
 ====
@@ -3587,13 +3710,13 @@ Button create = new Button("Create", new ClickHandler() {
 
 ====
 
-For details on the callback mechanism see <<sid-19398997_ErraiJAX-RS-HandlingResponses,Handling Responses>> .
+For details on the callback mechanism see <<sid-19398997_ErraiJAX-RS-HandlingResponses,Handling Responses>>.
 
 [[sid-19398997_ErraiJAX-RS-ProxyInjection]]
 
 ==== Proxy Injection
 
-Injectable proxies can be used as an alternative to calling [code]+RestClient.create()+ .
+Injectable proxies can be used as an alternative to calling [code]+RestClient.create()+.
 
 
 [source, java]
@@ -3610,7 +3733,7 @@ To create a request, the callback objects need to be provided to the [code]+call
 customerService.call(callback).listAllCustomers();
 ----
 
-To use caller injection, your application needs to inherit the Errai IOC GWT module. To do this, just add this line to your application's [code]+\*.gwt.xml+ file and make sure it comes [code]+after+ the Errai JAX-RS module (see <<sid-19398997_ErraiJAX-RS-GettingStarted,Getting Started>> ):
+To use caller injection, your application needs to inherit the Errai IOC GWT module. To do this, just add this line to your application's [code]+*.gwt.xml+ file and make sure it comes [code]+after+ the Errai JAX-RS module (see <<sid-19398997_ErraiJAX-RS-GettingStarted,Getting Started>>):
 
 
 [source, xml]
@@ -3736,7 +3859,7 @@ Client-side remote call interceptors provide the ability to manipulate or bypass
 
 ==== Annotating the JAX-RS Interface
 
-To have a JAX-RS remote call intercepted, either an interface method or the JAX-RS implementation class method has to be annotated with [code]+@InterceptedCall+ . If the type is annotated, all interface methods will be intercepted.
+To have a JAX-RS remote call intercepted, either an interface method or the JAX-RS implementation class method has to be annotated with [code]+@InterceptedCall+. If the type is annotated, all interface methods will be intercepted.
 
 
 [source, java]
@@ -3783,14 +3906,14 @@ The [code]+RestCallContext+ passed to the [code]+aroundInvoke+ method provides a
 
 Calling [code]+proceed+ executes the next interceptor in the chain or the actual remote call if all interceptors have already been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of [code]+proceed+ accepting a [code]+RemoteCallback+ has to be used instead.
 
-The result of the remote call can be manipulated by calling [code]+RestCallContext.setResult()+ .
+The result of the remote call can be manipulated by calling [code]+RestCallContext.setResult()+.
 
 Not calling [code]+proceed+ in the interceptor bypasses the actual remote call, passing [code]+RestCallContext.getResult()+ to the [code]+RemoteCallBack+ provided at the call site.
 
 
 ==== Annotating the Interceptor (alternative)
 
-If you cannot (or do not wish to) annotate the JAX-RS interface you may instead define remote call interceptors by annotating the interceptor class itself with [code]+@InterceptsRemoteCall+.  This annotation requires the developer to specify the JAX-RS interface that should be intercepted.  The interceptor will then be applied to all methods in that interface.  If the interface method is annotated with [code]+InterceptedCall+, that annotation will win out.
+If you cannot (or do not wish to) annotate the JAX-RS interface you may instead define remote call interceptors by annotating the interceptor class itself with [code]+@InterceptsRemoteCall+. This annotation requires the developer to specify the JAX-RS interface that should be intercepted. The interceptor will then be applied to all methods in that interface.  If the interface method is annotated with [code]+InterceptedCall+, that annotation will win out.
 
 [source, java]
 ----
@@ -3805,12 +3928,12 @@ public class MyCacheInterceptor implements RestClientInterceptor {
 }
 ----
 
-This approach sacrifices granularity (you cannot intercept individual methods on the JAX-RS interface).  However, it does allow method interception without modification to the JAX-RS interface (which is particularly useful when the developer is not in control of the JAX-RS interface).
+This approach sacrifices granularity (you cannot intercept individual methods on the JAX-RS interface). However, it does allow method interception without modification to the JAX-RS interface (which is particularly useful when the developer is not in control of the JAX-RS interface).
 
 
 ==== Interceptors and IOC
 
-It is worth noting that interceptors *may* be defined as managed beans using the [code]+@Dependent+, [code]+@Singleton+, or [code]+@ApplicationScoped+ annotations.  If the Errai application is using IOC (i.e. imports the IOC Errai module) *and* the interceptor is annotated as a managed bean, then the IOC container will be used to get/create the interceptor instance.  This allows developers to [code]+@Inject+ dependencies into interceptors.  If IOC is not being used, or else the interceptor is not properly annotated, then the interceptor class will simply be instantiated via *new*.
+It is worth noting that interceptors *may* be defined as managed beans using the [code]+@Dependent+, [code]+@Singleton+, or [code]+@ApplicationScoped+ annotations. If the Errai application is using IOC (i.e. imports the IOC Errai module) *and* the interceptor is annotated as a managed bean, then the IOC container will be used to get/create the interceptor instance. This allows developers to [code]+@Inject+ dependencies into interceptors.  If IOC is not being used, or else the interceptor is not properly annotated, then the interceptor class will simply be instantiated via *new*.
 
 
 [[sid-19398997_ErraiJAX-RS-WireFormat]]
@@ -3867,7 +3990,7 @@ Errai JPA implements the following subset of JPA 2.0:
 
 
 * Lifecycle events and entity lifecycle listeners
-* Much of the Metamodel API ( [code]+Metamodel+ , [code]+EntityType+ , [code]+SingularAttribute+ , [code]+PluralAttribute+ , etc.)
+* Much of the Metamodel API ( [code]+Metamodel+, [code]+EntityType+, [code]+SingularAttribute+, [code]+PluralAttribute+ , etc.)
 
 
 [IMPORTANT]
@@ -3894,13 +4017,13 @@ Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on h
 
 ==== INF/persistence.xml
 
-Errai ignores META-INF/persistence.xml for purposes of client-side JPA. Instead, Errai scans all Java packages that are part of your GWT modules for classes annotated with [code]+@Entity+ . This allows you the freedom of defining a persistence.xml that includes both shared entity classes that you use on the client and the server, plus server-only entities that are defined in a server-only package.
+Errai ignores META-INF/persistence.xml for purposes of client-side JPA. Instead, Errai scans all Java packages that are part of your GWT modules for classes annotated with [code]+@Entity+. This allows you the freedom of defining a persistence.xml that includes both shared entity classes that you use on the client and the server, plus server-only entities that are defined in a server-only package.
 
 [[sid-54493688_ErraiJPA-DeclaringanEntityClass]]
 
 ==== Declaring an Entity Class
 
-Classes whose instances can be stored and retrieved by JPA are called _entities_ . To declare a class as a JPA entity, annotate it with [code]+@Entity+ .
+Classes whose instances can be stored and retrieved by JPA are called _entities_. To declare a class as a JPA entity, annotate it with [code]+@Entity+.
 
 JPA requires that entity classes conform to a set of rules. These are:
 
@@ -3911,7 +4034,7 @@ JPA requires that entity classes conform to a set of rules. These are:
 * The class must be a top-level type (not a nested or inner class)
 
 
-Here is an example of a valid entity class with an ID attribute ( [code]+id+ ) and a String-valued persistent attribute ( [code]+name+ ):
+Here is an example of a valid entity class with an ID attribute ([code]+id+) and a String-valued persistent attribute ([code]+name+):
 
 
 [source, java]
@@ -3950,11 +4073,11 @@ public class Genre {
 
 The state of fields and JavaBeans properties of entities are generally persisted with the entity instance. These persistent things are called _attributes_ .
 
-JPA Attributes are subdivided into two main types: _singular_ and _plural_ . Singular attributes are scalar types like [code]+Integer+ or [code]+String+ . Plural attributes are collection values, such as [code]+List<Integer>+ or [code]+Set<String>+ .
+JPA Attributes are subdivided into two main types: _singular_ and _plural_ . Singular attributes are scalar types like [code]+Integer+ or [code]+String+. Plural attributes are collection values, such as [code]+List<Integer>+ or [code]+Set<String>+.
 
-The values of singular attributes (and the elements of plural attributes) can be of any application-defined entity type or a JPA Basic type. The JPA basic types are all of the Java primitive types, all boxed primitives, enums, BigInteger, BigDecimal, String, Date ( [code]+java.util.Date+ or [code]+java.sql.Date+ ), Time, and Timestamp.
+The values of singular attributes (and the elements of plural attributes) can be of any application-defined entity type or a JPA Basic type. The JPA basic types are all of the Java primitive types, all boxed primitives, enums, BigInteger, BigDecimal, String, Date ([code]+java.util.Date+ or [code]+java.sql.Date+), Time, and Timestamp.
 
-You can direct JPA to read and write your entity's attributes by direct field access or via JavaBeans property access methods (that is, "getters and setters"). Direct field access is the default. To request property access, annotate the class with [code]+@Access(AccessType.PROPERTY)+ . If using direct field access, attribute-specific JPA annotations should be on the fields themselves; when using property access, the attribute-specific annotations should be on the getter method for that property.
+You can direct JPA to read and write your entity's attributes by direct field access or via JavaBeans property access methods (that is, "getters and setters"). Direct field access is the default. To request property access, annotate the class with [code]+@Access(AccessType.PROPERTY)+. If using direct field access, attribute-specific JPA annotations should be on the fields themselves; when using property access, the attribute-specific annotations should be on the getter method for that property.
 
 [[sid-54493688_ErraiJPA-IDAttributesandAutoGeneratedIdentifiers]]
 
@@ -3962,7 +4085,7 @@ You can direct JPA to read and write your entity's attributes by direct field ac
 
 Each entity class must have exactly one ID attribute. The value of this attribute together with the fully-qualified class name uniquely identifies an instance to the entity manager.
 
-ID values can be assigned by the application, or they can be generated by the JPA entity manager. To declare a generated identifier, annotate the field with [code]+@GeneratedValue+ . To declare an application-assigned identifier, leave off the [code]+@GeneratedValue+ annotation.
+ID values can be assigned by the application, or they can be generated by the JPA entity manager. To declare a generated identifier, annotate the field with [code]+@GeneratedValue+. To declare an application-assigned identifier, leave off the [code]+@GeneratedValue+ annotation.
 
 Generated identifier fields must not be initialized or modified by application code. Application-assigned identifier fields must be initialized to a unique value before the entity is persisted by the entity manager, but must not be modified afterward.
 
@@ -3970,9 +4093,9 @@ Generated identifier fields must not be initialized or modified by application c
 
 ===== Single-valued Attributes
 
-By default, every field of a JPA basic type is a persistent attribute. If a basic type field should not be presistent, mark it with [code]+transient+ or annotate it with [code]+@Transient+ .
+By default, every field of a JPA basic type is a persistent attribute. If a basic type field should not be presistent, mark it with [code]+transient+ or annotate it with [code]+@Transient+.
 
-Single-valued attributes of entity types must be annotated with [code]+@OneToOne+ or [code]+@ManyToOne+ .
+Single-valued attributes of entity types must be annotated with [code]+@OneToOne+ or [code]+@ManyToOne+.
 
 Single-valued types that are neither entity types nor JPA Basic types are not presently supported by Errai JPA. Such attributes must be marked transient.
 
@@ -4018,9 +4141,9 @@ public class Album {
 
 ===== Plural (collection-valued) Attributes
 
-Collection-valued types [code]+Collection<T>+ , [code]+Set<T>+ , and [code]+List<T>+ are supported. JPA rules require that all access to the collections are done through the collection interface method; never by specific methods on an implementation.
+Collection-valued types [code]+Collection<T>+, [code]+Set<T>+, and [code]+List<T>+ are supported. JPA rules require that all access to the collections are done through the collection interface method; never by specific methods on an implementation.
 
-The element type of a collection attribute can be a JPA basic type or an entity type. If it is an entity type, the attribute must be annotated with [code]+@OneToMany+ or [code]+@ManyToMany+ .
+The element type of a collection attribute can be a JPA basic type or an entity type. If it is an entity type, the attribute must be annotated with [code]+@OneToMany+ or [code]+@ManyToMany+.
 
 Here is an example of an entity with two plural attributes:
 
@@ -4065,7 +4188,7 @@ public class Artist {
 
 ===== Cascade Rules
 
-When an entity changes state (more on this later), that state change can be cascaded automatically to related entity instances. By default, no state changes are cascaded to related entities. To request cascading of entity state changes, use the [code]+cascade+ attribute on any of the relationship quantifiers [code]+@OneToOne+ , [code]+@ManyToOne+ , [code]+@OneToMany+ , and [code]+@ManyToMany+ .
+When an entity changes state (more on this later), that state change can be cascaded automatically to related entity instances. By default, no state changes are cascaded to related entities. To request cascading of entity state changes, use the [code]+cascade+ attribute on any of the relationship quantifiers [code]+@OneToOne+, [code]+@ManyToOne+, [code]+@OneToMany+, and [code]+@ManyToMany+.
 
 [options="header"]
 |===============
@@ -4078,7 +4201,7 @@ When an entity changes state (more on this later), that state change can be casc
 |[code]+ALL+|Equivalent to specifying all of the above
 |===============
 
-For an example of specifying cascade rules, refer to the [code]+Artist+ example above. In that example, the cascade type on [code]+albums+ is [code]+ALL+ . When a particular [code]+Artist+ is persisted or removed, detached, etc., all of that artist's albums will also be persisted or removed, or detached correspondingly. However, the cascade rules for [code]+genres+ are different: we only specify [code]+PERSIST+ and [code]+MERGE+ . Because a [code]+Genre+ instance is reusable and potentially shared between many artists, we do not want to remove or detach these when one artist that references them is removed or detached. However, we still want the convenience of automatic cascading persistence in case we persist an [code]+Artist+ which references a new, unmanaged [code]+Genre+ .
+For an example of specifying cascade rules, refer to the [code]+Artist+ example above. In that example, the cascade type on [code]+albums+ is [code]+ALL+. When a particular [code]+Artist+ is persisted or removed, detached, etc., all of that artist's albums will also be persisted or removed, or detached correspondingly. However, the cascade rules for [code]+genres+ are different: we only specify [code]+PERSIST+ and [code]+MERGE+. Because a [code]+Genre+ instance is reusable and potentially shared between many artists, we do not want to remove or detach these when one artist that references them is removed or detached. However, we still want the convenience of automatic cascading persistence in case we persist an [code]+Artist+ which references a new, unmanaged [code]+Genre+.
 
 [[sid-54493688_ErraiJPA-ObtaininganinstanceofEntityManager]]
 
@@ -4151,7 +4274,7 @@ Once an entity has been removed and the entity manager's state has been flushed,
 
 Errai's EntityManager class provides a [code]+removeAll()+ method which removes everything from the browser's persistent store for the domain of the current webpage.
 
-This method is not part of the JPA standard, so you must down-cast your client-side [code]+EntityManager+ instance to [code]+ErraiEntityManager+ . Example:
+This method is not part of the JPA standard, so you must down-cast your client-side [code]+EntityManager+ instance to [code]+ErraiEntityManager+. Example:
 
 
 [source, java]
@@ -4187,7 +4310,7 @@ To check if a given object is presently managed by the entity manager, call [cod
 
 ==== Named Queries
 
-To retrieve one or more entities that match a set of criteria, Errai JPA allows the use of JPA _named queries_ . Named queries are declared in annotations on entity classes.
+To retrieve one or more entities that match a set of criteria, Errai JPA allows the use of JPA _named queries_. Named queries are declared in annotations on entity classes.
 
 [[sid-54493688_ErraiJPA-DeclaringNamedQueries]]
 
@@ -4232,7 +4355,7 @@ public class Album {
 
 ===== Executing Named Queries
 
-To execute a named query, retrieve it by name and result type from the entity manager, set the values of its parameters (if any), and then call one of the execution methods [code]+getSingleResult()+ or [code]+getResultList()+ .
+To execute a named query, retrieve it by name and result type from the entity manager, set the values of its parameters (if any), and then call one of the execution methods [code]+getSingleResult()+ or [code]+getResultList()+.
 
 Example:
 
@@ -4324,11 +4447,11 @@ To access the JPA Metamodel, call the [code]+EntityManager.getMetamodel()+ metho
 
 ===== Errai Extensions to JPA Metamodel API
 
-Wherever you obtain an instance of [code]+SingularAttribute+ from the metamodel API, you can down-cast it to [code]+ErraiSingularAttribute+ . Likewise, you can down-cast any [code]+PluralAttribute+ to [code]+ErraiPluralAttribute+ .
+Wherever you obtain an instance of [code]+SingularAttribute+ from the metamodel API, you can down-cast it to [code]+ErraiSingularAttribute+. Likewise, you can down-cast any [code]+PluralAttribute+ to [code]+ErraiPluralAttribute+ .
 
-In either case, you can read the value of an arbitrary attribute by calling [code]+ErraiAttribute.get()+ and passing in the entity instance. You can set any attribute's value by calling [code]+ErraiAttribute.set()+ , passing in the entity instance and the new value.
+In either case, you can read the value of an arbitrary attribute by calling [code]+ErraiAttribute.get()+ and passing in the entity instance. You can set any attribute's value by calling [code]+ErraiAttribute.set()+, passing in the entity instance and the new value.
 
-In addition to [code]+get()+ and [code]+set()+ , [code]+ErraiPluralAttribute+ also has the [code]+createEmptyCollection()+ method, which creates an empty collection of the correct interface type for the given attribute.
+In addition to [code]+get()+ and [code]+set()+, [code]+ErraiPluralAttribute+ also has the [code]+createEmptyCollection()+ method, which creates an empty collection of the correct interface type for the given attribute.
 
 [[sid-54493688_ErraiJPA-JPAFeaturesNotImplementedinErrai2.4]]
 
@@ -4339,7 +4462,7 @@ The following features are not yet implemented, but could conceivably be impleme
 * Flush modes other than immediate
 * Transactions, including EntityManager.getTransaction()
 * In named queries:
-* Joins and nested attribute paths ( [code]+a.b.c+ ) do not yet work, although single-step attribute paths ( [code]+a.b+ ) do.
+* Joins and nested attribute paths ([code]+a.b.c+) do not yet work, although single-step attribute paths ([code]+a.b+) do.
 * The [code]+SELECT+ clause must specify exactly one entity type. Selection of individual attributes is not yet implemented.
 * Embedded collections
 * Compound identifiers (presently, only basic types are supported for entity IDs)
@@ -4458,7 +4581,7 @@ public class Item {
 }
 ----
 
-To summarize: there are three entity types: [code]+User+ , [code]+GroceryList+ , and [code]+Item+ . Each [code]+GroceryList+ belongs to a [code]+User+ and has a list of [code]+Item+ objects.
+To summarize: there are three entity types: [code]+User+, [code]+GroceryList+, and [code]+Item+ . Each [code]+GroceryList+ belongs to a [code]+User+ and has a list of [code]+Item+ objects.
 
 [NOTE]
 ====
@@ -4648,7 +4771,7 @@ In some cases, your application may be able to do something smarter: apply domai
     };
 ----
 
-Remember, because of Errai's default "server wins" resolution policy, the call to [code]+em.find(GroceryList.class, cr.getActualNew().getId())+ will return a GroceryList object that has already been updated to match the state present in [code]+serverItems+ .
+Remember, because of Errai's default "server wins" resolution policy, the call to [code]+em.find(GroceryList.class, cr.getActualNew().getId())+ will return a GroceryList object that has already been updated to match the state present in [code]+serverItems+.
 
 [NOTE]
 ====
@@ -4712,7 +4835,7 @@ public class Customer {
 
 [IMPORTANT]
 ====
-If you cannot or prefer not to annotate your classes with [code]+@Bindable+ , you can alternatively specify bindable types in your ErraiApp.properties using a whitespace-separated list of fully qualified class names: [code]+errai.ui.bindableTypes=org.example.Model1 org.example.Model2+
+If you cannot or prefer not to annotate your classes with [code]+@Bindable+, you can alternatively specify bindable types in your ErraiApp.properties using a whitespace-separated list of fully qualified class names: [code]+errai.ui.bindableTypes=org.example.Model1 org.example.Model2+
 ====
 
 [[sid-51282340_DataBinding-InitializingaDataBinder]]
@@ -4769,8 +4892,7 @@ DataBinder<Customer> dataBinder = DataBinder.forModel(existingCustomerObject, In
 
 === Creating Bindings
 
-Bindings can be created by calling the [code]+bind+ method on a [code]+DataBinder+ instance, thereby specifying which widgets should be bound to which properties of the model. It is possible to use property chains for bindings, given that all nested properties are of bindable types. When binding to [code]+customer.address.streetName+ , for example, both [code]+customer+ and [code]+address+ have to be of a type annotated with [code]+@Bindable+ .
-
+Bindings can be created by calling the [code]+bind+ method on a [code]+DataBinder+ instance, thereby specifying which widgets should be bound to which properties of the model. It is possible to use property chains for bindings, given that all nested properties are of bindable types. When binding to [code]+customer.address.streetName+, for example, both [code]+customer+ and [code]+address+ have to be of a type annotated with [code]+@Bindable+.
 
 [source, java]
 ----
@@ -4794,7 +4916,7 @@ public class CustomerView {
 
 After the call to [code]+dataBinder.bind()+ in the example above, the customer object's name property and the [code]+nameTextBox+ are kept in sync until either the [code]+dataBinder.unbind()+ method is called or the [code]+CustomerView+ bean is destroyed.
 
-That means that a call to [code]+customer.setName()+ will automatically update the value of the TextBox and any change to the TextBox's value in the browser will update the customer object's name property. So, [code]+customer.getName()+ will always reflect the currently displayed value of the [code]+TextBox+ .
+That means that a call to [code]+customer.setName()+ will automatically update the value of the TextBox and any change to the TextBox's value in the browser will update the customer object's name property. So, [code]+customer.getName()+ will always reflect the currently displayed value of the [code]+TextBox+.
 
 [NOTE]
 ====
@@ -4835,7 +4957,7 @@ public class MyCustomDateConverter implements Converter<Date, String> {
 }
 ----
 
-All converters annotated with [code]+@DefaultConverter+ will be registered as global defaults calling [code]+Convert.registerDefaultConverter()+ . Note that the [code]+Converter+ interface specifies two type parameters. The first one represents the type of the model field, the second one the type held by the widget (e.g. [code]+String+ for widgets implementing [code]+HasValue<String>+ ). These default converters will be used for all bindings with matching model and widget types.
+All converters annotated with [code]+@DefaultConverter+ will be registered as global defaults calling [code]+Convert.registerDefaultConverter()+. Note that the [code]+Converter+ interface specifies two type parameters. The first one represents the type of the model field, the second one the type held by the widget (e.g. [code]+String+ for widgets implementing [code]+HasValue<String>+). These default converters will be used for all bindings with matching model and widget types.
 
 [[sid-51282340_DataBinding-Providingabindingspecificconverter]]
 
@@ -4855,7 +4977,7 @@ Converters specified on the binding level take precedence over global default co
 
 === Property Change Handlers
 
-In some cases keeping the model and the UI in sync is not enough. Errai's [code]+DataBinder+ allows for the registration of [code]+PropertyChangeHandlers+ for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g [code]+"customer.address.\*"+ ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g [code]+"customer.\*\*"+ ).
+In some cases keeping the model and the UI in sync is not enough. Errai's [code]+DataBinder+ allows for the registration of [code]+PropertyChangeHandlers+ for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g [code]+"customer.address.\*"+ ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g [code]+"customer.\*\*"+).
 
 This provides a uniform notification mechanism for model and UI value changes. [code]+PropertyChangeHandlers+ can be used to carry out any additional logic that might be necessary after a model or UI value has changed.
 
@@ -4906,7 +5028,7 @@ public class CustomerView {
 }
 ----
 
-Here is the same example injecting a [code]+DataBinder+ instead of the model object. This is useful when more control is needed (e.g. the ability to register property change handlers). The [code]+@AutoBound+ annotation specifies that this [code]+DataBinder+ should be used to bind the model to all enclosing widgets annotated with [code]+@Bound+ . This example uses field injection again but constructor and method injection are supported as well.
+Here is the same example injecting a [code]+DataBinder+ instead of the model object. This is useful when more control is needed (e.g. the ability to register property change handlers). The [code]+@AutoBound+ annotation specifies that this [code]+DataBinder+ should be used to bind the model to all enclosing widgets annotated with [code]+@Bound+. This example uses field injection again but constructor and method injection are supported as well.
 
 [source, java]
 ----
@@ -4931,7 +5053,7 @@ In both examples above an instance of the [code]+Customer+ model is automaticall
 
 ==== Default, Simple, and Chained Property Bindings
 
-By default, bindings are determined by matching field names to property names on the model object. In the examples above, the field [code]+name+ was automatically bound to the JavaBeans property [code]+name+ of the model ( [code]+user+ object). If the field name does not match the model property name, you can use the [code]+property+ attribute of the [code]+@Bound+ annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, [code]+user.address.streetName+ ). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.
+By default, bindings are determined by matching field names to property names on the model object. In the examples above, the field [code]+name+ was automatically bound to the JavaBeans property [code]+name+ of the model ( [code]+user+ object). If the field name does not match the model property name, you can use the [code]+property+ attribute of the [code]+@Bound+ annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, [code]+user.address.streetName+). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.
 
 The following example illustrates all three scenarios:
 
@@ -5433,7 +5555,7 @@ Three things are merged or modified when Errai UI creates a new Composite compon
 . DOM Elements are merged from the component to the template
 
 
-. Template element inner text and inner HTML are preserved when the given [code]+@DataField+[code]+Widget+ implements [code]+HasText+ or [code]+HasHTML+
+. Template element inner text and inner HTML are preserved when the given [code]+@DataField Widget+ implements [code]+HasText+ or [code]+HasHTML+
 
 
 [[sid-51806600_ErraiUI-Example]]
@@ -5504,7 +5626,7 @@ Element composition, however, functions inversely from attribute merging, and th
 
 ==== Inner text and inner HTML (preserved when component implements HasText or HasHTML)
 
-Additionally, because [code]+Label+ implements both [code]+HasText+ and [code]+HasHTML+ (only one is required,) the contents of this <span> "field-1" Element in the template were preserved; however, this would not have been the case if the [code]+@DataField+ specified for the element did not implement [code]+HasText+ or [code]+HasHTML+ . In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a [code]+@DataField+ reference, or ensure that the Widget being composited implements [code]+HasText+ or [code]+HasHTML+ .
+Additionally, because [code]+Label+ implements both [code]+HasText+ and [code]+HasHTML+ (only one is required,) the contents of this <span> "field-1" Element in the template were preserved; however, this would not have been the case if the [code]+@DataField+ specified for the element did not implement [code]+HasText+ or [code]+HasHTML+ . In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a [code]+@DataField+ reference, or ensure that the Widget being composited implements [code]+HasText+ or [code]+HasHTML+.
 
 [[sid-51806600_ErraiUI-Eventhandlers]]
 
@@ -5530,7 +5652,7 @@ It is not possible to handle Native DOM events on Widgets because GWT overrides 
 
 ==== Concepts
 
-Each of the three scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with [code]+@EventHandler("my-data-field")+ ( _event handler methods_ ) to handle events on the corresponding [code]+@DataField("my-data-field")+ in the same component. Event handler methods annotated with a bare [code]+@EventHandler+ annotation (no annotation parameter) are wired to receive events on the @Templated component itself.
+Each of the three scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with [code]+@EventHandler("my-data-field")+ (_event handler methods_) to handle events on the corresponding [code]+@DataField("my-data-field")+ in the same component. Event handler methods annotated with a bare [code]+@EventHandler+ annotation (no annotation parameter) are wired to receive events on the @Templated component itself.
 
 [[sid-51806600_ErraiUI-GWTeventsonWidgets]]
 
@@ -5590,7 +5712,7 @@ The last approach is handles the case where native DOM events must be handled, b
 </div>
 ----
 
-The [code]+@SinkNative+ annotation specifies (as a bit mask) which native events the method should handle; this sink behaves the same in Errai UI as it would with [code]+DOM.sinkEvents(Element e, int bits)+ . Note that a [code]+@DataField+ reference in the component class is optional.
+The [code]+@SinkNative+ annotation specifies (as a bit mask) which native events the method should handle; this sink behaves the same in Errai UI as it would with [code]+DOM.sinkEvents(Element e, int bits)+. Note that a [code]+@DataField+ reference in the component class is optional.
 
 [IMPORTANT]
 ====
@@ -5631,12 +5753,11 @@ Here is a sample `@Templated` login form class. This form has:
 * a `password` field
 * a button that with a click handler that attempts to login asynchronously
 
-.Login.java
 [source, java]
 ----
 @Dependent
 @Templated
-public class LoginForm extends AbstractForm { // <1>
+public class LoginForm extends AbstractForm { <1>
   
   @Inject
   private Caller<AuthenticationService> authenticationServiceCaller;
@@ -5650,15 +5771,15 @@ public class LoginForm extends AbstractForm { // <1>
   private PasswordTextBox password;
 
   @DataField
-  private final FormElement form = DOM.createForm(); // <2>
+  private final FormElement form = DOM.createForm(); <2>
 
   @Inject
   @DataField
-  private Button login; // <3>
+  private Button login; <3>
   
   @Override
   protected FormElement getFormElement() {
-    return form; // <4>
+    return form; <4>
   }
 
   @EventHandler("login")
@@ -5668,7 +5789,7 @@ public class LoginForm extends AbstractForm { // <1>
       @Override
       public void callback(User response) {
         // Now that we're logged in, submit the form
-        submit(); // <5>
+        submit(); <5>
       }
     }).login(username.getText(), password.getText());
   }
@@ -5690,7 +5811,6 @@ When a user successfully logs in via this example, the web browser should prompt
 
 The most likely way to go wrong is to accidentally use the wrong types of elements in your template. It is very important that you use a proper `from` element with `input` elements *with the exception of the submit button*. Here is an html template that could accompany the `LoginForm.java` example above:
 
-.LoginForm.html
 [source, html]
 ----
 <div>
@@ -5710,7 +5830,7 @@ To reiterate, notice that the `username` and `password` fields are legitimate `i
 
 A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks require a significant amount of boilerplate code which can be alleviated by Errai. Errai's <<sid-51282340,data binding module>> provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when used together with Errai UI.
 
-In the following example, all [code]+@DataFields+ annotated with [code]+@Bound+ have their contents bound to properties of the data model (a [code]+User+ object). The model object is injected and annotated with [code]+@Model+ , which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected [code]+DataBinder+ instance annotated with [code]+@AutoBound+ , see <<sid-51282340_DataBinding-DeclarativeBinding,Declarative Binding>> for details.
+In the following example, all [code]+@DataFields+ annotated with [code]+@Bound+ have their contents bound to properties of the data model (a [code]+User+ object). The model object is injected and annotated with [code]+@Model+, which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected [code]+DataBinder+ instance annotated with [code]+@AutoBound+ , see <<sid-51282340_DataBinding-DeclarativeBinding,Declarative Binding>> for details.
 
 
 [source, java]
@@ -5743,7 +5863,7 @@ Now the user object and the [code]+username+ and [code]+password+ fields in the 
 
 ==== Default, Simple, and Chained Property Bindings
 
-By default, bindings are determined by matching field names to property names on the model object. In the example above, the field [code]+name+ was automatically bound to the JavaBeans property [code]+name+ of the model ( [code]+user+ object). If the field name does not match the model property name, you can use the [code]+property+ attribute of the [code]+@Bound+ annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, [code]+user.address.streetName+ ). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.
+By default, bindings are determined by matching field names to property names on the model object. In the example above, the field [code]+name+ was automatically bound to the JavaBeans property [code]+name+ of the model ( [code]+user+ object). If the field name does not match the model property name, you can use the [code]+property+ attribute of the [code]+@Bound+ annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, [code]+user.address.streetName+). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.
 
 The following example illustrates all three scenarios:
 
@@ -5929,7 +6049,7 @@ Templating would not be complete without the ability to inherit from parent temp
 
 ==== Template
 
-Extension templating is particularly useful for creating reusable page layouts with some shared content (navigation menus, side-bars, footers, etc...,) where certain sections will be filled with unique content for each page that extends from the base template; this is commonly seen when combined with the MVP design pattern traditionally used in GWT applications.
+Extension templating is particularly useful for creating reusable page layouts with some shared content (navigation menus, side-bars, footers, etc.) where certain sections will be filled with unique content for each page that extends from the base template; this is commonly seen when combined with the MVP design pattern traditionally used in GWT applications.
 
 
 [source, xml]
@@ -6181,7 +6301,26 @@ public class NavBar extends Composite {
 
 === Extended styling with LESS
 
-Errai also supports link:$$http://lesscss.org$$[LESS] stylesheets. To get started using these you'll have to create a LESS stylesheet and place it on the classpath of your project. Errai will convert the LESS stylesheet to css preform optimisations on it and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:
+Errai also supports link:$$http://lesscss.org$$[LESS] stylesheets. To get started using these you'll have to create a LESS stylesheet and place it on the classpath of your project and declare their ordering with the `StyleDescriptor` annotation. Every application should have 0 or 1 classes annotated with `StyleDescriptor` like the following example:
+
+[source, java]
+----
+package org.jboss.errai.example;
+
+@StyleDescriptor({ "/main.less", "other.css" })
+public class MyStyleDescriptor {
+}
+----
+
+The two files listed above, `main.less` and `other.css`, will be compiled into a single stylesheet by Errai. The relative path for `other.css` will be loaded relative to the package `org.jboss.errai.example`.
+
+[NOTE]
+.Do Not Declare Imported Stylesheets
+====
+It is only necessary to declare top-level stylesheets with the `StyleDescriptor`. If a CSS or LESS resource is only meant to be imported by another LESS stylesheet, then it need only be on the classpath.
+====
+
+Errai will convert the LESS stylesheet to css, perform optimisations on it, and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:
 
 
 [source, java]
@@ -6192,7 +6331,7 @@ public class MyComponent extends Component {
 
   ...
 
-  @PostCreate
+  @PostConstruct
   private void init() {
     textBox.setStyleName(lessStyle.get("input"));
   }
@@ -6230,11 +6369,13 @@ Starting in version 2.1, Errai offers a system for creating applications that ha
 
 * Decentralized configuration
 * Create a new page by creating a new annotated class. No need to edit a second file.
-* Make navigational changes in the natural place in the code.
+* Make navigational changes in the natural place in the code
 
 
-* Integrates cleanly with Errai UI templates, but also works well with other view technologies.
+* Integrates cleanly with Errai UI templates, but also works well with other view technologies
 * Builds on Errai IoC & CDI
+
+* Provides support for HTML5 Push State and path-parameter based URLs
 
 
 [[sid-54493676_ErraiUINavigation-GettingStarted]]
@@ -6257,9 +6398,13 @@ Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on h
 
 === How it Works
 
-Errai Navigation has three main parts: the [code]+@Page+ annotation marks any widget as a page; the [code]+TransitionTo<P>+ interface is an injectable type that provides a link to another page; and the [code]+Navigation+ singleton offers control over the navigation system as a whole.
+Errai Navigation has these main parts:
 
-The [code]+Navigation+ singleton owns a GWT Panel called the _navigation panel_ . This panel always contains a widget corresponding to the the fragment ID (the part after the # symbol) in the browser's location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser's location bar is updated to reflect the new current page.
+* The [code]+@Page+ annotation marks any widget as a page.
+* The [code]+TransitionTo<P>+, [code]+TransitionAnchor<P>+, and [code]+TransitionToRole<R>+ classes are injectable types that provide links to other pages.
+* The [code]+Navigation+ singleton offers control over the navigation system as a whole.
+
+The [code]+Navigation+ singleton owns a GWT Panel called the _navigation panel_ . This panel always contains a widget corresponding to the fragment ID (the part after the # symbol) in the browser's location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser's location bar is updated to reflect the new current page.
 
 [[sid-54493676_ErraiUINavigation-DeclaringaPage]]
 
@@ -6276,7 +6421,7 @@ public class ItemListPage extends Composite {
 }
 ----
 
-By default, the name of a page is the simple name of the class that declares it. In the above example, the [code]+ItemListPage+ will fill the navigation panel whenever the browser's location bar ends with [code]+#ItemListPage+ . If you prefer a different page name, use the [code]+@Page+ annotation's [code]+path+ attribute:
+By default, the name of a page is the simple name of the class that declares it. In the above example, the [code]+ItemListPage+ will fill the navigation panel whenever the browser's location bar ends with [code]+#ItemListPage+. If you prefer a different page name, use the [code]+@Page+ annotation's [code]+path+ attribute:
 
 
 [source, java]
@@ -6290,14 +6435,14 @@ public class ItemListPage extends Composite {
 [IMPORTANT]
 .Navigation and Errai UI
 ====
-Any widget can be a page. This includes Errai UI [code]+@Templated+ classes! Simply annotate any Errai UI templated class with [code]+@Page+ , and it will become a page that can be navigated to.
+Any widget can be a page. This includes Errai UI [code]+@Templated+ classes! Simply annotate any Errai UI templated class with [code]+@Page+, and it will become a page that can be navigated to.
 ====
 
 [[sid-54493676_ErraiUINavigation-TheStartingPage]]
 
 ===== The Default (Starting) Page
 
-Each application must have exactly one _default page_ . This requirement is enforced at compile time. This default page is displayed when there is no fragment ID present in the browser's location bar.
+Each application must have exactly one _default page_. This requirement is enforced at compile time. This default page is displayed when there is no fragment ID present in the browser's location bar.
 
 Use the [code]+role = DefaultPage.class+ attribute to declare the default starting page, like this:
 
@@ -6311,11 +6456,18 @@ public class WelcomePage extends Composite {
 
 Pages are looked up as CDI beans, so you can inject other CDI beans into fields or a constructor. Pages can also have [code]+@PostConstruct+ and [code]+@PreDestroy+ CDI methods.
 
+===== Page Roles
+
+`DefaultPage` is just one example of a page role. A page role is simply an interface used to mark `@Page` types. The main uses for page roles:
+
+* Using the `Navigation` singleton, you can look up all pages that have a specific role.
+* If a role is unique (as is the case with `DefaultPage`) then it should extend `UniquePageRole`, making it possible to navigate to the page by its role.
+
 [[sid-54493676_ErraiUINavigation-PageLifecycle]]
 
-===== Page Lifecycle
+==== Page Lifecycle
 
-There are four annotations related to page lifecycle events: [code]+@PageShowing+ , [code]+@PageShown+ , [code]+@PageHiding+ , and [code]+@PageHidden+ . These annotations designate methods so a page widget can be notified when it is displayed or hidden:
+There are four annotations related to page lifecycle events: [code]+@PageShowing+, [code]+@PageShown+, [code]+@PageHiding+, and [code]+@PageHidden+. These annotations designate methods so a page widget can be notified when it is displayed or hidden:
 
 
 [source, java]
@@ -6335,7 +6487,7 @@ public class ItemPage extends VerticalPanel {
 }
 ----
 
-Page Lifecycle:
+===== Lifecycle Phases
 
 . The fragment identifier in the URL changes
 
@@ -6362,14 +6514,19 @@ Page Lifecycle:
 
 . The [code]+@PageShown+ method of the new page is invoked.
 
+===== Optional Parameters
 
-The [code]+@PageShowing+ and [code]+@PageShown+ methods are permitted one optional parameter of type [code]+HistoryToken+ ---more on this in the next section.
+The [code]+@PageShowing+ and [code]+@PageShown+ methods are permitted one optional parameter of type [code]+HistoryToken+ -- more on this in the next section.
+
+The [code]+@PageHiding+ method is also permitted one optional parameter of type [code]+NavigationControl+. If the parameter is present, the page navigation will not be carried out until `NavigationControl.proceed()` is invoked. This is useful for interrupting page navigations and then resuming at a later time (for example, to prompt the user to save their work before transitioning to a new page).
+
+===== Page Instance Lifespan
 
 The lifespan of a Page instance is governed by CDI scope: Dependent and implict-scoped page beans are instantiated each time the user navigates to them, whereas Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.
 
 [[sid-54493676_ErraiUINavigation-PageStateParameters]]
 
-===== Page State Parameters
+==== Page State Parameters
 
 A page widget will often represent a view on on instance of a class of things. For example, there might be an ItemPage that displays a particular item available at a store. In cases like this, it's important that the bookmarkable navigation URL includes not only the name of the page but also an identifier for the particular item being displayed.
 
@@ -6388,26 +6545,110 @@ public class ItemPage extends VerticalPanel {
 }
 ----
 
-This page would be reachable at a URL like [code]++ . Before the page was displayed, the Errai UI Navigation framework would write the [code]+int+ value [code]+4+ into the [code]+itemId+ field.
+This page would be reachable at a URL like `http://www.company.com/store/#ItemPage;itemId=4`. Before the page was displayed, the Errai UI Navigation framework would write the [code]+int+ value [code]+4+ into the [code]+itemId+ field.
 
-There are three ways to pass state information to a page: by passing a Multimap to [code]+TransitionTo.go()+ ; by passing a Multimap to [code]+Navigation.goTo()+ , or by including the state information in the fragment identifier of a hyperlink as illustrated in the previous paragraph (use the [code]+HistoryToken+ class to construct such a fragment ID properly.)
+Page state parameters can also be accessed using URLs with path parameters. In this case, you have to declare the template of the page's path in the [code]+path+ field of the [code]+@Page+ annotation. As an example, consider the following code:
 
-A page widget can have any number of [code]+@PageState+ fields. The fields can be of any primitive or boxed primitive type (except [code]+char+ or [code]+Character+ ), [code]+String+ , or a [code]+Collection+ , [code]+List+ , or [code]+Set+ of the allowable scalar types. Nested collections are not supported.
+[source, java]
+----
+@Page(path="item/{itemID}/{customerID}")
+public class ItemPage extends VerticalPanel {
+
+  @PageState
+  private int itemID;
+
+  @PageState
+  private String customerID;
+
+  // Anything goes...
+}
+----
+
+In the above example, the [code]+{itemID}+ and [code]+{customerID}+ fields represent path parameters. Any combination of path strings and path parameters that are separated by slashes is considered valid. The URL `http://www.company.com/store/ItemPage/5042/cust1234` would redirect the user to the ItemPage, with the state values set as [code]+int itemId = 4+ and [code]+String customerID = "cust1234"+.
+
+There are three ways to pass state information to a page: by passing a Multimap to [code]+TransitionTo.go()+ ; by passing a Multimap to [code]+Navigation.goTo()+ , or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the [code]+HistoryToken+ class to construct such a URL properly.)
+
+A page widget can have any number of [code]+@PageState+ fields. The fields can be of any primitive or boxed primitive type (except [code]+char+ or [code]+Character+ ), [code]+String+, or a [code]+Collection+, [code]+List+, or [code]+Set+ of the allowable scalar types. Nested collections are not supported.
 
 [code]+@PageState+ fields can be private, protected, default access, or public. They are always updated by direct field access; never via a setter method. The updates occur just before the [code]+@PageShowing+ method is invoked.
 
 In addition to receiving page state information via direct writes to [code]+@PageState+ fields, you can also receive the whole Multimap in the [code]+@PageShowing+ and [code]+@PageShown+ methods through a parameter of type [code]+HistoryToken+ . Whether or not a lifecycle method has such a parameter, the [code]+@PageState+ fields will still be written as usual.
 
-Page state values are represented in the URL much like HTML form parameters: as key=value pairs separated by the ampersand ( [code]+&+ ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a [code]+@PageState+ field is absent from the state information passed to the page, the framework writes a default value: [code]+null+ for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the [code]+HistoryToken+ class.
+Page state values are represented in the URL in place of the corresponding parameter variables declared in the URL template (the [code]+path+ field of the [code]+@Page+ annotation. See <<sid-54493676_ErraiUINavigation-DeclaringaPage, Declaring a Page>>). If a parameter variable is declared in the URL template and is missing from the actual typed URL, it will cause a navigation error as Errai will not be able to match the typed URL to any template. 
+
+Any additional path parameters not found in the URL template are appended as key=value pairs separated by the ampersand ( [code]+&+ ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a [code]+@PageState+ field is absent from the state information passed to the page, the framework writes a default value: [code]+null+ for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the [code]+HistoryToken+ class.
+
+To illustrate this further, consider the following example:
+
+[source, java]
+----
+@Page(path="item/{itemID}/{customerID}")
+public class ItemPage extends VerticalPanel {
+
+  @PageState
+  private int itemID;
+
+  @PageState
+  private String customerID;
+
+  @PageState
+  private int storeID;
+
+  // Anything goes...
+}
+----
+
+Given the host [code]+"www.company.com"+ and a state map with the values [code]+itemID=4231+ , [code]+customerID=9364+ , and [code]+storeID=0032+ , the following URL will be generated:
+[code]+www.company.com/#4231/9364;storeID=0032+
+
+If the value for storeID is undefined, the URL will be `www.company.com/#4231/9364;storeID=0` .
+
+If the URL typed into the browser is `www.company.com/#4231;storeID=0032` , it will cause a navigation error.
+
+In the case that push state functionality is enabled, the page path will be relative to the application context and the `#` symbol will be absent from the URL.
+
+
+==== Push State Functionality
+
+Errai now comes with support for Push State and path-parameter-based URLs. If HTML5 Push State is enabled, all page paths will be relative to the application context. Thus, if the fragment-identifier-based URL is `www.company.com/#ItemPage` , the push state URL will be `www.company.com/store/ItemPage` , where `store` is the application context. 
+
+HTML5 Push State can be enabled by adding the following lines to your GWT host page:
+
+[source, xml]
+----
+<script type="text/javascript">
+    var erraiPushStateEnabled = true;
+</script>
+----
+
+The application context must be the same as the application's servlet web context deployed on the server. Errai attempts to infer the application context upon the first page load, but it can also be set manually. To explicitly declare the application context, you can use the [code]+setApplicationContext+ method in the Navigation class, or set the [code]+erraiApplicationWebContext+ variable in your GWT host page as follows:
+
+[source, xml]
+----
+<script type="text/javascript">
+    var erraiApplicationWebContext = "store";
+</script>
+----
+
+In the event that the browser does not support HTML5, Errai automatically disables push state functionality and reverts to a '#'-based URL format. That is, Errai uses fragment identifiers to refer to particular resources.
+
+If the page that the user is trying to navigate to cannot be found, a 404 - Not Found page is displayed. You can override this functionality and display a custom page in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file:
+
+[source, xml]
+----
+<error-page>
+    <error-code>404</error-code>
+    <location>/</location>
+</error-page>
+----
 
 [[sid-54493676_ErraiUINavigation-DeclaringaLinkwithTransitionAnchor]]
 
 ==== Declaring a Link with TransitionAnchor
 
-The easiest way to declare a link between pages is to inject an instance of [code]+TransitionAnchor<P>+ , where [code]+P+ is the class of the target page.
+The easiest way to declare a link between pages is to inject an instance of [code]+TransitionAnchor<P>+, where [code]+P+ is the class of the target page.
 
 Here is an example declaring an anchor link from the templated welcome page to the item list page. The first code sample would go in WelcomePage.java while the second would go in the WelcomePage.html, the associated html template.
-
 
 [source, java]
 ----
@@ -6419,7 +6660,6 @@ public class WelcomePage extends Composite {
 
 }
 ----
-
 
 [source, xml]
 ----
@@ -6438,7 +6678,6 @@ Sometimes it is necessary to manually transition between pages (such as in respo
 
 This code declares a manual transition from the welcome page to the item list page:
 
-
 [source, java]
 ----
 @Page(role = DefaultPage.class)
@@ -6451,7 +6690,7 @@ public class WelcomePage extends Composite {
 
 You do not need to implement the [code]+TransitionTo+ interface yourself; the framework creates the appropriate instance for you.
 
-As with [code]+TransitionAnchor+ , the only restriction is that the target of the link must be a Widget type that is annotated with [code]+@Page+ .
+As with [code]+TransitionAnchor+, the only restriction is that the target of the link must be a Widget type that is annotated with [code]+@Page+ .
 
 [[sid-54493676_ErraiUINavigation-FollowingaManualLink]]
 
@@ -6472,6 +6711,12 @@ public class WelcomePage extends Composite {
   }
 }
 ----
+
+==== Declaring a Link By UniquePageRole
+
+For convenience, it is also possible to transition to a page by its role using an injected `TransitionToRole<R>` where `R` is an interface extending `UniquePageRole`. This type is used exactly as the `TransitionTo`: just inject a parameterized instance and invoke the `go()` method.
+
+By injecting a `TransitionToRole` into a `@Page`, Errai will verify the existence of a single page with this role at compile-time.
 
 [[sid-54493676_ErraiUINavigation-InstallingtheNavigationPanelintotheUserInterface]]
 
@@ -6509,7 +6754,7 @@ This last example demonstrates a simple approach to defining the page structure 
 ----
 @Templated
 @EntryPoint
-public class OverallPageStrucutre extends Composite {
+public class OverallPageStructure extends Composite {
 
   @Inject
   private Navigation navigation;
@@ -6536,13 +6781,13 @@ public class OverallPageStrucutre extends Composite {
 }
 ----
 
-[[sid-54493676_ErraiUINavigation-OverridingthedefaultNagivatingPaneltype]]
+[[sid-54493676_ErraiUINavigation-OverridingthedefaultNavigatingPaneltype]]
 
-==== Overriding the default Nagivating Panel type
+==== Overriding the default Navigating Panel type
 
 By default Errai uses [code]+com.google.gwt.user.client.ui.SimplePanel+ as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a [code]+com.google.gwt.user.client.ui.SimpleLayoutPanel+ that manages child size state.
 
-To provide your own implementation of the navigation panel you must implement [code]+org.jboss.errai.ui.nav.client.local.NavigatingContainer+ . For example:
+To provide your own implementation of the navigation panel you must implement [code]+org.jboss.errai.ui.nav.client.local.NavigatingContainer+. For example:
 
 
 [source, java]
@@ -6574,7 +6819,7 @@ public class NavigatingPanel implements NavigatingContainer {
 }
 ----
 
-Then in your GWT module descriptor you need to override the default navigation panel ( [code]+org.jboss.errai.ui.nav.client.local.NavigatingContainer+ ) by adding:
+Then in your GWT module descriptor you need to override the default navigation panel ( [code]+org.jboss.errai.ui.nav.client.local.NavigatingContainer+) by adding:
 
 
 [source, xml]
@@ -6583,6 +6828,42 @@ Then in your GWT module descriptor you need to override the default navigation p
   <when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/>
 </replace-with>
 ----
+
+==== Handling Navigation Errors
+
+When a user enters a url for an Errai page that does not exist an error is logged and the app navigates to the `DefaultPage`. It is possible to override this behaviour by setting an error handler on `Navigation`.
+
+Here is an example of a class that registers a navigation error handler that redirects the user to a special `PageNotFound` page:
+
+[source, java]
+----
+@ApplicationScoped
+public class NavigationErrorHandlerSetter {
+
+  @Inject
+  private Navigation navigation;
+
+  @PostConstruct
+  public void setErrorHandler() {
+    navigation.setErrorHandler(new PageNavigationErrorHandler() {
+
+      @Override
+      public void handleError(Exception exception, String pageName) {
+        navigation.goTo("PageNotFound");
+      }
+
+      @Override
+      public void handleError(Exception exception, Class<? extends PageRole> pageRole) { <1>
+        navigation.goTo("PageNotFound");
+      }
+    });
+  }
+
+}
+----
+
+<1> Note that this method signature is for errors that occur from calls to `Navigation.goToWithRole(Class<? extends UniquePageRole>)`. These kinds of errors can be avoided at compile-time by injecting `TransitionToRole` instances into your `@Page` classes instead of directly calling that method.
+
 
 [[sid-54493676_ErraiUINavigation-ViewingtheGeneratedNavigationGraph]]
 
@@ -6744,7 +7025,7 @@ The simplest way to begin experimenting with Errai Security is to add Users and 
 public class PicketLinkDefaultUsers {
 
   @Inject
-  private PartitionManager partitionManager; // <1>
+  private PartitionManager partitionManager; <1>
 
   /**
    * <p>Loads some users during the first construction.</p>
@@ -6766,7 +7047,7 @@ public class PicketLinkDefaultUsers {
     hacker.setFirstName("Hacker");
     hacker.setLastName("anonymous");
     
-    identityManager.add(john); // <2>
+    identityManager.add(john); <2>
     identityManager.add(hacker);
     final Password defaultPassword = new Password("123");
     identityManager.updateCredential(john, defaultPassword);
@@ -6778,7 +7059,7 @@ public class PicketLinkDefaultUsers {
     identityManager.add(roleDeveloper);
     identityManager.add(roleAdmin);
 
-    relationshipManager.add(new Grant(john, roleDeveloper)); // <3>
+    relationshipManager.add(new Grant(john, roleDeveloper)); <3>
     relationshipManager.add(new Grant(john, roleAdmin));
   }
 
@@ -6863,7 +7144,48 @@ Client-side interceptors are used for caching so that generally only calls to `l
 
 === RestrictedAccess
 
-The annotation `@RestrictedAccess` is the only annotation necessary to secure a resource or UI element. In general, `@RestrictedAccess` blocks a resource from users who are not logged in; if an array of roles are passed in, users without the declared roles are prevented access to the annotated resource. Below we will explain how different resources are blocked from unauthorized users.
+The annotation `@RestrictedAccess` is the only annotation necessary to secure a resource or UI element. In general, `@RestrictedAccess` blocks a resource from users who are either not logged in or who lack required roles. Roles are defined through the `@RestrictedAccess` annotation in one of the following two ways.
+
+==== Simple Roles as Strings
+
+Simple roles are roles that can be directly mapped to Strings (the String value being the role name). Simple roles are defined by defining an array of Strings in the `roles` parameter of `@RestrictedAccess`. Two simple roles are equivalent if they have the same name.
+
+Here is an example usage of `@RestrictedAccess` with two simple roles, "user" and "admin":
+
+[source,java]
+----
+@RestrictedAccess(roles = { "user", "admin" })
+----
+
+==== Provided Roles
+
+Conceptually, a provided can be used to implement a more complex security system. In practice, a provided role is some concrete type that implements the `Role` interface and overrides `Object.equals(Object)`. Provided roles are declared on a resource by creating a `RequiredRolesProvider` that produces these roles and assigning the type to the `providers` parameter of `@RestrictedAccess`.
+
+Here is an sample of a `RequireRolesProvider` and its usage with `@RestrictedAccess`. This example defines equivalent roles to the above example using simple roles.
+
+[source,java]
+----
+@Dependent <1>
+public class AdminRolesProvider implements RequiredRolesProvider {
+
+  @Override
+  public Set<Role> getRoles() {
+    return new HashSet<Role>(Arrays.asList(
+      new RoleImpl("user"), <2>
+      new RoleImpl("admin")
+    ));
+  }
+}
+----
+
+[source,java]
+----
+@RestrictedAccess(providers = { AdminRolesProvider.class })
+----
+
+<1> The role provider implementation must be a CDI bean so that it can be looked up dynamically on the client and server.
+
+<2> `RoleImpl` is the internal implementation used for simple roles. A `RoleImpl` equals another role if they are both instances of `RoleImpl` and have matching names.
 
 ==== RPC Services
 
@@ -6898,6 +7220,12 @@ public interface MixedService {
 }
 ----
 
+.Using Role Providers with RPC Services
+[NOTE]
+====
+If a `RequiredRolesProvider` is used on an RPC interface, the provider type must be located in a shared package. Security checks for RPCs are performed on the client and the server, so placing the type in a client- or server-only package will result in run-time errors.
+====
+
 ===== Error Callbacks
 
 When access to a secured RPC service is denied an `UnauthenticatedException` or `UnauthorizedException` is thrown. This error is then transmitted back to the client, where it can be caught with an `ErrorCallback` (provided when the RPC is invoked).
@@ -6912,7 +7240,7 @@ MessageBuilder.createCall(new RemoteCallback<Void>() {
     public void callback(Void response) {
       // ...
     }
-  }, new ErrorCallback<Message>() { // <1>
+  }, new ErrorCallback<Message>() { <1>
 
     @Override
     public boolean error(Message message, Throwable t) {
@@ -7164,21 +7492,152 @@ public class NavBar extends Composite {
 }
 ----
 
+=== Form Based Login
+
+If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. The `errai-security-server` jar contains a servlet filter for encoding the currently authenticated user as a cookie in the http response. Here are the steps for setting this up:
+
+. Create a login page using an html form that posts to a servlet-filter. If you are using Errai Security with PicketLink you will want to use the `org.picketlink.authentication.web.AuthenticationFilter` servlet-filter. Otherwise, you will need to implement one yourself that authenticates the user by calling `AuthenticationService.login(String, String)` method.
+
+. Add this filter-mapping for setting the Errai Security user cookie:
++
+[source,xml]
+----
+  <filter-mapping>
+    <filter-name>ErraiUserCookieFilter</filter-name>
+    <url-mapping>/gwt-host-page.html</url-mapping>
+  </filter-mapping>
+----
++
+The mapped URL should be that of your GWT Host Page.
++
+[IMPORTANT]
+.This mapping must come after the filter that authenticates the user
+====
+If this filter maps to the same URL as the filter for authentication, this filter must come after the authentication filter or else it will set the cookie before the user has logged in.
+====
+
+. Make sure this is in your ErraiApp.properties file: `errai.security.user_cookie_enabled=true`
+
 === Using an Alternative to PicketLink
 
 All Errai Security authentication is implemented with Errai Remote Procedure Calls to the `AuthenticationService`. A default implementation of this interface using PicketLink is provided in the `errai-security-picketlink` jar. But it is possible to use a different sever-side security framework by providing your own custom implementation of `AuthenticationService` and annotating it with `@Service`. In that case your project should not depend on `errai-security-picketlink`.
 
-==== Form Based Login
+=== Using Keycloak for Authentication
 
-If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. Here are the steps required:
+link:$$http://keycloak.jboss.org/$$[Keycloak] is is a new project that provides integrated SSO and IDM for browser apps and RESTful web services. By using Keycloak it is possible to outsource the responsibility of authentication and account management from your application entirely. Errai Security provides an optional `errai-security-keycloak` jar that provides an implementation of the `AuthenticationService` that works with Keycloak.
 
-. Create a login page using an html form that posts to a Java servlet.
+==== How It Works (Overview)
 
-. On the servlet attempt to login with the `AuthenticationService`. If a user's login request is successful, use the `org.jboss.errai.security.shared.api.UserCookieEncoder` to create a cookie.
+From the perspective of a visitor, here is what happens when she attempts to log in:
 
-. Set the cookie in the HTTP response and redirect the user to your Errai app.
+* The visitor is redirected to a Keycloak login page.
 
-. Make sure this is in your ErraiApp.properties file: `errai.security.user_cookie_enabled=true`
+* The visitor submits her credentials through the Keycloak login page.
+
+* Assuming the credentials are valid, the visitor is redirected back to the web app, where she is now logged in.
+
+===== Keycloak Token
+
+Behind the scenes, when the visitor successfully submits credentials she is redirected back to the web app with a Keycloak Access Token, which contains information that is configurable from within Keycloak. A servlet filter is used to extract the token from the request and assign it to the `AuthenticationService` implementation. At this point the User is now logged in to your application.
+
+==== Setup
+
+To add Keycloak integration to your application:
+
+. Setup a Keycloak server. Please consult the link:$$http://keycloak.jboss.org/docs.html$$[Keycloak documentation] for details on how this is achieved.
+
+  .. As part of your setup you should create a new realm for your application.
+
+  .. Add roles and users to your realm.
+
+  .. In your new realm you should create a new application (you can also use OAuth).
+
+  .. After creating your application select it from the list and make sure to adjust the following settings as appropriate:
+
+    * **Redirect URI** -- You should use this to whitelist pages that will be redirected to after a successful login.
+
+    * **Claims** -- You will need to explicitly enable any information about users that your application requires access to.
+
+    * **Scope** -- Move any roles that users in your app *may* possess to the "Assigned Roles". (Note: moving the roles to "Assigned Roles" does not mean *all* users will have this role. It does mean that these roles will be visible to your app for users that do have them.)
+
+  .. After adjusting the settings for your app, go to the *Installation* tab and select "keycloak.json" in the *Format Option* list. Copy this into a "keycloak.json" file in your `WEB-INF` directory.
+
+. Add the `errai-security-keycloak` jar to your project. In maven, the dependency is `org.jboss.errai:errai-security-keycloak`.
+
+. Configure the `ErraiUserCookieFilter` in your `web.xml`. All that is necessary is adding a filter-mapping for your GWT host page like so:
++
+[source,xml]
+----
+  <filter-mapping>
+    <filter-name>ErraiUserCookieFilter</filter-name>
+    <url-pattern>/index.html</url-pattern>
+  </filter-mapping>
+----
+
+. Configure the `ErraiLoginRedirectFilter` in your `web.xml`.
+
+  .. Create a filter-mapping of this filter onto a path that will act as a url to the Keycloak login page. For example, if your deployed app is called `my-app` and you wanted `<server-uri>/my-app/app-login` as your login url then you would add the following:
++
+[source,xml]
+----
+  <filter-mapping>
+    <filter-name>ErraiLoginRedirectFilter</filter-name>
+    <url-pattern>/app-login</url-pattern>
+  </filter-mapping>
+----
+
+  .. Add a security-constraint to login url. This is what actually causes the redirection to Keycloak. All the filter does is redirect back to your app (which happens after the login completes). For the previous example, the constraint would look like this:
++
+[source,xml]
+----
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Login</web-resource-name>
+      <url-pattern>/app-login</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+----
+
+  .. Optionally configure the URL that the `ErraiLoginRedirectFilter` redirects to. You can do this with the `redirectLocation` param, which takes a path relative to the app context:
++
+[source,xml]
+----
+  <filter>
+    <filter-name>ErraiLoginRedirectFilter</filter-name>
+    <init-param>
+      <param-name>redirectLocation</param-name>
+      <param-value>/index.jsp</param-value>
+    </init-param>
+  </filter>
+----
+
+. Set the login method to use Keycloak in you `web.xml`:
++
+[source,xml]
+----
+  <login-config>
+    <auth-method>KEYCLOAK</auth-method>
+    <realm-name>example</realm-name>
+  </login-config>
+----
+
+. Add roles available to users in your application to the `web.xml`. Here is an example declaration of a "user" role:
++
+[source,xml]
+----
+  <security-role>
+    <role-name>user</role-name>
+  </security-role>
+----
+
+.All users must have at least one role
+[IMPORTANT]
+====
+With this configuration all users must have at least a single role, or else they will not be redirected propertly. Unfortunately, there is no way to define a security-constraint that only requires authentication. The simplest solution is to add a default role to your realm.
+====
 
 [[sid-74908675]]
 
@@ -7283,9 +7742,9 @@ If you are increasing the logging level of an Errai log handler, you will also n
 
 ==== Format String
 
-The Errai log handlers use [code]+ErraiSimpleFormatter+ to format log output. The format string is similar to that used in by [code]+java.util.SimpleFormatter+ (for precise differences please see the javadocs for [code]+ErraiSimpleFormatter+ and [code]+StringFormat+ ).
+The Errai log handlers use [code]+ErraiSimpleFormatter+ to format log output. The format string is similar to that used in by [code]+java.util.SimpleFormatter+ (for precise differences please see the javadocs for [code]+ErraiSimpleFormatter+ and [code]+StringFormat+).
 
-As with handler settings, these can be configured in Java or Javascript. To do so in Java, use [code]+ErraiSimpleFormmater.setSimpleFormatString(String)+ . In Javascript, just set the variable [code]+erraiSimpleFormatString+ to the desired value.
+As with handler settings, these can be configured in Java or Javascript. To do so in Java, use [code]+ErraiSimpleFormmater.setSimpleFormatString(String)+. In Javascript, just set the variable [code]+erraiSimpleFormatString+ to the desired value.
 
 [[sid-74908675_Logging-ServerSideSetup]]
 
@@ -7293,7 +7752,7 @@ As with handler settings, these can be configured in Java or Javascript. To do s
 
 On the server you are free to use any logging back-end that has slf4j bindings (or to make your own). Just make sure to add dependencies for the slf4j-api artifact and the slf4j binding you choose. _Note:_ Some application servers provide their own slf4j bindings (such as JBoss AS), in which case you should add your binding dependency as provided scope.
 
-To learn more about how to setup slf4j for your server-side code, see link:$$http://www.slf4j.org/$$[their website] .
+To learn more about how to setup slf4j for your server-side code, see link:$$http://www.slf4j.org/$$[their website].
 
 [[sid-74908675_Logging-ExampleUsage]]
 
@@ -7424,6 +7883,59 @@ Here are some additional JVM arguments that can be passed to the JBossLauncher:
 
 We provide integration with the link:$$http://jboss.org/jbossas$$[JBoss Application Server], but the requirements are basically the same for other vendors. When running a GWT client app that leverages CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI ([code]+java:/BeanManager+).
 
+
+[[Offline-Mode]]
+
+=== Errai Offline Mode Configuration
+
+Errai provides special support for HTML5's application caching mechanism that enables applications to work offline. If you're 
+not familiar with the HTML5 application cache you can find all the details link:$$https://developer.mozilla.org/en-US/docs/Web/HTML/Using_the_application_cache$$[here].
+
+As GWT compiles separate browser-specific JavaScript permutations for your application, it is not enough to manually create a cache manifest file and simply list all generated JavaScript files. This would cause every browser to download and cache JavaScript files that it doesn't need in the first place (i.e. Safari would download and cache JavaScript files that were generated for Internet Explorer only). Errai solves this problem by using a custom linker to generate user-agent specific cache manifest files.
+
+The following steps are necessary to activate this linker:
+
+* Define the linker in your gwt.xml module descriptor:
+
+[source, xml]
+----
+<define-linker name="offline" class="org.jboss.errai.offline.linker.DefaultCacheManifestLinker" />
+<add-linker name="offline" />
+----
+
+* Add the manifest (`your_module_name`/errai.appcache) to the `html` tag in your host page:
+
+[source, xml]
+----
+<html manifest="your_module_name/errai.appcache">  
+----
+
+* Add a mime-mapping to your web.xml file (you can skip this step if you deploy the errai-javaee-all.jar as part of your application):
+
+[source, xml]
+----
+<mime-mapping>
+  <extension>manifest</extension>
+  <mime-type>text/cache-manifest</mime-type>
+</mime-mapping>
+----
+  
+* Make sure the `errai-common.jar` file is deployed as part of your application. It contains a servlet that will provide the correct user-agent specific manifest file in response to requests to your_module_name/errai.appcache
+
+* To obtain manifests that contain other files in addition to those generated by the `DefaultCacheManifestLinker`, create a subclass that overrides `otherCachedFiles()`, and use this subclass as a linker instead:
+
+[source, java]
+----
+@Shardable
+@LinkerOrder(Order.POST)
+public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
+  @Override
+  protected String[] otherCachedFiles() {
+    return new String[] {"/my-app/index.html","/my-app/css/application.css"};
+  }
+}
+----
+
 [[sid-5931354]]
 
 === ErraiApp.properties
@@ -7456,8 +7968,8 @@ If the same key appears in more than one ErraiApp.properties file, only one of t
 
 ===== Errai Marshalling Configuration
 
-* _$$errai.marshalling.use_static_marshallers$$_ when set to [code]+false+ , Errai will not use the precompiled server-side marshallers even if the generated [code]+ServerMarshallingFactoryImpl+ class is found on the classpath. This is useful when using Dev Mode in conjunction with an external server such as JBoss AS 7 or EAP 6.
-* _$$errai.marshalling.force_static_marshallers$$_ when set to [code]+true+ , Errai will not use dynamic marshallers. If the generated [code]+ServerMarshallingFactoryImpl+ cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.
+* _$$errai.marshalling.use_static_marshallers$$_ when set to [code]+false+, Errai will not use the precompiled server-side marshallers even if the generated [code]+ServerMarshallingFactoryImpl+ class is found on the classpath. This is useful when using Dev Mode in conjunction with an external server such as JBoss AS 7 or EAP 6.
+* _$$errai.marshalling.force_static_marshallers$$_ when set to [code]+true+, Errai will not use dynamic marshallers. If the generated [code]+ServerMarshallingFactoryImpl+ cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.
 
 
 Errai also supports configuring portable types in [code]+ErraiApp.properties+ as an alternative to the [code]+@Portable+ annotation. See <<sid-5931328_Marshalling-ManualMapping,the Errai Marshalling section on Manual Mapping>> for details.
@@ -7605,9 +8117,9 @@ The AsyncDispatcher provides full asynchronous delivery of messages. When this d
 
 ===== Startup Configuration
 
-* _$$errai.auto_discover_services$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. _This property must be set to true if and only if Errai CDI is not on the classpath_ . The default value is [code]+false+ .
+* _$$errai.auto_discover_services$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. _This property must be set to true if and only if Errai CDI is not on the classpath_ . The default value is [code]+false+.
 
-* _$$errai.auto_load_extensions$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for extensions. The default value is [code]+true+ .
+* _$$errai.auto_load_extensions$$_ A boolean indicating whether or not the Errai bootstrapper should automatically scan for extensions. The default value is [code]+true+.
 
 [[sid-5931338_Messaging%28ErraiBus%29Configuration-ExampleConfiguration]]
 
@@ -7780,12 +8292,12 @@ To use Errai JAX-RS, you must include it on the compile-time classpath. If you a
 
 [source, xml]
 ----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jaxrs-client</artifactId>
-      <version>${errai.version}</version>
-      <scope>provided</scope>
-    </dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-jaxrs-client</artifactId>
+  <version>${errai.version}</version>
+  <scope>provided</scope>
+</dependency>
 ----
 
 Or if you are not using Maven for dependency management, add [code]+errai-jaxrs-client-${errai.version}.jar+ to your classpath.
@@ -7795,12 +8307,11 @@ If you intend to use Errai's JSON format on the wire you will need to add Errai'
 
 [source, xml]
 ----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jaxrs-provider</artifactId>
-      <version>${errai.version}</version>
-    </dependency>
-
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-jaxrs-provider</artifactId>
+  <version>${errai.version}</version>
+</dependency>
 ----
 
 Or manually add [code]+errai-jaxrs-provider-${errai.version}.jar+ in case you're not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <<sid-19398997_ErraiJAX-RS-Configuration,Configuration>> ) .
@@ -7813,7 +8324,7 @@ Once you have Errai JAX-RS on your classpath, ensure your application inherits t
 
 [source, xml]
 ----
-  <inherits name="org.jboss.errai.enterprise.Jaxrs"/>
+<inherits name="org.jboss.errai.enterprise.Jaxrs"/>
 ----
 
 [[sid-19398997_ErraiJAX-RS-Configuration]]
@@ -7899,11 +8410,11 @@ To use Errai JPA, you must include it on the compile-time classpath. If you are 
 
 [source, xml]
 ----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jpa-client</artifactId>
-      <version>${errai.version}</version>
-    </dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-jpa-client</artifactId>
+  <version>${errai.version}</version>
+</dependency>
 ----
 
 If you are not using Maven for dependency management, add [code]+errai-jpa-client-${errai.version}.jar+ , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.
@@ -7916,7 +8427,7 @@ Once you have Errai JPA on your classpath, ensure your application inherits the 
 
 [source, xml]
 ----
-   <inherits name="org.jboss.errai.jpa.JPA"/>
+ <inherits name="org.jboss.errai.jpa.JPA"/>
 ----
 
 [[sid-54493688_ErraiJPA-METAINF%2Fpersistence.xml]]
@@ -7931,11 +8442,11 @@ First, ensure your [code]+pom.xml+ includes a dependency on the Data Sync module
 
 [source, xml]
 ----
-  <dependency>
-    <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-jpa-datasync</artifactId>
-    <version>${errai.version}</version>
-  </dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-jpa-datasync</artifactId>
+  <version>${errai.version}</version>
+</dependency>
 ----
 
 ==== GWT Module Descriptor
@@ -7944,7 +8455,7 @@ Then, ensure your project's [code]+*.gwt.xml+ module descriptor includes a depen
 
 [source, xml]
 ----
-  <inherits name="org.jboss.errai.jpa.sync.DataSync"/>
+<inherits name="org.jboss.errai.jpa.sync.DataSync"/>
 ----
 
 === Errai Data Binding
@@ -7958,11 +8469,11 @@ To use Errai's data binding module, you must include it on the compile-time clas
 
 [source, xml]
 ----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-data-binding</artifactId>
-      <version>${errai.version}</version>
-    </dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-data-binding</artifactId>
+  <version>${errai.version}</version>
+</dependency>
 ----
 
 If you are not using Maven for dependency management, add [code]+errai-data-binding-${errai.version}.jar+ to your classpath.
@@ -8028,7 +8539,6 @@ Or if you prefer to manage your project's dependency in a finer-grained way, you
 </dependency>
 ----
 
-
 [[sid-51806600_ErraiUI-App.gwt.xml]]
 
 ==== GWT Module Descriptor
@@ -8049,18 +8559,18 @@ To use Errai UI Navigation, you must include it on the compile-time classpath. I
 
 [source, xml]
 ----
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-navigation</artifactId>
-      <version>${errai.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-cdi-client</artifactId>
-      <version>${errai.version}</version>
-      <scope>provided</scope>
-    </dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-navigation</artifactId>
+  <version>${errai.version}</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-cdi-client</artifactId>
+  <version>${errai.version}</version>
+  <scope>provided</scope>
+</dependency>
 ----
 
 If you are not using Maven for dependency management, add [code]+errai-navigation-${errai.version}.jar+ to the compile-time classpath of a project that's already set up for Errai UI templating.
@@ -8073,7 +8583,7 @@ Once you have Errai UI Navigation on your classpath, ensure your application inh
 
 [source, xml]
 ----
-   <inherits name="org.jboss.errai.ui.nav.Navigation"/>
+<inherits name="org.jboss.errai.ui.nav.Navigation"/>
 ----
 
 === Errai Cordova (Mobile Support)
@@ -8085,11 +8595,11 @@ Using Errai Cordova requires the following compile-time dependency:
 
 [source, xml]
 ----
-  <dependency>
-    <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-cordova</artifactId>
-    <version>${errai.verison}</version>
-  </dependency>
+<dependency>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-cordova</artifactId>
+  <version>${errai.verison}</version>
+</dependency>
 ----
 
 ==== Cordova Maven Plugin
@@ -8100,12 +8610,12 @@ Errai Cordova allows you build an Errai app to natively run on a device. In orde
 ----
 <build>
  ...
-    <plugins>
-      <plugin>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>cordova-maven-plugin</artifactId>
-        <version>${errai.version}</version>
-      </plugin>
+	<plugins>
+	  <plugin>
+	    <groupId>org.jboss.errai</groupId>
+	    <artifactId>cordova-maven-plugin</artifactId>
+	    <version>${errai.version}</version>
+	  </plugin>
 ----
 
 [[sid-65274252_ErraiCordova%28MobileSupport%29-App.gwt.xml]]
@@ -8194,7 +8704,6 @@ If you are using picketlink for authentication, you should also include this:
   <version>${errai.version}</version>
 </dependency>
 ----
-
 
 ==== GWT Module Descriptor
 
@@ -8875,6 +9384,14 @@ _Answer:_ You can't invoke RPC methods via [code]+Caller<?>+ or by other means u
 
 If this doesn't help, it is also possible that the proxies were never generated in the first place. Check in [code]+.errai/RpcProxyLoaderImpl.java+ to see if proxy code exists for the [code]+@Remote+ and/or [code]+@Path+ interface in question. If not, your [code]+@Remote+ interfaces were not present on the GWT compiler's classpath when your application module was compiled. Double-check your GWT compilation classpath: all [code]+@Remote+ interfaces must be visible to (in or inherited by) the GWT module that contains the [code]+Caller<?>+ types. Pay special attention that your [code]+@Remote+ and [code]+@Path+ interfaces are not in a package excluded from the GWT module (by default, every subpackage other than [code]+client+ and [code]+shared+ is invisible to the GWT compiler).
 
+=== Why do I get a "404 - Not Found" page if I try to navigate to my web page by typing in the URL or refreshing the page?
+
+_Answer:_ There are two reasons that could cause this behaviour:
+ 
+You may not have declared a default page for Errai Push State to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <<sid-54493676_ErraiUINavigation-HowitWorks, Errai UI Navigation - How it Works -> Push State Functionality>> .
+
+If that doesn't work, check to see if you have explicitly declared the application web context in your GWT host page. See <<sid-54493676, Errai UI Navigation - How it Works -> Push State Functionality>> .
+
 [[sid-21758202]]
 
 == Upgrade Guide
@@ -8976,6 +9493,12 @@ Here are the steps you'll need to take to get your project running after you upd
 * Errai's custom jetty launcher (org.jboss.errai.cdi.erver.gwt.JettyLauncher) is no longer needed and has been deleted. Simply remove the corresponding -server parameter from your GWT launch configuration if you still use it.
 
 * The whole artifact errai-cdi-jetty has been deleted and is no longer required. Delete the JAR file from your project or remove the corresponding dependency in your pom.xml
+
+=== Upgrading to Errai 3.1 from 3.0
+
+Here are the steps you'll need to take to get your project running after you update:
+
+* If you are using Errai to compile LESS/CSS files you will need to declare a `StyleDescriptor` listing the resources to compile in the desired order. This change was made to provide a deterministic and configurable order of styles in the generated CSS.
 
 [[sid-5833087]]
 

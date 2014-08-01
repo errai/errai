@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jaxrs-integration-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -47,7 +47,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.7</version>
         <configuration>
           <excludes>**/core/**,**/ext/**</excludes>
         </configuration>
@@ -61,9 +60,9 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
+                  <!-- Do not put version here. Managed version will be used. -->
                   <groupId>org.jboss.spec.javax.ws.rs</groupId>
                   <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
-                  <version>1.0.0.Final</version>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
                   <outputDirectory>target/generated-sources/javax/ws/rs/super</outputDirectory>
@@ -82,6 +81,7 @@
       <artifactId>errai-marshalling</artifactId>
     </dependency>
 
+    <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -124,6 +124,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
       <scope>test</scope>
@@ -154,7 +160,7 @@
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
               <additionalClasspathElements>

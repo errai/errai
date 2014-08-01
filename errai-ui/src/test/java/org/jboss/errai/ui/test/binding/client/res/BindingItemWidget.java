@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ui.test.binding.client.res;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -39,6 +40,8 @@ public class BindingItemWidget extends Composite implements HasModel<TestModel> 
   @Inject @AutoBound
   private DataBinder<TestModel> binder;
   
+  private int num;
+  
   public TextBox getTextBox() {
     return name;
   }
@@ -51,5 +54,14 @@ public class BindingItemWidget extends Composite implements HasModel<TestModel> 
   @Override
   public void setModel(TestModel model) {
     binder.setModel(model, InitialState.FROM_MODEL);
+  }
+  
+  @PreDestroy
+  public void testDestroy() {
+    num++;
+  }
+  
+  public int getNum() {
+    return num;
   }
 }

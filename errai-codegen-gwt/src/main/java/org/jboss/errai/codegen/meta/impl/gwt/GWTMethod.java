@@ -73,6 +73,11 @@ public class GWTMethod extends MetaMethod {
   public MetaClass getDeclaringClass() {
     return GWTClass.newInstance(oracle, method.getEnclosingType());
   }
+  
+  @Override
+  public String getDeclaringClassName() {
+    return method.getEnclosingType().getName();
+  }
 
   @Override
   public MetaType getGenericReturnType() {
@@ -169,11 +174,5 @@ public class GWTMethod extends MetaMethod {
   public boolean equals(final Object o) {
     return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
-
-  @Override
-  public String toString() {
-    return "GWTMethod{" +
-            "method=" + method +
-            '}';
-  }
+  
 }

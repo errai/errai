@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -178,29 +179,29 @@ public final class MetaClassFactory {
   }
 
   public static boolean isCached(final String name) {
-    return getMetaClassCache().ERASED_CLASS_CACHE.containsKey(name);
+    return getMetaClassCache().isKnownErasedType(name);
   }
 
   private static MetaClass createOrGet(final String fullyQualifiedClassName) {
-    if (!getMetaClassCache().ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
+    if (!getMetaClassCache().isKnownErasedType(fullyQualifiedClassName)) {
       return createOrGet(fullyQualifiedClassName, false);
     }
 
-    return getMetaClassCache().ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
+    return getMetaClassCache().getErased(fullyQualifiedClassName);
   }
 
   private static MetaClass createOrGet(final TypeLiteral type) {
     if (type == null)
       return null;
 
-    if (!getMetaClassCache().ERASED_CLASS_CACHE.containsKey(type.toString())) {
+    if (!getMetaClassCache().isKnownErasedType(type.toString())) {
       final MetaClass gwtClass = JavaReflectionClass.newUncachedInstance(type);
 
       addLookups(type, gwtClass);
       return gwtClass;
     }
 
-    return getMetaClassCache().ERASED_CLASS_CACHE.get(type.toString());
+    return getMetaClassCache().getErased(type.toString());
   }
 
   private static MetaClass createOrGet(final String clsName, final boolean erased) {
@@ -209,9 +210,9 @@ public final class MetaClassFactory {
 
     MetaClass mCls;
     if (erased) {
-      mCls = getMetaClassCache().ERASED_CLASS_CACHE.get(clsName);
+      mCls = getMetaClassCache().getErased(clsName);
       if (mCls == null) {
-        getMetaClassCache().ERASED_CLASS_CACHE.put(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
+        getMetaClassCache().pushErasedCache(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
       }
     }
     else {
@@ -232,13 +233,13 @@ public final class MetaClassFactory {
         return JavaReflectionClass.newUncachedInstance(cls, type);
       }
 
-      if (!getMetaClassCache().ERASED_CLASS_CACHE.containsKey(cls.getName())) {
+      if (!getMetaClassCache().isKnownErasedType(cls.getName())) {
         final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
         addLookups(cls, javaReflectionClass);
         return javaReflectionClass;
       }
 
-      return getMetaClassCache().ERASED_CLASS_CACHE.get(cls.getName());
+      return getMetaClassCache().getErased(cls.getName());
     }
     else {
       MetaClass mCls;
@@ -433,11 +434,11 @@ public final class MetaClassFactory {
   }
 
   private static void addLookups(final TypeLiteral literal, final MetaClass metaClass) {
-    getMetaClassCache().ERASED_CLASS_CACHE.put(literal.toString(), metaClass);
+    getMetaClassCache().pushErasedCache(literal.toString(), metaClass);
   }
 
   private static void addLookups(final Class cls, final MetaClass metaClass) {
-    getMetaClassCache().ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
+    getMetaClassCache().pushErasedCache(cls.getName(), metaClass);
   }
 
   public static final Map<String, Class<?>> PRIMITIVE_LOOKUP = Collections.unmodifiableMap(new HashMap<String, Class<?>>() {
@@ -540,12 +541,27 @@ public final class MetaClassFactory {
     return newClasses;
   }
 
+  public static Collection<MetaClass> getAllNewOrUpdatedClasses() {
+    return getMetaClassCache().getAllNewOrUpdated();
+  }
+  
+  public static boolean isNewOrUpdated(String fqcn) {
+    return getMetaClassCache().isNewOrUpdated(fqcn);
+  }
+
+  public static Set<String> getAllRemovedClasses() {
+    return getMetaClassCache().getAllRemovedClasses();
+  }
 
   public static Collection<MetaClass> getAllCachedClasses() {
     return getMetaClassCache().getAllCached();
   }
-  
+
   public static boolean isKnownType(String fqcn) {
     return getMetaClassCache().isKnownType(fqcn);
+  }
+
+  public static boolean noChangedClasses() {
+    return getAllNewOrUpdatedClasses().isEmpty() && getAllRemovedClasses().isEmpty();
   }
 }

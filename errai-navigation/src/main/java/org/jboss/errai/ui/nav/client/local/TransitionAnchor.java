@@ -28,6 +28,7 @@ public final class TransitionAnchor<P extends IsWidget> extends Anchor implement
   private final Navigation navigation;
   private final Class<P> toPageWidgetType;
   private final Multimap<String, String> state;
+  private final HistoryTokenFactory htFactory;
 
   /**
    * Creates a new TransitionAnchor with the given attributes.
@@ -39,8 +40,8 @@ public final class TransitionAnchor<P extends IsWidget> extends Anchor implement
    * @throws NullPointerException
    *           if any of the arguments are null.
    */
-  TransitionAnchor(Navigation navigation, final Class<P> toPage) {
-    this(navigation, toPage, ImmutableMultimap.<String,String>of());
+  TransitionAnchor(Navigation navigation, final Class<P> toPage, HistoryTokenFactory htFactory) {
+    this(navigation, toPage, ImmutableMultimap.<String,String>of(), htFactory);
   }
 
   /**
@@ -55,10 +56,11 @@ public final class TransitionAnchor<P extends IsWidget> extends Anchor implement
    * @throws NullPointerException
    *           if any of the arguments are null.
    */
-  TransitionAnchor(Navigation navigation, final Class<P> toPage, final Multimap<String, String> state) {
+  TransitionAnchor(Navigation navigation, final Class<P> toPage, final Multimap<String, String> state, HistoryTokenFactory htFactory) {
     this.navigation = Assert.notNull(navigation);
     this.toPageWidgetType = Assert.notNull(toPage);
     this.state = Assert.notNull(state);
+    this.htFactory = Assert.notNull(htFactory);
     addClickHandler(this);
     addAttachHandler(new Handler() {
       @Override
@@ -79,7 +81,7 @@ public final class TransitionAnchor<P extends IsWidget> extends Anchor implement
    */
   private void initHref(Class<P> toPage, Multimap<String, String> state) {
     PageNode<P> toPageInstance = navigation.getNavGraph().getPage(toPage);
-    HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
+    HistoryToken token = htFactory.createHistoryToken(toPageInstance.name(), state);
     String href = "#" + token.toString();
     setHref(href);
   }

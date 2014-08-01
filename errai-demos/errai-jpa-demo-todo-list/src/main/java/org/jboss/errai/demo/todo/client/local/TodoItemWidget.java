@@ -63,7 +63,7 @@ public class TodoItemWidget extends Composite implements HasModel<TodoItem> {
   }
 
   @EventHandler
-  private void onClick(ClickEvent e) {
+  protected void onClick(ClickEvent e) {
     TodoItem item = getModel();
     item.setDone(!item.isDone());
   }

@@ -83,8 +83,7 @@ class CordovaMojo extends GroovyMojo {
 
         def www = "${project.build.directory}/${project.build.finalName}"
 
-        [androidDir, iosDir].each { dir ->
-            clean(dir)
+        [androidDir, iosDir].each { dir ->            
             copy(dir, www)
         }
 
@@ -146,7 +145,7 @@ class CordovaMojo extends GroovyMojo {
     }
 
     def void copy(dir, www) {
-        ant.copy(todir: dir) {
+        ant.copy(todir: dir, overwrite: 'true') {
             fileset(dir: www, excludes: '**/*.class, **/*.jar, **/*.java')
         }
     }

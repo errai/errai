@@ -1,3 +1,19 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2014, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.security.server;
 
 import java.io.IOException;
@@ -6,15 +22,11 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 import javax.servlet.FilterConfig;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
-import org.jboss.errai.security.shared.api.UserCookieEncoder;
-import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.picketlink.authentication.web.HTTPAuthenticationScheme;
 import org.picketlink.credential.DefaultLoginCredentials;
 
@@ -29,9 +41,6 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
   public static final String HTTP_FORM_SECURITY_CHECK_URI = "/uf_security_check";
   public static final String HTTP_FORM_USERNAME_PARAM = "uf_username";
   public static final String HTTP_FORM_PASSWORD_PARAM = "uf_password";
-
-  @Inject
-  private AuthenticationService authenticationService;
 
   /**
    * URI of the GWT host page, relative to the servlet container root (so it starts with '/' and includes the context
@@ -112,11 +121,6 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
 
   @Override
   public boolean postAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Cookie erraiUserCacheCookie = new Cookie(
-            UserCookieEncoder.USER_COOKIE_NAME,
-            UserCookieEncoder.toCookieValue(authenticationService.getUser()));
-    response.addCookie(erraiUserCacheCookie);
-
     StringBuilder redirectTarget = new StringBuilder(hostPageUri);
     String extraParams = extractParameters(request);
     if (extraParams.length() > 0) {

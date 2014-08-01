@@ -12,17 +12,10 @@ public class ClassWithServiceAndCommandMethod {
 
   @Inject
   private MessageBus bus;
-  
+
   @Service("ClassWithServiceAndCommandMethod")
   @Command("serviceAndCommandMethod")
   private void respond(Message message) {
     MessageBuilder.createConversation(message).subjectProvided().noErrorHandling().sendNowWith(bus);
   }
-  
-  @Service("ClassWithServiceAndCommandMethod")
-  @Command
-  private void badCommand(Message message) {
-    throw new RuntimeException("This should never be called!");
-  }
-  
 }

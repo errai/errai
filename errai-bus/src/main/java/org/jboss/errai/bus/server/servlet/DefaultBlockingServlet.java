@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +37,7 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
+import org.slf4j.Logger;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
@@ -82,6 +84,7 @@ import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
  */
 
 public class DefaultBlockingServlet extends AbstractErraiServlet implements Filter {
+  private static final Logger log = getLogger(DefaultBlockingServlet.class);
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -109,7 +112,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
    */
   @Override
   protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-      throws ServletException, IOException {
+      throws ServletException {
 
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest)),
@@ -131,16 +134,23 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
    *     - if the request for the POST could not be handled
    */
   @Override
-  protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-      throws ServletException, IOException {
+  protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException {
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest));
 
     try {
       service.store(createCommandMessage(session, httpServletRequest));
     }
+    catch (IOException ioe) {
+      log.debug("Problem when storing message", ioe);
+    }
     catch (QueueUnavailableException e) {
-      sendDisconnectDueToSessionExpiry(httpServletResponse);
+      try {
+        sendDisconnectDueToSessionExpiry(httpServletResponse);
+      } 
+      catch (IOException ioe) {
+        log.debug("Failed to inform client that session expired", ioe);
+      }
       return;
     }
 
@@ -148,7 +158,8 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   }
 
   private void pollForMessages(final QueueSession session, final HttpServletRequest httpServletRequest,
-                               final HttpServletResponse httpServletResponse, boolean wait, final boolean sse) throws IOException {
+                               final HttpServletResponse httpServletResponse, boolean wait, final boolean sse) {
+    
     try {
       if (sse) {
         prepareSSE(httpServletResponse);
@@ -159,7 +170,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
       final MessageQueue queue = service.getBus().getQueue(session);
 
-      final ServletOutputStream outputStream = httpServletResponse.getOutputStream();
       if (queue == null) {
         switch (getConnectionPhase(httpServletRequest)) {
           case CONNECTING:
@@ -170,29 +180,42 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
         sendDisconnectDueToSessionExpiry(httpServletResponse);
         return;
       }
-
       queue.heartBeat();
-
+      
+      final ServletOutputStream outputStream = httpServletResponse.getOutputStream();
       if (sse) {
         while (!queue.isStale()) {
-          prepareSSEContinue(httpServletResponse);
-          queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
-          outputStream.write(SSE_TERMINATION_BYTES);
-          outputStream.flush();
-          queue.heartBeat();
+          try {
+            prepareSSEContinue(httpServletResponse);
+            queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
+            outputStream.write(SSE_TERMINATION_BYTES);
+            outputStream.flush();
+            queue.heartBeat();
+          } 
+          catch (IOException e) {
+            log.debug("SSE problem when polling for new messages", e);
+            outputStream.close();
+            return;
+          }
         }
       }
       else if (wait) {
         queue.poll(TimeUnit.MILLISECONDS, getLongPollTimeout(), new OutputStreamWriteAdapter(outputStream));
-        outputStream.close();
       }
       else {
         queue.poll(new OutputStreamWriteAdapter(outputStream));
-        outputStream.close();
       }
     }
+    catch (final IOException io) {
+      log.debug("Problem when polling for new messages", io);
+    }
     catch (final Throwable t) {
-      writeExceptionToOutputStream(httpServletResponse, t);
+      try {
+        writeExceptionToOutputStream(httpServletResponse, t);
+      } 
+      catch (IOException e) {
+        log.debug("Couldn't write exception to output stream", e);
+      }
     }
   }
 

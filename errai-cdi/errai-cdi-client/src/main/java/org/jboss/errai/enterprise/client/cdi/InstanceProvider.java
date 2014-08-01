@@ -16,17 +16,18 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.Iterator;
+
+import javax.enterprise.inject.Instance;
+import javax.inject.Singleton;
+
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
-
-import javax.enterprise.inject.Instance;
-import javax.inject.Singleton;
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Iterator;
 
 @IOCProvider
 @Singleton
@@ -66,7 +67,7 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
     @Override
     public Instance select(final Class subtype, final Annotation... qualifiers) {
-      return new InstanceImpl(type, qualifiers);
+      return new InstanceImpl(subtype, qualifiers);
     }
 
     @Override
@@ -94,5 +95,10 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
         return bean.getInstance();
       }
     }
+
+	@Override
+	public void destroy(final Object instance) {
+	  IOC.getBeanManager().destroyBean(instance);
+	}
   }
 }

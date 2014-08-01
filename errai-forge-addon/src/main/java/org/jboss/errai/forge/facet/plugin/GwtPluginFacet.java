@@ -18,8 +18,6 @@ package org.jboss.errai.forge.facet.plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
@@ -34,7 +32,7 @@ import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
 /**
  * This facet configures the gwt-maven-plugin in the build section of the pom
  * file.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @FacetConstraint({ CoreBuildFacet.class, GwtHostPageFacet.class })
@@ -83,7 +81,8 @@ public class GwtPluginFacet extends AbstractPluginFacet {
             });
   }
 
-  private void init() {
+  @Override
+  protected void init() {
     for (final ConfigurationElement elem : configurations) {
       if (elem.getName().equals("hostedWebapp")) {
         ConfigurationElementBuilder.class.cast(elem).setText(WarPluginFacet.getWarSourceDirectory(getProject()));
@@ -91,11 +90,4 @@ public class GwtPluginFacet extends AbstractPluginFacet {
       }
     }
   }
-  
-  @Override
-  public Collection<ConfigurationElement> getConfigurations() {
-    init();
-    return super.getConfigurations();
-  }
-
 }

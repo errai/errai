@@ -1,15 +1,16 @@
 package org.jboss.errai.reflections.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * A utility for matching simple package patterns to package names.
- * 
+ * <p>A utility for matching simple package patterns to package names.
+ *
+ * <p>{@link #apply(String)} returns true iff an input is matched by at least one filter.
+ *
  * @author mbarkley <mbarkley@redhat.com>
  */
-public class SimplePackageFilter {
-
-  private final Collection<String> filters;
+public class SimplePackageFilter extends BasePackageFilter {
 
   /**
    * @param filters
@@ -17,30 +18,18 @@ public class SimplePackageFilter {
    *          (package names with subpackage globbing i.e. org.jboss.errai.* or
    *          org.jboss.errai*).
    */
-  public SimplePackageFilter(Collection<String> filters) {
-    this.filters = filters;
+  public SimplePackageFilter(final Collection<String> filters) {
+    super(filters);
   }
 
-  /**
-   * @param className
-   *          The class name to be matched.
-   * @return True iff the class name matches a package filter.
-   */
-  public boolean matches(final String className) {
-    for (final String pattern : filters) {
-      boolean res;
-      if (pattern.endsWith("*")) {
-        res = className.startsWith(pattern.substring(0, pattern.length()-1));
-      }
-      else {
-        res = className.equals(pattern);
-      }
-      if (res) {
-        return true;
-      }
-    }
+  @Override
+  protected Collection<String> processFilters(final Collection<String> filters) {
+    return new ArrayList<String>(filters);
+  }
 
-    return false;
+  @Override
+  public boolean apply(final String input) {
+    return matches(input);
   }
 
 }

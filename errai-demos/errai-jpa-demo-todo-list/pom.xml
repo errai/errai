@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jpa-demo-todo-list</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Errai::JPA::Demos::ToDoList</name>
   <description>A GWT framework.</description>
@@ -51,45 +51,21 @@
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
     <jetty.version>6.1.25</jetty.version>    
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
-    <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
+    <wildfly.plugin.version>1.0.1.Final</wildfly.plugin.version>
     <maven.compiler.target>1.6</maven.compiler.target>
-    <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
-    <picketlink.version>2.5.3.Final</picketlink.version>
+    <maven.gwt.plugin.version>2.6.1</maven.gwt.plugin.version>
+    <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <skipTests>true</skipTests>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.compiler.source>1.6</maven.compiler.source>
     <argLine></argLine>
-    <!-- Set this property to the full path to your JBoss/Wildfly/EAP installation to run DevMode -->
+    <!-- Set this property to the full path to your Wildfly installation to run DevMode -->
     <errai.jboss.home></errai.jboss.home>
   </properties>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.jboss.errai.bom</groupId>
-        <artifactId>errai-version-master</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-parent</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <!-- Question: should a project have to import this too? Could errai-bom should import it recursively? -->
-      <dependency>
-        <groupId>org.jboss.spec</groupId>
-        <artifactId>jboss-javaee-6.0</artifactId>
-        <version>3.0.2.Final</version> <!-- FIXME should use a property here I think -->
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>org.jboss.errai.bom</groupId>
         <artifactId>errai-bom</artifactId>
@@ -109,7 +85,6 @@
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-idm-simple-schema</artifactId>
-      <version>${picketlink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -190,13 +165,11 @@
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-api</artifactId>
-      <version>${picketlink.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-impl</artifactId>
-      <version>${picketlink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
@@ -269,7 +242,6 @@
           <failOnMissingWebXml>false</failOnMissingWebXml>
           <warName>${project.artifactId}</warName>
           <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
-          <warSourceExcludes>WEB-INF/web.xml</warSourceExcludes>
         </configuration>
       </plugin>
       <plugin>
@@ -286,7 +258,7 @@
                 <include>src/main/webapp/WEB-INF/deploy/**</include>
                 <include>src/main/webapp/WEB-INF/classes/**</include>
                 <include>src/main/webapp/WEB-INF/lib/**</include>
-                <include>src/main/webapp/App/**</include>
+                <include>src/main/webapp/TodoList/**</include>
                 <include>**/gwt-unitCache/**</include>
                 <include>**/*.JUnit/**</include>
                 <include>monitordb.*</include>
@@ -319,9 +291,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.jboss.as.plugins</groupId>
-        <artifactId>jboss-as-maven-plugin</artifactId>
-        <version>${jboss-as-maven-plugin.version}</version>
+        <groupId>org.wildfly.plugins</groupId>
+        <artifactId>wildfly-maven-plugin</artifactId>
+        <version>${wildfly.plugin.version}</version>
         <configuration>
           <filename>${project.artifactId}.${project.packaging}</filename>
         </configuration>
@@ -367,10 +339,10 @@
           <noServer>false</noServer>
           <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
           <disableCastChecking>true</disableCastChecking>
-          <runTarget>${errai.dev.context}/index.html</runTarget>
+          <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.javaopts=-XX:MaxPermSize=256m -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>
@@ -384,9 +356,9 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.jboss.as.plugins</groupId>
-            <artifactId>jboss-as-maven-plugin</artifactId>
-            <version>7.1.1.Final</version>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <version>${wildfly.plugin.version}</version>
           </plugin>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
@@ -402,8 +374,6 @@
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-data-binding</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.weld.servlet</groupId><artifactId>weld-servlet-core</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-navigation</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>org.jboss.weld</groupId><artifactId>weld-spi</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>org.jboss.weld</groupId><artifactId>weld-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>javax.inject</groupId><artifactId>javax.inject</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.resteasy</groupId><artifactId>jaxrs-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-cdi-jboss</artifactId><scope>provided</scope></dependency>

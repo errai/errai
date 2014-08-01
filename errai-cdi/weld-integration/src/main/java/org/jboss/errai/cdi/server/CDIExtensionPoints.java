@@ -62,6 +62,7 @@ import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServiceMethodParser;
 import org.jboss.errai.bus.server.util.ServiceParser;
 import org.jboss.errai.bus.server.util.ServiceTypeParser;
+import org.jboss.errai.cdi.server.events.AnyEventObserver;
 import org.jboss.errai.cdi.server.events.ConversationalEvent;
 import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventRoutingTable;
@@ -89,7 +90,6 @@ import org.slf4j.LoggerFactory;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CDIExtensionPoints implements Extension {
   private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
@@ -116,7 +116,6 @@ public class CDIExtensionPoints implements Extension {
     vetoClasses = Collections.unmodifiableSet(veto);
   }
 
-  @SuppressWarnings("UnusedDeclaration")
   public void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd) {
     log.info("starting errai cdi ...");
     final ResourceBundle erraiServiceConfig;
@@ -157,7 +156,7 @@ public class CDIExtensionPoints implements Extension {
    * @param <T>
    *          -
    */
-  @SuppressWarnings("UnusedDeclaration")
+  @SuppressWarnings("rawtypes")
   public <T> void observeResources(@Observes final ProcessAnnotatedType<T> event) {
     final AnnotatedType<T> type = event.getAnnotatedType();
 
@@ -204,8 +203,9 @@ public class CDIExtensionPoints implements Extension {
     // veto on client side implementations that contain CDI annotations
     // (i.e. @Observes) Otherwise Weld might try to invoke on them
     if (vetoClasses.contains(type.getJavaClass().getName())
-            || (type.getJavaClass().getPackage().getName().matches("(^|.*\\.)client(\\..*)?") && !type.getJavaClass()
-                    .isInterface())) {
+            || (type.getJavaClass().getPackage().getName().matches("(^|.*\\.)client(?!\\.shared)(\\..*)?")
+            && !type.getJavaClass().isInterface())) {
+      log.debug("Vetoing processed type: " + type.getJavaClass().getName());
       event.veto();
     }
     /**
@@ -238,6 +238,7 @@ public class CDIExtensionPoints implements Extension {
     }
   }
 
+  @SuppressWarnings("rawtypes")
   private void processEventInjector(final Class<?> type, final Type typeParm, final Annotation[] annotations) {
     if (Event.class.isAssignableFrom(type)) {
       final ParameterizedType pType = (ParameterizedType) typeParm;
@@ -305,7 +306,7 @@ public class CDIExtensionPoints implements Extension {
     }
   }
 
-  @SuppressWarnings({ "UnusedDeclaration", "unchecked" })
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public void processObserverMethod(@Observes final ProcessObserverMethod processObserverMethod) {
     final Type t = processObserverMethod.getObserverMethod().getObservedType();
     Class type = null;
@@ -327,7 +328,7 @@ public class CDIExtensionPoints implements Extension {
     }
   }
 
-  @SuppressWarnings({ "UnusedDeclaration", "CdiInjectionPointsInspection" })
+  @SuppressWarnings("rawtypes")
   public void afterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager bm) {
     final ErraiService service = ErraiServiceSingleton.getService();
     final MessageBus bus = service.getBus();
@@ -339,7 +340,6 @@ public class CDIExtensionPoints implements Extension {
 
     final byte[] randBytes = new byte[32];
     final Random random = new Random(System.currentTimeMillis());
-
     random.nextBytes(randBytes);
 
     abd.addBean(new ErraiServiceBean(bm, SecureHashUtil.hashToHexString(randBytes)));
@@ -360,8 +360,11 @@ public class CDIExtensionPoints implements Extension {
     // subscribe service and rpc endpoints
     subscribeServices(bm, bus);
 
-    final EventDispatcher eventDispatcher = new EventDispatcher(bm, eventRoutingTable, bus, observableEvents,
-            eventQualifiers, abd);
+    // initialize the CDI event bridge to the client
+    final EventDispatcher eventDispatcher = 
+            new EventDispatcher(bm, eventRoutingTable, bus, observableEvents, eventQualifiers);
+    
+    AnyEventObserver.init(eventDispatcher);
 
     // subscribe event dispatcher
     bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
@@ -413,16 +416,19 @@ public class CDIExtensionPoints implements Extension {
 
       if (registered.isEmpty()) {
         scheduledExecutorService.shutdown();
-        log.info("all services registered successfully");
         return;
       }
 
       // As each delegate becomes available, register all the associated services (type and method)
       for (final Class<?> delegateClass : managedTypes.getDelegateClasses()) {
-        if (!registered.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
+        try {
+          if (!registered.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
+            continue;
+          }
+        } 
+        catch(Throwable t) {
           continue;
         }
-
         registered.remove(delegateClass);
         
         for (final ServiceParser svcParser : managedTypes.getDelegateServices(delegateClass)) {
@@ -443,7 +449,6 @@ public class CDIExtensionPoints implements Extension {
   }
 
   private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
-
     /**
      * Due to the lack of contract in CDI guaranteeing when beans will be available, we use an
      * executor to search for the beans every 100ms until it finds them. Or, after a 25 seconds,
@@ -458,7 +463,7 @@ public class CDIExtensionPoints implements Extension {
     }
   }
 
-  private void createRPCScaffolding(final Class remoteIface, final MessageBus bus, final BeanManager beanManager) {
+  private void createRPCScaffolding(final Class<?> remoteIface, final MessageBus bus, final BeanManager beanManager) {
     final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
     final ServiceInstanceProvider genericSvc = new ServiceInstanceProvider() {
@@ -526,6 +531,7 @@ public class CDIExtensionPoints implements Extension {
       return conversational;
     }
 
+    @SuppressWarnings("rawtypes")
     public Class<?> getRawType() {
       if (eventType instanceof Class) {
         return (Class) eventType;

@@ -22,30 +22,44 @@ import java.lang.annotation.Annotation;
 
 import javax.enterprise.inject.Default;
 
-import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.VoidCallback;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.res.Counter;
-import org.jboss.errai.security.client.local.res.CountingMessageCallback;
+import org.jboss.errai.security.client.local.res.CountingRemoteCallback;
 import org.jboss.errai.security.client.local.res.ErrorCountingCallback;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.client.shared.AdminService;
+import org.jboss.errai.security.client.shared.AdminTypeUserMethodService;
 import org.jboss.errai.security.client.shared.AuthenticatedService;
 import org.jboss.errai.security.client.shared.DiverseService;
+import org.jboss.errai.security.client.shared.SecureRoleProvidedService;
+import org.jboss.errai.security.client.shared.UserMethodSharedImplService;
+import org.jboss.errai.security.client.shared.UserTypeAdminMethodService;
+import org.jboss.errai.security.client.shared.UserTypeSharedImplService;
+import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
-import org.junit.Test;
+import org.jboss.errai.ui.nav.client.local.Navigation;
 
 /**
+ * <p>
+ * These test cases are run in two modes:
+ * <ul>
+ * <li>ClientBusSecurityInterceptorTests runs these tests with a valid user cache, causing the
+ * client-side security interceptors to be triggered.
+ * <li>ServerBusSecurityInterceptorTests runs these tests with an invalid user cache, causing RPCs
+ * to bypass the client-side security checks.
+ *
+ * <p>
+ * Note that the client side tests use the ClientInteceptorTestAssistant so that calls not blocked
+ * by the client interceptor do not go to the server (making the tests compeletly independent).
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest {
+public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest {
 
   private final Annotation defaultAnno = new Annotation() {
     @Override
@@ -54,38 +68,64 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     }
   };
 
-  private ActiveUserCache provider;
+  protected ActiveUserCache provider;
 
   @Override
   protected void gwtSetUp() throws Exception {
+    TIME_LIMIT = 10000;
     super.gwtSetUp();
     provider = IOC.getBeanManager().lookupBean(ActiveUserCache.class, defaultAnno).getInstance();
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    IOC.getBeanManager().lookupBean(Navigation.class).getInstance().cleanUp();
+    super.gwtTearDown();
+  }
+
+  protected abstract void postLogout();
+
+  protected abstract void postLogin(User user);
+
+  @Override
+  protected void afterLogout(final Runnable test) {
+    super.afterLogout(new Runnable() {
       @Override
       public void run() {
-        MessageBuilder.createCall(new VoidCallback(), AuthenticationService.class).logout();
+        postLogout();
+        test.run();
       }
     });
   }
 
-  @Test
+  protected void afterLogin(final String username, final String password, final RemoteCallback<User> remoteCallback) {
+    afterLogout(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(final User user) {
+            postLogin(user);
+            remoteCallback.callback(user);
+          }
+        }, AuthenticationService.class).login(username, password);
+      }
+    });
+  }
+
   public void testAuthInterceptorNotLoggedInHomogenous() throws Exception {
     asyncTest();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        // Invalidate cache
-        provider.setUser(User.ANONYMOUS);
-        assertTrue(provider.isValid());
         createCall(new RemoteCallback<Void>() {
           @Override
           public void callback(Void response) {
             fail();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
-        AuthenticatedService.class)
-        .userStuff();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AuthenticatedService.class)
+                .userStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -96,56 +136,19 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
-  public void testAuthInterceptorRedirectsWithNoErrorHandler() throws
-  Exception {
-    asyncTest();
-    runNavTest(new Runnable() {
-      @Override
-      public void run() {
-        final TestLoginPage page =
-                IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
-        assertEquals(0, page.getPageLoadCounter());
-
-        // Invalidate cache
-        provider.setUser(User.ANONYMOUS);
-        assertTrue(provider.isValid());
-        createCall(new RemoteCallback<Void>() {
-          @Override
-          public void callback(Void response) {
-            fail();
-          }
-        }, AuthenticatedService.class)
-        .userStuff();
-        testUntil(TIME_LIMIT, new Runnable() {
-          @Override
-          public void run() {
-            assertEquals(1, page.getPageLoadCounter());
-          }
-        });
-      }
-    });
-  }
-
-  @Test
   public void testAuthInterceptorNotLoggedInHeterogenous() throws Exception {
     asyncTest();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        // Invalidate cache
-        provider.setUser(User.ANONYMOUS);
-        assertTrue(provider.isValid());
-
         createCall(new RemoteCallback<Void>() {
           @Override
           public void callback(Void response) {
             fail();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
-        DiverseService.class)
-        .needsAuthentication();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class)
+                .needsAuthentication();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -156,81 +159,65 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
   public void testAuthInterceptorLoggedInHeterogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogin("john", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        createCall(new RemoteCallback<User>() {
+      public void callback(User response) {
+        assertEquals(0, counter.getCount());
+        createCall(new RemoteCallback<Void>() {
           @Override
-          public void callback(User response) {
-            assertEquals(0, counter.getCount());
-            createCall(new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                counter.increment();
-              }
-            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
-            DiverseService.class)
-            .needsAuthentication();
-            testUntil(TIME_LIMIT, new Runnable() {
-              @Override
-              public void run() {
-                assertEquals(1, counter.getCount());
-                assertEquals(0, errorCounter.getCount());
-              }
-            });
+          public void callback(Void response) {
+            counter.increment();
           }
-        }, AuthenticationService.class).login("john", "123");
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class)
+                .needsAuthentication();
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+          }
+        });
       }
     });
   }
 
-  @Test
   public void testAuthInterceptorLoggedInHomogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogin("john", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        createCall(new RemoteCallback<User>() {
+      public void callback(User response) {
+        assertEquals(0, counter.getCount());
+        createCall(new RemoteCallback<Void>() {
           @Override
-          public void callback(User response) {
-            assertEquals(0, counter.getCount());
-            createCall(new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                counter.increment();
-              }
-            }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
-            AuthenticatedService.class)
-            .userStuff();
-            testUntil(TIME_LIMIT, new Runnable() {
-              @Override
-              public void run() {
-                assertEquals(1, counter.getCount());
-                assertEquals(0, errorCounter.getCount());
-              }
-            });
+          public void callback(Void response) {
+            counter.increment();
           }
-        }, AuthenticationService.class).login("john", "123");
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AuthenticatedService.class)
+                .userStuff();
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, counter.getCount());
+            assertEquals(0, errorCounter.getCount());
+          }
+        });
       }
     });
   }
 
-  @Test
   public void testRoleInterceptorNotLoggedInHomogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        // Invalidate cache
         provider.setUser(User.ANONYMOUS);
         assertTrue(provider.isValid());
 
@@ -241,8 +228,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
           public void callback(Void response) {
             counter.increment();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
-        AdminService.class).adminStuff();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), AdminService.class).adminStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -254,53 +240,13 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
-  public void
-  testRoleInterceptorRedirectsToLoginWhenNotLoggedInAndNoErrorHandler()
-          throws Exception {
-    asyncTest();
-    final Counter counter = new Counter();
-    runNavTest(new Runnable() {
-      @Override
-      public void run() {
-        final TestLoginPage page =
-                IOC.getBeanManager().lookupBean(TestLoginPage.class).getInstance();
-        assertEquals(0, page.getPageLoadCounter());
-
-        // Invalidate cache
-        provider.setUser(User.ANONYMOUS);
-        assertTrue(provider.isValid());
-
-        assertEquals(0, counter.getCount());
-        createCall(new RemoteCallback<Void>() {
-          @Override
-          public void callback(Void response) {
-            counter.increment();
-          }
-        }, AdminService.class).adminStuff();
-        testUntil(TIME_LIMIT, new Runnable() {
-          @Override
-          public void run() {
-            assertEquals(0, counter.getCount());
-            assertEquals(1, page.getPageLoadCounter());
-          }
-        });
-      }
-    });
-  }
-
-  @Test
   public void testRoleInterceptorNotLoggedInHeterogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogout(new Runnable() {
       @Override
       public void run() {
-        // Invalidate cache
-        provider.setUser(User.ANONYMOUS);
-        assertTrue(provider.isValid());
-
         assertEquals(0, counter.getCount());
         assertEquals(0, errorCounter.getCount());
         createCall(new RemoteCallback<Void>() {
@@ -308,8 +254,7 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
           public void callback(Void response) {
             counter.increment();
           }
-        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class),
-        DiverseService.class).adminOnly();
+        }, new ErrorCountingCallback(errorCounter, UnauthenticatedException.class), DiverseService.class).adminOnly();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -321,190 +266,21 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
-  public void testRoleInterceptorLoggedInUnprivelegedHeterogenous() throws
-  Exception {
+  public void testRoleInterceptorLoggedInUnprivelegedHeterogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogin("john", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        MessageBuilder.createCall(new RemoteCallback<User>() {
+      public void callback(User response) {
+        assertEquals(0, counter.getCount());
+        assertEquals(0, errorCounter.getCount());
+        createCall(new RemoteCallback<Void>() {
           @Override
-          public void callback(User response) {
-            assertEquals(0, counter.getCount());
-            assertEquals(0, errorCounter.getCount());
-            createCall(new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                counter.increment();
-              }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
-            DiverseService.class).adminOnly();
-            testUntil(TIME_LIMIT, new Runnable() {
-              @Override
-              public void run() {
-                assertEquals(0, counter.getCount());
-                assertEquals(1, errorCounter.getCount());
-              }
-            });
+          public void callback(Void response) {
+            counter.increment();
           }
-        }, AuthenticationService.class).login("john", "123");
-      }
-    });
-  }
-
-  @Test
-  public void testRoleInterceptorLoggedInUnprivelegedRedirectsToSecurityErrorWithNoErrorCallback() throws Exception {
-    asyncTest();
-    final Counter counter = new Counter();
-    runNavTest(new Runnable() {
-      @Override
-      public void run() {
-        final TestSecurityErrorPage page = IOC.getBeanManager().lookupBean(TestSecurityErrorPage.class)
-                .getInstance();
-        assertEquals(0, page.getPageLoadCounter());
-
-        MessageBuilder.createCall(new RemoteCallback<User>() {
-          @Override
-          public void callback(User response) {
-            assertEquals(0, counter.getCount());
-            createCall(new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                counter.increment();
-              }
-            }, DiverseService.class).adminOnly();
-            testUntil(TIME_LIMIT, new Runnable() {
-              @Override
-              public void run() {
-                assertEquals(0, counter.getCount());
-                assertEquals(1, page.getPageLoadCounter());
-              }
-            });
-          }
-        }, AuthenticationService.class).login("john", "123");
-      }
-    });
-  }
-
-  @Test
-  public void testRoleInterceptorLoggedInUnprivelegedHomogenous() throws
-  Exception {
-    asyncTest();
-    final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        MessageBuilder.createCall(new RemoteCallback<User>() {
-          @Override
-          public void callback(User response) {
-            assertEquals(0, counter.getCount());
-            assertEquals(0, errorCounter.getCount());
-            createCall(new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                counter.increment();
-              }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
-            AdminService.class).adminStuff();
-            testUntil(TIME_LIMIT, new Runnable() {
-              @Override
-              public void run() {
-                assertEquals(0, counter.getCount());
-                assertEquals(1, errorCounter.getCount());
-              }
-            });
-          }
-        }, AuthenticationService.class).login("john", "123");
-      }
-    });
-  }
-
-  @Test
-  public void testRoleInterceptorLoggedInPrivelegedHomogenous() throws
-  Exception {
-    asyncTest();
-    final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        MessageBuilder.createCall(new RemoteCallback<User>() {
-          @Override
-          public void callback(User response) {
-            assertEquals(0, counter.getCount());
-            assertEquals(0, errorCounter.getCount());
-            createCall(new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                counter.increment();
-              }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
-            AdminService.class).adminStuff();
-            testUntil(TIME_LIMIT, new Runnable() {
-              @Override
-              public void run() {
-                assertEquals(0, errorCounter.getCount());
-                assertEquals(1, counter.getCount());
-              }
-            });
-          }
-        }, AuthenticationService.class).login("admin", "123");
-      }
-    });
-  }
-
-  @Test
-  public void testRoleInterceptorLoggedInPrivelegedHeterogenous() throws
-  Exception {
-    asyncTest();
-    final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        MessageBuilder.createCall(new RemoteCallback<User>() {
-          @Override
-          public void callback(User response) {
-            assertEquals(0, counter.getCount());
-            assertEquals(0, errorCounter.getCount());
-            createCall(new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                counter.increment();
-              }
-            }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
-            DiverseService.class).adminOnly();
-            testUntil(TIME_LIMIT, new Runnable() {
-              @Override
-              public void run() {
-                assertEquals(1, counter.getCount());
-                assertEquals(0, errorCounter.getCount());
-              }
-            });
-          }
-        }, AuthenticationService.class).login("admin", "123");
-      }
-    });
-  }
-
-  @Test
-  public void testSecureCallbackNotLoggedIn() throws Exception {
-    asyncTest();
-    final Counter counter = new Counter();
-    final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        MessageBuilder.createMessage("SecureMessageCallback")
-        .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
+        }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), DiverseService.class).adminOnly();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -516,20 +292,21 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
-  public void testSecureClassNotLoggedIn() throws Exception {
+  public void testRoleInterceptorLoggedInUnprivelegedHomogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogin("john", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        MessageBuilder.createMessage("methodInSecureClass")
-        .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
+      public void callback(User response) {
+        assertEquals(0, counter.getCount());
+        assertEquals(0, errorCounter.getCount());
+        createCall(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void response) {
+            counter.increment();
+          }
+        }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), AdminService.class).adminStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -541,45 +318,47 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
-  public void testSecureMethodNotLoggedIn() throws Exception {
+  public void testRoleInterceptorLoggedInPrivelegedHomogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogin("admin", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        MessageBuilder.createMessage("secureMethod")
-        .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
+      public void callback(User user) {
+        assertEquals(0, counter.getCount());
+        assertEquals(0, errorCounter.getCount());
+        createCall(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void response) {
+            counter.increment();
+          }
+        }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), AdminService.class).adminStuff();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
-            assertEquals(0, counter.getCount());
-            assertEquals(1, errorCounter.getCount());
+            assertEquals(0, errorCounter.getCount());
+            assertEquals(1, counter.getCount());
           }
         });
       }
     });
   }
 
-  @Test
-  public void testInsecureMethodInClassWithSecureMethodNotLoggedIn() throws Exception {
+  public void testRoleInterceptorLoggedInPrivelegedHeterogenous() throws Exception {
     asyncTest();
     final Counter counter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogin("admin", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        MessageBuilder.createMessage("insecureMethod")
-        .signalling()
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
-
+      public void callback(User response) {
+        assertEquals(0, counter.getCount());
+        assertEquals(0, errorCounter.getCount());
+        createCall(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void response) {
+            counter.increment();
+          }
+        }, new ErrorCountingCallback(errorCounter, UnauthorizedException.class), DiverseService.class).adminOnly();
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
@@ -591,24 +370,106 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
-  public void testCommandMethodInSecureClassNotLoggedIn() throws Exception {
+  public void testRolesFromProviderAreRequiredWithInterceptor() throws Exception {
     asyncTest();
-    final Counter counter = new Counter();
+    final Counter successCounter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+    afterLogin("john", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        MessageBuilder.createMessage("commandMethodInSecureClass")
-        .command("command")
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
+      public void callback(User response) {
+        MessageBuilder.createCall(new CountingRemoteCallback(successCounter),
+                new ErrorCountingCallback(errorCounter, UnauthorizedException.class), SecureRoleProvidedService.class)
+                .secureService();
 
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
-            assertEquals(1, counter.getCount());
+            assertEquals(0, successCounter.getCount());
+            assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  public void testRolesFromMethodRequiredWhenRolesOnTypeAndMethod() throws Exception {
+    asyncTest();
+
+    final Counter successCounter = new Counter();
+    final Counter errorCounter = new Counter();
+
+    afterLogin("john", "123", new RemoteCallback<User>() {
+      @Override
+      public void callback(User response) {
+        // Preconditions
+        assertEquals(1, response.getRoles().size());
+        assertEquals(new RoleImpl("user"), response.getRoles().iterator().next());
+
+        MessageBuilder.createCall(new CountingRemoteCallback(successCounter),
+                new ErrorCountingCallback(errorCounter, UnauthorizedException.class), UserTypeAdminMethodService.class)
+                .someService();
+
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(0, successCounter.getCount());
+            assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  public void testRolesFromTypeRequiredWhenRolesOnTypeAndMethod() throws Exception {
+    asyncTest();
+
+    final Counter successCounter = new Counter();
+    final Counter errorCounter = new Counter();
+
+    afterLogin("john", "123", new RemoteCallback<User>() {
+      @Override
+      public void callback(User response) {
+        // Preconditions
+        assertEquals(1, response.getRoles().size());
+        assertEquals(new RoleImpl("user"), response.getRoles().iterator().next());
+
+        MessageBuilder.createCall(new CountingRemoteCallback(successCounter),
+                new ErrorCountingCallback(errorCounter, UnauthorizedException.class), AdminTypeUserMethodService.class)
+                .someService();
+
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(0, successCounter.getCount());
+            assertEquals(1, errorCounter.getCount());
+          }
+        });
+      }
+    });
+  }
+
+  public void testOnlyRolesFromRequestedInterfaceMethodRequired() throws Exception {
+    asyncTest();
+
+    final Counter successCounter = new Counter();
+    final Counter errorCounter = new Counter();
+
+    afterLogin("john", "123", new RemoteCallback<User>() {
+      @Override
+      public void callback(User response) {
+        // Preconditions
+        assertEquals(1, response.getRoles().size());
+        assertEquals(new RoleImpl("user"), response.getRoles().iterator().next());
+
+        MessageBuilder
+                .createCall(new CountingRemoteCallback(successCounter),
+                        new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                        UserMethodSharedImplService.class).someUserService();
+
+        testUntil(TIME_LIMIT, new Runnable() {
+          @Override
+          public void run() {
+            assertEquals(1, successCounter.getCount());
             assertEquals(0, errorCounter.getCount());
           }
         });
@@ -616,24 +477,28 @@ public class BusSecurityInterceptorTest extends AbstractSecurityInterceptorTest 
     });
   }
 
-  @Test
-  public void testSecureCommandMethodNotLoggedIn() throws Exception {
+  public void testOnlyRolesFromRequestedInterfaceTypeRequired() throws Exception {
     asyncTest();
-    final Counter counter = new Counter();
+
+    final Counter successCounter = new Counter();
     final Counter errorCounter = new Counter();
-    CDI.addPostInitTask(new Runnable() {
+
+    afterLogin("john", "123", new RemoteCallback<User>() {
       @Override
-      public void run() {
-        MessageBuilder.createMessage("secureCommandMethod")
-        .command("command")
-        .errorsHandledBy(new ErrorCountingCallback(errorCounter, UnauthenticatedException.class))
-        .repliesTo(new CountingMessageCallback(counter))
-        .sendNowWith(ErraiBus.get());
+      public void callback(User response) {
+        // Preconditions
+        assertEquals(1, response.getRoles().size());
+        assertEquals(new RoleImpl("user"), response.getRoles().iterator().next());
+
+        MessageBuilder
+                .createCall(new CountingRemoteCallback(successCounter),
+                        new ErrorCountingCallback(errorCounter, UnauthorizedException.class),
+                        UserTypeSharedImplService.class).someUserService();
 
         testUntil(TIME_LIMIT, new Runnable() {
           @Override
           public void run() {
-            assertEquals(1, counter.getCount());
+            assertEquals(1, successCounter.getCount());
             assertEquals(0, errorCounter.getCount());
           }
         });

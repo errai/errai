@@ -28,6 +28,7 @@ import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.DefaultVault.DefaultValue;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
@@ -35,14 +36,14 @@ import org.jboss.forge.addon.projects.Project;
 /**
  * This facet configures the source folders, build output directory, and pom
  * properties for a project.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@FacetConstraint({ ProjectConfig.class })
+@FacetConstraint({ ProjectConfig.class, VersionFacet.class })
 public class CoreBuildFacet extends AbstractBaseFacet {
 
   public static final String DEV_CONTEXT = "${project.artifactId}";
-  public static final String JBOSS_HOME = "${project.build.directory}/jboss-as-7.1.1.Final";
+  public static final String JBOSS_HOME = "${project.build.directory}/wildfly-8.1.0.Final";
 
   private String getErraiVersion() {
     return getFaceted().getFacet(ProjectConfig.class).getProjectProperty(ProjectProperty.ERRAI_VERSION, String.class);

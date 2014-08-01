@@ -30,28 +30,37 @@ import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 /**
  * This {@link Extension} allows type level {@link RestrictedAccess} annotations to
  * trigger server-side interceptors on their method calls.
- * 
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  * @author edewit@redhat.com
  */
 public class SecurityAnnotationExtension implements Extension {
 
-  /**
-   */
   public void addParameterLogger(@Observes ProcessAnnotatedType<?> processAnnotatedType) {
     final Class<?>[] interfaces = processAnnotatedType.getAnnotatedType().getJavaClass().getInterfaces();
 
     for (Class<?> anInterface : interfaces) {
       for (Method method : anInterface.getMethods()) {
-        copyAnnotation(processAnnotatedType, method, RestrictedAccess.class);
+        copyAnnotation(processAnnotatedType, anInterface, method, RestrictedAccess.class);
       }
     }
   }
 
-  private <X> void copyAnnotation(ProcessAnnotatedType<X> annotatedType, Method method,
+  private <X> void copyAnnotation(ProcessAnnotatedType<X> annotatedType, Class<?> anInterface, Method method,
           Class<? extends Annotation> annotation) {
-    if (method.isAnnotationPresent(annotation)) {
-      AnnotatedTypeBuilder<X> builder = new AnnotatedTypeBuilder<X>().readFromType(annotatedType.getAnnotatedType())
-              .addToMethod(getMethod(annotatedType, method.getName()), method.getAnnotation(annotation));
+    final Annotation methodAnnotation = method.getAnnotation(annotation);
+    final Annotation typeAnnotation = anInterface.getAnnotation(annotation);
+
+    if (methodAnnotation != null || typeAnnotation != null) {
+      AnnotatedTypeBuilder<X> builder = new AnnotatedTypeBuilder<X>().readFromType(annotatedType.getAnnotatedType());
+
+      if (typeAnnotation != null) {
+        builder = builder.addToClass(typeAnnotation);
+      }
+      if (methodAnnotation != null) {
+        builder = builder.addToMethod(getMethod(annotatedType, method.getName()), methodAnnotation);
+      }
+
       annotatedType.setAnnotatedType(builder.create());
     }
   }

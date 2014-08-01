@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai</groupId>
   <artifactId>errai-security-demo</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Errai Security::Demo</name>
 
@@ -55,8 +55,9 @@
     <url>http://www.jboss.org</url>
   </organization>
   <properties>
-    <errai.jboss.home>${project.build.directory}/jboss-as-7.1.1.Final</errai.jboss.home>
-    <gwt.version>2.5.1</gwt.version>
+    <wildfly.version>8.1.0.Final</wildfly.version>
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
+    <gwt.version>2.6.1</gwt.version>
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
@@ -66,27 +67,19 @@
     <dependencies>
       <dependency>
         <groupId>org.jboss.errai.bom</groupId>
-        <artifactId>errai-version-master</artifactId>
+        <artifactId>errai-bom</artifactId>
         <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-parent</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.spec</groupId>
-        <artifactId>jboss-javaee-6.0</artifactId>
-        <version>${javaee.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>xalan</groupId>
+        <artifactId>xalan</artifactId>
+        <version>2.7.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -117,6 +110,10 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-security-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-security-keycloak</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -217,6 +214,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
+        <version>2.4.1</version>
         <configuration>
           <filesets>
             <fileset>
@@ -234,6 +232,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -252,9 +251,9 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>org.jboss.as</groupId>
-                  <artifactId>jboss-as-dist</artifactId>
-                  <version>7.1.1.Final</version>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-dist</artifactId>
+                  <version>${wildfly.version}</version>
                   <type>zip</type>
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.directory}</outputDirectory>
@@ -283,10 +282,10 @@
           <noServer>false</noServer>
           <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
           <disableCastChecking>true</disableCastChecking>
-          <runTarget>${errai.dev.context}/index.html</runTarget>
+          <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx512m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.home=${errai.jboss.home} -Derrai.jboss.javaopts="-XX:MaxPermSize=128M -Xmx512M" -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>
@@ -313,9 +312,9 @@
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.jboss.as.plugins</groupId>
-            <artifactId>jboss-as-maven-plugin</artifactId>
-            <version>7.1.1.Final</version>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <version>1.0.2.Final</version>
             <extensions>false</extensions>
           </plugin>
         </plugins>
@@ -359,7 +358,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-cdi-jboss</artifactId>
-          <version>${project.version}</version>
           <scope>provided</scope>
         </dependency>
         <dependency>

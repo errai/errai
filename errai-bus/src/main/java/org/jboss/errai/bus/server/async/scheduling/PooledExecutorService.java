@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.async.scheduling;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.locks.LockSupport.parkUntil;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -27,13 +28,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.common.client.util.TimeUnit;
+import org.slf4j.Logger;
 
 public class PooledExecutorService implements TaskProvider {
+  private final static Logger log = getLogger(PooledExecutorService.class);
   private final BlockingQueue<TimedTask> queue;
 
   /**
@@ -259,6 +261,11 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     @Override
+    public boolean isFinished() {
+      return fired || isCancelled();
+    }
+
+    @Override
     public void run() {
       synchronized (this) {
         fired = true;
@@ -305,6 +312,11 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     @Override
+    public boolean isFinished() {
+      return fired || isCancelled();
+    }
+
+    @Override
     public void run() {
       synchronized (this) {
         fired = true;
@@ -325,6 +337,7 @@ public class PooledExecutorService implements TaskProvider {
   private static final class RepeatingTimedTask extends TimedTask {
     private final Runnable runnable;
     private volatile Thread runningOn;
+    private volatile boolean finished;
 
     private RepeatingTimedTask(Runnable runnable, long initialMillis, long intervalMillis) {
       this.interruptHook = new InterruptHandle() {
@@ -351,6 +364,10 @@ public class PooledExecutorService implements TaskProvider {
       }
     }
 
+    @Override
+    public boolean isFinished() {
+      return finished || isCancelled();
+    }
 
     @Override
     public void run() {
@@ -360,8 +377,10 @@ public class PooledExecutorService implements TaskProvider {
       }
       finally {
         runningOn = null;
-        if ((cancelled || nextRuntime == -1) && exitHandler != null)
+        if ((cancelled || nextRuntime == -1) && exitHandler != null) {
           exitHandler.run();
+          finished = true;
+        }
       }
     }
   }
@@ -381,8 +400,8 @@ public class PooledExecutorService implements TaskProvider {
           }
         }
         catch (InterruptedException e) {
-          e.printStackTrace();
-          // just fall through.
+          // This will happen during container shutdown, so logging as debug is sufficient.
+          log.debug("Scheduler thread interrupted", e);
         }
         catch (Throwable t) {
           t.printStackTrace();
@@ -405,6 +424,7 @@ public class PooledExecutorService implements TaskProvider {
   public void requestStop() {
     stopped = true;
     pool.requestStopAll();
+    schedulerThread.requestStop();
   }
 
 }

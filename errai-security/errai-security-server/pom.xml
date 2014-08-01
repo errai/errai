@@ -4,12 +4,19 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-security</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>errai-security-server</artifactId>
   <name>Errai::Security::Server</name>
 
   <dependencies>
+    <!-- Must come before gwt-user to override servlet api -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-bus</artifactId>
@@ -24,6 +31,7 @@
       <artifactId>errai-ui</artifactId>
       <scope>provided</scope>
     </dependency>
+
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -32,8 +40,7 @@
 
     <dependency>
       <groupId>org.apache.deltaspike.core</groupId>
-      <artifactId>deltaspike-core-api</artifactId>
-      <version>${deltaspike.version}</version>
+      <artifactId>deltaspike-core-api</artifactId>      
       <scope>compile</scope>
     </dependency>
 
@@ -81,63 +88,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skipTests>false</skipTests>
-          <forkMode>always</forkMode>
-          <argLine>-Xmx1500m ${argLine}</argLine>
 
-          <additionalClasspathElements>
-            <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-          </additionalClasspathElements>
-          <useSystemClassLoader>false</useSystemClassLoader>
-          <useManifestOnlyJar>true</useManifestOnlyJar>
-
-          <systemProperties>
-            <property>
-              <name>java.io.tmpdir</name>
-              <value>${project.build.directory}</value>
-            </property>
-            <property>
-              <name>log4j.output.dir</name>
-              <value>${project.build.directory}</value>
-            </property>
-
-            <!-- Do not accidently package server test marshallers when building 
-              Errai -->
-            <property>
-              <name>errai.marshalling.server.classOutput.enabled</name>
-              <value>false</value>
-            </property>
-
-
-            <!-- Must disable long polling for automated tests to succeed -->
-            <property>
-              <name>org.jboss.errai.bus.do_long_poll</name>
-              <value>false</value>
-            </property>
-
-            <!-- Disable caching of generated code -->
-            <property>
-              <name>errai.devel.nocache</name>
-              <value>true</value>
-            </property>
-          </systemProperties>
-
-          <includes>
-            <include>**/*Test.java</include>
-            <include>**/*Tests.java</include>
-          </includes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <profiles>
     <profile>
       <id>integration-test</id>
@@ -147,53 +98,23 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
-              <forkMode>always</forkMode>
-              <argLine>-Xmx1500m ${argLine}</argLine>
-
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
-              <useManifestOnlyJar>true</useManifestOnlyJar>
-
-              <systemProperties>
-                <property>
-                  <name>java.io.tmpdir</name>
-                  <value>${project.build.directory}</value>
-                </property>
-                <property>
-                  <name>log4j.output.dir</name>
-                  <value>${project.build.directory}</value>
-                </property>
-
-                <!-- Do not accidently package server test marshallers when 
-                  building Errai -->
-                <property>
-                  <name>errai.marshalling.server.classOutput.enabled</name>
-                  <value>false</value>
-                </property>
-
-
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>org.jboss.errai.bus.do_long_poll</name>
-                  <value>false</value>
-                </property>
-
-                <!-- Disable caching of generated code -->
-                <property>
-                  <name>errai.devel.nocache</name>
-                  <value>true</value>
-                </property>
-              </systemProperties>
-
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>selenium-maven-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
             </configuration>
           </plugin>
         </plugins>

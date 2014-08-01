@@ -16,6 +16,12 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.Subscription;
@@ -38,6 +44,8 @@ import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.user.client.Timer;
 
 /**
@@ -52,20 +60,34 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   protected void gwtSetUp() throws Exception {
+    originalHandler = GWT.getUncaughtExceptionHandler();
+    testHandler = new TestUncaughtExceptionHandler(originalHandler);
+    GWT.setUncaughtExceptionHandler(testHandler);
     super.gwtSetUp();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    GWT.setUncaughtExceptionHandler(originalHandler);
+    for (final Subscription sub : subscriptions) {
+      sub.remove();
+    }
+    subscriptions.clear();
+    super.gwtTearDown();
   }
 
   public void testBasicRoundTrip() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        bus.subscribe("MyTestService", new MessageCallback() {
+        subscriptions.add(bus.subscribe("MyTestService", new MessageCallback() {
           @Override
           public void callback(final Message message) {
             finishTest();
           }
-        });
+        }));
 
         MessageBuilder.createMessage()
             .toSubject("ServerEchoService")
@@ -76,18 +98,21 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   private int replies = 0;
+  private UncaughtExceptionHandler originalHandler;
+  private TestUncaughtExceptionHandler testHandler;
+  private final Collection<Subscription> subscriptions = new ArrayList<Subscription>();
 
   public void testBasicRoundTripWithGiantString() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        bus.subscribe("GiantStringClient", new MessageCallback() {
+        subscriptions.add(bus.subscribe("GiantStringClient", new MessageCallback() {
           @Override
           public void callback(final Message message) {
             if (++replies == 51)
               finishTest();
           }
-        });
+        }));
 
         MessageBuilder.createMessage()
             .toSubject("GiantStringTestService")
@@ -101,12 +126,12 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        bus.subscribe("MyTestService", new MessageCallback() {
+        subscriptions.add(bus.subscribe("MyTestService", new MessageCallback() {
           @Override
           public void callback(final Message message) {
             finishTest();
           }
-        });
+        }));
 
         MessageBuilder.createMessage("ServerEchoService")
             .with(MessageParts.ReplyTo, "MyTestService")
@@ -163,7 +188,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
         try {
           final SType sType1 = SType.create(new GWTRandomProvider());
 
-          bus.subscribe("ClientReceiver", new MessageCallback() {
+          subscriptions.add(bus.subscribe("ClientReceiver", new MessageCallback() {
             @Override
             public void callback(final Message message) {
               final SType type = message.get(SType.class, "SType");
@@ -179,7 +204,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
               }
               fail();
             }
-          });
+          }));
 
           MessageBuilder.createMessage()
               .toSubject("TestService1")
@@ -200,7 +225,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         final User user = User.create();
 
-        bus.subscribe("ClientReceiver2", new MessageCallback() {
+        subscriptions.add(bus.subscribe("ClientReceiver2", new MessageCallback() {
           @Override
           public void callback(final Message message) {
             final User u = message.get(User.class, "User");
@@ -217,7 +242,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
             }
             fail();
           }
-        });
+        }));
 
         MessageBuilder.createMessage()
             .toSubject("TestService2")
@@ -490,6 +515,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   public void testCommandMessageThrowingException() {
+    testHandler.setExpectedExceptionTypes(RuntimeException.class);
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -523,17 +549,23 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   public void testNonExistingCommandMessage() {
+    testHandler.setExpectedExceptionTypes(RuntimeException.class);
+
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+        subscriptions.add(bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
           @Override
           public void callback(final Message message) {
-            assertTrue("throwable should contain non-existing service name",
-                message.get(String.class, MessageParts.ErrorMessage).contains("non-existing"));
+            final String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
+            final String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
+            assertTrue("Throwable should contain non-existing service name."
+                    + "\n\tObserved errorMessage: " + errorMessage
+                    + "\n\tObserved additionalDetails: " + additionalDetails,
+                (errorMessage + additionalDetails).contains("non-existing"));
             finishTest();
           }
-        });
+        }));
 
         MessageBuilder.createMessage()
             .toSubject("TestSvc")
@@ -647,12 +679,12 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        bus.subscribe("PlainMessageResponse", new MessageCallback() {
+        subscriptions.add(bus.subscribe("PlainMessageResponse", new MessageCallback() {
           @Override
           public void callback(final Message message) {
             finishTest();
           }
-        });
+        }));
 
         MessageBuilder.createMessage()
             .toSubject("TestRPCServiceImpl")
@@ -700,5 +732,36 @@ public class BusCommunicationTests extends AbstractErraiTest {
       t = t.getCause();
     }
     fail("Stack trace does not contain the string: " + string);
+  }
+
+  @SuppressWarnings("rawtypes")
+  static class TestUncaughtExceptionHandler implements UncaughtExceptionHandler {
+
+    private final UncaughtExceptionHandler originalHandler;
+    final Set<Class> ignorable;
+
+    public TestUncaughtExceptionHandler(final UncaughtExceptionHandler originalHandler) {
+      this.originalHandler = originalHandler;
+      ignorable = new HashSet<Class>();
+    }
+
+    public void setExpectedExceptionTypes(final Class... expectedExceptionTypes) {
+      setExpectedExceptionTypes(Arrays.asList(expectedExceptionTypes));
+    }
+
+    public void setExpectedExceptionTypes(final Collection<Class> expectedExceptionTypes) {
+      ignorable.clear();
+      ignorable.addAll(expectedExceptionTypes);
+    }
+
+    @Override
+    public void onUncaughtException(final Throwable e) {
+      if (e != null) {
+        if (!ignorable.contains(e.getClass())) {
+          originalHandler.onUncaughtException(e);
+        }
+      }
+    }
+
   }
 }

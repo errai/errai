@@ -1,12 +1,12 @@
 package org.jboss.errai.ui.nav.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -15,9 +15,11 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.TransitionToRole;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -35,9 +37,7 @@ public class ValidationRulesTest {
   @Test
   public void shouldThrowExceptionWhenMoreThenOneDefaultPage() {
     // given
-    mockStatic(ClassScanner.class);
-    List<MetaClass> result = createMetaClassList(StartPage1.class, StartPage2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
+    mockClassScanner(StartPage1.class, StartPage2.class);
 
     // when
     try {
@@ -64,9 +64,7 @@ public class ValidationRulesTest {
   @Test
   public void shouldThrowExceptionMoreUniquePages() {
     // given
-    mockStatic(ClassScanner.class);
-    List<MetaClass> result = createMetaClassList(Page1.class, Page2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
+    mockClassScanner(Page1.class, Page2.class);
 
     // when
     try {
@@ -83,9 +81,7 @@ public class ValidationRulesTest {
   @Test
   public void shouldThrowExceptionWhenNoStartPageDefined() {
     // given
-    mockStatic(ClassScanner.class);
-    List<MetaClass> result = createMetaClassList(Page2.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(result);
+    mockClassScanner(Page2.class);
 
     // when
     try {
@@ -96,6 +92,51 @@ public class ValidationRulesTest {
       assertTrue(message.contains("DefaultPage"));
     }
     verify(ClassScanner.class);
+  }
+
+  @Test(expected = GenerationException.class)
+  public void shouldThrowExceptionWhenTransitionToForRoleWithNoPage() throws Exception {
+    mockClassScanner(StartPage1.class, PageWithTransitionToMyUniquePageRole.class);
+    generator.generate(null, null);
+    fail("GenerationException should have been thrown because no PageWithTransitionToMyUniquePageRole was defined.");
+  }
+
+  @Test
+  public void doNotValidateIfOnlyBlacklistedPages() throws Exception {
+    overrideBlacklistedClassNames(BlacklistedPage.class.getCanonicalName());
+    mockClassScanner(BlacklistedPage.class);
+
+    try {
+      generator.generate(null, null);
+    }
+    catch (GenerationException e) {
+      fail("Validation should not have ocurred.");
+    }
+  }
+  
+  @Test(expected = GenerationException.class)
+  public void shouldThrowExceptionForDefaultPageWithPathParam() throws Exception {
+    mockClassScanner(DefaultPageWithPathParam.class);
+    generator.generate(null, null);
+  }
+
+  private void mockClassScanner(Class<?>... pages) {
+    PowerMockito.mockStatic(ClassScanner.class);
+    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(createMetaClassList(pages));
+  }
+
+  private void overrideBlacklistedClassNames(final String... names) throws SecurityException, NoSuchFieldException,
+          IllegalArgumentException, IllegalAccessException {
+    final Field blacklistedField = NavigationGraphGenerator.class.getDeclaredField("BLACKLISTED_PAGES");
+
+    blacklistedField.setAccessible(true);
+
+    // Change the field to not be final so that we can overwrite it.
+    final Field fieldModifiers = Field.class.getDeclaredField("modifiers");
+    fieldModifiers.setAccessible(true);
+    fieldModifiers.setInt(blacklistedField, fieldModifiers.getInt(blacklistedField) & ~Modifier.FINAL);
+
+    blacklistedField.set(null, Arrays.asList(names));
   }
 
   @Page(role = DefaultPage.class)
@@ -111,4 +152,17 @@ public class ValidationRulesTest {
 
   @Page(role = ValidationRulesTest.MyUniquePageRole.class)
   private static class Page2 extends SimplePanel {}
+
+  @Page
+  private static class PageWithTransitionToMyUniquePageRole extends SimplePanel {
+    private TransitionToRole<MyUniquePageRole> transition;
+  }
+
+  @Page
+  private static class BlacklistedPage extends SimplePanel {
+  }
+  
+  @Page(role = DefaultPage.class, path = "{var}/text")
+  private static class DefaultPageWithPathParam extends SimplePanel {}
+  
 }

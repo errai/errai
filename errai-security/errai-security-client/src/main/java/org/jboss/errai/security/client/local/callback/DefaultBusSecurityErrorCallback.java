@@ -50,10 +50,10 @@ public class DefaultBusSecurityErrorCallback {
   public void handleError(final Throwable throwable) {
     try {
       if (throwable instanceof UnauthenticatedException) {
-        context.navigateToPage(LoginPage.class);
+        context.redirectToLoginPage();
       }
       else if (throwable instanceof UnauthorizedException) {
-        context.navigateToPage(SecurityError.class);
+        context.redirectToSecurityErrorPage();
       }
     }
     catch (MissingPageRoleException ex) {

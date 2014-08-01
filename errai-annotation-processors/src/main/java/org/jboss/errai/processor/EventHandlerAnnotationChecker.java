@@ -35,6 +35,7 @@ public class EventHandlerAnnotationChecker extends AbstractProcessor {
     final Types types = processingEnv.getTypeUtils();
     final Elements elements = processingEnv.getElementUtils();
     final TypeMirror gwtWidgetType = elements.getTypeElement(TypeNames.GWT_WIDGET).asType();
+    final TypeMirror gwtElementType = elements.getTypeElement(TypeNames.GWT_ELEMENT).asType();
     
     for (TypeElement annotation : annotations) {
       for (Element target : roundEnv.getElementsAnnotatedWith(annotation)) {
@@ -57,9 +58,9 @@ public class EventHandlerAnnotationChecker extends AbstractProcessor {
           for (AnnotationValue av : eventHandlerAnnotationValues) {
             String referencedFieldName = (String) av.getValue();
             Element referencedField = getField(enclosingClassElement, referencedFieldName);
-            if (referencedField == null || !types.isAssignable(referencedField.asType(), gwtWidgetType)) {
+            if (referencedField == null || (!types.isAssignable(referencedField.asType(), gwtWidgetType) &&!types.isAssignable(referencedField.asType(), gwtElementType))) {
               processingEnv.getMessager().printMessage(
-                      Kind.ERROR, "\"" + referencedFieldName + "\" must refer to a field of type Widget. To reference template elements directly, use @SinkNative.",
+                      Kind.ERROR, "\"" + referencedFieldName + "\" must refer to a field of type Widget or Element. To reference template elements directly, use @SinkNative.",
                       target, eventHandlerAnnotation, av);
             }
           }

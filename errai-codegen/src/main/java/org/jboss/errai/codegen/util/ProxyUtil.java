@@ -100,6 +100,9 @@ public abstract class ProxyUtil {
               .publicOverridesMethod("getMethodName")
               .append(Stmt.load(method.getName()).returnValue())
               .finish()
+              .publicOverridesMethod("getReturnType")
+              .append(Stmt.load(method.getReturnType()).returnValue())
+              .finish()
               .publicOverridesMethod("getAnnotations")
               .append(Stmt.load(filter(method.getAnnotations(), translatablePackages)).returnValue())
               .finish()
@@ -143,14 +146,25 @@ public abstract class ProxyUtil {
                               Stmt.loadVariable("interceptorErrorCallback").invoke("error", Variable.get("message"),
                                   Variable.get("throwable")))
                           .append(
-                              Stmt.if_(
+                            Stmt.if_(
+                                  BooleanExpressionBuilder.create(
+                                     StringStatement.of("getResult()", Object.class), BooleanOperator.NotEquals, Stmt
+                                          .loadLiteral(null)))
+                                  .append(
+                                      Stmt.loadVariable("remoteCallback").invoke("callback",
+                                              StringStatement.of("getResult()", Object.class)))
+                                  .append(Stmt.load(false).returnValue())
+                                  .finish()
+                              .elseif_(
                                   BooleanExpressionBuilder.create(
                                       Stmt.loadVariable("providedErrorCallback"), BooleanOperator.NotEquals, Stmt
                                           .loadLiteral(null)))
                                   .append(
-                                      Stmt.loadVariable("providedErrorCallback").invoke("error",
+                                      Stmt.nestedCall(
+                                        Stmt.loadVariable("providedErrorCallback").invoke("error",
                                           Variable.get("message"),
                                           Variable.get("throwable")))
+                                      .returnValue())
                                   .finish())
                           .append(Stmt.load(true).returnValue())
                           .finish()
@@ -173,13 +187,13 @@ public abstract class ProxyUtil {
     for (final Class<?> interceptor : interceptors) {
       interceptorStack.append(If.cond(Bool.equals(
               Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
-              .append(Stmt.loadVariable("status").invoke("setProceeding", false))
               .append(Stmt.declareFinalVariable("ctx", callContextType, Stmt.loadVariable("this")))
               .append(
                   Stmt.declareVariable(CreationalCallback.class).asFinal().named("icc")
                       .initializeWith(
                           Stmt.newObject(CreationalCallback.class).extend()
                               .publicOverridesMethod("callback", Parameter.of(Object.class, "beanInstance", true))
+                              .append(Stmt.loadVariable("status").invoke("setProceeding", false))
                               .append(
                                   Stmt.castTo(interceptor, Stmt.loadVariable("beanInstance")).invoke("aroundInvoke",
                                       Variable.get("ctx")))

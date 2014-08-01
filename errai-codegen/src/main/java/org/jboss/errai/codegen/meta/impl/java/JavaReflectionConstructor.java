@@ -73,6 +73,11 @@ public class JavaReflectionConstructor extends MetaConstructor {
     return declaringClass;
   }
 
+  @Override
+  public String getDeclaringClassName() {
+    return getDeclaringClass().getName();
+  }
+  
   private MetaType[] _genericParameterTypes;
 
   @Override

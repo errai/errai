@@ -20,10 +20,77 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EmptyStackException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.*;
+import org.jboss.errai.bus.client.tests.support.AImpl1;
+import org.jboss.errai.bus.client.tests.support.AImpl2;
+import org.jboss.errai.bus.client.tests.support.AbstractClassA;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.BuilderEntity;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithConstructorAndMethodMappedLong;
+import org.jboss.errai.bus.client.tests.support.EntityWithFactoryMethodAndMixedMappingTypes;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithGoodParts;
+import org.jboss.errai.bus.client.tests.support.EntityWithInheritedTypeVariable;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceArrayField;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
+import org.jboss.errai.bus.client.tests.support.EntityWithMixedMappingTypes;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
+import org.jboss.errai.bus.client.tests.support.EntityWithTypesUsingNestedParameterizedTypes;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnderscore_InClassName;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.EnumContainer;
+import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
+import org.jboss.errai.bus.client.tests.support.EnumWithAbstractMethod;
+import org.jboss.errai.bus.client.tests.support.EnumWithState;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntitySubtypeInteger;
+import org.jboss.errai.bus.client.tests.support.GenericEntitySubtypeString;
+import org.jboss.errai.bus.client.tests.support.GenericEntityWithConstructorMapping;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImmutableArrayContainer;
+import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
+import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
+import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
+import org.jboss.errai.bus.client.tests.support.OneDimensionalPrimitiveArrayPortable;
+import org.jboss.errai.bus.client.tests.support.Person;
+import org.jboss.errai.bus.client.tests.support.Student;
+import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.SubInterface;
+import org.jboss.errai.bus.client.tests.support.SubInterfaceImpl;
+import org.jboss.errai.bus.client.tests.support.SubMoron;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TestingTick;
+import org.jboss.errai.bus.client.tests.support.TestingTickCache;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.marshalling.client.Marshalling;
 
@@ -44,7 +111,7 @@ public class SerializationTests extends AbstractErraiTest {
     super.gwtSetUp();
     Marshalling.getMarshaller(OneDimensionalPrimitiveArrayPortable.class);
   }
-  
+
   public void testString() {
     runAfterInit(new Runnable() {
       @Override
@@ -2142,7 +2209,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testEntityWithUnderscore_InClassName() {
     runAfterInit(new Runnable() {
       @Override
@@ -2161,7 +2228,53 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
+  public void testEntityWithMixedMappingTypes() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithMixedMappingTypes entity = new EntityWithMixedMappingTypes("f", "c", "m");
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithMixedMappingTypes>() {
+          @Override
+          public void callback(EntityWithMixedMappingTypes response) {
+            assertEquals("f", response.getFieldInjected());
+            assertEquals("c", response.getConstructorInjected());
+            assertEquals("m", response.getMethodInjected());
+            assertFalse(response.wasNonMappingConstructorCalled());
+            assertTrue(response.wasMappingConstructorCalled());
+            assertTrue(response.wasSetterMethodCalled());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testEntityWithMixedMappingTypes(entity);
+      }
+    });
+  }
+
+  public void testEntityWithFactoryMethodAndMixedMappingTypes() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithFactoryMethodAndMixedMappingTypes entity = new EntityWithFactoryMethodAndMixedMappingTypes("field", "factory", "method");
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithFactoryMethodAndMixedMappingTypes>() {
+          @Override
+          public void callback(EntityWithFactoryMethodAndMixedMappingTypes response) {
+            assertEquals("field", response.getFieldInjected());
+            assertEquals("factory", response.getFactoryMethodInjected());
+            assertEquals("method", response.getMethodInjected());
+            assertFalse(response.wasNonMappingConstructorCalled());
+            assertTrue(response.wasFactoryMethodCalled());
+            assertTrue(response.wasSetterMethodCalled());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testEntityWithFactoryMethodAndMixedMappingTypes(entity);
+      }
+    });
+  }
+
   public void testInheritedBuiltInMappings() {
     assertNotNull(Marshalling.getMarshaller(EmptyStackException.class));
   }

@@ -18,13 +18,16 @@ package org.jboss.errai.forge.facet.dependency;
 
 import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.ErraiCommon;
 
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
 /**
  * This facet sets the Maven dependencies needed to use the errai-common project.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@FacetConstraint(VersionFacet.class)
 public class ErraiCommonDepdencyFacet extends AbstractDependencyFacet {
 
   public ErraiCommonDepdencyFacet() {
@@ -32,5 +35,5 @@ public class ErraiCommonDepdencyFacet extends AbstractDependencyFacet {
             DependencyBuilder.create(ErraiCommon.toString())
     );
   }
-  
+
 }

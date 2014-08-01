@@ -2,15 +2,12 @@ package org.jboss.errai.forge.facet.aggregate;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-
-import javax.inject.Inject;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -23,7 +20,6 @@ import org.jboss.errai.forge.facet.aggregate.BaseAggregatorFacet.UninstallationE
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.test.base.ForgeTest;
 import org.jboss.forge.addon.facets.Facet;
-import org.jboss.forge.addon.facets.FacetFactory;
 import org.jboss.forge.addon.facets.MutableFaceted;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
@@ -34,12 +30,9 @@ import org.junit.Test;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class AggregatorFacetTest extends ForgeTest {
 
-  @Inject
-  private FacetFactory facetFactory;
-
   @Test
   public void testUninstallRemovesConstraints() throws Exception {
-    final Project project = createTestProject();
+    final Project project = createErraiTestProject();
 
     addFeature(project, ErraiIocFacet.class);
     assertTrue(removeFeature(project, ErraiIocFacet.class));
@@ -64,7 +57,7 @@ public class AggregatorFacetTest extends ForgeTest {
 
   @Test
   public void testAggregatorDoesNotUninstallCore() throws Exception {
-    final Project project = createTestProject();
+    final Project project = createErraiTestProject();
 
     final CoreFacet coreFacet = facetFactory.install(project, CoreFacet.class);
     addFeature(project, ErraiMessagingFacet.class);
@@ -90,7 +83,7 @@ public class AggregatorFacetTest extends ForgeTest {
 
   @Test
   public void testUninstallDoesNotRemoveOtherDirectlyInstalled() throws Exception {
-    final Project project = createTestProject();
+    final Project project = createErraiTestProject();
 
     addFeature(project, ErraiIocFacet.class);
     addFeature(project, ErraiUiFacet.class);
@@ -103,7 +96,7 @@ public class AggregatorFacetTest extends ForgeTest {
 
   @Test
   public void testUninstallDoesRemoveOtherNotDirectlyInstalled() throws Exception {
-    final Project project = createTestProject();
+    final Project project = createErraiTestProject();
     addFeature(project, ErraiUiFacet.class);
     final ErraiIocFacet iocFacet = project.getFacet(ErraiIocFacet.class);
 
@@ -117,7 +110,7 @@ public class AggregatorFacetTest extends ForgeTest {
   
   @Test
   public void testCanInstallThenUninstallTwoRelatedFeatures() throws Exception {
-    final Project project = createTestProject();
+    final Project project = createErraiTestProject();
 
     final ErraiIocFacet iocFacet = addFeature(project, ErraiIocFacet.class);
     final ErraiUiFacet uiFacet = addFeature(project, ErraiUiFacet.class);
@@ -139,7 +132,7 @@ public class AggregatorFacetTest extends ForgeTest {
   
   @Test
   public void regressionTestForErrai726() throws Exception {
-    final Project project = createTestProject();
+    final Project project = createErraiTestProject();
 
     final ErraiIocFacet iocFacet = addFeature(project, ErraiIocFacet.class);
     final ErraiUiFacet uiFacet = addFeature(project, ErraiUiFacet.class);
@@ -201,20 +194,6 @@ public class AggregatorFacetTest extends ForgeTest {
     return aggregatorFacet;
   }
   
-  private Project createTestProject() {
-    final Project project = initializeJavaProject();
-    final ProjectConfig projectConfig = facetFactory.install(project, ProjectConfig.class);
-
-    projectConfig.setProjectProperty(ProjectProperty.ERRAI_VERSION, "3.0-SNAPSHOT");
-    projectConfig.setProjectProperty(ProjectProperty.MODULE_LOGICAL, "org.jboss.errai.ForgeTest");
-    projectConfig.setProjectProperty(ProjectProperty.MODULE_FILE, new File(project.getRootDirectory()
-            .getUnderlyingResourceObject(), "src/main/java/org/jboss/errai/ForgeTest.gwt.xml"));
-    projectConfig.setProjectProperty(ProjectProperty.MODULE_NAME, "test");
-    projectConfig.setProjectProperty(ProjectProperty.INSTALLED_FEATURES, new SerializableSet());
-
-    return project;
-  }
-
   private Set<Class<? extends Facet>> getCoreFacetConstraints() {
     final Set<Class<? extends Facet>> coreFacetTypes = new HashSet();
     coreFacetTypes.add(CoreFacet.class);

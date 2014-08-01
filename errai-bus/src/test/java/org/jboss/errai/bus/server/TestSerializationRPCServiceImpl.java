@@ -30,7 +30,43 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
-import org.jboss.errai.bus.client.tests.support.*;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.BuilderEntity;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.EntityWithConstructorAndMethodMappedLong;
+import org.jboss.errai.bus.client.tests.support.EntityWithFactoryMethodAndMixedMappingTypes;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithGoodParts;
+import org.jboss.errai.bus.client.tests.support.EntityWithInheritedTypeVariable;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceArrayField;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
+import org.jboss.errai.bus.client.tests.support.EntityWithMixedMappingTypes;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
+import org.jboss.errai.bus.client.tests.support.EntityWithTypesUsingNestedParameterizedTypes;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnderscore_InClassName;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntitySubtypeInteger;
+import org.jboss.errai.bus.client.tests.support.GenericEntitySubtypeString;
+import org.jboss.errai.bus.client.tests.support.GenericEntityWithConstructorMapping;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImmutableArrayContainer;
+import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
+import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
+import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
+import org.jboss.errai.bus.client.tests.support.SubMoron;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TestingTickCache;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.bus.server.annotations.Service;
 
 /**
@@ -446,5 +482,15 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public EntityWithUnderscore_InClassName testEntityWithUnderscore_InClassName(EntityWithUnderscore_InClassName e) {
     return e;
+  }
+
+  @Override
+  public EntityWithMixedMappingTypes testEntityWithMixedMappingTypes(EntityWithMixedMappingTypes entity) {
+    return entity;
+  }
+
+  @Override
+  public EntityWithFactoryMethodAndMixedMappingTypes testEntityWithFactoryMethodAndMixedMappingTypes(EntityWithFactoryMethodAndMixedMappingTypes entity) {
+    return entity;
   }
 }

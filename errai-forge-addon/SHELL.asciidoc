@@ -6,11 +6,11 @@ This guide explains how to install and use the Errai Forge Addon in the shell. Y
 
 == Getting Started
 
-=== Installing Forge 2.4.1.Final
+=== Installing Forge 2.5.0.Final
 
-===== 1. Download link:$$https://repository.jboss.org/nexus/service/local/artifact/maven/redirect?r=releases&g=org.jboss.forge&a=forge-distribution&v=2.4.1.Final&e=zip&c=offline$$[Forge 2.4.1.Final]
+===== 1. Download link:$$https://repository.jboss.org/nexus/service/local/artifact/maven/redirect?r=releases&g=org.jboss.forge&a=forge-distribution&v=2.5.0.Final&e=zip&c=offline$$[Forge 2.5.0.Final]
 
-.. Download the zip file for Forge 2.4.1.Final in the link above.
+.. Download the zip file for Forge 2.5.0.Final in the link above.
 
 .. Unzip the file in your home directory.
 
@@ -20,7 +20,7 @@ This guide explains how to install and use the Errai Forge Addon in the shell. Y
 +
 [code]
 ----
-PATH=$PATH:$HOME/forge-distribution-2.4.1.Final/bin
+PATH=$PATH:$HOME/forge-distribution-2.5.0.Final/bin
 ----
 
 ===== 3. Install the Core Addons
@@ -146,6 +146,46 @@ The `errai-remove-features` command works similarly to `errai-add-features` exce
 
 * You have previously installed.
 * That are not depended on by any other Errai features.
+====
+
+==== Generating Test Classes
+
+The Errai Forge Addon can generate GWT Mockito tests for unit testing and GWTTestCase tests for integration testing.
+
+For unit tests run the following:
+
+[code]
+----
+[errai-forge-demo]$ errai-add-unit-test --testableClassName org.jboss.errai.MyClass --testClassName org.jboss.errai.unittest.MyIntegrationTest
+----
+
+* `testableClassName` is the fully-qualified name of the Java class being tested.
+
+* `testClassName` is the fully-qualified name of the test class being generated.
+
+[NOTE]
+.Unit Test Package
+====
+GWT Mockito uses a special classloader that is not compatible with the test setup for integration tests. To work around this, the unit test command generates a custom test-runner that whitelists certain packages *including the package of your unit test*.
+
+It is important that your GWT Mockito tests and GWTTestCase tests be in *different* packages.
+====
+
+For integration tests run the following:
+
+[code]
+----
+[errai-forge-demo]$ errai-add-integration-test --testClassSimpleName MyIntegrationTest --testPackageName org.jboss.errai.integrationtest
+----
+
+* `testClassSimpleName` is the simple name of the test class being generated.
+
+* `testPackageName` is the root package for the test GWT module.
+
+[NOTE]
+.Requires Errai CDI
+====
+Integration tests require Errai CDI. You will not be able to run this command until you add Errai CDI you your project with the `errai-add-features` command.
 ====
 
 === Running Your Project

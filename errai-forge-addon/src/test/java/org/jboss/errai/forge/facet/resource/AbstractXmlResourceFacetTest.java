@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -40,6 +41,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.jboss.errai.forge.test.base.ForgeTest;
+import org.jboss.errai.forge.xml.ElementFactory;
+import org.jboss.errai.forge.xml.XmlParserFactory;
 import org.jboss.forge.addon.projects.Project;
 import org.junit.Test;
 import org.w3c.dom.DOMException;
@@ -48,6 +51,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class AbstractXmlResourceFacetTest extends ForgeTest {
+  
+  @Inject
+  private XmlParserFactory xmlParserFactory;
 
   public class TestXmlResourceFacet extends AbstractXmlResourceFacet {
     private final String relPath;
@@ -61,17 +67,18 @@ public class AbstractXmlResourceFacetTest extends ForgeTest {
       this.nodes = nodes;
       this.replacements = replacements;
       this.replacementsRemoval = replacementsRemoval;
+      this.xmlParserFactory = AbstractXmlResourceFacetTest.this.xmlParserFactory;
     }
 
     @Override
-    protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final Document doc)
-            throws ParserConfigurationException, XPathExpressionException {
+    protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath,
+            final ElementFactory elemFactory) throws ParserConfigurationException, XPathExpressionException {
       final Map<XPathExpression, Collection<Node>> retVal = new HashMap<XPathExpression, Collection<Node>>(nodes.size());
 
       for (final String rawExpression : nodes.keySet()) {
         final Collection<Node> value = new ArrayList<Node>(nodes.get(rawExpression).size());
         for (final Node importNode : nodes.get(rawExpression)) {
-          value.add(doc.importNode(importNode, true));
+          value.add(elemFactory.importElement((Element) importNode, true));
         }
         retVal.put(xPath.compile(rawExpression), value);
       }
@@ -79,21 +86,21 @@ public class AbstractXmlResourceFacetTest extends ForgeTest {
       return retVal;
     }
 
-    private Map<XPathExpression, Node> prepMap(final XPath xPath, final Document doc, final Map<String, Node> map)
-            throws XPathExpressionException, DOMException {
+    private Map<XPathExpression, Node> prepMap(final XPath xPath, final ElementFactory elemFactory,
+            final Map<String, Node> map) throws XPathExpressionException, DOMException {
       final Map<XPathExpression, Node> retVal = new HashMap<XPathExpression, Node>(map.size());
 
       for (final String rawExpression : map.keySet()) {
-        retVal.put(xPath.compile(rawExpression), doc.importNode(map.get(rawExpression), true));
+        retVal.put(xPath.compile(rawExpression), elemFactory.importElement((Element) map.get(rawExpression), true));
       }
 
       return retVal;
     }
 
     @Override
-    protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final Document doc)
+    protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final ElementFactory elemFactory)
             throws ParserConfigurationException, XPathExpressionException, DOMException {
-      return prepMap(xPath, doc, replacements);
+      return prepMap(xPath, elemFactory, replacements);
     }
 
     @Override
@@ -102,9 +109,9 @@ public class AbstractXmlResourceFacetTest extends ForgeTest {
     }
 
     @Override
-    protected Map<XPathExpression, Node> getRemovalMap(XPath xPath, Document doc) throws ParserConfigurationException,
-            XPathExpressionException {
-      return prepMap(xPath, doc, replacementsRemoval);
+    protected Map<XPathExpression, Node> getRemovalMap(final XPath xPath, final ElementFactory elemFactory)
+            throws ParserConfigurationException, XPathExpressionException {
+      return prepMap(xPath, elemFactory, replacementsRemoval);
     }
   }
 
@@ -169,7 +176,7 @@ public class AbstractXmlResourceFacetTest extends ForgeTest {
             replacements, new HashMap<String, Node>(0));
     testFacet.setFaceted(project);
 
-    testFacet.install();
+    assertTrue(testFacet.install());
 
     final Document resDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
             .parse(new File(testFacet.relPath));

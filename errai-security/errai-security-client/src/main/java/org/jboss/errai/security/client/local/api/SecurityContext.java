@@ -18,7 +18,13 @@ package org.jboss.errai.security.client.local.api;
 
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
-import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
+import org.jboss.errai.ui.nav.client.local.Navigation;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.api.LoginPage;
+import org.jboss.errai.ui.nav.client.local.api.SecurityError;
+
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Caches information regarding security events and the current user (i.e. which
@@ -29,37 +35,55 @@ import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 public interface SecurityContext {
 
   /**
-   * Navigate to the page with a given role, caching the current page so that it
-   * may be revisited later.
-   * 
-   * @see {@link #getLastCachedPageName()}
-   * @param roleClass
-   *          The role of the page to navigate to.
-   * @param lastPage
-   *          The name of the last page to cache.
+   * Navigate to the {@link LoginPage}, caching the current page. This is the same as calling
+   * {@link #redirectToLoginPage(Class)} with the argument {@link Navigation#getCurrentPage()
+   * Navigation.getCurrentPage().contentType()}.
    */
-  public void navigateToPage(Class<? extends UniquePageRole> roleClass, String lastPage);
+  public void redirectToLoginPage();
 
   /**
-   * Navigate to the page with a given role.
+   * Navigate to the {@link LoginPage}.
    * 
-   * @param roleClass
-   *          The role of the page to navigate to.
+   * @param fromPage
+   *          This {@link Page} type is cached so that a subsequent call to
+   *          {@link #navigateBackOrHome()} or {@link #navigateBackOrToPage(Class)} will return to
+   *          the {@link Page} of this type.
    */
-  public void navigateToPage(Class<? extends UniquePageRole> roleClass);
+  public void redirectToLoginPage(Class<? extends IsWidget> fromPage);
 
   /**
-   * Navigate to the last page a user was redirected from (via this security
-   * context), or home if the user has not been redirected.
+   * Navigate to the {@link SecurityError}, caching the current page. This is the same as calling
+   * {@link #redirectToSecurityErrorPage(Class)} with the argument
+   * {@link Navigation#getCurrentPage() Navigation.getCurrentPage().contentType()}.
+   */
+  public void redirectToSecurityErrorPage();
+
+  /**
+   * Navigate to the {@link SecurityError} page.
+   * 
+   * @param fromPage
+   *          This {@link Page} type is cached so that a subsequent call to
+   *          {@link #navigateBackOrHome()} or {@link #navigateBackOrToPage(Class)} will return to
+   *          the {@link Page} of this type.
+   */
+  public void redirectToSecurityErrorPage(Class<? extends IsWidget> fromPage);
+
+  /**
+   * Navigate to the last page a user was redirected from (via this security context), or to the
+   * {@link DefaultPage} if the user has not been redirected.
    */
   public void navigateBackOrHome();
 
   /**
-   * @return The name of the last cached page.
-   * @see {@link #navigateToPage(Class, String)}
+   * Navigate to the last page a user was redirected from (via this security context), or to the
+   * given page if the user has not been redirected.
+   *
+   * @param pageType
+   *          The type of the page to navigate to if the user has not been redirected. Must not be
+   *          {@code null}.
    */
-  public String getLastCachedPageName();
-  
+  public void navigateBackOrToPage(Class<? extends IsWidget> pageType);
+
   /**
    * @return True iff {@link SecurityContext#isCacheValid()} is true and
    *         {@link SecurityContext#getCachedUser()} will not return

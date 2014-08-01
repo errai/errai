@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author edewit@redhat.com
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DictionaryTest {
 
@@ -38,19 +39,23 @@ public class DictionaryTest {
     treeSet.add(CH);
     assertEquals(treeSet, dictionary.getSupportedLocals());
   }
-
+  
+  /**
+   * It was crucial for performance reasons to not return a
+   * defensive copy from {@link Dictionary#get(String)}. Some
+   * applications started up 5 times faster after removing the
+   * copying. 
+   */
   @Test
-  public void shouldReturnReadonlyCollections() {
+  public void shouldNotReturnDefensiveCopy() {
     // given
     Dictionary dictionary = new Dictionary();
     dictionary.put(NL, WELCOME_KEY, "Goedendag");
 
     // when
     dictionary.get(NL).put("try to", "break");
-    dictionary.getSupportedLocals().add(CH);
 
     // then
-    assertEquals(1, dictionary.get(NL).size());
-    assertEquals(1, dictionary.getSupportedLocals().size());
+    assertEquals(2, dictionary.get(NL).size());
   }
 }

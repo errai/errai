@@ -168,7 +168,25 @@ public final class TemplateUtil {
 
     logger.fine(parserDiv.getInnerHTML().trim());
 
-    return parserDiv.getFirstChildElement();
+    final Element templateRoot = firstNonMetaElement(parserDiv);
+    if (templateRoot == null) {
+      throw new IllegalStateException("Could not find template root for this template: " + templateContents);
+    }
+    else {
+      return templateRoot;
+    }
+  }
+
+  /*
+   * This ignores meta tags from ERRAI-779.
+   */
+  private static Element firstNonMetaElement(final Element parserDiv) {
+    Element displayable = parserDiv.getFirstChildElement();
+    while (displayable != null && displayable.getTagName().equalsIgnoreCase("meta")) {
+      displayable = displayable.getNextSiblingElement();
+    }
+
+    return displayable;
   }
 
   /**
@@ -272,6 +290,7 @@ public final class TemplateUtil {
     return untaggedTemplateElements;
   }
 
+  @SuppressWarnings("deprecation")
   public static void setupNativeEventListener(Composite component, Element element, EventListener listener,
           int eventsToSink) {
 
@@ -279,6 +298,7 @@ public final class TemplateUtil {
       throw new RuntimeException("A native event source was specified in " + component.getClass().getName()
               + " but the corresponding data-field does not exist!");
     }
+    // These casts must stay to maintain compatibility with GWT 2.5.1
     DOM.setEventListener((com.google.gwt.user.client.Element) element, listener);
     DOM.sinkEvents((com.google.gwt.user.client.Element) element, eventsToSink);
   }

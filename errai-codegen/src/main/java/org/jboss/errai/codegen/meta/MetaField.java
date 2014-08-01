@@ -64,12 +64,25 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
 
   /**
    * Returns a string which includes the declaring class's name and the field
-   * name. Do not rely on the format of this string remaining consistent across
+   * type and field name, as well as all declared annotations for that field.
+   * Do not rely on the format of this string remaining consistent across
    * releases of Errai.
    */
   @Override
   public String toString() {
-    return MetaField.class.getName() + ":" + getDeclaringClass().getFullyQualifiedName() + "." + getName();
+    StringBuilder sb = new StringBuilder();
+    sb.append(MetaField.class.getName()).append(":");
+    sb.append(getDeclaringClassName()).append(".");
+
+    Annotation[] annos = getAnnotations();
+    if (annos != null) {
+      for (Annotation anno : annos) {
+        sb.append(anno.toString()).append(" ");
+      }
+    }
+    
+    sb.append(this.getType()).append(" ").append(getName());
+    return sb.toString();
   }
 
   private String _hashString;
@@ -158,6 +171,11 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
     @Override
     public MetaClass getDeclaringClass() {
       return componentType;
+    }
+    
+    @Override
+    public String getDeclaringClassName() {
+      return componentType.getFullyQualifiedName();
     }
 
     @Override

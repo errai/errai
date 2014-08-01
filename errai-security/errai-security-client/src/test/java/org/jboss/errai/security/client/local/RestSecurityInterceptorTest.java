@@ -27,7 +27,6 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.VoidCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
@@ -271,7 +270,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
 
   private void helper(final Runnable test) {
     delayTestFinish((int) TIME_LIMIT);
-    CDI.addPostInitTask(test);
+    afterLogout(test);
   }
 
   private static SecureRestService restCallHelper(final RemoteCallback<Void> callback,

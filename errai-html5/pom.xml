@@ -5,7 +5,7 @@
     <parent>
       <artifactId>errai-parent</artifactId>
       <groupId>org.jboss.errai</groupId>
-      <version>3.0-SNAPSHOT</version>
+      <version>3.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,6 +13,12 @@
     <name>Errai::HTML5</name>
 
   <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-common</artifactId>
+    </dependency>
+
+    <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -98,28 +104,14 @@
             </configuration>
           </plugin>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <skipTests>false</skipTests>
               <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/
-                </additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/</additionalClasspathElement>
               </additionalClasspathElements>
-              <useManifestOnlyJar>false</useManifestOnlyJar>
-              <forkMode>pertest</forkMode>
 
               <!-- Note: to run the test in a real browser, set -DargLine='-Dgwt.args="-runStyle Manual:1"' -->
               <argLine>-Xmx1024m ${argLine}</argLine>
-
-              <systemProperties>
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>errai.hosted_mode_testing</name>
-                  <value>true</value>
-                </property>
-              </systemProperties>
             </configuration>
           </plugin>
         </plugins>
@@ -144,13 +136,11 @@
         <!-- Errai Core -->
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-bus</artifactId>
-          <version>${project.version}</version>
+          <artifactId>errai-bus</artifactId>          
         </dependency>
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-ioc</artifactId>
-          <version>${project.version}</version>
+          <artifactId>errai-ioc</artifactId>          
           <exclusions>
             <exclusion>
               <groupId>javax.inject</groupId>
@@ -165,21 +155,18 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-client</artifactId>
-          <version>${project.version}</version>
+          <artifactId>errai-cdi-client</artifactId>          
           <scope>compile</scope>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-weld-integration</artifactId>
-          <version>${project.version}</version>
+          <artifactId>errai-weld-integration</artifactId>          
         </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-tools</artifactId>
-          <version>${project.version}</version>
+          <artifactId>errai-tools</artifactId>          
         </dependency>
         <dependency>
           <groupId>org.mvel</groupId>
@@ -255,8 +242,7 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-javax-enterprise</artifactId>
-          <version>${project.version}</version>
+          <artifactId>errai-javax-enterprise</artifactId>          
           <scope>provided</scope>
         </dependency>
 

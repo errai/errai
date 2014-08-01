@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.logging.util.StringFormat;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -28,7 +29,7 @@ import org.jboss.errai.validation.client.shared.GwtCompatibleEmail;
 public class TodoListUser implements User {
 
   private static final long serialVersionUID = 1L;
-  
+
   public static final String SHORT_NAME = "shortName";
   public static final String FULL_NAME = "longName";
 
@@ -56,7 +57,7 @@ public class TodoListUser implements User {
   @NotNull
   @GwtCompatibleEmail
   private String email;
-  
+
   private transient Map<String, String> properties = new HashMap<String, String>();
 
   public String getLoginName() {
@@ -106,9 +107,9 @@ public class TodoListUser implements User {
   public boolean equals(Object obj) {
     if (!(obj instanceof User))
       return false;
-    
+
     final User user = (User) obj;
-    
+
     return getIdentifier().equals(user.getIdentifier());
   }
 
@@ -150,5 +151,15 @@ public class TodoListUser implements User {
   @Override
   public String getProperty(String name) {
     return properties.get(name);
+  }
+
+  @Override
+  public String toString() {
+    return StringFormat.format(
+            "TodoListUser: { loginName = '%s', shortName = '%s', fullName = '%s', email = '%s' }",
+            loginName,
+            shortName,
+            fullName,
+            email);
   }
 }

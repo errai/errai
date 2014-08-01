@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.enterprise.context.Dependent;
+
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.databinding.client.BindableListChangeHandler;
@@ -30,6 +32,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdapter;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ui.client.local.spi.InvalidBeanScopeException;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -77,6 +80,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     initWidget(panel);
   }
 
+  //TODO: protected abstract getItemModelType()
   /**
    * Returns the class object for the item widget type <W> to look up new instances of the widget
    * using the client-side bean manager.
@@ -171,6 +175,10 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
     pendingCallbacks = items.size();
     AsyncBeanDef<W> itemBeanDef = bm.lookupBean(getItemWidgetType());
+ 
+    if (!itemBeanDef.getScope().equals(Dependent.class))
+      throw new InvalidBeanScopeException("ListWidget cannot contain ApplicationScoped widgets");
+    
     for (final M item : items) {
       final WidgetCreationalCallback callback = new WidgetCreationalCallback(item);
       callbacks.add(callback);
@@ -303,18 +311,36 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemsCleared(List<M> oldList) {
+    AsyncBeanManager bm = IOC.getAsyncBeanManager();
+    Integer widgetCount = panel.getWidgetCount();
+    
+    Collection<Widget> widgets = new ArrayList<Widget>(widgetCount);
+    for (int i = 0; i < widgetCount; i++) {
+      widgets.add(panel.getWidget(i));
+    }
+    
     panel.clear();
+    
+    Iterator<Widget> itr = widgets.iterator();
+    while(itr.hasNext()) {
+      Widget w = (Widget) itr.next();
+      bm.destroyBean(w);
+    }
   }
 
   @Override
   public void onItemRemovedAt(List<M> oldList, int index) {
+    Widget widget = panel.getWidget(index);
     panel.remove(index);
+    IOC.getAsyncBeanManager().destroyBean(widget);
   }
 
   @Override
   public void onItemsRemovedAt(List<M> oldList, List<Integer> indexes) {
     for (Integer index : indexes) {
+      Widget widget = panel.getWidget(index);
       panel.remove(index);
+      IOC.getAsyncBeanManager().destroyBean(widget);
     }
   }
 

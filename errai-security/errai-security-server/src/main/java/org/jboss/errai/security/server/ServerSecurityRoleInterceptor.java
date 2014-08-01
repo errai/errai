@@ -16,25 +16,33 @@
  */
 package org.jboss.errai.security.server;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
+import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
+import org.jboss.errai.security.shared.util.AnnotationUtils;
 
 /**
  * SecurityRoleInterceptor server side implementation of the
  * SecurityRoleInterceptor does the same, but throws an exception instead of
  * 'redirecting' the user.
- * 
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  * @author edewit@redhat.com
  */
 @RestrictedAccess
@@ -42,21 +50,26 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
 public class ServerSecurityRoleInterceptor {
 
   private final AuthenticationService authenticationService;
+  private final RequiredRolesExtractor roleExtractor;
 
   @Inject
-  public ServerSecurityRoleInterceptor(AuthenticationService authenticationService) {
+  public ServerSecurityRoleInterceptor(final AuthenticationService authenticationService,
+          final RequiredRolesExtractor roleExtractor) {
     this.authenticationService = authenticationService;
+    this.roleExtractor = roleExtractor;
   }
 
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
     final User user = authenticationService.getUser();
-    final RestrictedAccess annotation = getRestrictedAccessAnnotation(context.getTarget().getClass(),
+    final Collection<RestrictedAccess> annotations = getRestrictedAccessAnnotations(context.getTarget().getClass(),
             context.getMethod());
+    final Set<Role> roles = AnnotationUtils.mergeRoles(roleExtractor, annotations);
+
     if (User.ANONYMOUS.equals(user)) {
       throw new UnauthenticatedException();
     }
-    else if (!user.hasAllRoles(annotation.roles())) {
+    else if (!user.getRoles().containsAll(roles)) {
       throw new UnauthorizedException();
     }
     else {
@@ -64,50 +77,49 @@ public class ServerSecurityRoleInterceptor {
     }
   }
 
-  private RestrictedAccess getRestrictedAccessAnnotation(Class<?> aClass, Method method) {
-    RestrictedAccess annotation = method.getAnnotation(RestrictedAccess.class);
-    if (annotation != null) {
-      return annotation;
+  private Collection<RestrictedAccess> getRestrictedAccessAnnotations(Class<?> aClass, Method method) {
+    final Collection<RestrictedAccess> annotations = new ArrayList<RestrictedAccess>();
+
+    addRestrictedAccessIfPresent(method, annotations);
+    addRestrictedAccessIfPresent(method.getDeclaringClass(), annotations);
+
+    for (Class<?> iface : aClass.getInterfaces()) {
+      annotations.addAll(getRestrictedAccessFromRelevantInterface(iface, method));
     }
 
-    annotation = method.getDeclaringClass().getAnnotation(RestrictedAccess.class);
-    if (annotation != null) {
-      return annotation;
-    }
-
-    Class<?>[] interfaces = aClass.getInterfaces();
-    for (int i = 0, interfacesLength = interfaces.length; i < interfacesLength && annotation == null; i++) {
-      annotation = getRestrictedAccess(interfaces[i], method);
-    }
-
-    if (annotation == null) {
+    if (annotations.isEmpty()) {
       throw new IllegalArgumentException(
-              String.format("Could not @RestrictedAccess annotation on method (%s), class (%s), or interfaces.",
+              String.format("Could not find any @RestrictedAccess annotations on method (%s), class (%s), or interfaces.",
                       method.getName(), method.getDeclaringClass().getCanonicalName()));
     }
 
-    return annotation;
+    return annotations;
   }
 
-  private RestrictedAccess getRestrictedAccess(Class<?> aClass, Method searchMethod) {
-    for (Method method : aClass.getMethods()) {
-      final RestrictedAccess annotation = getRestrictAccess(searchMethod, method);
-      if (annotation != null) {
-        return annotation;
+  private Collection<RestrictedAccess> getRestrictedAccessFromRelevantInterface(Class<?> iface, Method searchMethod) {
+    final Collection<RestrictedAccess> annotations = new ArrayList<RestrictedAccess>();
+
+    for (Method method : iface.getMethods()) {
+      if (isMatchingMethod(searchMethod, method)) {
+        addRestrictedAccessIfPresent(method, annotations);
+        addRestrictedAccessIfPresent(iface, annotations);
+        break;
       }
     }
 
-    return null;
+    return annotations;
   }
 
-  private RestrictedAccess getRestrictAccess(Method searchMethod, Method method) {
-    RestrictedAccess requiredRoles = null;
+  private boolean isMatchingMethod(Method searchMethod, Method method) {
+    return searchMethod.getName().equals(method.getName())
+            && Arrays.equals(searchMethod.getParameterTypes(), method.getParameterTypes());
+  }
 
-    if (searchMethod.getName().equals(method.getName())
-            && Arrays.equals(searchMethod.getParameterTypes(), method.getParameterTypes())) {
-      requiredRoles = method.getAnnotation(RestrictedAccess.class);
+  private void addRestrictedAccessIfPresent(final AnnotatedElement annotated,
+          final Collection<RestrictedAccess> annotations) {
+    final RestrictedAccess annotation = annotated.getAnnotation(RestrictedAccess.class);
+    if (annotation != null) {
+      annotations.add(annotation);
     }
-
-    return requiredRoles;
   }
 }

@@ -221,6 +221,11 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
                 public boolean isCancelled() {
                   return future.isCancelled();
                 }
+
+                @Override
+                public boolean isFinished() {
+                  return future.isDone();
+                }
               };
             }
 
@@ -242,6 +247,11 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
                 @Override
                 public boolean isCancelled() {
                   return future.isCancelled();
+                }
+
+                @Override
+                public boolean isFinished() {
+                  return future.isDone();
                 }
               };
             }

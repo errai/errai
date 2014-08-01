@@ -106,7 +106,9 @@ public class LessConverter {
       boolean css = importedFile.matches(".*css$");
       if (!css) {
         String importedLess = parseLess(new URL(base, importedFile));
+        // update content *and* matcher
         content = content.substring(0, importMatcher.start()) + importedLess + content.substring(importMatcher.end());
+        importMatcher = IMPORT_PATTERN.matcher(content);
       }
     }
 

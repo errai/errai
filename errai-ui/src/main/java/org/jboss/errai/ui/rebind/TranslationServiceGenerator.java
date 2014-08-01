@@ -19,11 +19,14 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -51,6 +54,8 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
@@ -59,7 +64,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.reflections.Configuration;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.scanners.ResourcesScanner;
-import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -71,6 +75,8 @@ import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -91,12 +97,16 @@ import com.google.gwt.resources.client.TextResource;
  * it. This allows translated strings to be used from Errai Java code, not just from templates.
  * 
  * @author eric.wittmann@redhat.com
+ * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @GenerateAsync(TranslationService.class)
 public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   private static final String GENERATED_CLASS_NAME = "TranslationServiceImpl";
   private static Pattern LOCALE_IN_FILENAME_PATTERN = Pattern.compile("([^_]*)_(\\w\\w)?(_\\w\\w)?\\.json");
+
+  private static final Logger log = LoggerFactory.getLogger(TranslationServiceGenerator.class);
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
@@ -112,8 +122,6 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
             TranslationService.class, GENERATED_CLASS_NAME);
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
 
-    // The bundles we've already done - do avoid dupes
-    Set<String> processedBundles = new HashSet<String>();
     // The i18n keys found (per locale) while processing the bundles.
     Map<String, Set<String>> discoveredI18nMap = new HashMap<String, Set<String>>();
 
@@ -142,7 +150,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         name = fieldVal.toString();
       }
       catch (Exception e) {
-        // TODO log this
+        log.warn("There was an error while processing a TranslationKey", e);
       }
 
       // Figure out the translation key value (for the null locale).
@@ -166,53 +174,53 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     // Scan for all @Bundle annotations.
     final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class, context);
-    // For each one, generate the code to load the translation and put that generated
-    // code in the c'tor of the generated class (GeneratedTranslationService)
+
+    Set<String> bundlePaths = new HashSet<String>();
     for (MetaClass bundleAnnotatedClass : bundleAnnotatedClasses) {
       String bundlePath = getMessageBundlePath(bundleAnnotatedClass);
+      bundlePaths.add(bundlePath);
+    }
 
-      // Skip if we've already processed this bundle.
-      if (processedBundles.contains(bundlePath)) {
-        continue;
-      }
+    // Now get all files in the message bundle (all localized versions)
+    final Collection<URL> scannableUrls = getScannableUrls(bundleAnnotatedClasses);
+    log.info("Preparing to scan for i18n bundle files.");
+    MessageBundleScanner scanner = new MessageBundleScanner(
+            new ConfigurationBuilder()
+                .filterInputsBy(new FilterBuilder().include(".*json"))
+                .setUrls(scannableUrls)
+                .setScanners(new MessageBundleResourceScanner(bundlePaths)));
 
-      // Now get all files in the message bundle (all localized versions)
-      // TODO optimize this - scan the classpath once and then pull out just the resources we need
-      MessageBundleScanner scanner = new MessageBundleScanner(
-              new ConfigurationBuilder()
-                  .filterInputsBy(new FilterBuilder().include(".*json"))
-                  .setUrls(ClasspathHelper.forClassLoader())
-                  .setScanners(new MessageBundleResourceScanner(bundlePath)));
-      Collection<String> resources = scanner.getStore().get(MessageBundleResourceScanner.class).values();
+    // For each one, generate the code to load the translation and put that generated
+    // code in the c'tor of the generated class (GeneratedTranslationService)
+    Collection<String> resources = scanner.getStore().get(MessageBundleResourceScanner.class).values();
+    for (String bundlePath : bundlePaths) {
       // If we didn't find at least the specified root bundle file, that's a problem.
       if (!resources.contains(bundlePath)) {
         throw new GenerationException("Missing i18n bundle (specified in @Bundle): " + bundlePath);
       }
-
-      // Now generate code to load up each of the JSON files and register them
-      // with the translation service.
-      for (String resource : resources) {
-        // Generate this component's ClientBundle resource interface
-        BuildMetaClass messageBundleResourceInterface = generateMessageBundleResourceInterface(resource);
-        // Add it as an inner class to the generated translation service
-        classBuilder.getClassDefinition().addInnerClass(new InnerClass(messageBundleResourceInterface));
-
-        // Instantiate the ClientBundle MessageBundle resource
-        final String msgBundleVarName = InjectUtil.getUniqueVarName();
-        ctor.append(Stmt.declareVariable(messageBundleResourceInterface).named(msgBundleVarName)
-                .initializeWith(Stmt.invokeStatic(GWT.class, "create", messageBundleResourceInterface)));
-
-        // Create a dictionary from the message bundle and register it.
-        String locale = getLocaleFromBundlePath(resource);
-        ctor.append(Stmt.loadVariable("this").invoke("registerBundle",
-                Stmt.loadVariable(msgBundleVarName).invoke("getContents").invoke("getText"),
-                locale));
-
-        recordBundleKeys(discoveredI18nMap, locale, resource);
-      }
-
-      processedBundles.add(bundlePath);
     }
+
+    // Now generate code to load up each of the JSON files and register them
+    // with the translation service.
+    for (String resource : resources) {
+      // Generate this component's ClientBundle resource interface
+      BuildMetaClass messageBundleResourceInterface = generateMessageBundleResourceInterface(resource);
+      // Add it as an inner class to the generated translation service
+      classBuilder.getClassDefinition().addInnerClass(new InnerClass(messageBundleResourceInterface));
+
+      // Instantiate the ClientBundle MessageBundle resource
+      final String msgBundleVarName = InjectUtil.getUniqueVarName();
+      ctor.append(Stmt.declareVariable(messageBundleResourceInterface).named(msgBundleVarName)
+              .initializeWith(Stmt.invokeStatic(GWT.class, "create", messageBundleResourceInterface)));
+
+      // Create a dictionary from the message bundle and register it.
+      String locale = getLocaleFromBundlePath(resource);
+      ctor.append(Stmt.loadVariable("this").invoke("registerBundle",
+              Stmt.loadVariable(msgBundleVarName).invoke("getContents").invoke("getText"), locale));
+
+      recordBundleKeys(discoveredI18nMap, locale, resource);
+    }
+
     // We're done generating the c'tor
     ctor.finish();
 
@@ -221,9 +229,62 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     return classBuilder.toJavaString();
   }
 
+  private Collection<URL> getScannableUrls(final Collection<MetaClass> bundleAnnotatedClasses) {
+    final Collection<URL> urls = new HashSet<URL>();
+
+    addUrlsFromBundleAnnotations(bundleAnnotatedClasses, urls);
+    addUrlsFromErraiAppProperties(urls);
+
+    return urls;
+  }
+
+  private void addUrlsFromErraiAppProperties(final Collection<URL> urls) {
+    urls.addAll(MetaDataScanner.getConfigUrls());
+  }
+
+  private void addUrlsFromBundleAnnotations(final Collection<MetaClass> bundleAnnotatedClasses, final Collection<URL> urls) {
+    final Set<String> completedPaths = new HashSet<String>();
+
+    for (final MetaClass bundleClass : bundleAnnotatedClasses) {
+      final String bundlePath = getMessageBundlePath(bundleClass);
+      if (bundlePath != null && !completedPaths.contains(bundlePath)) {
+        final URL resource = getClass().getClassLoader().getResource(bundlePath);
+        if (resource == null) {
+          throw new GenerationException("Failed to load bundle " + bundlePath + 
+                  " defined on class " + bundleClass.getFullyQualifiedName());
+        }
+        
+        final URL classpathElement;
+        final String pathRoot = getPathRoot(bundleClass, resource);
+        try {
+          classpathElement = new File(pathRoot).toURI().toURL();
+        } catch (MalformedURLException e) {
+          log.warn("Failed to construct URL for i18n bundle defined in " + bundleClass);
+          continue;
+        }
+        urls.add(classpathElement);
+        completedPaths.add(bundlePath);
+      }
+    }
+  }
+
+  private String getPathRoot(final MetaClass bundleClass, final URL resource) {
+    final String fullPath = resource.getPath();
+    final String resourcePath = bundleClass.getAnnotation(Bundle.class).value();
+
+    final String relativePath;
+    if (resourcePath.startsWith("/"))
+      relativePath = resourcePath;
+    else
+      // Do NOT use File.separatorChar here: Url.getPath() always uses forward-slashes
+      relativePath = bundleClass.getPackageName().replace('.', '/');
+
+    return fullPath.substring(0, fullPath.indexOf(relativePath));
+  }
+
   /**
    * Records all of the i18n keys found in the given bundle.
-   * 
+   *
    * @param discoveredI18nMap
    * @param locale
    * @param bundlePath
@@ -492,7 +553,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @author eric.wittmann@redhat.com
    */
   private static class MessageBundleResourceScanner extends ResourcesScanner {
-    private final String bundlePrefix;
+    private final List<String> bundlePrefixes = new ArrayList<String>();
     private final String bundleSuffix = ".json";
 
     /**
@@ -500,8 +561,12 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
      * 
      * @param bundlePath
      */
-    public MessageBundleResourceScanner(String bundlePath) {
-      this.bundlePrefix = bundlePath.substring(0, bundlePath.lastIndexOf(".json"));
+    public MessageBundleResourceScanner(Set<String> bundlePaths) {
+      Assert.notNull(bundlePaths);
+      for (String bundlePath : bundlePaths) {
+        String prefix = bundlePath.substring(0, bundlePath.lastIndexOf(".json"));
+        bundlePrefixes.add(prefix);
+      }
     }
 
     /**
@@ -509,7 +574,17 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
      */
     @Override
     public boolean acceptsInput(String file) {
-      return file != null && file.startsWith(this.bundlePrefix) && file.endsWith(this.bundleSuffix);
+      if (file == null || !file.endsWith(this.bundleSuffix)) {
+        return false;
+      }
+
+      for (String bundlePrefix : bundlePrefixes) {
+        if (file.startsWith(bundlePrefix)) {
+          return true;
+        }
+      }
+      
+      return false;
     }
   }
 

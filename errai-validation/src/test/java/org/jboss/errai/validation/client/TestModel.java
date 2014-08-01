@@ -1,20 +1,24 @@
 /*
-* JBoss, Home of Professional Open Source
-* Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual contributors
-* by the @authors tag. See the copyright.txt in the distribution for a
-* full listing of individual contributors.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-* http://www.apache.org/licenses/LICENSE-2.0
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual contributors
+ * by the @authors tag. See the copyright.txt in the distribution for a
+ * full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.validation.client;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -35,7 +39,7 @@ import org.junit.Ignore;
 @Ignore
 public class TestModel {
 
-  @Min(value=100)
+  @Min(value = 100)
   private int numVal;
 
   @NotNull
@@ -43,9 +47,20 @@ public class TestModel {
 
   @TestConstraint(groups = TestGroup.class)
   private String testConstraint;
-  
+
   @Valid
   private TestModel child;
+
+  @NotNull
+  @Valid
+  private List<TestModel> list = new ArrayList<TestModel>();
+
+  @NotNull
+  @Valid
+  private HashSet<TestModel> set = new HashSet<TestModel>();
+  
+  // Serves as a regression test for ERRAI-763
+  private HashSet<TestModel> nullList;
 
   public int getNumVal() {
     return numVal;
@@ -77,4 +92,37 @@ public class TestModel {
   public void setChild(TestModel child) {
     this.child = child;
   }
+
+  public List<TestModel> getList() {
+    return list;
+  }
+
+  public void setList(List<TestModel> list) {
+    this.list = list;
+  }
+
+  public void addToList(TestModel l) {
+    this.list.add(l);
+  }
+  
+  public HashSet<TestModel> getSet() {
+    return set;
+  }
+
+  public void setSet(HashSet<TestModel> set) {
+    this.set = set;
+  }
+  
+  public void addToSet(TestModel l) {
+    this.set.add(l);
+  }
+  
+  public HashSet<TestModel> getNullList() {
+    return nullList;
+  }
+
+  public void setNullList(HashSet<TestModel> nullList) {
+    this.nullList = nullList;
+  }
+
 }

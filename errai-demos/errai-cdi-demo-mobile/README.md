@@ -1,10 +1,6 @@
 Errai Multi-Module Demo
 =======================
 
-Note: this demo application is not done yet! See the TODO section below for an outline of
-what remains to be done.
-
-
 This demo app shows how to use the following technologies together:
 
  * ErraiCDI

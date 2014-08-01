@@ -154,4 +154,24 @@ public interface Instance<T> extends Iterable<T>, Provider<T>
     */
    public boolean isAmbiguous();
 
+    /**
+     * <p>
+     * When called, the container destroys the instance if the active context object for the scope
+     * type of the bean supports destroying bean instances. All normal scoped built-in contexts support destroying bean
+     * instances.
+     * </p>
+     *
+     * <p>
+     * The instance passed should either be a dependent scoped bean instance, or the client proxy for a normal scoped bean
+     * instance.
+     * </p>
+     *
+     *
+     * @since 1.1
+     * @param instance the instance to destroy
+     * @throws UnsupportedOperationException if the active context object for the scope type of the bean does not support
+     *         destroying bean instances
+     */
+    public void destroy(T instance);
+
 }

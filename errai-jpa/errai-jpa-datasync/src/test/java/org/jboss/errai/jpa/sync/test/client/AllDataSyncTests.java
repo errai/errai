@@ -34,7 +34,8 @@ import org.junit.runners.Suite;
   EntityComparatorTest.class,
   ErraiJpaAttributeAccessorTest.class,
   JavaReflectionAttributeAccessorTest.class,
-  ClientSyncManagerIntegrationTest.class})
+  ClientSyncManagerIntegrationTest.class,
+  SyncableDataSetTest.class})
 public class AllDataSyncTests {
 
 }

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -40,6 +40,7 @@
       <artifactId>errai-data-binding</artifactId>
     </dependency>
 
+    <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -78,7 +79,7 @@
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
               <additionalClasspathElements>
@@ -88,8 +89,7 @@
               </additionalClasspathElements>
               <useManifestOnlyJar>false</useManifestOnlyJar>
               <forkMode>pertest</forkMode>
-              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true
-                -Derrai.codegen.permissive=false</argLine>
+              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false</argLine>
 
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->

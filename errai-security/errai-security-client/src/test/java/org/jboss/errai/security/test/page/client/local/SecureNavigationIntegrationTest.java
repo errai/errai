@@ -16,11 +16,8 @@
  */
 package org.jboss.errai.security.test.page.client.local;
 
-import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.enterprise.inject.Default;
 
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -29,23 +26,27 @@ import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.client.local.TestLoginPage;
 import org.jboss.errai.security.client.local.TestPage;
 import org.jboss.errai.security.client.local.TestSecurityErrorPage;
+import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.test.page.client.res.RequireAuthenticationPage;
+import org.jboss.errai.security.test.page.client.res.RequiresProvidedRolesPage;
 import org.jboss.errai.security.test.page.client.res.RequiresRoleBasedPage;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
-import org.junit.Test;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.user.client.Timer;
 
 public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
   private SyncBeanManager bm;
   private ActiveUserCache activeUserCache;
+  private Navigation navigation;
+  private SecurityContext securityContext;
 
   @Override
   public String getModuleName() {
@@ -54,14 +55,15 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   protected void gwtSetUp() throws Exception {
+    disableBus = true;
     super.gwtSetUp();
     bm = IOC.getBeanManager();
-    activeUserCache = bm.lookupBean(ActiveUserCache.class, new Annotation() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return Default.class;
-      }
-    }).getInstance();
+
+    activeUserCache = bm.lookupBean(ActiveUserCache.class).getInstance();
+    securityContext = bm.lookupBean(SecurityContext.class).getInstance();
+    navigation = bm.lookupBean(Navigation.class).getInstance();
+
+    activeUserCache.setUser(User.ANONYMOUS);
 
     InitVotes.registerOneTimeInitCallback(new Runnable() {
 
@@ -78,26 +80,22 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
     super.gwtTearDown();
   }
 
-  @Test
   public void testRequireAuthenticationNotLoggedIn() throws Exception {
     runNavTest(new Runnable() {
 
       @Override
       public void run() {
-        final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
-
         // Precondition
-        assertEquals(TestPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestPage.class, navigation.getCurrentPage().contentType());
 
-        nav.goTo("RequireAuthenticationPage");
+        navigation.goTo("RequireAuthenticationPage");
 
-        assertEquals(TestLoginPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestLoginPage.class, navigation.getCurrentPage().contentType());
         finishTest();
       }
     });
   }
 
-  @Test
   public void testRequireAuthenticationLoggedIn() throws Exception {
     runNavTest(new Runnable() {
 
@@ -107,39 +105,33 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
         // Cache a logged in user.
         activeUserCache.setUser(user);
 
-        final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
-
         // Precondition
-        assertEquals(TestPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestPage.class, navigation.getCurrentPage().contentType());
 
-        nav.goTo("RequireAuthenticationPage");
+        navigation.goTo("RequireAuthenticationPage");
 
-        assertEquals(RequireAuthenticationPage.class, nav.getCurrentPage().contentType());
+        assertEquals(RequireAuthenticationPage.class, navigation.getCurrentPage().contentType());
         finishTest();
       }
     });
   }
 
-  @Test
   public void testRequireRoleNotLoggedIn() throws Exception {
     runNavTest(new Runnable() {
 
       @Override
       public void run() {
-        final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
-
         // Precondition
-        assertEquals(TestPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestPage.class, navigation.getCurrentPage().contentType());
 
-        nav.goTo("RequiresRoleBasedPage");
+        navigation.goTo("RequiresRoleBasedPage");
 
-        assertEquals(TestLoginPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestLoginPage.class, navigation.getCurrentPage().contentType());
         finishTest();
       }
     });
   }
 
-  @Test
   public void testRequireRoleUnauthorized() throws Exception {
     runNavTest(new Runnable() {
 
@@ -152,20 +144,17 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
         // Cache a logged in user.
         activeUserCache.setUser(user);
 
-        final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
-
         // Precondition
-        assertEquals(TestPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestPage.class, navigation.getCurrentPage().contentType());
 
-        nav.goTo("RequiresRoleBasedPage");
+        navigation.goTo("RequiresRoleBasedPage");
 
-        assertEquals(TestSecurityErrorPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestSecurityErrorPage.class, navigation.getCurrentPage().contentType());
         finishTest();
       }
     });
   }
 
-  @Test
   public void testRequireRoleAuthorized() throws Exception {
     runNavTest(new Runnable() {
 
@@ -179,14 +168,52 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
         // Cache a logged in user.
         activeUserCache.setUser(user);
 
-        final Navigation nav = bm.lookupBean(Navigation.class).getInstance();
-
         // Precondition
-        assertEquals(TestPage.class, nav.getCurrentPage().contentType());
+        assertEquals(TestPage.class, navigation.getCurrentPage().contentType());
 
-        nav.goTo("RequiresRoleBasedPage");
+        navigation.goTo("RequiresRoleBasedPage");
 
-        assertEquals(RequiresRoleBasedPage.class, nav.getCurrentPage().contentType());
+        assertEquals(RequiresRoleBasedPage.class, navigation.getCurrentPage().contentType());
+        finishTest();
+      }
+    });
+  }
+
+  public void testSecurityContextReturnsToDeniedPageAfterLogin() throws Exception {
+    runNavTest(new Runnable() {
+
+      @Override
+      public void run() {
+        final Set<Role> roles = new HashSet<Role>();
+        roles.add(new RoleImpl("user"));
+        final User user = new UserImpl("testuser", roles);
+
+        // Setup
+        assertEquals(TestPage.class, navigation.getCurrentPage().contentType());
+        navigation.goTo("RequireAuthenticationPage");
+        assertEquals(TestLoginPage.class, navigation.getCurrentPage().contentType());
+
+        // Now login and try to go to the page we were denied from.
+        activeUserCache.setUser(user);
+        securityContext.navigateBackOrHome();
+
+        assertEquals(RequireAuthenticationPage.class, navigation.getCurrentPage().contentType());
+        finishTest();
+      }
+    });
+  }
+
+  public void testRolesFromProviderAreRequired() throws Exception {
+    runNavTest(new Runnable() {
+
+      @Override
+      public void run() {
+        final User user = new UserImpl("testuser");
+        activeUserCache.setUser(user);
+
+        navigation.goTo(RequiresProvidedRolesPage.class, ImmutableMultimap.<String, String>of());
+
+        assertEquals(TestSecurityErrorPage.class, navigation.getCurrentPage().contentType());
         finishTest();
       }
     });

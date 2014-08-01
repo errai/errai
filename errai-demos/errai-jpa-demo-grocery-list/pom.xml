@@ -5,7 +5,7 @@
   <name>Errai::JPA::Demos::GroceryList</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jpa-demo-grocery-list</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -61,7 +61,7 @@
     <cdiapi.version>1.0-SP4</cdiapi.version>
     <servletapi.version>1.0.0.Final</servletapi.version>
     <jbosslogging.version>3.1.0.GA</jbosslogging.version>
-    <gwt.version>2.5.1</gwt.version>
+    <gwt.version>2.6.1</gwt.version>
     <uel.impl.version>2.1.2-b04</uel.impl.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
@@ -92,12 +92,14 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-navigation</artifactId>
+      <scope>provided</scope>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cordova</artifactId>
+      <scope>provided</scope>
       <version>${project.version}</version>
     </dependency>
 
@@ -357,21 +359,7 @@
           <version>${project.version}</version>
           <scope>provided</scope>
         </dependency>
-
-        <dependency>
-          <groupId>org.jboss.weld</groupId>
-          <artifactId>weld-api</artifactId>
-          <version>1.1.Final</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.weld</groupId>
-          <artifactId>weld-spi</artifactId>
-          <version>1.1.Final</version>
-          <scope>provided</scope>
-        </dependency>
-
+        
         <dependency>
           <groupId>javax.inject</groupId>
           <artifactId>javax.inject</artifactId>
@@ -506,36 +494,6 @@
             <directory>src/test/resources</directory>
           </testResource>
         </testResources>
-        <plugins>
-          <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.5</version>
-            <configuration>
-              <skipTests>false</skipTests>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/
-                                </additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useManifestOnlyJar>false</useManifestOnlyJar>
-              <forkMode>pertest</forkMode>
-              <!-- Note: to run the test in a real browser, set -DargLine='-Dgwt.args="-runStyle Manual:1"' -->
-              <argLine>-Xmx1500m ${argLine}</argLine>
-              <systemProperties>
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>errai.hosted_mode_testing</name>
-                  <value>true</value>
-                </property>
-                <property>
-                  <name>gwt.args</name>
-                  <value>-war src/main/webapp</value>
-                </property>
-              </systemProperties>
-            </configuration>
-          </plugin>
-        </plugins>
       </build>
 
       <dependencies>
@@ -722,8 +680,8 @@
         <configuration>
           <strict>false</strict>
           <logLevel>INFO</logLevel>
-          <runTarget>index.html</runTarget>
-          <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:CompileThreshold=100 -XX:+UseNUMA</extraJvmArgs>
+          <runTarget>/</runTarget>
+          <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:+UseNUMA</extraJvmArgs>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>                
         </configuration>

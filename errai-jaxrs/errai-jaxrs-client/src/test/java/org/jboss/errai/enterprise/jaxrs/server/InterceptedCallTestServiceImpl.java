@@ -18,6 +18,8 @@ package org.jboss.errai.enterprise.jaxrs.server;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedCallTestService;
 
 /**
@@ -61,5 +63,15 @@ public class InterceptedCallTestServiceImpl implements InterceptedCallTestServic
   @Override
   public String interceptedGetWithResponseCallback(String result) {
     return result;
+  }
+
+  @Override
+  public Response interceptedGetWithResponseAndErrorCallback(String result) {
+    return Response.ok(result).build();
+  }
+
+  @Override
+  public String interceptedGetForClientError(String result) {
+    return "request should not have reached server";
   }
 }

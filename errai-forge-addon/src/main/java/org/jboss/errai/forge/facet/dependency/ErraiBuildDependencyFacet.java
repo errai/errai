@@ -16,17 +16,14 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.ErraiJboss;
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.ErraiTools;
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.GwtUser;
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.JUnit;
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.JbossSupport;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
 
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.errai.forge.facet.base.DependencyManagementFacet;
+import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
@@ -53,7 +50,7 @@ public class ErraiBuildDependencyFacet extends AbstractDependencyFacet {
       // Set main profile to be active by default
       final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
       final Model pom = coreFacet.getModel();
-      Profile profile = getProfile(MAIN_PROFILE, pom.getProfiles());
+      Profile profile = MavenModelUtil.getProfileById(MAIN_PROFILE, pom.getProfiles());
       if (profile == null) {
         profile = new Profile();
         profile.setId(MAIN_PROFILE);

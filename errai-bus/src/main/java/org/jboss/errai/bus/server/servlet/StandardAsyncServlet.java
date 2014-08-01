@@ -46,49 +46,47 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   private static final long serialVersionUID = 1L;
 
   @Override
-  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException,
-      IOException {
-    
+  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
     session.setAttribute("NoSSE", Boolean.TRUE);
     
     final MessageQueue queue = service.getBus().getQueue(session);
-
     if (queue == null) {
       switch (getConnectionPhase(request)) {
         case CONNECTING:
         case DISCONNECTING:
           return;
       }
-      sendDisconnectDueToSessionExpiry(response);
+      try {
+        sendDisconnectDueToSessionExpiry(response);
+      } 
+      catch (IOException ioe) {
+        log.debug("Failed to inform client that session expired", ioe);
+      }
       return;
     }
-
     queue.heartBeat();
 
-    final OutputStreamWriteAdapter writer;
+    
     final AsyncContext asyncContext = request.startAsync();
     asyncContext.setTimeout(60000);
     queue.setTimeout(65000);
-    writer = new OutputStreamWriteAdapter(asyncContext.getResponse().getOutputStream());
-
+    
     asyncContext.addListener(new AsyncListener() {
         @Override
         public void onComplete(final AsyncEvent event) throws IOException {
-          synchronized (queue.getActivationLock()) {
-            queue.setActivationCallback(null);
-            asyncContext.complete();
-          }
+          clearActivationCallback(queue);
         }
 
         @Override
         public void onTimeout(final AsyncEvent event) throws IOException {
-          onComplete(event);
+          clearActivationCallback(queue);
+          asyncContext.complete();
         }
 
         @Override
         public void onError(final AsyncEvent event) throws IOException {
-          queue.setActivationCallback(null);
+          clearActivationCallback(queue);
         }
 
         @Override
@@ -98,8 +96,13 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
     synchronized (queue.getActivationLock()) {
       if (queue.messagesWaiting()) {
-        queue.poll(writer);
-        asyncContext.complete();
+        try {
+          queue.poll(new OutputStreamWriteAdapter(asyncContext.getResponse().getOutputStream()));
+          asyncContext.complete();
+        } 
+        catch(IOException ioe) {
+          log.debug("Problem when polling for new messages", ioe);       
+        }
         return;
       }
 
@@ -107,15 +110,12 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         @Override
         public void activate(final MessageQueue queue) {
           try {
-            queue.poll(writer);
+            queue.poll(new OutputStreamWriteAdapter(asyncContext.getResponse().getOutputStream()));
             queue.setActivationCallback(null);
-
             queue.heartBeat();
-            writer.flush();
           }
           catch (IOException e) {
             log.debug("Closing queue with id: " + queue.getSession().getSessionId() + " due to IOException", e);
-            
           }
           catch (final Throwable t) {
             try {
@@ -130,12 +130,11 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
           }
         }
       });
-      writer.flush();
     }
   }
 
   @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
     session.setAttribute("NoSSE", Boolean.TRUE);
     try {
@@ -157,14 +156,28 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         }
       }
     }
+    catch (final IOException ioe) {
+      log.debug("Problem when storing message", ioe);
+    }
     catch (Exception e) {
       final String message = e.getMessage();
       if (message == null) {
-        e.printStackTrace();
+        log.debug("Problem when storing message", e);
       }
       else if (!message.contains("expired")) {
-        writeExceptionToOutputStream(response, e);
+        try {
+          writeExceptionToOutputStream(response, e);
+        } 
+        catch (IOException ioe) {
+          log.debug("Couldn't write exception to output stream", ioe);
+        }
       }
+    }
+  }
+  
+  private void clearActivationCallback(final MessageQueue queue) {
+    synchronized (queue.getActivationLock()) {
+      queue.setActivationCallback(null);
     }
   }
 }

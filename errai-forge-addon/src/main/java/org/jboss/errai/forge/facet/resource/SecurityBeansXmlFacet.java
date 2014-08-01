@@ -19,53 +19,53 @@ package org.jboss.errai.forge.facet.resource;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
-import org.w3c.dom.Document;
+import org.jboss.errai.forge.xml.ElementFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class SecurityBeansXmlFacet extends AbstractXmlResourceFacet {
 
   @Override
-  protected Map<XPathExpression, Node> getRemovalMap(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Node> getRemovalMap(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException,
           XPathExpressionException {
     return new HashMap<XPathExpression, Node>(0);
   }
 
   @Override
-  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Collection<Node>> getElementsToInsert(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException, XPathExpressionException {
-    final XPathExpression interceptorsPath = xPathFactory.newXPath().compile("/beans/interceptors");
-    final Node interceptors = (Node) interceptorsPath.evaluate(doc, XPathConstants.NODE);
-    if (interceptors == null) {
-      doc.getFirstChild().insertBefore(doc.createElement("interceptors"), null);
-    }
+    final Map<XPathExpression, Collection<Node>> retVal = new LinkedHashMap<XPathExpression, Collection<Node>>();
+    
+    final Element interceptors = elemFactory.createElement("interceptors");
 
-    final Map<XPathExpression, Collection<Node>> retVal = new HashMap<XPathExpression, Collection<Node>>();
-    final Element userInterceptor = doc.createElement("class");
+    final Element userInterceptor = elemFactory.createElement("class");
     userInterceptor.setTextContent("org.jboss.errai.security.server.SecurityUserInterceptor");
-    final Element roleInterceptor = doc.createElement("class");
+    final Element roleInterceptor = elemFactory.createElement("class");
     roleInterceptor.setTextContent("org.jboss.errai.security.server.ServerSecurityRoleInterceptor");
 
-    retVal.put(xPath.compile("/beans/interceptors"), Arrays.asList(new Node[] {
+    retVal.put(xPath.compile("/beans"), Arrays.<Node>asList(
+        interceptors
+    ));
+    retVal.put(xPath.compile("/beans/interceptors"), Arrays.<Node>asList(
         userInterceptor,
         roleInterceptor
-    }));
+    ));
 
     return retVal;
   }
 
   @Override
-  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final Document doc)
+  protected Map<XPathExpression, Node> getReplacements(final XPath xPath, final ElementFactory elemFactory)
           throws ParserConfigurationException,
           XPathExpressionException {
     return new HashMap<XPathExpression, Node>(0);

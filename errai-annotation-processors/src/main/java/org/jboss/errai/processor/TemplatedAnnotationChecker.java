@@ -48,7 +48,6 @@ public class TemplatedAnnotationChecker extends AbstractProcessor {
         try {
           FileObject resource = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH, packageElement.getQualifiedName(), templateRef);
           CharSequence charContent = resource.getCharContent(true);
-          System.out.println("Contents of template: " + charContent);
         } catch (IllegalArgumentException e) {
           // unfortunately, Eclipse just throws IAE when we try to read files from CLASS_PATH
           // so the best we can do is ignore this error and skip validating the template reference
@@ -67,13 +66,27 @@ public class TemplatedAnnotationChecker extends AbstractProcessor {
    * Resolves the filename that the given class's {@code @Templated} annotation
    * points to, taking all default behaviour into account.
    * 
-   * @param target a class that bears the {@code Templated} annotation.
+   * @param target
+   *          a class that bears the {@code Templated} annotation.
    */
   private String getReferencedTemplate(Element target) {
     String templateRef = "";
-    AnnotationValue paramValue = getAnnotationParamValueWithoutDefaults(target, TypeNames.TEMPLATED, "value");
+    AnnotationValue paramValue = getAnnotationParamValueWithoutDefaults(target,
+            TypeNames.TEMPLATED, "value");
     if (paramValue != null) {
-      templateRef = paramValue.getValue().toString();
+      if (paramValue.getValue().toString().startsWith("#")) {
+        // use simple name
+      }
+      else if (paramValue.getValue().toString().contains("#")) {
+        String[] split = paramValue.getValue().toString().split("#");
+        if (split != null && split.length > 0) {
+          // use html part
+          templateRef = split[0];
+        }
+      }
+      else {
+        templateRef = paramValue.getValue().toString();
+      }
     }
     if (templateRef.equals("")) {
       templateRef = target.getSimpleName() + ".html";

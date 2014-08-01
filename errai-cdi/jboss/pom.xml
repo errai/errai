@@ -6,15 +6,11 @@
   <artifactId>errai-cdi-jboss</artifactId>
   <packaging>jar</packaging>
 
-  <properties>
-    <jboss.version>8.0.0.Final</jboss.version>
-  </properties>
-
   <!-- Parent -->
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>cdi-integration-parent</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -22,15 +18,13 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-client-local-class-hider</artifactId>
-      <version>${parent.version}</version>
+      <artifactId>errai-client-local-class-hider</artifactId>      
     </dependency>
 
     <!-- JBoss -->
     <dependency>
       <groupId>org.wildfly</groupId>
-      <artifactId>wildfly-cli</artifactId>
-      <version>${jboss.version}</version>
+      <artifactId>wildfly-cli</artifactId>      
       <exclusions>
         <exclusion>
           <groupId>org.wildfly</groupId>
@@ -41,8 +35,7 @@
 
     <dependency>
       <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-dist</artifactId>
-      <version>7.1.1.Final</version>
+      <artifactId>jboss-as-dist</artifactId>      
       <type>zip</type>
     </dependency>
 
@@ -58,26 +51,6 @@
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
     </dependency>
-
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.jboss.remoting</groupId>
-        <artifactId>jboss-remoting</artifactId>
-        <version>4.0.0.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.xnio</groupId>
-        <artifactId>xnio-api</artifactId>
-        <version>3.2.0.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.xnio</groupId>
-        <artifactId>xnio-nio</artifactId>
-        <version>3.2.0.Final</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>

@@ -42,10 +42,16 @@ public class BeanValidator extends AbstractGwtValidator {
 
   public BeanValidator(AbstractGwtValidator validator) {
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    this.validator = validator;
-    this.validator.init(factory.getConstraintValidatorFactory(), 
-        factory.getMessageInterpolator(), 
-        factory.getTraversableResolver());
+
+    if (validator != null) {
+      this.validator = validator;
+      this.validator.init(factory.getConstraintValidatorFactory(), 
+              factory.getMessageInterpolator(), 
+              factory.getTraversableResolver());
+    }
+    else {
+      this.validator = new NoopValidator();
+    }
   }
 
   @Override

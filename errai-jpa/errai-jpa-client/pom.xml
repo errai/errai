@@ -7,7 +7,7 @@
   <parent>
     <artifactId>errai-jpa-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>errai-jpa-client</artifactId>
@@ -43,6 +43,7 @@
       <artifactId>errai-data-binding</artifactId>
     </dependency>
 
+    <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -64,7 +65,6 @@
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -92,7 +92,7 @@
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
               <forkMode>always</forkMode>

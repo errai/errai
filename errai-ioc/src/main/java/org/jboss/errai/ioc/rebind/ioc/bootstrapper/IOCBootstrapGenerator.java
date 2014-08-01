@@ -24,7 +24,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,8 +111,7 @@ public class IOCBootstrapGenerator {
   private final TreeLogger logger;
   private static final Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
-  // production mode cache only -- used so work is only done in one permutation
-  private static volatile String _bootstrapperCache;
+  private static Map<String, MetaClass> cachedPseudoDependentScoped;
   private static final Object generatorLock = new Object();
 
   public IOCBootstrapGenerator(final GeneratorContext context,
@@ -129,22 +128,21 @@ public class IOCBootstrapGenerator {
     synchronized (generatorLock) {
       EnvUtil.recordEnvironmentState();
 
-      if (_bootstrapperCache != null && EnvUtil.isProdMode()) {
-        return _bootstrapperCache;
-      }
-
       final String gen;
 
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
 
+      log.debug("setting up injection context...");
+      final long injectionStart = System.currentTimeMillis();
       final InjectionContext injectionContext = setupContexts(packageName, className);
+      log.debug("injection context setup in " + (System.currentTimeMillis() - injectionStart) + "ms");
 
       gen = generateBootstrappingClassSource(injectionContext);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
           + "(" + injectionContext.getAllKnownInjectionTypes().size() + " beans processed)");
 
-      return _bootstrapperCache = gen;
+      return gen;
     }
   }
 
@@ -267,7 +265,10 @@ public class IOCBootstrapGenerator {
 
     final IOCConfigProcessor processorFactory = new IOCConfigProcessor(injectionContext);
 
+    log.debug("Processing IOC extensions...");
+    long start = System.currentTimeMillis();
     processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
+    log.debug("Extensions processed in " + (System.currentTimeMillis() - start) + "ms");
 
     final IOCProcessingContext processingContext = injectionContext.getProcessingContext();
     final ClassStructureBuilder<?> classBuilder = processingContext.getBootstrapBuilder();
@@ -288,9 +289,15 @@ public class IOCBootstrapGenerator {
     @SuppressWarnings("unchecked")
     final BlockBuilder builder = new BlockBuilderImpl(classBuilder.getClassDefinition().getInstanceInitializer(), null);
 
+    log.debug("Running before tasks...");
+    start = System.currentTimeMillis();
     _doRunnableTasks(beforeTasks, builder);
+    log.debug("Tasks run in " + (System.currentTimeMillis() - start) + "ms");
 
+    log.debug("Process dependency graph...");
+    start = System.currentTimeMillis();
     processorFactory.process(processingContext);
+    log.debug("Processed dependency graph in " + (System.currentTimeMillis() - start) + "ms");
 
     int i = 0;
     int beanDeclareMethodCount = 0;
@@ -328,7 +335,10 @@ public class IOCBootstrapGenerator {
       PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs ? "jsni" : "reflection", classBuilder, m);
     }
 
+    log.debug("Running after tasks...");
+    start = System.currentTimeMillis();
     _doRunnableTasks(afterTasks, blockBuilder);
+    log.debug("Tasks run in " + (System.currentTimeMillis() - start) + "ms");
 
     blockBuilder.append(loadVariable(processingContext.getContextVariableReference()).returnValue());
 
@@ -478,43 +488,92 @@ public class IOCBootstrapGenerator {
   }
 
   private static void computeDependentScope(final GeneratorContext context, final InjectionContext injectionContext) {
+    log.debug("computing dependent scope...");
+    final long start = System.currentTimeMillis();
 
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
 
-    final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class, context));
-    knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class, context));
-
     if (context != null) {
-      TypeScan:
-      for (final MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
-        if (translatablePackages.contains(clazz.getPackageName())) {
+      final Collection<MetaClass> allNewOrUpdatedClasses = MetaClassFactory.getAllNewOrUpdatedClasses();
+      final Set<String> removedClasses = MetaClassFactory.getAllRemovedClasses();
 
-          for (final Annotation a : clazz.getAnnotations()) {
-            final Class<? extends Annotation> clazz1 = a.annotationType();
+      log.debug(allNewOrUpdatedClasses.size() + " new or updated classes in the MetaClassFactory");
+      log.trace("New or updated classes : " + allNewOrUpdatedClasses);
 
-            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)
-                || clazz1.equals(EnabledByProperty.class)) {
-              continue TypeScan;
-            }
-          }
+      log.debug(removedClasses.size() + " removed classes in the MetaClassFactory");
+      log.trace("Removed class names : " + removedClasses);
 
-          if (!clazz.isDefaultInstantiable()) {
-            boolean hasInjectableConstructor = false;
-            for (final MetaConstructor c : clazz.getConstructors()) {
-              if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
-                hasInjectableConstructor = true;
-                break;
-              }
-            }
+      final Map<String, MetaClass> newPsuedoDependentScoped = getNewPseudoDependentScopedClasses(injectionContext,
+              translatablePackages, allNewOrUpdatedClasses);
 
-            if (!hasInjectableConstructor) {
-              continue;
-            }
-          }
+      updateCachedPseudoDepdentScopedClasses(allNewOrUpdatedClasses, removedClasses, newPsuedoDependentScoped);
+      addPseudoDependentScopedClasses(injectionContext);
+    }
 
-          injectionContext.addPseudoScopeForType(clazz);
+    log.debug("computed dependent scope in " + (System.currentTimeMillis() - start) + "ms");
+  }
+
+  private static Map<String, MetaClass> getNewPseudoDependentScopedClasses(final InjectionContext injectionContext,
+          final Set<String> translatablePackages, final Collection<MetaClass> allNewOrUpdatedClasses) {
+    final Map<String, MetaClass> newPsuedoDependentScoped = new HashMap<String, MetaClass>();
+
+    for (final MetaClass clazz : allNewOrUpdatedClasses) {
+      if (isPseudoDependentScoped(injectionContext, translatablePackages, clazz))
+        newPsuedoDependentScoped.put(clazz.getFullyQualifiedName(), clazz);
+    }
+    return newPsuedoDependentScoped;
+  }
+
+  private static void addPseudoDependentScopedClasses(final InjectionContext injectionContext) {
+    for (final MetaClass clazz : cachedPseudoDependentScoped.values()) {
+      injectionContext.addPseudoScopeForType(clazz);
+    }
+  }
+
+  private static void updateCachedPseudoDepdentScopedClasses(final Collection<MetaClass> allNewOrUpdatedClasses,
+          final Set<String> removedClasses, final Map<String, MetaClass> newPsuedoDependentScoped) {
+    if (cachedPseudoDependentScoped == null) {
+      cachedPseudoDependentScoped = newPsuedoDependentScoped;
+    }
+    else {
+      for (final MetaClass clazz : allNewOrUpdatedClasses) {
+        cachedPseudoDependentScoped.remove(clazz.getFullyQualifiedName());
+      }
+      cachedPseudoDependentScoped.putAll(newPsuedoDependentScoped);
+      cachedPseudoDependentScoped.keySet().removeAll(removedClasses);
+    }
+  }
+
+  private static boolean isPseudoDependentScoped(final InjectionContext injectionContext, final Set<String> translatablePackages,
+          final MetaClass clazz) {
+    if (translatablePackages.contains(clazz.getPackageName())) {
+
+      for (final Annotation a : clazz.getAnnotations()) {
+        final Class<? extends Annotation> clazz1 = a.annotationType();
+
+        if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)
+            || clazz1.equals(EnabledByProperty.class)) {
+          return false;
         }
       }
+
+      if (!clazz.isDefaultInstantiable()) {
+        boolean hasInjectableConstructor = false;
+        for (final MetaConstructor c : clazz.getConstructors()) {
+          if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
+            hasInjectableConstructor = true;
+            break;
+          }
+        }
+
+        if (!hasInjectableConstructor) {
+          return false;
+        }
+      }
+
+      return true;
     }
+
+    return false;
   }
 }

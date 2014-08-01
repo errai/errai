@@ -68,13 +68,13 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
   }
-  
+
   @Test
   public void testBindingSpecificConverterAndNullValues() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
-        return (widgetValue == null) ? -1 : 0;
+        return ("".equals(widgetValue)) ? -1 : 0;
       }
 
       @Override
@@ -85,6 +85,9 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
 
     TextBox textBox = new TextBox();
     TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "age", converter).getModel();
+
+    // Set initial non-empty value so that value change handlers are called on the next call.
+    textBox.setValue("1337", false);
 
     textBox.setValue(null, true);
     assertEquals("Model not properly updated using custom converter", Integer.valueOf(-1), model.getAge());
@@ -175,7 +178,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
-        return (widgetValue == null) ? -1 : 0;
+        return ("".equals(widgetValue)) ? -1 : 0;
       }
 
       @Override
@@ -188,6 +191,9 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
 
     TextBox textBox = new TextBox();
     TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "age").getModel();
+
+    // Set initial non-empty value so that value change handlers are called on the next call.
+    textBox.setValue("1337", false);
 
     textBox.setValue(null, true);
     assertEquals("Model not properly updated using global default converter", Integer.valueOf(-1), model.getAge());

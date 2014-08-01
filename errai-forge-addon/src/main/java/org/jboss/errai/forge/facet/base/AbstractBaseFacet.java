@@ -17,7 +17,6 @@
 package org.jboss.errai.forge.facet.base;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -26,7 +25,8 @@ import org.jboss.errai.forge.constant.ArtifactVault;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.util.MavenConverter;
-import org.jboss.errai.forge.util.VersionOracle;
+import org.jboss.errai.forge.util.MavenModelUtil;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.AbstractFacet;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
@@ -50,25 +50,6 @@ public abstract class AbstractBaseFacet extends AbstractFacet<Project> implement
   }
 
   /**
-   * Get a Maven {@link Profile} by name from a {@link List}.
-   * 
-   * @param name
-   *          The name of the {@link Profile} to search for.
-   * @param profiles
-   *          A {@link List} of {@link Profile} objects to search.
-   * @return The {@link Profile} in the given {@link List} matching the provided
-   *         name, or {@literal null} if none was found.
-   */
-  protected static Profile getProfile(final String name, final List<Profile> profiles) {
-    for (final Profile profile : profiles) {
-      if (profile.getId().equals(name))
-        return profile;
-    }
-
-    return null;
-  }
-
-  /**
    * Add dependencies to a Maven profile.
    * 
    * @param name
@@ -77,17 +58,17 @@ public abstract class AbstractBaseFacet extends AbstractFacet<Project> implement
    * @param deps
    *          Dependencies to be added. Note that the versions of these
    *          dependencies will be ignored, and instead provided by the
-   *          {@link VersionOracle}.
-   * @param versionOracle
+   *          {@link VersionFacet}.
+   * @param versionFacet
    *          Used to determine the version of dependencies.
    * @return True iff the dependencies were successfully added.
    */
   protected boolean addDependenciesToProfile(final String name, final Collection<DependencyBuilder> deps,
-          final VersionOracle versionOracle) {
+          final VersionFacet versionFacet) {
     final MavenFacet coreFacet = getProject().getFacet(MavenFacet.class);
     final Model pom = coreFacet.getModel();
 
-    Profile profile = getProfile(name, pom.getProfiles());
+    Profile profile = MavenModelUtil.getProfileById(name, pom.getProfiles());
 
     if (profile == null) {
       profile = new Profile();
@@ -97,12 +78,12 @@ public abstract class AbstractBaseFacet extends AbstractFacet<Project> implement
 
     for (DependencyBuilder dep : deps) {
       if (!hasDependency(profile, dep)) {
-        if (!versionOracle.isManaged(dep)) {
+        if (!versionFacet.isManaged(dep)) {
           if (dep.getCoordinate().getVersion() == null || dep.getCoordinate().getVersion().equals("")) {
             if (dep.getGroupId().equals(ArtifactVault.ERRAI_GROUP_ID))
               dep.setVersion(Property.ErraiVersion.invoke());
             else
-              dep.setVersion(versionOracle.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
+              dep.setVersion(versionFacet.resolveVersion(dep.getGroupId(), dep.getCoordinate().getArtifactId()));
           }
         }
         profile.addDependency(MavenConverter.convert(dep));

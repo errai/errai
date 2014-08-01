@@ -17,11 +17,36 @@
 package org.jboss.errai.security.shared.api;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.security.shared.api.identity.User;
+
+/**
+ * <p>
+ * Represents a category this user belongs for the purposes of access control. This can also be
+ * thought of as a group or permission.
+ *
+ * <p>
+ * The default implementation of this role in Errai is {@link RoleImpl}, but a different
+ * implementation may be used so long as:
+ * <ul>
+ * <li>It is {@link Portable}.
+ * <li>It overrides the {@link Object#equals(Object)} method (used to compare roles between
+ * {@link User} and a resource).
+ * <li>It overrides the {@link Object#hashCode()} method so that equal roles have the same hash.
+ * (This is important if you use the default {@link User} implementation, which stores roles in a
+ * {@link HashSet}.)
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
 public interface Role extends Serializable {
-  
+
   public static final Role NOBODY = new RoleImpl("NOBODY");
 
+  /**
+   * @return The name of this role. This should <b>not</b> be used for comparing instances.
+   */
   String getName();
 
 }

@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.tests.lifecycle.client.local;
 
-import static org.junit.Assert.*;
-
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
@@ -11,7 +9,6 @@ import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListenerGenerator;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-import org.junit.Test;
 
 public class IOCLifecycleTest extends AbstractErraiIOCTest {
 
@@ -45,7 +42,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     }
   }
 
-  @Test
+  @SuppressWarnings("unchecked")
   public void testSingleLifecycleListenerIsCalled() {
     // Build listener and generator
     final Counter listenerCounter = new Counter();
@@ -81,7 +78,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, callbackCounter.getValue());
   }
 
-  @Test
+  @SuppressWarnings("unchecked")
   public void testLifecycleListenerIsUnsubscribedSameInstance() throws Exception {
     // Build listener and generator
     final Counter listenerCounter = new Counter();
@@ -125,7 +122,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, listenerCounter.getValue());
   }
 
-  @Test
+  @SuppressWarnings("unchecked")
   public void testLifecycleListenerIsUnsubscribedNewInstance() throws Exception {
     // Build listener and generator
     final Counter listenerCounter = new Counter();
@@ -170,7 +167,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, listenerCounter.getValue());
   }
 
-  @Test
+  @SuppressWarnings("unchecked")
   public void testListenersNotSharedAcrossInstances() throws Exception {
     // Build listeners and generator
     final Counter firstCounter = new Counter();
@@ -229,7 +226,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, secondCounter.getValue());
   }
   
-  @Test
+  @SuppressWarnings("unchecked")
   public void testRegisterSingleInstanceListener() throws Exception {
     final Counter listenerCounter = new Counter();
     final Counter callbackCounter = new Counter();
@@ -258,7 +255,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, listenerCounter.getValue());
   }
   
-  @Test
+  @SuppressWarnings("unchecked")
   public void testUnregisterSingleInstanceListener() throws Exception {
     final Counter listenerCounter = new Counter();
     final Counter callbackCounter = new Counter();
@@ -295,7 +292,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     assertEquals(1, listenerCounter.getValue());
   }
 
-  @Test
+  @SuppressWarnings("unchecked")
   public void testUnregisterSingleInstanceListenerTwice() throws Exception {
     final Counter listenerCounter = new Counter();
     final LifecycleListener<Integer> listener = new CountingListener(listenerCounter);
@@ -322,7 +319,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     }
   }
 
-  @Test
+  @SuppressWarnings("unchecked")
   public void testUnregisterSingleInstanceListenerAfterDestruction() throws Exception {
     final Counter listenerCounter = new Counter();
     final LifecycleListener<Integer> listener = new CountingListener(listenerCounter);
@@ -351,7 +348,7 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     }
   }
 
-  @Test
+  @SuppressWarnings("unchecked")
   public void testVeto() throws Exception {
     final Counter listenerCounter = new Counter();
     final Counter callbackCounter = new Counter();
@@ -386,6 +383,33 @@ public class IOCLifecycleTest extends AbstractErraiIOCTest {
     
     assertEquals(1, callbackCounter.getValue());
     assertEquals(1, listenerCounter.getValue());
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testGetInstanceReturnsNullOutsideOfFireAsync() throws Exception {
+    final Integer instance = 1337;
+    final LifecycleListener<Integer> listener = new LifecycleListener<Integer>() {
+      @Override
+      public void observeEvent(final LifecycleEvent<Integer> event) {
+        assertEquals(instance, event.getInstance());
+      }
+      @Override
+      public boolean isObserveableEventType(Class<? extends LifecycleEvent<Integer>> eventType) {
+        return true;
+      }
+    };
+    IOC.registerLifecycleListener(instance, listener);
+
+    final Access<Integer> event = IOC.getBeanManager().lookupBean(Access.class).getInstance();
+
+    assertNull(event.getInstance());
+    event.fireAsync(instance, new LifecycleCallback() {
+      @Override
+      public void callback(final boolean success) {
+        assertNull(event.getInstance());
+      }
+    });
+    assertNull(event.getInstance());
   }
 
   @Override

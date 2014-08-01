@@ -1,9 +1,9 @@
 package org.jboss.errai.ui.rebind.less;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -48,7 +48,7 @@ public class LessConverterTest {
   }
 
   @Test
-  public void shouldTrowException() throws Exception {
+  public void shouldThrowException() throws Exception {
     // given
     final PropertyOracle oracle = noVariablesFoundOracle();
     File lessError = File.createTempFile("error", ".less");
@@ -125,6 +125,20 @@ public class LessConverterTest {
 
     // then
     assertEquals(".class1 {  background-color: white;}.theclass {  color: #808080;}", readFile(css));
+  }
+
+  @Test
+  public void shouldImportMultipleLessFiles() throws Exception {
+    // given
+    final URL resource = getClass().getResource("/multipleImports.less");
+    final PropertyOracle oracle = noVariablesFoundOracle();
+
+    // when
+    final File css = new LessConverter(TreeLogger.NULL, oracle).convert(resource);
+
+    // then
+    assertEquals(".imported1 {  color: #0000ff;}.imported2 {  color: #800080;}.main {  color: #0000ff;  background-color: #800080;}",
+            readFile(css));
   }
 
   private PropertyOracle noVariablesFoundOracle() throws BadPropertyValueException {

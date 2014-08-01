@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai.forge</groupId>
   <artifactId>errai-forge-addon</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
   <name>Errai::Forge Addon</name>
   <properties>
     <forge.api.version>2.5.0.Final</forge.api.version>
@@ -46,6 +46,18 @@
     <system>jira</system>
     <url>http://jira.jboss.org/jira/browse/ERRAI</url>
   </issueManagement>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.forge</groupId>
+        <artifactId>forge-bom</artifactId>
+        <type>pom</type>
+        <scope>import</scope>
+        <version>${forge.api.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -53,61 +65,58 @@
       <artifactId>cdi</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-      <version>${forge.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>configuration</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-      <version>${forge.api.version}</version>
-    </dependency>
+      </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>projects</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-      <version>${forge.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>ui</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-      <version>${forge.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>maven</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-      <version>${forge.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>facets</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-      <version>${forge.api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.forge.addon</groupId>
+      <artifactId>parser-java</artifactId>
+      <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.furnace.test</groupId>
       <artifactId>furnace-test-harness</artifactId>
       <scope>test</scope>
-      <version>${forge.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.furnace.test</groupId>
       <artifactId>arquillian-furnace-classpath</artifactId>
       <scope>test</scope>
-      <version>${forge.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>resources</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-      <version>${forge.api.version}</version>
     </dependency>
   </dependencies>
   <repositories>
@@ -123,8 +132,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -193,6 +202,7 @@
             <version>2.5</version>
             <configuration>
               <skipTests>false</skipTests>
+              <argLine>-XX:MaxPermSize=256m</argLine>
             </configuration>
           </plugin>
         </plugins>

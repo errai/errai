@@ -87,14 +87,14 @@ public class CordovaButtonEventProducer {
       }
     });
 
-    event.getVolumneDownButtonPressedHandler().addVolumneDownButtonPressedHandler(new VolumeDownButtonPressedHandler() {
+    event.getVolumeDownButtonPressedHandler().addVolumeDownButtonPressedHandler(new VolumeDownButtonPressedHandler() {
       @Override
       public void onVolumeDownButtonPressed(VolumeDownButtonPressedEvent event) {
         volumeDownButtonEventSource.fire(new VolumeDownButtonEvent());
       }
     });
 
-    event.getVolumneUpButtonPressedHandler().addVolumneUpButtonPressedHandler(new VolumeUpButtonPressedHandler() {
+    event.getVolumeUpButtonPressedHandler().addVolumeUpButtonPressedHandler(new VolumeUpButtonPressedHandler() {
       @Override
       public void onVolumeUpButtonPressed(VolumeUpButtonPressedEvent event) {
         volumeUpButtonEventSource.fire(new VolumeUpButtonEvent());

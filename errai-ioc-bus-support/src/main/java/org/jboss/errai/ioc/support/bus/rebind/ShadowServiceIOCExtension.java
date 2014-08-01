@@ -111,7 +111,7 @@ public class ShadowServiceIOCExtension extends IOCDecoratorExtension<ShadowServi
                             Stmt.loadVariable("message").invoke("getCommandType"))
             ).append(
                     Stmt.declareVariable("methodParms", List.class, Stmt.loadVariable("message").invoke(
-                            "get", List.class, Variable.get("\"MethodParms\"")))
+                            "get", List.class, Stmt.loadLiteral("MethodParms")))
             );
 
     for (final Method method : intf.getMethods()) {

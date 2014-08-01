@@ -20,8 +20,6 @@ import org.slf4j.LoggerFactory;
  * @author Mike Brock
  */
 public class EventRoutingTable {
-  private static final Logger log = LoggerFactory.getLogger(EventRoutingTable.class);
-
   private static final String CDI_EVENT_ROUTES_ACTIVE = "cdi.event.routesActive";
 
   // type to (set<annotations> to set<session ids>)

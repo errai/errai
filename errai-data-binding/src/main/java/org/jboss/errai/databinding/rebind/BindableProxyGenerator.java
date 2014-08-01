@@ -20,7 +20,10 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Cast;
@@ -32,6 +35,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -66,11 +70,13 @@ public class BindableProxyGenerator {
   private final MetaClass bindable;
   private final String agentField;
   private final TreeLogger logger;
+  private final Set<MetaMethod> proxiedAccessorMethods;
 
   public BindableProxyGenerator(MetaClass bindable, TreeLogger logger) {
     this.bindable = bindable;
     this.agentField = inferSafeAgentFieldName();
     this.logger = logger;
+    this.proxiedAccessorMethods = new HashSet<MetaMethod>();
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -166,6 +172,8 @@ public class BindableProxyGenerator {
       classBuilder.publicMethod(getterMethod.getReturnType(), getterMethod.getName())
           .append(target().invoke(getterMethod.getName()).returnValue())
           .finish();
+      
+      proxiedAccessorMethods.add(getterMethod);
     }
   }
 
@@ -196,7 +204,7 @@ public class BindableProxyGenerator {
       Statement wrappedListProperty = EmptyStatement.INSTANCE;
       if (paramType.isAssignableTo(List.class)) {
         wrappedListProperty = Stmt.loadVariable(property).assignValue(
-            agent().invoke("ensureBoundListIsProxied", property, Stmt.loadVariable(property))); 
+            Cast.to(paramType ,agent().invoke("ensureBoundListIsProxied", property, Stmt.loadVariable(property)))); 
       }
       
       Statement callSetterOnTarget =
@@ -236,6 +244,8 @@ public class BindableProxyGenerator {
               agent().invoke("updateWidgetsAndFireEvent", property, Variable.get(oldValName), Variable.get(property)))
           .append(returnValueOfSetter)
           .finish();
+      
+      proxiedAccessorMethods.add(setterMethod);
     }
   }
 
@@ -248,7 +258,7 @@ public class BindableProxyGenerator {
   private void generateNonAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     for (MetaMethod method : bindable.getMethods()) {
       String methodName = method.getName();
-      if (!methodName.startsWith("get") && !methodName.startsWith("set") && !methodName.startsWith("is")
+      if (!proxiedAccessorMethods.contains(method)  
           && !methodName.equals("hashCode") && !methodName.equals("equals") && !methodName.equals("toString")
           && method.isPublic() && !method.isFinal() && !method.isStatic()) {
 
@@ -304,7 +314,7 @@ public class BindableProxyGenerator {
                 DataBindingUtil.isBindableType(readMethod.getReturnType()),
                 readMethod.getReturnType().isAssignableTo(List.class))
             )
-            );
+        );
       }
     }
     return (block.isEmpty()) ? EmptyStatement.INSTANCE : block;
@@ -315,49 +325,86 @@ public class BindableProxyGenerator {
    */
   private Statement generateDeepUnwrapMethodBody(final String methodName) {
     final String cloneVar = "clone";
-    final BlockStatement stmt = new BlockStatement();
-    stmt.addStatement(Stmt.declareFinalVariable(cloneVar, bindable, Stmt.newObject(bindable)));
+    final BlockStatement block = new BlockStatement();
+    block.addStatement(Stmt.declareFinalVariable(cloneVar, bindable, Stmt.newObject(bindable)));
     
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
       final MetaMethod writeMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
       if (readMethod != null && writeMethod != null) {
-        if (!readMethod.getReturnType().isAnnotationPresent(Bindable.class)
-                && !DataBindingUtil.getConfiguredBindableTypes().contains(readMethod.getReturnType())) {
-          stmt.addStatement(
-              Stmt.loadVariable(cloneVar).invoke(writeMethod,target().invoke(readMethod))
-          );
+        MetaClass type = readMethod.getReturnType();
+        if (!DataBindingUtil.isBindableType(type)) {
+          // If we find a collection we copy its elements and unwrap them if necessary
+          // TODO support map types
+          if (type.isAssignableTo(Collection.class)) {
+            String colVarName = property + "Clone";
+            String elemVarName = property + "Elem";
+            
+            BlockBuilder<ElseBlockBuilder> colBlock = If.isNotNull(Stmt.nestedCall(target().invoke(readMethod)));
+            
+            if ((type.isInterface() || type.isAbstract()) && 
+                    (type.isAssignableTo(List.class) || type.isAssignableTo(Set.class))) {
+              MetaClass clazz = (type.isAssignableTo(Set.class)) 
+                      ? MetaClassFactory.get(HashSet.class) : MetaClassFactory.get(ArrayList.class); 
+                colBlock.append(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(clazz)));
+            }
+            else {
+              if (!type.isInterface() && !type.isAbstract()) {
+                colBlock.append(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(type.getErased())));
+              }
+              else {
+                logger.log(TreeLogger.WARN, "Bean validation on collection " + property + " in class " + bindable + 
+                        " won't work. Change to either List or Set or use a concrete type instead.");
+                continue;
+              }
+            }
+            // Check if the collection element is proxied and unwrap if necessary
+            colBlock.append(
+              Stmt.nestedCall(target().invoke(readMethod)).foreach(elemVarName, Object.class)
+               .append (
+                 If.instanceOf(Refs.get(elemVarName), BindableProxy.class)
+                  .append (Stmt.loadVariable(colVarName)
+                    .invoke("add", Stmt.castTo(BindableProxy.class, Stmt.loadVariable(elemVarName)).invoke(methodName))
+                  )
+               .finish()
+               .else_()
+                 .append(Stmt.loadVariable(colVarName).invoke("add", Refs.get(elemVarName)))
+               .finish()
+             )
+             .finish());
+            
+            colBlock.append(Stmt.loadVariable(cloneVar).invoke(writeMethod, Refs.get(colVarName)));
+            block.addStatement(colBlock.finish());
+          }
+          else {
+            block.addStatement(Stmt.loadVariable(cloneVar).invoke(writeMethod,target().invoke(readMethod)));
+          }
         }
+        // Found a bindable property: Generate code to unwrap for the case the instance is proxied
         else {
           final Statement field = target().invoke(readMethod);
-          stmt.addStatement(
-              If.instanceOf(field, BindableProxy.class)
-                  .append(
-                      Stmt.loadVariable(cloneVar)
-                      .invoke(
-                          writeMethod,
-                          Cast.to(
-                              readMethod.getReturnType(),
-                              Stmt.castTo(BindableProxy.class, Stmt.loadVariable("this").invoke(readMethod)
-                              )
-                              .invoke(methodName)
-                          )
-                      )
-                  )
+          block.addStatement (
+            If.instanceOf(field, BindableProxy.class)
+              .append(Stmt.loadVariable(cloneVar).invoke(writeMethod,
+                        Cast.to (
+                            readMethod.getReturnType(),
+                            Stmt.castTo(BindableProxy.class, Stmt.loadVariable("this").invoke(readMethod))
+                            .invoke(methodName)
+                        )
+                    )
+                )
               .finish()
               .else_()
-                  .append(
-                      Stmt.loadVariable(cloneVar).invoke(writeMethod, target().invoke(readMethod))
-                  )
+                .append(Stmt.loadVariable(cloneVar).invoke(writeMethod, target().invoke(readMethod)))
               .finish()
           );
         }
       }
     }
     
-    stmt.addStatement(Stmt.loadVariable(cloneVar).returnValue());
+    block.addStatement(Stmt.loadVariable(cloneVar).returnValue());
     
-    return stmt;
+    return block;
   }
 
   private String inferSafeAgentFieldName() {

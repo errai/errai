@@ -98,8 +98,8 @@ public abstract class EnvUtil {
     if (_isDevMode != null) return _isDevMode;
 
     for (final StackTraceElement el : new Throwable().getStackTrace()) {
-      if (el.getClassName().startsWith("com.google.gwt.dev.shell.OophmSessionHandler") || 
-          el.getClassName().startsWith("com.google.gwt.dev.codeserver.CodeServer")) {
+      if (el.getClassName().startsWith("com.google.gwt.dev.shell.OophmSessionHandler") ||
+          el.getClassName().startsWith("com.google.gwt.dev.codeserver")) {
         return _isDevMode = Boolean.TRUE;
       }
     }
@@ -171,7 +171,7 @@ public abstract class EnvUtil {
                   explicitTypes.add(s.trim());
                 }
                 catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
+                  throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s, e);
                 }
               }
 
@@ -184,7 +184,7 @@ public abstract class EnvUtil {
                   nonportableClasses.add(MetaClassFactory.get(s.trim()));
                 }
                 catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s);
+                  throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s, e);
                 }
               }
 
@@ -208,7 +208,7 @@ public abstract class EnvUtil {
                   explicitTypes.add(toMapping.getName());
                 }
                 catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
+                  throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
                 }
               }
             }

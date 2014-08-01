@@ -18,6 +18,7 @@ public final class TransitionAnchorFactory<P extends IsWidget> {
 
   private final Navigation navigation;
   private final Class<P> toPageWidgetType;
+  private final HistoryTokenFactory htFactory;
 
   /**
    * Creates a new {@link TransitionAnchorFactory}.
@@ -29,9 +30,10 @@ public final class TransitionAnchorFactory<P extends IsWidget> {
    * @throws NullPointerException
    *           if any of the arguments are null.
    */
-  TransitionAnchorFactory(Navigation navigation, final Class<P> toPage) {
+  TransitionAnchorFactory(Navigation navigation, final Class<P> toPage, HistoryTokenFactory htFactory) {
     this.navigation = Assert.notNull(navigation);
     this.toPageWidgetType = Assert.notNull(toPage);
+    this.htFactory = Assert.notNull(htFactory);
   }
 
   /**
@@ -39,7 +41,7 @@ public final class TransitionAnchorFactory<P extends IsWidget> {
    * {@link PageState}.
    */
   public TransitionAnchor<P> get() {
-    return new TransitionAnchor<P>(navigation, toPageWidgetType);
+    return new TransitionAnchor<P>(navigation, toPageWidgetType, htFactory);
   }
 
   /**
@@ -47,7 +49,7 @@ public final class TransitionAnchorFactory<P extends IsWidget> {
    * @param state
    */
   public TransitionAnchor<P> get(Multimap<String, String> state) {
-    return new TransitionAnchor<P>(navigation, toPageWidgetType, state);
+    return new TransitionAnchor<P>(navigation, toPageWidgetType, state, htFactory);
   }
 
   /**
@@ -60,7 +62,7 @@ public final class TransitionAnchorFactory<P extends IsWidget> {
   public TransitionAnchor<P> get(String stateKey, String stateValue) {
     Multimap<String, String> state = HashMultimap.create();
     state.put(stateKey, stateValue);
-    return new TransitionAnchor<P>(navigation, toPageWidgetType, state);
+    return new TransitionAnchor<P>(navigation, toPageWidgetType, state, htFactory);
   }
 
   /**

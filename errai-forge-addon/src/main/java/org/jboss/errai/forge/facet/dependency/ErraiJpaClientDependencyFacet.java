@@ -17,10 +17,13 @@
 package org.jboss.errai.forge.facet.dependency;
 
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
+@FacetConstraint(VersionFacet.class)
 public class ErraiJpaClientDependencyFacet extends AbstractDependencyFacet {
-  
+
   public ErraiJpaClientDependencyFacet() {
     setCoreDependencies(DependencyBuilder.create(DependencyArtifact.ErraiJpaClient.toString()));
   }

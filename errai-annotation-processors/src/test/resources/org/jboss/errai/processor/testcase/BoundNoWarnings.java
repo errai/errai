@@ -6,6 +6,9 @@ import javax.inject.Inject;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.Model;
 
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -20,6 +23,9 @@ public class BoundNoWarnings {
 
     @Inject @Bound
     private TextBox property2;
+
+    @Bound
+    private Element property3 = DOM.createDiv();
 
     private final Widget constructorInjectedWidget;
     private final TextBox widgetNamedByGetter = new TextBox();

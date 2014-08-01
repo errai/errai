@@ -157,8 +157,8 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals((short) 123, page.getShortThing());
     assertEquals(1234, page.getIntThing());
     assertEquals(12345L, page.getLongThing());
-    assertEquals(1.2f, page.getFloatThing(), 0f);
-    assertEquals(1.23, page.getDoubleThing(), 0.0);
+    assertEquals(1.2f, page.getFloatThing(), 0.0001f);
+    assertEquals(1.23, page.getDoubleThing(), 0.0001);
     assertEquals(true, page.getBoolThing());
 
     assertEquals(Byte.valueOf("12"), page.getBoxedByteThing());
@@ -174,7 +174,7 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(new HashSet<String>(Arrays.asList("0", "1", "0")), page.getStringSet());
     assertEquals(Arrays.asList(0, 1, 0), page.getIntList());
   }
-  
+
   public void testSettingPageStateTriggersIOCLifecycleEvent() throws Exception {
     final PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
     // force fields back to defaults before we start
@@ -197,7 +197,7 @@ public class PageStateTest extends AbstractErraiCDITest {
     };
     IOC.registerLifecycleListener(page, lifecycleListener);
     assertTrue(observedEvents.isEmpty());
-    
+
     ImmutableMultimap<String, String> stateValues = ImmutableMultimap.<String,String>builder()
             .put("stringThing", "string")
             .build();

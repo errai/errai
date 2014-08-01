@@ -6,7 +6,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -92,6 +92,7 @@
       <artifactId>cdi-api</artifactId>
     </dependency>
 
+    <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -126,7 +127,6 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
       </dependencies>
 
       <build>
-
         <testResources>
           <testResource>
             <directory>src/test/java</directory>
@@ -138,20 +138,13 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 
         <plugins>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <skipTests>false</skipTests>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
-
               <!-- This is required because the BasicIOCTest is run in "simulated client" mode, which
          prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
 
-              <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+              <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 
               <systemProperties>
                 <property>
@@ -162,24 +155,8 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                   <name>log4j.output.dir</name>
                   <value>${project.build.directory}</value>
                 </property>
-
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>org.jboss.errai.bus.do_long_poll</name>
-                  <value>false</value>
-                </property>
-
-                <!-- Do not accidently package server test marshallers when
-              building Errai -->
-                <property>
-                  <name>errai.marshalling.server.classOutput.enabled</name>
-                  <value>false</value>
-                </property>
               </systemProperties>
 
-              <includes>
-                <include>**/*Test.java</include>
-              </includes>
               <excludes>
                 <exclude>**/IOCTests.java</exclude>
               </excludes>

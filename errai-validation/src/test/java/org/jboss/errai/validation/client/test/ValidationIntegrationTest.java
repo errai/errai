@@ -78,23 +78,6 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Expected no constraint violations", 0, violations.size());
   }
   
-  public void testValidationOfNestedBindableType() {
-    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    
-    TestModel model = DataBinder.forModel(new TestModel()).bind(new TextBox(), "child.stringVal").getModel();
-    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
-    // model and child model should get validated (see @Valid on child field which caused validation when not null)
-    assertEquals("Expected four constraint violations", 4, violations.size());
-    
-    model.setNumVal(101);
-    violations = validator.validate(model);
-    assertEquals("Expected three constraint violations", 3, violations.size());
-    
-    model.getChild().setStringVal("valid");
-    violations = validator.validate(model);
-    assertEquals("Expected two constraint violations", 2, violations.size());
-  }
-
   public void testValidationOfBindableTypeWithInjectedValidator() {
     ModuleWithInjectedValidator module =
       IOC.getBeanManager().lookupBean(ModuleWithInjectedValidator.class).getInstance();
@@ -111,6 +94,89 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
     model.setNumVal(101);
     violations = validator.validate(model);
     assertEquals("Expected no constraint violations", 0, violations.size());
+  }
+  
+  public void testValidationOfNestedBindableType() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    TestModel model = DataBinder.forModel(new TestModel()).bind(new TextBox(), "child.stringVal").getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
+    // model and child model should get validated (see @Valid on child field which caused validation when not null)
+    assertEquals("Expected four constraint violations", 4, violations.size());
+    
+    model.setNumVal(101);
+    violations = validator.validate(model);
+    assertEquals("Expected three constraint violations", 3, violations.size());
+    
+    model.getChild().setStringVal("valid");
+    violations = validator.validate(model);
+    assertEquals("Expected two constraint violations", 2, violations.size());
+  }
+  
+  public void testValidationOfListOfBindableTypes() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    TestModel model = new TestModel();
+    model.setNumVal(101);
+    model.setStringVal("val");
+    model = DataBinder.forModel(model).getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
+    
+    model.addToList(new TestModel());
+    // the list now contains one invalid element
+    violations = validator.validate(model);
+    assertEquals("Expected two constraint violations", 2, violations.size());
+    
+    model.getList().get(0).setNumVal(101);
+    model.getList().get(0).setStringVal("val");
+    // the list now contains one valid element
+    violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
+  }
+
+  public void testValidationOfListOfProxiedBindableTypes() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    TestModel model = new TestModel();
+    model.setNumVal(101);
+    model.setStringVal("val");
+    model = DataBinder.forModel(model).getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
+    
+    model.addToList(DataBinder.forType(TestModel.class).getModel());
+    // the list now contains one invalid element
+    violations = validator.validate(model);
+    assertEquals("Expected two constraint violations", 2, violations.size());
+    
+    model.getList().get(0).setNumVal(101);
+    model.getList().get(0).setStringVal("val");
+    // the list now contains one valid element
+    violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
+  }
+  
+  public void testValidationOfSetOfProxiedBindableTypes() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    TestModel model = new TestModel();
+    model.setNumVal(101);
+    model.setStringVal("val");
+    model = DataBinder.forModel(model).getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
+    
+    model.addToSet(DataBinder.forType(TestModel.class).getModel());
+    // the set now contains one invalid element
+    violations = validator.validate(model);
+    assertEquals("Expected two constraint violations", 2, violations.size());
+    
+    model.getSet().iterator().next().setNumVal(101);
+    model.getSet().iterator().next().setStringVal("val");
+    // the set now contains one valid element
+    violations = validator.validate(model);
+    assertEquals("Expected zero constraint violations", 0, violations.size());
   }
   
   public void testValidationWithGroup() {

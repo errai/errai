@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -85,6 +85,7 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -216,20 +217,11 @@
             </executions>
           </plugin>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <skipTests>false</skipTests>
               <forkMode>always</forkMode>
-              <argLine>${argLine} -Xmx1500m -Dgwt.args='-testBeginTimeout 5'</argLine>
-
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-              </additionalClasspathElements>
-              <useSystemClassLoader>false</useSystemClassLoader>
+              <argLine>${argLine} -Xmx1500m -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
-
               <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>
@@ -240,31 +232,27 @@
                   <value>${project.build.directory}</value>
                 </property>
 
-                <!-- Do not accidently package server test marshallers when 
-                  building Errai -->
-                <property>
-                  <name>errai.marshalling.server.classOutput.enabled</name>
-                  <value>false</value>
-                </property>
-
-
-                <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>org.jboss.errai.bus.do_long_poll</name>
-                  <value>false</value>
-                </property>
-
                 <!-- Disable caching of generated code -->
                 <property>
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
-              </systemProperties>
 
-              <includes>
-                <include>**/*Test.java</include>
-                <include>**/*Tests.java</include>
-              </includes>
+                <!-- Must disable long polling for automated tests to succeed -->
+                <property>
+                  <name>errai.hosted_mode_testing</name>
+                  <value>true</value>
+                </property>
+                <property>
+                  <name>org.jboss.errai.bus.do_long_poll</name>
+                  <value>false</value>
+                </property>
+                <!-- Do not accidently package server test marshallers when building Errai -->
+                <property>
+                  <name>errai.marshalling.server.classOutput.enabled</name>
+                  <value>false</value>
+                </property>
+              </systemProperties>
               <excludes>
                 <exclude>**/ErraiBusTests.java</exclude>
               </excludes>

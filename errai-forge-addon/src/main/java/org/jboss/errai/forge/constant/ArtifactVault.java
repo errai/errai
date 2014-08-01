@@ -41,6 +41,7 @@ public final class ArtifactVault {
   public static enum DependencyArtifact {
     // Non-errai
     GwtUser("gwt-user", "com.google.gwt"),
+    GwtDev("gwt-dev", "com.google.gwt"),
     Guava("guava", "com.google.guava"),
     GuavaGwt("guava-gwt", "com.google.guava"),
     Hsq("hsqldb", "org.hsqldb"),
@@ -61,13 +62,18 @@ public final class ArtifactVault {
     JaxrsApi("jaxrs-api", "org.jboss.resteasy"),
     JbossInterceptors("jboss-interceptors-api_1.1_spec", "org.jboss.spec.javax.interceptor"),
     JbossTransaction("jboss-transaction-api_1.1_spec", "org.jboss.spec.javax.transaction"),
+    WildflyDist("wildfly-dist", "org.wildfly"),
     WeldServletCore("weld-servlet-core", "org.jboss.weld.servlet"),
+    WeldSeCore("weld-se-core", "org.jboss.weld.se"),
     WeldCore("weld-core", "org.jboss.weld"),
     WeldApi("weld-api", "org.jboss.weld"),
     WeldSpi("weld-spi", "org.jboss.weld"),
     XmlApis("xml-apis", "xml-apis"),
     JettyNaming("jetty-naming", "org.mortbay.jetty"),
     RestEasyCdi("resteasy-cdi", "org.jboss.resteasy"),
+    
+    // tests
+    GwtMockito("gwtmockito", "com.google.gwt.gwtmockito"),
 
     // plugins
     Clean("maven-clean-plugin", "org.apache.maven.plugins"),
@@ -75,7 +81,8 @@ public final class ArtifactVault {
     Compiler("maven-compiler-plugin", "org.apache.maven.plugins"),
     GwtPlugin("gwt-maven-plugin", "org.codehaus.mojo"),
     War("maven-war-plugin", "org.apache.maven.plugins"),
-    JbossPlugin("jboss-as-maven-plugin", "org.jboss.as.plugins"),
+    WildflyPlugin("wildfly-maven-plugin", "org.wildfly.plugins"),
+    Surefire("maven-surefire-plugin", "org.apache.maven.plugins"),
 
     // errai
     ErraiVersionMaster("errai-version-master", "org.jboss.errai.bom"),
@@ -142,6 +149,7 @@ public final class ArtifactVault {
     /**
      * Returns the string {@code groupId} + ":" + {@code artifactId}.
      */
+    @Override
     public String toString() {
       return String.format("%s:%s", groupId, artifactId);
     }

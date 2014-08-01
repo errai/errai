@@ -1,8 +1,6 @@
 package org.jboss.errai.demo.todo.client.local;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -17,8 +15,9 @@ import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.demo.todo.shared.TodoListService;
 import org.jboss.errai.demo.todo.shared.TodoListUser;
-import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
-import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
+import org.jboss.errai.jpa.sync.client.local.Sync;
+import org.jboss.errai.jpa.sync.client.local.SyncParam;
+import org.jboss.errai.jpa.sync.client.shared.SyncResponses;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
@@ -47,10 +46,11 @@ import com.google.gwt.user.client.ui.TextBox;
 public class TodoListPage extends Composite {
 
   @Inject private EntityManager em;
-  @Inject private ClientSyncManager syncManager;
   @Inject private Caller<TodoListService> todoListService;
 
   private User user; // filled in by @PageShowing method
+  @SuppressWarnings("unused")
+  private String loginName; // used for jpa-datasync query param
 
   @Inject private @DataField TextBox newItemBox;
   @Inject private @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
@@ -58,7 +58,6 @@ public class TodoListPage extends Composite {
   @Inject private @DataField ListWidget<SharedList, SharedListWidget> sharedContainer;
 
   @Inject private @DataField Button archiveButton;
-  @Inject private @DataField Button syncButton;
   @Inject private @DataField Button shareButton;
 
   @Inject private @DataField Label errorLabel;
@@ -78,6 +77,7 @@ public class TodoListPage extends Composite {
       @Override
       public void callback(final User result) {
         user = result;
+        loginName = user.getIdentifier();
         String shortName = user.getProperty(TodoListUser.SHORT_NAME);
         if (shortName == null) {
           shortName = "Anonymous";
@@ -142,35 +142,15 @@ public class TodoListPage extends Composite {
     refreshItems();
   }
 
-  @EventHandler("syncButton")
-  void sync(ClickEvent event) {
-    Map<String,Object> params = new HashMap<String, Object>();
-    params.put("userId", user.getIdentifier());
-    syncManager.coldSync("allItemsForUser", TodoItem.class, params,
-            new RemoteCallback<List<SyncResponse<TodoItem>>>() {
-      @Override
-      public void callback(List<SyncResponse<TodoItem>> response) {
-        syncButton.setEnabled(true);
-        System.out.println("Got data sync complete event!");
-        refreshItems();
-      }
-    },
-    new BusErrorCallback() {
-      @Override
-      public boolean error(Message message, Throwable throwable) {
-        syncButton.setEnabled(true);
-        errorLabel.setText("Sync failed: " + throwable);
-        errorLabel.setVisible(true);
-        return false;
-      }
-    });
-    syncButton.setEnabled(false);
-    System.out.println("Initiated cold sync");
+  @Sync(query = "allItemsForUser", params = { @SyncParam(name = "userId", val = "{loginName}") })
+  void autoSync(final SyncResponses<TodoItem> responses) {
+    if (!responses.getResponses().isEmpty()) {
+      refreshItems();
+    }
   }
 
   @EventHandler("logoutLink")
   void logout(ClickEvent event) {
-    syncManager.clear();
     authCaller.call(new RemoteCallback<Void>() {
 
       @Override

@@ -117,4 +117,20 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
       return null;
     }
   }
+  
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    Annotation[] annos = getAnnotations();
+    if (annos != null) {
+      for (Annotation anno : annos) {
+        sb.append(anno.toString()).append(" ");
+      }
+    }
+    sb.append(" ").append(getReturnType())
+    .append(" ").append(getName())
+    .append("(").append(Arrays.toString(getParameters())).append(")");
+    
+    return sb.toString();
+  }
 }

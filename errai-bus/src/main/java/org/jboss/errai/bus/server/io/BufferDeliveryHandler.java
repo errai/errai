@@ -81,9 +81,7 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
 
     try {
       queue.getBuffer().read(markedOutputStream, queue.getBufferColor(), new MultiMessageFilter());
-
-      markedOutputStream.flush();
-
+      
       if (markedOutputStream.dataWasWritten() && markedOutputStream.getBytesWritten() > 2) {
         queue.resetMessageCount();
         return true;
@@ -107,9 +105,7 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
     try {
       queue.getBuffer().readWait(timeUnit, timeout, markedOutputStream, queue.getBufferColor(),
           new MultiMessageFilter());
-
-      markedOutputStream.flush();
-
+      
       if (markedOutputStream.dataWasWritten() && markedOutputStream.getBytesWritten() > 2) {
         queue.resetMessageCount();
         return true;

@@ -21,7 +21,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * Role represents the role a user belongs to. Also commonly known as a "group."
- * 
+ *
  * @author edewit@redhat.com
  */
 @Portable
@@ -49,5 +49,10 @@ public class RoleImpl implements Role {
   @Override
   public int hashCode() {
     return name.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return name;
   }
 }

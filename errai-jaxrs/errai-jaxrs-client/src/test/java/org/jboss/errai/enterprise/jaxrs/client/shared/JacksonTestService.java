@@ -23,7 +23,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallCustomTypeResultManipulatingInterceptor;
 
 /**
  * This service is used to test support for Jackson generated JSON.
@@ -45,6 +47,21 @@ public interface JacksonTestService {
    */
   @POST
   public String postJackson(String jackson);
+  
+  /**
+   * Accepts a jackson compatible JSON string, marshals it into an object using the jackson ObjectMapper (which we can't
+   * use on the client), then demarshals it again and returns the representation.
+   * 
+   * @param jackson
+   *          jackson compatible JSON representation
+   * 
+   * @return the jackson JSON representation the client (unit test) can use to confirm that it can unmarshal it,
+   *         resulting in an object equal to the original.
+   */
+  @POST
+  @Path("/1")
+  @InterceptedCall(RestCallCustomTypeResultManipulatingInterceptor.class)
+  public User postJacksonIntercepted(String jackson);
 
   /**
    * Accepts a jackson compatible JSON string, marshals it into an list of {@link User} using the jackson ObjectMapper
