@@ -74,4 +74,9 @@ public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
     return isLocalStorageAllowed;
   }
 
+  @Override
+  protected boolean isCacheValid() {
+    return false;
+  }
+
 }
