@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.jboss.errai.common.rebind.CacheStore;
 
@@ -38,9 +37,9 @@ public class MetaClassCache implements CacheStore {
   private final Map<String, MetaClass> ERASED_CLASS_CACHE
       = new ConcurrentHashMap<String, MetaClass>(2000);
 
-  private final Set<String> invalidated = new ConcurrentSkipListSet<String>();
-  private final Set<MetaClass> added = new ConcurrentSkipListSet<MetaClass>();
-  private final Set<String> removed = new ConcurrentSkipListSet<String>();
+  private final Set<String> invalidated =  Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+  private final Set<MetaClass> added = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
+  private final Set<String> removed =  Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
   private final Map<String, CacheEntry> backupClassCache = new ConcurrentHashMap<String, MetaClassCache.CacheEntry>();
 
   @Override
