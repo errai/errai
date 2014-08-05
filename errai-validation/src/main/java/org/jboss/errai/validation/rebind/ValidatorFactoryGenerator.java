@@ -61,7 +61,7 @@ public class ValidatorFactoryGenerator extends Generator {
     long start = System.currentTimeMillis();
     log.info("Generating validator factory...");
     if (printWriter != null) {
-      ClassStructureBuilder<?> validatorInterface = new GwtValidatorGenerator().generate();
+      ClassStructureBuilder<?> validatorInterface = new GwtValidatorGenerator().generate(context);
       ClassStructureBuilder<?> builder = ClassBuilder
             .define(packageName + "." + className, AbstractGwtValidatorFactory.class)
             .publicScope()

@@ -17,10 +17,10 @@
 package org.jboss.errai.validation.rebind;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,15 +31,22 @@ import javax.validation.groups.Default;
 
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.util.PropertiesUtil;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
 import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
 import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
-import org.jboss.errai.reflections.util.SimplePackageFilePathPredicate;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.thirdparty.guava.common.collect.Sets;
 import com.google.gwt.validation.client.GwtValidation;
 
@@ -52,37 +59,46 @@ import com.google.gwt.validation.client.GwtValidation;
  */
 class GwtValidatorGenerator {
 
-  class ValidationScanner extends Reflections {
-
-    ValidationScanner() {
+  class ContraintScanner extends Reflections {
+    ContraintScanner() {
       super(new ConfigurationBuilder()
         .setUrls(ClasspathHelper.forClassLoader())
-        .filterInputsBy(new SimplePackageFilePathPredicate(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, "\\s")))
         .setScanners(
             new FieldAnnotationsScanner(),
             new TypeAnnotationsScanner()));
       scan();
     }
-
   }
 
-  public static final String BLACKLIST_PROPERTY = "errai.validation.blacklist";
-
-  private final ValidationScanner scanner;
-
-  GwtValidatorGenerator() {
-    this.scanner = new ValidationScanner();
-  }
-
-  ClassStructureBuilder<?> generate() {
-    final Set<Class<?>> validationAnnotations = scanner.getTypesAnnotatedWith(Constraint.class);
-    final SetMultimap<Class<?>, Annotation> validationConfig = getValidationConfig(validationAnnotations);
-    final Set<Class<?>> beans = Sets.newHashSet(validationConfig.keySet());
-    // look for beans that use @Valid but no other constraints.
-    addBeansAnnotatedWithValid(beans);
+  private static final String BLACKLIST_PROPERTY = "errai.validation.blacklist";
+  private static Set<MetaClass> globalConstraints;
+  
+  public ClassStructureBuilder<?> generate(final GeneratorContext context) {
+    if (globalConstraints == null) {
+      globalConstraints = new HashSet<MetaClass>();
+      for (Class<?> clazz : new ContraintScanner().getTypesAnnotatedWith(Constraint.class)) {
+        globalConstraints.add(MetaClassFactory.get(clazz)); 
+      }
+    }
+    
+    Collection<MetaClass> constraints =  ClassScanner.getTypesAnnotatedWith(Constraint.class, context);
+    Set<MetaClass> allConstraints = new HashSet<MetaClass>();
+    allConstraints.addAll(globalConstraints);
+    allConstraints.addAll(constraints);
+    
+    final SetMultimap<MetaClass, Annotation> validationConfig = getValidationConfig(allConstraints, context);
+    final Set<Class<?>> beans = extractValidatableBeans(validationConfig.keySet(), context);
     final Set<Class<?>> groups = extractValidationGroups(validationConfig);
     
-    if (beans.isEmpty() || groups.isEmpty()) {
+    final Set<Class<?>> filteredBeans = new HashSet<Class<?>>();
+    SimplePackageFilter filter = new SimplePackageFilter(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, " "));
+    for (Class<?> bean : beans) {
+      if (!filter.apply(bean.getName())) {
+        filteredBeans.add(bean);
+      }
+    }
+    
+    if (filteredBeans.isEmpty() || groups.isEmpty()) {
       // Nothing to validate
       return null;
     }
@@ -93,7 +109,7 @@ class GwtValidatorGenerator {
     builder.getClassDefinition().addAnnotation(new GwtValidation() {
       @Override
       public Class<?>[] value() {
-        return beans.toArray(new Class<?>[beans.size()]);
+        return filteredBeans.toArray(new Class<?>[filteredBeans.size()]);
       }
 
       @Override
@@ -111,38 +127,46 @@ class GwtValidatorGenerator {
   }
 
   @SuppressWarnings("unchecked")
-  private SetMultimap<Class<?>, Annotation> getValidationConfig(Set<Class<?>> validationAnnotations) {
-    SetMultimap<Class<?>, Annotation> beans = HashMultimap.create();
-    for (Class<?> annotation : validationAnnotations) {
-      for (Field field : scanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation)) {
-        beans.put(field.getDeclaringClass(), field.getAnnotation((Class<? extends Annotation>) annotation));
+  private SetMultimap<MetaClass, Annotation> getValidationConfig(Collection<MetaClass> validationAnnotations, GeneratorContext context) {
+    SetMultimap<MetaClass, Annotation> beans = HashMultimap.create();
+    for (MetaClass annotation : validationAnnotations) {
+      for (MetaField field : ClassScanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
+        beans.put(field.getDeclaringClass(), field.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
       }
-      for (Method method : scanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation)) {
-        beans.put(method.getDeclaringClass(), method.getAnnotation((Class<? extends Annotation>) annotation));
+      for (MetaMethod method : ClassScanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
+        beans.put(method.getDeclaringClass(), method.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
       }
     }
 
     return beans;
   }
 
-  private void addBeansAnnotatedWithValid(Set<Class<?>> beans) {
-    for (Field field : scanner.getFieldsAnnotatedWith(Valid.class)) {
-      beans.add(field.getDeclaringClass());
-      beans.add(field.getType());
+  private Set<Class<?>> extractValidatableBeans(final Set<MetaClass> beans, final GeneratorContext context) {
+    Set<Class<?>> allBeans = new HashSet<Class<?>>();
+    
+    for (MetaClass bean : beans) {
+      allBeans.add(bean.asClass());
     }
-    for (Method method : scanner.getMethodsAnnotatedWith(Valid.class)) {
-      beans.add(method.getDeclaringClass());
-      beans.add(method.getReturnType());
+    
+    for (MetaField field : ClassScanner.getFieldsAnnotatedWith(Valid.class, null, context)) {
+      allBeans.add(field.getDeclaringClass().asClass());
+      allBeans.add(field.getType().asClass());
     }
+    for (MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Valid.class, null, context)) {
+      allBeans.add(method.getDeclaringClass().asClass());
+      allBeans.add(method.getReturnType().asClass());
+    }
+    
+    return allBeans;
   }
 
-  private Set<Class<?>> extractValidationGroups(SetMultimap<Class<?>, Annotation> validationConfig) {
+  private Set<Class<?>> extractValidationGroups(SetMultimap<MetaClass, Annotation> validationConfig) {
     Set<Class<?>> groups = new HashSet<Class<?>>();
 
     for (Annotation annotation : validationConfig.values()) {
       try {
-        Method method = annotation.getClass().getMethod("groups", null);
-        Class<?>[] ret = (Class<?>[]) method.invoke(annotation, null);
+        Method method = annotation.getClass().getMethod("groups", (Class<?>[]) null);
+        Class<?>[] ret = (Class<?>[]) method.invoke(annotation, (Object[]) null);
         if (ret.length != 0) {
           groups.addAll(Arrays.asList(ret));
         }
