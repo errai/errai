@@ -28,7 +28,10 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 import org.jboss.errai.validation.client.BeanValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.Generator;
@@ -46,7 +49,8 @@ import com.google.gwt.validation.client.impl.AbstractGwtValidator;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ValidatorFactoryGenerator extends Generator {
-
+  
+  private static final Logger log = LoggerFactory.getLogger(ValidatorFactoryGenerator.class);
   private final String packageName = "org.jboss.errai.validation.client";
   private final String className = ValidatorFactory.class.getSimpleName() + "Impl";
 
@@ -54,6 +58,8 @@ public class ValidatorFactoryGenerator extends Generator {
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
 
+    long start = System.currentTimeMillis();
+    log.info("Generating validator factory...");
     if (printWriter != null) {
       ClassStructureBuilder<?> validatorInterface = new GwtValidatorGenerator().generate();
       ClassStructureBuilder<?> builder = ClassBuilder
@@ -89,6 +95,7 @@ public class ValidatorFactoryGenerator extends Generator {
           new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
       RebindUtils.writeStringToFile(tmpFile, gen);
 
+      log.info("Generated validator factory in " + (System.currentTimeMillis() - start) + "ms");
       context.commit(logger, printWriter);
     }
 
