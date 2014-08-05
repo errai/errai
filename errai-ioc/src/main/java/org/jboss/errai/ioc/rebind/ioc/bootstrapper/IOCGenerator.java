@@ -72,7 +72,7 @@ public class IOCGenerator extends AbstractAsyncGenerator {
   @Override
   protected boolean isCacheValid() {
     return hasGenerationCache() &&
-            (EnvUtil.isProdMode() || MetaClassFactory.hasAnyChanges());
+            (EnvUtil.isProdMode() || !MetaClassFactory.hasAnyChanges());
   }
 
 }
