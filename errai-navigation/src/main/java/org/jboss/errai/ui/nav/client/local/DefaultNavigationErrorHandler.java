@@ -20,21 +20,35 @@ public class DefaultNavigationErrorHandler implements PageNavigationErrorHandler
 
   @Override
   public void handleInvalidPageNameError(Exception exception, String pageName) {
-    GWT.log("Got invalid page name \"" + pageName + "\". Redirecting to default page.", exception);
-    navigation.goTo("");
+    if (pageName.equals("")) {
+      throw new Error("Failed to initialize Default Page", exception);
+    }
+    else {
+      GWT.log("Got invalid page name \"" + pageName + "\". Redirecting to default page.", exception);
+      navigation.goTo("");
+    }
   }
 
   @Override
-  public void handleError(Exception exception, Class<? extends PageRole> pageRole) {
-    GWT.log("Got invalid page role \"" + pageRole + "\". Redirecting to default page.", exception);
-    navigation.goTo("");
-
+  public void handleError(Exception exception, Class<? extends UniquePageRole> pageRole) {
+    if (pageRole.equals(DefaultPage.class)) {
+      throw new Error("Failed to initialize Default Page", exception);
+    }
+    else {
+      GWT.log("Got invalid page role \"" + pageRole + "\". Redirecting to default page.", exception);
+      navigation.goTo("");
+    }
   }
 
   @Override
   public void handleInvalidURLError(Exception exception, String urlPath) {
-    GWT.log("Got invalid URL \"" + urlPath + "\". Redirecting to default page.", exception);
-    navigation.goTo("");
+    if(urlPath.equals("")) {
+      throw new Error("Failed to initialize Default Page", exception);
+    }
+    else {
+      GWT.log("Got invalid URL \"" + urlPath + "\". Redirecting to default page.", exception);
+      navigation.goTo("");
+    }
   }
 
 }

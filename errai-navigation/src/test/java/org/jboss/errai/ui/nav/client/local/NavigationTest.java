@@ -79,7 +79,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testDefaultErrorHandlerWithMissingPage() throws Exception {
-    navigation.goTo("page_b"); // navigate to a known non-default page before
+    navigation.goTo("PageB"); // navigate to a known non-default page before
                                // test because the expected behavior is that it
                                // navigates back to the default page
 
@@ -105,7 +105,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testMissingPageRole() throws Exception {
-    navigation.goTo("page_b"); // navigate to a known non-default page before
+    navigation.goTo("PageB"); // navigate to a known non-default page before
     // test because the expected behavior is that it
     // navigates back to the default page
 

@@ -1,6 +1,6 @@
 package org.jboss.errai.ui.nav.client.local.api;
 
-import org.jboss.errai.ui.nav.client.local.PageRole;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 
 /**
  * Defines an error handler used for page navigation errors.
@@ -23,7 +23,7 @@ public interface PageNavigationErrorHandler {
    * @param pageRole
    *          The role of the page which we tried to navigate to.
    */
-  public void handleError(Exception exception, Class<? extends PageRole> pageRole);
+  public void handleError(Exception exception, Class<? extends UniquePageRole> pageRole);
 
   /**
    * 

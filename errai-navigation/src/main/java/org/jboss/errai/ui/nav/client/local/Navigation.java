@@ -18,6 +18,7 @@ import org.jboss.errai.ioc.client.lifecycle.impl.AccessImpl;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.api.PageNavigationErrorHandler;
 import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
+import org.jboss.errai.ui.nav.client.local.api.RedirectLoopException;
 import org.jboss.errai.ui.nav.client.local.pushstate.PushStateUtil;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -87,11 +88,11 @@ public class Navigation {
   protected PageNode<IsWidget> currentPage;
 
   protected IsWidget currentWidget;
+  
+  private PageNavigationErrorHandler navigationErrorHandler;
 
   private HandlerRegistration historyHandlerRegistration;
 
-  private PageNavigationErrorHandler navigationErrorHandler = new DefaultNavigationErrorHandler(this);
-  
   @Inject
   private Logger logger;
 
@@ -120,10 +121,13 @@ public class Navigation {
   private void init() {
     if (navGraph.isEmpty())
       return;
+    
+    navigationErrorHandler = new DefaultNavigationErrorHandler(this);
 
     historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
       public void onValueChange(final ValueChangeEvent<String> event) {
+        HistoryToken token = null;
         try {
           logger.debug("URL value changed to " + event.getValue());
           if (needsApplicationContext()) {
@@ -134,7 +138,7 @@ public class Navigation {
                     + ", or calling Navigation.setAppContext.");
             setAppContext(context);
           }
-          HistoryToken token = historyTokenFactory.parseURL(event.getValue());
+          token = historyTokenFactory.parseURL(event.getValue());
           PageNode<IsWidget> toPage = null;
 
           toPage = navGraph.getPage(token.getPageName());
@@ -142,7 +146,10 @@ public class Navigation {
             navigate(new Request<IsWidget>(toPage, token), false);
           }
         } catch (Exception e) {
-          navigationErrorHandler.handleInvalidPageNameError(e, event.getValue());
+          if (token == null)
+            navigationErrorHandler.handleInvalidURLError(e, event.getValue());
+          else
+            navigationErrorHandler.handleInvalidPageNameError(e, token.getPageName());
         }
       }
     });
@@ -204,8 +211,21 @@ public class Navigation {
    *          names of fields annotated with {@code @PageState} in the widget class, but this is not required.
    */
   public <W extends IsWidget> void goTo(Class<W> toPage, Multimap<String, String> state) {
-    PageNode<W> toPageInstance = navGraph.getPage(toPage);
-    navigate(toPageInstance, state);
+    PageNode<W> toPageInstance = null;
+    
+    try {
+      toPageInstance = navGraph.getPage(toPage);
+      navigate(toPageInstance, state);
+    } catch (RuntimeException e) {
+      if (toPageInstance == null)
+        // This is an extremely unlikely case, so throwing an exception is preferable to going through the navigation error handler.
+        throw new PageNotFoundException("There is no page of type " + toPage.getName() + " in the navigation graph.");
+      else if (e instanceof RedirectLoopException)
+        throw e;
+      else
+        navigationErrorHandler.handleInvalidPageNameError(e, toPageInstance.name());
+    }
+    
   }
 
   /**
@@ -219,8 +239,11 @@ public class Navigation {
     try {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance);
-    } catch (Exception e) {
-      navigationErrorHandler.handleInvalidPageNameError(e, toPage);
+    } catch (RuntimeException e) {
+      if(e instanceof RedirectLoopException)
+        throw e;
+      else
+       navigationErrorHandler.handleInvalidPageNameError(e, toPage);
     }
   }
 
@@ -232,11 +255,15 @@ public class Navigation {
    *          The unique role of the page that needs to be displayed.
    */
   public void goToWithRole(Class<? extends UniquePageRole> role) {
+    PageNode<?> toPageInstance = null;
     try {
-      PageNode<?> toPageInstance = navGraph.getPageByRole(role);
+       toPageInstance = navGraph.getPageByRole(role);
       navigate(toPageInstance);
-    } catch (Exception e) {
-      navigationErrorHandler.handleError(e, role);
+    } catch (RuntimeException e) {
+      if (e instanceof RedirectLoopException)
+        throw e;
+      else
+        navigationErrorHandler.handleError(e, role);
     }
   }
 
@@ -273,7 +300,7 @@ public class Navigation {
 
     redirectDepth++;
     if (redirectDepth >= MAXIMUM_REDIRECTS) {
-      throw new RuntimeException("Maximum redirect limit of " + MAXIMUM_REDIRECTS + " reached. "
+      throw new RedirectLoopException("Maximum redirect limit of " + MAXIMUM_REDIRECTS + " reached. "
               + "Do you have a redirect loop?");
     }
 
