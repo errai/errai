@@ -545,12 +545,16 @@ public final class MetaClassFactory {
     return getMetaClassCache().getAllNewOrUpdated();
   }
   
-  public static boolean isNewOrUpdated(String fqcn) {
-    return getMetaClassCache().isNewOrUpdated(fqcn);
+  public static Collection<MetaClass> getNewClasses() {
+    return getMetaClassCache().getAllNewClasses();
   }
-
-  public static Set<String> getAllRemovedClasses() {
-    return getMetaClassCache().getAllRemovedClasses();
+  
+  public static boolean isChangedOrDeleted(String fqcn) {
+    return getMetaClassCache().getAllDeletedClasses().contains(fqcn) || getMetaClassCache().isNewOrUpdated(fqcn);
+  }
+  
+  public static Set<String> getAllDeletedClasses() {
+    return getMetaClassCache().getAllDeletedClasses();
   }
 
   public static Collection<MetaClass> getAllCachedClasses() {
@@ -561,7 +565,7 @@ public final class MetaClassFactory {
     return getMetaClassCache().isKnownType(fqcn);
   }
 
-  public static boolean noChangedClasses() {
-    return getAllNewOrUpdatedClasses().isEmpty() && getAllRemovedClasses().isEmpty();
+  public static boolean hasAnyChanges() {
+    return !getAllNewOrUpdatedClasses().isEmpty() || !getAllDeletedClasses().isEmpty();
   }
 }

@@ -495,7 +495,7 @@ public class IOCBootstrapGenerator {
 
     if (context != null) {
       final Collection<MetaClass> allNewOrUpdatedClasses = MetaClassFactory.getAllNewOrUpdatedClasses();
-      final Set<String> removedClasses = MetaClassFactory.getAllRemovedClasses();
+      final Set<String> removedClasses = MetaClassFactory.getAllDeletedClasses();
 
       log.debug(allNewOrUpdatedClasses.size() + " new or updated classes in the MetaClassFactory");
       log.trace("New or updated classes : " + allNewOrUpdatedClasses);

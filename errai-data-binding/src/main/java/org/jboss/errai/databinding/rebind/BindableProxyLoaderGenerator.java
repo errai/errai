@@ -16,6 +16,9 @@
 
 package org.jboss.errai.databinding.rebind;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -72,7 +75,10 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
-    for (MetaClass bindable : DataBindingUtil.getAllBindableTypes(context)) {
+    Set<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context);
+    addCacheRelevantClasses(allBindableTypes);
+    
+    for (MetaClass bindable : allBindableTypes) {
       if (bindable.isFinal()) {
         throw new RuntimeException("@Bindable type cannot be final: " + bindable.getFullyQualifiedName());
       }
@@ -114,8 +120,10 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
   private void generateDefaultConverterRegistrations(final MethodBlockBuilder<?> loadProxies,
       final GeneratorContext context) {
 
-    for (MetaClass converter : ClassScanner.getTypesAnnotatedWith(DefaultConverter.class,
-        RebindUtils.findTranslatablePackages(context), context)) {
+    Collection<MetaClass> defaultConverters = ClassScanner.getTypesAnnotatedWith(DefaultConverter.class,
+            RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(defaultConverters);
+    for (MetaClass converter : defaultConverters) {
 
       Statement registerConverterStatement = null;
       for (MetaClass iface : converter.getInterfaces()) {
@@ -139,5 +147,10 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
             + "! Make sure it implements Converter and specifies type arguments for the model and widget type");
       }
     }
+  }
+  
+  @Override
+  protected boolean isRelevantNewClass(MetaClass clazz) {
+    return clazz.isAnnotationPresent(Bindable.class) || clazz.isAnnotationPresent(DefaultConverter.class);
   }
 }

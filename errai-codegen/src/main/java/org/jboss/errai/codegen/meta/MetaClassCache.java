@@ -39,6 +39,7 @@ public class MetaClassCache implements CacheStore {
       = new ConcurrentHashMap<String, MetaClass>(2000);
 
   private final Set<String> invalidated = new ConcurrentSkipListSet<String>();
+  private final Set<MetaClass> added = new ConcurrentSkipListSet<MetaClass>();
   private final Set<String> removed = new ConcurrentSkipListSet<String>();
   private final Map<String, CacheEntry> backupClassCache = new ConcurrentHashMap<String, MetaClassCache.CacheEntry>();
 
@@ -49,6 +50,7 @@ public class MetaClassCache implements CacheStore {
 
     invalidated.clear();
     removed.clear();
+    added.clear();
 
     PRIMARY_CLASS_CACHE.clear();
     ERASED_CLASS_CACHE.clear();
@@ -76,6 +78,10 @@ public class MetaClassCache implements CacheStore {
       final CacheEntry previousCacheEntry = backupClassCache.get(entry.getKey());
       if (previousCacheEntry == null || previousCacheEntry.hashCode != newCacheEntry.hashCode) {
         invalidated.add(entry.getKey());
+        
+        if (previousCacheEntry == null) {
+          added.add(entry.getValue());
+        }
       }
     }
   }
@@ -117,8 +123,12 @@ public class MetaClassCache implements CacheStore {
     return newOrUpdated;
   }
 
-  public Set<String> getAllRemovedClasses() {
+  public Set<String> getAllDeletedClasses() {
     return Collections.unmodifiableSet(removed);
+  }
+  
+  public Set<MetaClass> getAllNewClasses() {
+    return Collections.unmodifiableSet(added);
   }
 
   public boolean isKnownErasedType(final String fqcn) {
