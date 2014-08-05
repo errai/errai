@@ -21,19 +21,23 @@ public class DefaultNavigationErrorHandler implements
 
   @Override
   public void handleError(Exception exception, String pageName) {
-
-    GWT.log("Got invalid page name \"" + pageName
-            + "\". Falling back to default page.", exception);
-    navigation.goTo("");// guaranteed at compile time to exist
-
+    if (pageName.equals("")) {
+      throw new Error("Failed to initialize Default Page", exception);
+    }
+    else {
+      GWT.log("Got invalid page name \"" + pageName + "\". Redirecting to default page.", exception);
+      navigation.goTo("");
+    }
   }
 
   @Override
-  public void handleError(Exception exception,
-          Class<? extends PageRole> pageRole) {
-    GWT.log("Got invalid page role \"" + pageRole
-            + "\". Falling back to default page.", exception);
-    navigation.goTo("");// guaranteed at compile time to exist
+  public void handleError(Exception exception, Class<? extends UniquePageRole> pageRole) {
+    if (pageRole.equals(DefaultPage.class)) {
+      throw new Error("Failed to initialize Default Page", exception);
+    }
+    else {
+      GWT.log("Got invalid page role \"" + pageRole + "\". Redirecting to default page.", exception);
+      navigation.goTo("");
+    }
   }
-
 }
