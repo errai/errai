@@ -358,6 +358,6 @@ public class InvocationBuilderTest extends AbstractCodegenTest {
   public void testLookupOfMethodWithArrayParameters() {
     final MetaClass metaClass = MetaClassFactory.get(Arrays.class);
     final MetaMethod equals = metaClass.getBestMatchingMethod("equals", Class[].class, Class[].class);
-    assertEquals("boolean equals([[Ljava.lang.Object;, [Ljava.lang.Object;])", equals.toString());
+    assertEquals("public boolean equals([[Ljava.lang.Object;, [Ljava.lang.Object;])", equals.toString());
   }
 }

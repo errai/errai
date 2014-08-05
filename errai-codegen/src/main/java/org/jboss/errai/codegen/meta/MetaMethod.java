@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.errai.codegen.util.GenUtil;
+
 public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration {
   @Override
   public abstract String getName();
@@ -127,9 +129,9 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
         sb.append(anno.toString()).append(" ");
       }
     }
-    sb.append(" ").append(getReturnType())
-    .append(" ").append(getName())
-    .append("(").append(Arrays.toString(getParameters())).append(")");
+    sb.append(" ").append(GenUtil.scopeOf(this).getCanonicalName()).append(" ")
+    .append(getReturnType()).append(" ")
+    .append(getName()).append("(").append(Arrays.toString(getParameters())).append(")");
     
     return sb.toString();
   }
