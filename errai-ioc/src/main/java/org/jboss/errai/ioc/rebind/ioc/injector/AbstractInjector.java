@@ -66,6 +66,7 @@ public abstract class AbstractInjector implements Injector {
   private boolean created;
   private boolean rendered;
   protected boolean singleton;
+  protected boolean lazySingleton;
   protected boolean replaceable;
   protected boolean provider;
   protected boolean basic;
@@ -103,8 +104,15 @@ public abstract class AbstractInjector implements Injector {
   public boolean isSingleton() {
     return singleton;
   }
+  
+      /**
+     * @return the lazySingleton
+     */
+    public boolean isLazySingleton() {
+        return lazySingleton;
+    }
 
-  @Override
+@Override
   public boolean isDependent() {
     return !singleton;
   }
