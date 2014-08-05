@@ -68,14 +68,8 @@ public class QualifierEqualityFactoryGenerator extends Generator {
       final String packageName = classType.getPackage().getName();
       final String className = classType.getSimpleSourceName() + "Impl";
 
-      log.info("Generating QualifierEqualityFactory...");
-
-      final long start = System.currentTimeMillis();
-      
       // Generate class source code
       generateQualifierEqualityFactory(packageName, className, logger, context);
-
-      log.info("Generated QualifierEqualityFactory in " + (System.currentTimeMillis() - start) + "ms");
 
       // return the fully qualified name of the class generated
       return packageName + "." + className;
@@ -97,6 +91,8 @@ public class QualifierEqualityFactoryGenerator extends Generator {
     if (printWriter == null) {
       return;
     }
+    final long start = System.currentTimeMillis();
+    log.info("Generating QualifierEqualityFactory...");
 
     final TypeOracle oracle = generatorContext.getTypeOracle();
 
@@ -182,6 +178,7 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     printWriter.append(csq);
 
+    log.info("Generated QualifierEqualityFactory in " + (System.currentTimeMillis() - start) + "ms");
     generatorContext.commit(logger, printWriter);
   }
 
