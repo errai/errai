@@ -66,19 +66,20 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
-
     log.info("generating RPC proxy loader class...");
+    
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
     final long time = System.currentTimeMillis();
     final MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
 
-    final Collection<MetaClass> typesAnnotatedWith = ClassScanner.getTypesAnnotatedWith(Remote.class,
+    final Collection<MetaClass> remotes = ClassScanner.getTypesAnnotatedWith(Remote.class,
         RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(remotes);
     
     final InterceptorProvider interceptorProvider = getInterceptorProvider(context);
 
-    for (final MetaClass remote : typesAnnotatedWith) {
+    for (final MetaClass remote : remotes) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote, context, interceptorProvider).generate();
@@ -107,10 +108,21 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
   private InterceptorProvider getInterceptorProvider(final GeneratorContext context) {
     final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
         RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(featureInterceptors);
     
     final Collection<MetaClass> standaloneInterceptors = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class,
         RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(standaloneInterceptors);
     
     return new InterceptorProvider(featureInterceptors, standaloneInterceptors);
   }
+
+  @Override
+  protected boolean isRelevantNewClass(MetaClass clazz) {
+    return clazz.isAnnotationPresent(Remote.class) || clazz.isAnnotationPresent(FeatureInterceptor.class)
+            || clazz.isAnnotationPresent(InterceptsRemoteCall.class); 
+  }
+  
+  
+
 }

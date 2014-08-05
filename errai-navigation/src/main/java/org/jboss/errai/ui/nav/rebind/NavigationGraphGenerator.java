@@ -116,6 +116,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class, context);
+    addCacheRelevantClasses(pages);
 
     /*
      * This prevents @Page validation logic from aborting compilation if a user has errai security
@@ -698,5 +699,10 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     else {
       return Stmt.load(null);
     }
+  }
+
+  @Override
+  protected boolean isRelevantNewClass(MetaClass clazz) {
+    return clazz.isAnnotationPresent(Page.class);
   }
 }

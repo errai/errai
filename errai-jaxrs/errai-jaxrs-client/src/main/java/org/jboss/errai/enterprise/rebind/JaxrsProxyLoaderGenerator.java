@@ -74,8 +74,11 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     final InterceptorProvider interceptorProvider = getInterceptorProvider(context);
     final Multimap<MetaClass, MetaClass> exceptionMappers = getClientExceptionMappers(context);
 
-    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Path.class,
-        RebindUtils.findTranslatablePackages(context), context)) {
+    Collection<MetaClass> remotes = ClassScanner.getTypesAnnotatedWith(Path.class,
+        RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(remotes);
+    
+    for (MetaClass remote : remotes) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy =
@@ -105,9 +108,11 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
   private InterceptorProvider getInterceptorProvider(final GeneratorContext context) {
     final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
         RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(featureInterceptors);
 
     final Collection<MetaClass> standaloneInterceptors = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class,
         RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(standaloneInterceptors);
 
     return new InterceptorProvider(featureInterceptors, standaloneInterceptors);
   }
@@ -122,6 +127,7 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
 
     Collection<MetaClass> providers = ClassScanner.getTypesAnnotatedWith(Provider.class,
         RebindUtils.findTranslatablePackages(context), context);
+    addCacheRelevantClasses(providers);
 
     MetaClass genericExceptionMapperClass = null;
     for (MetaClass metaClass : providers) {
@@ -144,5 +150,11 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     }
 
     return result;
+  }
+  
+  @Override
+  protected boolean isRelevantNewClass(MetaClass clazz) {
+    return clazz.isAnnotationPresent(Path.class) || clazz.isAnnotationPresent(FeatureInterceptor.class)
+            || clazz.isAnnotationPresent(InterceptsRemoteCall.class) || clazz.isAnnotationPresent(Provider.class); 
   }
 }

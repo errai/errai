@@ -18,11 +18,15 @@ package org.jboss.errai.config.rebind;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ThreadUtil;
@@ -41,7 +45,9 @@ import com.google.gwt.core.ext.TreeLogger;
 public abstract class AbstractAsyncGenerator extends Generator implements AsyncCodeGenerator {
 
   private static final Map<Class<? extends AbstractAsyncGenerator>, String> cacheMap = new ConcurrentHashMap<Class<? extends AbstractAsyncGenerator>, String>();
-
+  private static final Map<Class<? extends AbstractAsyncGenerator>, Set<String>> cacheRelevantClasses = 
+          new ConcurrentHashMap<Class<? extends AbstractAsyncGenerator>, Set<String>>();
+  
   private static Logger log = LoggerFactory.getLogger(AbstractAsyncGenerator.class);
 
   @Override
@@ -57,6 +63,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
         }
         else {
           log.info("Running generator " + AbstractAsyncGenerator.this.getClass().getName());
+          clearCacheRelevantClasses();
           generatedCode = generate(logger, context);
           setGeneratedCache(generatedCode);
         }
@@ -85,7 +92,45 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * @return True iff this generator does not need to be run again this refresh.
    */
   protected boolean isCacheValid() {
-    return hasGenerationCache() && MetaClassFactory.noChangedClasses();
+    boolean hasChanges = MetaClassFactory.hasAnyChanges() && hasRelevantChanges();
+    return hasGenerationCache() && !hasChanges;
+  }
+  
+  private boolean hasRelevantChanges() {
+    Set<String> relevantClasses = cacheRelevantClasses.get(this.getClass());
+    if (relevantClasses == null) {
+      // generator did not mark any classes. we have to assume that a rerun is required.
+      return true;
+    }
+    
+    for (MetaClass newClazz : MetaClassFactory.getNewClasses()) {
+      if (isRelevantNewClass(newClazz)) {
+        return true;
+      }
+    }
+    
+    for (String relevantClass : relevantClasses) {
+      if (MetaClassFactory.isChangedOrDeleted(relevantClass)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Checks if the provided class is relevant to this generator. This method is
+   * invoked to determine whether or not the introduction of the provided class
+   * should trigger a rerun of this generator.
+   * 
+   * @param clazz
+   *          a newly introduced clazz since the last refresh.
+   * 
+   * @return true if newly introduced class is relevant to this generator,
+   *         otherwise false.
+   */
+  protected boolean isRelevantNewClass(MetaClass clazz) {
+    return true;
   }
 
   /**
@@ -155,5 +200,44 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
     }
 
     return packageName + "." + className;
+  }
+  
+  /**
+   * Marks the provided class as cache relevant. This means that the provided
+   * class will be considered when checking for changes to determine whether or
+   * not the generator needs to rerun after a refresh. If no cache relevant
+   * classes are added any change to reloadable classes will cause the generator
+   * to rerun.
+   * 
+   * @param clazz
+   *          the class to consider when checking for changes.
+   */
+  protected void addCacheRelevantClass(MetaClass clazz) {
+    Set<String> classes = cacheRelevantClasses.get(this.getClass());
+    if (classes == null) {
+      classes = new HashSet<String>();
+      cacheRelevantClasses.put(this.getClass(), classes);
+    }
+    classes.add(clazz.getFullyQualifiedName());
+  }
+
+  /**
+   * Marks the provided classes as cache relevant. This means that the provided
+   * classes will be considered when checking for changes to determine whether
+   * or not the generator needs to rerun after a refresh. If no cache relevant
+   * classes are added any change to reloadable classes will cause the generator
+   * to rerun.
+   * 
+   * @param classes
+   *          the classes to consider when checking for changes.
+   */
+  protected void addCacheRelevantClasses(Collection<MetaClass> classes) {
+    for (MetaClass clazz : classes) {
+      addCacheRelevantClass(clazz);
+    }
+  }
+  
+  private void clearCacheRelevantClasses() {
+    cacheRelevantClasses.remove(this.getClass());
   }
 }
