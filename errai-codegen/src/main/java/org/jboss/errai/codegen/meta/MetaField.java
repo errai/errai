@@ -19,6 +19,8 @@ package org.jboss.errai.codegen.meta;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
+import org.jboss.errai.codegen.util.GenUtil;
+
 public abstract class MetaField implements HasAnnotations, MetaClassMember {
 
   /**
@@ -81,7 +83,10 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
       }
     }
     
-    sb.append(this.getType()).append(" ").append(getName());
+    sb.append(GenUtil.scopeOf(this).getCanonicalName()).append(" ")
+    .append(GenUtil.modifiersOf(this).toJavaString()).append(" ")
+    .append(this.getType()).append(" ").append(getName());
+    
     return sb.toString();
   }
 

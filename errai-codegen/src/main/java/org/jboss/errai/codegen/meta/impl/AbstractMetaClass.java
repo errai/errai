@@ -740,17 +740,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           sb.append(a.toString());
         }
       }
-      for (MetaMethod c : getConstructors()) {
+      for (MetaMethod c : getDeclaredConstructors()) {
         sb.append(c.toString());
-      }
-      for (MetaField f : getFields()) {
-        sb.append(f.toString());
       }
       for (MetaField f : getDeclaredFields()) {
         sb.append(f.toString());
-      }
-      for (MetaMethod m : getMethods()) {
-        sb.append(m.toString());
       }
       for (MetaMethod m : getDeclaredMethods()) {
         sb.append(m.toString());
@@ -762,8 +756,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         sb.append(dc.getFullyQualifiedNameWithTypeParms());
       }
       if (getSuperClass() != null) {
-        sb.append(getSuperClass().getFullyQualifiedNameWithTypeParms());
+        sb.append(getSuperClass().hashContent());
       }
+      
       contentString = sb.toString();
     }
     
