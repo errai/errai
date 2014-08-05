@@ -44,6 +44,9 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
    */
   private final Set<String> concreteBeans = new HashSet<String>();
 
+  //ensures that even when having multiple async beans only one instance is created global
+  private final  Map<Class<?>, SingletonBeanProvider<?>> lazySingletons = new HashMap<Class<?>, SingletonBeanProvider<?>>();
+
   public AsyncBeanManagerImpl() {
 
     // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose
@@ -54,58 +57,72 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
   }
 
   private AsyncBeanDef<Object> _registerSingletonBean(final Class<Object> type,
-                                                      final Class<?> beanType,
-                                                      final AsyncBeanProvider<Object> callback,
-                                                      final Object instance,
-                                                      final Annotation[] qualifiers,
-                                                      final String name,
-                                                      final boolean concrete,
-                                                      final Class<Object> beanActivatorType) {
+          final Class<?> beanType, final AsyncBeanProvider<Object> callback,
+          AsyncCreationalContext context,
+          AsyncInjectionContext injectionContext,
+          final Annotation[] qualifiers, final String name,
+          final boolean concrete, final Class<Object> beanActivatorType) {
 
-    return registerBean(AsyncSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback,
-        instance, beanActivatorType));
+    return registerBean(AsyncSingletonBean.newBean(this, type, beanType,
+            qualifiers, name, concrete, callback, context, injectionContext,
+            beanActivatorType));
+  }
+
+  private AsyncBeanDef<Object> _registerSingletonBean(final Class<Object> type,
+          final Class<?> beanType, final AsyncBeanProvider<Object> callback,
+          final Object instance, final Annotation[] qualifiers,
+          final String name, final boolean concrete,
+          final Class<Object> beanActivatorType) {
+
+    return registerBean(AsyncSingletonBean.newBean(this, type, beanType,
+            qualifiers, name, concrete, callback, instance, beanActivatorType));
   }
 
   private AsyncBeanDef<Object> _registerDependentBean(final Class<Object> type,
-                                                      final Class<?> beanType,
-                                                      final AsyncBeanProvider<Object> callback,
-                                                      final Annotation[] qualifiers,
-                                                      final String name,
-                                                      final boolean concrete,
-                                                      final Class<Object> beanActivatorType) {
+          final Class<?> beanType, final AsyncBeanProvider<Object> callback,
+          final Annotation[] qualifiers, final String name,
+          final boolean concrete, final Class<Object> beanActivatorType) {
 
-    return registerBean(
-        AsyncDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, beanActivatorType));
+    return registerBean(AsyncDependentBean.newBean(this, type, beanType,
+            qualifiers, name, concrete, callback, beanActivatorType));
   }
 
-  private void registerSingletonBean(final Class<Object> type,
-                                     final Class<?> beanType,
-                                     final AsyncBeanProvider<Object> callback,
-                                     final Object instance,
-                                     final Annotation[] qualifiers,
-                                     final String beanName,
-                                     final boolean concrete,
-                                     final Class<Object> beanActivatorType) {
+  private <T> void registerSingletonBean(final Class<Object> type,
+          final Class<T> beanType, final AsyncBeanProvider<Object> callback,
+          final Object instance, final Annotation[] qualifiers,
+          final String beanName, final boolean concrete,
+          final Class<Object> beanActivatorType) {
 
-
-    _registerNamedBean(beanName, 
-        _registerSingletonBean(type, beanType, callback, instance, qualifiers, beanName, concrete, beanActivatorType));
+    // check if already having some lazy singleton beans waiting for init
+    Collection<AsyncBeanDef<T>> lookupBeans = lookupBeans(beanType, qualifiers);
+    if (lookupBeans != null && lookupBeans.size() > 0) {
+      AsyncBeanDef<T> next = lookupBeans.iterator().next();
+      if (next instanceof AsyncSingletonBean) {
+        // update existing bean with instance
+        if (((AsyncSingletonBean<T>) next).isLazySingleton()) {
+          ((AsyncSingletonBean<T>) next).setInstance((T) instance);
+          return;
+        }
+      }
+    }
+    _registerNamedBean(
+            beanName,
+            _registerSingletonBean(type, beanType, callback, instance,
+                    qualifiers, beanName, concrete, beanActivatorType));
   }
 
   private void registerDependentBean(final Class<Object> type,
-                                     final Class<?> beanType,
-                                     final AsyncBeanProvider<Object> callback,
-                                     final Annotation[] qualifiers,
-                                     final String beanName,
-                                     final boolean concrete,
-                                     final Class<Object> beanActivatorType) {
+          final Class<?> beanType, final AsyncBeanProvider<Object> callback,
+          final Annotation[] qualifiers, final String beanName,
+          final boolean concrete, final Class<Object> beanActivatorType) {
 
-    _registerNamedBean(beanName, 
-        _registerDependentBean(type, beanType, callback, qualifiers, beanName, concrete, beanActivatorType));
+    _registerNamedBean(
+            beanName,
+            _registerDependentBean(type, beanType, callback, qualifiers,
+                    beanName, concrete, beanActivatorType));
   }
 
-  private void _registerNamedBean(final String name,
-                                  final AsyncBeanDef beanDef) {
+  private void _registerNamedBean(final String name, final AsyncBeanDef beanDef) {
     if (name == null)
       return;
 
@@ -116,47 +133,43 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
   }
 
   @Override
-  public void addBean(final Class<Object> type,
-                      final Class<?> beanType,
-                      final AsyncBeanProvider<Object> callback,
-                      final Object instance,
-                      final Annotation[] qualifiers) {
+  public void addBean(final Class<Object> type, final Class<?> beanType,
+          final AsyncBeanProvider<Object> callback, final Object instance,
+          final Annotation[] qualifiers) {
 
-    addBean(type, beanType, callback, instance, qualifiers, null, beanType.equals(type), null);
+    addBean(type, beanType, callback, instance, qualifiers, null,
+            beanType.equals(type), null);
   }
 
   @Override
-  public void addBean(final Class<Object> type,
-                      final Class<?> beanType,
-                      final AsyncBeanProvider<Object> callback,
-                      final Object instance,
-                      final Annotation[] qualifiers,
-                      final String name) {
+  public void addBean(final Class<Object> type, final Class<?> beanType,
+          final AsyncBeanProvider<Object> callback, final Object instance,
+          final Annotation[] qualifiers, final String name) {
 
-    addBean(type, beanType, callback, instance, qualifiers, name, beanType.equals(type), null);
+    addBean(type, beanType, callback, instance, qualifiers, name,
+            beanType.equals(type), null);
   }
 
   @Override
-  public void addBean(final Class<Object> type,
-                      final Class<?> beanType,
-                      final AsyncBeanProvider<Object> callback,
-                      final Object instance,
-                      final Annotation[] qualifiers,
-                      final String name,
-                      final boolean concreteType,
-                      final Class<Object> beanActivatorType) {
+  public void addBean(final Class<Object> type, final Class<?> beanType,
+          final AsyncBeanProvider<Object> callback, final Object instance,
+          final Annotation[] qualifiers, final String name,
+          final boolean concreteType, final Class<Object> beanActivatorType) {
 
     if (concreteType) {
       concreteBeans.add(type.getName());
     }
 
     if (instance != null) {
-      registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType, beanActivatorType);
+      registerSingletonBean(type, beanType, callback, instance, qualifiers,
+              name, concreteType, beanActivatorType);
     }
     else {
-      registerDependentBean(type, beanType, callback, qualifiers, name, concreteType, beanActivatorType);
+      registerDependentBean(type, beanType, callback, qualifiers, name,
+              concreteType, beanActivatorType);
     }
   }
+
 
   @Override
   @SuppressWarnings("unchecked")
@@ -366,5 +379,31 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
   public void destroyAllBeans() {
     namedBeans.clear();
     beanMap.clear();
+    lazySingletons.clear();
+  }
+  
+  @Override
+  public void addBean(Class<Object> type, Class<?> beanType,
+          AsyncBeanProvider<Object> callback, AsyncCreationalContext context,
+          AsyncInjectionContext injectionContext, Annotation[] qualifiers,
+          String name, boolean concreteType,
+          final Class<Object> beanActivatorType) {
+    if (concreteType) {
+      concreteBeans.add(type.getName());
+    }
+    _registerNamedBean(
+            name,
+            _registerSingletonBean(type, beanType, callback, context,
+                    injectionContext, qualifiers, name, concreteType,
+                    beanActivatorType));
+
+  }
+
+  public <T>  SingletonBeanProvider<T> getLazySingleBeanProvider(Class<?> beanType) {
+    return (SingletonBeanProvider<T>) lazySingletons.get(beanType);
+  }
+  
+  public <T> void putLazySingleBeanProvider(Class<?> beanType,SingletonBeanProvider<T> beanProvider) {
+    lazySingletons.put(beanType,beanProvider);
   }
 }

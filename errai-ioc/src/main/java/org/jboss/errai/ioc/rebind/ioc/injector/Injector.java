@@ -82,6 +82,13 @@ public interface Injector {
   boolean isSingleton();
 
   /**
+   * Checks if the injector for a lazySingleton bean.
+   *
+   * @return true if the injector handles a lazySingleton bean.
+   */
+  boolean isLazySingleton();
+  
+  /**
    * Check if the injector if of the dependent scope.
    *
    * @return true if the injector is of a dependent scope.

@@ -18,6 +18,7 @@ import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.OuterBean;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.ServiceA;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.ServiceB;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.ServiceC;
+import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.SomeOtherSingleton;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.UnreferencedDependentRootBean;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
@@ -40,6 +41,25 @@ public class AsyncDependentScopeIntegrationTest extends IOCClientTestCase {
   public void gwtSetUp() throws Exception {
     DependentBeanCycleB.instanceCount = 1;
     super.gwtSetUp();
+  }
+  
+  public void testComplexSetup() {
+    delayTestFinish(10000);
+
+    Container.runAfterInit(new Runnable() {
+
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(SomeOtherSingleton.class)
+                .getInstance(new CreationalCallback<SomeOtherSingleton>() {
+
+                  @Override
+                  public void callback(SomeOtherSingleton beanInstance) {
+                    finishTest();
+                  }
+                });
+      }
+    });
   }
 
   public void testDependentBeanScope() {

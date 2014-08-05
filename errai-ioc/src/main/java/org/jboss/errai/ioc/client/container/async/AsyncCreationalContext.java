@@ -60,8 +60,9 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
 
       if (!beanList.isEmpty()) {
         final AsyncBeanDef<T> bean = beanList.iterator().next();
-        if (bean != null && bean instanceof AsyncSingletonBean) {
-          //   addWait(new BeanRef(beanType, qualifiers), creationalCallback);
+        //return instance directly if asyncsingleton bean. just check if it is not the first call for that singleton bean (isready will be false)
+        if (bean != null && bean instanceof AsyncSingletonBean && ((AsyncSingletonBean)bean).isReady()) {
+          //   addWait(new BeanRef(beanType, qualifiers), creationa8lCallback);
           bean.getInstance(creationalCallback);
           return;
         }

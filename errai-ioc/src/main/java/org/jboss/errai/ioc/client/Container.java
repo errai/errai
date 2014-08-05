@@ -127,6 +127,7 @@ public class Container implements EntryPoint {
   public static void runAfterInit(final Runnable runnable) {
     if (init) {
       runnable.run();
+      return;
     }
 
     afterInit.add(runnable);
