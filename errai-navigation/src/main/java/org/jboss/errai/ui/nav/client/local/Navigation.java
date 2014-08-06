@@ -182,12 +182,12 @@ public class Navigation {
     try {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance, state);
+    } catch (RedirectLoopException e) {
+      throw e;
     } catch (RuntimeException e) {
       if (toPageInstance == null)
         // This is an extremely unlikely case, so throwing an exception is preferable to going through the navigation error handler.
         throw new PageNotFoundException("There is no page of type " + toPage.getName() + " in the navigation graph.");
-      else if (e instanceof RedirectLoopException)
-        throw e;
       else
         navigationErrorHandler.handleError(e, toPageInstance.name());
     }
@@ -205,11 +205,10 @@ public class Navigation {
     try {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance);
+    } catch (RedirectLoopException e) {
+      throw e;
     } catch (RuntimeException e) {
-      if(e instanceof RedirectLoopException)
-        throw e;
-      else
-       navigationErrorHandler.handleError(e, toPage);
+      navigationErrorHandler.handleError(e, toPage);
     }
   }
 
@@ -225,10 +224,9 @@ public class Navigation {
     try {
        toPageInstance = navGraph.getPageByRole(role);
       navigate(toPageInstance);
+    } catch (RedirectLoopException e) {
+      throw e;
     } catch (RuntimeException e) {
-      if (e instanceof RedirectLoopException)
-        throw e;
-      else
         navigationErrorHandler.handleError(e, role);
     }
   }
