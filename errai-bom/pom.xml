@@ -111,6 +111,7 @@
     <selenium.version>2.42.2</selenium.version>
     <servlet.api.version>3.0.1</servlet.api.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
+    <weld.api.version>2.0.SP1</weld.api.version>
     <weld.spi.version>2.0.SP1</weld.spi.version>
     <weld.version>2.0.5.Final</weld.version>
     <wildfly.cli.version>8.0.0.Final</wildfly.cli.version>
@@ -1027,6 +1028,12 @@
         <groupId>org.jboss.weld</groupId>
         <artifactId>weld-spi</artifactId>
         <version>${weld.spi.version}</version>
+      </dependency>
+
+       <dependency>
+        <groupId>org.jboss.weld</groupId>
+        <artifactId>weld-api</artifactId>
+        <version>${weld.api.version}</version>
       </dependency>
 
       <dependency>
