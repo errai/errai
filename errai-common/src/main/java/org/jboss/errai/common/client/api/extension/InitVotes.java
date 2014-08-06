@@ -17,6 +17,7 @@
 package org.jboss.errai.common.client.api.extension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +52,7 @@ public final class InitVotes {
   private static final List<InitFailureListener> initFailureListeners = new ArrayList<InitFailureListener>();
 
   private static boolean armed = false;
+  private static boolean init = false;
   private static final Set<String> waitForSet = new HashSet<String>();
 
   // a list of both strings and runnable references that are marked done.
@@ -86,6 +88,7 @@ public final class InitVotes {
       waitForSet.clear();
       completedSet.clear();
       armed = false;
+      init = false;
     }
   }
 
@@ -255,6 +258,9 @@ public final class InitVotes {
       if (!initCallbacks.contains(runnable)) {
         initCallbacks.add(runnable);
       }
+      if (init) {
+        _runAllRunnables(Arrays.asList(runnable), initCallbacks);
+      }
     }
   }
 
@@ -333,6 +339,7 @@ public final class InitVotes {
   private static void finishInit() {
     synchronized (lock) {
       armed = false;
+      init = true;
       idempotentStopFailTimer();
 
       _runAllRunnables(initCallbacks);
