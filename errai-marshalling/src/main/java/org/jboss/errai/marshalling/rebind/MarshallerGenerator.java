@@ -76,17 +76,17 @@ public class MarshallerGenerator extends IncrementalGenerator {
     final String marshallerTypeName = packageName + "." + className;
     final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
     
-    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    if (printWriter == null) {
-      return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);      
-    }
-    else if (cachedType != null && cachedType.hashContent() == type.hashContent() 
+    if (cachedType != null && cachedType.hashContent() == type.hashContent() 
             && context.isGeneratorResultCachingEnabled()) {
       log.debug("Reusing cached marshaller for "  + fullyQualifiedTypeName);
       return new RebindResult(RebindMode.USE_ALL_CACHED, marshallerTypeName);
     }
     else {
-      log.debug("Generating marshaller for "  + fullyQualifiedTypeName);
+      final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+      if (printWriter == null) {
+        return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);
+      } 
+      log.debug("Generating marshaller for " + fullyQualifiedTypeName);
       generateMarshaller(context, type, className, marshallerTypeName, logger, printWriter);
       cachedPortableTypes.put(fullyQualifiedTypeName, type);
       return new RebindResult(RebindMode.USE_ALL_NEW, marshallerTypeName);
