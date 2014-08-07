@@ -63,31 +63,60 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
     addBean(type, beanType, provider, singleton, qualifiers, name, concrete, null);   
   }
 
-  public void addBean(final Class type,
-      final Class beanType,
-      final AsyncBeanProvider provider,
-      final boolean singleton,
-      final Annotation[] qualifiers,
-      final String name,
-      final boolean concrete,
-      final Class beanActivatorType) {
+   public void addBean(final Class type,
+  					  final Class beanType,
+          			  final AsyncBeanProvider provider,
+          			  final boolean singleton,
+          			  final boolean lazySingleton,
+          			  final Annotation[] qualifiers,
+          			  final String name,
+          			  final boolean concrete) {
 
+    addBean(type, beanType, provider, singleton, lazySingleton, qualifiers, name, concrete, null);
+  }
+
+  public void addBean(final Class type,
+  					  final Class beanType,
+          			  final AsyncBeanProvider provider,
+          			  final boolean singleton,
+          			  final Annotation[] qualifiers,
+          			  final String name,
+          			  final boolean concrete,
+          			  final Class beanActivatorType) {
+    addBean(type, beanType, provider, singleton, false, qualifiers, name, concrete, null);
+  }
+
+  public void addBean(final Class type,
+  					  final Class beanType,
+          			  final AsyncBeanProvider provider,
+          			  final boolean singleton,
+          			  final boolean lazySingleton, 
+         			  final Annotation[] qualifiers,
+          			  final String name, 
+         			  final boolean concrete,
+          			  final Class beanActivatorType) {
     if (singleton) {
       final CreationalCallback creationalCallback = new CreationalCallback() {
         @Override
         public void callback(final Object beanInstance) {
-          }
+        }
 
         @Override
         public String toString() {
           return type.getName();
         }
       };
-      context.getSingletonInstanceOrNew(this, provider, creationalCallback, type, beanType, qualifiers, name);
+      if (!lazySingleton) {
+        // Creating singleton instance: " + type);
+        context.getSingletonInstanceOrNew(this, provider, creationalCallback, type, beanType, qualifiers, name);
+      }
+      else {
+        // Lazy singleton detected skip creating instance: " + type);
+        ((AsyncBeanManagerSetup) manager).addBean(type, beanType, provider, context, this, qualifiers, name, concrete, beanActivatorType);
+      }
     }
     else {
-      ((AsyncBeanManagerSetup) manager).addBean(type, beanType, provider, null, qualifiers, name, concrete,
-          beanActivatorType);
+      ((AsyncBeanManagerSetup) manager).addBean(type, beanType, provider, null, qualifiers, name, concrete, beanActivatorType);
     }
 
   }

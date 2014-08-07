@@ -37,13 +37,13 @@ public abstract class AbstractAsyncInjector extends AbstractInjector {
         
         statement =
             loadVariable(context.getProcessingContext().getContextVariableReference()).invoke("addBean",
-                getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()), isSingleton(),
+                getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()), isSingleton(), isLazySingleton(),
                 qualifyingMetadata.render(), beanName, true, Stmt.load(ab.value()));
       }
-      else {
+      else{
         statement =
             loadVariable(context.getProcessingContext().getContextVariableReference()).invoke("addBean",
-                getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()), isSingleton(),
+                getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()), isSingleton(), isLazySingleton(),
                 qualifyingMetadata.render(), beanName, true);
       }
 

@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.ioc.client.LazySingleton;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.api.LoadAsync.NO_FRAGMENT;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
@@ -68,7 +69,9 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     this.testMock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
-
+   
+    this.lazySingleton = type.getAnnotation(LazySingleton.class)!=null;
+    
     this.instanceVarName = InjectUtil.getNewInjectorName().concat("_").concat(type.getName());
 
     final Set<Annotation> qualifiers = JSR330QualifyingMetadata.createSetFromAnnotations(type.getAnnotations());
@@ -98,8 +101,10 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
 
   @Override
   public void renderProvider(final InjectableInstance injectableInstance) {
-    if (isRendered()) return;
-
+  	if ((isRendered() && isEnabled()) ||
+              !injectableInstance.getInjectionContext().isIncluded(type)) {
+            return;
+          }
     final InjectionContext injectContext = injectableInstance.getInjectionContext();
     final IOCProcessingContext ctx = injectContext.getProcessingContext();
 

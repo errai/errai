@@ -5,6 +5,15 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Specializes;
+import javax.inject.Named;
+
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -20,6 +29,7 @@ import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.LazySingleton;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -39,14 +49,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
-
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Specializes;
-import javax.inject.Named;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -79,6 +81,8 @@ public class ProducerInjector extends AbstractInjector {
     this.producerInjectableInstance = producerInjectableInstance;
 
     this.singleton = injectionContext.isElementType(WiringElementType.SingletonBean, getProducerMember());
+
+	this.lazySingleton = getProducerMember().getAnnotation(LazySingleton.class)!=null;
 
     this.disposerMethod = findDisposerMethod(injectionContext.getProcessingContext());
 
