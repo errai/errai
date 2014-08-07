@@ -75,7 +75,7 @@ public class ContextualProviderInjector extends TypeInjector {
         throw new RuntimeException("illegal task type: " + injectableInstance.getEnclosingType());
     }
 
-    final MetaType[] typeArgs = pType.getTypeParameters();
+    final MetaType[] typeArgs = (pType != null ? pType.getTypeParameters() : new MetaType[0]);
     final MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
 
     for (int i = 0; i < typeArgs.length; i++) {
