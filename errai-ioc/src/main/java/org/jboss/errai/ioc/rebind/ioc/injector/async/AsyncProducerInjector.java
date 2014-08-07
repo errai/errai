@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.ioc.client.LazySingleton;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanContext;
@@ -83,6 +84,8 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     this.producerInjectableInstance = producerInjectableInstance;
 
     this.singleton = injectionContext.isElementType(WiringElementType.SingletonBean, getProducerMember());
+
+    this.lazySingleton = getProducerMember().getAnnotation(LazySingleton.class)!=null;
 
     this.disposerMethod = findDisposerMethod(injectionContext.getProcessingContext());
 

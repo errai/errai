@@ -16,6 +16,15 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Provider;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
@@ -50,14 +59,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncTypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
-import javax.inject.Provider;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class AsyncInjectUtil {
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {

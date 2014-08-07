@@ -7,11 +7,17 @@ import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Cow;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Foo;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Pig;
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.SomeOtherOtherSingleton;
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.SomeOtherSingleton;
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.SomeSingleton;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.TestInterface;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+
+import com.google.gwt.user.client.Timer;
 
 import java.util.Collection;
 
@@ -23,6 +29,14 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.async.test.beanmanager.AsyncBeanManagerTests";
+  }
+  
+  @Override
+  protected void gwtTearDown() throws Exception {
+    super.gwtTearDown();
+    SomeSingleton.instances=0;
+    SomeOtherSingleton.instances=0;
+    SomeOtherOtherSingleton.instances=0;
   }
 
   public void testAsyncLookup() {
@@ -162,6 +176,74 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
       if (def.getType().equals(clazz)) return true;
     }
     return false;
+  }
+  
+
+  public void testComplexSingletonWithBeanManagerSzenario() {
+    delayTestFinish(25000);
+
+    Container.$(new Runnable() {
+      @Override
+      public void run() {
+            final AsyncBeanManager asyncBeanManager = IOC.getAsyncBeanManager();
+            // we wait a bit more than after init to ensure all instances are created
+            new Timer() {
+                
+                @Override
+                public void run() {
+                    // we except instances upfront, since some test may run before this test. we don't know how much instacnes we have
+                    // anyhow getting bean will create a new instance
+                    assertEquals(1, SomeSingleton.instances);
+                    assertEquals(1, SomeOtherSingleton.instances);
+                    assertEquals(1, SomeOtherOtherSingleton.instances);
+                    
+                    // wait until someothersingleton has loaded everything in its postconsctruct call
+                    new Timer() {
+                        
+                        @Override
+                        public void run() {
+                            // decoupled thread is loading some instances with bean manager async. wait until done
+                            assertEquals(1, SomeSingleton.instances);
+                            assertEquals(1, SomeOtherSingleton.instances);
+                            assertEquals(1, SomeOtherOtherSingleton.instances);
+                            
+                            asyncBeanManager.lookupBean(SomeSingleton.class).getInstance(new CreationalCallback<SomeSingleton>() {
+                                
+                                @Override
+                                public void callback(SomeSingleton beanInstance) {
+                                    assertEquals(1, SomeSingleton.instances);
+                                    // we wait to ensure that the postcontruct method has bean called yet & is fully processed
+                                    // event for async calls like calling the bean manager
+                                    new Timer() {
+                                        
+                                        @Override
+                                        public void run() {
+                                            // no the nested bean manager cal should have created this intances
+                                            assertEquals(1, SomeOtherSingleton.instances);
+                                            assertEquals(1, SomeOtherOtherSingleton.instances);
+                                            
+                                            // try to do something simlar
+                                            asyncBeanManager.lookupBean(SomeSingleton.class).getInstance(new CreationalCallback<SomeSingleton>() {
+                                                
+                                                @Override
+                                                public void callback(SomeSingleton beanInstance) {
+                                                    assertEquals(1, SomeOtherOtherSingleton.instances);
+                                                    finishTest();
+                                                }
+                                                
+                                            });
+                                        }
+                                    }.schedule(1000);
+                                }
+                            });
+                            
+                        }
+                    }.schedule(1000);
+                    
+                }
+            }.schedule(1000);
+        }
+    });
   }
 }
 
