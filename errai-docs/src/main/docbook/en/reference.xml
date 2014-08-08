@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-06-30</date>
+    <date>2014-08-08</date>
     
     
     
@@ -158,7 +158,48 @@ public class App {
 <simpara>Once you have configured your browser for development with GWT, and after loading the app with the <emphasis>Launch Default Browser</emphasis> button, you should see the application load.</simpara>
 <simpara>If you are using errai-tutorial, you should see a page with a complaint form.</simpara>
 <simpara>If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".</simpara>
-<simpara>That&#8217;s it! You&#8217;ve got your first Errai Application up and running. In the next section we&#8217;ll setup your IDE.</simpara>
+<simpara>That&#8217;s it! You&#8217;ve got your first Errai Application up and running. In the next section we&#8217;ll learn how to run super devmode. Otherwise, skip to the section afterwards to setup your IDE.</simpara>
+</section>
+<section id="_running_your_app_in_super_devmode">
+<title>Running your app in Super Devmode</title>
+<simpara>Regular Devmode requires a special browser plugin to run client-side code in a as Java. Super Devmode is an alternative method that compiles code to javascript to be run natively in any browser. With browsers that support source-mapping, it is possible to debug with lines from your original source code within the browser.</simpara>
+<simpara>To run super devmode you will need to open two terminals in your project. In the first enter:</simpara>
+<screen>mvn clean gwt:run</screen>
+<simpara>This will launch a classic devmode server for hosting server-side resources. In the second enter:</simpara>
+<screen>mvn gwt:run-codeserver</screen>
+<simpara>This will launch the super devmode codeserver that hosts compiled GWT code. When the super devmode codeserver is finished compiling your GWT module, it will display a message like this:</simpara>
+<screen>The code server is ready.
+Next, visit: http://localhost:9876</screen>
+<simpara>Go to the displayed link and copy the two bookmarks <emphasis role="strong">Dev Mode On</emphasis> and <emphasis role="strong">Dev Mode Off</emphasis>.</simpara>
+<simpara>After completing the above, you may run your application as follows:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Go to the classic devmode window and click <emphasis role="strong">Copy Link</emphasis>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Paste the link in to the browser, but <emphasis role="strong">remove</emphasis> the query paramters (i.e. <literal>?gwt.codesvr=...</literal>).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Go to the link. You may see prompts saying that your GWT module needs to be recompiled.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Click the <emphasis role="strong">Dev Mode On</emphasis> bookmark you copied previously. You should see a prompt to compile your GWT module. Click <emphasis role="strong">Compile</emphasis> to do so.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Once the super devmode server has completed, your application should be running.</simpara>
+      
+    </listitem>
+  
+</orderedlist>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">
 <title>Configuring your project for Eclipse</title>
@@ -5504,14 +5545,14 @@ public class NavBar extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-ExtendedstylingwithLESS">
 <title>Extended styling with LESS</title>
-<simpara>Errai also supports <ulink url="http://lesscss.org">LESS</ulink> stylesheets. To get started using these you&#8217;ll have to create a LESS stylesheet and place it on the classpath of your project. Errai will convert the LESS stylesheet to css preform optimisations on it and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:</simpara>
+<simpara>Errai also supports <ulink url="http://lesscss.org">LESS</ulink> stylesheets. To get started using these you&#8217;ll have to create a LESS stylesheet and place it on the classpath of your project. Errai will convert the LESS stylesheet to css, perform optimisations on it, and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class MyComponent extends Component {
   @Inject
   private LessStyle lessStyle;
 
   ...
 
-  @PostCreate
+  @PostConstruct
   private void init() {
     textBox.setStyleName(lessStyle.get("input"));
   }
