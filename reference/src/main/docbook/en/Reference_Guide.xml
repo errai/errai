@@ -21,18 +21,5 @@
                href="chapter-11-Errai_UI_Navigation.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
                href="chapter-12-Errai_Cordova_Mobile_Support_.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="chapter-13-Logging.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-14-Configuration.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-15-Troubleshooting_FAQ.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-16-Upgrade_Guide.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="chapter-17-Downloads.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="chapter-18-Sources.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-19-Reporting_problems.xml"/>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-               href="chapter-20-Errai_License.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="Revision_History.xml"/>
 </book>
