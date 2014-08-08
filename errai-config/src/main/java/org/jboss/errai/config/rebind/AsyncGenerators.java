@@ -172,8 +172,6 @@ public final class AsyncGenerators {
         for (final Map.Entry<Class, AsyncCodeGenerator> entry : codeGenerators.entrySet()) {
           final Future<String> value = entry.getValue().generateAsync(job.getTreeLogger(), job.getGeneratorContext());
           activeFutures.put(entry.getKey(), new FutureWrapper(entry.getKey(), value));
-
-          log.info("started async generation for >> " + entry.getKey().getName());
         }
       }
       else {
