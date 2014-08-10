@@ -74,9 +74,15 @@ public enum ErraiConfigAttribs {
   ENABLE_WEB_SOCKET_SERVER("errai.bus.enable_web_socket_server", "false"),
   WEB_SOCKET_URL("errai.bus.web_socket_url", "/websocket.bus"),
   WEB_SOCKET_PORT("errai.bus.web_socket_port", "8085"),
+  SECURE_WEB_SOCKET_SERVER("errai.bus.secure_web_socket_server", "false"),
+  WEB_SOCKET_KEYSTORE("errai.bus.web_socket_keystore"),
+  WEB_SOCKET_KEYSTORE_TYPE("errai.bus.web_socket_keystore_type", "JKS"),
+  WEB_SOCKET_KEYSTORE_PASSWORD("errai.bus.web_socket_keystore_password"),
+  WEB_SOCKET_KEY_PASSWORD("errai.bus.web_socket_key_password"),
 
   WEBSOCKET_SERVLET_ENABLED("errai.bus.websocket.servlet.enabled", "false"),
   WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket"),
+  FORCE_SECURE_WEBSOCKET("errai.bus.websocket.force.secure", "false"),
 
   AUTO_DISCOVER_SERVICES("errai.bus.auto_discover_services", "false"),
 

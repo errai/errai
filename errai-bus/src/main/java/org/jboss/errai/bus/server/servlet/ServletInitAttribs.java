@@ -23,6 +23,7 @@ public enum ServletInitAttribs {
   SERVICE_LOCATOR("service-locator"),
   WEBSOCKETS_PATH_ELEMENT("websocket-path-element"),
   WEBSOCKETS_ENABLED("websockets-enabled"),
+  FORCE_SECURE_WEBSOCKETS("force-secure-websockets"),
   AUTO_DISCOVER_SERVICES("auto-discover-services");
 
   private final String attributeName;

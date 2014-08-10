@@ -1337,6 +1337,66 @@ You can also define filters when using the JSR-356 WebSocket implementation. The
 </context-param>
 ----
 
+==== WebSocket Security
+
+Errai supports Websocket security (wss) for two deployment scenarios.
+
+. Servlet-container is deployed behind a reverse-proxy or other SSL terminating appliance.
+. Servlet-container deployed in front. Means the servlet-container itself acts as SSL termination.
+
+===== When Servlet-container is NOT SSL terminator
+
+Because the websocket URL is build on the server side for configuration purpose, Errai have to know to use wss scheme.
+To solve this, add the following to the [code]+web.xml+
+[source, xml]
+----
+<context-param>
+		<param-name>force-secure-websockets</param-name>
+		<param-value>true</param-value>
+</context-param>
+----
+
+That's it for all kinds of Errai websocket implementations. From now Errai use anytime the wss scheme to establish a websocket connection with the server side SSL endpoint.
+
+[IMPORTANT]
+.Dont forget to configure your reverse-proxy or appliance to handle websocket with ssl!
+====
+To use this kind of configuration you have to configure your reverse-proxy or appliance with HTTPS (SSL / TLS) to WAN.
+====
+
+===== When Servlet-container IS SSL terminator
+
+====== With JBoss AS 7.1.2 (or higher) & JSR-356 Websocket
+
+Errai determine the websocket scheme against the servlet scheme. This means, if the servlet-container is configured to use HTTPS, the Errai Websocket Servlet for JBoss AS 7 and / or the Errai JSR-356 Websocket implementation use the wss scheme automatically against the servlet scheme.
+So, you have nothing to do!
+
+====== Sideband server
+
+Since this websocket configuration start it's own small Netty server and there are so many servlet-containers out there, you have to apply it's own SSL configuration to handle the wss scheme.
+
+To tell the sideband server to use SSL and Errai the wss scheme, this properties are mandatory in the [code]+ErraiService.properties+:
+
+. errai.bus.secure_web_socket_server=true -> This tells the sideband server and Errai to use SSL / wss.
+. errai.bus.web_socket_keystore=[full qualified path to the JKS or PKCS12 keystore] -> Key store to use
+. errai.bus.web_socket_keystore_password=[password for the key store] -> Password for the key store to use
+
+Depending your configurations and kinds of PKI containers you can the add following addtional properties in the [code]+ErraiService.properties+:
+
+. errai.bus.web_socket_keystore_type=[kind of key store] -> When you want to use the PKCS12 format instead of JKS (default)
+. errai.bus.web_socket_key_password=[password of private key] -> When the private key in the container has a different password as the keystore itself.
+
+Done.
+
+[IMPORTANT]
+.Sidband server need a keystore.
+====
+In this deployment case, the sideband server need a keystore with a server certificate an the corresponding private key. You can also use the same as for the middleware itself.
+====
+
+When you have applied all necessary information the Errai Bus can communicate through the wss scheme over the websocket sideband server.
+
+
 [[sid-59146643]]
 
 === Bus Lifecycle

@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server.io.websockets;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -25,10 +24,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-
+import io.netty.handler.ssl.SslHandler;
+import org.jboss.errai.bus.server.io.websockets.ssl.SslHandlerFactory;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Mike Brock
@@ -43,19 +46,29 @@ public class WebSocketServer {
   }
 
   public void start() {
-    final int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(svc.getConfiguration());
+    final ErraiServiceConfigurator esc = svc.getConfiguration();
+    final int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(esc);
     final ServerBootstrap bootstrap = new ServerBootstrap();
-    final WebSocketServerHandler webSocketHandler = new WebSocketServerHandler(svc);
+    final WebSocketServerHandler webSocketHandler = new WebSocketServerHandler(
+            svc);
 
     try {
       final NioEventLoopGroup bossGroup = new NioEventLoopGroup();
       final NioEventLoopGroup workerGroup = new NioEventLoopGroup();
-      final ChannelFuture channelFuture = bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+      final ChannelFuture channelFuture = bootstrap
+              .group(bossGroup, workerGroup)
+              .channel(NioServerSocketChannel.class)
               .childHandler(new ChannelInitializer() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
+                  final SslHandler sslHandler = SslHandlerFactory
+                          .buildSslHandler(esc);
+                  if (sslHandler != null) {
+                    ch.pipeline().addLast("ssl", sslHandler);
+                  }
                   ch.pipeline().addLast("codec-http", new HttpServerCodec());
-                  ch.pipeline().addLast("aggregator", new HttpObjectAggregator(65536));
+                  ch.pipeline().addLast("aggregator",
+                          new HttpObjectAggregator(65536));
                   ch.pipeline().addLast("handler", webSocketHandler);
                 }
 
@@ -68,11 +81,9 @@ public class WebSocketServer {
             webSocketHandler.stop();
             channelFuture.channel().close();
             log.info("web socket server stopped.");
-          } 
-          catch (Exception e) {
+          } catch (Exception e) {
             throw new RuntimeException(e);
-          }
-          finally {
+          } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
           }
