@@ -2,6 +2,7 @@ package org.jboss.errai.bus.server.websocket.jsr356.weld.conversation;
 
 import org.apache.commons.lang.StringUtils;
 
+
 /**
  * Running state of {@link javax.enterprise.context.Conversation}.
  * 

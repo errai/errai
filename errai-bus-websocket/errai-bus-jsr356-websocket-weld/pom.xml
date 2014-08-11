@@ -86,12 +86,6 @@
       <type>pom</type>
       <scope>test</scope>
       <!--There is a problem with Aether https://issues.jboss.org/browse/SHRINKRES-174 -->
-      <exclusions>
-        <exclusion>
-          <artifactId>maven-aether-provider</artifactId>
-          <groupId>org.apache.maven</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <artifactId>maven-aether-provider</artifactId>
@@ -110,6 +104,10 @@
       <version>${wildfly.version}</version>
       <type>zip</type>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
     </dependency>
   </dependencies>
 
@@ -133,14 +131,18 @@
   </build>
 
   <profiles>
-    <!-- Skipping the tests until JDK7 build issues are resolved -->
+
     <profile>
       <id>integration-test</id>
-      <!-- dependencies>
+      <dependencies>
+        <dependency>
+          <artifactId>maven-aether-provider</artifactId>
+          <groupId>org.apache.maven</groupId>
+          <version>3.2.1</version>
+        </dependency>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-bus</artifactId>
-          <scope>test</scope>
           <exclusions>
             <exclusion>
               <groupId>com.google.guava</groupId>
@@ -154,21 +156,20 @@
           <version>13.0.1</version>
           <scope>test</scope>
         </dependency>
-      </dependencies-->
+      </dependencies>
       <build>
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-              <!-- Skipping the tests until JDK7 build issues are resolved -->
-              <skipTests>true</skipTests>
+              <skipTests>false</skipTests>
               <systemPropertyVariables>
                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
               </systemPropertyVariables>
             </configuration>
           </plugin>
 
-          <!-- plugin>
+          <plugin>
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
               <execution>
@@ -190,7 +191,7 @@
                 </configuration>
               </execution>
             </executions>
-          </plugin-->
+          </plugin>
         </plugins>
       </build>
     </profile>
