@@ -1217,7 +1217,7 @@ Note that the only difference between the example in the previous section and th
 
 ErraiBus has support for WebSocket-based communication. When WebSockets are enabled, capable web browsers will attempt to upgrade their COMET-based communication with the server-side bus to use a WebSocket channel.
 
-There are three different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration and the third is to rely in JSR-356 support in WildFly.
+There are three different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration and the third is to rely in JSR-356 support in WildFly. Of course, you only need to configure one of these three options!
 
 [[sid-53380177_WebSockets-Configuringthesidebandserver]]
 
@@ -1319,7 +1319,7 @@ Also make sure to deploy the required errai-bus-jboss7-websocket.jar to your ser
 ----
 ====
 
-==== JSR-356 WebSocket support
+==== JSR-356 WebSocket support (Deploying to WildFly 8.0 or higher)
 
 Errai provides two implementations for this:
 
@@ -1378,61 +1378,53 @@ You can also define filters when using the JSR-356 WebSocket implementation. The
 
 Errai supports Websocket security (wss) for two deployment scenarios.
 
-. Servlet-container is deployed behind a reverse-proxy or other SSL terminating appliance.
-. Servlet-container deployed in front. Means the servlet-container itself acts as SSL termination.
+. The servlet container is deployed behind a reverse-proxy or other SSL terminating appliance
+. The servlet container is deployed in front and takes care of SSL termination
 
-===== When Servlet-container is NOT SSL terminator
+===== Servlet container is deployed behind a reverse-proxy
 
-Because the websocket URL is build on the server side for configuration purpose, Errai have to know to use wss scheme.
-To solve this, add the following to the [code]+web.xml+
+All you need to do is configure the following context parameter in your [code]+web.xml+
+
 [source, xml]
 ----
 <context-param>
-		<param-name>force-secure-websockets</param-name>
-		<param-value>true</param-value>
+  <param-name>force-secure-websockets</param-name>
+  <param-value>true</param-value>
 </context-param>
 ----
 
-That's it for all kinds of Errai websocket implementations. From now Errai use anytime the wss scheme to establish a websocket connection with the server side SSL endpoint.
+This will work for the sideband-server as well as JBoss AS7 and WildFly based websocket support.
 
 [IMPORTANT]
-.Dont forget to configure your reverse-proxy or appliance to handle websocket with ssl!
+.Dont forget to configure your reverse-proxy or appliance to handle websocket connections with SSL!
 ====
-To use this kind of configuration you have to configure your reverse-proxy or appliance with HTTPS (SSL / TLS) to WAN.
+To use this kind of configuration you have to configure your reverse-proxy or appliance to use HTTPS (SSL / TLS).
 ====
 
-===== When Servlet-container IS SSL terminator
+===== Servlet container takes care of SSL termination
 
-====== With JBoss AS 7.1.2 (or higher) & JSR-356 Websocket
+====== With JBoss AS 7.1.2 (or higher) & JSR-356 WebSocket (WildFly 8 or higher)
 
-Errai determine the websocket scheme against the servlet scheme. This means, if the servlet-container is configured to use HTTPS, the Errai Websocket Servlet for JBoss AS 7 and / or the Errai JSR-356 Websocket implementation use the wss scheme automatically against the servlet scheme.
-So, you have nothing to do!
+If the servlet container is configured to use HTTPS, the Errai WebSocket Servlet for JBoss AS 7 and / or the Errai JSR-356 WebSocket implementation for WildFly will use the WSS scheme automatically. So, there's is nothing else to do!
 
-====== Sideband server
+====== Using the sideband server
 
-Since this websocket configuration start it's own small Netty server and there are so many servlet-containers out there, you have to apply it's own SSL configuration to handle the wss scheme.
+To tell the sideband server to use SSL and configure Errai to use the WSS scheme the following properties are mandatory in [code]+ErraiService.properties+:
 
-To tell the sideband server to use SSL and Errai the wss scheme, this properties are mandatory in the [code]+ErraiService.properties+:
-
-. errai.bus.secure_web_socket_server=true -> This tells the sideband server and Errai to use SSL / wss.
+. errai.bus.secure_web_socket_server=true -> This tells the sideband server and Errai to use SSL / WSS.
 . errai.bus.web_socket_keystore=[full qualified path to the JKS or PKCS12 keystore] -> Key store to use
 . errai.bus.web_socket_keystore_password=[password for the key store] -> Password for the key store to use
 
-Depending your configurations and kinds of PKI containers you can the add following addtional properties in the [code]+ErraiService.properties+:
+Depending on your configuration and type of PKI container you can the add following addtional properties in the [code]+ErraiService.properties+:
 
 . errai.bus.web_socket_keystore_type=[kind of key store] -> When you want to use the PKCS12 format instead of JKS (default)
-. errai.bus.web_socket_key_password=[password of private key] -> When the private key in the container has a different password as the keystore itself.
-
-Done.
+. errai.bus.web_socket_key_password=[password of private key] -> When the private key in the container has a different password than the keystore itself.
 
 [IMPORTANT]
-.Sidband server need a keystore.
+.Sidband server needs a keystore.
 ====
-In this deployment case, the sideband server need a keystore with a server certificate an the corresponding private key. You can also use the same as for the middleware itself.
+In this deployment case, the sideband server needs a keystore with a server certificate and the corresponding private key.
 ====
-
-When you have applied all necessary information the Errai Bus can communicate through the wss scheme over the websocket sideband server.
-
 
 [[sid-59146643]]
 

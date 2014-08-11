@@ -104,12 +104,9 @@ public final class ServletBootstrapUtil {
         ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.set(configurator, webSocketsEnabled);
       }
 
-		final String forceSecureWebsockets = ServletInitAttribs.FORCE_SECURE_WEBSOCKETS.getInitOrContextValue(config, "false");
-		ErraiConfigAttribs.FORCE_SECURE_WEBSOCKET.set(configurator, forceSecureWebsockets);
-
-
-		ErraiConfigAttribs.WEBSOCKET_SERVLET_CONTEXT_PATH.set(configurator,
-              context.getContextPath() + "/" + pathElement);
+      final String forceSecureWebsockets = ServletInitAttribs.FORCE_SECURE_WEBSOCKETS.getInitOrContextValue(config, "false");
+      ErraiConfigAttribs.FORCE_SECURE_WEBSOCKET.set(configurator, forceSecureWebsockets);
+      ErraiConfigAttribs.WEBSOCKET_SERVLET_CONTEXT_PATH.set(configurator, context.getContextPath() + "/" + pathElement);
 
       return ErraiServiceSingleton.initSingleton(configurator);
     }
