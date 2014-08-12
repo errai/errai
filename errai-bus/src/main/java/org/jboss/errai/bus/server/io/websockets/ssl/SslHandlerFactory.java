@@ -35,29 +35,27 @@ public class SslHandlerFactory {
    * @return the ssl handler, never null.
    */
   public static SslHandler buildSslHandler(ErraiServiceConfigurator esc) {
-    if (ErraiConfigAttribs.SECURE_WEB_SOCKET_SERVER.getBoolean(esc)) {
-      keyPassword = StringUtils.isEmpty(keyPassword) ? ErraiConfigAttribs.WEB_SOCKET_KEY_PASSWORD.get(esc) : keyPassword;
-      if (keyStore == null) {
-        final String keyStorePath = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE.get(esc);
-        final String keystoreType = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_TYPE.get(esc);
+    keyPassword = StringUtils.isEmpty(keyPassword) ? ErraiConfigAttribs.WEB_SOCKET_KEY_PASSWORD.get(esc) : keyPassword;
+    if (keyStore == null) {
+      final String keyStorePath = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE.get(esc);
+      final String keystoreType = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_TYPE.get(esc);
 
-        if (StringUtils.isEmpty(keyStorePath)) {
-          throw new IllegalStateException(
-                  "when ssl is activated for the sideband server, key store information is necessary");
-        }
-        String keyStorePassword = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_PASSWORD.get(esc);
-
-        if (StringUtils.isEmpty(keyStorePassword)) {
-          throw new IllegalStateException(
-                  "keystore configured for sideband websocket server, but missing keystore password");
-        }
-
-        if (StringUtils.isEmpty(keyPassword)) {
-          keyPassword = keyStorePassword;
-        }
-
-        keyStore = KeystoreFactory.getKeyStore(keyStorePath, keyStorePassword, keystoreType);
+      if (StringUtils.isEmpty(keyStorePath)) {
+        throw new IllegalStateException(
+                "when ssl is activated for the sideband server, key store information is necessary");
       }
+      String keyStorePassword = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_PASSWORD.get(esc);
+
+      if (StringUtils.isEmpty(keyStorePassword)) {
+        throw new IllegalStateException(
+                "keystore configured for sideband websocket server, but missing keystore password");
+      }
+
+      if (StringUtils.isEmpty(keyPassword)) {
+        keyPassword = keyStorePassword;
+      }
+
+      keyStore = KeystoreFactory.getKeyStore(keyStorePath, keyStorePassword, keystoreType);
     }
     return new SslHandler(getSslEngine(keyStore, keyPassword));
   }
@@ -85,8 +83,7 @@ public class SslHandlerFactory {
         sslEngine.setNeedClientAuth(false);
 
         SslHandlerFactory.sslEngine = sslEngine;
-      } 
-      catch (Exception e) {
+      } catch (Exception e) {
         throw new RuntimeException("could not build SSL Engine", e);
       }
     }

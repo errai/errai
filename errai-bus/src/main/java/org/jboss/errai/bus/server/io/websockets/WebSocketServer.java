@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 public class WebSocketServer {
   private ErraiService svc;
   private Logger log = getLogger(getClass());
+  private boolean useSecureWebSocket = false;
 
   public WebSocketServer(ErraiService svc) {
     this.svc = svc;
@@ -47,6 +48,7 @@ public class WebSocketServer {
 
   public void start() {
     final ErraiServiceConfigurator esc = svc.getConfiguration();
+    useSecureWebSocket = ErraiConfigAttribs.SECURE_WEB_SOCKET_SERVER.getBoolean(esc);
     final int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(esc);
     final ServerBootstrap bootstrap = new ServerBootstrap();
     final WebSocketServerHandler webSocketHandler = new WebSocketServerHandler(svc);
@@ -58,8 +60,8 @@ public class WebSocketServer {
               .childHandler(new ChannelInitializer() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
-                  final SslHandler sslHandler = SslHandlerFactory.buildSslHandler(esc);
-                  if (sslHandler != null) {
+                  if (useSecureWebSocket) {
+                    final SslHandler sslHandler = SslHandlerFactory.buildSslHandler(esc);
                     ch.pipeline().addLast("ssl", sslHandler);
                   }
                   ch.pipeline().addLast("codec-http", new HttpServerCodec());
@@ -79,7 +81,7 @@ public class WebSocketServer {
           } 
           catch (Exception e) {
             throw new RuntimeException(e);
-          }
+          } 
           finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
@@ -87,10 +89,10 @@ public class WebSocketServer {
         }
       });
 
-    } catch (Throwable t) {
+    } 
+    catch (Throwable t) {
       throw new RuntimeException(t);
     }
-
     log.info("started web socket server on port: " + port);
   }
 }
