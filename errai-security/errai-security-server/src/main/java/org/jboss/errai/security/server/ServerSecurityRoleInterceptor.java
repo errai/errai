@@ -41,7 +41,7 @@ import org.jboss.errai.security.shared.util.AnnotationUtils;
  * SecurityRoleInterceptor server side implementation of the
  * SecurityRoleInterceptor does the same, but throws an exception instead of
  * 'redirecting' the user.
- *
+ * 
  * @author Max Barkley <mbarkley@redhat.com>
  * @author edewit@redhat.com
  */
@@ -51,6 +51,13 @@ public class ServerSecurityRoleInterceptor {
 
   private final AuthenticationService authenticationService;
   private final RequiredRolesExtractor roleExtractor;
+
+  public ServerSecurityRoleInterceptor() {
+    authenticationService = null;
+    roleExtractor = null;
+    throw new IllegalStateException(
+            "This default no-arg constructor exists to ensure Java EE 6+ compliance and should never be called!");
+  }
 
   @Inject
   public ServerSecurityRoleInterceptor(final AuthenticationService authenticationService,
@@ -88,9 +95,9 @@ public class ServerSecurityRoleInterceptor {
     }
 
     if (annotations.isEmpty()) {
-      throw new IllegalArgumentException(
-              String.format("Could not find any @RestrictedAccess annotations on method (%s), class (%s), or interfaces.",
-                      method.getName(), method.getDeclaringClass().getCanonicalName()));
+      throw new IllegalArgumentException(String.format(
+              "Could not find any @RestrictedAccess annotations on method (%s), class (%s), or interfaces.",
+              method.getName(), method.getDeclaringClass().getCanonicalName()));
     }
 
     return annotations;

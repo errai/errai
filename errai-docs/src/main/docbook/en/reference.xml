@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-07-07</date>
+    <date>2014-08-12</date>
     
     
     
@@ -158,7 +158,48 @@ public class App {
 <simpara>Once you have configured your browser for development with GWT, and after loading the app with the <emphasis>Launch Default Browser</emphasis> button, you should see the application load.</simpara>
 <simpara>If you are using errai-tutorial, you should see a page with a complaint form.</simpara>
 <simpara>If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".</simpara>
-<simpara>That&#8217;s it! You&#8217;ve got your first Errai Application up and running. In the next section we&#8217;ll setup your IDE.</simpara>
+<simpara>That&#8217;s it! You&#8217;ve got your first Errai Application up and running. In the next section we&#8217;ll learn how to run super devmode. Otherwise, skip to the section afterwards to setup your IDE.</simpara>
+</section>
+<section id="_running_your_app_in_super_devmode">
+<title>Running your app in Super Devmode</title>
+<simpara>Regular Devmode requires a special browser plugin to run client-side code in a as Java. Super Devmode is an alternative method that compiles code to javascript to be run natively in any browser. With browsers that support source-mapping, it is possible to debug with lines from your original source code within the browser.</simpara>
+<simpara>To run super devmode you will need to open two terminals in your project. In the first enter:</simpara>
+<screen>mvn clean gwt:run</screen>
+<simpara>This will launch a classic devmode server for hosting server-side resources. In the second enter:</simpara>
+<screen>mvn gwt:run-codeserver</screen>
+<simpara>This will launch the super devmode codeserver that hosts compiled GWT code. When the super devmode codeserver is finished compiling your GWT module, it will display a message like this:</simpara>
+<screen>The code server is ready.
+Next, visit: http://localhost:9876</screen>
+<simpara>Go to the displayed link and copy the two bookmarks <emphasis role="strong">Dev Mode On</emphasis> and <emphasis role="strong">Dev Mode Off</emphasis>.</simpara>
+<simpara>After completing the above, you may run your application as follows:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Go to the classic devmode window and click <emphasis role="strong">Copy Link</emphasis>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Paste the link in to the browser, but <emphasis role="strong">remove</emphasis> the query paramters (i.e. <literal>?gwt.codesvr=...</literal>).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Go to the link. You may see prompts saying that your GWT module needs to be recompiled.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Click the <emphasis role="strong">Dev Mode On</emphasis> bookmark you copied previously. You should see a prompt to compile your GWT module. Click <emphasis role="strong">Compile</emphasis> to do so.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Once the super devmode server has completed, your application should be running.</simpara>
+      
+    </listitem>
+  
+</orderedlist>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">
 <title>Configuring your project for Eclipse</title>
@@ -1456,7 +1497,7 @@ public class HelloWorldService implements MessageCallback {
 <section id="sid-53380177">
 <title>WebSockets</title>
 <simpara>ErraiBus has support for WebSocket-based communication. When WebSockets are enabled, capable web browsers will attempt to upgrade their COMET-based communication with the server-side bus to use a WebSocket channel.</simpara>
-<simpara>There are three different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration and the third is to rely in JSR-356 support in WildFly.</simpara>
+<simpara>There are three different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration and the third is to rely in JSR-356 support in WildFly. Of course, you only need to configure one of these three options!</simpara>
 <section id="sid-53380177_WebSockets-Configuringthesidebandserver">
 <title>Configuring the sideband server</title>
 <simpara>Activating the sideband server is as simple as adding the following to the <literal><phrase role="code">ErraiService.properties</phrase></literal> file:</simpara>
@@ -1515,8 +1556,8 @@ public class HelloWorldService implements MessageCallback {
 	&lt;/dependency&gt;</programlisting>
 </important>
 </section>
-<section id="_jsr_356_websocket_support">
-<title>JSR-356 WebSocket support</title>
+<section id="_jsr_356_websocket_support_deploying_to_wildfly_8_0_or_higher">
+<title>JSR-356 WebSocket support (Deploying to WildFly 8.0 or higher)</title>
 <simpara>Errai provides two implementations for this:</simpara>
 <orderedlist numeration="arabic">
   
@@ -1563,6 +1604,83 @@ public class HelloWorldService implements MessageCallback {
 	&lt;param-name&gt;errai-jsr-356-websocket-filter&lt;/param-name&gt;
 	&lt;param-value&gt;foo.bar.FooFilter,foo.bar.BarFilter&lt;/param-value&gt;
 &lt;/context-param&gt;</programlisting>
+</section>
+<section id="_websocket_security">
+<title>WebSocket Security</title>
+<simpara>Errai supports Websocket security (wss) for two deployment scenarios.</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>The servlet container is deployed behind a reverse-proxy or other SSL terminating appliance</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>The servlet container is deployed in front and takes care of SSL termination</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<section id="_servlet_container_is_deployed_behind_a_reverse_proxy">
+<title>Servlet container is deployed behind a reverse-proxy</title>
+<simpara>All you need to do is configure the following context parameter in your <literal><phrase role="code">web.xml</phrase></literal></simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;context-param&gt;
+  &lt;param-name&gt;force-secure-websockets&lt;/param-name&gt;
+  &lt;param-value&gt;true&lt;/param-value&gt;
+&lt;/context-param&gt;</programlisting>
+<simpara>This will work for the sideband-server as well as JBoss AS7 and WildFly based websocket support.</simpara>
+<important>
+<title>Dont forget to configure your reverse-proxy or appliance to handle websocket connections with SSL!</title>
+<simpara>To use this kind of configuration you have to configure your reverse-proxy or appliance to use HTTPS (SSL / TLS).</simpara>
+</important>
+</section>
+<section id="_servlet_container_takes_care_of_ssl_termination">
+<title>Servlet container takes care of SSL termination</title>
+<section id="_with_jboss_as_7_1_2_or_higher_amp_jsr_356_websocket_wildfly_8_or_higher">
+<title>With JBoss AS 7.1.2 (or higher) &amp; JSR-356 WebSocket (WildFly 8 or higher)</title>
+<simpara>If the servlet container is configured to use HTTPS, the Errai WebSocket Servlet for JBoss AS 7 and / or the Errai JSR-356 WebSocket implementation for WildFly will use the WSS scheme automatically. So, there&#8217;s is nothing else to do!</simpara>
+</section>
+<section id="_using_the_sideband_server">
+<title>Using the sideband server</title>
+<simpara>To tell the sideband server to use SSL and configure Errai to use the WSS scheme the following properties are mandatory in <literal><phrase role="code">ErraiService.properties</phrase></literal>:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>errai.bus.secure_web_socket_server=true &#8594; This tells the sideband server and Errai to use SSL / WSS.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>errai.bus.web_socket_keystore=[full qualified path to the JKS or PKCS12 keystore] &#8594; Key store to use</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>errai.bus.web_socket_keystore_password=[password for the key store] &#8594; Password for the key store to use</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<simpara>Depending on your configuration and type of PKI container you can the add following addtional properties in the <literal><phrase role="code">ErraiService.properties</phrase></literal>:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>errai.bus.web_socket_keystore_type=[kind of key store] &#8594; When you want to use the PKCS12 format instead of JKS (default)</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>errai.bus.web_socket_key_password=[password of private key] &#8594; When the private key in the container has a different password than the keystore itself.</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<important>
+<title>Sidband server needs a keystore.</title>
+<simpara>In this deployment case, the sideband server needs a keystore with a server certificate and the corresponding private key.</simpara>
+</important>
+</section>
+</section>
 </section>
 </section>
 <section id="sid-59146643">
@@ -5553,14 +5671,25 @@ public class NavBar extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-ExtendedstylingwithLESS">
 <title>Extended styling with LESS</title>
-<simpara>Errai also supports <ulink url="http://lesscss.org">LESS</ulink> stylesheets. To get started using these you&#8217;ll have to create a LESS stylesheet and place it on the classpath of your project. Errai will convert the LESS stylesheet to css preform optimisations on it and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:</simpara>
+<simpara>Errai also supports <ulink url="http://lesscss.org">LESS</ulink> stylesheets. To get started using these you&#8217;ll have to create a LESS stylesheet and place it on the classpath of your project and declare their ordering with the <literal>StyleDescriptor</literal> annotation. Every application should have 0 or 1 classes annotated with <literal>StyleDescriptor</literal> like the following example:</simpara>
+<programlisting language="java" linenumbering="unnumbered">package org.jboss.errai.example;
+
+@StyleDescriptor({ "/main.less", "other.css" })
+public class MyStyleDescriptor {
+}</programlisting>
+<simpara>The two files listed above, <literal>main.less</literal> and <literal>other.css</literal>, will be compiled into a single stylesheet by Errai. The relative path for <literal>other.css</literal> will be loaded relative to the package <literal>org.jboss.errai.example</literal>.</simpara>
+<note>
+<title>Do Not Declare Imported Stylesheets</title>
+<simpara>It is only necessary to declare top-level stylesheets with the <literal>StyleDescriptor</literal>. If a CSS or LESS resource is only meant to be imported by another LESS stylesheet, then it need only be on the classpath.</simpara>
+</note>
+<simpara>Errai will convert the LESS stylesheet to css, perform optimisations on it, and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class MyComponent extends Component {
   @Inject
   private LessStyle lessStyle;
 
   ...
 
-  @PostCreate
+  @PostConstruct
   private void init() {
     textBox.setStyleName(lessStyle.get("input"));
   }
@@ -5610,17 +5739,22 @@ public class NavBar extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>Make navigational changes in the natural place in the code.</simpara>
+      <simpara>Make navigational changes in the natural place in the code</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Integrates cleanly with Errai UI templates, but also works well with other view technologies.</simpara>
+      <simpara>Integrates cleanly with Errai UI templates, but also works well with other view technologies</simpara>
       
     </listitem>
   
     <listitem>
       <simpara>Builds on Errai IoC &amp; CDI</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Provides support for HTML5 Push State and path-parameter based URLs</simpara>
       
     </listitem>
   
@@ -5797,11 +5931,63 @@ public class ItemPage extends VerticalPanel {
   // Anything goes...
 }</programlisting>
 <simpara>This page would be reachable at a URL like <literal>http://www.company.com/store/#ItemPage;itemId=4</literal>. Before the page was displayed, the Errai UI Navigation framework would write the <literal><phrase role="code">int</phrase></literal> value <literal><phrase role="code">4</phrase></literal> into the <literal><phrase role="code">itemId</phrase></literal> field.</simpara>
-<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal> ; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal> , or by including the state information in the fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a fragment ID properly.)</simpara>
+<simpara>Page state parameters can also be accessed using URLs with path parameters. In this case, you have to declare the template of the page&#8217;s path in the <literal><phrase role="code">path</phrase></literal> field of the <literal><phrase role="code">@Page</phrase></literal> annotation. As an example, consider the following code:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Page(path="item/{itemID}/{customerID}")
+public class ItemPage extends VerticalPanel {
+
+  @PageState
+  private int itemID;
+
+  @PageState
+  private String customerID;
+
+  // Anything goes...
+}</programlisting>
+<simpara></simpara>
+<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal> ; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal> , or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a URL properly.)</simpara>
 <simpara>A page widget can have any number of <literal><phrase role="code">@PageState</phrase></literal> fields. The fields can be of any primitive or boxed primitive type (except <literal><phrase role="code">char</phrase></literal> or <literal><phrase role="code">Character</phrase></literal> ), <literal><phrase role="code">String</phrase></literal>, or a <literal><phrase role="code">Collection</phrase></literal>, <literal><phrase role="code">List</phrase></literal>, or <literal><phrase role="code">Set</phrase></literal> of the allowable scalar types. Nested collections are not supported.</simpara>
 <simpara><literal><phrase role="code">@PageState</phrase></literal> fields can be private, protected, default access, or public. They are always updated by direct field access; never via a setter method. The updates occur just before the <literal><phrase role="code">@PageShowing</phrase></literal> method is invoked.</simpara>
 <simpara>In addition to receiving page state information via direct writes to <literal><phrase role="code">@PageState</phrase></literal> fields, you can also receive the whole Multimap in the <literal><phrase role="code">@PageShowing</phrase></literal> and <literal><phrase role="code">@PageShown</phrase></literal> methods through a parameter of type <literal><phrase role="code">HistoryToken</phrase></literal> . Whether or not a lifecycle method has such a parameter, the <literal><phrase role="code">@PageState</phrase></literal> fields will still be written as usual.</simpara>
-<simpara>Page state values are represented in the URL much like HTML form parameters: as key=value pairs separated by the ampersand ( <literal><phrase role="code">&amp;</phrase></literal> ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a <literal><phrase role="code">@PageState</phrase></literal> field is absent from the state information passed to the page, the framework writes a default value: <literal><phrase role="code">null</phrase></literal> for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the <literal><phrase role="code">HistoryToken</phrase></literal> class.</simpara>
+<simpara>Page state values are represented in the URL in place of the corresponding parameter variables declared in the URL template (the <literal><phrase role="code">path</phrase></literal> field of the <literal><phrase role="code">@Page</phrase></literal> annotation. See <link linkend="sid-54493676_ErraiUINavigation-DeclaringaPage">Declaring a Page</link>). If a parameter variable is declared in the URL template and is missing from the actual typed URL, it will cause a navigation error as Errai will not be able to match the typed URL to any template.</simpara>
+<simpara>Any additional path parameters not found in the URL template are appended as key=value pairs separated by the ampersand ( <literal><phrase role="code">&amp;</phrase></literal> ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a <literal><phrase role="code">@PageState</phrase></literal> field is absent from the state information passed to the page, the framework writes a default value: <literal><phrase role="code">null</phrase></literal> for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the <literal><phrase role="code">HistoryToken</phrase></literal> class.</simpara>
+<simpara>To illustrate this further, consider the following example:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Page(path="item/{itemID}/{customerID}")
+public class ItemPage extends VerticalPanel {
+
+  @PageState
+  private int itemID;
+
+  @PageState
+  private String customerID;
+
+  @PageState
+  private int storeID;
+
+  // Anything goes...
+}</programlisting>
+<simpara>Given the host <literal><phrase role="code">"www.company.com"</phrase></literal> and a state map with the values <literal><phrase role="code">itemID=4231</phrase></literal> , <literal><phrase role="code">customerID=9364</phrase></literal> , and <literal><phrase role="code">storeID=0032</phrase></literal> , the following URL will be generated:
+<literal><phrase role="code">www.company.com/#4231/9364;storeID=0032</phrase></literal></simpara>
+<simpara>If the value for storeID is undefined, the URL will be <literal>www.company.com/#4231/9364;storeID=0</literal> .</simpara>
+<simpara>If the URL typed into the browser is <literal>www.company.com/#4231;storeID=0032</literal> , it will cause a navigation error.</simpara>
+<simpara>In the case that push state functionality is enabled, the page path will be relative to the application context and the <literal>#</literal> symbol will be absent from the URL.</simpara>
+</section>
+<section id="_push_state_functionality">
+<title>Push State Functionality</title>
+<simpara>Errai now comes with support for Push State and path-parameter-based URLs. If HTML5 Push State is enabled, all page paths will be relative to the application context. Thus, if the fragment-identifier-based URL is <literal>www.company.com/#ItemPage</literal> , the push state URL will be <literal>www.company.com/store/ItemPage</literal> , where <literal>store</literal> is the application context.</simpara>
+<simpara>HTML5 Push State can be enabled by adding the following lines to your GWT host page:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
+    var erraiPushStateEnabled = true;
+&lt;/script&gt;</programlisting>
+<simpara>The application context must be the same as the application&#8217;s servlet web context deployed on the server. Errai attempts to infer the application context upon the first page load, but it can also be set manually. To explicitly declare the application context, you can use the <literal><phrase role="code">setApplicationContext</phrase></literal> method in the Navigation class, or set the <literal><phrase role="code">erraiApplicationWebContext</phrase></literal> variable in your GWT host page as follows:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
+    var erraiApplicationWebContext = "store";
+&lt;/script&gt;</programlisting>
+<simpara>In the event that the browser does not support HTML5, Errai automatically disables push state functionality and reverts to a <emphasis>#</emphasis>-based URL format. That is, Errai uses fragment identifiers to refer to particular resources.</simpara>
+<simpara>If the page that the user is trying to navigate to cannot be found, a 404 - Not Found page is displayed. You can override this functionality and display a custom page in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;error-page&gt;
+    &lt;error-code&gt;404&lt;/error-code&gt;
+    &lt;location&gt;/&lt;/location&gt;
+&lt;/error-page&gt;</programlisting>
 </section>
 <section id="sid-54493676_ErraiUINavigation-DeclaringaLinkwithTransitionAnchor">
 <title>Declaring a Link with TransitionAnchor</title>
@@ -5873,7 +6059,7 @@ public class Bootstrap {
 <simpara>This last example demonstrates a simple approach to defining the page structure with an Errai UI template. The final product is identical to the above example, but in this case the overall page structure is declared in an HTML template rather than being defined programmatically in procedural logic:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 @EntryPoint
-public class OverallPageStrucutre extends Composite {
+public class OverallPageStructure extends Composite {
 
   @Inject
   private Navigation navigation;
@@ -5899,8 +6085,8 @@ public class OverallPageStrucutre extends Composite {
 
 }</programlisting>
 </section>
-<section id="sid-54493676_ErraiUINavigation-OverridingthedefaultNagivatingPaneltype">
-<title>Overriding the default Nagivating Panel type</title>
+<section id="sid-54493676_ErraiUINavigation-OverridingthedefaultNavigatingPaneltype">
+<title>Overriding the default Navigating Panel type</title>
 <simpara>By default Errai uses <literal><phrase role="code">com.google.gwt.user.client.ui.SimplePanel</phrase></literal> as a container for navigation panel. Sometimes this is not sufficient and users would prefer using another implementation. For example a <literal><phrase role="code">com.google.gwt.user.client.ui.SimpleLayoutPanel</phrase></literal> that manages child size state.</simpara>
 <simpara>To provide your own implementation of the navigation panel you must implement <literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal>. For example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class NavigatingPanel implements NavigatingContainer {
@@ -7273,9 +7459,9 @@ public class NamedLogExample {
 </section>
 <section id="Offline-Mode">
 <title>Errai Offline Mode Configuration</title>
-<simpara>Errai provides special support for HTML5&#8217;s application caching mechanism that allows applications to work offline. If you&#8217;re
+<simpara>Errai provides special support for HTML5&#8217;s application caching mechanism that enables applications to work offline. If you&#8217;re
 not familiar with the HTML5 application cache you can find all the details <ulink url="https://developer.mozilla.org/en-US/docs/Web/HTML/Using_the_application_cache">here</ulink>.</simpara>
-<simpara>As GWT compiles separate browser specific JavaScript permutations for every application, it is not enough to manually create a cache manifest file and simply list all generated JavaScript files. This would cause every browser to download and cache JavaScript files that it doesn&#8217;t need in the first place (i.e. Safari would download and cache JavaScript files that were generated for Internet Explorer only). Errai solves this problem by using a custom linker to generate user-agent specific cache manifest files.</simpara>
+<simpara>As GWT compiles separate browser-specific JavaScript permutations for your application, it is not enough to manually create a cache manifest file and simply list all generated JavaScript files. This would cause every browser to download and cache JavaScript files that it doesn&#8217;t need in the first place (i.e. Safari would download and cache JavaScript files that were generated for Internet Explorer only). Errai solves this problem by using a custom linker to generate user-agent specific cache manifest files.</simpara>
 <simpara>The following steps are necessary to activate this linker:</simpara>
 
 <itemizedlist>
@@ -7311,14 +7497,14 @@ not familiar with the HTML5 application cache you can find all the details <ulin
 </itemizedlist>
 
 <programlisting language="xml" linenumbering="unnumbered">&lt;mime-mapping&gt;
-&lt;extension&gt;manifest&lt;/extension&gt;
-&lt;mime-type&gt;text/cache-manifest&lt;/mime-type&gt;
+  &lt;extension&gt;manifest&lt;/extension&gt;
+  &lt;mime-type&gt;text/cache-manifest&lt;/mime-type&gt;
 &lt;/mime-mapping&gt;</programlisting>
 
 <itemizedlist>
   
     <listitem>
-      <simpara>Make sure the errai-common.jar file is deployed as part of your application. It contains a servlet that will provide the correct user-agent specific manifest file in response to requests to your_module_name/errai.appcache</simpara>
+      <simpara>Make sure the <literal>errai-common.jar</literal> file is deployed as part of your application. It contains a servlet that will provide the correct user-agent specific manifest file in response to requests to your_module_name/errai.appcache</simpara>
       
     </listitem>
   
@@ -12330,6 +12516,12 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <simpara><emphasis>Answer:</emphasis> You can&#8217;t invoke RPC methods via <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> or by other means until after the Errai Bus has finished its initial handshake. Try changing your <literal><phrase role="code">@PostConstruct</phrase></literal> annotation to <literal><phrase role="code">@AfterInitialization</phrase></literal> . This will cause your method to be invoked later after the bus handshake has completed.</simpara>
 <simpara>If this doesn&#8217;t help, it is also possible that the proxies were never generated in the first place. Check in <literal><phrase role="code">.errai/RpcProxyLoaderImpl.java</phrase></literal> to see if proxy code exists for the <literal><phrase role="code">@Remote</phrase></literal> and/or <literal><phrase role="code">@Path</phrase></literal> interface in question. If not, your <literal><phrase role="code">@Remote</phrase></literal> interfaces were not present on the GWT compiler&#8217;s classpath when your application module was compiled. Double-check your GWT compilation classpath: all <literal><phrase role="code">@Remote</phrase></literal> interfaces must be visible to (in or inherited by) the GWT module that contains the <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> types. Pay special attention that your <literal><phrase role="code">@Remote</phrase></literal> and <literal><phrase role="code">@Path</phrase></literal> interfaces are not in a package excluded from the GWT module (by default, every subpackage other than <literal><phrase role="code">client</phrase></literal> and <literal><phrase role="code">shared</phrase></literal> is invisible to the GWT compiler).</simpara>
 </section>
+<section id="_why_do_i_get_a_404_not_found_page_if_i_try_to_navigate_to_my_web_page_by_typing_in_the_url_or_refreshing_the_page">
+<title>Why do I get a "404 - Not Found" page if I try to navigate to my web page by typing in the URL or refreshing the page?</title>
+<simpara><emphasis>Answer:</emphasis> There are two reasons that could cause this behaviour:</simpara>
+<simpara>You may not have declared a default page for Errai Push State to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <link linkend="sid-54493676_ErraiUINavigation-HowitWorks">Errai UI Navigation - How it Works &#8594; Push State Functionality</link> .</simpara>
+<simpara>If that doesn&#8217;t work, check to see if you have explicitly declared the application web context in your GWT host page. See <link linkend="sid-54493676">Errai UI Navigation - How it Works &#8594; Push State Functionality</link> .</simpara>
+</section>
 </chapter>
 <chapter id="sid-21758202">
 <title>Upgrade Guide</title>
@@ -12474,6 +12666,20 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
   
     <listitem>
       <simpara>The whole artifact errai-cdi-jetty has been deleted and is no longer required. Delete the JAR file from your project or remove the corresponding dependency in your pom.xml</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_upgrading_to_errai_3_1_from_3_0">
+<title>Upgrading to Errai 3.1 from 3.0</title>
+<simpara>Here are the steps you&#8217;ll need to take to get your project running after you update:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>If you are using Errai to compile LESS/CSS files you will need to declare a <literal>StyleDescriptor</literal> listing the resources to compile in the desired order. This change was made to provide a deterministic and configurable order of styles in the generated CSS.</simpara>
       
     </listitem>
   
