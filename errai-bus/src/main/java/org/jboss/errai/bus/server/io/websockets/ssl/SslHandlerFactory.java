@@ -30,34 +30,32 @@ public class SslHandlerFactory {
   /**
    * Build a {@link io.netty.handler.ssl.SslHandler} when the side band server
    * is configured to use ssl for websocket.
-   * 
+   *
    * @param esc
    * @return the ssl handler, never null.
    */
   public static SslHandler buildSslHandler(ErraiServiceConfigurator esc) {
-    if (ErraiConfigAttribs.SECURE_WEB_SOCKET_SERVER.getBoolean(esc)) {
-      keyPassword = StringUtils.isEmpty(keyPassword) ? ErraiConfigAttribs.WEB_SOCKET_KEY_PASSWORD.get(esc) : keyPassword;
-      if (keyStore == null) {
-        final String keyStorePath = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE.get(esc);
-        final String keystoreType = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_TYPE.get(esc);
+    keyPassword = StringUtils.isEmpty(keyPassword) ? ErraiConfigAttribs.WEB_SOCKET_KEY_PASSWORD.get(esc) : keyPassword;
+    if (keyStore == null) {
+	  final String keyStorePath = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE.get(esc);
+	  final String keystoreType = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_TYPE.get(esc);
 
-        if (StringUtils.isEmpty(keyStorePath)) {
-          throw new IllegalStateException(
-                  "when ssl is activated for the sideband server, key store information is necessary");
-        }
-        String keyStorePassword = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_PASSWORD.get(esc);
+	  if (StringUtils.isEmpty(keyStorePath)) {
+	    throw new IllegalStateException(
+			  "when ssl is activated for the sideband server, key store information is necessary");
+	  }
+	  String keyStorePassword = ErraiConfigAttribs.WEB_SOCKET_KEYSTORE_PASSWORD.get(esc);
 
-        if (StringUtils.isEmpty(keyStorePassword)) {
-          throw new IllegalStateException(
-                  "keystore configured for sideband websocket server, but missing keystore password");
-        }
+	  if (StringUtils.isEmpty(keyStorePassword)) {
+	    throw new IllegalStateException(
+			  "keystore configured for sideband websocket server, but missing keystore password");
+	  }
 
-        if (StringUtils.isEmpty(keyPassword)) {
-          keyPassword = keyStorePassword;
-        }
+	  if (StringUtils.isEmpty(keyPassword)) {
+	    keyPassword = keyStorePassword;
+	  }
 
-        keyStore = KeystoreFactory.getKeyStore(keyStorePath, keyStorePassword, keystoreType);
-      }
+	  keyStore = KeystoreFactory.getKeyStore(keyStorePath, keyStorePassword, keystoreType);
     }
     return new SslHandler(getSslEngine(keyStore, keyPassword));
   }
@@ -66,7 +64,7 @@ public class SslHandlerFactory {
    * Initialize the {@link javax.net.ssl.SSLEngine} for the
    * {@link io.netty.handler.ssl.SslHandler}. Anytime the engine is null or no
    * more valid. Otherwise the previous created will be reused.
-   * 
+   *
    * @param keyPassword
    * @param keyStore
    * @return
@@ -85,7 +83,7 @@ public class SslHandlerFactory {
         sslEngine.setNeedClientAuth(false);
 
         SslHandlerFactory.sslEngine = sslEngine;
-      } 
+      }
       catch (Exception e) {
         throw new RuntimeException("could not build SSL Engine", e);
       }
