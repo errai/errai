@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 public class WebSocketServer {
   private ErraiService svc;
   private Logger log = getLogger(getClass());
+  private boolean useSecureWebSocket = false;
 
   public WebSocketServer(ErraiService svc) {
     this.svc = svc;
@@ -47,7 +48,8 @@ public class WebSocketServer {
 
   public void start() {
     final ErraiServiceConfigurator esc = svc.getConfiguration();
-    final int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(esc);
+	useSecureWebSocket = ErraiConfigAttribs.SECURE_WEB_SOCKET_SERVER.getBoolean(esc);
+	final int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(esc);
     final ServerBootstrap bootstrap = new ServerBootstrap();
     final WebSocketServerHandler webSocketHandler = new WebSocketServerHandler(svc);
 
@@ -58,9 +60,9 @@ public class WebSocketServer {
               .childHandler(new ChannelInitializer() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
-                  final SslHandler sslHandler = SslHandlerFactory.buildSslHandler(esc);
-                  if (sslHandler != null) {
-                    ch.pipeline().addLast("ssl", sslHandler);
+                  if (useSecureWebSocket) {
+                  	final SslHandler sslHandler = SslHandlerFactory.buildSslHandler(esc);
+					ch.pipeline().addLast("ssl", sslHandler);
                   }
                   ch.pipeline().addLast("codec-http", new HttpServerCodec());
                   ch.pipeline().addLast("aggregator", new HttpObjectAggregator(65536));
