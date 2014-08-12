@@ -93,7 +93,7 @@ public class SecurityRoleInterceptorTest {
     when(authenticationService.getUser()).thenReturn(User.ANONYMOUS);
     interceptor.aroundInvoke(context);
 
-    fail("exception shoudl have been thrown");
+    fail("exception should have been thrown");
   }
 
   @Test(expected = UnauthorizedException.class)
