@@ -6427,7 +6427,7 @@ Starting in version 2.1, Errai offers a system for creating applications that ha
 * Integrates cleanly with Errai UI templates, but also works well with other view technologies
 * Builds on Errai IoC & CDI
 
-* Provides support for HTML5 Push State and path-parameter based URLs
+* Provides support for HTML5 pushState and path-parameter based URLs
 
 
 [[sid-54493676_ErraiUINavigation-GettingStarted]]
@@ -6597,7 +6597,7 @@ public class ItemPage extends VerticalPanel {
 }
 ----
 
-This page would be reachable at a URL like `http://www.company.com/store/#ItemPage;itemId=4`. Before the page was displayed, the Errai UI Navigation framework would write the [code]+int+ value [code]+4+ into the [code]+itemId+ field.
+This page would be reachable at a URL like `http://www.company.com/store/#ItemPage;itemId=4`, assuming `www.company.com` was the host address and `store` was the application context. Before the page was displayed, the Errai UI Navigation framework would write the [code]+int+ value [code]+4+ into the [code]+itemId+ field.
 
 Page state parameters can also be accessed using URLs with path parameters. In this case, you have to declare the template of the page's path in the [code]+path+ field of the [code]+@Page+ annotation. As an example, consider the following code:
 
@@ -6616,7 +6616,7 @@ public class ItemPage extends VerticalPanel {
 }
 ----
 
-In the above example, the [code]+{itemID}+ and [code]+{customerID}+ fields represent path parameters. Any combination of path strings and path parameters that are separated by slashes is considered valid. The URL `http://www.company.com/store/ItemPage/5042/cust1234` would redirect the user to the ItemPage, with the state values set as [code]+int itemId = 4+ and [code]+String customerID = "cust1234"+.
+In the above example, the [code]+{itemID}+ and [code]+{customerID}+ fields represent path parameters. Any combination of path strings and path parameters that are separated by slashes is considered valid. The URL `http://www.company.com/store/#item/5042/cust1234` would redirect the user to the ItemPage, with the state values set as [code]+int itemId = 4+ and [code]+String customerID = "cust1234"+.
 
 There are three ways to pass state information to a page: by passing a Multimap to [code]+TransitionTo.go()+ ; by passing a Multimap to [code]+Navigation.goTo()+ , or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the [code]+HistoryToken+ class to construct such a URL properly.)
 
@@ -6650,21 +6650,18 @@ public class ItemPage extends VerticalPanel {
 }
 ----
 
-Given the host [code]+"www.company.com"+ and a state map with the values [code]+itemID=4231+ , [code]+customerID=9364+ , and [code]+storeID=0032+ , the following URL will be generated:
-[code]+www.company.com/#4231/9364;storeID=0032+
+Given the host [code]+"www.company.com"+, the context `store`, and a state map with the values [code]+itemID=4231+ , [code]+customerID=9364+ , and [code]+storeID=0032+ , the following URL will be generated:
+[code]+www.company.com/store/#item/4231/9364;storeID=0032+
 
-If the value for storeID is undefined, the URL will be `www.company.com/#4231/9364;storeID=0` .
+If the value for storeID is undefined, the URL will be `www.company.com/store/#item/4231/9364;storeID=0` .
 
-If the URL typed into the browser is `www.company.com/#4231;storeID=0032` , it will cause a navigation error.
+If the URL typed into the browser is `www.company.com/store/#item/4231;storeID=0032`, it will cause a navigation error (assuming there is no other page by this url) because there is a missing path parameter.
 
-In the case that push state functionality is enabled, the page path will be relative to the application context and the `#` symbol will be absent from the URL.
+==== PushState Functionality
 
+Errai now comes with support for pushState and path-parameter-based URLs. If HTML5 pushState is enabled Errai Navigation urls will not use the fragment-identifier (#). Thus the non-pushState url from the previous section, `www.company.com/store/#item/4231/9364`, would become `www.company.com/store/item/4231/9364`. 
 
-==== Push State Functionality
-
-Errai now comes with support for Push State and path-parameter-based URLs. If HTML5 Push State is enabled, all page paths will be relative to the application context. Thus, if the fragment-identifier-based URL is `www.company.com/#ItemPage` , the push state URL will be `www.company.com/store/ItemPage` , where `store` is the application context. 
-
-HTML5 Push State can be enabled by adding the following lines to your GWT host page:
+HTML5 pushState can be enabled by adding the following lines to your GWT host page:
 
 [source, xml]
 ----
@@ -6682,7 +6679,7 @@ The application context must be the same as the application's servlet web contex
 </script>
 ----
 
-In the event that the browser does not support HTML5, Errai automatically disables push state functionality and reverts to a '#'-based URL format. That is, Errai uses fragment identifiers to refer to particular resources.
+In the event that the browser does not support HTML5, Errai automatically disables pushState functionality and reverts to a '#'-based URL format. That is, Errai uses fragment identifiers to refer to particular resources.
 
 If the page that the user is trying to navigate to cannot be found, a 404 - Not Found page is displayed. You can override this functionality and display a custom page in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file:
 
@@ -9440,9 +9437,9 @@ If this doesn't help, it is also possible that the proxies were never generated 
 
 _Answer:_ There are two reasons that could cause this behaviour:
  
-You may not have declared a default page for Errai Push State to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <<sid-54493676_ErraiUINavigation-HowitWorks, Errai UI Navigation - How it Works -> Push State Functionality>> .
+You may not have declared a default page for Errai pushState to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <<sid-54493676_ErraiUINavigation-HowitWorks, Errai UI Navigation - How it Works -> PushState Functionality>> .
 
-If that doesn't work, check to see if you have explicitly declared the application web context in your GWT host page. See <<sid-54493676, Errai UI Navigation - How it Works -> Push State Functionality>> .
+If that doesn't work, check to see if you have explicitly declared the application web context in your GWT host page. See <<sid-54493676, Errai UI Navigation - How it Works -> PushState Functionality>> .
 
 [[sid-21758202]]
 
