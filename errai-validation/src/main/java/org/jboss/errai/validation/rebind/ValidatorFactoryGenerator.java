@@ -28,7 +28,6 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 import org.jboss.errai.validation.client.BeanValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,14 +58,14 @@ public class ValidatorFactoryGenerator extends Generator {
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
 
     long start = System.currentTimeMillis();
-    log.info("Generating validator factory...");
     if (printWriter != null) {
+      log.info("Generating validator factory...");
       ClassStructureBuilder<?> validatorInterface = new GwtValidatorGenerator().generate(context);
       ClassStructureBuilder<?> builder = ClassBuilder
             .define(packageName + "." + className, AbstractGwtValidatorFactory.class)
             .publicScope()
             .body();
-      
+
       BlockBuilder<?> methodBuilder = builder.publicMethod(AbstractGwtValidator.class, "createValidator");
       if (validatorInterface == null) {
         methodBuilder.append(
