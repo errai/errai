@@ -252,6 +252,12 @@
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
                 </property>
+
+                <!-- Prevent Jenkins failures from IPv6 firewall -->
+                <property>
+                  <name>java.net.preferIPv4Stack</name>
+                  <value>true</value>
+                </property>
               </systemProperties>
               <excludes>
                 <exclude>**/ErraiBusTests.java</exclude>
