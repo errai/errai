@@ -5754,7 +5754,7 @@ public class MyStyleDescriptor {
     </listitem>
   
     <listitem>
-      <simpara>Provides support for HTML5 Push State and path-parameter based URLs</simpara>
+      <simpara>Provides support for HTML5 pushState and path-parameter based URLs</simpara>
       
     </listitem>
   
@@ -5930,7 +5930,7 @@ public class ItemPage extends VerticalPanel {
 
   // Anything goes...
 }</programlisting>
-<simpara>This page would be reachable at a URL like <literal>http://www.company.com/store/#ItemPage;itemId=4</literal>. Before the page was displayed, the Errai UI Navigation framework would write the <literal><phrase role="code">int</phrase></literal> value <literal><phrase role="code">4</phrase></literal> into the <literal><phrase role="code">itemId</phrase></literal> field.</simpara>
+<simpara>This page would be reachable at a URL like <literal>http://www.company.com/store/#ItemPage;itemId=4</literal>, assuming <literal>www.company.com</literal> was the host address and <literal>store</literal> was the application context. Before the page was displayed, the Errai UI Navigation framework would write the <literal><phrase role="code">int</phrase></literal> value <literal><phrase role="code">4</phrase></literal> into the <literal><phrase role="code">itemId</phrase></literal> field.</simpara>
 <simpara>Page state parameters can also be accessed using URLs with path parameters. In this case, you have to declare the template of the page&#8217;s path in the <literal><phrase role="code">path</phrase></literal> field of the <literal><phrase role="code">@Page</phrase></literal> annotation. As an example, consider the following code:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(path="item/{itemID}/{customerID}")
 public class ItemPage extends VerticalPanel {
@@ -5965,16 +5965,15 @@ public class ItemPage extends VerticalPanel {
 
   // Anything goes...
 }</programlisting>
-<simpara>Given the host <literal><phrase role="code">"www.company.com"</phrase></literal> and a state map with the values <literal><phrase role="code">itemID=4231</phrase></literal> , <literal><phrase role="code">customerID=9364</phrase></literal> , and <literal><phrase role="code">storeID=0032</phrase></literal> , the following URL will be generated:
-<literal><phrase role="code">www.company.com/#4231/9364;storeID=0032</phrase></literal></simpara>
-<simpara>If the value for storeID is undefined, the URL will be <literal>www.company.com/#4231/9364;storeID=0</literal> .</simpara>
-<simpara>If the URL typed into the browser is <literal>www.company.com/#4231;storeID=0032</literal> , it will cause a navigation error.</simpara>
-<simpara>In the case that push state functionality is enabled, the page path will be relative to the application context and the <literal>#</literal> symbol will be absent from the URL.</simpara>
+<simpara>Given the host <literal><phrase role="code">"www.company.com"</phrase></literal>, the context <literal>store</literal>, and a state map with the values <literal><phrase role="code">itemID=4231</phrase></literal> , <literal><phrase role="code">customerID=9364</phrase></literal> , and <literal><phrase role="code">storeID=0032</phrase></literal> , the following URL will be generated:
+<literal><phrase role="code">www.company.com/store/#item/4231/9364;storeID=0032</phrase></literal></simpara>
+<simpara>If the value for storeID is undefined, the URL will be <literal>www.company.com/store/#item/4231/9364;storeID=0</literal> .</simpara>
+<simpara>If the URL typed into the browser is <literal>www.company.com/store/#item/4231;storeID=0032</literal>, it will cause a navigation error (assuming there is no other page by this url) because there is a missing path parameter.</simpara>
 </section>
-<section id="_push_state_functionality">
-<title>Push State Functionality</title>
-<simpara>Errai now comes with support for Push State and path-parameter-based URLs. If HTML5 Push State is enabled, all page paths will be relative to the application context. Thus, if the fragment-identifier-based URL is <literal>www.company.com/#ItemPage</literal> , the push state URL will be <literal>www.company.com/store/ItemPage</literal> , where <literal>store</literal> is the application context.</simpara>
-<simpara>HTML5 Push State can be enabled by adding the following lines to your GWT host page:</simpara>
+<section id="_pushstate_functionality">
+<title>PushState Functionality</title>
+<simpara>Errai now comes with support for pushState and path-parameter-based URLs. If HTML5 pushState is enabled Errai Navigation urls will not use the fragment-identifier (#). Thus the non-pushState url from the previous section, <literal>www.company.com/store/#item/4231/9364</literal>, would become <literal>www.company.com/store/item/4231/9364</literal>.</simpara>
+<simpara>HTML5 pushState can be enabled by adding the following lines to your GWT host page:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
     var erraiPushStateEnabled = true;
 &lt;/script&gt;</programlisting>
@@ -5982,7 +5981,7 @@ public class ItemPage extends VerticalPanel {
 <programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
     var erraiApplicationWebContext = "store";
 &lt;/script&gt;</programlisting>
-<simpara>In the event that the browser does not support HTML5, Errai automatically disables push state functionality and reverts to a <emphasis>#</emphasis>-based URL format. That is, Errai uses fragment identifiers to refer to particular resources.</simpara>
+<simpara>In the event that the browser does not support HTML5, Errai automatically disables pushState functionality and reverts to a <emphasis>#</emphasis>-based URL format. That is, Errai uses fragment identifiers to refer to particular resources.</simpara>
 <simpara>If the page that the user is trying to navigate to cannot be found, a 404 - Not Found page is displayed. You can override this functionality and display a custom page in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;error-page&gt;
     &lt;error-code&gt;404&lt;/error-code&gt;
@@ -12519,8 +12518,8 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <section id="_why_do_i_get_a_404_not_found_page_if_i_try_to_navigate_to_my_web_page_by_typing_in_the_url_or_refreshing_the_page">
 <title>Why do I get a "404 - Not Found" page if I try to navigate to my web page by typing in the URL or refreshing the page?</title>
 <simpara><emphasis>Answer:</emphasis> There are two reasons that could cause this behaviour:</simpara>
-<simpara>You may not have declared a default page for Errai Push State to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <link linkend="sid-54493676_ErraiUINavigation-HowitWorks">Errai UI Navigation - How it Works &#8594; Push State Functionality</link> .</simpara>
-<simpara>If that doesn&#8217;t work, check to see if you have explicitly declared the application web context in your GWT host page. See <link linkend="sid-54493676">Errai UI Navigation - How it Works &#8594; Push State Functionality</link> .</simpara>
+<simpara>You may not have declared a default page for Errai pushState to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <link linkend="sid-54493676_ErraiUINavigation-HowitWorks">Errai UI Navigation - How it Works &#8594; PushState Functionality</link> .</simpara>
+<simpara>If that doesn&#8217;t work, check to see if you have explicitly declared the application web context in your GWT host page. See <link linkend="sid-54493676">Errai UI Navigation - How it Works &#8594; PushState Functionality</link> .</simpara>
 </section>
 </chapter>
 <chapter id="sid-21758202">

@@ -4,7 +4,7 @@
   <name>Errai::Bus::Demos::Stock</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-bus-demo-stock</artifactId>
-  <version>3.1.0-SNAPSHOT</version>
+  <version>3.1.0.CR1</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
