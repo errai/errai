@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
-
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -40,7 +39,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  */
 public abstract class MetaClassBridgeUtil {
   private MetaClassBridgeUtil() {}
-
 
   /**
    * Erases the {@link org.jboss.errai.codegen.meta.MetaClassFactory} cache, then populates it with types
@@ -72,6 +70,7 @@ public abstract class MetaClassBridgeUtil {
     if (typeOracle != null) {
       final Map<String, MetaClass> classesToPush = new HashMap<String, MetaClass>(typeOracle.getTypes().length);
       final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));
+      final Set<String> reloadable = RebindUtils.getReloadablePackageNames(context);
       translatable.remove("java.lang");
       translatable.remove("java.lang.annotation");
 
@@ -89,16 +88,22 @@ public abstract class MetaClassBridgeUtil {
                 + "you cannot currently introduce new annotations in devmode. Please restart.");
           }
 
-
           final MetaClass clazz = JavaReflectionClass
               .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName()));
 
-          classesToPush.put(clazz.getFullyQualifiedName(), clazz);
+          if (isReloadable(clazz, reloadable))
+            classesToPush.put(clazz.getFullyQualifiedName(), clazz);
+          else
+            cache.pushCache(clazz);
         }
         else {
           logger.log(TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
           final MetaClass clazz = GWTClass.newInstance(typeOracle, type);
-          classesToPush.put(clazz.getFullyQualifiedName(), clazz);
+
+          if (isReloadable(clazz, reloadable))
+            classesToPush.put(clazz.getFullyQualifiedName(), clazz);
+          else
+            cache.pushCache(clazz);
         }
       }
 
@@ -107,6 +112,15 @@ public abstract class MetaClassBridgeUtil {
     tOCache.populatedFrom = context;
 
     CacheUtil.getCache(EnvUtil.EnvironmentConfigCache.class).clear();
+  }
+
+  private static boolean isReloadable(final MetaClass clazz, final Set<String> reloadablePacakges) {
+    for (final String packageName : reloadablePacakges) {
+      if (clazz.getPackageName().startsWith(packageName))
+        return true;
+    }
+
+    return false;
   }
 
   public static class GWTTypeOracleCacheStore implements CacheStore {
