@@ -35,12 +35,17 @@ import org.slf4j.LoggerFactory;
 import com.google.gwt.core.client.GWT;
 
 /**
- * The <tt>InitVotes</tt> class provides the central algorithm around which disparate services
- * within the Errai Framework can elect to prevent initialization and be notified when
- * initialization occurs. This is required internally to ensure that services such as RPC proxies
- * have been properly bound prior to any remote calls being made. This API also makes it possible
- * for user-defined services and extensions to Errai to participate in the startup contract.
- * 
+ * <p>
+ * The <tt>InitVotes</tt> class provides the central algorithm around which disparate services within the Errai
+ * Framework can elect to prevent initialization and be notified when initialization occurs. This is required internally
+ * to ensure that services such as RPC proxies have been properly bound prior to any remote calls being made. This API
+ * also makes it possible for user-defined services and extensions to Errai to participate in the startup contract.
+ *
+ * <p>
+ * Initialization fails if there are any services still waiting after the timeout duration has elapsed. By default the
+ * timeout is 90 seconds for Development Mode and 45 seconds for production mode, but it can be adjusted by setting the
+ * Javascript variable <code>erraiInitTimeout</code> in the GWT Host Page.
+ *
  * @author Mike Brock
  */
 public final class InitVotes {
@@ -58,7 +63,7 @@ public final class InitVotes {
   // a list of both strings and runnable references that are marked done.
   private static final Set<Object> completedSet = new HashSet<Object>();
 
-  private static int timeoutMillis = !GWT.isProdMode() ? 90000 : 45000;
+  private static int timeoutMillis = !GWT.isProdMode() ? getConfiguredTimeoutOrElse(90000) : getConfiguredTimeoutOrElse(45000);
 
   private static volatile AsyncTask initTimeout;
   private static volatile AsyncTask initDelay;
@@ -91,6 +96,13 @@ public final class InitVotes {
       init = false;
     }
   }
+
+  private static native int getConfiguredTimeoutOrElse(final int fallback) /*-{
+    var configuredValue = $wnd.erraiInitTimeout;
+    return (configuredValue == undefined || configuredValue <= 0) ?
+              fallback :
+              configuredValue;
+  }-*/;
 
   /**
    * Specifies the number of milliseconds that will be permitted to transpire until dependencies are

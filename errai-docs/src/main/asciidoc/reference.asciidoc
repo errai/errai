@@ -2011,6 +2011,10 @@ public class MyClientBean {
 
 ====
 
+===== Increase the Initialization Timeout
+
+For some very large applications it is possible for initialization to timeout in Development Mode because of deferred code generation. If you experience this problem, you can adjust the initialization timeout value by setting the `erraiInitTimeout` variable in your GWT Host Page to a value in milliseconds.
+
 [[sid-71467095]]
 
 ==== Timed Methods
