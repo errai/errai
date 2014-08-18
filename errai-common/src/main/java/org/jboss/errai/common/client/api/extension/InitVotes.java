@@ -63,7 +63,7 @@ public final class InitVotes {
   // a list of both strings and runnable references that are marked done.
   private static final Set<Object> completedSet = new HashSet<Object>();
 
-  private static int timeoutMillis = !GWT.isProdMode() ? getConfiguredTimeoutOrElse(90000) : getConfiguredTimeoutOrElse(45000);
+  private static int timeoutMillis = !GWT.isProdMode() ? 90000 : 45000;
 
   private static volatile AsyncTask initTimeout;
   private static volatile AsyncTask initDelay;
@@ -97,12 +97,12 @@ public final class InitVotes {
     }
   }
 
-  private static native int getConfiguredTimeoutOrElse(final int fallback) /*-{
-    var configuredValue = $wnd.erraiInitTimeout;
-    return (configuredValue == undefined || configuredValue <= 0) ?
-              fallback :
-              configuredValue;
-  }-*/;
+//  private static native int getConfiguredTimeoutOrElse(final int fallback) /*-{
+//    var configuredValue = $wnd.erraiInitTimeout;
+//    return (configuredValue == undefined || configuredValue <= 0) ?
+//              fallback :
+//              configuredValue;
+//  }-*/;
 
   /**
    * Specifies the number of milliseconds that will be permitted to transpire until dependencies are
