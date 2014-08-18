@@ -20,7 +20,7 @@ import com.google.gwt.user.client.Timer;
  */
 public class ServiceAnnotationTests extends AbstractErraiTest {
 
-  MessageBus bus = ErraiBus.get();
+  private MessageBus bus; 
   private boolean received;
   private Message receivedMessage;
   private Timer timer;
@@ -39,6 +39,7 @@ public class ServiceAnnotationTests extends AbstractErraiTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+    bus = ErraiBus.get();
     // Do this to enhance independence of tests
     REPLY_TO = REPLY_TO_BASE + ++counter;
 

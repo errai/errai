@@ -16,7 +16,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
   private static final int TIMEOUT = 60000;
   private static final int POLL = 500;
 
-  private MessageBus bus = ErraiBus.get();
+  private MessageBus bus;
   private boolean received;
   private MessageCallback callback = new MessageCallback() {
     @Override
@@ -33,6 +33,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+    bus = ErraiBus.get();
     received = false;
   }
 
