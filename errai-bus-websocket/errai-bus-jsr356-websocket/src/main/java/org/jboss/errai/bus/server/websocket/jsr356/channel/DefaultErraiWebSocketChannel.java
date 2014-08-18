@@ -18,7 +18,9 @@ import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handler for websocket messages for both receiving and sending. There is one
@@ -72,9 +74,17 @@ public class DefaultErraiWebSocketChannel implements ErraiWebSocketChannel {
         }
       }
       else {
-        FilterDelegate.invokeFilter(session, httpSession, message);
-        final List<Message> commandMessages = MessageFactory.createCommandMessage(queueSession, val);
-        erraiService.store(commandMessages);
+		  Map<Object, Object> sharedProperties = new HashMap<Object, Object>();
+		  try {
+			  FilterDelegate.invokeFilterBefore(session, httpSession, sharedProperties, message);
+		  } finally {
+			  try {
+				  final List<Message> commandMessages = MessageFactory.createCommandMessage(queueSession, val);
+				  erraiService.store(commandMessages);
+			  } finally {
+				  FilterDelegate.invokeFilterAfter(session, httpSession, sharedProperties, message);
+			  }
+		  }
       }
     } catch (IOException e) {
       LOGGER.error("could not proceed message", e);

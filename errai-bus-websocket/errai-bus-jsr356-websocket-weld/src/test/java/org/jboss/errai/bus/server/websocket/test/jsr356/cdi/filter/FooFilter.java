@@ -5,14 +5,18 @@ import org.jboss.errai.bus.server.websocket.jsr356.filter.WebSocketFilter;
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
+import java.util.Map;
 
 /**
  * @author Michel Werren
  */
 @ApplicationScoped
 public class FooFilter implements WebSocketFilter {
-  @Override
-  public void doFilter(Session websocketSession, HttpSession httpSession, String message) {
+	@Override
+	public void beforeProcessingMessage(Session websocketSession, HttpSession httpSession, Map<Object, Object> sharedProperties, String message) {
+	}
 
-  }
+	@Override
+	public void afterProcessingMessage(Session websocketSession, HttpSession httpSession, Map<Object, Object> sharedProperties, String message) {
+	}
 }
