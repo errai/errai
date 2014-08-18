@@ -1374,6 +1374,19 @@ You can also define filters when using the JSR-356 WebSocket implementation. The
 </context-param>
 ----
 
+Because one of the filter method parameters is the actual WebSocket session, you also have to add the following dependency to your  [code]+pom.xml+:
+[source, xml]
+----
+<dependency>
+	<groupId>org.jboss.spec.javax.websocket</groupId>
+	<artifactId>jboss-websocket-api_1.0_spec</artifactId>
+	<scope>provided</scope>
+	<version>1.0.0.Final</version>
+</dependency>
+----
+
+Please take a look at the JavaDoc of the filter interface for more information about the method parameters.
+
 ==== WebSocket Security
 
 Errai supports Websocket security (wss) for two deployment scenarios.
