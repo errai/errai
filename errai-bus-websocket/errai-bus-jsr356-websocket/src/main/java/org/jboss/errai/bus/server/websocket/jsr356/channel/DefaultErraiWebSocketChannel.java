@@ -18,7 +18,9 @@ import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handler for websocket messages for both receiving and sending. There is one
@@ -29,7 +31,8 @@ import java.util.List;
  */
 public class DefaultErraiWebSocketChannel implements ErraiWebSocketChannel {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultErraiWebSocketChannel.class.getName());
+  private static final Logger LOGGER = LoggerFactory
+          .getLogger(DefaultErraiWebSocketChannel.class.getName());
 
   protected final Session session;
 
@@ -47,7 +50,8 @@ public class DefaultErraiWebSocketChannel implements ErraiWebSocketChannel {
       erraiService = ErraiServiceSingleton.getService();
     }
     else {
-      throw new IllegalStateException("Errai Bus should be initialized at this time. Default servlet configured?");
+      throw new IllegalStateException(
+              "Errai Bus should be initialized at this time. Default servlet configured?");
     }
   }
 
@@ -57,24 +61,38 @@ public class DefaultErraiWebSocketChannel implements ErraiWebSocketChannel {
     // this is not an active channel.
     try {
       if (queueSession == null) {
-        queueSession = WebSocketNegotiationHandler.establishNegotiation(val, this, erraiService);
+        queueSession = WebSocketNegotiationHandler.establishNegotiation(val,
+                this, erraiService);
         if (queueSession != null) {
-          LOGGER.trace("Negotiation done for errai session: {} on websocket session: {}", queueSession.getSessionId(),
-                  session.getId());
+          LOGGER.trace(
+                  "Negotiation done for errai session: {} on websocket session: {}",
+                  queueSession.getSessionId(), session.getId());
           queueSession.addSessionEndListener(new SessionEndListener() {
             @Override
             public void onSessionEnd(SessionEndEvent event) {
               if (session.isOpen()) {
-                LOGGER.warn("Errai queue session closed: {}", queueSession.getSessionId());
+                LOGGER.warn("Errai queue session closed: {}",
+                        queueSession.getSessionId());
               }
             }
           });
         }
       }
       else {
-        FilterDelegate.invokeFilter(session, httpSession, message);
-        final List<Message> commandMessages = MessageFactory.createCommandMessage(queueSession, val);
-        erraiService.store(commandMessages);
+        Map<Object, Object> sharedProperties = new HashMap<Object, Object>();
+        try {
+          FilterDelegate.invokeFilterBefore(session, httpSession,
+                  sharedProperties, message);
+        } finally {
+          try {
+            final List<Message> commandMessages = MessageFactory
+                    .createCommandMessage(queueSession, val);
+            erraiService.store(commandMessages);
+          } finally {
+            FilterDelegate.invokeFilterAfter(session, httpSession,
+                    sharedProperties, message);
+          }
+        }
       }
     } catch (IOException e) {
       LOGGER.error("could not proceed message", e);
