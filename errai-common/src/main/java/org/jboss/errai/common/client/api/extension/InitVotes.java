@@ -97,24 +97,23 @@ public final class InitVotes {
     }
   }
 
-//  private static native int getConfiguredTimeoutOrElse(final int fallback) /*-{
-//    var configuredValue = $wnd.erraiInitTimeout;
-//    return (configuredValue == undefined || configuredValue <= 0) ?
-//              fallback :
-//              configuredValue;
-//  }-*/;
+  private static native int getConfiguredTimeoutOrElse(final int fallback) /*-{
+    var configuredValue = $wnd.erraiInitTimeout;
+    return (configuredValue == undefined || configuredValue <= 0) ?
+              fallback :
+              configuredValue;
+  }-*/;
 
   /**
    * Specifies the number of milliseconds that will be permitted to transpire until dependencies are
-   * assumed to have failed to satisfy, and thus an error is rendered to the browser console. The
-   * default value is 5000 milliseconds.
+   * assumed to have failed to satisfy, and thus an error is rendered to the browser console. 
    * 
    * @param millis
    *          milliseconds.
    */
   public static void setTimeoutMillis(final int millis) {
     timeoutMillis = millis;
-  }
+  };
 
   /**
    * Declares a startup dependency on the specified class. By doing so, initialization of the
@@ -305,6 +304,7 @@ public final class InitVotes {
       logger.warn("did not start polling. already armed.");
       return;
     }
+    timeoutMillis = getConfiguredTimeoutOrElse(timeoutMillis);
     beginInit();
   }
 
