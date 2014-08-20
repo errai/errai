@@ -106,14 +106,21 @@ public final class TemplateUtil {
       for (int i = 0; i < templateAttributes.length(); i++) {
         final Node node = templateAttributes.get(i);
         String name = node.getNodeName();
-        String oldValue = node.getNodeValue();
+        String value = node.getNodeValue();
         /*
          * If this new component is templated, do not overwrite i18n related attributes.
          */
-        if ((name.equals("data-i18n-key") || name.equals("data-role") && oldValue.equals("dummy"))
+        if ((name.equals("data-i18n-key") || name.equals("data-role") && value.equals("dummy"))
                 && (hasI18nKey || hasI18nPrefix))
           continue;
-        field.getElement().setAttribute(name, oldValue);
+
+        if (name.equals("class")) {
+          // setAttribute for "class" does not work in IE8.
+          field.getElement().setClassName(value);
+        }
+        else {
+          field.getElement().setAttribute(name, value);
+        }
       }
     } catch (Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName + "]" +
