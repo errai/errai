@@ -19,8 +19,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -257,8 +257,14 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         final URL classpathElement;
         final String pathRoot = getPathRoot(bundleClass, resource);
         try {
-          classpathElement = new File(pathRoot).toURI().toURL();
-        } catch (MalformedURLException e) {
+          String urlString = new File(pathRoot).toURI().toURL().toString();
+          
+          // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
+          // a HTML form encoded String, which is why we escape the plus symbols here.
+          // Otherwise, they would be decoded into space characters.
+          // The pound character still must not appear anywhere in the path!
+          classpathElement = new URL(URLDecoder.decode(urlString.replaceAll("\\+", "%2b"), "UTF-8"));
+        } catch (Exception e) {
           log.warn("Failed to construct URL for i18n bundle defined in " + bundleClass);
           continue;
         }
