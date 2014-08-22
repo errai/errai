@@ -20,18 +20,21 @@ import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
- * Default implementation of {@link Role}. On the client, Errai should never reference
- * this type directly. The interface should be used instead to provide the
- * ability to plug in custom {@link Role} implementations.
- *
- * @author Max Barkley <mbarkley@redhat.com>
+ * Default implementation of {@link Group}. Errai's built-in security modules do
+ * not assign any semantics to groups and therefore don't consider them when
+ * checking for permissions.
+ * 
+ * On the client, Errai should never reference this type directly. The interface
+ * should be used instead to provide the ability to plug in custom {@link Group}
+ * implementations.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Portable
-public class RoleImpl implements Role {
+public class GroupImpl implements Group {
   private final String name;
 
-  public RoleImpl(@MapsTo("role") String name) {
+  public GroupImpl(@MapsTo("group") String name) {
     this.name = name;
   }
 
@@ -42,11 +45,13 @@ public class RoleImpl implements Role {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof RoleImpl)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof GroupImpl))
+      return false;
 
-    RoleImpl role = (RoleImpl) o;
-    return name.equals(role.name);
+    GroupImpl group = (GroupImpl) o;
+    return name.equals(group.name);
   }
 
   @Override

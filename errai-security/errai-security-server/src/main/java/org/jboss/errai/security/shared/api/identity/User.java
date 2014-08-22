@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.security.shared.api.Group;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
@@ -67,19 +68,14 @@ public interface User extends Serializable {
    * @return The set of all {@link Role Roles} associated with this user.
    */
   Set<Role> getRoles();
-
+  
   /**
-   * Use {@link #getRoles()} instead.
+   * The implementation returned must use the {@link Object#equals(Object)} method for comparison.
+   *
+   * @return The set of all {@link Group Groups} associated with this user.
    */
-  @Deprecated
-  boolean hasAllRoles(String... roleNames);
-
-  /**
-   * Use {@link #getRoles()} instead.
-   */
-  @Deprecated
-  boolean hasAnyRoles(String... roleNames);
-
+  Set<Group> getGroups();
+  
   /**
    * Note: the contents of this map will depend on the implementations of {@link User} and
    * {@link AuthenticationService} being used.

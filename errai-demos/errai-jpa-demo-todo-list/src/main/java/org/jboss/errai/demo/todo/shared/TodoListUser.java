@@ -15,6 +15,7 @@ import javax.validation.constraints.Size;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.logging.util.StringFormat;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.security.shared.api.Group;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.validation.client.shared.GwtCompatibleEmail;
@@ -123,14 +124,17 @@ public class TodoListUser implements User {
     return Collections.emptySet();
   }
 
-  @Override
   public boolean hasAllRoles(String... roleNames) {
     return roleNames.length == 0;
   }
 
-  @Override
   public boolean hasAnyRoles(String... roleNames) {
     return false;
+  }
+  
+  @Override
+  public Set<Group> getGroups() {
+    return Collections.<Group> emptySet();
   }
 
   @Override

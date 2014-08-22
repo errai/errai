@@ -28,6 +28,7 @@ import org.jboss.errai.security.keycloak.mock.MockWrappedAuthenticationService;
 import org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.User.StandardUserProperties;
+import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.AlreadyLoggedInException;
 import org.junit.Before;
 import org.junit.Test;
@@ -210,8 +211,7 @@ public class KeycloakAuthenticationServiceTest {
     map.get(KeycloakPropertyNames.ZONE_INFO).doAssertion(ZONE_INFO, user.getProperty(KeycloakPropertyNames.ZONE_INFO));
   }
 
-  @SuppressWarnings("deprecation")
-  private void verifyUserRoles(final User user, final String... roleNames) {
+  private void verifyUserRoles(final UserImpl user, final String... roleNames) {
     assertTrue(user.hasAllRoles(roleNames));
   }
 
@@ -236,7 +236,7 @@ public class KeycloakAuthenticationServiceTest {
   public void getUserReturnsUserWhenKeycloakUserLoggedIn() throws Exception {
     authService.setSecurityContext(securityContext);
 
-    final User user = authService.getUser();
+    final UserImpl user = (UserImpl) authService.getUser();
     verifyUserProperties(user, keycloakAssertionMap);
     verifyUserRoles(user, USER_ROLE);
   }
@@ -252,7 +252,7 @@ public class KeycloakAuthenticationServiceTest {
   public void getUserReturnsUserWhenWrappedUserLoggedIn() throws Exception {
     mockWrappedService.login(ID, "");
 
-    final User user = authService.getUser();
+    final UserImpl user = (UserImpl) authService.getUser();
     verifyUserProperties(user, wrappedAssertionMap);
     verifyUserRoles(user);
   }
