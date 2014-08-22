@@ -16,8 +16,10 @@
  */
 package org.jboss.errai.security;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -35,7 +37,9 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
+import org.jboss.errai.security.shared.roles.SharedRequiredRolesExtractorImpl;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,12 +48,14 @@ import org.junit.Test;
  */
 public class SecurityRoleInterceptorTest {
   private AuthenticationService authenticationService;
+  private RequiredRolesExtractor roleExtractor;
   private ServerSecurityRoleInterceptor interceptor;
 
   @Before
   public void setUp() throws Exception {
     authenticationService = mock(AuthenticationService.class);
-    interceptor = new ServerSecurityRoleInterceptor(authenticationService);
+    roleExtractor = new SharedRequiredRolesExtractorImpl() {};
+    interceptor = new ServerSecurityRoleInterceptor(authenticationService, roleExtractor);
   }
 
   @Test

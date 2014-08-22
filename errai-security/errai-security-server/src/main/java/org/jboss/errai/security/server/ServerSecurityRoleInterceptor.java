@@ -21,17 +21,20 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
+import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
 
 /**
@@ -47,6 +50,7 @@ import org.jboss.errai.security.shared.util.AnnotationUtils;
 public class ServerSecurityRoleInterceptor {
 
   private final AuthenticationService authenticationService;
+  private final RequiredRolesExtractor roleExtractor;
 
   public ServerSecurityRoleInterceptor() {
     authenticationService = null;
@@ -55,8 +59,10 @@ public class ServerSecurityRoleInterceptor {
   }
 
   @Inject
-  public ServerSecurityRoleInterceptor(AuthenticationService authenticationService) {
+  public ServerSecurityRoleInterceptor(AuthenticationService authenticationService, 
+          final RequiredRolesExtractor roleExtractor) {
     this.authenticationService = authenticationService;
+    this.roleExtractor = roleExtractor;
   }
 
   @AroundInvoke
@@ -64,12 +70,12 @@ public class ServerSecurityRoleInterceptor {
     final User user = authenticationService.getUser();
     final Collection<RestrictedAccess> annotations = getRestrictedAccessAnnotations(context.getTarget().getClass(),
             context.getMethod());
-    final String[] roles = AnnotationUtils.mergeRoles(annotations.toArray(new RestrictedAccess[annotations.size()]));
+    final Set<Role> roles = AnnotationUtils.mergeRoles(roleExtractor, annotations);
 
     if (User.ANONYMOUS.equals(user)) {
       throw new UnauthenticatedException();
     }
-    else if (!user.hasAllRoles(roles)) {
+    else if (!user.getRoles().containsAll(roles)) {
       throw new UnauthorizedException();
     }
     else {

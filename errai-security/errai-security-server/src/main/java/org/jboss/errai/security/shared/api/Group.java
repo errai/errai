@@ -17,30 +17,32 @@
 package org.jboss.errai.security.shared.api;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.security.shared.api.identity.User;
 
 /**
- * Represents a set of capabilities of a {@link User} for the purpose of access control. 
+ * Represents a group a {@link User} can be part of for the purpose of access control. 
  *
  * <p>
- * The default implementation of this role in Errai is {@link RoleImpl}, but a different
+ * The default implementation of this group in Errai is {@link GroupImpl}, but a different
  * implementation may be used so long as:
  * <ul>
  * <li>It is {@link Portable}.
- * <li>It overrides the {@link Object#equals(Object)} method (used to compare roles between
+ * <li>It overrides the {@link Object#equals(Object)} method (used to compare groups between
  * {@link User} and a secured resource).
- * <li>It overrides the {@link Object#hashCode()} method so that equal roles have the same hash.
- * (This is important if you use the default {@link User} implementation, which stores roles in a
+ * <li>It overrides the {@link Object#hashCode()} method so that equal groups have the same hash.
+ * (This is important if you use the default {@link User} implementation, which stores groups in a
  * {@link HashSet}.)
  *
- * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface Role extends Serializable {
-  
-  public static final Role NOBODY = new RoleImpl("NOBODY");
+public interface Group extends Serializable {
 
+  /**
+   * @return The name of this group. This should <b>not</b> be used for comparing instances.
+   */
   String getName();
 
 }

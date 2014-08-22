@@ -1,14 +1,16 @@
 package org.jboss.errai.security.server;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.security.shared.api.identity.User.StandardUserProperties;
+import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.AuthenticationException;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +89,7 @@ public class PicketLinkUserMappingTest {
     when(mockQuery.getResultList()).thenReturn(plRoles);
 
     plAuthService.login("cow", "moo");
-    assertTrue(plAuthService.getUser().hasAllRoles("meadow", "barn"));
+    assertTrue(((UserImpl)plAuthService.getUser()).hasAllRoles("meadow", "barn"));
     assertEquals(2, plAuthService.getUser().getRoles().size());
   }
 }

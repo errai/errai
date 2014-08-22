@@ -40,7 +40,8 @@ public class UserCookieEncoderTest {
             + "\"roles\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"2\",\"^Value\":"
             + "[{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"3\",\"name\":\"staff\"},"
             + "{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"4\",\"name\":\"user\"}]},"
-            + "\"properties\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableMap\",\"^ObjectID\":\"5\","
+            + "\"groups\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"5\",\"^Value\":[]},"
+            + "\"properties\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableMap\",\"^ObjectID\":\"6\","
             + "\"^Value\":{\"p2\":\"v2\",\"p1\":\"v1\"}}}";
     assertEquals(expected, cookieValue);
   }
@@ -52,27 +53,32 @@ public class UserCookieEncoderTest {
                     + "\"roles\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"2\",\"^Value\":"
                     + "[{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"3\",\"name\":\"staff\"},"
                     + "{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"4\",\"name\":\"user\"}]},"
-                    + "\"properties\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableMap\",\"^ObjectID\":\"5\","
+                    + "\"groups\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"5\",\"^Value\":[]},"
+                    + "\"properties\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableMap\",\"^ObjectID\":\"6\","
                     + "\"^Value\":{\"p2\":\"v2\",\"p1\":\"v1\"}}}";
 
     User fred = UserCookieEncoder.fromCookieValue(nonEncodedFred);
 
-    String expected = "UserImpl [id=fred, roles=[staff, user], properties={p2=v2, p1=v1}]";
+    String expected = "UserImpl [id=fred, roles=[staff, user], groups=[], properties={p2=v2, p1=v1}]";
     assertEquals(expected, fred.toString());
   }
 
   /**
    * Jetty 6 quotes and escapes cookie values that contain "special" characters, which are always present in Errai's
-   * Marshalled object strings.
+   * marshalled object strings.
    */
   @Test
   public void testDecodeJettyQuotedEscapedUserCookie() throws Exception {
     String quotedAdmin = "\"{\\\"^EncodedType\\\":\\\"org.jboss.errai.security.shared.api.identity.UserImpl\\\",\\\"^ObjectID\\\":\\\"1\\\","
-            + "\\\"name\\\":\\\"admin\\\",\\\"roles\\\":{\\\"^EncodedType\\\":\\\"java.util.Collections$UnmodifiableSet\\\","
+            + "\\\"name\\\":\\\"admin\\\","
+            + "\\\"roles\\\":{\\\"^EncodedType\\\":\\\"java.util.Collections$UnmodifiableSet\\\","
             + "\\\"^ObjectID\\\":\\\"2\\\",\\\"^Value\\\":[{\\\"^EncodedType\\\":\\\"org.jboss.errai.security.shared.api.RoleImpl\\\","
             + "\\\"^ObjectID\\\":\\\"3\\\",\\\"name\\\":\\\"admin\\\"},{\\\"^EncodedType\\\":\\\"org.jboss.errai.security.shared.api.RoleImpl\\\","
-            + "\\\"^ObjectID\\\":\\\"4\\\",\\\"name\\\":\\\"simple\\\"}]},\\\"properties\\\":{\\\"^EncodedType\\\":"
-            + "\\\"java.util.TreeMap\\\",\\\"^ObjectID\\\":\\\"5\\\",\\\"^Value\\\":"
+            + "\\\"^ObjectID\\\":\\\"4\\\",\\\"name\\\":\\\"simple\\\"}]},"
+            + "\\\"groups\\\":{\\\"^EncodedType\\\":\\\"java.util.Collections$UnmodifiableSet\\\","
+            + "\\\"^ObjectID\\\":\\\"5\\\",\\\"^Value\\\":[]},"
+            + "\\\"properties\\\":{\\\"^EncodedType\\\":"
+            + "\\\"java.util.TreeMap\\\",\\\"^ObjectID\\\":\\\"6\\\",\\\"^Value\\\":"
             + "{\\\"org.jboss.errai.security.FIRST_NAME\\\":\\\"John\\\",\\\"org.jboss.errai.security.EMAIL\\\":\\\"john@doe.com\\\","
             + "\\\"org.jboss.errai.security.LAST_NAME\\\":\\\"Do\u00e9\\\"}}}\"";
 
