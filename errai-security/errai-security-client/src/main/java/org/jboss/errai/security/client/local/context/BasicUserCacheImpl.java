@@ -18,6 +18,8 @@ package org.jboss.errai.security.client.local.context;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Assert;
@@ -64,6 +66,12 @@ public class BasicUserCacheImpl implements ActiveUserCache {
         setActiveUser(storedUser, false);
       }
     }
+  }
+  
+  @Produces @Dependent
+  private User produceActiveUser() {
+    maybeLoadStoredCache();
+    return activeUser;
   }
 
   private void setActiveUser(User user, boolean localStorage) {
