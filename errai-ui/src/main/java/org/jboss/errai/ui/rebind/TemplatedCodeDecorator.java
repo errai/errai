@@ -607,7 +607,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * Get the name of the {@link Template} class of the given {@link MetaClass} type
    */
   private String getTemplateTypeName(final MetaClass type) {
-    return type.getFullyQualifiedName().replace('.', '_') + "TemplateResource";
+    return type.getFullyQualifiedName().replace('.', '_').replace('$', '_') + "TemplateResource";
   }
 
   /**
