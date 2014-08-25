@@ -3,6 +3,7 @@ package org.jboss.errai.ui.test.nested.client;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.test.nested.client.res.A;
+import org.jboss.errai.ui.test.nested.client.res.NestedClassComponent;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
@@ -46,6 +47,15 @@ public class NestedTemplateTest extends AbstractErraiCDITest {
 
     assertEquals("This is the address field in A.html", a.getAddress().getValue());
     assertEquals("This is the address field in B.html", a.getB().getAddress().getText());
+  }
+  
+  /**
+   * Regression test for the failure case documented in ERRAI-790.
+   */
+  @Test
+  public void testComponentAsStaticInnerClass() {
+    NestedClassComponent.Content c = IOC.getBeanManager().lookupBean(NestedClassComponent.Content.class).getInstance();
+    assertNotNull(c);
   }
 
 }
