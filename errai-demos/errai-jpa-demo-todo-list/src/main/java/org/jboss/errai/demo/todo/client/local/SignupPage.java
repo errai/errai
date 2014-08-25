@@ -11,15 +11,16 @@ import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.demo.todo.shared.TodoListUser;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.slf4j.Logger;
 
@@ -34,9 +35,9 @@ import com.google.gwt.user.client.ui.TextBox;
 @Page(path="signup")
 public class SignupPage extends Composite {
 
+  @Inject @AutoBound private DataBinder<TodoListUser> user;
+  
   @Inject private @DataField Label overallErrorMessage;
-
-  @Inject private @Model TodoListUser user;
   @Inject private @Bound @DataField TextBox shortName;
   @Inject private @Bound @DataField TextBox fullName;
   @Inject private @Bound @DataField TextBox email;
@@ -61,7 +62,7 @@ public class SignupPage extends Composite {
 
   @EventHandler("signupButton")
   private void doSignup(ClickEvent e) {
-    Set<ConstraintViolation<TodoListUser>> violations = validator.validate(user);
+    Set<ConstraintViolation<TodoListUser>> violations = validator.validate(user.getModel());
     if (violations.size() > 0) {
       ConstraintViolation<TodoListUser> violation = violations.iterator().next();
       overallErrorMessage.setText(violation.getPropertyPath() + " " + violation.getMessage());
@@ -97,10 +98,10 @@ public class SignupPage extends Composite {
           logger.error(throwable.getMessage(), throwable);
           return false;
         }
-      }).register(user, password1.getText());
+      }).register(user.getModel(), password1.getText());
     } catch (RegistrationException e1) {
       // won't happen for async remote call
     }
   }
-
+  
 }
