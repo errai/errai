@@ -26,6 +26,9 @@ public class BoundNoWarnings {
 
     @Bound
     private Element property3 = DOM.createDiv();
+    
+    @Inject @Bound(property="property4")
+    private TextBox thisNameIsOverriddenByAttribute;
 
     private final Widget constructorInjectedWidget;
     private final TextBox widgetNamedByGetter = new TextBox();

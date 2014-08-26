@@ -65,6 +65,7 @@ public class BoundAnnotationChecker extends AbstractProcessor {
           boundThings = new ArrayList<Element>();
           classesWithBoundThings.put(enclosingClass, boundThings);
         }
+        
         boundThings.add(target);
       }
     }
@@ -85,10 +86,17 @@ public class BoundAnnotationChecker extends AbstractProcessor {
         TypeMirror modelType = modelTypes.get(0);
         Set<String> modelPropertyNames = getPropertyNames(modelType);
         for (Element boundElement : classWithItsBoundThings.getValue()) {
+          
+          String configuredProperty = AnnotationProcessors.
+                  extractAnnotationStringValue(elements, getAnnotation(boundElement, TypeNames.BOUND), "property");
+          
+          final String boundProperty = (configuredProperty != null && !configuredProperty.isEmpty()) ? 
+                  configuredProperty : boundElement.getSimpleName().toString();
+          
           switch (boundElement.getKind()) {
           case FIELD:
           case PARAMETER:
-            if (!modelPropertyNames.contains(boundElement.getSimpleName().toString())) {
+            if (!modelPropertyNames.contains(boundProperty)) {
               processingEnv.getMessager().printMessage(
                       Kind.ERROR, "The model type " + ((DeclaredType) modelType).asElement().getSimpleName() + " does not have property \"" + boundElement.getSimpleName() + "\"",
                       boundElement, getAnnotation(boundElement, TypeNames.BOUND));
@@ -192,5 +200,4 @@ public class BoundAnnotationChecker extends AbstractProcessor {
     // in a superclass, this could return a type variable or a wildcard
     return ((DeclaredType) dataBinderDeclaration).getTypeArguments().get(0);
   }
-
 }
