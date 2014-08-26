@@ -2,6 +2,7 @@ package org.jboss.errai.processor;
 
 import java.util.Map;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -10,19 +11,21 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Elements;
 
 /**
  * An indiscriminate dumping ground for static methods that help paper over the
  * missing functionality in the Java 6 Annotation Processing API.
  * <p>
  * Do your worst! :-)
- *
+ * 
  * @author jfuerth
  */
 public class AnnotationProcessors {
 
   /** Prevents instantiation. */
-  private AnnotationProcessors() {}
+  private AnnotationProcessors() {
+  }
 
   public static boolean hasAnnotation(Element target, CharSequence annotationQualifiedName) {
     return getAnnotation(target, annotationQualifiedName) != null;
@@ -41,7 +44,7 @@ public class AnnotationProcessors {
   /**
    * Retrieves a parameter value from an annotation that targets the given
    * element. The returned value does not take defaults into consideration.
-   *
+   * 
    * @param target
    *          The element targeted by an instance of the given annotation. Could
    *          be a class, field, method, or anything else.
@@ -53,12 +56,51 @@ public class AnnotationProcessors {
    * @return the String value of the given annotation's parameter, or null if
    *         the parameter is not present on the annotation.
    */
-  static AnnotationValue getAnnotationParamValueWithoutDefaults(
-          Element target, CharSequence annotationQualifiedName, CharSequence paramName) {
+  static AnnotationValue getAnnotationParamValueWithoutDefaults(Element target, CharSequence annotationQualifiedName,
+          CharSequence paramName) {
     AnnotationMirror templatedAnnotation = getAnnotation(target, annotationQualifiedName);
-    Map<? extends ExecutableElement, ? extends AnnotationValue> annotationParams = templatedAnnotation.getElementValues();
+    Map<? extends ExecutableElement, ? extends AnnotationValue> annotationParams = templatedAnnotation
+            .getElementValues();
     for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> param : annotationParams.entrySet()) {
       if (param.getKey().getSimpleName().contentEquals(paramName)) {
+        return param.getValue();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Retrieves a string parameter value from an annotation.
+   * 
+   * @param elements
+   *          Reference to the element utilities see
+   *          {@link ProcessingEnvironment#getElementUtils()}.
+   * @param annotation
+   *          The annotation to retrieve the parameter value from.
+   * @param paramName
+   *          the name of the annotation parameter to retrieve.
+   * @return the String value of the given annotation's parameter, or null if
+   *         the parameter is not present on the annotation.
+   */
+  public static String extractAnnotationStringValue(Elements elementUtils, AnnotationMirror annotation,
+          CharSequence paramName) {
+
+    final AnnotationValue av = extractAnnotationPropertyValue(elementUtils, annotation, paramName);
+    if (av != null && av.getValue() != null) {
+      return av.getValue().toString();
+    }
+
+    return null;
+  }
+
+  private static AnnotationValue extractAnnotationPropertyValue(Elements elementUtils, AnnotationMirror annotation,
+          CharSequence annotationProperty) {
+
+    Map<? extends ExecutableElement, ? extends AnnotationValue> annotationParams = elementUtils
+            .getElementValuesWithDefaults(annotation);
+
+    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> param : annotationParams.entrySet()) {
+      if (param.getKey().getSimpleName().contentEquals(annotationProperty)) {
         return param.getValue();
       }
     }
@@ -95,7 +137,7 @@ public class AnnotationProcessors {
    * it does in fact define a property name. The name is calculated by stripping
    * off the prefix "is", "get", or "set" and then converting the new initial
    * character to lowercase.
-   *
+   * 
    * @param el
    *          The method element to extract a property name from.
    * @return the property name defined by the method according to JavaBeans
