@@ -37,9 +37,6 @@ public abstract class AbstractCDIEventCallback<T> implements MessageCallback {
     return qualifierSet;
   }
 
-  private static final Set<String> DEFAULT_QUALIFIERS
-      = Collections.singleton(Any.class.getName());
-
   @SuppressWarnings("unchecked")
   @Override
   public final void callback(final Message message) {
@@ -49,20 +46,15 @@ public abstract class AbstractCDIEventCallback<T> implements MessageCallback {
       msgQualifiers = Collections.emptySet();
     }
 
-    // if the event was fired from the client, then we apply a containsAll operation rather than an equals() operation.
-    // this is because Weld on the server takes care of identifying the proper observer methods we have registered
-    // to invoke, resulting in potential redundant event propagation. Thus, we only check for exact matches from
-    // the service.
-
-    // TODO: CDI 1.1 allows EventObservers to know what qualifiers were associated with firing the event
-    //       a future version of Errai should be able to use containsAll() from the server as well, when
-    //       Errai switches to CDI 1.1.
     if (message.hasPart(CDIProtocol.FromClient)) {
       if (isDefault() || msgQualifiers.containsAll(qualifierSet)) {
         fireEvent((T) message.get(Object.class, CDIProtocol.BeanReference));
       }
     }
     else {
+      // Our server-side CDI integration module knows of all client-side event
+      // observers and sends a separate message specific to each matching
+      // observer.
       if (msgQualifiers.equals(qualifierSet)) {
         fireEvent((T) message.get(Object.class, CDIProtocol.BeanReference));
       }
