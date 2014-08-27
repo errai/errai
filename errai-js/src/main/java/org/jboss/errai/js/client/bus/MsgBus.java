@@ -17,10 +17,12 @@
 package org.jboss.errai.js.client.bus;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.js.client.bus.marshall.MsgTools;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportPackage;
@@ -30,6 +32,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ExportPackage("errai")
 @Export
@@ -38,6 +41,10 @@ public class MsgBus implements Exportable {
 
   public void subscribe(String subject, JavaScriptObject func) {
     bus.subscribe(subject, new JsFunctionMessageCallback(func));
+  }
+  
+  public void subscribeCdi(String subject, JavaScriptObject func) {
+    CDI.subscribe(subject, new CdiJsFunctionMessageCallback(func));
   }
 
   public void send(String subject, Object value) {
@@ -58,6 +65,20 @@ public class MsgBus implements Exportable {
     @Override
     public void callback(Message message) {
       _callFunction(functionReference, MsgTools.mapToJSPrototype(message.getParts()));
+    }
+  }
+  
+  private static final class CdiJsFunctionMessageCallback extends AbstractCDIEventCallback {
+    private final JavaScriptObject functionReference;
+
+    private CdiJsFunctionMessageCallback(JavaScriptObject functionReference) {
+      // TODO configure qualifiers
+      this.functionReference = functionReference;
+    }
+
+    @Override
+    protected void fireEvent(Object event) {
+      _callFunction(functionReference, event);
     }
   }
 
