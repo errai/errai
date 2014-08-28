@@ -16,9 +16,11 @@
 
 package org.jboss.errai.js.client;
 
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.js.client.bus.MsgBus;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import org.jboss.errai.js.client.bus.MsgBus;
 
 /**
  * @author Mike Brock
@@ -28,6 +30,13 @@ public class ErraiJS implements EntryPoint {
   public void onModuleLoad() {
     GWT.create(MsgBus.class);
     erraiOnLoad();
+    
+    CDI.addPostInitTask(new Runnable(){
+      @Override
+      public void run() {
+        erraiCdiOnLoad();
+      }
+    });
   }
 
   private native void erraiOnLoad() /*-{
@@ -48,5 +57,9 @@ public class ErraiJS implements EntryPoint {
     };
 
     if ($wnd.erraiOnLoad && typeof $wnd.erraiOnLoad == 'function') $wnd.erraiOnLoad();
+  }-*/;
+  
+  private native void erraiCdiOnLoad() /*-{
+    if ($wnd.erraiCdiOnLoad && typeof $wnd.erraiCdiOnLoad == 'function') $wnd.erraiCdiOnLoad();
   }-*/;
 }

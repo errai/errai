@@ -44,6 +44,7 @@ public class MsgBus implements Exportable {
   }
   
   public void subscribeCdi(String subject, JavaScriptObject func) {
+    bus.subscribe(CDI.getSubjectNameByType(subject), CDI.ROUTING_CALLBACK);
     CDI.subscribe(subject, new CdiJsFunctionMessageCallback(func));
   }
 
