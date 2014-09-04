@@ -114,17 +114,17 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testNestedBindingWithModelChange() {
     TextBox textBox = new TextBox();
-    
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_MODEL);
-    TestModel model = binder.bind(textBox, "child.value").getModel();
+    TestModel model = new TestModel();
+    DataBinder<TestModel> binder = DataBinder.forModel(model, InitialState.FROM_MODEL);
+    model = binder.bind(textBox, "child.value").getModel();
     
     textBox.setValue("old string", true);
     assertEquals("Model not properly updated", "old string", model.getChild().getValue());
 
     TestModel newChild = new TestModel();
     
-    model.setChild(newChild);
     newChild.value = "new string";
+    model.setChild(newChild);
     
     assertEquals("Widget not properly updated", "new string", textBox.getText());
   }
