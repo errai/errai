@@ -3,6 +3,7 @@ package org.jboss.errai.ui.nav.client.local.testpages;
 import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageState;
 
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -13,6 +14,8 @@ public class PageBWithState extends SimplePanel {
 
   @PageState
   public String uuid;
+  
+  public static int hitCount;
 
   /**
    * Constructor.
@@ -20,4 +23,8 @@ public class PageBWithState extends SimplePanel {
   public PageBWithState() {
   }
 
+  @PageShowing
+  public void onPageShowing() {
+    hitCount++;
+  }
 }

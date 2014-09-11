@@ -18,6 +18,7 @@ import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingPageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingUniquePageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.PageA;
+import org.jboss.errai.ui.nav.client.local.testpages.PageBWithState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
@@ -431,6 +432,22 @@ public class NavigationTest extends AbstractErraiCDITest {
     Multimap<String, String> pageStateMap = builder.build();
     String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
+  }
+  
+  public void testPageReloadWithChangedPageState() throws Exception {
+    PageBWithState.hitCount = 0;
+    
+    Builder<String, String> oldBuilder = ImmutableMultimap.builder();
+    oldBuilder.put("uuid", "old state");
+    Multimap<String, String> oldState = oldBuilder.build();
+    navigation.goTo(PageBWithState.class, oldState);
+    assertEquals("Did not hit @PageShowing method", 1, PageBWithState.hitCount);
+    
+    Builder<String, String> newBuilder = ImmutableMultimap.builder();
+    newBuilder.put("uuid", "new state");
+    Multimap<String, String> newState = newBuilder.build();
+    navigation.goTo(PageBWithState.class, newState);
+    assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
   }
   
   public void testForEmptyContextWithoutPushState() throws Exception {
