@@ -17,6 +17,7 @@ import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingPageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingUniquePageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.PageA;
+import org.jboss.errai.ui.nav.client.local.testpages.PageBWithState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
@@ -25,6 +26,8 @@ import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableMultimap.Builder;
+import com.google.common.collect.Multimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
@@ -389,4 +392,20 @@ public class NavigationTest extends AbstractErraiCDITest {
     }.scheduleRepeating(interval);
   }
 
+  public void testPageReloadWhenPageStateChangedInURLBar() throws Exception {
+    PageBWithState.hitCount = 0;
+    
+    Builder<String, String> oldBuilder = ImmutableMultimap.builder();
+    oldBuilder.put("uuid", "oldstate");
+    Multimap<String, String> state = oldBuilder.build();
+    navigation.goTo(PageBWithState.class, state);
+    assertEquals("Did not hit @PageShowing method", 1, PageBWithState.hitCount);
+    
+    String oldUrl = Window.Location.getHref();
+    StringBuilder urlBuilder = new StringBuilder(oldUrl);
+    urlBuilder.replace(oldUrl.length() - 8, oldUrl.length(), "newstate");
+    String newUrl = urlBuilder.toString();
+    Window.Location.assign(newUrl);
+    assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
+  }
 }
