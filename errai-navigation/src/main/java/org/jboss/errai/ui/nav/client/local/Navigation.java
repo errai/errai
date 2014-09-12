@@ -89,6 +89,8 @@ public class Navigation {
 
   protected IsWidget currentWidget;
   
+  protected HistoryToken currentPageToken;
+  
   private PageNavigationErrorHandler navigationErrorHandler;
 
   private HandlerRegistration historyHandlerRegistration;
@@ -139,10 +141,9 @@ public class Navigation {
             setAppContext(context);
           }
           token = historyTokenFactory.parseURL(event.getValue());
-          PageNode<IsWidget> toPage = null;
-
-          toPage = navGraph.getPage(token.getPageName());
-          if (currentPage == null || !toPage.name().equals(currentPage.name())) {
+          
+          if (currentPage == null || !token.equals(currentPageToken)) {
+            PageNode<IsWidget> toPage = navGraph.getPage(token.getPageName());
             navigate(new Request<IsWidget>(toPage, token), false);
           }
         } catch (Exception e) {
@@ -364,6 +365,7 @@ public class Navigation {
           throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
         }
         maybeAttachContentPanel();
+        currentPageToken = request.state;
         pageHiding(widget, request, fireEvent);
       }
     });

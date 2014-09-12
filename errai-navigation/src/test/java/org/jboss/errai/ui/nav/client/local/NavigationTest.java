@@ -434,20 +434,38 @@ public class NavigationTest extends AbstractErraiCDITest {
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
   }
   
-  public void testPageReloadWithChangedPageState() throws Exception {
+  public void testPageReloadWithChangedPageStateUsingGoTo() throws Exception {
     PageBWithState.hitCount = 0;
     
     Builder<String, String> oldBuilder = ImmutableMultimap.builder();
-    oldBuilder.put("uuid", "old state");
+    oldBuilder.put("uuid", "oldstate");
     Multimap<String, String> oldState = oldBuilder.build();
     navigation.goTo(PageBWithState.class, oldState);
     assertEquals("Did not hit @PageShowing method", 1, PageBWithState.hitCount);
     
     Builder<String, String> newBuilder = ImmutableMultimap.builder();
-    newBuilder.put("uuid", "new state");
+    newBuilder.put("uuid", "newstate");
     Multimap<String, String> newState = newBuilder.build();
     navigation.goTo(PageBWithState.class, newState);
     assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
+  }
+  
+  public void testPageReloadWhenPageStateChangedInURLBar() throws Exception {
+    PageBWithState.hitCount = 0;
+    
+    Builder<String, String> oldBuilder = ImmutableMultimap.builder();
+    oldBuilder.put("uuid", "oldstate");
+    Multimap<String, String> state = oldBuilder.build();
+    navigation.goTo(PageBWithState.class, state);
+    assertEquals("Did not hit @PageShowing method", 1, PageBWithState.hitCount);
+    
+    String oldUrl = Window.Location.getHref();
+    StringBuilder urlBuilder = new StringBuilder(oldUrl);
+    urlBuilder.replace(oldUrl.length() - 8, oldUrl.length(), "newstate");
+    String newUrl = urlBuilder.toString();
+    Window.Location.assign(newUrl);
+    assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
+
   }
   
   public void testForEmptyContextWithoutPushState() throws Exception {
