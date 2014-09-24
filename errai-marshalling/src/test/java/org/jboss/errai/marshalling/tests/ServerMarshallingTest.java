@@ -31,6 +31,8 @@ import org.jboss.errai.marshalling.tests.res.EnumTestA;
 import org.jboss.errai.marshalling.tests.res.EnumWithAbstractMethod;
 import org.jboss.errai.marshalling.tests.res.EnumWithState;
 import org.jboss.errai.marshalling.tests.res.ImmutableEnumContainer;
+import org.jboss.errai.marshalling.tests.res.Outer;
+import org.jboss.errai.marshalling.tests.res.Outer2;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
@@ -626,5 +628,17 @@ public class ServerMarshallingTest {
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall immutable enum container with nulls",
             val, ServerMarshalling.fromJSON(json));
+  }
+  
+  // This is a regression test for ERRAI-794
+  @Test
+  public void testBackReferenceOrderingWithMapsTo() {
+    Outer.Nested key = new Outer.Nested("exp");
+    Outer outer = new Outer (Arrays.asList(key), key);
+    testEncodeDecode(Outer.class, outer);
+    
+    Outer2.Nested key2 = new Outer2.Nested("exp");
+    Outer2 outer2 = new Outer2 (key2, Arrays.asList(key2));
+    testEncodeDecode(Outer2.class, outer2);
   }
 }

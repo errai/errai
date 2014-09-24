@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.tests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,7 +25,22 @@ import java.util.Set;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
-import org.jboss.errai.marshalling.tests.res.*;
+import org.jboss.errai.marshalling.tests.res.AImpl1;
+import org.jboss.errai.marshalling.tests.res.AImpl2;
+import org.jboss.errai.marshalling.tests.res.ASubImpl1;
+import org.jboss.errai.marshalling.tests.res.BImpl1;
+import org.jboss.errai.marshalling.tests.res.BImpl2;
+import org.jboss.errai.marshalling.tests.res.EntityWithAbstractFieldType;
+import org.jboss.errai.marshalling.tests.res.EntityWithInheritedPublicFields;
+import org.jboss.errai.marshalling.tests.res.EntityWithInterface;
+import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArray;
+import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArrayInPublicField;
+import org.jboss.errai.marshalling.tests.res.EntityWithMapUsingArrayValues;
+import org.jboss.errai.marshalling.tests.res.EntityWithPortableSubtypesInArray;
+import org.jboss.errai.marshalling.tests.res.EntityWithPublicFields;
+import org.jboss.errai.marshalling.tests.res.InterfaceA;
+import org.jboss.errai.marshalling.tests.res.Outer;
+import org.jboss.errai.marshalling.tests.res.Outer2;
 import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
@@ -47,7 +63,8 @@ public class MarshallingAPITest {
   private void testEncodeDecode(Object value) {
     if (value == null) return;
     final String json = ServerMarshalling.toJSON(value);
-    Assert.assertEquals(value, ServerMarshalling.fromJSON(json));
+    Object result = ServerMarshalling.fromJSON(json);
+    Assert.assertEquals(value, result);
   }
 
   @Test
@@ -257,4 +274,17 @@ public class MarshallingAPITest {
     ewmuav.setData(data);
     testEncodeDecode(ewmuav);
   }
+  
+  // This is a regression test for ERRAI-794
+  @Test
+  public void testBackReferenceOrderingWithMapsTo() {
+    Outer.Nested key = new Outer.Nested("exp");
+    Outer outer = new Outer (Arrays.asList(key), key);
+    testEncodeDecode(outer);
+    
+    Outer2.Nested key2 = new Outer2.Nested("exp");
+    Outer2 outer2 = new Outer2 (key2, Arrays.asList(key2));
+    testEncodeDecode(outer);
+  }
+  
 }

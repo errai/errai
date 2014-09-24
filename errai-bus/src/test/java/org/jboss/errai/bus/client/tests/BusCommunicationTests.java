@@ -60,7 +60,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   @Override
-  @SuppressWarnings("rawtypes")
   protected void gwtSetUp() throws Exception {
     originalHandler = GWT.getUncaughtExceptionHandler();
     testHandler = new TestUncaughtExceptionHandler(originalHandler);

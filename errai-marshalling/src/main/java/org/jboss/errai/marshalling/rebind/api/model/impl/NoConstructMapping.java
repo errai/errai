@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.rebind.api.model.impl;
 
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
@@ -53,4 +55,15 @@ public class NoConstructMapping implements ConstructorMapping {
   public boolean isNoConstruct() {
     return true;
   }
+
+  @Override
+  public Mapping[] getMappingsInKeyOrder(List<String> keys) {
+    return new Mapping[0];
+  }
+  
+  @Override
+  public int getIndex(String key) {
+    return 0;
+  }
+
 }

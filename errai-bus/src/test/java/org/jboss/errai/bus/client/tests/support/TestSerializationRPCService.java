@@ -212,4 +212,8 @@ public interface TestSerializationRPCService {
   public EntityWithMixedMappingTypes testEntityWithMixedMappingTypes(EntityWithMixedMappingTypes entity);
 
   public EntityWithFactoryMethodAndMixedMappingTypes testEntityWithFactoryMethodAndMixedMappingTypes(EntityWithFactoryMethodAndMixedMappingTypes entity);
+  
+  public Outer testBackReferenceOrderingWithMapsTo(Outer entity);
+  
+  public Outer2 testBackReferenceOrderingWithMapsToInverted(Outer2 entity);
 }

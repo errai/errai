@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.rebind.api.model;
 
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 
@@ -24,6 +26,9 @@ import org.jboss.errai.codegen.meta.MetaClassMember;
  */
 public interface InstantiationMapping {
   public Mapping[] getMappings();
+  public Mapping[] getMappingsInKeyOrder(List<String> keys);
+  public int getIndex(String key);
+  
   public Class<?>[] getSignature();
 
   public MetaClassMember getMember();
