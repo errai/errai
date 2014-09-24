@@ -23,6 +23,5 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
  */
 public interface ConstructorMapping extends InstantiationMapping {
   public MetaConstructor getMember();
-
   public boolean isNoConstruct();
  }

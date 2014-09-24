@@ -61,6 +61,8 @@ import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
+import org.jboss.errai.bus.client.tests.support.Outer;
+import org.jboss.errai.bus.client.tests.support.Outer2;
 import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
@@ -491,6 +493,16 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public EntityWithFactoryMethodAndMixedMappingTypes testEntityWithFactoryMethodAndMixedMappingTypes(EntityWithFactoryMethodAndMixedMappingTypes entity) {
+    return entity;
+  }
+
+  @Override
+  public Outer testBackReferenceOrderingWithMapsTo(Outer entity) {
+    return entity;
+  }
+
+  @Override
+  public Outer2 testBackReferenceOrderingWithMapsToInverted(Outer2 entity) {
     return entity;
   }
 }

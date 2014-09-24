@@ -79,6 +79,8 @@ import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
 import org.jboss.errai.bus.client.tests.support.OneDimensionalPrimitiveArrayPortable;
+import org.jboss.errai.bus.client.tests.support.Outer;
+import org.jboss.errai.bus.client.tests.support.Outer2;
 import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
@@ -2277,5 +2279,45 @@ public class SerializationTests extends AbstractErraiTest {
 
   public void testInheritedBuiltInMappings() {
     assertNotNull(Marshalling.getMarshaller(EmptyStackException.class));
+  }
+  
+  // This is a regression test for ERRAI-794
+  public void testBackReferenceOrderingWithMapsTo() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Outer.Nested key = new Outer.Nested("exp");
+        final Outer outer = new Outer (Arrays.asList(key), key);
+
+        MessageBuilder.createCall(new RemoteCallback<Outer>() {
+          @Override
+          public void callback(Outer response) {
+            assertEquals(outer, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testBackReferenceOrderingWithMapsTo(outer);
+      }
+    });
+  }
+  
+  // This is a regression test for ERRAI-794
+  public void testBackReferenceOrderingWithMapsToInverted() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Outer2.Nested key = new Outer2.Nested("exp");
+        final Outer2 outer = new Outer2(key, Arrays.asList(key));
+
+        MessageBuilder.createCall(new RemoteCallback<Outer2>() {
+          @Override
+          public void callback(Outer2 response) {
+            assertEquals(outer, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testBackReferenceOrderingWithMapsToInverted(outer);
+      }
+    });
   }
 }

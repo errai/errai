@@ -166,10 +166,15 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           final Mapping[] cMappings = instantiationMapping.getMappings();
           if (cMappings.length > 0) {
             // use constructor mapping.
+            final List<String> memberKeys = new ArrayList<String>();
+            for (MemberMapping memberMapping : mappingDefinition.getMemberMappings()) {
+              memberKeys.add(memberMapping.getKey());
+            }
+            
+            final Statement[] constructorParameters = new Statement[cMappings.length];
 
-            final List<Statement> constructorParameters = new ArrayList<Statement>();
-
-            for (final Mapping mapping : mappingDefinition.getInstantiationMapping().getMappings()) {
+            for (final Mapping mapping : instantiationMapping.getMappingsInKeyOrder(memberKeys)) {
+              int parmIndex = instantiationMapping.getIndex(mapping.getKey());
               final MetaClass type = mapping.getType().asBoxed();
               BlockBuilder<?> lazyInitMethod = (needsLazyInit(type)) ? initMethod : null;
               if (type.isArray()) {
@@ -187,14 +192,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     Statement deferred = context.getArrayMarshallerCallback().deferred(type, arrayMarshaller);
                     MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type, lazyInitMethod,
                         deferred);
-                    constructorParameters.add(
+                    constructorParameters[parmIndex] = 
                         Stmt.loadVariable(MarshallingGenUtil.getVarName(type)).invoke("demarshall",
-                            extractJSONObjectProperty(mapping.getKey(), EJObject.class), Stmt.loadVariable("a1")));
+                            extractJSONObjectProperty(mapping.getKey(), EJObject.class), Stmt.loadVariable("a1"));
                   }
                   else {
                     MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type, lazyInitMethod);
-                    constructorParameters.add(context.getArrayMarshallerCallback()
-                        .demarshall(type, extractJSONObjectProperty(mapping.getKey(), EJObject.class)));
+                    constructorParameters[parmIndex] = context.getArrayMarshallerCallback()
+                        .demarshall(type, extractJSONObjectProperty(mapping.getKey(), EJObject.class));
                   }
                 }
                 else {
@@ -206,11 +211,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 MarshallingGenUtil.ensureMarshallerFieldCreated(classStructureBuilder, toMap, type, lazyInitMethod);
                 if (context.canMarshal(type.getFullyQualifiedName())) {
                   Statement s = maybeAddAssumedTypes(builder,
-                      "c" + constructorParameters.size(),
-                      // null,
+                      "c" + parmIndex,
                       mapping, fieldDemarshall(mapping, EJObject.class));
 
-                  constructorParameters.add(s);
+                  constructorParameters[parmIndex] =  s;
                 }
                 else {
                   throw new MarshallingException("Encountered non-marshallable type " + type +
@@ -227,8 +231,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 builder
                     .append(Stmt.declareVariable(toMap).named("entity")
                         .initializeWith(
-                            Stmt.newObject(toMap, constructorParameters
-                                .toArray(new Object[constructorParameters.size()]))));
+                            Stmt.newObject(toMap, (Object[]) constructorParameters)));
               }
               else {
                 PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", classStructureBuilder,
@@ -238,14 +241,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         Stmt.invokeStatic(
                             classStructureBuilder.getClassDefinition(),
                             PrivateAccessUtil.getPrivateMethodName(constructor),
-                            constructorParameters.toArray(new Object[constructorParameters.size()]))));
+                            (Object[]) constructorParameters)));
               }
             }
             else if (instantiationMapping instanceof FactoryMapping) {
               builder.append(Stmt.declareVariable(toMap).named("entity")
                   .initializeWith(
                       Stmt.invokeStatic(toMap, ((FactoryMapping) instantiationMapping).getMember().getName(),
-                          constructorParameters.toArray(new Object[constructorParameters.size()]))));
+                              (Object[]) constructorParameters)));
             }
           }
           else {

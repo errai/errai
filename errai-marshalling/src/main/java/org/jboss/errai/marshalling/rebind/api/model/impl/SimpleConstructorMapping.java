@@ -16,16 +16,17 @@
 
 package org.jboss.errai.marshalling.rebind.api.model.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @author Mike Brock
@@ -33,8 +34,9 @@ import java.util.TreeMap;
 public class SimpleConstructorMapping implements ConstructorMapping {
   private MetaClass toMap;
 
-  private Map<Integer, String> parmsToIndexMap = new HashMap<Integer, String>();
   private Map<Integer, MetaClass> indexToType = new TreeMap<Integer, MetaClass>();
+  private Map<Integer, String> indexToName = new TreeMap<Integer, String>();
+  private Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
 
   protected MetaConstructor constructor;
 
@@ -44,15 +46,17 @@ public class SimpleConstructorMapping implements ConstructorMapping {
 
 
   public void mapParmToIndex(String parm, int index, MetaClass type) {
-    parmsToIndexMap.put(index, parm);
     indexToType.put(index, type);
+    indexToName.put(index, parm);
+    nameToIndex.put(parm, index);
   }
 
   public SimpleConstructorMapping getCopyForInheritance() {
     SimpleConstructorMapping mapping = new SimpleConstructorMapping();
     mapping.toMap = toMap;
-    mapping.parmsToIndexMap = Collections.unmodifiableMap(parmsToIndexMap);
     mapping.indexToType = Collections.unmodifiableMap(indexToType);
+    mapping.indexToName = Collections.unmodifiableMap(indexToName);
+    mapping.nameToIndex = Collections.unmodifiableMap(nameToIndex);
 
     return mapping;
   }
@@ -63,7 +67,7 @@ public class SimpleConstructorMapping implements ConstructorMapping {
   }
 
   public String[] getKeyNames() {
-    return parmsToIndexMap.values().toArray(new String[parmsToIndexMap.size()]);
+    return indexToName.values().toArray(new String[indexToName.size()]);
   }
 
   private Mapping[] _mappingsCache;
@@ -84,6 +88,32 @@ public class SimpleConstructorMapping implements ConstructorMapping {
     return _mappingsCache = mappings;
   }
 
+  private Mapping[] _mappingsCacheInMemberMappingOrder;
+  
+  @Override
+  public Mapping[] getMappingsInKeyOrder(List<String> keys) {
+    if (_mappingsCacheInMemberMappingOrder != null) {
+      return _mappingsCacheInMemberMappingOrder;
+    }
+
+    final Mapping[] mappings = getMappings();
+    Mapping[] sortedMappings = new Mapping[mappings.length];
+    
+    int i = 0;
+    for (String key : keys) {
+     Integer index = nameToIndex.get(key);
+     if (index != null) {
+       sortedMappings[i++] = mappings[index];
+     }
+     else {
+       sortedMappings = mappings;
+       break;
+     }
+    }
+    
+    return _mappingsCacheInMemberMappingOrder = sortedMappings;
+  }
+  
   private Class<?>[] _constructorSignature;
 
   @Override
@@ -136,4 +166,11 @@ public class SimpleConstructorMapping implements ConstructorMapping {
   public boolean isNoConstruct() {
     return false;
   }
+
+
+  @Override
+  public int getIndex(String key) {
+    return nameToIndex.get(key);
+  }
+
 }
