@@ -88,14 +88,14 @@ public class SimpleFactoryMapping implements FactoryMapping {
     
     int i = 0;
     for (String key : keys) {
-     Integer index = nameToIndex.get(key);
-     if (index != null) {
-       sortedMappings[i++] = mappings[index];
-     }
-     else {
-       sortedMappings = mappings;
-       break;
-     }
+      Integer index = nameToIndex.get(key);
+      if (index != null) {
+        sortedMappings[i++] = mappings[index];
+      }
+      else {
+        sortedMappings = mappings;
+        break;
+      }
     }
     
     return _mappingsCacheInMemberMappingOrder = sortedMappings;

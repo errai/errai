@@ -31,7 +31,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 public class RoleImpl implements Role {
   private final String name;
 
-  public RoleImpl(@MapsTo("role") String name) {
+  public RoleImpl(@MapsTo("name") String name) {
     this.name = name;
   }
 
