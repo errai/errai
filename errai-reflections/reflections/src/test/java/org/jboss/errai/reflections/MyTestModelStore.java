@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 //generated using Reflections JavaCodeSerializer [Thu Sep 25 15:57:49 EDT 2014]
 package org.jboss.errai.reflections;
 
