@@ -94,7 +94,7 @@
     <lesscss.version>1.3.3</lesscss.version>
     <log4.version>1.2.16</log4.version>
     <mockito.core.version>1.9.5</mockito.core.version>
-    <mojo.executor.version>2.0</mojo.executor.version>
+    <mojo.executor.version>2.2.0</mojo.executor.version>
     <mvel.version>2.1.7.Final</mvel.version>
     <netty.codec.http.version>4.0.12.Final</netty.codec.http.version>
     <objenesis.version>1.0</objenesis.version>
