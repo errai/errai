@@ -20,7 +20,6 @@ import com.google.gwt.core.client.EntryPoint;
  * <ul>
  * <li>{@link ErraiSystemLogHandler}: Prints to terminal in Dev Mode.</li>
  * <li>{@link ErraiConsoleLogHandler}: Logs to web console.</li>
- * <li>{@link EraiFirebugLogHandler}: Logs to Firefox web console.</li>
  * <li>{@link ErraiDevelopmentModeLogHandler}: Logs to Dev Mode window.</li>
  * </ul>
  * 
