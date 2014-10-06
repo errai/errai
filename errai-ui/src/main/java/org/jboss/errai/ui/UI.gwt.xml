@@ -25,8 +25,7 @@
   <inherits name="org.w3c.dom.Dom"/>
 
   <!--the GWT logging framework breaks Mobile Safari in iOS 6.1 -->
-  <!--<inherits name="com.google.gwt.logging.Logging"/>-->
-  <!--<set-property name="gwt.logging.popupHandler" value="DISABLED"/>-->
+  <!--<inherits name="com.google.gwt.logging.Logging"/>-->  
 
   <generate-with class="org.jboss.errai.ui.rebind.TranslationServiceGenerator">
     <when-type-is class="org.jboss.errai.ui.client.local.spi.TranslationService"/>
