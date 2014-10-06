@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import org.jboss.errai.common.client.logging.formatters.ErraiSimpleFormatter;
 import org.jboss.errai.common.client.logging.handlers.ErraiConsoleLogHandler;
 import org.jboss.errai.common.client.logging.handlers.ErraiDevelopmentModeLogHandler;
-import org.jboss.errai.common.client.logging.handlers.ErraiFirebugLogHandler;
 import org.jboss.errai.common.client.logging.handlers.ErraiLogHandler;
 import org.jboss.errai.common.client.logging.handlers.ErraiSystemLogHandler;
 
@@ -45,9 +44,6 @@ public class LoggingHandlerConfigurator implements EntryPoint {
     handlers.put(ErraiConsoleLogHandler.class, new ErraiConsoleLogHandler());
     logger.addHandler(handlers.get(ErraiConsoleLogHandler.class));
 
-    handlers.put(ErraiFirebugLogHandler.class, new ErraiFirebugLogHandler());
-    logger.addHandler(handlers.get(ErraiFirebugLogHandler.class));
-
     handlers.put(ErraiDevelopmentModeLogHandler.class, new ErraiDevelopmentModeLogHandler());
     logger.addHandler(handlers.get(ErraiDevelopmentModeLogHandler.class));
 
@@ -69,6 +65,7 @@ public class LoggingHandlerConfigurator implements EntryPoint {
    *          The type of an {@link ErraiLogHandler}.
    * @return The active {@link Handler} of the requested type.
    */
+  @SuppressWarnings("unchecked")
   public <H extends ErraiLogHandler> H getHandler(Class<H> handlerType) {
     return (H) handlers.get(handlerType);
   }
