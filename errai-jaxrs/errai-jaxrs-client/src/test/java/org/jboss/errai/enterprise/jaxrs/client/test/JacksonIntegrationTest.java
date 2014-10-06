@@ -99,8 +99,14 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
         put("friend2-first", friend2);
       }
     });
+    
+    List<Gender> genders = new ArrayList<Gender>();
+    genders.add(Gender.MALE);
+    genders.add(Gender.FEMALE);
+    user.setGenders(genders);
 
     String jackson = MarshallingWrapper.toJSON(user);
+    
     call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override

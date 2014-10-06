@@ -53,6 +53,16 @@ public class User {
 
   private Map<Integer, String> friendsNameMap = new HashMap<Integer, String>();
   private Map<String, User> friendsMap = new HashMap<String, User>();
+  
+  private List<Gender> genders;
+
+  public List<Gender> getGenders() {
+    return genders;
+  }
+
+  public void setGenders(List<Gender> genders) {
+    this.genders = genders;
+  }
 
   private Integer age;
   private boolean alive = true;
@@ -262,6 +272,12 @@ public class User {
         return false;
     }
     else if (!friendsMap.equals(other.friendsMap))
+      return false;
+    if (genders == null) {
+      if (other.genders != null)
+        return false;
+    }
+    else if (!genders.equals(other.genders))
       return false;
     if (friendsNameMap == null) {
       if (other.friendsNameMap != null)
