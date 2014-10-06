@@ -141,6 +141,7 @@ public class JacksonTransformer {
           if (parent != null) {
             parent.put(key, obj.get(k));
           }
+          return toJackson(obj.get(k), k, obj, objectCache);
         }
         else if (k.equals(QUALIFIED_VALUE)) {
           if (parent != null) {
@@ -174,7 +175,7 @@ public class JacksonTransformer {
       }
     }
 
-    return cleanUpEmbeddedJson(obj);
+    return (obj != null) ? cleanUpEmbeddedJson(obj) : val;
   }
 
   private static JSONObject cleanUpEmbeddedJson(JSONObject obj) {

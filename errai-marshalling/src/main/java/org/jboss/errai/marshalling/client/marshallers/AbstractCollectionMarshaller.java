@@ -72,12 +72,15 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
             type = assumedElementType;
           }
         }
+        else {
+          type = assumedElementType;
+        }
 
         if (type == null) {
           type = ctx.determineTypeFor(null, elem);
         }
 
-        // the assumed element type can only be used once since they it is not set for nested collections.
+        // the assumed element type can only be used once since it is not set for nested collections.
         ctx.setAssumedElementType(null);
         final Marshaller<Object> marshallerInstance = ctx.getMarshallerInstance(type);
         if (marshallerInstance == null) {
