@@ -50,20 +50,22 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(LessStyleMapping.class, GENERATED_CLASS_NAME);
     final ConstructorBlockBuilder<?> constructor = classBuilder.publicConstructor();
 
-    final LessStylesheetContext stylesheetContext = new LessStylesheetContext(logger, context.getPropertyOracle());
-    final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class, context);
     final Collection<URL> stylesheets = getStylesheets(context);
+    if (!stylesheets.isEmpty()) {
+      final LessStylesheetContext stylesheetContext = new LessStylesheetContext(logger, context.getPropertyOracle());
+      final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class, context);
 
-    try {
-      stylesheetContext.compileLessStylesheets(stylesheets);
-    } catch (IOException e) {
-      throw new GenerationException(e);
+      try {
+        stylesheetContext.compileLessStylesheets(stylesheets);
+      } catch (IOException e) {
+        throw new GenerationException(e);
+      }
+
+      addStyleMappingsToConstructor(constructor, stylesheetContext);
+      performCssTransformations(stylesheetContext, templated);
+      addStyleInjectorCallToConstructor(constructor, stylesheetContext);
     }
-
-    addStyleMappingsToConstructor(constructor, stylesheetContext);
-    performCssTransformations(stylesheetContext, templated);
-    addStyleInjectorCallToConstructor(constructor, stylesheetContext);
-
+    
     constructor.finish();
     return classBuilder.toJavaString();
   }
