@@ -20,6 +20,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.slf4j.Logger;
@@ -46,6 +47,10 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
   }
 
   private static class UserCookieStorageHandlerImpl implements UserStorageHandler {
+
+    UserCookieStorageHandlerImpl() {
+      MarshallerFramework.initializeDefaultSessionProvider();
+    }
 
     @Override
     public User getUser() {
