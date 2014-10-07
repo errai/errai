@@ -44,17 +44,17 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(TreeLogger logger, GeneratorContext context) {
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(LessStyleMapping.class, GENERATED_CLASS_NAME);
-    ConstructorBlockBuilder<?> constructor = classBuilder.publicConstructor();
+    final ConstructorBlockBuilder<?> constructor = classBuilder.publicConstructor();
     final PropertyOracle oracle = context.getPropertyOracle();
     final LessStylesheetContext stylesheetContext = new LessStylesheetContext(logger, oracle);
     final Map<String, String> styleMapping = stylesheetContext.getStyleMapping();
-    for (Map.Entry<String, String> entry : styleMapping.entrySet()) {
-      constructor.append(Stmt.nestedCall(Refs.get("styleNameMapping")).invoke("put", entry.getKey(), entry.getValue()));
-    }
 
     if (!styleMapping.isEmpty()) {
+      for (Map.Entry<String, String> entry : styleMapping.entrySet()) {
+        constructor.append(Stmt.nestedCall(Refs.get("styleNameMapping")).invoke("put", entry.getKey(), entry.getValue()));
+      }
+      
       final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class, context);
-
       for (MetaClass metaClass : templated) {
         String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
 
@@ -62,9 +62,9 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
         chain.addCommand(new SelectorReplacer(styleMapping));
         chain.visitTemplate(templateFileName);
       }
+      constructor.append(Stmt.create().invokeStatic(StyleInjector.class, "inject", stylesheetContext.getStylesheet()));
     }
 
-    constructor.append(Stmt.create().invokeStatic(StyleInjector.class, "inject", stylesheetContext.getStylesheet()));
     constructor.finish();
 
     return classBuilder.toJavaString();
