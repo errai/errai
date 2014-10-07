@@ -19,6 +19,7 @@ package org.jboss.errai.security.client.local;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.res.BeanWithInjectedUser;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -32,6 +33,9 @@ public class InjectableUserIntegrationTest extends AbstractErraiCDITest {
     return "org.jboss.errai.security.SecurityTest";
   }
 
+  public void testHandlerInitializesMarshallingSystem() throws Exception {
+    assertNotNull(ParserFactory.get());
+  }
 
   public void testUserIsInjectable() throws Exception {
     asyncTest();
@@ -48,7 +52,7 @@ public class InjectableUserIntegrationTest extends AbstractErraiCDITest {
 
         User su = new UserImpl("su2000");
         securityContext.setCachedUser(su);
-        
+
         final BeanWithInjectedUser bean2 = IOC.getBeanManager().lookupBean(BeanWithInjectedUser.class).getInstance();
         assertEquals(su, bean2.getUser());
         finishTest();
