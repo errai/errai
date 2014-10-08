@@ -10,10 +10,12 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.client.local.spi.LessStyleMapping;
@@ -38,6 +40,7 @@ import com.google.gwt.dom.client.StyleInjector;
 @GenerateAsync(LessStyleMapping.class)
 public class LessStyleGenerator extends AbstractAsyncGenerator {
   private static final String GENERATED_CLASS_NAME = "LessStyleMappingGenerated";
+  private static boolean needsToRun = false;
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
@@ -64,6 +67,11 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
       addStyleMappingsToConstructor(constructor, stylesheetContext);
       performCssTransformations(stylesheetContext, templated);
       addStyleInjectorCallToConstructor(constructor, stylesheetContext);
+
+      // If this generator ran once it needs to rerun on every refresh (no
+      // caching) because it moved the active template to a temporary location
+      // which doesn't get updated otherwise.
+      needsToRun = true;
     }
     
     constructor.finish();
@@ -124,5 +132,10 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
       throw new GenerationException("Could not find stylesheet " + stylesheet + " declared in @Templated class " + descriptorClass);
 
     return resource;
+  }
+  
+  @Override
+  protected boolean isCacheValid() {
+    return super.isCacheValid() && !needsToRun;
   }
 }
