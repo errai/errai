@@ -34,6 +34,7 @@ import com.google.gwt.dom.client.StyleInjector;
 @GenerateAsync(LessStyleMapping.class)
 public class LessStyleGenerator extends AbstractAsyncGenerator {
   private static final String GENERATED_CLASS_NAME = "LessStyleMappingGenerated";
+  private static boolean needsToRun = false;
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
@@ -57,16 +58,25 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
       final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class, context);
       for (MetaClass metaClass : templated) {
         String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
-
         final TemplateChain chain = new TemplateChain();
         chain.addCommand(new SelectorReplacer(styleMapping));
         chain.visitTemplate(templateFileName);
       }
       constructor.append(Stmt.create().invokeStatic(StyleInjector.class, "inject", stylesheetContext.getStylesheet()));
+
+      // If this generator ran once it needs to rerun on every refresh (no
+      // caching) because it moved the active template to a temporary location
+      // which doesn't get updated otherwise.
+      needsToRun = true;
     }
 
     constructor.finish();
 
     return classBuilder.toJavaString();
+  }
+  
+  @Override
+  protected boolean isCacheValid() {
+    return super.isCacheValid() && !needsToRun;
   }
 }
