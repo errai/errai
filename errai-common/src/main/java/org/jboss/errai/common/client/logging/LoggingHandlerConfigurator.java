@@ -14,6 +14,7 @@ import org.jboss.errai.common.client.logging.handlers.ErraiLogHandler;
 import org.jboss.errai.common.client.logging.handlers.ErraiSystemLogHandler;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.logging.client.HasWidgetsLogHandler;
 
 /**
  * Initializes Errai log handlers, which are:
@@ -36,6 +37,21 @@ public class LoggingHandlerConfigurator implements EntryPoint {
   @Override
   public void onModuleLoad() {
     final Logger logger = Logger.getLogger("");
+    
+    // FIXME temporary workaround for
+    // https://groups.google.com/forum/#!topic/google-web-toolkit/Sd9P0UjUyRA
+   
+    // We had to remove <set-property name="gwt.logging.popupHandler"
+    // value="DISABLED"/> for GWT 2.7 compatibility but don't want to annoy our
+    // users on older GWT versions with the pop-up window or force them to
+    // disable the logger themselves.
+    Handler[] logHandlers = logger.getHandlers();
+    for (Handler logHandler : logHandlers) {
+      if (logHandler instanceof HasWidgetsLogHandler) {
+        logger.removeHandler(logHandler);
+        ((HasWidgetsLogHandler)logHandler).clear();
+      }
+    }
 
     handlers.put(ErraiSystemLogHandler.class, new ErraiSystemLogHandler());
     logger.addHandler(handlers.get(ErraiSystemLogHandler.class));
