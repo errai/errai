@@ -1,5 +1,15 @@
 package org.jboss.errai.bus.server.websocket.test.jsr356.cdi.adapter;
 
+import java.io.File;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.enterprise.context.Conversation;
+import javax.enterprise.inject.spi.Bean;
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.errai.bus.server.websocket.jsr356.weld.conversation.ConversationState;
@@ -13,24 +23,13 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.weld.context.bound.BoundConversationContext;
 import org.jboss.weld.context.bound.BoundRequestContext;
-import org.jboss.weld.context.bound.BoundSessionContext;
+import org.jboss.weld.manager.BeanManagerImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.Conversation;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.servlet.http.HttpSession;
-
-import java.io.File;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests the contexts and scopes.
@@ -63,13 +62,10 @@ public class ContainerOnlyTest {
   private BoundRequestContext boundRequestContext;
 
   @Inject
-  private BoundSessionContext boundSessionContext;
-
-  @Inject
   private BoundConversationContext boundConversationContext;
 
   @Inject
-  private BeanManager beanManager;
+  private BeanManagerImpl beanManager;
 
   @Inject
   private Conversation conversation;
@@ -77,7 +73,7 @@ public class ContainerOnlyTest {
   @Before
   public void setUp() throws Exception {
     WeldRequestScopeAdapter.init(boundRequestContext);
-    WeldSessionScopeAdapter.init(boundSessionContext);
+    WeldSessionScopeAdapter.init(beanManager);
     WeldConversationScopeAdapter.init(boundConversationContext);
   }
 
