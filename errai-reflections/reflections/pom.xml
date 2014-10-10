@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.errai.reflections</groupId>
     <artifactId>reflections-parent</artifactId>
-    <version>3.0.3-SNAPSHOT</version>
+    <version>3.0.3.Final</version>
     <relativePath>../</relativePath>
   </parent>
 
