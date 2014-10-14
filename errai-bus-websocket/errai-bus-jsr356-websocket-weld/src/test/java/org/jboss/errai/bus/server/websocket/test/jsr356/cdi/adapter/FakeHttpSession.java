@@ -1,12 +1,13 @@
 package org.jboss.errai.bus.server.websocket.test.jsr356.cdi.adapter;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
-
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
 
 /**
  * Fake session to activate the session context for test cases.
@@ -64,7 +65,7 @@ public class FakeHttpSession implements HttpSession {
 
   @Override
   public Enumeration<String> getAttributeNames() {
-    return null;
+    return Collections.<String>emptyEnumeration();
   }
 
   @Override

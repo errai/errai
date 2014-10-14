@@ -1,11 +1,11 @@
 package org.jboss.errai.bus.server.websocket.jsr356.weld.conversation;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.OperationNotSupportedException;
 
 import org.jboss.errai.bus.server.websocket.jsr356.weld.request.WeldRequestScopeAdapter;
+import org.jboss.errai.bus.server.websocket.jsr356.weld.session.WeldSessionScopeAdapter;
 import org.jboss.weld.context.ManagedConversation;
 import org.jboss.weld.context.bound.BoundConversationContext;
 import org.jboss.weld.context.bound.BoundRequest;
@@ -55,7 +55,7 @@ public class WeldConversationScopeAdapter implements ConversationScopeAdapter {
 
       @Override
       public Map<String, Object> getSessionMap(boolean create) {
-        return new ConcurrentHashMap<String, Object>();
+        return WeldSessionScopeAdapter.getInstance().getCurrentBeanStore();
       }
     };
     final boolean successful = boundConversationContext.associate(storage);

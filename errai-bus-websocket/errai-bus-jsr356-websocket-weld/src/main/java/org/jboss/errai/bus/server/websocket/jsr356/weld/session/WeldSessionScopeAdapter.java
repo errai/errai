@@ -4,6 +4,7 @@ import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.jboss.errai.bus.server.websocket.jsr356.weld.SyncBeanStore;
 import org.jboss.weld.context.http.HttpSessionContext;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.jboss.weld.servlet.SessionHolder;
@@ -16,10 +17,11 @@ import org.jboss.weld.servlet.SessionHolder;
  */
 public class WeldSessionScopeAdapter implements SessionScopeAdapter {
 
+  private static final String BEAN_STORE_SESSION_ATTR_NAME = "erraiBeanStore";
   private static WeldSessionScopeAdapter instance;
   private final BeanManagerImpl beanManager;
   
-  private ThreadLocal<HttpServletRequest> simulatedHttpRequest = new ThreadLocal<HttpServletRequest>(); 
+  private static ThreadLocal<HttpServletRequest> simulatedHttpRequest = new ThreadLocal<HttpServletRequest>(); 
 
   private WeldSessionScopeAdapter(BeanManagerImpl beanManager) {
     this.beanManager = beanManager;
@@ -46,6 +48,7 @@ public class WeldSessionScopeAdapter implements SessionScopeAdapter {
 
     sessionContext.associate(simulatedHttpRequest.get());
     sessionContext.activate();
+    getOrCreateBeanStore(httpSession);
   }
 
   @Override
@@ -63,5 +66,24 @@ public class WeldSessionScopeAdapter implements SessionScopeAdapter {
     HttpSessionContext sessionContext = beanManager.instance().select(HttpSessionContext.class).get();
     SessionHolder.clear();
     sessionContext.dissociate(simulatedHttpRequest.get());
+  }
+  
+  private SyncBeanStore getOrCreateBeanStore(HttpSession httpSession) {
+    final Object beanStore = httpSession.getAttribute(BEAN_STORE_SESSION_ATTR_NAME);
+    if (beanStore != null) {
+      return (SyncBeanStore) beanStore;
+    }
+    else {
+      final SyncBeanStore newBeanStore = new SyncBeanStore();
+      httpSession.setAttribute(BEAN_STORE_SESSION_ATTR_NAME, newBeanStore);
+      return newBeanStore;
+    }
+  }
+   
+  public static SyncBeanStore getCurrentBeanStore() {
+    if (simulatedHttpRequest.get() == null) 
+      throw new RuntimeException("No HTTP session associated!");
+    
+    return (SyncBeanStore) simulatedHttpRequest.get().getSession().getAttribute(BEAN_STORE_SESSION_ATTR_NAME);
   }
 }
