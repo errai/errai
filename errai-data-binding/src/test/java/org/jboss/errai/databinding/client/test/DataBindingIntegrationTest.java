@@ -907,4 +907,17 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertNotSame(modelProxy1, modelProxy3);
     assertNotSame(modelProxy2, modelProxy3);
   }
+  
+  @Test
+  public void testListChangesTriggerWidgetUpdates() {
+    ListOfStringWidget widget = new ListOfStringWidget();
+    TestModelWithList model = DataBinder.forType(TestModelWithList.class).bind(widget, "list").getModel();
+
+    model.getList().add("1");
+    assertEquals("Widget not properly updated", 1, widget.getValue().size());
+    assertTrue("Widget not properly updated", widget.getValue().contains("1"));
+    
+    model.getList().remove("1");
+    assertEquals("Widget not properly updated", 0, widget.getValue().size());
+  }
 }

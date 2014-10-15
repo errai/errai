@@ -145,8 +145,8 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
     if (changed) {
       this.items.addChangeHandler(this);
+      init();
     }
-    init();
   }
 
   private void init() {

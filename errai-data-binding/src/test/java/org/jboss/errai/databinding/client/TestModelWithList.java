@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -23,7 +24,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 @Bindable
 public class TestModelWithList {
 
-  private List<String> list;
+  private List<String> list = new ArrayList<String>();
 
   public List<String> getList() {
     return list;

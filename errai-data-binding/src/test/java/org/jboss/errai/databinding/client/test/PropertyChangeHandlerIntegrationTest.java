@@ -206,7 +206,9 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     MockHandler handler = new MockHandler();
 
     TestModelWithListWidget widget = new TestModelWithListWidget();
+    
     DataBinder<TestModelWithList> binder = DataBinder.forType(TestModelWithList.class).bind(widget, "list");
+    binder.getModel().setList(null);
     binder.addPropertyChangeHandler(handler);
 
     List<String> list = new ArrayList<String>();
