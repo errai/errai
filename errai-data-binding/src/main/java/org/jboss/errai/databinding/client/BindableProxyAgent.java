@@ -405,7 +405,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       newList.addChangeHandler(new UnspecificListChangeHandler() {
         @Override
         void onListChanged(List oldList) {
-          firePropertyChangeEvent(property, oldList, newList);
+          updateWidgetsAndFireEvent(property, oldList, newList);
         }
       });
 
