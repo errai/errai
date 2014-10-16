@@ -219,7 +219,7 @@ public class BindableProxyGenerator {
       }
 
       Statement updateNestedProxy = null;
-      if (paramType.isAnnotationPresent(Bindable.class)) {
+      if (DataBindingUtil.isBindableType(paramType)) {
         updateNestedProxy =
             Stmt.if_(Bool.expr(agent("binders").invoke("containsKey", property)))
                 .append(Stmt.loadVariable(property).assignValue(Cast.to(paramType,

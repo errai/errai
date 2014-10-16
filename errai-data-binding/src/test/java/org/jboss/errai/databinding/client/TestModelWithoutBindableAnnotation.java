@@ -32,6 +32,14 @@ public class TestModelWithoutBindableAnnotation {
   private String value;
   private TestModelWithoutBindableAnnotation child;
 
+  public TestModelWithoutBindableAnnotation() {
+    
+  }
+  
+  public TestModelWithoutBindableAnnotation (String value) {
+    this.value = value;
+  }
+  
   public String getValue() {
     return value;
   }

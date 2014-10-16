@@ -24,7 +24,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.databinding.client.*;
+import org.jboss.errai.databinding.client.BindableProxy;
+import org.jboss.errai.databinding.client.DeclarativeBindingModule;
+import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingBinder;
+import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingModel;
+import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingParams;
+import org.jboss.errai.databinding.client.ListOfStringWidget;
+import org.jboss.errai.databinding.client.ModuleWithInjectedBindable;
+import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.SingletonBindable;
+import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelWidget;
+import org.jboss.errai.databinding.client.TestModelWithList;
+import org.jboss.errai.databinding.client.TestModelWithNestedConfiguredBindable;
+import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
+import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -358,6 +373,25 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Widget not properly updated", "newValue", textBox.getText());
     
     model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+  
+  @Test
+  public void testBindablePropertyChainWithNestedConfiguredInstanceChange() {
+    TextBox textBox = new TextBox();
+    TestModelWithNestedConfiguredBindable model = DataBinder.forType(TestModelWithNestedConfiguredBindable.class)
+            .bind(textBox, "nested.value").getModel();
+
+    model.setNested(new TestModelWithoutBindableAnnotation("value"));
+    assertEquals("Widget not properly updated", "value", textBox.getText());
+    
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getNested().getValue());
+
+    model.setNested(new TestModelWithoutBindableAnnotation("newValue"));
+    assertEquals("Widget not properly updated", "newValue", textBox.getText());
+    
+    model.getNested().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
   }
 
