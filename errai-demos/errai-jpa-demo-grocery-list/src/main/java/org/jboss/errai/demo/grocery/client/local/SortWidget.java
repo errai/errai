@@ -101,6 +101,6 @@ public class SortWidget extends Composite {
 
     private void changeSortOrder(GroceryListWidget.SortBy order) {
         groceryListWidget.sortBy(order);
-        groceryListWidget.refresh();
+        groceryListWidget.refreshListWidget();
     }
 }

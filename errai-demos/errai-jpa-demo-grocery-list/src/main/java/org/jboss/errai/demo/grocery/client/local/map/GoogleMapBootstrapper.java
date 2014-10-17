@@ -43,7 +43,7 @@ public class GoogleMapBootstrapper {
      * The Google Maps API key. Fill this in with your own key if you're going to deploy this app to a remotely-accessible
      * website. The default (empty string) only works when the app is loaded from localhost.
      */
-    private final String MAP_API_KEY = "";
+    //private final String MAP_API_KEY = "";
 
     public GoogleMapBootstrapper() {
         boolean sensor = true;

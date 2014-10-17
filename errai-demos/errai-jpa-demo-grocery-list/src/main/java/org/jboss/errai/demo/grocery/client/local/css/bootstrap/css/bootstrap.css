@@ -105,7 +105,7 @@ q {
 }
 
 small {
-  font-size: 80%;
+  font-size: 70%;
 }
 
 sub,
@@ -151,7 +151,6 @@ button,
 input,
 select,
 textarea {
-  margin: 0;
   font-family: inherit;
   font-size: 100%;
 }
@@ -411,6 +410,9 @@ cite {
 
 .text-right {
   text-align: right;
+  float: right;
+  display: inline-block;
+
 }
 
 .text-center {
@@ -483,6 +485,7 @@ h3,
 h4,
 .h4 {
   font-size: 18px;
+  display: inline;
 }
 
 h5,
@@ -812,6 +815,7 @@ pre code {
   min-height: 1px;
   padding-right: 15px;
   padding-left: 15px;
+  display: block;
 }
 
 .col-1,
@@ -1016,6 +1020,7 @@ pre code {
   .col-lg-11,
   .col-lg-12 {
     float: left;
+    display: inline;
   }
   .col-lg-1 {
     width: 8.333333333333332%;
@@ -1052,6 +1057,10 @@ pre code {
   }
   .col-lg-12 {
     width: 100%;
+  }
+  
+  .col-offset-half {
+  	margin-left: 4.166666666666667%;
   }
   .col-offset-1 {
     margin-left: 8.333333333333332%;
@@ -1547,7 +1556,7 @@ textarea.input-small {
 }
 
 .btn {
-  display: inline-block;
+  display: inline;
   padding: 8px 12px;
   margin-bottom: 0;
   font-size: 14px;
@@ -1844,6 +1853,9 @@ fieldset[disabled] .btn-link:focus {
   font-size: 12px;
   line-height: 1.5;
   border-radius: 3px;
+  color: #ffffff;
+  background-color: #474949;
+  border-color: #474949;
 }
 
 .btn-mini {
@@ -2041,19 +2053,19 @@ input[type="button"].btn-block {
 
 @media (min-width: 768px) {
   .form-horizontal .form-group {
-    margin-right: -15px;
-    margin-left: -15px;
+    margin-right: 15px;
+    margin-left: 15px;
   }
 }
 
 .form-horizontal .form-group .row {
-  margin-right: -15px;
-  margin-left: -15px;
+  margin-right: 15px;
+  margin-left: 15px;
 }
 
 @media (min-width: 768px) {
   .form-horizontal .control-label {
-    text-align: right;
+    text-align: left;
   }
 }
 
@@ -2204,6 +2216,7 @@ input[type="button"].btn-block {
 }
 
 .list-group-item {
+  min-height: 75px;
   position: relative;
   display: block;
   padding: 10px 30px 10px 15px;
@@ -2231,6 +2244,8 @@ input[type="button"].btn-block {
 .list-group-item-heading {
   margin-top: 0;
   margin-bottom: 5px;
+  margin-left: 10px;
+  display: inline;
 }
 
 .list-group-item-text {

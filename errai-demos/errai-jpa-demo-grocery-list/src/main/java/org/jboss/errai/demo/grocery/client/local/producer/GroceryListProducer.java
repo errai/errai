@@ -30,7 +30,7 @@ import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 @ApplicationScoped
 public class GroceryListProducer {
 
-    @Produces
+    //@Produces
     @ApplicationScoped
     private GroceryList getGroceryList(final EntityManager em, final User user) {
         final TypedQuery<GroceryList> q = em.createNamedQuery("groceryListsForUser", GroceryList.class);

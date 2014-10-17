@@ -72,6 +72,7 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
         for (int i = 0; i < getPanel().getWidgetCount(); i++) {
             final int widgetIndex = i;
             final DepartmentWidget dw = getWidget(widgetIndex);
+            dw.getElement().getStyle().setPaddingRight(20, Unit.PX);
             final ItemMoveAnimation growAnimation = new ItemMoveAnimation(dw);
             dw.getElement().setDraggable(Element.DRAGGABLE_TRUE);
             dw.addDragStartHandler(new DragStartHandler() {
@@ -119,16 +120,16 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
                         }
                     }
 
-                    // add first then remove. if done the other way around, indices > widgetIndex become incorrect
+                    // remove first then add. if done the other way around, indices > widgetIndex become incorrect
                     items.remove(indexOfDraggingWidget);
                     int addIndex = widgetIndex;
-                    if (addIndex > indexOfDraggingWidget) {
-                        // we just removed an item that comes before the drop location. have to compensate.
-                        addIndex--;
-                    }
                     items.add(addIndex, draggingDepartmentWidget.getModel());
+                    onItemsRendered(items);
+
                 }
             }, DropEvent.getType());
+            
+           
         }
     }
 
@@ -151,12 +152,13 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
         @Override
         protected void onUpdate(double progress) {
             current = start + ((end - start) * progress);
-            item.getElement().getStyle().setPaddingTop(current, Unit.PX);
+
         }
 
         @Override
         protected void onComplete() {
             current = end;
+            item.getElement().getStyle().setPaddingTop(current, Unit.PX);
             super.onComplete();
         }
 

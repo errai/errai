@@ -19,6 +19,7 @@ package org.jboss.errai.demo.grocery.client.shared;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,6 +34,7 @@ import javax.persistence.OneToMany;
  * @author jfuerth
  */
 @Entity
+@ApplicationScoped
 @NamedQuery(name = "groceryListsForUser", query = "SELECT gl FROM GroceryList gl WHERE gl.owner=:user")
 public class GroceryList {
 
@@ -61,4 +63,6 @@ public class GroceryList {
     public List<Item> getItems() {
         return items;
     }
+    
+    
 }

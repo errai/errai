@@ -47,6 +47,7 @@ public class WelcomePage extends Composite {
 
     @EventHandler("startButton")
     public void onStartButtonPress(ClickEvent e) {
-        startButtonClicked.go();
+        startButtonClicked.go(); //
     }
+
 }

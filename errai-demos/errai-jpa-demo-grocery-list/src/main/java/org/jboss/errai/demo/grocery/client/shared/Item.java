@@ -31,6 +31,8 @@ import javax.validation.constraints.Size;
 
 import org.jboss.errai.databinding.client.api.Bindable;
 
+import com.google.gwt.user.client.ui.CheckBox;
+
 @Bindable
 @Entity
 @EntityListeners(EventTranslator.ItemLifecycleListener.class)
@@ -43,6 +45,16 @@ public class Item {
 
     @NotNull
     private String name;
+    
+    private Boolean checkBox;
+    
+    public Boolean getCheckBox() {
+      return checkBox;
+    }
+    
+    public void setCheckBox(Boolean checkBoxValue) {
+      checkBox = checkBoxValue;
+    }
 
     @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
     private Department department;
@@ -108,10 +120,10 @@ public class Item {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
         if (obj == null)
             return false;
+        if (this == obj)
+            return true;
         if (getClass() != obj.getClass())
             return false;
         Item other = (Item) obj;

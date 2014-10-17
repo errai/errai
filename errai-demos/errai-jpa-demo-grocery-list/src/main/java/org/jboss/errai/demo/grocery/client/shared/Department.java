@@ -46,6 +46,10 @@ public class Department {
     private long id;
 
     private String name;
+    
+    public Department() {
+      this.name = new String("");
+    }
 
     public String getName() {
         return name;

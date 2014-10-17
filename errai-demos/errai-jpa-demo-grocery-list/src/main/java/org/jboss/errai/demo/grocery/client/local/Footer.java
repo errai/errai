@@ -63,6 +63,7 @@ public class Footer extends Composite {
     }
   }
 
+  @SuppressWarnings("unused")
   private void onPageSwitch(@Observes NavigationEvent event) {
     final Style style = sortWidget.getElement().getStyle();
     if ("ItemListPage".equals(event.getPageRequest().getPageName())) {

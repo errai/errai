@@ -19,7 +19,6 @@ package org.jboss.errai.demo.grocery.client.local;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
@@ -34,21 +33,26 @@ import com.google.gwt.user.client.ui.Composite;
 @ApplicationScoped
 public class ItemListPage extends Composite {
 
-    @Inject private EntityManager em;
+  // @Inject
+  // private EntityManager em;
 
-    @Inject private @DataField GroceryListWidget listWidget;
-    @Inject private @DataField ItemForm newItemForm;
+  @Inject
+  private @DataField
+  GroceryListWidget listWidget;
+  @Inject
+  private @DataField
+  ItemForm newItemForm;
 
-    @PostConstruct
-    private void initInstance() {
-
-        // clear the item form after an item is saved
-        newItemForm.setAfterSaveAction(new Runnable() {
-            @Override
-            public void run() {
-                newItemForm.setItem(new Item());
-            }
-        });
-    }
+  @PostConstruct
+  private void initInstance() {
+    System.out.println("newItemForm type " + newItemForm.getClass());
+    // clear the item form after an item is saved
+    newItemForm.setAfterSaveAction(new Runnable() {
+      @Override
+      public void run() {
+        newItemForm.setItem(new Item());
+      }
+    });
+  }
 
 }

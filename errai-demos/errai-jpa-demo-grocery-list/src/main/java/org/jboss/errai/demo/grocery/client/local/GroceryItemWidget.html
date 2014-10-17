@@ -18,16 +18,33 @@
 <link href="css/bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="css/GroceryList.css" rel="stylesheet">
 
-<div class="list-group-item" data-field="main">
-  <h4 class="list-group-item-heading"><span data-field="name">Bread</span></h4>
-  <p class="list-group-item-text">
-    <span data-field="department">Department Bread</span>
-    <small><span data-field="comment">notes</span></small>
-  </p>
-  <p class="text-right">
-    <small>
-      <span>Added</span> <span data-field="addedOn">3 Days Ago</span>
-      <span>by</span> <span data-field="addedBy">jfuerth</span>
-    </small>
-  </p>
+<div class="list-group-item" title="Double-click to edit" data-field="main">
+
+	<div class="name-element">
+		<div class="item-name">
+			<input type="checkbox" data-field="checkBox" class="checkItem"></input>
+  			<h3 class="list-group-item-heading"><span data-field="name">Bread</span></h3>
+  		</div>
+  		<div class="formButton">
+  			<button type="reset" class="btn btn-small" data-field="deleteButton">Delete</button>
+  		</div>
+	</div>
+
+	<div class="list-group-item-text">
+		<div class="item-info">
+    		<span data-field="department">Department Bread</span>
+    		<small><span data-field="comment" class="italic">(notes)</span></small>
+    	</div>
+    	<div class="text-right">
+    		<small>
+      			<span>Added</span> <span data-field="addedOn">3 Days Ago</span>
+      			<span>by</span> <span data-field="addedBy">jfuerth</span>
+    		</small>
+    	</div>
+  	</div>
+
+    <div data-field="formHolder">
+  		<h4 class="item-edit-heading">Edit <span data-field="name">Bread</span></h4>
+ 	</div>
+
 </div>

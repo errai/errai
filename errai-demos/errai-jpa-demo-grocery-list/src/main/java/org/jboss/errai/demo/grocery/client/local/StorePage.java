@@ -20,7 +20,16 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.gwtopenmaps.openlayers.client.*;
+import org.gwtopenmaps.openlayers.client.Bounds;
+import org.gwtopenmaps.openlayers.client.Icon;
+import org.gwtopenmaps.openlayers.client.LonLat;
+import org.gwtopenmaps.openlayers.client.Map;
+import org.gwtopenmaps.openlayers.client.MapOptions;
+import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.Marker;
+import org.gwtopenmaps.openlayers.client.Pixel;
+import org.gwtopenmaps.openlayers.client.Projection;
+import org.gwtopenmaps.openlayers.client.Size;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.OverviewMap;
@@ -150,7 +159,7 @@ public class StorePage extends Composite {
         for (Department d : em.createNamedQuery("allDepartments", Department.class).getResultList()) {
             dso.add(d.getName());
         }
-        addDepartment.getTextBox().addKeyPressHandler(new KeyPressHandler() {
+        addDepartment.getValueBox().addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
                 if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
@@ -260,6 +269,11 @@ public class StorePage extends Composite {
     @EventHandler("saveButton")
     private void save(ClickEvent e) {
         Store store = storeBinder.getModel();
+        
+        if (!isValidName(store.getName())) {
+          return;
+        }
+        
         em.merge(store);
         em.flush();
 
@@ -361,5 +375,16 @@ public class StorePage extends Composite {
         else {
             return null;
         }
+    }
+    
+    protected boolean isValidName(String name) {
+      if (name == null)
+        return false;
+      else if (name.isEmpty())
+        return false;
+      else if (name.matches(".*\\w.*"))   //if name.getText() contains at least one word character
+        return true;
+      
+      return false;
     }
 }
