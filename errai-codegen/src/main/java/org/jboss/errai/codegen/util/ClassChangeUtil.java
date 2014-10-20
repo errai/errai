@@ -450,8 +450,11 @@ public class ClassChangeUtil {
   @SuppressWarnings("ConstantConditions")
   public static void _findAllMatching(final HashSet<File> matching, final String fileName, final File from) {
     if (from.isDirectory()) {
-      for (final File file : from.listFiles()) {
-        _findAllMatching(matching, fileName, file);
+      final File[] files = from.listFiles();
+      if (files != null) {
+        for (final File file : from.listFiles()) {
+          _findAllMatching(matching, fileName, file);
+        }
       }
     }
     else {
