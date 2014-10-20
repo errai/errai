@@ -134,7 +134,6 @@ public class ClassChangeUtil {
     return loadClassDefinition(outputLocation, packageName, className);
   }
 
-  @SuppressWarnings({"ConstantConditions", "ResultOfMethodCallIgnored"})
   public static String compileClass(final String sourcePath,
                                     final String packageName,
                                     final String className,
@@ -213,7 +212,6 @@ public class ClassChangeUtil {
     }
   }
 
-  @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
   public static Class loadClassDefinition(final String path,
                                           final String packageName,
                                           final String className) throws IOException {
@@ -335,7 +333,6 @@ public class ClassChangeUtil {
       return super.defineClass(className, b, off, len);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     protected Class<?> findClass(final String name) throws ClassNotFoundException {
       try {
@@ -447,7 +444,6 @@ public class ClassChangeUtil {
     return matching;
   }
 
-  @SuppressWarnings("ConstantConditions")
   public static void _findAllMatching(final HashSet<File> matching, final String fileName, final File from) {
     if (from.isDirectory()) {
       final File[] files = from.listFiles();
@@ -455,6 +451,9 @@ public class ClassChangeUtil {
         for (final File file : from.listFiles()) {
           _findAllMatching(matching, fileName, file);
         }
+      }
+      else {
+        log.debug("Failed to read: " + from.getAbsolutePath());
       }
     }
     else {
