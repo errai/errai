@@ -83,9 +83,14 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         if (key.equals(SerializationParts.OBJECT_ID)) {
           continue;
         }
-
+        
         if (assumedKeyType != null && assumedValueType != null) {
-          demarshalledKey = convertKey(assumedKeyType, key, ctx);
+          if (key.equals(SerializationParts.NULL_VALUE)) {
+            demarshalledKey = null;
+          }
+          else {
+            demarshalledKey = convertKey(assumedKeyType, key, ctx);
+          }
 
           final String valueType;
           if (ejValue.isObject() != null && ejValue.isObject().containsKey(SerializationParts.ENCODED_TYPE)) {
@@ -98,8 +103,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
           impl.put(demarshalledKey, demarshalledValue);
         }
         else {
-          //   demarshalledKey = key;
-          impl.put(key,
+          demarshalledKey = (key.equals(SerializationParts.NULL_VALUE)) ? null : key;
+          impl.put(demarshalledKey,
               ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
         }
       }
@@ -112,6 +117,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
   // type. We only need to support primitive wrapper types and enums as key types. Other types require a custom
   // Key(De)Serializer in Jackson anyway which would be unknown to Errai.
   private Object convertKey(final String toType, final String key, final MarshallingSession ctx) {
+    if (key == null) return null;
+    
     Marshaller<?> keyMarshaller = ctx.getMarshallerInstance(toType);
     if (toType.equals(Integer.class.getName())) {
       return Integer.parseInt(key);
@@ -177,6 +184,9 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
             .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(
                 MarshallUtil.maybeUnwrap(entry.getKey()), ctx)))
             .append("\"");
+      }
+      else {
+        buf.append("\"" + SerializationParts.NULL_VALUE + "\"");
       }
 
       buf.append(":");

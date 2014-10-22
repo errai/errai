@@ -908,6 +908,7 @@ public class SerializationTests extends AbstractErraiTest {
         map.put(2l, "bar");
         map.put(3l, "baz\\qux");
         map.put(4l, null);
+        map.put(null, "zap");
 
         MessageBuilder.createCall(new RemoteCallback<Map<Long, String>>() {
           @Override

@@ -284,7 +284,17 @@ public class MarshallingAPITest {
     
     Outer2.Nested key2 = new Outer2.Nested("exp");
     Outer2 outer2 = new Outer2 (key2, Arrays.asList(key2));
-    testEncodeDecode(outer);
+    testEncodeDecode(outer2);
+  }
+  
+  // This is a regression test for ERRAI-811
+  @Test
+  public void testEntityWithMapUsingNullKey() {
+    Map<String, String> data = new HashMap<String, String>();
+    data.put("key1", "value1");
+    data.put(null, "value2");
+
+    testEncodeDecode(data);
   }
   
 }
