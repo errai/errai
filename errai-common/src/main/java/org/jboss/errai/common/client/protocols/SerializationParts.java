@@ -22,6 +22,7 @@ public class SerializationParts {
   public static final String OBJECT_ID = "^ObjectID";
   public static final String INSTANTIATE_ONLY = "^InstantiateOnly";
   public static final String NUMERIC_VALUE = "^NumVal";
+  public static final String NULL_VALUE = "^NullVal";
   public static final String QUALIFIED_VALUE = "^Value";
 
  // public static final String VALUE = "Value";
