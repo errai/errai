@@ -459,13 +459,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     navigation.goTo(PageBWithState.class, state);
     assertEquals("Did not hit @PageShowing method", 1, PageBWithState.hitCount);
     
-    String oldUrl = Window.Location.getHref();
-    StringBuilder urlBuilder = new StringBuilder(oldUrl);
-    urlBuilder.replace(oldUrl.length() - 8, oldUrl.length(), "newstate");
-    String newUrl = urlBuilder.toString();
-    Window.Location.assign(newUrl);
+    History.newItem("page_b_with_state;uuid=newstate", true);
     assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
-
   }
   
   public void testForEmptyContextWithoutPushState() throws Exception {

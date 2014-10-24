@@ -17,7 +17,7 @@ public class PageWithException extends VerticalPanel {
 
   @PageShowing
   protected void beforeShow() {
-    throw new NullPointerException("raped");
+    throw new NullPointerException("");
   }
 
 }

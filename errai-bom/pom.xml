@@ -58,8 +58,7 @@
     <gwt.incubator.version>2.0.1</gwt.incubator.version>
     <gwt.maps.api.version>3.9.0-build-16</gwt.maps.api.version>
     <gwt.openlayers.client.version>0.8</gwt.openlayers.client.version>
-    <gwt.phonegap.version>3.4.0.0-m1</gwt.phonegap.version>
-    <gwt.pushstate.version>1.0.0</gwt.pushstate.version>
+    <gwt.phonegap.version>3.4.0.0-m1</gwt.phonegap.version>    
     <gwt.slf4j.version>0.0.2</gwt.slf4j.version>
     <gwt.version>2.6.1</gwt.version>
     <h2database.version>1.3.168</h2database.version>
@@ -374,12 +373,6 @@
       </dependency>
       
       <!-- Third Party Dependencies -->
-
-      <dependency>
-        <groupId>de.barop.gwt</groupId>
-        <artifactId>gwt-pushstate</artifactId>
-        <version>${gwt.pushstate.version}</version>
-      </dependency>
     
       <dependency>
         <groupId>org.apache.commons</groupId>

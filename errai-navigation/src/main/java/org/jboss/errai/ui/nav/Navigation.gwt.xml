@@ -5,7 +5,6 @@
    <inherits name="com.google.common.collect.Collect" />
    <inherits name="org.jboss.errai.common.ErraiCommon" />
    <inherits name="org.jboss.errai.ioc.Container" />
-   <inherits name="de.barop.gwt.PushState" />
 
    <generate-with class="org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.spi.NavigationGraph"/>
@@ -14,13 +13,5 @@
    <replace-with class="org.jboss.errai.ui.nav.client.local.SimpleNavigationPanel">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/>
    </replace-with>
-   
-   <replace-with class="org.jboss.errai.ui.nav.client.local.pushstate.DynamicHistoryImpl">
-     <when-type-is class="com.google.gwt.user.client.impl.HistoryImpl" />
-   </replace-with>
-   
-  <replace-with class="org.jboss.errai.ui.nav.client.local.pushstate.DynamicHistoryConverter">
-    <when-type-is class="de.barop.gwt.client.HistoryConverter" />
-  </replace-with>
 
 </module>

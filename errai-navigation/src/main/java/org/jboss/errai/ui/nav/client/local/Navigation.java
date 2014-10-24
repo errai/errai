@@ -126,7 +126,7 @@ public class Navigation {
     
     navigationErrorHandler = new DefaultNavigationErrorHandler(this);
 
-    historyHandlerRegistration = History.addValueChangeHandler(new ValueChangeHandler<String>() {
+    historyHandlerRegistration = HistoryWrapper.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
       public void onValueChange(final ValueChangeEvent<String> event) {
         HistoryToken token = null;
@@ -160,7 +160,7 @@ public class Navigation {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
-        History.fireCurrentHistoryState();
+        HistoryWrapper.fireCurrentHistoryState();
       }
     });
 
@@ -312,7 +312,7 @@ public class Navigation {
       // This is the page which has to be displayed and the browser's history
       // can be updated.
       redirectDepth = 0;
-      History.newItem(request.state.toString(), fireEvent);
+      HistoryWrapper.newItem(request.state.toString(), fireEvent);
     }
     else {
       // Process all navigation requests captured in the lifecycle methods.
