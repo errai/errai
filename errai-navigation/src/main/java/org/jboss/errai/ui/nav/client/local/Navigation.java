@@ -29,7 +29,7 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -124,6 +124,8 @@ public class Navigation {
     if (navGraph.isEmpty())
       return;
     
+    final String hash = Window.Location.getHash();
+    
     navigationErrorHandler = new DefaultNavigationErrorHandler(this);
 
     historyHandlerRegistration = HistoryWrapper.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -154,7 +156,9 @@ public class Navigation {
         }
       }
     });
-
+    
+    maybeConvertHistoryToken(hash);
+    
     // finally, we bootstrap the navigation system (this invokes the callback
     // above)
     InitVotes.registerOneTimeInitCallback(new Runnable() {
@@ -505,5 +509,18 @@ public class Navigation {
        return $wnd.erraiApplicationWebContext;
      } 
   }-*/;
+
+  private void maybeConvertHistoryToken(String token) {
+    if (PushStateUtil.isPushStateActivated()) {
+      if (token == null || token.isEmpty()) {
+        return;
+      }
   
+      if (token.startsWith("#")) {
+        token = token.substring(1);
+      }
+  
+      HistoryWrapper.newItem(Window.Location.getPath() + token, false);
+    }
+  }
 }
