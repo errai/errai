@@ -509,7 +509,7 @@
         <artifactId>gwt-maven-plugin</artifactId>
         <version>${maven.gwt.plugin.version}</version>
         <configuration>
-          <strict>true</strict>
+          <strict>false</strict>
           <logLevel>INFO</logLevel>
           <runTarget>index.html</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100</extraJvmArgs>

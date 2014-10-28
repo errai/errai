@@ -276,7 +276,7 @@
           </execution>
         </executions>
         <configuration>
-          <strict>true</strict>
+          <strict>false</strict>
           <webappDirectory>src/main/webapp</webappDirectory>
           <logLevel>INFO</logLevel>
           <noServer>false</noServer>
