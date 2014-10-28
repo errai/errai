@@ -43,13 +43,34 @@ public class RestClient {
    * @param callback
    *          the asynchronous callback to use. Must not be null.
    * @param successCodes
-   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
-   *          status codes are interpreted as success for this request.
+   *          optional HTTP status codes used to determine whether the request
+   *          was successful. If omitted, all 2xx status codes are interpreted
+   *          as success for this request.
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback, Integer... successCodes) {
+    return create(remoteService, null, callback, null, successCodes);
+  }
+
+  /**
+   * Creates a client/proxy for the provided JAX-RS resource interface.
+   * 
+   * @param remoteService
+   *          the JAX-RS resource interface. Must not be null.
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param requestCallback
+   *          the request callback that provides access to the
+   *          {@link com.google.gwt.http.client.Request}.
+   * @param successCodes
+   *          optional HTTP status codes used to determine whether the request
+   *          was successful. If omitted, all 2xx status codes are interpreted
+   *          as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
-      Integer... successCodes) {
-    return create(remoteService, null, callback, null, successCodes);
+          final RequestCallback requestCallback, Integer... successCodes) {
+    return create(remoteService, null, callback, null, requestCallback, successCodes);
   }
 
   /**
@@ -62,12 +83,13 @@ public class RestClient {
    * @param callback
    *          the asynchronous callback to use. Must not be null.
    * @param successCodes
-   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
-   *          status codes are interpreted as success for this request.
+   *          optional HTTP status codes used to determine whether the request
+   *          was successful. If omitted, all 2xx status codes are interpreted
+   *          as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
-      Integer... successCodes) {
+          Integer... successCodes) {
     return create(remoteService, baseUrl, callback, null, successCodes);
   }
 
@@ -81,13 +103,37 @@ public class RestClient {
    * @param errorCallback
    *          the error callback to use
    * @param successCodes
-   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
-   *          status codes are interpreted as success for this request.
+   *          optional HTTP status codes used to determine whether the request
+   *          was successful. If omitted, all 2xx status codes are interpreted
+   *          as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
-      final RestErrorCallback errorCallback, Integer... successCodes) {
+          final RestErrorCallback errorCallback, Integer... successCodes) {
     return create(remoteService, null, callback, errorCallback, successCodes);
+  }
+
+  /**
+   * Creates a client/proxy for the provided JAX-RS resource interface.
+   * 
+   * @param remoteService
+   *          the JAX-RS resource interface. Must not be null.
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param errorCallback
+   *          the error callback to use
+   * @param requestCallback
+   *          the request callback that provides access to the
+   *          {@link com.google.gwt.http.client.Request}.
+   * @param successCodes
+   *          optional HTTP status codes used to determine whether the request
+   *          was successful. If omitted, all 2xx status codes are interpreted
+   *          as success for this request.
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
+          final RestErrorCallback errorCallback, final RequestCallback requestCallback, Integer... successCodes) {
+    return create(remoteService, null, callback, errorCallback, requestCallback, successCodes);
   }
 
   /**
@@ -102,12 +148,38 @@ public class RestClient {
    * @param errorCallback
    *          the error callback to use
    * @param successCodes
-   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
-   *          status codes are interpreted as success for this request.
+   *          optional HTTP status codes used to determine whether the request
+   *          was successful. If omitted, all 2xx status codes are interpreted
+   *          as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
-      final RestErrorCallback errorCallback, Integer... successCodes) {
+          final RestErrorCallback errorCallback, Integer... successCodes) {
+    return create(remoteService, baseUrl, callback, errorCallback, null, successCodes);
+  }
+
+  /**
+   * Creates a client/proxy for the provided JAX-RS resource interface.
+   * 
+   * @param remoteService
+   *          the JAX-RS resource interface. Must not be null.
+   * @param baseUrl
+   *          the base URL overriding the default application root path
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param errorCallback
+   *          the error callback to use
+   * @param requestCallback
+   *          the request callback that provides access to the
+   *          {@link com.google.gwt.http.client.Request}.
+   * @param successCodes
+   *          optional HTTP status codes used to determine whether the request
+   *          was successful. If omitted, all 2xx status codes are interpreted
+   *          as success for this request.
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
+          final RestErrorCallback errorCallback, final RequestCallback requestCallback, Integer... successCodes) {
 
     Assert.notNull(remoteService);
     Assert.notNull(callback);
@@ -122,6 +194,7 @@ public class RestClient {
 
     ((AbstractJaxrsProxy) proxy).setRemoteCallback(callback);
     ((AbstractJaxrsProxy) proxy).setErrorCallback(errorCallback);
+    ((AbstractJaxrsProxy) proxy).setRequestCallback(requestCallback);
     ((AbstractJaxrsProxy) proxy).setBaseUrl(baseUrl);
     return proxy;
   }
@@ -129,19 +202,20 @@ public class RestClient {
   /**
    * Returns the configured JAX-RS default application root path.
    * 
-   * @return path with trailing slash, or empty string if undefined or explicitly set to empty
+   * @return path with trailing slash, or empty string if undefined or
+   *         explicitly set to empty
    */
   public static native String getApplicationRoot() /*-{
     if ($wnd.erraiJaxRsApplicationRoot === undefined || $wnd.erraiJaxRsApplicationRoot.length === 0) {
       return ""; 
-     } 
-     else {
-       if ($wnd.erraiJaxRsApplicationRoot.substr(-1) !== "/") {
-         return $wnd.erraiJaxRsApplicationRoot + "/";
-       }
-       return $wnd.erraiJaxRsApplicationRoot;
-     }  
-   }-*/;
+    } 
+    else {
+      if ($wnd.erraiJaxRsApplicationRoot.substr(-1) !== "/") {
+        return $wnd.erraiJaxRsApplicationRoot + "/";
+      }
+      return $wnd.erraiJaxRsApplicationRoot;
+    }
+  }-*/;
 
   /**
    * Configures the JAX-RS default application root path.
@@ -159,7 +233,8 @@ public class RestClient {
   }-*/;
 
   /**
-   * Checks if a jackson compatible JSON format should be used instead of Errai JSON.
+   * Checks if a jackson compatible JSON format should be used instead of Errai
+   * JSON.
    * 
    * @return true, if jackson marshalling should be used, otherwise false.
    */
@@ -174,7 +249,7 @@ public class RestClient {
 
   /**
    * Activates/Deactivates jackson conform JSON marshalling.
-   *
+   * 
    * @param active
    *          true if jackson marshalling should be activated, otherwise false.
    */
@@ -183,10 +258,13 @@ public class RestClient {
   }-*/;
 
   /**
-   * Set a cookie for the domain and path returned by {@link #getApplicationRoot()}.
-   *
-   * @param cookieName The name of the cookie to set.
-   * @param cookieValue The value of the cookie to set.
+   * Set a cookie for the domain and path returned by
+   * {@link #getApplicationRoot()}.
+   * 
+   * @param cookieName
+   *          The name of the cookie to set.
+   * @param cookieValue
+   *          The value of the cookie to set.
    */
   public static void setCookie(final String cookieName, final String cookieValue) {
     final AnchorElement anchorElement = Document.get().createAnchorElement();

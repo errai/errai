@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    AbortHttpRequestTest.class,
     CallerInjectionIntegrationTest.class,
     ConfigurationTest.class,
     ContentNegotiationIntegrationTest.class,
