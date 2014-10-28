@@ -37,7 +37,7 @@ public class RestClient {
 
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
-   * 
+   *
    * @param remoteService
    *          the JAX-RS resource interface. Must not be null.
    * @param callback
@@ -50,6 +50,25 @@ public class RestClient {
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
       Integer... successCodes) {
     return create(remoteService, null, callback, null, successCodes);
+  }
+
+  /**
+   * Creates a client/proxy for the provided JAX-RS resource interface.
+   *
+   * @param remoteService
+   *          the JAX-RS resource interface. Must not be null.
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param requestCallback
+   *          the request callback that is used to obtain {@link com.google.gwt.http.client.Request}.
+   * @param successCodes
+   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
+   *          status codes are interpreted as success for this request.
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
+                                final RequestCallback requestCallback, Integer... successCodes) {
+    return create(remoteService, null, callback, null, requestCallback, successCodes);
   }
 
   /**
@@ -89,6 +108,26 @@ public class RestClient {
       final RestErrorCallback errorCallback, Integer... successCodes) {
     return create(remoteService, null, callback, errorCallback, successCodes);
   }
+  /**
+   * Creates a client/proxy for the provided JAX-RS resource interface.
+   *
+   * @param remoteService
+   *          the JAX-RS resource interface. Must not be null.
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param errorCallback
+   *          the error callback to use
+   * @param requestCallback
+   *          the request callback that is used to obtain {@link com.google.gwt.http.client.Request}.
+   * @param successCodes
+   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
+   *          status codes are interpreted as success for this request.
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
+      final RestErrorCallback errorCallback, final RequestCallback requestCallback, Integer... successCodes) {
+    return create(remoteService, null, callback, errorCallback, requestCallback, successCodes);
+  }
 
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
@@ -108,6 +147,29 @@ public class RestClient {
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
       final RestErrorCallback errorCallback, Integer... successCodes) {
+    return create(remoteService, baseUrl, callback, errorCallback, null, successCodes);
+  }
+
+  /**
+   * Creates a client/proxy for the provided JAX-RS resource interface.
+   *
+   * @param remoteService
+   *          the JAX-RS resource interface. Must not be null.
+   * @param baseUrl
+   *          the base URL overriding the default application root path
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param errorCallback
+   *          the error callback to use
+   * @param requestCallback
+   *          the request callback that is used to obtain {@link com.google.gwt.http.client.Request}.
+   * @param successCodes
+   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
+   *          status codes are interpreted as success for this request.
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
+      final RestErrorCallback errorCallback, final RequestCallback requestCallback, Integer... successCodes) {
 
     Assert.notNull(remoteService);
     Assert.notNull(callback);
@@ -122,6 +184,7 @@ public class RestClient {
 
     ((AbstractJaxrsProxy) proxy).setRemoteCallback(callback);
     ((AbstractJaxrsProxy) proxy).setErrorCallback(errorCallback);
+    ((AbstractJaxrsProxy) proxy).setRequestCallback(requestCallback);
     ((AbstractJaxrsProxy) proxy).setBaseUrl(baseUrl);
     return proxy;
   }
