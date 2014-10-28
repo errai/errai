@@ -3917,6 +3917,38 @@ public class SpecificClientExceptionMapper implements ClientExceptionMapper {
 }
 ----
 
+[[sid-19398997_ErraiJAX-RS-AbortingRequests]]
+
+=== Accesssing and aborting requests
+
+An instance of Errai's [code]+RequestCallback+ can optionally be passed to the [code]+RestClient.create()+ call, which will
+provide access to the underlying HTTP request. The callback is invoked synchronously after the HTTP request has been initiated.
+This means that you will have access to the request immediately after the call.
+
+[source, java]
+----
+RequestCallback requestCallback = new RequestCallback() {
+  @Override
+  public void callback(Request request) {
+    this.request = request;
+  }
+};
+
+RestClient.create(SearchService.class, callback, requestCallback).find(query);
+----
+
+This allows you to cancel a pending request. Alternatively, a [code]+RequestHolder+ can be used instead.
+
+[source, java]
+----
+RequestHolder searchRequestHolder = new RequestHolder();
+RestClient.create(SearchService.class, callback, searchRequestHolder).find(query);
+...
+if (searchRequestHolder.isAlive()) {
+  searchRequestHolder.getRequest().cancel();
+}
+----
+
 [[sid-19398997_ErraiJAX-RS-ClientsideInterceptors]]
 
 === Client-side Interceptors
