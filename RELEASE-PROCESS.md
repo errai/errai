@@ -23,7 +23,7 @@ Release Steps
 
 1. Run the test suite. Ensure all tests pass.
         
-        % mvn -Pintegration-test test
+        % mvn -Pintegration-test clean test
         
 1. Update reference guide with latest content and check in generated docbook.
         
@@ -45,7 +45,8 @@ Release Steps
 1. Build and package the release. These are the bits that will be uploaded to nexus.
    Expect this to take about 4 minutes, depending on network speed.
 
-        % mvn clean deploy -Dgwt.compiler.skip=true -Dmaven.test.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
+        % mvn clean install -Dgwt.compiler.skip=true
+        % mvn deploy -Dgwt.compiler.skip=true -Dmaven.test.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
 
 1. Create the a-la-carte binary Errai distribution and docs
 

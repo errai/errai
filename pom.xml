@@ -146,9 +146,22 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-bus</artifactId>
+        <type>test-jar</type>      
+        <version>${project.version}</version>      
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
         <artifactId>errai-cdi-client</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-cdi-client</artifactId>
+        <type>test-jar</type>      
+        <version>${project.version}</version>      
+      </dependency>
+
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-codegen</artifactId>
@@ -195,6 +208,12 @@
         <artifactId>errai-ioc</artifactId>
         <version>${project.version}</version>
       </dependency>
+        <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-ioc</artifactId>
+        <type>test-jar</type>      
+        <version>${project.version}</version>      
+      </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-ioc-bus-support</artifactId>
@@ -220,6 +239,12 @@
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-jaxrs-client</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jaxrs-client</artifactId>
+        <type>test-jar</type>      
+        <version>${project.version}</version>      
       </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>

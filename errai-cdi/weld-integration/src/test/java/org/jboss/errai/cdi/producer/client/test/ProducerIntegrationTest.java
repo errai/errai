@@ -1,7 +1,7 @@
 package org.jboss.errai.cdi.producer.client.test;
 
 
-import static org.junit.Assert.*;
+import java.util.List;
 
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumersMultiProducers;
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumesOwnProducer;
@@ -25,9 +25,6 @@ import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.junit.Test;
-
-import java.util.List;
 
 /**
  * Tests CDI producers.
