@@ -15,6 +15,47 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/AbstractErraiIOCTest.*</include>
+                <include>**/MockIOCGenerator.*</include>
+                <include>**/IOCSimulatedTestRunner.*</include>
+                <include>**/IOCClientTestCase*.*</include>
+                <include>**/*ContainerBootstrapper.*</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -117,10 +158,13 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <!-- This is required because the BasicIOCTest is run in "simulated client" mode, which
-                   prevents subsequent tests from succeeding -->
+              <!-- This is required because the BasicIOCTest is run in "simulated 
+                client" mode, which prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
-              <argLine>-Xmx1500m -XX:MaxPermSize=500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+              <argLine>-Xmx1500m -XX:MaxPermSize=500m
+                -Dgwt.gen=/tmp/gwt_test_gen_out/
+                -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug
+                -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 
               <systemProperties>
                 <property>

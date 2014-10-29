@@ -154,7 +154,7 @@ public class BatchCallerIntegrationTest extends AbstractErraiIOCBusTest {
     GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
       @Override
       public void onUncaughtException(Throwable t) {
-        if (!(t.getMessage().equals("batchedMethodThrowsException"))) { 
+        if (!(t.getMessage().contains("batchedMethodThrowsException"))) { 
           // only let the test fail in case we get an exception we didn't anticipate
           oldHandler.onUncaughtException(t);
         }

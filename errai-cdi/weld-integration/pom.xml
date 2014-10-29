@@ -49,7 +49,7 @@
         <!-- Errai Core -->
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-common</artifactId>          
+          <artifactId>errai-common</artifactId>
         </dependency>
 
         <dependency>
@@ -59,7 +59,14 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-config</artifactId>          
+          <artifactId>errai-bus</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-config</artifactId>
         </dependency>
 
         <dependency>
@@ -70,7 +77,14 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-ioc-bus-support</artifactId>          
+          <artifactId>errai-ioc</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-ioc-bus-support</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -82,8 +96,15 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-cdi-client</artifactId>          
+          <artifactId>errai-cdi-client</artifactId>
           <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-cdi-client</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -151,13 +172,13 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-javax-enterprise</artifactId>          
+          <artifactId>errai-javax-enterprise</artifactId>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-data-binding</artifactId>          
+          <artifactId>errai-data-binding</artifactId>
           <scope>provided</scope>
         </dependency>
       </dependencies>
@@ -188,7 +209,7 @@
         <profile.testOutputDirectory>war/WEB-INF/classes</profile.testOutputDirectory>
       </properties>
 
-      <build>
+      <build>        
         <testResources>
           <testResource>
             <directory>src/test/java</directory>
@@ -226,21 +247,7 @@
         </plugins>
       </build>
 
-      <dependencies>
-        <dependency>
-          <groupId>javax.el</groupId>
-          <artifactId>el-api</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.spec.javax.interceptor</groupId>
-          <artifactId>jboss-interceptors-api_1.2_spec</artifactId>          
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-          <scope>provided</scope>
-        </dependency>
+      <dependencies> 
         <dependency>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
@@ -255,8 +262,20 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-common</artifactId>
-        </dependency>
+        </dependency>              
 
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-bus</artifactId>
+        </dependency>
+        
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-bus</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+        </dependency>
+        
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc</artifactId>
@@ -269,7 +288,14 @@
               <groupId>javax.annotation</groupId>
               <artifactId>jsr250-api</artifactId>
             </exclusion>
-          </exclusions>
+          </exclusions>        
+        </dependency>
+        
+         <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-ioc</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -277,11 +303,18 @@
           <artifactId>errai-cdi-client</artifactId>
           <scope>compile</scope>
         </dependency>
+        
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-cdi-client</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+        </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc-bus-support</artifactId>
-        </dependency>
+        </dependency>      
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -320,7 +353,7 @@
         </dependency>
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet-core</artifactId>
+          <artifactId>weld-servlet</artifactId>
         </dependency>
 
         <!-- GWT and GWT Extensions -->
@@ -375,7 +408,7 @@
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-data-binding</artifactId>
           <scope>provided</scope>
-        </dependency>
+        </dependency>        
       </dependencies>
     </profile>
   </profiles>

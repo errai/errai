@@ -1,3 +1,4 @@
+package org.jboss.errai.ioc.client;
 /*
  * Copyright 2011 JBoss, by Red Hat, Inc
  *
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client;
+
 
 import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
