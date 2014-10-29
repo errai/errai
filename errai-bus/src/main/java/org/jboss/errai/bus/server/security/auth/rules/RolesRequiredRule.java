@@ -87,7 +87,12 @@ public class RolesRequiredRule implements BooleanRoutingRule {
             .copyResource("Session", message)
             .errorsHandledBy(new ErrorCallback<Message>() {
               public boolean error(Message message, Throwable throwable) {
-                ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
+			    if (null != throwable) {
+					ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
+				}
+				else {
+					ErrorHelper.sendClientError(bus, message, "", throwable);
+				}
                 return false;
               }
             })
