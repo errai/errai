@@ -18,6 +18,7 @@ package org.jboss.errai.enterprise.client.jaxrs.test;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
+import org.jboss.errai.enterprise.client.jaxrs.api.RequestCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
@@ -33,7 +34,7 @@ import com.google.gwt.junit.client.GWTTestCase;
  */
 public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected String jaxRsApplicationRoot = "/";
-  private final TestErrorCallback errorCallback = new TestErrorCallback();;
+  private final TestErrorCallback errorCallback = new TestErrorCallback();
 
   @Override
   protected void gwtSetUp() throws Exception {
@@ -50,6 +51,11 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, RestErrorCallback errorCallback,
       Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, successCodes);
+  }
+
+  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, RestErrorCallback errorCallback,
+      RequestCallback requestCallback, Integer... successCodes) {
+    return RestClient.create(remote, callback, errorCallback, requestCallback, successCodes);
   }
 
   protected <T, R> T call(Class<T> remote, String baseUrl, RemoteCallback<R> callback, Integer... successCodes) {

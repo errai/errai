@@ -36,4 +36,11 @@ public class RequestCallbackImpl implements RequestCallback {
   public Request getRequest() {
     return request;
   }
+
+  /**
+   * @return true if request has been initiated and is waiting for a response.
+   */
+  public boolean isAlive() {
+    return request != null && request.isPending();
+  }
 }

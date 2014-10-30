@@ -32,6 +32,7 @@ import org.junit.runners.Suite;
     CookieParamIntegrationTest.class,
     CustomTypeIntegrationTest.class,
     ErrorHandlingIntegrationTest.class,
+    AbortHttpRequestTest.class,
     HeaderParamIntegrationTest.class,
     InterceptedCallIntegrationTest.class,
     InterceptsRemoteCallIntegrationTest.class,
