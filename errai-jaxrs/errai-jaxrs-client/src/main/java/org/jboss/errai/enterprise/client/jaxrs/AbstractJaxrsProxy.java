@@ -16,9 +16,8 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.*;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.RpcBatch;
@@ -28,12 +27,8 @@ import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
+import java.lang.annotation.Annotation;
+import java.util.List;
 
 /**
  * JAX-RS proxies are {@link RpcStub}s managed by the shared {@see RemoteServiceProxyFactory}. The implementations of
@@ -45,6 +40,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   private String baseUrl;
   private List<Integer> successCodes;
   private ClientExceptionMapper exceptionMapper;
+  private RemoteCallback<Request> requestCallback;
 
   /**
    * Returns the remote callback used by this proxy.
@@ -96,7 +92,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   /**
    * Sets a list of HTTP status codes that will be used to determine whether a request was successful or not.
    * 
-   * @param codes
+   * @param successCodes
    *          list of HTTP status codes
    */
   public void setSuccessCodes(List<Integer> successCodes) {
@@ -112,7 +108,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
       // Allow overriding of request body in client-side interceptors
       String requestBody = 
               (requestBuilder.getRequestData() != null) ? requestBuilder.getRequestData() : body;
-      requestBuilder.sendRequest(requestBody, new RequestCallback() {
+      Request request = requestBuilder.sendRequest(requestBody, new RequestCallback() {
         @Override
         public void onError(Request request, Throwable throwable) {
           handleError(throwable, request, null);
@@ -147,13 +143,16 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
           }
         }
       });
+      if (requestCallback != null) {
+        requestCallback.callback(request);
+      }
     }
     catch (RequestException throwable) {
       handleError(throwable, null, null);
     }
-  } 
+  }
 
-  /**
+   /**
    * Uses the configured {@link ClientExceptionMapper} to unmarshal the {@link Response} into
    * a {@link Throwable}.
    * @param response
@@ -188,6 +187,10 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   @Override
   public void setBatch(@SuppressWarnings("rawtypes") RpcBatch batch) {
     throw new UnsupportedOperationException("Batching of remote calls is not supported in errai jax-rs!");
+  }
+
+  public void setRequestCallback(RemoteCallback<Request> requestCallback) {
+    this.requestCallback = requestCallback;
   }
 
   /**
