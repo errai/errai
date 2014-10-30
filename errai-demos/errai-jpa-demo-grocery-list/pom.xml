@@ -778,13 +778,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>cordova-maven-plugin</artifactId>
-        <version>${project.version}</version>
-      </plugin>
+      </plugin>      
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
