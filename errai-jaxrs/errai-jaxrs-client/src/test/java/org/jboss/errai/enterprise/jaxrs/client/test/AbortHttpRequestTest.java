@@ -19,7 +19,7 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 import org.jboss.errai.enterprise.client.jaxrs.api.RequestCallback;
-import org.jboss.errai.enterprise.client.jaxrs.api.RequestCallbackImpl;
+import org.jboss.errai.enterprise.client.jaxrs.api.RequestHolder;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
@@ -62,7 +62,7 @@ public class AbortHttpRequestTest extends AbstractErraiJaxrsTest {
   }
 
   public void testRequestCallbackImpl() {
-    RequestCallbackImpl requestCallback = new RequestCallbackImpl();
+    RequestHolder requestHolder = new RequestHolder();
     call(JaxrsResponseObjectTestService.class,
         new ResponseCallback() {
           @Override
@@ -76,8 +76,8 @@ public class AbortHttpRequestTest extends AbstractErraiJaxrsTest {
             fail("ErrorCallback should not be invoked");
             return false;
           }
-        }, requestCallback).get();
-    assertTrue(requestCallback.isAlive());
-    requestCallback.getRequest().cancel();
+        }, requestHolder).get();
+    assertTrue(requestHolder.isAlive());
+    requestHolder.getRequest().cancel();
   }
 }

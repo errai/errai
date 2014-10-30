@@ -21,7 +21,7 @@ import com.google.gwt.http.client.Request;
 /**
  * Default implementation of {@link RequestCallback} that allows developer to abort {@link Request}.
  */
-public class RequestCallbackImpl implements RequestCallback {
+public class RequestHolder implements RequestCallback {
 
   private Request request;
 
