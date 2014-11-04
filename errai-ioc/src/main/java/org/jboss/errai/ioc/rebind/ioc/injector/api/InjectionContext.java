@@ -543,7 +543,8 @@ public class InjectionContext {
           // type is a meta-annotation. so we need to map all annotations with this
           // meta-annotation to the decorator extension.
 
-          for (final MetaClass annotationClazz : ClassScanner.getTypesAnnotatedWith(annotation)) {
+          for (final MetaClass annotationClazz : ClassScanner.getTypesAnnotatedWith(annotation,
+                  processingContext.getGeneratorContext())) {
             if (Annotation.class.isAssignableFrom(annotationClazz.asClass())) {
               final Class<? extends Annotation> javaAnnoCls = annotationClazz.asClass().asSubclass(Annotation.class);
               decorators.get(javaAnnoCls).add(iocExtension);

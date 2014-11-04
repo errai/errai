@@ -108,7 +108,7 @@ public final class ClassScanner {
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
           final Set<String> packages, final String excludeRegEx, final GeneratorContext genCtx, boolean reflections) {
 
-    final Collection<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
+    final Collection<MetaClass> result = new HashSet<MetaClass>();
 
     if (genCtx != null) {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
