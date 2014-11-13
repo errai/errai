@@ -16,21 +16,20 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.AnnotationParser;
-import org.jboss.errai.codegen.util.GenUtil;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -112,7 +111,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   @Override
   public synchronized Annotation[] getAnnotations() {
     if (annotationsCache == null) {
-      annotationsCache = AnnotationParser.parseAnnotations(constructor.getAnnotations());
+      annotationsCache = constructor.getAnnotations();
     }
     return annotationsCache;
   }

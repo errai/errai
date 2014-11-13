@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -50,7 +49,7 @@ public class JavaReflectionField extends MetaField {
     if (_annotationsCache != null) {
       return _annotationsCache;
     }
-    return _annotationsCache = AnnotationParser.parseAnnotations(field.getAnnotations());
+    return _annotationsCache = field.getAnnotations();
   }
 
   @SuppressWarnings("unchecked")
@@ -60,11 +59,6 @@ public class JavaReflectionField extends MetaField {
       if (a.annotationType().equals(annotation)) return (A) a;
     }
     return null;
-  }
-
-  @Override
-  public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
   }
 
   @Override

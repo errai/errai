@@ -42,7 +42,7 @@ public class GWTParameter extends MetaParameter {
 
   private GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaClassMember declaredBy) {
     this.parameter = parameter;
-    this.annotations = AnnotationParser.parseAnnotations(parameter.getAnnotations());
+    this.annotations = parameter.getAnnotations();
     this.declaredBy = declaredBy;
     this.oracle = oracle;
   }
@@ -69,11 +69,6 @@ public class GWTParameter extends MetaParameter {
       if (a.annotationType().equals(annotation)) return (A) a;
     }
     return null;
-  }
-
-  @Override
-  public final boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
   }
 
   @Override

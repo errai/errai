@@ -38,7 +38,7 @@ public class GWTConstructor extends MetaConstructor {
 
   public GWTConstructor(final TypeOracle oracle, final JConstructor c) {
     this.constructor = c;
-    this.annotations = AnnotationParser.parseAnnotations(c.getAnnotations());
+    this.annotations = c.getAnnotations();
 
     this.declaringClass = GWTClass.newInstance(oracle, c.getEnclosingType());
     this.oracle = oracle;

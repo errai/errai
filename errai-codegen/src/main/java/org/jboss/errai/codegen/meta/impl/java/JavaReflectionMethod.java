@@ -21,10 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -106,7 +104,7 @@ public class JavaReflectionMethod extends MetaMethod {
   public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache != null)
       return _annotationsCache;
-    return _annotationsCache = AnnotationParser.parseAnnotations(method.getAnnotations());
+    return _annotationsCache = method.getAnnotations();
   }
 
   @Override

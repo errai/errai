@@ -16,13 +16,12 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import org.jboss.errai.codegen.meta.AnnotationParser;
+import java.lang.annotation.Annotation;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
-
-import java.lang.annotation.Annotation;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -43,7 +42,7 @@ public class JavaReflectionParameter extends MetaParameter {
     this.name = "jp" + paramNameCounter.getAndIncrement();
     
     this.type = type;
-    this.annotations = AnnotationParser.parseAnnotations(annotations);
+    this.annotations = annotations;
     this.declaredBy = declaredBy;
   }
 
@@ -69,12 +68,6 @@ public class JavaReflectionParameter extends MetaParameter {
     }
     return null;
   }
-
-  @Override
-  public final boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
-  }
-
 
   @Override
   public MetaClassMember getDeclaringMember() {

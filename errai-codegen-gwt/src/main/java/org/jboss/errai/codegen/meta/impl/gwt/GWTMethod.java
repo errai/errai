@@ -39,7 +39,7 @@ public class GWTMethod extends MetaMethod {
 
   GWTMethod(final TypeOracle oracle, final JMethod method) {
     this.method = method;
-    this.annotations = AnnotationParser.parseAnnotations(method.getAnnotations());
+    this.annotations = method.getAnnotations();
     this.oracle = oracle;
   }
 

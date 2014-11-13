@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 
 import org.jboss.errai.codegen.util.GenUtil;
 
-public abstract class MetaField implements HasAnnotations, MetaClassMember {
+public abstract class MetaField extends AbstractHasAnnotations implements MetaClassMember {
 
   /**
    * Returns an actual MetaClass (a class, interface, primitive type, array, or
@@ -145,7 +145,7 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
    * Special-purpose implementation of MetaField that represents the
    * {@code length} property of an array.
    */
-  public static class ArrayLengthMetaField extends MetaField {
+  public static class ArrayLengthMetaField extends MetaField implements HasAnnotations {
 
     private MetaClass componentType;
 
