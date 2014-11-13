@@ -9,6 +9,7 @@
   <name>Errai::Forge Addon</name>
   <properties>
     <forge.api.version>2.5.0.Final</forge.api.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <url>https://github.com/errai/forge-errai</url>
@@ -171,6 +172,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
+        <version>2.6.1</version>
         <configuration>
           <filesets>
             <fileset>
