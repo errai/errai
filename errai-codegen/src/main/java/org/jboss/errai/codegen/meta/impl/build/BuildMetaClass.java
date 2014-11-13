@@ -33,7 +33,6 @@ import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
-import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -394,7 +393,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public Annotation[] getAnnotations() {
-    return AnnotationParser.parseAnnotations(annotations.toArray(new Annotation[annotations.size()]));
+    return annotations.toArray(new Annotation[annotations.size()]);
   }
 
   @Override

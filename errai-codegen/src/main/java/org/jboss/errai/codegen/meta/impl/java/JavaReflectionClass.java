@@ -37,7 +37,6 @@ import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -48,7 +47,7 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
-  private volatile Annotation[] _annotationsCache;
+  private Annotation[] _annotationsCache;
 
   protected JavaReflectionClass(final Class clazz, final boolean erased) {
     this(clazz, null, erased);
@@ -374,7 +373,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache == null) {
-      _annotationsCache = AnnotationParser.parseAnnotations(getEnclosedMetaObject().getAnnotations());
+      _annotationsCache = getEnclosedMetaObject().getAnnotations();
     }
     return _annotationsCache;
   }

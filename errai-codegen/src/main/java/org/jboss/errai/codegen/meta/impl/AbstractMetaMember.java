@@ -33,9 +33,4 @@ public abstract class AbstractMetaMember implements MetaClassMember {
     }
     return null;
   }
-
-  @Override
-  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
-  }
 }

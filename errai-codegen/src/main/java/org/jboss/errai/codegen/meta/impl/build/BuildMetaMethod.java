@@ -226,7 +226,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public Annotation[] getAnnotations() {
-    return AnnotationParser.parseAnnotations(annotations.toArray(new Annotation[annotations.size()]));
+    return annotations.toArray(new Annotation[annotations.size()]);
   }
 
   @Override

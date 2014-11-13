@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public abstract class MetaClass implements HasAnnotations, MetaType, MetaGenericDeclaration {
+public abstract class MetaClass extends AbstractHasAnnotations implements MetaType, MetaGenericDeclaration {
   @Override
   public abstract String getName();
 

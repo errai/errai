@@ -344,11 +344,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return null;
   }
 
-  @Override
-  public final boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
-  }
-
   // docs inherited from superclass
   @Override
   public final List<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
