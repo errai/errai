@@ -24,7 +24,9 @@ public class ErraiSecurityDependencyFacet extends AbstractDependencyFacet {
   public ErraiSecurityDependencyFacet() {
     setCoreDependencies(
             DependencyBuilder.create(DependencyArtifact.ErraiSecurityServer.toString()),
-            DependencyBuilder.create(DependencyArtifact.ErraiSecurityClient.toString()));
+            DependencyBuilder.create(DependencyArtifact.ErraiSecurityClient.toString()),
+            DependencyBuilder.create(DependencyArtifact.ErraiSecurityPicketlink.toString())
+    );
   }
 
 }

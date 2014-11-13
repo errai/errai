@@ -110,6 +110,7 @@ public final class ArtifactVault {
     ErraiCordova("errai-cordova"),
     ErraiSecurityClient("errai-security-client"),
     ErraiSecurityServer("errai-security-server"),
+    ErraiSecurityPicketlink("errai-security-picketlink"),
     CordovaPlugin("cordova-maven-plugin"),
     ErraiHtml5("errai-html5");
 

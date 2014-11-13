@@ -48,18 +48,13 @@ public class SecurityBeansXmlFacet extends AbstractXmlResourceFacet {
     
     final Element interceptors = elemFactory.createElement("interceptors");
 
-    final Element userInterceptor = elemFactory.createElement("class");
-    userInterceptor.setTextContent("org.jboss.errai.security.server.SecurityUserInterceptor");
     final Element roleInterceptor = elemFactory.createElement("class");
     roleInterceptor.setTextContent("org.jboss.errai.security.server.ServerSecurityRoleInterceptor");
 
     retVal.put(xPath.compile("/beans"), Arrays.<Node>asList(
         interceptors
     ));
-    retVal.put(xPath.compile("/beans/interceptors"), Arrays.<Node>asList(
-        userInterceptor,
-        roleInterceptor
-    ));
+    retVal.put(xPath.compile("/beans/interceptors"), Arrays.<Node>asList(roleInterceptor));
 
     return retVal;
   }
