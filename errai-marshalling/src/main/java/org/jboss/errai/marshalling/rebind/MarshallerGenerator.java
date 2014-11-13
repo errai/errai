@@ -77,8 +77,8 @@ public class MarshallerGenerator extends IncrementalGenerator {
     final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
     
     if (cachedType != null && cachedType.hashContent() == type.hashContent() 
-            && context.isGeneratorResultCachingEnabled()) {
-      log.debug("Reusing cached marshaller for "  + fullyQualifiedTypeName);
+            && context.isGeneratorResultCachingEnabled() && !type.isArray()) {
+      log.debug("Reusing cached marshaller for " + fullyQualifiedTypeName);
       return new RebindResult(RebindMode.USE_ALL_CACHED, marshallerTypeName);
     }
     else {
