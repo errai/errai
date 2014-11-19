@@ -212,6 +212,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           .initializeWith(
               Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateElement", Stmt
                   .loadVariable(templateVarName).invoke("getContents").invoke("getText"),
+                  getTemplateFileName(ctx.getEnclosingType()),
                   getTemplateFragmentName(declaringClass))));
 
       final Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
@@ -232,7 +233,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       final String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
       initStmts.add(Stmt.declareVariable(dataFieldElementsVarName,
           new TypeLiteral<Map<String, Element>>() {},
-          Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement))
+          Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", 
+                  rootTemplateElement))
       );
 
       /*

@@ -196,6 +196,26 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     BindingItemWidget itemWidget1 = listWidget.getWidget(1);
     assertEquals("Second item widget was not rendered correctly!", "1", itemWidget1.getTextBox().getText());
   }
+  
+  @Test
+  public void testListBindingAndAddManyItems() {
+    List<TestModel> modelList = new ArrayList<TestModel>();
+    modelList.add(new TestModel(1, "0"));
+
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    BindingListWidget listWidget = app.getListWidget();
+    listWidget.setItems(modelList);
+    assertEquals("Expected one widgets", 1, listWidget.getWidgetCount());
+
+    List<TestModel> addModelList = new ArrayList<TestModel>();
+    for (int i = 1; i < 100; i++) {
+      addModelList.add(new TestModel(i, ""+i));
+    }
+
+    // Add widgets to the UI by adding model instances to the model list
+    listWidget.getItems().addAll(addModelList);
+    assertEquals("Expected exactly 100 widgets", 100, listWidget.getWidgetCount());
+  }
 
   @Test
   public void testListBindingAndAddItemByIndex() {
@@ -230,7 +250,7 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     listWidget.getValue().add(1, new TestModel(1, "1"));
     assertItemsRendered(listWidget);
   }
-
+  
   @Test
   public void testListBindingAndAddItemByIndexAtHead() {
     List<TestModel> modelList = new ArrayList<TestModel>();
