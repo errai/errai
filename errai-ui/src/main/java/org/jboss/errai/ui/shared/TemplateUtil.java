@@ -16,6 +16,7 @@
 package org.jboss.errai.ui.shared;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -43,11 +44,12 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public final class TemplateUtil {
   private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
+  
   private static TranslationService translationService = null;
-
   public static TranslationService getTranslationService() {
     if (translationService == null) {
       translationService = GWT.create(TranslationService.class);
@@ -124,8 +126,8 @@ public final class TemplateUtil {
       }
     } catch (Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName + "]" +
-      		" - Did you already @Insert or @Replace a parent Element?" +
-      		" Is an element referenced by more than one @DataField?", e);
+            " - Did you already @Insert or @Replace a parent Element?" +
+            " Is an element referenced by more than one @DataField?", e);
     }
   }
 
@@ -142,10 +144,17 @@ public final class TemplateUtil {
     component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
   }-*/;
 
-  public static Element getRootTemplateElement(String templateContents, final String rootField) {
+  private static long rootTotal;
+  
+  private static Map<String, Element> templateRoots = new HashMap<String, Element>();
+  public static Element getRootTemplateElement(String templateContents, final String templateFileName, final String rootField) {
+    String key = templateFileName + "#" + rootField;
+    if (templateRoots.containsKey(key)) {
+      return cloneWithEmptyParent(templateRoots.get(key));
+    }
+    
     Element parserDiv = DOM.createDiv();
     parserDiv.setInnerHTML(templateContents);
-
     if (rootField != null && !rootField.trim().isEmpty()) {
       logger.fine("Locating root element: " + rootField);
       VisitContext<TaggedElement> context = Visit.depthFirst(parserDiv, new Visitor<TaggedElement>() {
@@ -180,7 +189,8 @@ public final class TemplateUtil {
       throw new IllegalStateException("Could not find template root for this template: " + templateContents);
     }
     else {
-      return templateRoot;
+      templateRoots.put(key, templateRoot);
+      return cloneWithEmptyParent(templateRoot);
     }
   }
 
@@ -267,6 +277,7 @@ public final class TemplateUtil {
     final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
 
     logger.fine("Searching template for fields.");
+    
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
@@ -342,5 +353,12 @@ public final class TemplateUtil {
   private static native JsArray<Node> getAttributes(Element elem) /*-{
     return elem.attributes;
   }-*/;
+  
+  private static Element cloneWithEmptyParent(Element element) { 
+    Element parent = DOM.createDiv();
+    Element clone = DOM.clone(element, true);
+    parent.appendChild(clone);
+    return clone;
+  }
 
 }

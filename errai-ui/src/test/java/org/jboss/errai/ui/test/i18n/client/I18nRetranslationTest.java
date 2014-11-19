@@ -161,11 +161,11 @@ public class I18nRetranslationTest extends AbstractErraiCDITest {
 
     // Check values through DOM
     Element element = parent.getElement();
-    assertEquals("Parent template leaf element was not properly translated", "bonjour", element.getFirstChildElement()
-            .getInnerText());
-    assertEquals("Non-keyed child template was not translated", "bonjour", element.getFirstChildElement()
-            .getNextSiblingElement().getInnerText());
-    assertEquals("Keyed child template was not translated", "bonjour", element.getFirstChildElement()
+    Element firstChild = element.getFirstChildElement();
+    String foo = firstChild.getInnerText();
+    assertEquals("Parent template leaf element was not properly translated", "bonjour", firstChild.getInnerText());
+    assertEquals("Non-keyed child template was not translated", "bonjour", firstChild.getNextSiblingElement().getInnerText());
+    assertEquals("Keyed child template was not translated", "bonjour", firstChild
             .getNextSiblingElement().getNextSiblingElement().getInnerText());
 
     // Check values through widgets
