@@ -16,10 +16,12 @@
  */
 package org.jboss.errai.forge.facet.resource;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
+import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
+import org.jboss.errai.forge.xml.ElementFactory;
+import org.jboss.errai.forge.xml.XmlParser;
+import org.jboss.errai.forge.xml.XmlParserFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,13 +31,10 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
-import org.jboss.errai.forge.xml.ElementFactory;
-import org.jboss.errai.forge.xml.XmlParser;
-import org.jboss.errai.forge.xml.XmlParserFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * A base class for modifying XML-based configuration files. Concrete subclasses

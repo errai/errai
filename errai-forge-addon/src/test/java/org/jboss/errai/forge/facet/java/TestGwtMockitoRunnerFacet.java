@@ -1,6 +1,9 @@
 package org.jboss.errai.forge.facet.java;
 
-import static org.junit.Assert.*;
+import org.jboss.errai.forge.test.base.ForgeTest;
+import org.jboss.forge.addon.projects.Project;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,10 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 
-import org.jboss.errai.forge.test.base.ForgeTest;
-import org.jboss.forge.addon.projects.Project;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class TestGwtMockitoRunnerFacet extends ForgeTest {
 

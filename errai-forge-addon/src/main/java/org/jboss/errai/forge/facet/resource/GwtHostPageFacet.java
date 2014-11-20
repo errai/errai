@@ -16,11 +16,11 @@
  */
 package org.jboss.errai.forge.facet.resource;
 
-import java.io.File;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
+
+import java.io.File;
 
 /**
  * This facet adds a GWT host page if none already exists.

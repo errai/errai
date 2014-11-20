@@ -16,12 +16,12 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
+import org.jboss.errai.forge.util.VersionFacet;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
+
 import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.WeldSeCore;
 import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.WeldServletCore;
 import static org.jboss.forge.addon.dependencies.builder.DependencyBuilder.create;
-
-import org.jboss.errai.forge.util.VersionFacet;
-import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
 @FacetConstraint(VersionFacet.class)
 public class WeldIntegrationTestDependencyFacet extends AbstractDependencyFacet {

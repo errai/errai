@@ -1,9 +1,8 @@
 package org.jboss.errai.forge.config.converter;
 
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.inject.Singleton;
 
 @Singleton
 public class ConfigTypeConverterFactory {

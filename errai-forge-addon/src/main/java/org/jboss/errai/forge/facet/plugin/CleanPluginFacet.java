@@ -16,10 +16,6 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
@@ -30,6 +26,10 @@ import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
 import org.jboss.forge.addon.maven.plugins.Execution;
 import org.jboss.forge.addon.maven.plugins.PluginElement;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This facet configures the maven-clean-plugin in the build section of the

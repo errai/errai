@@ -16,16 +16,7 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.maven.model.BuildBase;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginExecution;
-import org.apache.maven.model.Profile;
+import org.apache.maven.model.*;
 import org.jboss.errai.forge.constant.ArtifactVault;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
@@ -38,6 +29,10 @@ import org.jboss.forge.addon.maven.plugins.Configuration;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.MavenPluginAdapter;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A base class for facets that install Maven plugins within the given profile

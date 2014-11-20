@@ -1,11 +1,5 @@
 package org.jboss.errai.forge.ui.command;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
-
-import java.io.File;
-
-import javax.inject.Inject;
-
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
@@ -20,6 +14,11 @@ import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.metadata.UICommandMetadata;
 import org.jboss.forge.addon.ui.util.Categories;
 import org.jboss.forge.addon.ui.util.Metadata;
+
+import javax.inject.Inject;
+import java.io.File;
+
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.GwtMockito;
 
 public abstract class CreateTestCommand extends AbstractProjectCommand {
 
@@ -95,4 +94,18 @@ public abstract class CreateTestCommand extends AbstractProjectCommand {
     }
   }
 
+  protected void addTestJarDependency(final Project project, final DependencyArtifact artifact) {
+    final DependencyBuilder depBuilder = DependencyBuilder.create(artifact.toString());
+    final MavenDependencyFacet dependencyFacet = project.getFacet(MavenDependencyFacet.class);
+    final VersionFacet versionFacet = project.getFacet(VersionFacet.class);
+    depBuilder.setPackaging("test-jar");
+    depBuilder.setScopeType("test");
+
+    if ((!versionFacet.isManaged(depBuilder))) {
+      depBuilder.setVersion(versionFacet.resolveVersion(artifact));
+      System.out.println("Version set to " + depBuilder.toString());
+    }
+
+    dependencyFacet.addDirectDependency(depBuilder);
+  }
 }

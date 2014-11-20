@@ -16,12 +16,6 @@
  */
 package org.jboss.errai.forge.ui.setup;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
@@ -42,6 +36,11 @@ import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Metadata;
 import org.jboss.forge.addon.ui.wizard.UIWizardStep;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class VersionSelect extends AbstractUICommand implements UIWizardStep {
 

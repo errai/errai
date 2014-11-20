@@ -16,25 +16,20 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import javax.enterprise.context.Dependent;
-
 import org.apache.maven.model.Build;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
-import org.jboss.forge.addon.maven.plugins.ConfigurationBuilder;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
-import org.jboss.forge.addon.maven.plugins.Execution;
-import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
+import org.jboss.forge.addon.maven.plugins.*;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.junit.Test;
+
+import javax.enterprise.context.Dependent;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 public class AbstractPluginFacetTest extends BasePluginFacetTest {
 

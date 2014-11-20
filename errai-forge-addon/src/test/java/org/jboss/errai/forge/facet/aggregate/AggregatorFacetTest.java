@@ -1,14 +1,5 @@
 package org.jboss.errai.forge.facet.aggregate;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
-
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -26,6 +17,10 @@ import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
 import org.junit.Test;
+
+import java.util.*;
+
+import static org.junit.Assert.*;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class AggregatorFacetTest extends ForgeTest {

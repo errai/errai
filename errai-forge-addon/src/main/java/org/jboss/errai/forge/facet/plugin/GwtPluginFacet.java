@@ -16,8 +16,6 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
@@ -28,6 +26,9 @@ import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
 import org.jboss.forge.addon.maven.plugins.Execution;
 import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This facet configures the gwt-maven-plugin in the build section of the pom

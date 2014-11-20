@@ -16,16 +16,16 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.WildflyPlugin;
-
-import java.util.ArrayList;
-
 import org.apache.maven.model.PluginExecution;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
+
+import java.util.ArrayList;
+
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.WildflyPlugin;
 
 /**
  * This facet configures the jboss-as-maven-plugin in the

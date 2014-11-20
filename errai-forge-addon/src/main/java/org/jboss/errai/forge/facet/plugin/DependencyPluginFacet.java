@@ -16,20 +16,17 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.WildflyDist;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
-import org.jboss.forge.addon.maven.plugins.ConfigurationBuilder;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
-import org.jboss.forge.addon.maven.plugins.Execution;
-import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
+import org.jboss.forge.addon.maven.plugins.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.WildflyDist;
 
 /**
  * This facet configures the maven-dependency-plugin in the build section of the pom file.

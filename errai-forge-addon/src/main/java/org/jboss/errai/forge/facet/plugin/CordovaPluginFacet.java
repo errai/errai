@@ -16,9 +16,6 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.apache.maven.model.PluginExecution;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
@@ -26,6 +23,9 @@ import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Configures the cordova plugin for building native mobile apps.

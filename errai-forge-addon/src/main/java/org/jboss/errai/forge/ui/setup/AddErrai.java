@@ -16,11 +16,6 @@
  */
 package org.jboss.errai.forge.ui.setup;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.util.Condition;
 import org.jboss.forge.addon.facets.FacetFactory;
@@ -40,6 +35,10 @@ import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Categories;
 import org.jboss.forge.addon.ui.util.Metadata;
 import org.jboss.forge.addon.ui.wizard.UIWizard;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class AddErrai extends AbstractProjectCommand implements UIWizard {
 

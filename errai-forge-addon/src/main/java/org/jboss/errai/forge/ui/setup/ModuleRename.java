@@ -16,8 +16,6 @@
  */
 package org.jboss.errai.forge.ui.setup;
 
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.aggregate.CoreFacet;
@@ -37,6 +35,8 @@ import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Metadata;
 import org.jboss.forge.addon.ui.wizard.UIWizardStep;
+
+import javax.inject.Inject;
 
 public class ModuleRename extends AbstractUICommand implements UIWizardStep {
 

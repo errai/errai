@@ -14,21 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.forge.facet.module;
+package org.jboss.errai.forge.facet.dependency;
 
-import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.constant.ModuleVault.Module;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
-import java.util.Arrays;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
+import static org.jboss.forge.addon.dependencies.builder.DependencyBuilder.create;
 
-@FacetConstraint({ ProjectConfig.class })
-public class ErraiCdiModuleFacet extends AbstractModuleFacet {
-  
-  public ErraiCdiModuleFacet() {
-    modules = Arrays.asList(new Module[] {
-            Module.ErraiCdi
-    });
+/**
+ * @author Divya Dadlani <ddadlani@redhat.com>
+ *
+ * Contains the Jetty dependencies for the Maven integration-test profile
+ */
+@FacetConstraint(VersionFacet.class)
+public class JettyIntegrationTestDependencyFacet extends AbstractDependencyFacet {
+
+  public JettyIntegrationTestDependencyFacet() {
+    setCoreDependencies();
+    setProfileDependencies("integration-test", create(Jetty.toString()), create(JettyPlus.toString()), create(JettyNaming.toString()));
   }
-
 }

@@ -2,8 +2,8 @@ package $$_testClassPackage_$$;
 
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 public class $$_testClassSimpleName_$$ extends AbstractErraiCDITest {
 

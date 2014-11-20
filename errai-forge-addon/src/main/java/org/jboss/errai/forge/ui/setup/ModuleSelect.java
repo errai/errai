@@ -16,14 +16,6 @@
  */
 package org.jboss.errai.forge.ui.setup;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.jboss.errai.forge.config.ProjectConfig;
@@ -44,6 +36,13 @@ import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Metadata;
 import org.jboss.forge.addon.ui.wizard.UIWizardStep;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ModuleSelect extends AbstractUICommand implements UIWizardStep {
 

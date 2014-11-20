@@ -16,11 +16,6 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
-import static org.jboss.errai.forge.constant.DefaultVault.DefaultValue.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import org.apache.maven.model.PluginExecution;
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
@@ -33,6 +28,12 @@ import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
 import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
 import org.jboss.forge.addon.projects.Project;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.War;
+import static org.jboss.errai.forge.constant.DefaultVault.DefaultValue.WarSourceDirectory;
 
 /**
  * This facet configures the maven-war-plugin in the

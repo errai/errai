@@ -16,15 +16,10 @@
  */
 package org.jboss.errai.forge.constant;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.forge.addon.dependencies.Dependency;
+
+import java.util.*;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -49,15 +44,18 @@ public final class ArtifactVault {
     GwtSlf4j("gwt-slf4j", "de.benediktmeurer.gwt-slf4j"),
     JavaxInject("javax.inject", "javax.inject"),
     CdiApi("cdi-api", "javax.enterprise"),
+    Jetty("jetty", "org.mortbay.jetty"),
+    JettyPlus("jetty-plus", "org.mortbay.jetty"),
+    JettyNaming("jetty-naming", "org.mortbay.jetty"),
     JsrApi("jsr250-api", "javax.annotation"),
     JavaxValidation("validation-api", "javax.validation"),
-    JavaxValidationSources("validation-api", "javax.validation", "sources"),
+    JavaxValidationSources("validation-api", "javax.validation", "sources", null),
     HibernateAnnotations("hibernate-commons-annotations", "org.hibernate.common"),
     HibernateJpa("hibernate-jpa-2.0-api", "org.hibernate.javax.persistence"),
     HibernateCore("hibernate-core", "org.hibernate"),
     HibernateEntityManager("hibernate-entitymanager", "org.hibernate"),
     HibernateValidator("hibernate-validator", "org.hibernate"),
-    HibernateValidatorSources("hibernate-validator", "org.hibernate", "sources"),
+    HibernateValidatorSources("hibernate-validator", "org.hibernate", "sources", null),
     JbossLogging("jboss-logging", "org.jboss.logging"),
     JaxrsApi("jaxrs-api", "org.jboss.resteasy"),
     JbossInterceptors("jboss-interceptors-api_1.1_spec", "org.jboss.spec.javax.interceptor"),
@@ -69,9 +67,8 @@ public final class ArtifactVault {
     WeldApi("weld-api", "org.jboss.weld"),
     WeldSpi("weld-spi", "org.jboss.weld"),
     XmlApis("xml-apis", "xml-apis"),
-    JettyNaming("jetty-naming", "org.mortbay.jetty"),
     RestEasyCdi("resteasy-cdi", "org.jboss.resteasy"),
-    
+
     // tests
     GwtMockito("gwtmockito", "com.google.gwt.gwtmockito"),
 
@@ -96,6 +93,7 @@ public final class ArtifactVault {
     ErraiTools("errai-tools"),
     ErraiBus("errai-bus"),
     ErraiCdiClient("errai-cdi-client"),
+    ErraiCdiClientTest("errai-cdi-client", "org.jboss.errai", null, "test-jar"),
     ErraiWeldIntegration("errai-weld-integration"),
     ErraiCdiJetty("errai-cdi-jetty"),
     ErraiCodegenGwt("errai-codegen-gwt"),
@@ -118,15 +116,17 @@ public final class ArtifactVault {
     private final String artifactId;
     private final String groupId;
     private final String classifier;
+    private final String type;
 
-    private DependencyArtifact(final String artifactId, final String groupId, final String classifier) {
+    private DependencyArtifact(final String artifactId, final String groupId, final String classifier, final String type) {
       this.artifactId = artifactId;
       this.groupId = groupId;
       this.classifier = classifier;
+      this.type = type;
     }
 
     private DependencyArtifact(final String artifactId, final String groupId) {
-      this(artifactId, groupId, null);
+      this(artifactId, groupId, null, null);
     }
 
     private DependencyArtifact(final String id) {
@@ -152,7 +152,18 @@ public final class ArtifactVault {
      */
     @Override
     public String toString() {
-      return String.format("%s:%s", groupId, artifactId);
+            return String.format("%s:%s", groupId, artifactId);
+//      StringBuilder artifactBuilder = new StringBuilder();
+//
+//      String plainArtifactString = new String(groupId + ":" + artifactId);
+//      artifactBuilder.append(plainArtifactString);
+//
+//      if (type != null) {
+//        artifactBuilder.append(":::");
+//        artifactBuilder.append(type);
+//      }
+//
+//      return artifactBuilder.toString();
     }
 
     private static Map<String, DependencyArtifact> artifacts = new HashMap<String, ArtifactVault.DependencyArtifact>();
@@ -173,6 +184,10 @@ public final class ArtifactVault {
 
     public String getClassifier() {
       return classifier;
+    }
+
+    public String getType() {
+      return type;
     }
   }
 

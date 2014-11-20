@@ -16,20 +16,6 @@
  */
 package org.jboss.errai.forge.facet.module;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.enterprise.context.Dependent;
-
 import org.apache.maven.model.Model;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
@@ -40,6 +26,17 @@ import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
 import org.junit.Test;
+
+import javax.enterprise.context.Dependent;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.*;
 
 public class ModuleFacetTest extends ForgeTest {
 

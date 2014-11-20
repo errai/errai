@@ -16,14 +16,6 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -38,6 +30,9 @@ import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * A base class for all facets that install Maven dependencies. Concrete

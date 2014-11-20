@@ -1,11 +1,5 @@
 package org.jboss.errai.forge.facet.ui.command.res;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import javax.enterprise.inject.Alternative;
-
 import org.jboss.forge.addon.convert.Converter;
 import org.jboss.forge.addon.facets.FacetNotFoundException;
 import org.jboss.forge.addon.ui.context.UIValidationContext;
@@ -15,6 +9,11 @@ import org.jboss.forge.addon.ui.input.UIInput;
 import org.jboss.forge.addon.ui.input.ValueChangeListener;
 import org.jboss.forge.addon.ui.validate.UIValidator;
 import org.jboss.forge.furnace.spi.ListenerRegistration;
+
+import javax.enterprise.inject.Alternative;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 @Alternative
 public class UIInputMock<T> implements UIInput<T> {
@@ -102,6 +101,14 @@ public class UIInputMock<T> implements UIInput<T> {
   @Override
   public UIInput<T> setDescription(String description) {
     this.description = description;
+    return this;
+  }
+
+  @Override
+  public UIInput<T> setDescription(Callable<String> description){
+    try {
+      this.description = description.call();
+    } catch (Exception e) {}
     return this;
   }
 

@@ -1,5 +1,6 @@
 *.iml
-/.idea/*
+.idea/*
+*/.idea/*
 .classpath
 .project
 .settings

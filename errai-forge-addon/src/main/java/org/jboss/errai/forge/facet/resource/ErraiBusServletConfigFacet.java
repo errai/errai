@@ -16,22 +16,21 @@
  */
 package org.jboss.errai.forge.facet.resource;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
 import org.jboss.errai.forge.xml.ElementFactory;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This facet configures the ErraiServlet used by the errai-bus project.

@@ -1,20 +1,16 @@
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.jboss.errai.forge.constant.DefaultVault.DefaultValue.*;
-import static org.junit.Assert.*;
-
 import org.jboss.errai.forge.facet.aggregate.CoreFacet;
 import org.jboss.errai.forge.test.base.ForgeTest;
 import org.jboss.forge.addon.dependencies.builder.CoordinateBuilder;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
-import org.jboss.forge.addon.maven.plugins.MavenPlugin;
-import org.jboss.forge.addon.maven.plugins.MavenPluginBuilder;
-import org.jboss.forge.addon.maven.plugins.PluginElement;
+import org.jboss.forge.addon.maven.plugins.*;
 import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.jboss.errai.forge.constant.DefaultVault.DefaultValue.WarSourceDirectory;
+import static org.junit.Assert.*;
 
 public class WarSourceDirectoryTest extends ForgeTest {
 

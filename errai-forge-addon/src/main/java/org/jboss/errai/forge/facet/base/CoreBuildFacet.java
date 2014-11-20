@@ -16,11 +16,6 @@
  */
 package org.jboss.errai.forge.facet.base;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Resource;
@@ -32,6 +27,11 @@ import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * This facet configures the source folders, build output directory, and pom

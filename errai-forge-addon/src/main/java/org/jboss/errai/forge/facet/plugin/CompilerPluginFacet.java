@@ -16,9 +16,6 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
@@ -26,6 +23,9 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
 import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
 import org.jboss.forge.addon.maven.plugins.Execution;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This facet configures the maven-compiler-plugin in the build section of the pom file.

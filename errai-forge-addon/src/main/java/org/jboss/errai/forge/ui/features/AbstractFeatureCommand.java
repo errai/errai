@@ -16,11 +16,6 @@
  */
 package org.jboss.errai.forge.ui.features;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.facet.aggregate.AggregatorFacetReflections;
 import org.jboss.errai.forge.facet.aggregate.AggregatorFacetReflections.Feature;
 import org.jboss.forge.addon.convert.Converter;
@@ -32,6 +27,10 @@ import org.jboss.forge.addon.ui.context.UIExecutionContext;
 import org.jboss.forge.addon.ui.input.UISelectMany;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractFeatureCommand extends AbstractProjectCommand {
 

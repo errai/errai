@@ -16,18 +16,6 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.enterprise.context.Dependent;
-
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -41,6 +29,11 @@ import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
 import org.junit.Test;
+
+import javax.enterprise.context.Dependent;
+import java.util.*;
+
+import static org.junit.Assert.*;
 
 public class AbstractDependencyFacetTest extends ForgeTest {
 

@@ -16,23 +16,18 @@
  */
 package org.jboss.errai.forge.facet.aggregate;
 
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.base.CoreBuildFacet;
 import org.jboss.errai.forge.facet.dependency.ErraiBuildDependencyFacet;
 import org.jboss.errai.forge.facet.module.ModuleCoreFacet;
-import org.jboss.errai.forge.facet.plugin.CleanPluginFacet;
-import org.jboss.errai.forge.facet.plugin.CompilerPluginFacet;
-import org.jboss.errai.forge.facet.plugin.DependencyPluginFacet;
-import org.jboss.errai.forge.facet.plugin.GwtPluginFacet;
-import org.jboss.errai.forge.facet.plugin.WildflyPluginFacet;
-import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
+import org.jboss.errai.forge.facet.plugin.*;
 import org.jboss.errai.forge.facet.resource.ErraiAppPropertiesFacet;
 import org.jboss.forge.addon.facets.FacetFactory;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.ProjectFacet;
+
+import javax.inject.Inject;
 
 /**
  * Aggregates core facets required by all other facet aggregators. Installing

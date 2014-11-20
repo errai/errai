@@ -16,21 +16,16 @@
  */
 package org.jboss.errai.forge.facet.resource;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
+import org.jboss.errai.forge.xml.ElementFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-
-import org.jboss.errai.forge.facet.plugin.WarPluginFacet;
-import org.jboss.errai.forge.xml.ElementFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import java.util.*;
 
 public class SecurityBeansXmlFacet extends AbstractXmlResourceFacet {
 

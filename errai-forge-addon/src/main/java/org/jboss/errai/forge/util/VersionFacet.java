@@ -16,10 +16,6 @@
  */
 package org.jboss.errai.forge.util;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.maven.project.artifact.PluginArtifact;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
@@ -33,6 +29,10 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides versions for Maven dependencies.

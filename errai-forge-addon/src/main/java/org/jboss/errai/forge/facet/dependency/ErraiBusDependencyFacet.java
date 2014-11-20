@@ -16,14 +16,14 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.ErraiBus;
+import org.jboss.errai.forge.util.VersionFacet;
+import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
 import java.util.Collection;
 import java.util.HashMap;
 
-import org.jboss.errai.forge.util.VersionFacet;
-import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
-import org.jboss.forge.addon.facets.constraints.FacetConstraint;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.ErraiBus;
 
 /**
  * This facet sets the Maven dependencies necessary for using the errai-bus project.

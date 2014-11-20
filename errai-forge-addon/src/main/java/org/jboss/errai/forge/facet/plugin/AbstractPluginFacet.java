@@ -16,8 +16,6 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import java.util.Collection;
-
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.jboss.errai.forge.constant.ArtifactVault;
@@ -27,15 +25,11 @@ import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
 import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.forge.addon.dependencies.Dependency;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
-import org.jboss.forge.addon.maven.plugins.Configuration;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder;
-import org.jboss.forge.addon.maven.plugins.Execution;
-import org.jboss.forge.addon.maven.plugins.MavenPlugin;
-import org.jboss.forge.addon.maven.plugins.MavenPluginBuilder;
-import org.jboss.forge.addon.maven.plugins.PluginElement;
+import org.jboss.forge.addon.maven.plugins.*;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
+
+import java.util.Collection;
 
 /**
  * This is a base class for facets that add Maven plugins to the build section

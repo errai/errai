@@ -16,12 +16,6 @@
  */
 package org.jboss.errai.forge.facet.ui.command;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.util.List;
-import java.util.Set;
-
 import org.jboss.errai.forge.facet.java.GwtMockitoRunnerFacet;
 import org.jboss.errai.forge.facet.ui.command.res.SimpleTestableClass;
 import org.jboss.errai.forge.facet.ui.command.res.UIExecutionContextMock;
@@ -37,6 +31,12 @@ import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIContextProvider;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.*;
 
 public class UnitTestCommandTest extends ForgeTest {
 
