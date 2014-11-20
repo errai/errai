@@ -16,8 +16,6 @@
  */
 package org.jboss.errai.forge.facet.base;
 
-import java.util.Collection;
-
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -32,6 +30,8 @@ import org.jboss.forge.addon.facets.AbstractFacet;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
+
+import java.util.Collection;
 
 /**
  * A base class for Errai-related facets providing some basic routines.

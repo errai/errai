@@ -1,16 +1,15 @@
 package org.jboss.errai.forge.facet.java;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.jboss.errai.forge.facet.resource.AbstractFileResourceFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.parser.java.facets.JavaSourceFacet;
 import org.jboss.forge.addon.parser.java.resources.JavaResource;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @FacetConstraint({ JavaSourceFacet.class })
 public class GwtMockitoRunnerFacet extends AbstractFileResourceFacet {
@@ -62,13 +61,7 @@ public class GwtMockitoRunnerFacet extends AbstractFileResourceFacet {
   }
 
   private JavaResource getGwtRunnerResource(final JavaSourceFacet sourceFacet) {
-    try {
       return sourceFacet.getTestJavaResource(GWT_MOCKITO_RUNNER_REL_PATH);
-    }
-    catch (final FileNotFoundException e) {
-      throw new IllegalStateException(String.format("%s is installed but the file %s does not exist.",
-              GwtMockitoRunnerFacet.class.getSimpleName(), GWT_MOCKITO_RUNNER_REL_PATH));
-    }
   }
   
   public boolean removeBlacklistedPackage(final String packageName) {

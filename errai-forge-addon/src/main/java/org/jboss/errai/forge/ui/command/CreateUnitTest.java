@@ -16,14 +16,6 @@
  */
 package org.jboss.errai.forge.ui.command;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.Callable;
-
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.facet.aggregate.CoreFacet;
 import org.jboss.errai.forge.facet.java.GwtMockitoRunnerFacet;
 import org.jboss.forge.addon.facets.FacetFactory;
@@ -35,6 +27,14 @@ import org.jboss.forge.addon.ui.context.UIExecutionContext;
 import org.jboss.forge.addon.ui.input.UIInput;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.Callable;
+
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.GwtMockito;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.JUnit;
 
 @FacetConstraint({ CoreFacet.class })
 public class CreateUnitTest extends CreateTestCommand {

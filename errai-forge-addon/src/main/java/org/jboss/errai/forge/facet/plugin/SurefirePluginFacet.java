@@ -16,15 +16,15 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
-import static org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder.*;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
+import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
+import org.jboss.forge.addon.maven.projects.MavenFacet;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.jboss.forge.addon.facets.constraints.FacetConstraint;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
-import org.jboss.forge.addon.maven.projects.MavenFacet;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.Surefire;
+import static org.jboss.forge.addon.maven.plugins.ConfigurationElementBuilder.create;
 
 @FacetConstraint({ MavenFacet.class })
 public class SurefirePluginFacet extends AbstractProfilePluginFacet {

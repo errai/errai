@@ -1,8 +1,6 @@
 package org.jboss.errai.forge.xml;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
+import org.xml.sax.SAXException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -10,8 +8,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
-
-import org.xml.sax.SAXException;
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
 
 @ApplicationScoped
 public class XmlParserFactory {

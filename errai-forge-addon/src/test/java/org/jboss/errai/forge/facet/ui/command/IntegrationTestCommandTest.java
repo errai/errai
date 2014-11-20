@@ -16,13 +16,6 @@
  */
 package org.jboss.errai.forge.facet.ui.command;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.Resource;
@@ -45,6 +38,13 @@ import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIContextProvider;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class IntegrationTestCommandTest extends ForgeTest {
   
@@ -111,16 +111,19 @@ public class IntegrationTestCommandTest extends ForgeTest {
     final DependencyBuilder junitDependency = DependencyBuilder.create("junit:junit");
     final DependencyBuilder erraiCdiDependency = DependencyBuilder.create("org.jboss.errai:errai-cdi-client");
     final DependencyBuilder gwtDevDependency = DependencyBuilder.create("com.google.gwt:gwt-dev");
+    final DependencyBuilder erraiCdiTestJarDependency = DependencyBuilder.create("org.jboss.errai:errai-cdi-client:::test-jar");
 
     assertFalse(depFacet.hasDirectDependency(junitDependency));
     assertFalse(depFacet.hasDirectDependency(erraiCdiDependency));
     assertFalse(depFacet.hasDirectDependency(gwtDevDependency));
-    
+    assertFalse(depFacet.hasDirectDependency(erraiCdiTestJarDependency));
+
     testableInstance.execute(context);
     
     assertTrue(depFacet.hasDirectDependency(junitDependency));
     assertTrue(depFacet.hasDirectDependency(erraiCdiDependency));
     assertTrue(depFacet.hasDirectDependency(gwtDevDependency));
+    assertTrue(depFacet.hasDirectDependency(erraiCdiTestJarDependency));
   }
   
   @Test
@@ -155,9 +158,12 @@ public class IntegrationTestCommandTest extends ForgeTest {
 
     final List<org.apache.maven.model.Dependency> dependencies = testProfile.getDependencies();
 
-    assertEquals(2, dependencies.size());
+    assertEquals(5, dependencies.size());
     hasDependency(dependencies, "org.jboss.weld.se:weld-se-core");
     hasDependency(dependencies, "org.jboss.weld.servlet:weld-servlet-core");
+    hasDependency(dependencies, "org.mortbay.jetty:jetty");
+    hasDependency(dependencies, "org.mortbay.jetty:jetty-plus");
+    hasDependency(dependencies, "org.mortbay.jetty:jetty-naming");
   }
 
   @Test

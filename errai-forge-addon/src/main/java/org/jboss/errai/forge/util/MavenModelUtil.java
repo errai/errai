@@ -1,8 +1,8 @@
 package org.jboss.errai.forge.util;
 
-import java.util.Collection;
-
 import org.apache.maven.model.Profile;
+
+import java.util.Collection;
 
 public class MavenModelUtil {
 

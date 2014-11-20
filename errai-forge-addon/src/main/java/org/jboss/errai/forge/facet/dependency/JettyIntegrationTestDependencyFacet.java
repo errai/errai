@@ -16,21 +16,22 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.ErraiCommon;
+import org.jboss.errai.forge.util.VersionFacet;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
-import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
+import static org.jboss.forge.addon.dependencies.builder.DependencyBuilder.create;
 
 /**
- * This facet sets the Maven dependencies needed to use the errai-common project.
- * 
- * @author Max Barkley <mbarkley@redhat.com>
+ * @author Divya Dadlani <ddadlani@redhat.com>
+ *
+ * Contains the Jetty dependencies for the Maven integration-test profile
  */
-public class ErraiCommonDepdencyFacet extends AbstractDependencyFacet {
+@FacetConstraint(VersionFacet.class)
+public class JettyIntegrationTestDependencyFacet extends AbstractDependencyFacet {
 
-  public ErraiCommonDepdencyFacet() {
-    setCoreDependencies(
-            DependencyBuilder.create(ErraiCommon.toString())
-    );
+  public JettyIntegrationTestDependencyFacet() {
+    setCoreDependencies();
+    setProfileDependencies("integration-test", create(Jetty.toString()), create(JettyPlus.toString()), create(JettyNaming.toString()));
   }
-  
 }

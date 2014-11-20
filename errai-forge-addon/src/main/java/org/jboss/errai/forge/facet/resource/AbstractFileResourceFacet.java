@@ -16,13 +16,9 @@
  */
 package org.jboss.errai.forge.facet.resource;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import org.jboss.errai.forge.facet.base.AbstractBaseFacet;
+
+import java.io.*;
 
 /**
  * Base class for facets that add required a resource file (such as a

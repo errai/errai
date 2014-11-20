@@ -1,15 +1,11 @@
 package org.jboss.errai.forge.facet.ui.command.res;
 
-import javax.enterprise.inject.Alternative;
-
-import org.jboss.forge.addon.projects.Project;
-import org.jboss.forge.addon.projects.ProjectFacet;
-import org.jboss.forge.addon.projects.ProjectFactory;
-import org.jboss.forge.addon.projects.ProjectListener;
-import org.jboss.forge.addon.projects.ProjectProvider;
+import org.jboss.forge.addon.projects.*;
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.furnace.spi.ListenerRegistration;
 import org.jboss.forge.furnace.util.Predicate;
+
+import javax.enterprise.inject.Alternative;
 
 /**
  * Returns {@link #project} for all methods that return a {@link Project}.

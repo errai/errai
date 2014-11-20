@@ -1,15 +1,14 @@
 package org.jboss.errai.forge.xml;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
 
 public interface XmlParser extends ElementFactory {
 

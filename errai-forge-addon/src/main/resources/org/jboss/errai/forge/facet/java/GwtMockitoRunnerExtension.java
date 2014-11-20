@@ -1,10 +1,9 @@
 package org.jboss.errai;
 
-import java.util.Collection;
-
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.junit.runners.model.InitializationError;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import java.util.Collection;
 
 /**
  * Test runner allowing GwtMockito tests to run in maven with GWTTestCase tests.

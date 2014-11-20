@@ -16,18 +16,6 @@
  */
 package org.jboss.errai.forge.ui.command;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -36,6 +24,7 @@ import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.facet.aggregate.CoreFacet;
 import org.jboss.errai.forge.facet.aggregate.ErraiCdiFacet;
+import org.jboss.errai.forge.facet.dependency.JettyIntegrationTestDependencyFacet;
 import org.jboss.errai.forge.facet.dependency.WeldIntegrationTestDependencyFacet;
 import org.jboss.errai.forge.facet.plugin.SurefirePluginFacet;
 import org.jboss.errai.forge.facet.resource.AbstractFileResourceFacet;
@@ -53,6 +42,17 @@ import org.jboss.forge.addon.ui.context.UIExecutionContext;
 import org.jboss.forge.addon.ui.input.UIInput;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
 
 @FacetConstraint({ CoreFacet.class, ErraiCdiFacet.class })
 public class CreateIntegrationTest extends CreateTestCommand {
@@ -128,6 +128,7 @@ public class CreateIntegrationTest extends CreateTestCommand {
     addTestScopedDependency(project, JUnit);
     addTestScopedDependency(project, ErraiCdiClient);
     addTestScopedDependency(project, GwtDev);
+    addTestJarDependency(project, ErraiCdiClient);
   }
   
   private void setupTestProfile(final Project project) {
@@ -142,6 +143,7 @@ public class CreateIntegrationTest extends CreateTestCommand {
 
   private void installIntegrationTestDependencies(final Project project) {
     installFacet(project, WeldIntegrationTestDependencyFacet.class);
+    installFacet(project,JettyIntegrationTestDependencyFacet.class);
   }
 
   private void installFacet(final Project project, final Class<? extends ProjectFacet> facetType) {

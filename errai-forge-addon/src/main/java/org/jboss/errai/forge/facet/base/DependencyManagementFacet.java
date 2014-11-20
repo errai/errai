@@ -21,12 +21,13 @@ import java.util.Collection;
 
 import org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
+import org.jboss.errai.forge.util.VersionFacet;
 import org.jboss.errai.forge.util.VersionOracle;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.facets.DependencyFacet;
 
-@FacetConstraint({ CoreBuildFacet.class })
+@FacetConstraint({ CoreBuildFacet.class, VersionFacet.class })
 public class DependencyManagementFacet extends AbstractBaseFacet {
 
   protected Collection<DependencyBuilder> dependencies = new ArrayList<DependencyBuilder>();

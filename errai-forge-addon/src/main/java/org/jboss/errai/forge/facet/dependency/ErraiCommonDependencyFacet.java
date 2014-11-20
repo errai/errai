@@ -14,21 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.forge.facet.module;
+package org.jboss.errai.forge.facet.dependency;
 
-import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.constant.ModuleVault.Module;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.ErraiCommon;
+
+import org.jboss.errai.forge.util.VersionFacet;
+import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
-import java.util.Arrays;
+/**
+ * This facet sets the Maven dependencies needed to use the errai-common project.
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+@FacetConstraint(VersionFacet.class)
+public class ErraiCommonDependencyFacet extends AbstractDependencyFacet {
 
-@FacetConstraint({ ProjectConfig.class })
-public class ErraiCdiModuleFacet extends AbstractModuleFacet {
-  
-  public ErraiCdiModuleFacet() {
-    modules = Arrays.asList(new Module[] {
-            Module.ErraiCdi
-    });
+  public ErraiCommonDependencyFacet() {
+    setCoreDependencies(
+            DependencyBuilder.create(ErraiCommon.toString())
+    );
   }
-
+  
 }

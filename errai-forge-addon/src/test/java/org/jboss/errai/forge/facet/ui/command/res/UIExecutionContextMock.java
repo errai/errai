@@ -1,12 +1,5 @@
 package org.jboss.errai.forge.facet.ui.command.res;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.inject.Alternative;
-
 import org.jboss.forge.addon.ui.UIProvider;
 import org.jboss.forge.addon.ui.command.CommandExecutionListener;
 import org.jboss.forge.addon.ui.context.UIContext;
@@ -15,6 +8,12 @@ import org.jboss.forge.addon.ui.context.UISelection;
 import org.jboss.forge.addon.ui.input.UIPrompt;
 import org.jboss.forge.addon.ui.progress.UIProgressMonitor;
 import org.jboss.forge.furnace.spi.ListenerRegistration;
+
+import javax.enterprise.inject.Alternative;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 @Alternative
 public class UIExecutionContextMock implements UIExecutionContext {
@@ -29,9 +28,13 @@ public class UIExecutionContextMock implements UIExecutionContext {
       @Override
       public <SELECTIONTYPE> void setSelection(SELECTIONTYPE resource) {
       }
-      
+
       @Override
-      public <SELECTIONTYPE> SELECTIONTYPE getSelection() {
+      public <SELECTIONTYPE> void setSelection(UISelection<SELECTIONTYPE> resource) {
+      }
+
+      @Override
+      public <SELECTIONTYPE> UISelection<SELECTIONTYPE> getSelection() {
         return null;
       }
       

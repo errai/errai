@@ -16,13 +16,12 @@
  */
 package org.jboss.errai.forge.facet.aggregate;
 
+import org.jboss.forge.addon.configuration.Configuration;
+
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import javax.inject.Singleton;
-
-import org.jboss.forge.addon.configuration.Configuration;
 
 /**
  * A class for querying meta-data on of top-level aggregator facets.

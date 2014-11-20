@@ -16,8 +16,8 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
-import static org.jboss.errai.forge.constant.DefaultVault.DefaultValue.*;
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.War;
+import static org.jboss.errai.forge.constant.DefaultVault.DefaultValue.WarSourceDirectory;
 
 import java.util.ArrayList;
 import java.util.Arrays;

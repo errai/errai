@@ -16,8 +16,6 @@
  */
 package org.jboss.errai.forge.facet.dependency;
 
-import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
-
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -27,6 +25,8 @@ import org.jboss.errai.forge.util.MavenModelUtil;
 import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.maven.projects.MavenFacet;
+
+import static org.jboss.errai.forge.constant.ArtifactVault.DependencyArtifact.*;
 
 /**
  * This facet sets all the common Maven dependencies required to build or run in

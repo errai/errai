@@ -16,12 +16,12 @@
  */
 package org.jboss.errai.forge.facet.module;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
+import org.jboss.errai.forge.config.ProjectConfig;
+import org.jboss.errai.forge.config.ProjectProperty;
+import org.jboss.errai.forge.constant.ModuleVault.Module;
+import org.jboss.errai.forge.xml.XmlParser;
+import org.jboss.forge.addon.facets.constraints.FacetConstraint;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -29,13 +29,12 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
-
-import org.jboss.errai.forge.config.ProjectConfig;
-import org.jboss.errai.forge.config.ProjectProperty;
-import org.jboss.errai.forge.constant.ModuleVault.Module;
-import org.jboss.errai.forge.xml.XmlParser;
-import org.jboss.forge.addon.facets.constraints.FacetConstraint;
-import org.xml.sax.SAXException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * This facet creates a GWT module file if necessary and inherits the

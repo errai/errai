@@ -16,13 +16,11 @@
  */
 package org.jboss.errai.forge.ui.features;
 
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.config.SerializableSet;
-import org.jboss.errai.forge.facet.aggregate.CoreFacet;
 import org.jboss.errai.forge.facet.aggregate.AggregatorFacetReflections.Feature;
+import org.jboss.errai.forge.facet.aggregate.CoreFacet;
 import org.jboss.forge.addon.facets.FacetFactory;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.Project;
@@ -30,6 +28,8 @@ import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.metadata.UICommandMetadata;
 import org.jboss.forge.addon.ui.util.Categories;
 import org.jboss.forge.addon.ui.util.Metadata;
+
+import javax.inject.Inject;
 
 @FacetConstraint({ CoreFacet.class })
 public class AddErraiFeatureCommand extends AbstractFeatureCommand {

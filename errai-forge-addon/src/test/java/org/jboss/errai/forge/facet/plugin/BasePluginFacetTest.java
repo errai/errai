@@ -16,24 +16,17 @@
  */
 package org.jboss.errai.forge.facet.plugin;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.apache.maven.model.BuildBase;
+import org.jboss.errai.forge.test.base.ForgeTest;
+import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
+import org.jboss.forge.addon.maven.plugins.*;
+import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
+import org.jboss.forge.addon.projects.Project;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.apache.maven.model.BuildBase;
-import org.jboss.errai.forge.test.base.ForgeTest;
-import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
-import org.jboss.forge.addon.maven.plugins.Configuration;
-import org.jboss.forge.addon.maven.plugins.ConfigurationElement;
-import org.jboss.forge.addon.maven.plugins.Execution;
-import org.jboss.forge.addon.maven.plugins.MavenPlugin;
-import org.jboss.forge.addon.maven.plugins.PluginElement;
-import org.jboss.forge.addon.maven.projects.MavenPluginFacet;
-import org.jboss.forge.addon.projects.Project;
+import static org.junit.Assert.*;
 
 public abstract class BasePluginFacetTest extends ForgeTest {
 

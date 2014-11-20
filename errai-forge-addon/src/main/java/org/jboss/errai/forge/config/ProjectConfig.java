@@ -16,10 +16,6 @@
  */
 package org.jboss.errai.forge.config;
 
-import java.util.Arrays;
-
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.config.converter.ConfigTypeConverter;
 import org.jboss.errai.forge.config.converter.ConfigTypeConverterFactory;
 import org.jboss.forge.addon.configuration.Configuration;
@@ -28,6 +24,9 @@ import org.jboss.forge.addon.facets.AbstractFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
+
+import javax.inject.Inject;
+import java.util.Arrays;
 
 /**
  * A singleton class for accessing project-wide plugin settings.

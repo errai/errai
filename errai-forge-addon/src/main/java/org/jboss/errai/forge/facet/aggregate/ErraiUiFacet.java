@@ -17,7 +17,6 @@
 package org.jboss.errai.forge.facet.aggregate;
 
 import org.jboss.errai.forge.facet.dependency.ErraiDataBindingDependencyFacet;
-
 import org.jboss.errai.forge.facet.dependency.ErraiUiDependencyFacet;
 import org.jboss.errai.forge.facet.module.ErraiUiModuleFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;

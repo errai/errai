@@ -16,15 +16,6 @@
  */
 package org.jboss.errai.forge.facet.aggregate;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
 import org.jboss.errai.forge.config.SerializableSet;
@@ -35,6 +26,9 @@ import org.jboss.forge.addon.facets.MutableFaceted;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFacet;
+
+import javax.inject.Inject;
+import java.util.*;
 
 /**
  * Acts as top-level aggregator for pulling in other facet dependencies.

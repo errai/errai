@@ -16,16 +16,6 @@
  */
 package org.jboss.errai.forge.test.base;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.errai.forge.config.ProjectConfig;
@@ -46,6 +36,15 @@ import org.jboss.forge.arquillian.archive.ForgeArchive;
 import org.jboss.forge.furnace.repositories.AddonDependencyEntry;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.junit.runner.RunWith;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
 public abstract class ForgeTest {
@@ -102,7 +101,7 @@ public abstract class ForgeTest {
   }
   
   protected void assertResourceAndFileContentsSame(final String resourcePath, final File file)
-          throws FileNotFoundException, IOException {
+          throws IOException {
     assertTrue(file.getAbsolutePath() + " was not created.", file.exists());
     try (final InputStreamReader expectedReader = new InputStreamReader(
             ClassLoader.getSystemResourceAsStream(resourcePath));
