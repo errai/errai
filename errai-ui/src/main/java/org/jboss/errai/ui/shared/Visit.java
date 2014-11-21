@@ -23,32 +23,28 @@ import com.google.gwt.dom.client.Element;
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  *
  */
-public class Visit
-{
-   public static <T> VisitContext<T> depthFirst(Element root, Visitor<T> visitor)
-   {
-      return depthFirst(new VisitContextImpl<T>(), root, visitor);
-   }
+public class Visit {
+  
+  public static <T> VisitContext<T> depthFirst(Element root, Visitor<T> visitor) {
+    if (root == null)
+      throw new IllegalArgumentException("Root Element to visit must not be null.");
 
-   private static <T> VisitContext<T> depthFirst(VisitContextImpl<T> context, Element root, Visitor<T> visitor)
-   {
-      if (root == null)
-         throw new IllegalArgumentException("Root Element to visit must not be null.");
+    return depthFirst(new VisitContextImpl<T>(), root, visitor);
+  }
 
-      if (context == null)
-         context = new VisitContextImpl<T>();
+  private static <T> VisitContext<T> depthFirst(VisitContextImpl<T> context, Element root, Visitor<T> visitor) {
 
-      Element current = root;
-      // If visit returns false, stop visiting down (but keep visiting)
-      if (visitor.visit(context, current)) {
-        current = current.getFirstChildElement();
-        while (current != null && !context.isVisitComplete()) {
-           depthFirst(context, current, visitor);
-           current = current.getNextSiblingElement();
-        }
+    Element current = root;
+    // If visit returns false, stop visiting down (but keep visiting)
+    if (visitor.visit(context, current)) {
+      current = current.getFirstChildElement();
+      while (current != null && !context.isVisitComplete()) {
+        depthFirst(context, current, visitor);
+        current = current.getNextSiblingElement();
       }
+    }
 
-      return context;
-   }
+    return context;
+  }
 
 }
