@@ -82,8 +82,8 @@ public final class TemplateUtil {
       logger.warning("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
               + field.getElement().getTagName() + "]");
     }
+    
     Element parentElement = element.getParentElement();
-
     try {
       if (field instanceof HasText) {
         Node firstNode = element.getFirstChild();
@@ -144,8 +144,6 @@ public final class TemplateUtil {
     component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
   }-*/;
 
-  private static long rootTotal;
-  
   private static Map<String, Element> templateRoots = new HashMap<String, Element>();
   public static Element getRootTemplateElement(String templateContents, final String templateFileName, final String rootField) {
     String key = templateFileName + "#" + rootField;
@@ -274,10 +272,11 @@ public final class TemplateUtil {
   }
 
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
+    
+    final Map<String, Element> dataFields = new LinkedHashMap<String, Element>();
     final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
 
     logger.fine("Searching template for fields.");
-    
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
@@ -286,12 +285,14 @@ public final class TemplateUtil {
       public boolean visit(VisitContextMutable<Object> context, Element element) {
         for (AttributeType attrType : AttributeType.values()) {
           String attrName = attrType.getAttributeName();
-          if (element.hasAttribute(attrName)) {
-            logger.fine("Located " + attrName + ": " + element.getAttribute(attrName));
-            for (String dataFieldName : element.getAttribute(attrName).split(" +")) {
+          String attrVal = element.getAttribute(attrName);
+          if (attrVal != null && !attrVal.isEmpty()) {
+            String[] attributeValues = (attrType == AttributeType.CLASS) ? attrVal.split(" +") : new String[]{attrVal};
+            for (String dataFieldName : attributeValues) {
               TaggedElement existingCandidate = childTemplateElements.get(dataFieldName);
               if (existingCandidate == null || existingCandidate.getAttributeType().ordinal() < attrType.ordinal()) {
                 childTemplateElements.put(dataFieldName, new TaggedElement(attrType, element));
+                dataFields.put(dataFieldName, element);
               }
             }
           }
@@ -299,13 +300,8 @@ public final class TemplateUtil {
         return true;
       }
     });
-
-    Map<String, Element> untaggedTemplateElements = new LinkedHashMap<String, Element>();
-    for (Map.Entry<String, TaggedElement> entry : childTemplateElements.entrySet()) {
-      untaggedTemplateElements.put(entry.getKey(), entry.getValue().getElement());
-    }
-
-    return untaggedTemplateElements;
+    
+    return dataFields;
   }
 
   @SuppressWarnings("deprecation")
@@ -360,5 +356,4 @@ public final class TemplateUtil {
     parent.appendChild(clone);
     return clone;
   }
-
 }

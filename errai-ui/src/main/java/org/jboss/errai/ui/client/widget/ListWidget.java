@@ -63,8 +63,8 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite implements HasValue<List<M>>,
-        BindableListChangeHandler<M> {
+public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite 
+  implements HasValue<List<M>>, BindableListChangeHandler<M> {
 
   private final ComplexPanel panel;
   private BindableListWrapper<M> items;

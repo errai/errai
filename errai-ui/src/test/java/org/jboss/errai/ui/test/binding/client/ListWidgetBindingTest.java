@@ -17,7 +17,6 @@
 package org.jboss.errai.ui.test.binding.client;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -30,7 +29,6 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.client.local.spi.InvalidBeanScopeException;
 import org.jboss.errai.ui.client.widget.ListWidget;
-import org.jboss.errai.ui.test.binding.client.res.AppScopedBindingItemWidget;
 import org.jboss.errai.ui.test.binding.client.res.AppScopedBindingListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
@@ -39,7 +37,6 @@ import org.jboss.errai.ui.test.binding.client.res.SingletonBindingListWidget;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -208,13 +205,13 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertEquals("Expected one widgets", 1, listWidget.getWidgetCount());
 
     List<TestModel> addModelList = new ArrayList<TestModel>();
-    for (int i = 1; i < 100; i++) {
+    for (int i = 1; i < 500; i++) {
       addModelList.add(new TestModel(i, ""+i));
     }
 
     // Add widgets to the UI by adding model instances to the model list
     listWidget.getItems().addAll(addModelList);
-    assertEquals("Expected exactly 100 widgets", 100, listWidget.getWidgetCount());
+    assertEquals("Expected exactly 100 widgets", 500, listWidget.getWidgetCount());
   }
 
   @Test
