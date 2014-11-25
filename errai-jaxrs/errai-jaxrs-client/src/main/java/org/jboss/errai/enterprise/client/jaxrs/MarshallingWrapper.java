@@ -29,7 +29,7 @@ import org.jboss.errai.marshalling.client.Marshalling;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingWrapper {
-  public static interface Marshaller{
+  public static interface Marshaller {
     String toJSON(final Object obj);
     String toJSON(final Map<Object, Object> obj);
     String toJSON(final List<?> arr);
@@ -39,7 +39,7 @@ public class MarshallingWrapper {
     Object fromJSON(final String json);
   }
   
-  private static Marshaller marschaller = new Marshaller() {
+  private static Marshaller marshaller = new Marshaller() {
     @Override
     public String toJSON(Object obj) {
       return _toJSON(Marshalling.toJSON(obj));
@@ -100,39 +100,39 @@ public class MarshallingWrapper {
     }
   };
   
-  public static void setMarschaller(Marshaller marschaller) {
-    MarshallingWrapper.marschaller = marschaller;
+  public static void setMarshaller(Marshaller marshaller) {
+    MarshallingWrapper.marshaller = marshaller;
   }
   
-  public static Marshaller getMarschaller() {
-    return marschaller;
+  public static Marshaller getMarshaller() {
+    return marshaller;
   }
 
   public static String toJSON(final Object obj) {
-    return marschaller.toJSON(obj);
+    return marshaller.toJSON(obj);
   }
 
   public static String toJSON(final Map<Object, Object> obj) {
-    return marschaller.toJSON(obj);
+    return marshaller.toJSON(obj);
   }
 
   public static String toJSON(final List<?> arr) {
-    return marschaller.toJSON(arr);
+    return marshaller.toJSON(arr);
   }
 
   public static <T> T fromJSON(final String json, final Class<T> type) {
-    return marschaller.fromJSON(json, type);
+    return marshaller.fromJSON(json, type);
   }
 
   public static <T> T fromJSON(final String json, final Class<T> type, final Class<?> elementType) {
-    return marschaller.fromJSON(json, type, elementType);
+    return marshaller.fromJSON(json, type, elementType);
   }
 
   public static <K, V> Map<K, V> fromJSON(final String json, final Class<?> type, final Class<K> mapKeyType, final Class<V> mapValueType) {
-    return marschaller.fromJSON(json, type, mapKeyType, mapValueType);
+    return marshaller.fromJSON(json, type, mapKeyType, mapValueType);
   }
 
   public static Object fromJSON(final String json) {
-    return marschaller.fromJSON(json);
+    return marshaller.fromJSON(json);
   }
 }
