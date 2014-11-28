@@ -50,7 +50,6 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.CommonConfigAttribs;
 import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
@@ -66,8 +65,6 @@ import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContextFactory;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
-import org.jboss.errai.marshalling.rebind.api.MarshallingExtension;
-import org.jboss.errai.marshalling.rebind.api.MarshallingExtensionConfigurator;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
@@ -209,24 +206,6 @@ public class MarshallerGeneratorFactory {
 
     final MetaClass javaUtilMap = MetaClassFactory.get(new TypeLiteral<Map<String, Marshaller>>() {});
     autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
-
-    for (final Class<?> extensionClass : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(
-        MarshallingExtension.class)) {
-      if (!MarshallingExtensionConfigurator.class.isAssignableFrom(extensionClass)) {
-        throw new RuntimeException("class " + extensionClass.getName() + " is not a valid marshalling extension. " +
-            "marshalling extensions should implement: " + MarshallingExtensionConfigurator.class.getName());
-      }
-
-      try {
-        final MarshallingExtensionConfigurator configurator =
-            extensionClass.asSubclass(MarshallingExtensionConfigurator.class).newInstance();
-
-        configurator.configure(mappingContext);
-      }
-      catch (Exception e) {
-        throw new RuntimeException("error loading marshalling extension: " + extensionClass.getName(), e);
-      }
-    }
 
     ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
 
