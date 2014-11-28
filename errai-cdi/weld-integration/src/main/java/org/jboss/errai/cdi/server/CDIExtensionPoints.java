@@ -19,17 +19,22 @@ import static java.util.ResourceBundle.getBundle;
 import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -39,7 +44,6 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.inject.Inject;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
@@ -63,7 +67,6 @@ import org.jboss.errai.bus.server.util.ServiceMethodParser;
 import org.jboss.errai.bus.server.util.ServiceParser;
 import org.jboss.errai.bus.server.util.ServiceTypeParser;
 import org.jboss.errai.cdi.server.events.AnyEventObserver;
-import org.jboss.errai.cdi.server.events.ConversationalEvent;
 import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventRoutingTable;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
@@ -75,9 +78,6 @@ import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
-import org.jboss.errai.enterprise.client.cdi.internal.ObserverModel;
-import org.jboss.errai.ioc.support.bus.client.Sender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,9 +95,7 @@ public class CDIExtensionPoints implements Extension {
 
   private final TypeRegistry managedTypes = new TypeRegistry();
 
-  private final Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
   private final Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
-
   private final Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
   private final Map<String, Annotation> beanQualifiers = new HashMap<String, Annotation>();
 
@@ -207,102 +205,6 @@ public class CDIExtensionPoints implements Extension {
             && !type.getJavaClass().isInterface())) {
       log.debug("Vetoing processed type: " + type.getJavaClass().getName());
       event.veto();
-    }
-    /**
-     * We must scan for Event consumer injection points to build the tables
-     */
-    final Class clazz = type.getJavaClass();
-
-    for (final Field f : clazz.getDeclaredFields()) {
-      if (f.isAnnotationPresent(Inject.class) && f.isAnnotationPresent(ObserverModel.class)) {
-        processEventInjector(f.getType(), f.getGenericType(), f.getAnnotations());
-      }
-    }
-    for (final Method m : clazz.getDeclaredMethods()) {
-      if (m.isAnnotationPresent(Inject.class) && m.isAnnotationPresent(ObserverModel.class)) {
-        final Class<?>[] parameterTypes = m.getParameterTypes();
-        for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
-          final Class<?> parmType = parameterTypes[i];
-          processEventInjector(parmType, m.getGenericParameterTypes()[i], m.getParameterAnnotations()[i]);
-        }
-      }
-    }
-    for (final Constructor c : clazz.getDeclaredConstructors()) {
-      if (c.isAnnotationPresent(Inject.class) && c.isAnnotationPresent(ObserverModel.class)) {
-        final Class<?>[] parameterTypes = c.getParameterTypes();
-        for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
-          final Class<?> parmType = parameterTypes[i];
-          processEventInjector(parmType, c.getGenericParameterTypes()[i], c.getParameterAnnotations()[i]);
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  private void processEventInjector(final Class<?> type, final Type typeParm, final Annotation[] annotations) {
-    if (Event.class.isAssignableFrom(type)) {
-      final ParameterizedType pType = (ParameterizedType) typeParm;
-      final Class eventType = (Class) pType.getActualTypeArguments()[0];
-
-      for (final Class<?> observesType : EnvUtil.getAllPortableSubtypes(eventType)) {
-        final List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-        /**
-         * Collect Qualifier types for the Event consumer.
-         */
-        for (final Annotation annotation : annotations) {
-          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
-                  && !annotation.annotationType().equals(ObserverModel.class)) {
-            qualifiers.add(annotation);
-            eventQualifiers.put(annotation.annotationType().getName(), annotation);
-          }
-        }
-
-        eventConsumers.add(new EventConsumer(observesType.isAnnotationPresent(Conversational.class), null,
-                observesType, qualifiers.toArray(new Annotation[qualifiers.size()])));
-      }
-    }
-    else if (ConversationalEvent.class.isAssignableFrom(type)) {
-      final ParameterizedType pType = (ParameterizedType) typeParm;
-
-      final Class eventType = (Class) pType.getActualTypeArguments()[0];
-
-      for (final Class<?> observesType : EnvUtil.getAllPortableSubtypes(eventType)) {
-        final List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-        /**
-         * Collect Qualifier types for the Event consumer.
-         */
-        for (final Annotation annotation : annotations) {
-          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
-                  && !annotation.annotationType().equals(ObserverModel.class)) {
-            qualifiers.add(annotation);
-            eventQualifiers.put(annotation.annotationType().getName(), annotation);
-          }
-        }
-        eventConsumers.add(new EventConsumer(true, typeParm, observesType, qualifiers.toArray(new Annotation[qualifiers
-                .size()])));
-      }
-    }
-    else if (Sender.class.isAssignableFrom(type)) {
-      final ParameterizedType pType = (ParameterizedType) typeParm;
-      final Class sendType = (Class) pType.getActualTypeArguments()[0];
-      final Set<Annotation> qualifiers = new HashSet<Annotation>();
-
-      /**
-       * Collect Qualifier types for the Event consumer.
-       */
-      for (final Annotation annotation : annotations) {
-        if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
-                && !annotation.annotationType().equals(ObserverModel.class)) {
-          qualifiers.add(annotation);
-          eventQualifiers.put(annotation.annotationType().getName(), annotation);
-        }
-      }
-
-      if (EnvUtil.isPortableType(sendType)) {
-        messageSenders.add(new MessageSender(typeParm, qualifiers));
-      }
     }
   }
 
@@ -511,68 +413,6 @@ public class CDIExtensionPoints implements Extension {
                 "There is not yet an available Errai RPC implementation for the server-side environment.");
       }
     }));
-  }
-
-  static class EventConsumer {
-    private final boolean conversational;
-    private final Type eventBeanType;
-    private final Type eventType;
-    private final Annotation[] qualifiers;
-
-    EventConsumer(final boolean conversational, final Type eventBeanType, final Type type, final Annotation[] qualifiers) {
-
-      this.conversational = conversational;
-      this.eventBeanType = eventBeanType;
-      this.eventType = type;
-      this.qualifiers = qualifiers;
-    }
-
-    public boolean isConversational() {
-      return conversational;
-    }
-
-    @SuppressWarnings("rawtypes")
-    public Class<?> getRawType() {
-      if (eventType instanceof Class) {
-        return (Class) eventType;
-      }
-      else if (eventType instanceof ParameterizedType) {
-        return (Class) ((ParameterizedType) eventType).getRawType();
-      }
-      else {
-        throw new RuntimeException("bad type: " + eventType);
-      }
-    }
-
-    public Type getEventBeanType() {
-      return eventBeanType;
-    }
-
-    public Annotation[] getQualifiers() {
-      return qualifiers;
-    }
-
-    @Override
-    public String toString() {
-      return "EventConsumer " + eventType + " " + Arrays.toString(qualifiers);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (this == o)
-        return true;
-      if (!(o instanceof EventConsumer))
-        return false;
-
-      final EventConsumer that = (EventConsumer) o;
-
-      return that.toString().equals(toString());
-    }
-
-    @Override
-    public int hashCode() {
-      return toString().hashCode();
-    }
   }
 
   static class MessageSender {
