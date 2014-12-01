@@ -8,7 +8,7 @@
   <version>3.1.0-SNAPSHOT</version>
   <name>Errai::Forge Addon</name>
   <properties>
-    <forge.api.version>2.12.3-SNAPSHOT</forge.api.version>
+    <forge.api.version>2.12.3.Final</forge.api.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -129,7 +129,7 @@
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>maven-impl-projects</artifactId>
-      <version>2.12.3-SNAPSHOT</version>
+      <version>${forge.api.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
