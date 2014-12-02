@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai</groupId>
   <artifactId>errai-security-demo</artifactId>
-  <version>3.0.4.Final</version>
+  <version>3.0.5-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Errai Security::Demo</name>
 
