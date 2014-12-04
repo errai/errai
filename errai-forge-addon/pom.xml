@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai.forge</groupId>
   <artifactId>errai-forge-addon</artifactId>
-  <version>3.1.0.Final</version>
+  <version>3.1.1-SNAPSHOT</version>
   <name>Errai::Forge Addon</name>
   <properties>
     <forge.api.version>2.12.3.Final</forge.api.version>
