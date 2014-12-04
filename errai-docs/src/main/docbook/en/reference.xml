@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-08-12</date>
+    <date>2014-12-02</date>
     
     
     
@@ -1604,6 +1604,14 @@ public class HelloWorldService implements MessageCallback {
 	&lt;param-name&gt;errai-jsr-356-websocket-filter&lt;/param-name&gt;
 	&lt;param-value&gt;foo.bar.FooFilter,foo.bar.BarFilter&lt;/param-value&gt;
 &lt;/context-param&gt;</programlisting>
+<simpara>Because one of the filter method parameters is the actual WebSocket session, you also have to add the following dependency to your  <literal><phrase role="code">pom.xml</phrase></literal>:</simpara>
+<programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
+	&lt;groupId&gt;org.jboss.spec.javax.websocket&lt;/groupId&gt;
+	&lt;artifactId&gt;jboss-websocket-api_1.0_spec&lt;/artifactId&gt;
+	&lt;scope&gt;provided&lt;/scope&gt;
+	&lt;version&gt;1.0.0.Final&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+<simpara>Please take a look at the JavaDoc of the filter interface for more information about the method parameters.</simpara>
 </section>
 <section id="_websocket_security">
 <title>WebSocket Security</title>
@@ -2130,6 +2138,10 @@ public class MyClientBean {
   }
 }</programlisting>
 </example>
+</section>
+<section id="_increase_the_initialization_timeout">
+<title>Increase the Initialization Timeout</title>
+<simpara>For some very large applications it is possible for initialization to timeout in Development Mode because of deferred code generation. If you experience this problem, you can adjust the initialization timeout value by setting the <literal>erraiInitTimeout</literal> variable in your GWT Host Page to a value in milliseconds.</simpara>
 </section>
 </section>
 <section id="sid-71467095">
@@ -3554,6 +3566,27 @@ public class SpecificClientExceptionMapper implements ClientExceptionMapper {
 
 }</programlisting>
 </section>
+</section>
+<section id="sid-19398997_ErraiJAX-RS-AbortingRequests">
+<title>Accesssing and aborting requests</title>
+<simpara>An instance of Errai&#8217;s <literal><phrase role="code">RequestCallback</phrase></literal> can optionally be passed to the <literal><phrase role="code">RestClient.create()</phrase></literal> call, which will
+provide access to the underlying HTTP request. The callback is invoked synchronously after the HTTP request has been initiated.
+This means that you will have access to the request immediately after the call.</simpara>
+<programlisting language="java" linenumbering="unnumbered">RequestCallback requestCallback = new RequestCallback() {
+  @Override
+  public void callback(Request request) {
+    this.request = request;
+  }
+};
+
+RestClient.create(SearchService.class, callback, requestCallback).find(query);</programlisting>
+<simpara>This allows you to cancel a pending request. Alternatively, a <literal><phrase role="code">RequestHolder</phrase></literal> can be used instead.</simpara>
+<programlisting language="java" linenumbering="unnumbered">RequestHolder searchRequestHolder = new RequestHolder();
+RestClient.create(SearchService.class, callback, searchRequestHolder).find(query);
+...
+if (searchRequestHolder.isAlive()) {
+  searchRequestHolder.getRequest().cancel();
+}</programlisting>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-ClientsideInterceptors">
 <title>Client-side Interceptors</title>
