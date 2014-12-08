@@ -16,30 +16,27 @@
 
 package org.jboss.errai.common.rebind;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
+
 /**
  * @author Mike Brock
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes("*")
 public class ModuleAnnotationProcessor extends AbstractProcessor {
 
   final Set<Element> allKnownElements = new HashSet<Element>();
 
-  @SuppressWarnings("NullArgumentToVariableArgMethod")
   @Override
   public boolean process(final Set<? extends TypeElement> typeElements,
                          final RoundEnvironment roundEnvironment) {
@@ -54,7 +51,7 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
 
       try {
         final FileObject fo
-                = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf", null);
+                = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf");
 
         final Writer writer = fo.openWriter();
         writer.write(builder.toString());
@@ -67,4 +64,5 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
     }
     return false;
   }
+  
 }
