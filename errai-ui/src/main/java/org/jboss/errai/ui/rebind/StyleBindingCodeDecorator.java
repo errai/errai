@@ -95,23 +95,41 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
 
     final DataBindingUtil.DataBinderRef dataBinder = DataBindingUtil.lookupDataBinderRef(ctx);
 
+    final List<Statement> initStmts = new ArrayList<Statement>();
     if (dataBinder != null) {
       if (!ctx.getInjector().hasAttribute(DATA_BINDING_CONFIG_ATTR)) {
         ctx.getInjector().setAttribute(DATA_BINDING_CONFIG_ATTR, Boolean.TRUE);
 
         stmts.add(Stmt.declareFinalVariable("bindingChangeHandler", StyleBindingChangeHandler.class,
             Stmt.newObject(StyleBindingChangeHandler.class)));
-        stmts.add(Stmt.nestedCall(
+        // ERRAI-817 deferred initialization
+        initStmts.add(Stmt.nestedCall(
             dataBinder.getValueAccessor()).invoke("addPropertyChangeHandler",
             Stmt.loadVariable("bindingChangeHandler"))
             );
       }
     }
-
-    stmts.add(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
+    // ERRAI-821 deferred initialization
+    initStmts.add(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
         .invoke("addElementBinding", Refs.get(ctx.getInjector().getInstanceVarName()),
             ctx.getRawAnnotation(),
             Stmt.nestedCall(valueAccessor).invoke("getElement")));
+    final Statement initCallback = InjectUtil.createInitializationCallback(ctx.getInjector().getInjectedType(), "obj", initStmts);
+    Statement addInitCallback
+        = Stmt.loadVariable("context").invoke("addInitializationCallback",
+        Refs.get(ctx.getInjector().getInstanceVarName()), initCallback);
+
+    if (ctx.getInjectionContext().isAsync()) {
+      final Statement runnable = Stmt.newObject(Runnable.class).extend()
+          .publicOverridesMethod("run")
+          .append(addInitCallback)
+          .finish()
+          .finish();
+      stmts.add(Stmt.loadVariable("async").invoke("runOnFinish", runnable));
+    }
+    else {
+      stmts.add(addInitCallback);
+    }
 
     addCleanup(ctx, stmts);
 

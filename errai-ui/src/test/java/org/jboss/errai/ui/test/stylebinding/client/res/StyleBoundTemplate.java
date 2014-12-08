@@ -17,10 +17,10 @@ import com.google.gwt.user.client.ui.Label;
  */
 @Templated
 public class StyleBoundTemplate extends Composite {
-  @Inject @AutoBound DataBinder<TestModel> dataBinder;
 
   @Inject @Bound @AdminBinding @DataField private Label testA;
   @Inject @Bound @TestBinding @DataField private Label testB;
+  @Inject @Bound @ComponentBinding @DataField private CustomComponent testC;
 
   public Label getTestA() {
     return testA;
@@ -29,10 +29,16 @@ public class StyleBoundTemplate extends Composite {
   public Label getTestB() {
     return testB;
   }
+    
+  public CustomComponent getTestC() {
+    return testC;
+  }
 
   public TestModel getTestModel() {
     return dataBinder.getModel();
   }
+
+  @Inject @AutoBound DataBinder<TestModel> dataBinder;
 
   @TestBinding
   private void testBindingStyleUpdate(Style style) {
@@ -43,5 +49,14 @@ public class StyleBoundTemplate extends Composite {
        style.clearVisibility();
      }
   }
-
+  
+  @ComponentBinding
+  private void testCustomComponentBindingStyleUpdate(Style style) {
+    if ("0".equals(getTestModel().getTestC())) {
+      style.setVisibility(Style.Visibility.HIDDEN);
+    }
+    else {
+      style.clearVisibility();
+    }
+  }
 }
