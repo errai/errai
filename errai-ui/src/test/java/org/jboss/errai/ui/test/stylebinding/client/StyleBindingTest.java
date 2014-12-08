@@ -59,6 +59,18 @@ public class StyleBindingTest extends AbstractErraiCDITest {
     assertEquals("hidden", instance.getTestB().getElement().getStyle().getVisibility());
   }
 
+  public void testCustomComponentDataBindingChangesUpdatesStyle() {
+    final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    final StyleBoundTemplate instance = bean.getInstance();
+
+    assertEquals("", instance.getTestC().getElement().getStyle().getVisibility());
+
+    instance.getTestModel().setTestC("0");
+
+    assertEquals("0", instance.getTestC().getValue());
+    assertEquals("hidden", instance.getTestC().getElement().getStyle().getVisibility());
+  }
+
   public void testDestroyingBeanCleansUpStyleBindings() {
     final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
     final StyleBoundTemplate instance = bean.getInstance();
