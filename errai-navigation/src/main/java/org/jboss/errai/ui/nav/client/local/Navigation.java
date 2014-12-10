@@ -1,7 +1,9 @@
 package org.jboss.errai.ui.nav.client.local;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import javax.annotation.PostConstruct;
@@ -27,9 +29,12 @@ import org.slf4j.Logger;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -94,6 +99,8 @@ public class Navigation {
   private PageNavigationErrorHandler navigationErrorHandler;
 
   private HandlerRegistration historyHandlerRegistration;
+  
+  private Map<IsWidget, HandlerRegistration> attachHandlerRegistrations = new HashMap<IsWidget, HandlerRegistration>();
 
   @Inject
   private Logger logger;
@@ -368,16 +375,35 @@ public class Navigation {
         if (widget == null) {
           throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
         }
+        
         maybeAttachContentPanel();
         currentPageToken = request.state;
-        pageHiding(widget, request, fireEvent);
+        
+        if ((widget instanceof Composite) && (getCompositeWidget((Composite) widget) == null)) {
+          final HandlerRegistration reg = widget.asWidget().addAttachHandler(new Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+              if (event.isAttached() && currentWidget != widget) {
+                pageHiding(widget, request, fireEvent);
+              }
+            }
+          });
+          attachHandlerRegistrations.put(widget, reg);
+        }
+        else {
+          pageHiding(widget, request, fireEvent);
+        }
       }
     });
   }
 
   private <W extends IsWidget> void pageHiding(final W widget, final Request<W> request, final boolean fireEvent) {
+    HandlerRegistration reg = attachHandlerRegistrations.remove(widget);
+    if (reg != null) {
+      reg.removeHandler();
+    }
+    
     final NavigationControl control = new NavigationControl(new Runnable() {
-
       @Override
       public void run() {
         final Access<W> accessEvent = new AccessImpl<W>();
@@ -523,4 +549,8 @@ public class Navigation {
       HistoryWrapper.newItem(Window.Location.getPath() + token, false);
     }
   }
+  
+  private native static IsWidget getCompositeWidget(Composite instance) /*-{
+    return instance.@com.google.gwt.user.client.ui.Composite::widget;
+  }-*/;
 }

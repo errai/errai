@@ -18,12 +18,20 @@ package org.jboss.errai.ui.shared;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.logging.Logger;
 
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ui.client.local.spi.TemplateProvider;
+import org.jboss.errai.ui.client.local.spi.TemplateRenderingCallback;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
 
@@ -31,6 +39,7 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.EventListener;
@@ -138,12 +147,14 @@ public final class TemplateUtil {
     
     DOM.setEventListener(component.getElement(), component);
     StyleBindingsRegistry.get().updateStyles(component);
+    AttachEvent.fire(component, true);
+    TemplateInitializedEvent.fire(component);
   }
 
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
     component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
   }-*/;
-
+  
   private static Map<String, Element> templateRoots = new HashMap<String, Element>();
   public static Element getRootTemplateElement(String templateContents, final String templateFileName, final String rootField) {
     String key = templateFileName + "#" + rootField;
@@ -355,5 +366,78 @@ public final class TemplateUtil {
     Element clone = DOM.clone(element, true);
     parent.appendChild(clone);
     return clone;
+  }
+  
+  private final static class TemplateRequest {
+    final Class<?> templateProvider;
+    final String location;
+    final TemplateRenderingCallback renderingCallback;
+    
+    TemplateRequest(Class<?> templateProvider, String location, TemplateRenderingCallback renderingCallback) {
+      this.templateProvider = templateProvider;
+      this.location = location;
+      this.renderingCallback = renderingCallback;
+    }
+  }
+  
+  private static Queue<TemplateRequest> requests = new LinkedList<TemplateRequest>();
+  
+  /**
+   * Called by the generated IOC bootstrapper if a provider is specified on a
+   * templated composite (see {@link Templated#provider()}). This method will
+   * make sure that templates will be provided and rendered in invocation order
+   * even if a given provider is asynchronous.
+   * 
+   * @param templateProvider
+   *          the template provider to use for supplying the template, must not
+   *          be null.
+   * @param location
+   *          the location of the template, must not be null.
+   * @param renderingCallback
+   *          the callback to invoke when the template is available, must not be
+   *          null.
+   */
+  public static void provideTemplate(final Class<?> templateProvider, final String location,
+          final TemplateRenderingCallback renderingCallback) {
+
+    TemplateRequest request = new TemplateRequest(templateProvider, location, renderingCallback);
+    requests.add(request);
+    if (requests.size() == 1) {
+      provideNextTemplate();
+    }
+  }
+  
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  private static void provideNextTemplate() {
+    if (requests.isEmpty())
+      return;
+
+    try {
+      final TemplateRequest request = requests.peek();
+      IOC.getAsyncBeanManager().lookupBean(request.templateProvider).getInstance(new CreationalCallback() {
+        @Override
+        public void callback(Object bean) {
+          TemplateProvider provider = ((TemplateProvider) bean);
+          try {
+            provider.provideTemplate(request.location, new TemplateRenderingCallback() {
+              @Override
+              public void renderTemplate(String template) {
+                request.renderingCallback.renderTemplate(template);
+                requests.remove();
+                provideNextTemplate();
+              }
+            });
+          } 
+          catch (RuntimeException t) {
+            requests.remove();
+            throw t;
+          }
+        }
+      });
+    } 
+    catch (IOCResolutionException ioce) {
+      requests.remove();
+      throw ioce;
+    }
   }
 }
