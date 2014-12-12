@@ -133,10 +133,17 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     for (MetaClass metaClass : providers) {
       if (!metaClass.isAbstract() && metaClass.isAssignableTo(ClientExceptionMapper.class)) {
         MapsFrom mapsFrom = metaClass.getAnnotation(MapsFrom.class);
-        if (mapsFrom == null && genericExceptionMapperClass == null) {
-          // Found a generic client-side exception mapper (to be used for all REST interfaces)
-          genericExceptionMapperClass = metaClass;
-          result.put(genericExceptionMapperClass, null);
+        if (mapsFrom == null) { 
+          if (genericExceptionMapperClass == null) {
+            // Found a generic client-side exception mapper (to be used for all REST interfaces)
+            genericExceptionMapperClass = metaClass;
+            result.put(genericExceptionMapperClass, null);
+          }
+          else {
+            throw new RuntimeException("Found two generic client-side exception mappers: "
+                    + genericExceptionMapperClass.getFullyQualifiedName() + " and " + metaClass + ". Make use of "
+                    + MapsFrom.class.getName() + " to resolve this problem.");
+          }
         }
         else {
           Class<?>[] remotes = mapsFrom.value();
