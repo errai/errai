@@ -60,6 +60,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 public class GWTClass extends AbstractMetaClass<JType> {
   protected final Annotation[] annotations;
   protected TypeOracle oracle;
+  private String fqcn;
 
   static {
     GenUtil.addClassAlias(GWTClass.class);
@@ -172,17 +173,22 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public String getFullyQualifiedName() {
+    if (fqcn != null)  {
+      return fqcn;
+    }
+      
     if (isArray()) {
       if (getOuterComponentType().isPrimitive()) {
-        return getInternalName();
+        fqcn = getInternalName();
       }
       else {
-        return getInternalName().replace('/', '.');
+        fqcn = getInternalName().replace('/', '.');
       }
     }
     else {
-      return getEnclosedMetaObject().getQualifiedBinaryName();
+      fqcn = getEnclosedMetaObject().getQualifiedBinaryName();
     }
+    return fqcn;
   }
 
   @Override
