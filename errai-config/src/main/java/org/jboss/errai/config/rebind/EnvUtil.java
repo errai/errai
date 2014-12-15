@@ -138,78 +138,63 @@ public abstract class EnvUtil {
         if (decl.isSynthetic()) {
           continue;
         }
-
         exposedClasses.add(decl);
       }
     }
-
     exposedClasses.addAll(exposedFromScanner);
 
-
     final Collection<URL> erraiAppProperties = getErraiAppProperties();
-
     for (final URL url : erraiAppProperties) {
       InputStream inputStream = null;
       try {
-
         log.debug("checking " + url.getFile() + " for configured types ...");
-
         inputStream = url.openStream();
 
         final ResourceBundle props = new PropertyResourceBundle(inputStream);
-        if (props != null) {
-
-          for (final Object o : props.keySet()) {
-            final String key = (String) o;
-
-            frameworkProps.put(key, props.getString(key));
-
+        for (final Object o : props.keySet()) {
+          final String key = (String) o;
+          final String value = props.getString(key);
+          frameworkProps.put(key, value);
+          
+          for (final String s : value.split(" ")) {
+            if ("".equals(s))
+              continue;
             if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-              for (final String s : props.getString(key).split(" ")) {
-                try {
-                  exposedClasses.add(MetaClassFactory.get(s.trim()));
-                  explicitTypes.add(s.trim());
-                }
-                catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s, e);
-                }
+              try {
+                exposedClasses.add(MetaClassFactory.get(s.trim()));
+                explicitTypes.add(s.trim());
+              } 
+              catch (Exception e) {
+                throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: "
+                        + s, e);
               }
-
-              continue;
             }
-
-            if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
-              for (final String s : props.getString(key).split(" ")) {
-                try {
-                  nonportableClasses.add(MetaClassFactory.get(s.trim()));
-                }
-                catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s, e);
-                }
+            else if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
+              try {
+                nonportableClasses.add(MetaClassFactory.get(s.trim()));
+              } 
+              catch (Exception e) {
+                throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: "
+                        + s, e);
               }
-
-              continue;
             }
+            else if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
+              try {
+                final String[] mapping = s.split("->");
 
-            if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
-              for (final String s : props.getString(key).split(" ")) {
-                try {
-                  final String[] mapping = s.split("->");
-
-                  if (mapping.length != 2) {
-                    throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
-                  }
-
-                  final Class<?> fromMapping = Class.forName(mapping[0].trim());
-                  final Class<?> toMapping = Class.forName(mapping[1].trim());
-
-                  mappingAliases.put(fromMapping.getName(), toMapping.getName());
-                  explicitTypes.add(fromMapping.getName());
-                  explicitTypes.add(toMapping.getName());
+                if (mapping.length != 2) {
+                  throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
                 }
-                catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
-                }
+
+                final Class<?> fromMapping = Class.forName(mapping[0].trim());
+                final Class<?> toMapping = Class.forName(mapping[1].trim());
+
+                mappingAliases.put(fromMapping.getName(), toMapping.getName());
+                explicitTypes.add(fromMapping.getName());
+                explicitTypes.add(toMapping.getName());
+              } 
+              catch (Exception e) {
+                throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
               }
             }
           }
@@ -229,7 +214,6 @@ public abstract class EnvUtil {
         }
       }
     }
-
 
     final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class, true);
     for (final MetaClass cls : exts) {
