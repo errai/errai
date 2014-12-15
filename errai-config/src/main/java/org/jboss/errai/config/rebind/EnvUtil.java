@@ -157,62 +157,53 @@ public abstract class EnvUtil {
         inputStream = url.openStream();
 
         final ResourceBundle props = new PropertyResourceBundle(inputStream);
-        if (props != null) {
+        // props couldn't be null
 
-          for (final Object o : props.keySet()) {
+        for (final Object o : props.keySet()) {
             final String key = (String) o;
+            final String value = props.getString(key);
 
-            frameworkProps.put(key, props.getString(key));
-
-            if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-              for (final String s : props.getString(key).split(" ")) {
-                try {
-                  exposedClasses.add(MetaClassFactory.get(s.trim()));
-                  explicitTypes.add(s.trim());
+            frameworkProps.put(key, value);
+            for (final String s : value.split(" ")) {
+                if ("".equals(s))
+                    continue;
+                if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+                    try {
+                        exposedClasses.add(MetaClassFactory.get(s.trim()));
+                        explicitTypes.add(s.trim());
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s, e);
+                    }
                 }
-                catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s, e);
+                else if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
+                    try {
+                        nonportableClasses.add(MetaClassFactory.get(s.trim()));
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s, e);
+                    }
                 }
-              }
+                else if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
+                    try {
+                        final String[] mapping = s.split("->");
 
-              continue;
+                        if (mapping.length != 2) {
+                            throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
+                        }
+
+                        final Class<?> fromMapping = Class.forName(mapping[0].trim());
+                        final Class<?> toMapping = Class.forName(mapping[1].trim());
+
+                        mappingAliases.put(fromMapping.getName(), toMapping.getName());
+                        explicitTypes.add(fromMapping.getName());
+                        explicitTypes.add(toMapping.getName());
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
+                    }
+                }
             }
-
-            if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
-              for (final String s : props.getString(key).split(" ")) {
-                try {
-                  nonportableClasses.add(MetaClassFactory.get(s.trim()));
-                }
-                catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s, e);
-                }
-              }
-
-              continue;
-            }
-
-            if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
-              for (final String s : props.getString(key).split(" ")) {
-                try {
-                  final String[] mapping = s.split("->");
-
-                  if (mapping.length != 2) {
-                    throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
-                  }
-
-                  final Class<?> fromMapping = Class.forName(mapping[0].trim());
-                  final Class<?> toMapping = Class.forName(mapping[1].trim());
-
-                  mappingAliases.put(fromMapping.getName(), toMapping.getName());
-                  explicitTypes.add(fromMapping.getName());
-                  explicitTypes.add(toMapping.getName());
-                }
-                catch (Exception e) {
-                  throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
-                }
-              }
-            }
-          }
         }
       }
       catch (IOException e) {
