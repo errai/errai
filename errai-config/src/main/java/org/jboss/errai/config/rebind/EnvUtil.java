@@ -21,15 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -246,17 +238,14 @@ public abstract class EnvUtil {
   public static Collection<URL> getErraiAppProperties() {
     try {
       final Set<URL> urlList = new HashSet<URL>();
-      Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("ErraiApp.properties");
-
-      while (resources.hasMoreElements()) {
-        urlList.add(resources.nextElement());
+      for (ClassLoader classLoader : Arrays.asList(
+          Thread.currentThread().getContextClassLoader(),
+          EnvUtil.class.getClassLoader())) {
+        Enumeration<URL> resources = classLoader.getResources("ErraiApp.properties");
+        while (resources.hasMoreElements()) {
+            urlList.add(resources.nextElement());
+        }
       }
-
-      resources = EnvUtil.class.getClassLoader().getResources("ErraiApp.properties");
-      while (resources.hasMoreElements()) {
-        urlList.add(resources.nextElement());
-      }
-
       return urlList;
     }
     catch (IOException e) {
