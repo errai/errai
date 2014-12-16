@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 JBoss, by Red Hat, Inc
+ * Copyright 2014 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,10 @@ import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncQualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncTypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProducerInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.SyncProducerInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class InjectorFactory {
     this.async = async;
 
     addInjector(BootstrapType.Synchronous, WiringElementType.Type, TypeInjector.class);
-    addInjector(BootstrapType.Synchronous, WiringElementType.ProducerElement, ProducerInjector.class);
+    addInjector(BootstrapType.Synchronous, WiringElementType.ProducerElement, SyncProducerInjector.class);
     addInjector(BootstrapType.Synchronous, WiringElementType.TopLevelProvider, ProviderInjector.class);
     addInjector(BootstrapType.Synchronous, WiringElementType.ContextualTopLevelProvider,
         ContextualProviderInjector.class);
