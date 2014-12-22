@@ -31,8 +31,8 @@
         var erraiSimpleFormatString = "%1$tc %2$s%n%4$s: %5$s%6$s%n";
         // This parameter is only used if Push State is enabled.
         var erraiApplicationWebContext="<%= contextPath %>";
-		//	Comment the line below to disable Errai PushState
-        var erraiPushStateEnabled = true;
+		//	Comment the line below to enable Errai PushState
+        // var erraiPushStateEnabled = true;
     </script>
 </head>
 
