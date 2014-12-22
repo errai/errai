@@ -68,7 +68,7 @@ This demo has to users:
 
 ### Keycloak Integration
 
-This demo also features Keycloak integration. To preview this you will need a Keycloak server. You can download a fully-configured in the [Keycloak appliance zip file](http://sourceforge.net/projects/keycloak/files/1.0-beta-3/keycloak-appliance-dist-all-1.0-beta-3.zip/download). To run this server, unzip the file, `cd` into the directory, then run `keycloak/bin/standalone.sh`.
+This demo also features Keycloak integration. To preview this you will need a Keycloak server. You can download a fully-configured [Keycloak appliance zip file](http://sourceforge.net/projects/keycloak/files/1.0.4.Final/keycloak-appliance-dist-all-1.0.4.Final.zip/download). To run this server, unzip the file, `cd` into the directory, then run `keycloak/bin/standalone.sh`.
 
 The following instructions assume you are using the Keycloak server from the link above.
 
@@ -100,7 +100,7 @@ The following instructions assume you are using the Keycloak server from the lin
 
   * After saving go to the *Credentials* tab and set a password.
 
-  * Go to the *Role Mappings* tab. Add *atleast one* role to the *Assigned Roles* for your application (scroll down to *Application Roles*). For this demo map the admin role to a user named *john*.
+  * Go to the *Role Mappings* tab. Add *at least one* role to the *Assigned Roles* for your application (scroll down to *Application Roles*). For this demo map the admin role to a user named *john*.
 
 1. Uncomment the login-config element in `errai-security-demo/src/main/webapp/WEB-INF/web.xml`.
 
