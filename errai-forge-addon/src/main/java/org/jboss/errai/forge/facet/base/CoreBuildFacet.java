@@ -16,11 +16,10 @@
  */
 package org.jboss.errai.forge.facet.base;
 
-import org.apache.maven.model.Build;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Resource;
+import org.apache.maven.model.*;
 import org.jboss.errai.forge.config.ProjectConfig;
 import org.jboss.errai.forge.config.ProjectProperty;
+import org.jboss.errai.forge.constant.ArtifactVault;
 import org.jboss.errai.forge.constant.DefaultVault.DefaultValue;
 import org.jboss.errai.forge.constant.PomPropertyVault.Property;
 import org.jboss.errai.forge.util.VersionFacet;
@@ -84,7 +83,7 @@ public class CoreBuildFacet extends AbstractBaseFacet {
     }
 
     if (directories.isEmpty())
-      return null;
+      return "src/main/resources";
 
     Collections.sort(directories);
 
@@ -105,14 +104,13 @@ public class CoreBuildFacet extends AbstractBaseFacet {
     pom.addProperty(Property.DevContext.getName(), DEV_CONTEXT);
     pom.addProperty(Property.ErraiVersion.getName(), getErraiVersion());
 
-    if (build.getSourceDirectory() == null)
-      build.setSourceDirectory(DefaultValue.SourceDirectory.getDefaultValue());
+    if (build.getOutputDirectory() == null)
+      build.setOutputDirectory("src/main/webapp/WEB-INF/classes");
 
     Resource res = getResource(build.getSourceDirectory(), build.getResources());
     if (res == null) {
       res = new Resource();
       res.setDirectory(build.getSourceDirectory());
-      build.addResource(res);
     }
 
     if (build.getResources().size() < 2) {
@@ -120,7 +118,6 @@ public class CoreBuildFacet extends AbstractBaseFacet {
       if (res == null) {
         res = new Resource();
         res.setDirectory(DefaultValue.ResourceDirectory.getDefaultValue());
-        build.addResource(res);
       }
     }
 
@@ -142,9 +139,7 @@ public class CoreBuildFacet extends AbstractBaseFacet {
             || !properties.containsKey(Property.DevContext.getName())
             || !properties.get(Property.DevContext.getName()).equals(DEV_CONTEXT)
             || !properties.containsKey(Property.ErraiVersion.getName())
-            || !properties.get(Property.ErraiVersion.getName()).equals(getErraiVersion())
-            || getResource(build.getSourceDirectory(), build.getResources()) == null
-            || build.getResources().size() < 2);
+            || !properties.get(Property.ErraiVersion.getName()).equals(getErraiVersion()));
   }
 
   private Resource getResource(String relPath, List<Resource> resources) {

@@ -53,8 +53,8 @@ public class DependencyPluginFacet extends AbstractPluginFacet {
                                             .setName("type").setText("zip"))
                                     .addChild(ConfigurationElementBuilder.create()
                                             .setName("overWrite").setText("false"))
-                                    .addChild(ConfigurationElementBuilder.create()
-                                            .setName("outputDirectory").setText("${project.build.directory}"))
+//                                    .addChild(ConfigurationElementBuilder.create()
+//                                            .setName("outputDirectory").setText("${project.build.directory}"))
 
                              )
                     )
