@@ -100,8 +100,8 @@ public class DecoratorTask extends InjectionTask {
 
       final InjectableInstance instance =
           new InjectableInstance(annotation, taskType, constructor, method, field, type, parm, injector, ctx);
-      for (final Statement stmt : dec.generateDecorator(instance)) {
-        ctx.getProcessingContext().append(stmt);
+      for (final Object stmt : dec.generateDecorator(instance)) {
+        ctx.getProcessingContext().append((Statement) stmt);
       }
       injector.updateProxies();
     }

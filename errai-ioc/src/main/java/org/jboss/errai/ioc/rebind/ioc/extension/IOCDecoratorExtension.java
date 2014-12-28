@@ -54,9 +54,18 @@ public abstract class IOCDecoratorExtension<T extends Annotation> {
   /**
    * The <tt>generateDecorator()</tt> method is called at the point the container has finished constructing a
    * reference to an element annotated with the configured annotation.
+   * <p/>
+   * Note:
+   * This method returns {@code List&lt;Object&gt;} instead of {@code List&lt;Statement&gt;} because this method is
+   * always called with a raw type. To be applicable an unchecked conversion is necessary which causes the erasure
+   * of the return type (JLS, Java SE 7 Edition, section 15.12.2.6).<br/>
+   * This compiles with warnings with a JDK7 but fails regardless of the source-level with JDK 8.<br/>
+   * See: http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7144506<br/>
+   * TODO: Remove calls with raw types to this method
+   *
    * @param ctx the {@link org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance} reference, representing
    *            the value of the element which is annotated.
    * @return a list of statements to be rendered into the injector code.
    */
-  public abstract List<? extends Statement> generateDecorator(InjectableInstance<T> ctx);
+  public abstract List<?> generateDecorator(InjectableInstance<T> ctx);
 }
