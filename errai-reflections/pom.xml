@@ -86,6 +86,7 @@
           <!-- Disable DocLint, which will cause the compiler to fail for bad JavaDoc syntax.
           See: http://openjdk.java.net/jeps/172 -->
           <additionalparam>-Xdoclint:none</additionalparam>
+          <failOnError>false</failOnError>
         </configuration>
         <executions>
           <execution>
