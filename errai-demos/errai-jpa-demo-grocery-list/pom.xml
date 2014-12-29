@@ -64,7 +64,7 @@
     <gwt.version>2.7.0</gwt.version>
     <uel.impl.version>2.1.2-b04</uel.impl.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>    
     <argLine></argLine>
   </properties>
 

@@ -56,6 +56,7 @@
     <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
+    <maven.gwt.plugin.version>2.7.0</maven.gwt.plugin.version>
     <skipTests>true</skipTests>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.compiler.source>1.6</maven.compiler.source>
@@ -314,7 +315,8 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>        
+        <artifactId>gwt-maven-plugin</artifactId> 
+        <version>${maven.gwt.plugin.version}</version>       
         <executions>
           <execution>
             <id>resources</id>

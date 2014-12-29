@@ -61,6 +61,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
+    <maven.gwt.plugin.version>2.7.0</maven.gwt.plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -264,7 +265,8 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>        
+        <artifactId>gwt-maven-plugin</artifactId>   
+        <version>${maven.gwt.plugin.version}</version>
         <executions>
           <execution>
             <goals>
