@@ -298,7 +298,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
     JClassType type = getEnclosedMetaObject().isClass();
     while (type != null) {
       for (JField field : type.getFields()) {
-        if (field.isPublic()) {
+        // In GWT 2.7 java.lang.Object contains two public fields castableTypeMap and typeMarker that we don't want.
+        if (field.isPublic() && !field.getEnclosingType().getQualifiedSourceName().equals("java.lang.Object")) {
           fields.add(new GWTField(oracle, field));
         }
       }
