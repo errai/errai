@@ -60,8 +60,7 @@
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.6.1</maven.gwt.plugin.version>
+    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>    
     <jetty.version>6.1.25</jetty.version>
   </properties>
 
@@ -127,8 +126,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
-        <version>${maven.gwt.plugin.version}</version>
+        <artifactId>gwt-maven-plugin</artifactId>        
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>TagCloudDemo.html</runTarget>

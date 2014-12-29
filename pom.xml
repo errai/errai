@@ -67,8 +67,7 @@
   </issueManagement>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gwt.maven.version>2.6.1</gwt.maven.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    
     <guice.version>3.0</guice.version>
     <guava.version>17.0</guava.version>
     <appengine.version>1.7.6</appengine.version>
@@ -291,8 +290,7 @@
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
-          <artifactId>gwt-maven-plugin</artifactId>
-          <version>${gwt.maven.version}</version>
+          <artifactId>gwt-maven-plugin</artifactId>          
           <executions>
             <execution>
               <goals>

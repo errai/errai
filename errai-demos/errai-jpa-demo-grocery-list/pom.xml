@@ -61,7 +61,7 @@
     <cdiapi.version>1.0-SP4</cdiapi.version>
     <servletapi.version>1.0.0.Final</servletapi.version>
     <jbosslogging.version>3.1.0.GA</jbosslogging.version>
-    <gwt.version>2.6.1</gwt.version>
+    <gwt.version>2.7.0</gwt.version>
     <uel.impl.version>2.1.2-b04</uel.impl.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
