@@ -43,7 +43,7 @@
     <apache.maven.repo.metadata.version>3.0</apache.maven.repo.metadata.version>
     <apache.maven.settings>3.0</apache.maven.settings>    
     <apache.stanbol.htmlextractor.version>0.10.0</apache.stanbol.htmlextractor.version>
-    <asm.version>4.0</asm.version>
+    <asm.version>5.0.3</asm.version>
     <cal10n.version>0.7.4</cal10n.version>
     <cdi.api.version>1.2</cdi.api.version>
     <deltaspike.version>0.4</deltaspike.version>
