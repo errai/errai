@@ -15,19 +15,21 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  -->
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
-        "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.6//EN"
+    "http://www.gwtproject.org/doctype/2.6.1/gwt-module.dtd">
 
 <module rename-to='contacts'>
-    <inherits name='com.google.gwt.user.User' />
-    <inherits name='com.google.gwt.user.theme.standard.Standard' />
 
-    <inherits name="org.jboss.errai.common.ErraiCommon" />
-    <inherits name="org.jboss.errai.bus.ErraiBus" />
-    <inherits name="org.jboss.errai.ioc.Container" />
-    <inherits name="org.jboss.errai.enterprise.CDI" />
-    <inherits name="org.jboss.errai.uibinder.UIBinderForIOC" />
+  <inherits name='com.google.gwt.user.User'/>
+  <inherits name='com.google.gwt.user.theme.standard.Standard'/>
 
-    <!-- Specify the paths for translatable code -->
-    <source path='client' />
+  <inherits name="org.jboss.errai.common.ErraiCommon"/>
+  <inherits name="org.jboss.errai.bus.ErraiBus"/>
+  <inherits name="org.jboss.errai.ioc.Container"/>
+  <inherits name="org.jboss.errai.enterprise.CDI"/>
+  <inherits name="org.jboss.errai.uibinder.UIBinderForIOC"/>
+
+  <!-- Specify the paths for translatable code -->
+  <source path='client'/>
+
 </module>
