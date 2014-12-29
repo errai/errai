@@ -16,11 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-
 import java.lang.annotation.Annotation;
 import java.util.List;
+
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 
 /**
  * A code decorator extension for the Errai IOC framework. Decorators allow the generation of code in and around
@@ -54,9 +53,9 @@ public abstract class IOCDecoratorExtension<T extends Annotation> {
   /**
    * The <tt>generateDecorator()</tt> method is called at the point the container has finished constructing a
    * reference to an element annotated with the configured annotation.
-   * <p/>
+   * <p>
    * Note:
-   * This method returns {@code List&lt;Object&gt;} instead of {@code List&lt;Statement&gt;} because this method is
+   * This method returns List&lt;Object&gt; instead of List&lt;Statement&gt; because this method is
    * always called with a raw type. To be applicable an unchecked conversion is necessary which causes the erasure
    * of the return type (JLS, Java SE 7 Edition, section 15.12.2.6).<br/>
    * This compiles with warnings with a JDK7 but fails regardless of the source-level with JDK 8.<br/>

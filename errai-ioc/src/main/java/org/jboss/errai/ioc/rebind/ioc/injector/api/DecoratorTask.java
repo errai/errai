@@ -68,7 +68,7 @@ public class DecoratorTask extends InjectionTask {
     this.annotationType = annotationType;
   }
 
-  @SuppressWarnings({ "unchecked" })
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public boolean doTask(final InjectionContext ctx) {
     Annotation annotation = null;

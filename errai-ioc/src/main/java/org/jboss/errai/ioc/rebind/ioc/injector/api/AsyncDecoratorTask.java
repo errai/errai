@@ -57,7 +57,7 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
     this.IOCExtensions = decs;
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public boolean doTask(final InjectionContext ctx) {
     Annotation annotation = null;
