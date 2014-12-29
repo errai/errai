@@ -26,4 +26,7 @@
   <entry-point class="org.errai.samples.stockdemo.client.local.StockClient"/>
   <source path="client"/>
 
+  <!-- Cut down compilation time by limiting the permutations to a single bigger one.  -->
+  <collapse-all-properties/>
+
 </module>

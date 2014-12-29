@@ -38,4 +38,7 @@
   <inherits name="org.jboss.errai.enterprise.Jaxrs"/>
   <inherits name="org.jboss.errai.jpa.JPA"/>
 
+  <!-- Cut down compilation time by limiting the permutations to a single bigger one.  -->
+  <collapse-all-properties/>
+
 </module>

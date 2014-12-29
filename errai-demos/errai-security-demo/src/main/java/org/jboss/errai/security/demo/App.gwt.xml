@@ -35,4 +35,7 @@
 
   <set-property name="user.agent" value="safari"/>
 
+  <!-- Cut down compilation time by limiting the permutations to a single bigger one.  -->
+  <collapse-all-properties/>
+
 </module>
