@@ -7640,29 +7640,39 @@ Behind the scenes, when the visitor successfully submits credentials she is redi
 
 ==== Setup
 
-To add Keycloak integration to your application:
+[NOTE]
+.Make sure to check out the Errai Security Demo. 
+====
+This demo can be configured to work with Keycloak in just a few simple steps as outlined in the link:$$https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo$$[README file]!
+====
 
-. Setup a Keycloak server. Please consult the link:$$http://keycloak.jboss.org/docs.html$$[Keycloak documentation] for details on how this is achieved.
+To start from scratch and add Keycloak integration to your application:
 
-  .. As part of your setup you should create a new realm for your application.
+* Setup a Keycloak server. Please consult the link:$$http://keycloak.jboss.org/docs.html$$[Keycloak documentation] for details on how this is achieved.
 
-  .. Add roles and users to your realm.
+* Start the Keycloak server.
 
-  .. In your new realm you should create a new application (you can also use OAuth).
+* Go to the link:$$https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo$$[Keycloak Administrative Console] (i.e. http://localhost:8080/auth/admin/) (the username and password are both *admin* on first use).
 
-  .. After creating your application select it from the list and make sure to adjust the following settings as appropriate:
+* Click *Add Realm* and create a custom realm for your application.
 
-    * **Redirect URI** -- You should use this to whitelist pages that will be redirected to after a successful login.
+* Select the *Applications* tab and click *Add Application*, then fill in the following to add the application to this realm:
+  ** `Name`: the name of your application (i.e. errai-security-demo)
+  ** `Access Type`: public
+  ** `Redirect URI`: the url of your application (i.e. `http://localhost:8080/[your-application]/*`)
+  
+* After saving your application, choose the new application in the menu and make sure the following are set:
+  ** In the *Roles* tab add your custom roles.
+  ** In the *Installation* tab choose the format option `keycloak.json` and copy the contents in your `WEB-INF/keycloak.json` file. 
 
-    * **Claims** -- You will need to explicitly enable any information about users that your application requires access to.
+* Click on *Users* on the side-panel to add a user:
+  ** Fill out the `Username`, `Email`, `First Name`, and `Last Name` with any values.
+  ** After saving go to the *Credentials* tab and set a password.
+  ** Go to the *Role Mappings* tab. Add `at least one` role to the `Assigned Roles` for your application (scroll down to `Application Roles` and select your application to do this).
 
-    * **Scope** -- Move any roles that users in your app *may* possess to the "Assigned Roles". (Note: moving the roles to "Assigned Roles" does not mean *all* users will have this role. It does mean that these roles will be visible to your app for users that do have them.)
+* Add the `errai-security-keycloak` jar to your project and make sure it's being deployed to the server. In maven, the dependency is `org.jboss.errai:errai-security-keycloak`.
 
-  .. After adjusting the settings for your app, go to the *Installation* tab and select "keycloak.json" in the *Format Option* list. Copy this into a "keycloak.json" file in your `WEB-INF` directory.
-
-. Add the `errai-security-keycloak` jar to your project. In maven, the dependency is `org.jboss.errai:errai-security-keycloak`.
-
-. Configure the `ErraiUserCookieFilter` in your `web.xml`. All that is necessary is adding a filter-mapping for your GWT host page like so:
+* Configure the `ErraiUserCookieFilter` in your `web.xml`. All that is necessary is adding a filter-mapping for your GWT host page like so:
 +
 [source,xml]
 ----
@@ -7672,9 +7682,8 @@ To add Keycloak integration to your application:
   </filter-mapping>
 ----
 
-. Configure the `ErraiLoginRedirectFilter` in your `web.xml`.
-
-  .. Create a filter-mapping of this filter onto a path that will act as a url to the Keycloak login page. For example, if your deployed app is called `my-app` and you wanted `<server-uri>/my-app/app-login` as your login url then you would add the following:
+* Configure the `ErraiLoginRedirectFilter` in your `web.xml`.
+  ** Create a filter-mapping of this filter onto a path that will act as a url to the Keycloak login page. For example, if your deployed app is called `my-app` and you wanted `<server-uri>/my-app/app-login` as your login url then you would add the following:
 +
 [source,xml]
 ----
@@ -7684,7 +7693,7 @@ To add Keycloak integration to your application:
   </filter-mapping>
 ----
 
-  .. Add a security-constraint to login url. This is what actually causes the redirection to Keycloak. All the filter does is redirect back to your app (which happens after the login completes). For the previous example, the constraint would look like this:
+  ** Add a security-constraint to login url. This is what actually causes the redirection to Keycloak. All the filter does is redirect back to your app (which happens after the login completes). For the previous example, the constraint would look like this:
 +
 [source,xml]
 ----
@@ -7699,7 +7708,7 @@ To add Keycloak integration to your application:
   </security-constraint>
 ----
 
-  .. Optionally configure the URL that the `ErraiLoginRedirectFilter` redirects to. You can do this with the `redirectLocation` param, which takes a path relative to the app context:
+  ** Optionally configure the URL that the `ErraiLoginRedirectFilter` redirects to. You can do this with the `redirectLocation` param, which takes a path relative to the app context:
 +
 [source,xml]
 ----
@@ -7712,17 +7721,17 @@ To add Keycloak integration to your application:
   </filter>
 ----
 
-. Set the login method to use Keycloak in you `web.xml`:
+* Set the login method to use Keycloak in you `web.xml`:
 +
 [source,xml]
 ----
   <login-config>
     <auth-method>KEYCLOAK</auth-method>
-    <realm-name>example</realm-name>
+    <realm-name>[your-realm-name]</realm-name>
   </login-config>
 ----
 
-. Add roles available to users in your application to the `web.xml`. Here is an example declaration of a "user" role:
+* Add roles available to users in your application to the `web.xml`. Here is an example declaration of a "user" role:
 +
 [source,xml]
 ----
@@ -7757,9 +7766,7 @@ The client-side slf4j code uses the link:$$http://www.gwtproject.org/doc/latest/
 
 . Add the errai-common artifact as a maven dependency to your project
 
-
 . Inherit the gwt module [code]+org.jboss.errai.common.ErraiCommon+
-
 
 [[sid-74908675_Logging-ErraiClientSideLogHandlers]]
 

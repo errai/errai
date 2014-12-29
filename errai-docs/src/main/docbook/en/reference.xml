@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-12-02</date>
+    <date>2014-12-22</date>
     
     
     
@@ -7031,47 +7031,52 @@ public class NavBar extends Composite {
 </section>
 <section id="_setup">
 <title>Setup</title>
-<simpara>To add Keycloak integration to your application:</simpara>
-<orderedlist numeration="arabic">
+<note>
+<title>Make sure to check out the Errai Security Demo.</title>
+<simpara>This demo can be configured to work with Keycloak in just a few simple steps as outlined in the <ulink url="https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo">README file</ulink>!</simpara>
+</note>
+<simpara>To start from scratch and add Keycloak integration to your application:</simpara>
+
+<itemizedlist>
   
     <listitem>
       <simpara>Setup a Keycloak server. Please consult the <ulink url="http://keycloak.jboss.org/docs.html">Keycloak documentation</ulink> for details on how this is achieved.</simpara>
       
-<orderedlist numeration="loweralpha">
+    </listitem>
   
     <listitem>
-      <simpara>As part of your setup you should create a new realm for your application.</simpara>
+      <simpara>Start the Keycloak server.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Add roles and users to your realm.</simpara>
+      <simpara>Go to the <ulink url="https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo">Keycloak Administrative Console</ulink> (i.e. <ulink url="http://localhost:8080/auth/admin/)">http://localhost:8080/auth/admin/)</ulink> (the username and password are both <emphasis role="strong">admin</emphasis> on first use).</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>In your new realm you should create a new application (you can also use OAuth).</simpara>
+      <simpara>Click <emphasis role="strong">Add Realm</emphasis> and create a custom realm for your application.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>After creating your application select it from the list and make sure to adjust the following settings as appropriate:</simpara>
+      <simpara>Select the <emphasis role="strong">Applications</emphasis> tab and click <emphasis role="strong">Add Application</emphasis>, then fill in the following to add the application to this realm:</simpara>
       
 
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis role="strong">Redirect URI</emphasis>&#8201;&#8212;&#8201;You should use this to whitelist pages that will be redirected to after a successful login.</simpara>
+      <simpara><literal>Name</literal>: the name of your application (i.e. errai-security-demo)</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis role="strong">Claims</emphasis>&#8201;&#8212;&#8201;You will need to explicitly enable any information about users that your application requires access to.</simpara>
+      <simpara><literal>Access Type</literal>: public</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis role="strong">Scope</emphasis>&#8201;&#8212;&#8201;Move any roles that users in your app <emphasis role="strong">may</emphasis> possess to the "Assigned Roles". (Note: moving the roles to "Assigned Roles" does not mean <emphasis role="strong">all</emphasis> users will have this role. It does mean that these roles will be visible to your app for users that do have them.)</simpara>
+      <simpara><literal>Redirect URI</literal>: the url of your application (i.e. <literal>http://localhost:8080/[your-application]/*</literal>)</simpara>
       
     </listitem>
   
@@ -7082,17 +7087,56 @@ public class NavBar extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>After adjusting the settings for your app, go to the <emphasis role="strong">Installation</emphasis> tab and select "keycloak.json" in the <emphasis role="strong">Format Option</emphasis> list. Copy this into a "keycloak.json" file in your <literal>WEB-INF</literal> directory.</simpara>
+      <simpara>After saving your application, choose the new application in the menu and make sure the following are set:</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>In the <emphasis role="strong">Roles</emphasis> tab add your custom roles.</simpara>
       
     </listitem>
   
-</orderedlist>
+    <listitem>
+      <simpara>In the <emphasis role="strong">Installation</emphasis> tab choose the format option <literal>keycloak.json</literal> and copy the contents in your <literal>WEB-INF/keycloak.json</literal> file.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
 
       
     </listitem>
   
     <listitem>
-      <simpara>Add the <literal>errai-security-keycloak</literal> jar to your project. In maven, the dependency is <literal>org.jboss.errai:errai-security-keycloak</literal>.</simpara>
+      <simpara>Click on <emphasis role="strong">Users</emphasis> on the side-panel to add a user:</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Fill out the <literal>Username</literal>, <literal>Email</literal>, <literal>First Name</literal>, and <literal>Last Name</literal> with any values.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>After saving go to the <emphasis role="strong">Credentials</emphasis> tab and set a password.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Go to the <emphasis role="strong">Role Mappings</emphasis> tab. Add <literal>at least one</literal> role to the <literal>Assigned Roles</literal> for your application (scroll down to <literal>Application Roles</literal> and select your application to do this).</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add the <literal>errai-security-keycloak</literal> jar to your project and make sure it&#8217;s being deployed to the server. In maven, the dependency is <literal>org.jboss.errai:errai-security-keycloak</literal>.</simpara>
       
     </listitem>
   
@@ -7110,26 +7154,23 @@ public class NavBar extends Composite {
     <listitem>
       <simpara>Configure the <literal>ErraiLoginRedirectFilter</literal> in your <literal>web.xml</literal>.</simpara>
       
-<orderedlist numeration="loweralpha">
+
+<itemizedlist>
   
     <listitem>
       <simpara>Create a filter-mapping of this filter onto a path that will act as a url to the Keycloak login page. For example, if your deployed app is called <literal>my-app</literal> and you wanted <literal>&lt;server-uri&gt;/my-app/app-login</literal> as your login url then you would add the following:</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <programlisting language="xml" linenumbering="unnumbered">  &lt;filter-mapping&gt;
     &lt;filter-name&gt;ErraiLoginRedirectFilter&lt;/filter-name&gt;
     &lt;url-pattern&gt;/app-login&lt;/url-pattern&gt;
   &lt;/filter-mapping&gt;</programlisting>
-<orderedlist numeration="loweralpha">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>Add a security-constraint to login url. This is what actually causes the redirection to Keycloak. All the filter does is redirect back to your app (which happens after the login completes). For the previous example, the constraint would look like this:</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <programlisting language="xml" linenumbering="unnumbered">  &lt;security-constraint&gt;
     &lt;web-resource-collection&gt;
       &lt;web-resource-name&gt;Login&lt;/web-resource-name&gt;
@@ -7139,14 +7180,13 @@ public class NavBar extends Composite {
       &lt;role-name&gt;*&lt;/role-name&gt;
     &lt;/auth-constraint&gt;
   &lt;/security-constraint&gt;</programlisting>
-<orderedlist numeration="loweralpha">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>Optionally configure the URL that the <literal>ErraiLoginRedirectFilter</literal> redirects to. You can do this with the <literal>redirectLocation</literal> param, which takes a path relative to the app context:</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <programlisting language="xml" linenumbering="unnumbered">  &lt;filter&gt;
     &lt;filter-name&gt;ErraiLoginRedirectFilter&lt;/filter-name&gt;
     &lt;init-param&gt;
@@ -7158,12 +7198,18 @@ public class NavBar extends Composite {
       
     </listitem>
   
+</itemizedlist>
+
+
+      
+    </listitem>
+  
     <listitem>
       <simpara>Set the login method to use Keycloak in you <literal>web.xml</literal>:</simpara>
       
 <programlisting language="xml" linenumbering="unnumbered">  &lt;login-config&gt;
     &lt;auth-method&gt;KEYCLOAK&lt;/auth-method&gt;
-    &lt;realm-name&gt;example&lt;/realm-name&gt;
+    &lt;realm-name&gt;[your-realm-name]&lt;/realm-name&gt;
   &lt;/login-config&gt;</programlisting>
 
       
@@ -7179,7 +7225,8 @@ public class NavBar extends Composite {
       
     </listitem>
   
-</orderedlist>
+</itemizedlist>
+
 <important>
 <title>All users must have at least one role</title>
 <simpara>With this configuration all users must have at least a single role, or else they will not be redirected propertly. Unfortunately, there is no way to define a security-constraint that only requires authentication. The simplest solution is to add a default role to your realm.</simpara>

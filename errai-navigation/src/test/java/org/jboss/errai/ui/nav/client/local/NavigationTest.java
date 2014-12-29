@@ -474,4 +474,10 @@ public class NavigationTest extends AbstractErraiCDITest {
       
     }, TIMEOUT, 500);
   }
+  
+  public void testNavigationPanelInjection() {
+    NavigationPanelTestApp app = 
+            IOC.getBeanManager().lookupBean(NavigationPanelTestApp.class).getInstance();
+    assertNotNull(app.getNavigationPanel());
+  }
 }

@@ -59,7 +59,7 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.6.1</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.7.0</maven.gwt.plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -137,7 +137,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${maven.gwt.plugin.version}</version>
+        <version>${maven.gwt.plugin.version}</version>    
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>App.html</runTarget>

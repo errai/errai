@@ -188,7 +188,8 @@ public class UiBinderGenerator extends Generator {
 
     UiBinderWriter uiBinderWriter = new UiBinderWriter(interfaceType, implName,
             templatePath, oracle, logger, fieldManager, messages, designTime, uiBinderCtx,
-            useSafeHtmlTemplates(logger, propertyOracle), useLazyWidgetBuilders, BINDER_URI);
+            useSafeHtmlTemplates(logger, propertyOracle), useLazyWidgetBuilders, BINDER_URI,
+            resourceOracle);
 
     Document doc = getW3cDoc(logger, designTime, resourceOracle, templatePath);
     designTime.rememberPathForElements(doc);

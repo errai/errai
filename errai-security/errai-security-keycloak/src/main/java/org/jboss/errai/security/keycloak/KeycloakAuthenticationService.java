@@ -48,6 +48,7 @@ import java.util.Set;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
+
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.keycloak.extension.Filtered;
 import org.jboss.errai.security.shared.api.Role;
@@ -79,6 +80,7 @@ import org.keycloak.representations.AccessToken;
  * {@link AccessToken} pertaining to the user that were not null.
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Service
 @SessionScoped
@@ -168,8 +170,7 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   }
 
   protected User createKeycloakUser(final AccessToken accessToken) {
-    final User user = new UserImpl(accessToken.getId(), createRoles(accessToken
-            .getRealmAccess().getRoles()));
+    final User user = new UserImpl(accessToken.getPreferredUsername(), createRoles(accessToken));
 
     final Collection<KeycloakProperty> properties = getKeycloakUserProperties(accessToken);
 
@@ -215,9 +216,9 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
     return properties;
   }
 
-  private Collection<? extends Role> createRoles(final Set<String> roleNames) {
+  private Collection<? extends Role> createRoles(final AccessToken accessToken) {
+    Set<String> roleNames = accessToken.getResourceAccess(accessToken.getIssuedFor()).getRoles();
     final List<Role> roles = new ArrayList<Role>(roleNames.size());
-
     for (final String roleName : roleNames) {
       roles.add(new RoleImpl(roleName));
     }
@@ -233,7 +234,7 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   void setSecurityContext(final KeycloakSecurityContext keycloakSecurityContext) {
     if (wrappedAuthService.isLoggedIn() && keycloakSecurityContext != null) {
       throw new AlreadyLoggedInException("Logged in as " + wrappedAuthService.getUser());
-    }
+    }    
     this.keycloakSecurityContext = keycloakSecurityContext;
     keycloakUser = null;
   }

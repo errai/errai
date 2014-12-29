@@ -46,7 +46,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class KeycloakAuthenticationServiceTest {
 
-  private static final String ID = "john-uid";
+  private static final String PREFERRED_USERNAME = "john-uid";
 
   private static final String USER_ROLE = "user";
 
@@ -59,8 +59,6 @@ public class KeycloakAuthenticationServiceTest {
   private static final String REGION = "ON";
 
   private static final String PROFILE = "http://www.somesite.com/jd1970";
-
-  private static final String PREFERRED_USERNAME = "jd1970";
 
   private static final String POSTAL_CODE = "A1B2C3";
 
@@ -97,6 +95,8 @@ public class KeycloakAuthenticationServiceTest {
   private static final String BIRTHDATE = "January 1st, 1970";
 
   private static final String ADDRESS = "123 Fake Street";
+  
+  private static final String ERRAI_APP = "http://some-errai-app";
 
   private AssertMap keycloakAssertionMap;
 
@@ -113,7 +113,7 @@ public class KeycloakAuthenticationServiceTest {
   @Before
   public void setup() {
     final AccessToken accessToken = new AccessToken();
-
+    
     setUserProperties(accessToken);
 
     // Token strings are never used
@@ -135,7 +135,7 @@ public class KeycloakAuthenticationServiceTest {
   }
 
   private void setUserProperties(final AccessToken accessToken) {
-    accessToken.id(ID);
+    accessToken.setPreferredUsername(PREFERRED_USERNAME);
 
     accessToken.setAddress(ADDRESS);
     accessToken.setBirthdate(BIRTHDATE);
@@ -155,7 +155,6 @@ public class KeycloakAuthenticationServiceTest {
     accessToken.setPhoneNumberVerified(PHONE_NUMBER_VERIFIED);
     accessToken.setPicture(PICTURE);
     accessToken.setPostalCode(POSTAL_CODE);
-    accessToken.setPreferredUsername(PREFERRED_USERNAME);
     accessToken.setProfile(PROFILE);
     accessToken.setRegion(REGION);
     accessToken.setStreetAddress(STREET_ADDRESS);
@@ -168,12 +167,15 @@ public class KeycloakAuthenticationServiceTest {
   private void setUserRoles(final AccessToken accessToken) {
     final Access access = new Access();
     access.addRole(USER_ROLE);
-
-    accessToken.setRealmAccess(access);
+    
+    Map<String, Access> resourceAccess = new HashMap<String, Access>();
+    resourceAccess.put(ERRAI_APP, access);
+    accessToken.issuedFor(ERRAI_APP);
+    accessToken.setResourceAccess(resourceAccess);
   }
 
   private void verifyUserProperties(final User user, final AssertMap map) {
-    assertEquals(ID, user.getIdentifier());
+    assertEquals(PREFERRED_USERNAME, user.getIdentifier());
 
     map.get(KeycloakPropertyNames.ADDRESS).doAssertion(ADDRESS, user.getProperty(KeycloakPropertyNames.ADDRESS));
     map.get(KeycloakPropertyNames.BIRTHDATE).doAssertion(BIRTHDATE, user.getProperty(KeycloakPropertyNames.BIRTHDATE));
@@ -243,14 +245,14 @@ public class KeycloakAuthenticationServiceTest {
 
   @Test
   public void isLoggedInReturnsTrueWhenWrappedUserLoggedIn() throws Exception {
-    mockWrappedService.login(ID, "");
+    mockWrappedService.login(PREFERRED_USERNAME, "");
 
     assertTrue(authService.isLoggedIn());
   }
 
   @Test
   public void getUserReturnsUserWhenWrappedUserLoggedIn() throws Exception {
-    mockWrappedService.login(ID, "");
+    mockWrappedService.login(PREFERRED_USERNAME, "");
 
     final UserImpl user = (UserImpl) authService.getUser();
     verifyUserProperties(user, wrappedAssertionMap);
@@ -302,7 +304,7 @@ public class KeycloakAuthenticationServiceTest {
   public void loginFailsIfKeycloakUserLoggedIn() throws Exception {
     getUserReturnsUserWhenKeycloakUserLoggedIn();
 
-    authService.login(ID, "");
+    authService.login(PREFERRED_USERNAME, "");
   }
 
   @Test(expected = AlreadyLoggedInException.class)
