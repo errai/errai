@@ -18,13 +18,15 @@ package org.jboss.errai.cdi.injection.client.test;
 
 import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 
+import javax.enterprise.inject.Instance;
+
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBeanA;
 import org.jboss.errai.cdi.injection.client.DependentBeanA;
 import org.jboss.errai.cdi.injection.client.DependentInstanceTestBean;
 import org.jboss.errai.cdi.injection.client.InstanceTestBean;
+import org.jboss.errai.cdi.injection.client.InterfaceA;
+import org.jboss.errai.cdi.injection.client.UnmanagedBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-
-import javax.enterprise.inject.Instance;
 
 /**
  * @author Mike Brock
@@ -96,4 +98,39 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
     assertNotNull(b1.getBeanB());
     assertTrue(b1.getBeanB().isPostConstr());
   }
+  
+  public void testIsUnsatisfied() {
+    final InstanceTestBean testBean = getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
+    assertNotNull("InstanceTestBean is null", testBean);
+
+    final Instance<UnmanagedBean> instanceUnmanagedBean = testBean.getUnmanagedBean();
+    assertNotNull("InstanceTestBean.Instance<UnmanagedBean> is null", instanceUnmanagedBean);
+    assertTrue("Unmanaged bean should not be satisfied", instanceUnmanagedBean.isUnsatisfied());
+    
+    final Instance<ApplicationScopedBeanA> instanceApplicationScopedBean = testBean.getInjectApplicationScoped();
+    assertFalse(instanceApplicationScopedBean.isUnsatisfied());
+    
+    final Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
+    assertFalse(instanceDependentBeanA.isUnsatisfied());
+  }
+  
+  public void testIsAmbiguous() {
+    final InstanceTestBean testBean = getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
+    assertNotNull("InstanceTestBean is null", testBean);
+
+    final Instance<InterfaceA> ambiguousBean = testBean.getAmbiguousBean();
+    assertNotNull("InstanceTestBean.Instance<InterfaceA> is null", ambiguousBean);
+    assertTrue(ambiguousBean.isAmbiguous());
+    
+    final Instance<UnmanagedBean> instanceUnmanagedBean = testBean.getUnmanagedBean();
+    assertNotNull("InstanceTestBean.Instance<UnmanagedBean> is null", instanceUnmanagedBean);
+    assertFalse(instanceUnmanagedBean.isAmbiguous());
+    
+    final Instance<ApplicationScopedBeanA> instanceApplicationScopedBean = testBean.getInjectApplicationScoped();
+    assertFalse(instanceApplicationScopedBean.isAmbiguous());
+    
+    final Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
+    assertFalse(instanceDependentBeanA.isAmbiguous());
+  }
+  
 }
