@@ -5078,7 +5078,7 @@ Converters specified on the binding level take precedence over global default co
 
 === Property Change Handlers
 
-In some cases keeping the model and the UI in sync is not enough. Errai's [code]+DataBinder+ allows for the registration of [code]+PropertyChangeHandlers+ for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g [code]+"customer.address.\*"+ ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g [code]+"customer.\*\*"+).
+In some cases keeping the model and the UI in sync is not enough. Errai's [code]+DataBinder+ allows for the registration of [code]+PropertyChangeHandlers+ for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g [code]+"customer.address.\*"+ ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g [code]+"customer.\**"+ or just [code]+"**"+) .
 
 This provides a uniform notification mechanism for model and UI value changes. [code]+PropertyChangeHandlers+ can be used to carry out any additional logic that might be necessary after a model or UI value has changed.
 
