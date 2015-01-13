@@ -94,18 +94,27 @@ public class VersionSelect extends AbstractUICommand implements UIWizardStep {
   }
 
   private boolean isValidVersion(final String version) {
-    final Integer majorVersion;
+    final Double majorVersion;
+    final Integer minorVersion;
 
     try {
-      majorVersion = Integer.valueOf(version.substring(0, 1));
+      majorVersion = Double.valueOf(version.substring(0, 3));
+      minorVersion = Integer.valueOf(version.substring(4, 5));
     }
     catch (NumberFormatException e) {
       return false;
     }
 
-    return (majorVersion > 3
-    || (majorVersion == 3
-            && (version.contains("SNAPSHOT")) || version.compareTo("3.0.0.20140214-M4") > 0));
+    /*
+     * TODO: Change this depending on the latest valid Errai versions and snapshots released.
+     */
+    if (majorVersion == 3.0)
+      return ((minorVersion >= 4) && (!version.contains("SNAPSHOT")));
+
+    else if (majorVersion > 3.0)
+      return ((minorVersion > 0) || (!version.contains("SNAPSHOT")));
+
+    return false;
   }
 
 }
