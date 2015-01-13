@@ -75,7 +75,10 @@ public class VersionFacet extends AbstractFacet<Project> implements ProjectFacet
         if (erraiVersion.startsWith("3.0")) {
           return "2.5.1";
         }
-        // Addon only supports 3.x, so this is handles version greater than 3.0
+        else if (erraiVersion.startsWith("3.1.0")) {
+          return "2.6.1";
+        }
+        // Addon only supports 3.x, so this handles versions greater than 3.1.0
         else {
           return "2.7.0";
         }
