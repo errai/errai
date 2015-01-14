@@ -24,6 +24,9 @@ public class BoundToNonExistingModelProperty {
     @Inject @Bound(property="stillNonProperty6")
     private TextBox nonProperty6;
     
+    @Inject @Bound(property="property1.property2")
+    private TextBox nonPropertyChain;
+    
     private final Widget constructorInjectedWidget;
     private final TextBox widgetNamedByGetter = new TextBox();
     private TextBox methodInjectedWidget = new TextBox();

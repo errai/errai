@@ -30,6 +30,12 @@ public class BoundNoWarnings {
     @Inject @Bound(property="property4")
     private TextBox thisNameIsOverriddenByAttribute;
 
+    @Inject @Bound(property="property6.property1")
+    private TextBox propertyChainOneLevel;
+    
+    @Inject @Bound(property="property6.property6.property1")
+    private TextBox propertyChainTwoLevels;
+    
     private final Widget constructorInjectedWidget;
     private final TextBox widgetNamedByGetter = new TextBox();
     private TextBox methodInjectedWidget = new TextBox();
