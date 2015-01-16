@@ -10,6 +10,7 @@ public class BoundModelClass {
   private String property3;
   private String property4;
   private String property5;
+  private BoundModelClass property6;
 
   public String getProperty1() {
     return property1;
@@ -40,5 +41,11 @@ public class BoundModelClass {
   }
   public void setProperty5(String property5) {
     this.property5 = property5;
+  }
+  public BoundModelClass getProperty6() {
+    return property6;
+  }
+  public void setProperty6(BoundModelClass property6) {
+    this.property6 = property6;
   }
 }

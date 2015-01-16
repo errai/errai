@@ -80,6 +80,7 @@ public final class ArtifactVault {
     War("maven-war-plugin", "org.apache.maven.plugins"),
     WildflyPlugin("wildfly-maven-plugin", "org.wildfly.plugins"),
     Surefire("maven-surefire-plugin", "org.apache.maven.plugins"),
+    EclipseMavenPlugin("lifecycle-mapping", "org.eclipse.m2e"),
 
     // errai
     ErraiVersionMaster("errai-version-master", "org.jboss.errai.bom"),
@@ -153,17 +154,6 @@ public final class ArtifactVault {
     @Override
     public String toString() {
             return String.format("%s:%s", groupId, artifactId);
-//      StringBuilder artifactBuilder = new StringBuilder();
-//
-//      String plainArtifactString = new String(groupId + ":" + artifactId);
-//      artifactBuilder.append(plainArtifactString);
-//
-//      if (type != null) {
-//        artifactBuilder.append(":::");
-//        artifactBuilder.append(type);
-//      }
-//
-//      return artifactBuilder.toString();
     }
 
     private static Map<String, DependencyArtifact> artifacts = new HashMap<String, ArtifactVault.DependencyArtifact>();

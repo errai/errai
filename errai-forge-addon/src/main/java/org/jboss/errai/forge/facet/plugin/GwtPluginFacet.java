@@ -45,7 +45,8 @@ public class GwtPluginFacet extends AbstractPluginFacet {
     executions = Arrays.asList(new Execution[] {
         // Note: phase and id must be explicitly set, otherwise forge will write
         // "null" as values to the tags
-        ExecutionBuilder.create().setId("resources").setPhase("process-resources").addGoal("resources"),
+        //ExecutionBuilder.create().setId("resources").setPhase("process-resources").addGoal("resources"),
+
         ExecutionBuilder.create().setId("compile").setPhase("prepare-package").addGoal("compile")
     });
     configurations = Arrays

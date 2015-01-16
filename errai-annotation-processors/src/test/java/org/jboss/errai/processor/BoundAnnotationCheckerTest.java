@@ -69,10 +69,11 @@ public class BoundAnnotationCheckerTest extends AbstractProcessorTest {
 
     assertCompilationMessage(diagnostics, Kind.ERROR, 18, 5,  "The model type BoundModelClass does not have property \"nonProperty1\"");
     assertCompilationMessage(diagnostics, Kind.ERROR, 21, 13, "The model type BoundModelClass does not have property \"nonProperty2\"");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 24, 13, "The model type BoundModelClass does not have property \"nonProperty6\"");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 32, 44, "The model type BoundModelClass does not have property \"nonProperty5\"");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 37, 38, "The model type BoundModelClass does not have property \"nonProperty3\"");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 41, 5,  "The model type BoundModelClass does not have property \"nonProperty4\"");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 24, 13, "The model type BoundModelClass does not have property \"stillNonProperty6\"");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 27, 13, "The model type BoundModelClass does not have property \"property1.property2\"");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 35, 44, "The model type BoundModelClass does not have property \"nonProperty5\"");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 40, 38, "The model type BoundModelClass does not have property \"nonProperty3\"");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 44, 5,  "The model type BoundModelClass does not have property \"nonProperty4\"");
   }
 
   @Test
