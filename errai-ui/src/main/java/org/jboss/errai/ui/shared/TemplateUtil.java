@@ -75,7 +75,7 @@ public final class TemplateUtil {
       throw new IllegalStateException("Template [" + templateFile
               + "] did not contain data-field, id or class attribute for field [" + componentType + "." + fieldName + "]");
     }
-    logger.fine("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
+    logger.finer("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
 
     if (!element.getTagName().equals(field.getElement().getTagName())) {
@@ -154,7 +154,7 @@ public final class TemplateUtil {
     Element parserDiv = DOM.createDiv();
     parserDiv.setInnerHTML(templateContents);
     if (rootField != null && !rootField.trim().isEmpty()) {
-      logger.fine("Locating root element: " + rootField);
+      logger.finer("Locating root element: " + rootField);
       VisitContext<TaggedElement> context = Visit.depthFirst(parserDiv, new Visitor<TaggedElement>() {
         @Override
         public boolean visit(VisitContextMutable<TaggedElement> context, Element element) {
@@ -180,7 +180,7 @@ public final class TemplateUtil {
       }
     }
 
-    logger.fine(parserDiv.getInnerHTML().trim());
+    logger.finest(parserDiv.getInnerHTML().trim());
 
     final Element templateRoot = firstNonMetaElement(parserDiv);
     if (templateRoot == null) {
@@ -251,7 +251,7 @@ public final class TemplateUtil {
     if (!getTranslationService().isEnabled())
       return;
 
-    logger.fine("Translating template: " + templateFile);
+    logger.finer("Translating template: " + templateFile);
     final String i18nKeyPrefix = getI18nPrefix(templateFile);
 
     // Add i18n prefix attribute for post-creation translation
@@ -276,7 +276,7 @@ public final class TemplateUtil {
     final Map<String, Element> dataFields = new LinkedHashMap<String, Element>();
     final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
 
-    logger.fine("Searching template for fields.");
+    logger.finer("Searching template for fields.");
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
