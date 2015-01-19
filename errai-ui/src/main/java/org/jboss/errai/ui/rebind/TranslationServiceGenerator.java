@@ -431,6 +431,10 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     // Find all *usages* of translation keys by scanning and processing all templates.
     final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
+      if (!templatedAnnotatedClass.getAnnotation(Templated.class)
+              .provider().equals(Templated.DEFAULT_PROVIDER.class)) 
+        continue;
+      
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
       String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
