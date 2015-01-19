@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-12-22</date>
+    <date>2015-01-09</date>
     
     
     
@@ -4708,7 +4708,7 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
 </section>
 <section id="sid-51282340_DataBinding-PropertyChangeHandlers">
 <title>Property Change Handlers</title>
-<simpara>In some cases keeping the model and the UI in sync is not enough. Errai&#8217;s <literal><phrase role="code">DataBinder</phrase></literal> allows for the registration of <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g <literal><phrase role="code">"customer.address.*"</phrase></literal> ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g <literal><phrase role="code">"customer.\*\*"</phrase></literal>).</simpara>
+<simpara>In some cases keeping the model and the UI in sync is not enough. Errai&#8217;s <literal><phrase role="code">DataBinder</phrase></literal> allows for the registration of <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g <literal><phrase role="code">"customer.address.*"</phrase></literal> ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g <literal><phrase role="code">"customer.**"</phrase></literal> or just <literal><phrase role="code">"**"</phrase></literal>) .</simpara>
 <simpara>This provides a uniform notification mechanism for model and UI value changes. <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> can be used to carry out any additional logic that might be necessary after a model or UI value has changed.</simpara>
 <programlisting language="java" linenumbering="unnumbered">dataBinder.addPropertyChangeHandler(new PropertyChangeHandler() {
   @Override
