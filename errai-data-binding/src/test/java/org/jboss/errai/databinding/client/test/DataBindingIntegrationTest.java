@@ -35,6 +35,7 @@ import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.SingletonBindable;
 import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelTakesValueWidget;
 import org.jboss.errai.databinding.client.TestModelWidget;
 import org.jboss.errai.databinding.client.TestModelWithList;
 import org.jboss.errai.databinding.client.TestModelWithNestedConfiguredBindable;
@@ -316,6 +317,20 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindingToCustomHasValueType() {
     TestModelWidget widget = new TestModelWidget();
+
+    TestModel childModel = new TestModel();
+    childModel.setName("child");
+
+    TestModel model = new TestModel();
+    model.setChild(childModel);
+
+    DataBinder<TestModel> binder = DataBinder.forModel(model, InitialState.FROM_MODEL).bind(widget, "child");
+    assertEquals("Widget not updated based on model's state", childModel, binder.getModel().getChild());
+  }
+
+  @Test
+  public void testBindingToCustomTakesValueType() {
+    TestModelTakesValueWidget widget = new TestModelTakesValueWidget();
 
     TestModel childModel = new TestModel();
     childModel.setName("child");

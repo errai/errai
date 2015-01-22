@@ -35,6 +35,7 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
@@ -50,11 +51,11 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * <li>Update the bound widget when a setter method is invoked on the model (see
  * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for widgets that either
- * implement {@link HasValue} or {@link HasText})</li>
+ * implement {@link TakesValue} or {@link HasText})</li>
  * 
  * <li>Update the bound widgets when a non-accessor method is invoked on the model (by comparing all
  * bound properties to detect changes). See {@link #updateWidgetsAndFireEvents()}. Works for widgets
- * that either implement {@link HasValue} or {@link HasText})</li>
+ * that either implement {@link TakesValue} or {@link HasText})</li>
  * 
  * <li>Update the target model in response to value change events (only works for bound widgets that
  * implement {@link HasValue})</li>
@@ -141,8 +142,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         }
       });
     }
-    else if (!(widget instanceof HasText)) {
-      throw new RuntimeException("Widget must implement either " + HasValue.class.getName() +
+    else if (!(widget instanceof HasText) && !(widget instanceof TakesValue)) {
+      // implementing TakesValue implies HasValue since HasValue extends the TakesValue interface...
+      throw new RuntimeException("Widget must implement either " + TakesValue.class.getName() +
           " or " + HasText.class.getName() + "!");
     }
 
@@ -302,8 +304,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (widget == excluding)
         continue;
 
-      if (widget instanceof HasValue) {
-        HasValue hv = (HasValue) widget;
+      if (widget instanceof TakesValue) {
+        TakesValue hv = (TakesValue) widget;
         Object widgetValue =
             Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converter);
         hv.setValue(widgetValue);
@@ -355,8 +357,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (initialState != null) {
       Object value = proxy.get(property);
-      if (widget instanceof HasValue) {
-        value = initialState.getInitialValue(value, ((HasValue) widget).getValue());
+      if (widget instanceof TakesValue) {
+        value = initialState.getInitialValue(value, ((TakesValue) widget).getValue());
       }
       else if (widget instanceof HasText) {
         value = initialState.getInitialValue(value, ((HasText) widget).getText());
