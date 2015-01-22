@@ -32,9 +32,9 @@ import com.google.gwt.user.client.ui.HasValue;
  * associated with a {@link DataBinder} (see {@link AutoBound} and {@link Model}).
  * <p>
  * The annotated widget can either be a field, method or constructor parameter or a method return
- * value and must implement either {@link HasText} or {@link HasValue}. Note that a {@link Bound}
- * field can but does not have to be injected. The following example shows all valid use cases for
- * the {@link Bound} annotation.
+ * value and must implement either {@link HasText}, {@link HasValue} or {@link TakesValue}. Note 
+ * that a {@link Bound} field can but does not have to be injected. The following example shows 
+ * all valid use cases for the {@link Bound} annotation.
  * 
  * <pre>
  *      public class MyBean {

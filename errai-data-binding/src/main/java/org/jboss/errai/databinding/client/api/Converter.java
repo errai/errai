@@ -44,7 +44,8 @@ public interface Converter<M, W> {
   public M toModelValue(W widgetValue);
 
   /**
-   * Converts the provided model value to a value usable by widgets of type {@link HasValue HasValue&lt;W&gt;}.
+   * Converts the provided model value to a value usable by widgets of type {@link HasValue HasValue&lt;W&gt;} or
+   * {@link TakesValue TakesValue&lt;W&gt;}.
    *
    * @param modelValue
    *          the model value to convert, may be null.
