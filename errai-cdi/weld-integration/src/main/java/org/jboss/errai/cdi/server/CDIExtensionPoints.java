@@ -325,18 +325,25 @@ public class CDIExtensionPoints implements Extension {
       for (final Class<?> delegateClass : managedTypes.getDelegateClasses()) {
         try {
           if (!registered.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
+            log.info("not available or already registered: " + delegateClass.getName());
             continue;
           }
         } 
         catch(Throwable t) {
           continue;
         }
-        registered.remove(delegateClass);
         
         for (final ServiceParser svcParser : managedTypes.getDelegateServices(delegateClass)) {
-          final Object delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
+          final Object delegateInstance;
+          try {
+            delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
+          } 
+          catch (IllegalStateException t) {
+            // handle WELD-001332: BeanManager method getReference() is not available during application initialization
+            // try again later...
+            return;
+          }
           final MessageCallback callback = svcParser.getCallback(delegateInstance);
-          
           if (callback != null) {
             if (svcParser.isLocal()) {
               bus.subscribeLocal(svcParser.getServiceName(), callback);
@@ -346,6 +353,7 @@ public class CDIExtensionPoints implements Extension {
             }
           }
         }
+        registered.remove(delegateClass);
       }
     }
   }
