@@ -276,7 +276,7 @@ public class CDIExtensionPoints implements Extension {
    * Registers beans (type and method services) as they become available from the bean manager.
    */
   private class StartupCallback implements Runnable {
-    private final Set<Object> registered = new HashSet<Object>();
+    private final Set<Object> toRegister = new HashSet<Object>();
     private final BeanManager beanManager;
     private final MessageBus bus;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -287,7 +287,7 @@ public class CDIExtensionPoints implements Extension {
       this.beanManager = beanManager;
       this.bus = bus;
       this.scheduledExecutorService = scheduledExecutorService;
-      registered.addAll(managedTypes.getDelegateClasses());
+      toRegister.addAll(managedTypes.getDelegateClasses());
 
       this.expiryTime = System.currentTimeMillis() + (timeOutInSeconds * 1000);
     }
@@ -316,7 +316,7 @@ public class CDIExtensionPoints implements Extension {
         throw new RuntimeException("failed to discover beans: " + managedTypes.getDelegateClasses());
       }
 
-      if (registered.isEmpty()) {
+      if (toRegister.isEmpty()) {
         scheduledExecutorService.shutdown();
         return;
       }
@@ -324,8 +324,7 @@ public class CDIExtensionPoints implements Extension {
       // As each delegate becomes available, register all the associated services (type and method)
       for (final Class<?> delegateClass : managedTypes.getDelegateClasses()) {
         try {
-          if (!registered.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
-            log.info("not available or already registered: " + delegateClass.getName());
+          if (!toRegister.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
             continue;
           }
         } 
@@ -353,7 +352,7 @@ public class CDIExtensionPoints implements Extension {
             }
           }
         }
-        registered.remove(delegateClass);
+        toRegister.remove(delegateClass);
       }
     }
   }
