@@ -46,7 +46,7 @@
     <asm.version>5.0.3</asm.version>
     <cal10n.version>0.7.4</cal10n.version>
     <cdi.api.version>1.2</cdi.api.version>
-    <deltaspike.version>0.4</deltaspike.version>
+    <deltaspike.version>1.2.1</deltaspike.version>
     <el.api.version>2.2</el.api.version>
     <exec.maven.plugin.version>1.2.1</exec.maven.plugin.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
