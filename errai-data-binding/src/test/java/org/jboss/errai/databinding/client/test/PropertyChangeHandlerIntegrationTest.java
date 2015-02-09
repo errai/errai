@@ -24,6 +24,7 @@ import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.InvalidPropertyExpressionException;
 import org.jboss.errai.databinding.client.MockHandler;
 import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelWithBindableTypeList;
 import org.jboss.errai.databinding.client.TestModelWithList;
 import org.jboss.errai.databinding.client.TestModelWithListWidget;
 import org.jboss.errai.databinding.client.api.Convert;
@@ -206,9 +207,9 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     MockHandler handler = new MockHandler();
 
     TestModelWithListWidget widget = new TestModelWithListWidget();
-    
     DataBinder<TestModelWithList> binder = DataBinder.forType(TestModelWithList.class).bind(widget, "list");
     binder.getModel().setList(null);
+    
     binder.addPropertyChangeHandler(handler);
 
     List<String> list = new ArrayList<String>();
@@ -242,6 +243,35 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong old property value in event", Arrays.asList("1", "2"), handler.getEvents().get(3).getOldValue());
     assertEquals("Wrong property value in event", Arrays.asList("1"), handler.getEvents().get(3).getNewValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(3).getSource());
+  }
+  
+  @Test
+  public void testBoundListFiresPropertyChangeEventOnElementChange() {
+    MockHandler handler = new MockHandler();
+
+    DataBinder<TestModelWithBindableTypeList> binder = 
+            DataBinder.forType(TestModelWithBindableTypeList.class).bind(new TextBox(), "list");
+    binder.getModel().getList().add(new TestModelWithBindableTypeList("id"));
+    binder.addPropertyChangeHandler(handler);
+
+    // Mutating the list element should cause a property change event for the list
+    TestModelWithBindableTypeList element = binder.getModel().getList().get(0);
+    element.setId("id-change");
+    
+    assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
+    assertEquals("Wrong property name in event", "list", handler.getEvents().get(0).getPropertyName());
+    assertTrue("Wrong property value in event",handler.getEvents().get(0).getNewValue().equals(
+            Arrays.asList(new TestModelWithBindableTypeList("id-change"))));
+    assertTrue("Wrong property value in event",handler.getEvents().get(0).getNewValue().equals(
+            binder.getModel().getList()));
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
+    
+    binder.getModel().getList().remove(0);
+    assertEquals("Should have received exactly two property change event", 2, handler.getEvents().size());
+    
+    // Once the element is removed from the list mutations should no longer cause change events
+    element.setId("id-change2");
+    assertEquals("Should have received no additional property change event", 2, handler.getEvents().size());
   }
   
   @Test

@@ -19,12 +19,16 @@ package org.jboss.errai.databinding.client;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
 /**
  * Wraps a List<M> to notify change handlers of all operations that mutate the underlying list.
@@ -39,6 +43,9 @@ public class BindableListWrapper<M> implements List<M> {
 
   private final List<M> list;
   private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
+  
+  private final Map<BindableProxyAgent<?>, PropertyChangeHandler<?>> elementChangeHandlers = 
+          new HashMap<BindableProxyAgent<?>, PropertyChangeHandler<?>>();
 
   public BindableListWrapper(List<M> list) {
     Assert.notNull(list);
@@ -114,6 +121,9 @@ public class BindableListWrapper<M> implements List<M> {
     for (BindableListChangeHandler<M> handler : handlers) {
       handler.onItemsCleared(oldValue);
     }
+    for (BindableProxyAgent<?> agent : elementChangeHandlers.keySet()) {
+      removeElementChangeHandler(agent);
+    }
   }
 
   @Override
@@ -180,6 +190,7 @@ public class BindableListWrapper<M> implements List<M> {
       for (BindableListChangeHandler<M> handler : handlers) {
         handler.onItemRemovedAt(oldValue, index);
       }
+      removeElementChangeHandler(oldValue.get(index));
     }
     return b;
   }
@@ -192,6 +203,7 @@ public class BindableListWrapper<M> implements List<M> {
     for (BindableListChangeHandler<M> handler : handlers) {
       handler.onItemRemovedAt(oldValue, index);
     }
+    removeElementChangeHandler(m);
     return m;
   }
 
@@ -213,6 +225,9 @@ public class BindableListWrapper<M> implements List<M> {
     if (b) {
       for (BindableListChangeHandler<M> handler : handlers) {
         handler.onItemsRemovedAt(oldValue, indexes);
+      }
+      for (BindableProxyAgent<?> agent : elementChangeHandlers.keySet()) {
+        removeElementChangeHandler(agent);
       }
     }
     return b;
@@ -236,6 +251,7 @@ public class BindableListWrapper<M> implements List<M> {
     for (BindableListChangeHandler<M> handler : handlers) {
       handler.onItemChanged(oldValue, index, element);
     }
+    removeElementChangeHandler(m);
     return m;
   }
 
@@ -271,8 +287,57 @@ public class BindableListWrapper<M> implements List<M> {
   private Object convertToProxy(Object element) {
     if (BindableProxyFactory.isBindableType(element)) {
       element = BindableProxyFactory.getBindableProxy(element, InitialState.FROM_MODEL);
+      
+      // Register a property change handler on the element to fire a change
+      // event for the list when the element changes
+      PropertyChangeHandler<Object> handler = new PropertyChangeHandler<Object>() {
+        @Override
+        public void onPropertyChange(PropertyChangeEvent<Object> event) {
+          final int index = list.indexOf(event.getSource());
+          final List<M> source = new ArrayList<M>(list);
+          if (index == -1)  return; 
+          
+          source.set(index, null);
+          for (BindableListChangeHandler<M> handler : handlers) {
+            handler.onItemChanged(source, index, (M) event.getSource());
+          }
+        }
+      };
+      
+      BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getAgent();
+      
+      agent.addPropertyChangeHandler(handler);
+      elementChangeHandlers.put(agent, handler);
     }
     return element;
+  }
+  
+  private void removeElementChangeHandler(Object element) {
+    if (!BindableProxyFactory.isBindableType(element)) {
+      return;
+    }
+    
+    final BindableProxyAgent<?> agent= ((BindableProxy<?>) element).getAgent();
+    removeElementChangeHandler(agent);
+  }
+  
+  private void removeElementChangeHandler(BindableProxyAgent<?> agent) {
+    Assert.notNull(agent);
+    
+    PropertyChangeHandler<?> handler = elementChangeHandlers.remove(agent);
+    if (handler != null) {
+      agent.removePropertyChangeHandler(handler);
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return list.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+   return list.equals(obj);
   }
 
   /**
@@ -325,9 +390,11 @@ public class BindableListWrapper<M> implements List<M> {
     public void remove() {
       List<M> oldValue = new ArrayList<M>(list);
       iterator.remove();
+      int index = iterator.previousIndex() + 1;
       for (BindableListChangeHandler<M> handler : handlers) {
-        handler.onItemRemovedAt(oldValue, iterator.previousIndex() + 1);
+        handler.onItemRemovedAt(oldValue, index);
       }
+      removeElementChangeHandler(oldValue.get(index));
     }
 
     @Override
@@ -335,9 +402,11 @@ public class BindableListWrapper<M> implements List<M> {
       List<M> oldValue = new ArrayList<M>(list);
       e = (M) convertToProxy(e);
       iterator.set(e);
+      int index = iterator.nextIndex() - 1;
       for (BindableListChangeHandler<M> handler : handlers) {
-        handler.onItemChanged(oldValue, iterator.nextIndex() - 1, e);
+        handler.onItemChanged(oldValue, index, e);
       }
+      removeElementChangeHandler(oldValue.get(index));
     }
 
     @Override
