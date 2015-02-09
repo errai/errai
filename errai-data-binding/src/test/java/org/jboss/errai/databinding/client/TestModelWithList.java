@@ -25,7 +25,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 public class TestModelWithList {
 
   private List<String> list = new ArrayList<String>();
-
+  
   public List<String> getList() {
     return list;
   }
@@ -33,4 +33,5 @@ public class TestModelWithList {
   public void setList(List<String> list) {
     this.list = list;
   }
+
 }

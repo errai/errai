@@ -117,4 +117,5 @@ public interface BindableListChangeHandler<M> {
    *          the new value of the item at the provided index.
    */
   public void onItemChanged(List<M> source, int index, M item);
+  
 }
