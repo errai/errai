@@ -200,10 +200,12 @@ public class CDIExtensionPoints implements Extension {
 
     // veto on client side implementations that contain CDI annotations
     // (i.e. @Observes) Otherwise Weld might try to invoke on them
-    if (vetoClasses.contains(type.getJavaClass().getName())
-            || (type.getJavaClass().getPackage().getName().matches("(^|.*\\.)client(?!\\.shared)(\\..*)?")
-            && !type.getJavaClass().isInterface())) {
-      log.debug("Vetoing processed type: " + type.getJavaClass().getName());
+    Class<?> javaClass = type.getJavaClass();
+    Package pkg = javaClass.getPackage();
+    if (vetoClasses.contains(javaClass.getName())
+            || (pkg != null && pkg.getName().matches("(^|.*\\.)client(?!\\.shared)(\\..*)?")
+            && !javaClass.isInterface())) {
+      log.debug("Vetoing processed type: " + javaClass.getName());
       event.veto();
     }
   }
