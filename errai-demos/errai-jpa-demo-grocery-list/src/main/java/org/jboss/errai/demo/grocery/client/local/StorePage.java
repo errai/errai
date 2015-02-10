@@ -69,7 +69,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.gen2.picker.client.SliderBar;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.events.place.PlaceChangeMapEvent;
