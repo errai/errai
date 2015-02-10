@@ -121,9 +121,7 @@ public class BindableListWrapper<M> implements List<M> {
     for (BindableListChangeHandler<M> handler : handlers) {
       handler.onItemsCleared(oldValue);
     }
-    for (BindableProxyAgent<?> agent : elementChangeHandlers.keySet()) {
-      removeElementChangeHandler(agent);
-    }
+    removeElementChangeHandlers();
   }
 
   @Override
@@ -226,9 +224,7 @@ public class BindableListWrapper<M> implements List<M> {
       for (BindableListChangeHandler<M> handler : handlers) {
         handler.onItemsRemovedAt(oldValue, indexes);
       }
-      for (BindableProxyAgent<?> agent : elementChangeHandlers.keySet()) {
-        removeElementChangeHandler(agent);
-      }
+      removeElementChangeHandlers();
     }
     return b;
   }
@@ -327,6 +323,13 @@ public class BindableListWrapper<M> implements List<M> {
     PropertyChangeHandler<?> handler = elementChangeHandlers.remove(agent);
     if (handler != null) {
       agent.removePropertyChangeHandler(handler);
+    }
+  }
+  
+  private void removeElementChangeHandlers() {
+    List<BindableProxyAgent<?>> agents = new ArrayList<BindableProxyAgent<?>>(elementChangeHandlers.keySet());
+    for (BindableProxyAgent<?> agent : agents) {
+      removeElementChangeHandler(agent);
     }
   }
   
