@@ -6301,7 +6301,11 @@ In addition when using this in conjunction with Errai Databinding. Any Errai UI 
 
 === Internationalization (i18n)
 
-User interfaces often need to be available in multiple languages. To get started with Errai's internationalization support, simply put the [code]+@Bundle("bundle.json")+ annotation on your entry point and add an empty [code]+bundle.json+ file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.
+User interfaces often need to be available in different languages. Errai's i18n support makes it easier for you to publish your web app in multiple languages. This section explains how to use this feature in your application.
+
+==== HTML Template Translation
+
+To get started with Errai's internationalization support, simply put the [code]+@Bundle("bundle.json")+ annotation on your entry point and add an empty [code]+bundle.json+ file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.
 
 Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called [code]+errai-bundle-all.json+ and put it in your [code]+.errai+ directory. You can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.
 
@@ -6376,7 +6380,7 @@ public class NavBar extends Composite {
   ListWidget<Locale, LanguageItem> language;
 
   @AfterInitialization
-  public void buildLangaugeList() {
+  public void buildLanguageList() {
     language.setItems(new ArrayList<Locale>(selector.getSupportedLocales()));
   }
 
@@ -6396,6 +6400,60 @@ public class NavBar extends Composite {
         navigation.goTo(navigation.getCurrentPage().name());
       }
     });
+----
+
+==== TranslationKey and TranslationService
+
+The [code]+@TranslationKey+ annotation and [code]+TranslationService+ class extend Errai's i18n support to Java code. They provide a mechanism for developers to declare translation strings from within their GWT application code (as opposed to the HTML templates).
+
+To do this, developers must annotate a field which represents the translation key with [code]+@TranslationKey+ annotation. This key will then map to a value in the translation bundle file. Once the field is annotated appropriately, the developer must directly invoke the TranslationService's format() method. This method call will perform a lookup in the translation service of the value mapped to the provided key. Note that value substitution using the +\{N\}+ format is supported.
+
+As an example, consider the following code:
+
+
+[source, java]
+----
+package org.example.ui.client.local;
+
+public class AppMessages {
+
+   @TranslationKey(defaultValue = "I guess something happened!")
+   public static final String CUSTOM_MESSAGE = "app.custom-message";
+   
+   @TranslationKey(defaultValue = "Hey {0}, I just told you something happened!")
+   public static final String CUSTOM_MESSAGE_WITH_NAME = "app.custom-message-with-name";
+}
+----
+
+
+[source, java]
+----
+package org.example.ui.client.local;
+
+@Dependent
+@Templated
+public class CustomComponent extends Composite {
+      
+   @Inject
+   private TranslationService translationService;
+
+   @Inject
+   @DataField
+   private Button someAction;
+
+   @EventHandler("someAction")
+   private void doLogin(ClickEvent event) {
+     
+      // do some action that may require a notification sent to the user
+     
+      String messageToUser = translationService.format(AppMessages.CUSTOM_MESSAGE);
+      Window.alert(messageToUser);
+     
+      String username = getCurrentUserName();
+      String messageToUserWithName = translationService.format(AppMessages.CUSTOM_MESSAGE_WITH_NAME, username);
+      Window.alert(messageToUserWithName);
+   }
+}
 ----
 
 [[sid-51806600_ErraiUI-ExtendedstylingwithLESS]]

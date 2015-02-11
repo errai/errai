@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2015-01-09</date>
+    <date>2015-02-12</date>
     
     
     
@@ -5681,7 +5681,7 @@ public class NavBar extends Composite {
   ListWidget&lt;Locale, LanguageItem&gt; language;
 
   @AfterInitialization
-  public void buildLangaugeList() {
+  public void buildLanguageList() {
     language.setItems(new ArrayList&lt;Locale&gt;(selector.getSupportedLocales()));
   }
 
