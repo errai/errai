@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Parameter;
@@ -37,6 +39,8 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.ext.typeinfo.JArrayType;
@@ -92,8 +96,39 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
   }
 
+  
+  public static class GWTClassCache implements CacheStore {
+    private Map<String, MetaClass> cache = new ConcurrentHashMap<String, MetaClass>();
+    
+    @Override
+    public void clear() {
+      cache.clear();
+    }
+    
+    public void push(MetaClass clazz) {
+      cache.put(clazz.getFullyQualifiedName(), clazz);
+    }
+    
+    public MetaClass get(String name) {
+      return cache.get(name);
+    }
+    
+  }
+  
   public static MetaClass newInstance(final TypeOracle oracle, final JType type) {
-    return newUncachedInstance(oracle, type);
+    final GWTClassCache cache = CacheUtil.getCache(GWTClassCache.class);
+    
+    if (type.isGenericType() != null || type.isParameterized() != null) {
+      return newUncachedInstance(oracle, type);
+    }
+    
+    MetaClass clazz = cache.get(type.getQualifiedSourceName());
+    if (clazz == null) {
+      clazz = newUncachedInstance(oracle, type);
+      cache.push(clazz);
+    }
+    
+    return clazz;
   }
 
   public static MetaClass newInstance(final TypeOracle oracle, final String type) {
@@ -106,7 +141,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newUncachedInstance(final TypeOracle oracle, final JType type) {
-
     return new GWTClass(oracle, type, false);
   }
 
@@ -201,9 +235,15 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return getEnclosedMetaObject().getJNISignature();
   }
 
+  private String _packageName = null;
   @Override
   public String getPackageName() {
-    return getEnclosedMetaObject().isClassOrInterface().getPackage().getName();
+    if (_packageName != null) {
+      return _packageName;
+    }
+    
+    _packageName = getEnclosedMetaObject().isClassOrInterface().getPackage().getName();
+    return _packageName;
   }
 
   private static MetaMethod[] fromMethodArray(final TypeOracle oracle, final JMethod[] methods) {
@@ -234,8 +274,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
   private static final List<MetaMethod> overrideMethods =
       Arrays.asList(MetaClassFactory.get(Object.class).getMethods());
 
+  private MetaMethod[] _methodsCache = null;
+  
   @Override
   public MetaMethod[] getMethods() {
+    if (_methodsCache != null) {
+      return _methodsCache;
+    }
+    
     final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
     meths.addAll(getSpecialTypeMethods());
 
@@ -267,8 +313,9 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
     while ((type = type.getSuperclass()) != null && !type.getQualifiedSourceName().equals("java.lang.Object"));
     meths.addAll(overrideMethods);
-
-    return meths.toArray(new MetaMethod[meths.size()]);
+    _methodsCache = meths.toArray(new MetaMethod[meths.size()]);
+    
+    return _methodsCache;
   }
 
   @Override
@@ -405,8 +452,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return declaredClasses;
   }
 
+  private MetaClass[] _intefacesCache = null;
+  
   @Override
   public MetaClass[] getInterfaces() {
+    if (_intefacesCache != null) {
+      return _intefacesCache;
+    }
+    
     final JClassType jClassType = getEnclosedMetaObject().isClassOrInterface();
     if (jClassType == null)
       return new MetaClass[0];
@@ -417,7 +470,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
       metaClassList.add(new GWTClass(oracle, type, false));
     }
 
-    return metaClassList.toArray(new MetaClass[metaClassList.size()]);
+    _intefacesCache = metaClassList.toArray(new MetaClass[metaClassList.size()]);
+    return _intefacesCache;
   }
 
   @Override
@@ -438,7 +492,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-    return newUncachedInstance(oracle, type);
+    return newInstance(oracle, type);
   }
 
   @Override

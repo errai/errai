@@ -129,14 +129,18 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return getEnclosedMetaObject().getCanonicalName();
   }
 
+  private String _packageName = null;
   @Override
   public String getPackageName() {
-    String packageName = null;
+    if (_packageName != null) {
+      return _packageName;
+    }
+    
     final Package pack = getEnclosedMetaObject().getPackage();
     if (pack != null) {
-      packageName = pack.getName();
+      _packageName = pack.getName();
     }
-    return packageName;
+    return _packageName;
   }
 
   private MetaMethod[] fromMethodArray(final Method[] methods) {
@@ -152,8 +156,14 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
+  private MetaMethod[] _methodCache = null;
+  
   @Override
   public MetaMethod[] getMethods() {
+    if (_methodCache != null) {
+      return _methodCache;
+    }
+    
     final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
 
     Class<?> type = getEnclosedMetaObject();
@@ -186,7 +196,8 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
     while ((type = type.getSuperclass()) != null);
 
-    return meths.toArray(new MetaMethod[meths.size()]);
+    _methodCache = meths.toArray(new MetaMethod[meths.size()]);
+    return _methodCache;
   }
 
   private transient volatile MetaMethod[] _declaredMethodCache;

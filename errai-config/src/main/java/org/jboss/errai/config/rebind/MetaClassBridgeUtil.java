@@ -98,7 +98,7 @@ public abstract class MetaClassBridgeUtil {
         }
         else {
           logger.log(TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
-          final MetaClass clazz = GWTClass.newInstance(typeOracle, type);
+          final MetaClass clazz = GWTClass.newUncachedInstance(typeOracle, type);
 
           if (isReloadable(clazz, reloadable))
             classesToPush.put(clazz.getFullyQualifiedName(), clazz);
