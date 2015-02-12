@@ -112,12 +112,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
     public MetaClass get(String name) {
       return cache.get(name);
     }
-    
   }
   
+  final static GWTClassCache cache = CacheUtil.getCache(GWTClassCache.class);
+  
   public static MetaClass newInstance(final TypeOracle oracle, final JType type) {
-    final GWTClassCache cache = CacheUtil.getCache(GWTClassCache.class);
-    
     if (type.isGenericType() != null || type.isParameterized() != null) {
       return newUncachedInstance(oracle, type);
     }
