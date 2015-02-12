@@ -16,14 +16,17 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import java.util.Collection;
 import java.util.Set;
 
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.ioc.client.Bootstrapper;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -71,8 +74,17 @@ public class IOCGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isCacheValid() {
-    return hasGenerationCache() &&
-            (EnvUtil.isProdMode() || !MetaClassFactory.hasAnyChanges());
+    Collection<MetaClass> newOrUpdated = MetaClassFactory.getAllNewOrUpdatedClasses();
+    // filter out generated IOC environment config
+    if (newOrUpdated.size() == 1) {
+      MetaClass clazz = newOrUpdated.iterator().next();
+      if (clazz.isAssignableTo(IOCEnvironment.class)) {
+        newOrUpdated.clear();
+      }
+    }
+    
+    boolean hasAnyChanges =  !newOrUpdated.isEmpty() || !MetaClassFactory.getAllDeletedClasses().isEmpty();
+    return hasGenerationCache() && (EnvUtil.isProdMode() || !hasAnyChanges);
   }
 
 }
