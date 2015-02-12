@@ -16,23 +16,32 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
-import com.google.gwt.gen2.picker.client.SliderBar;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
+
+import com.google.gwt.user.client.ui.ValueListBox;
 
 /**
  * @author edewit@redhat.com
  */
 @ApplicationScoped
-public class SliderBarProducer {
+public class ValueListBoxProducer {
 
-    @Produces
-    public SliderBar createSliderBar() {
-        SliderBar sliderBar = new SliderBar(50, 2000);
-        sliderBar.setStepSize(20);
-        sliderBar.setCurrentValue(100);
-        sliderBar.setNumTicks(20);
-        return sliderBar;
-    }
+  @Produces
+  public ValueListBox<Integer> createValueListBox() {
+    Collection<Integer> values = new ArrayList<Integer>();
+    values.add(Integer.valueOf(1));
+    values.add(Integer.valueOf(2));
+    values.add(Integer.valueOf(5));
+    values.add(Integer.valueOf(10));
+    values.add(Integer.valueOf(25));
+
+    final ValueListBox<Integer> radiusPicker = new ValueListBox<Integer>();
+    radiusPicker.setValue(Integer.valueOf(25));
+    radiusPicker.setAcceptableValues(values);
+    return radiusPicker;
+  }
 }

@@ -29,7 +29,6 @@
     <inherits name="com.google.gwt.maps.Maps" />
     <inherits name="org.gwtopenmaps.openlayers.OpenLayers" />
     <inherits name="org.jboss.errai.ui.Cordova" />
-    <inherits name="com.google.gwt.gen2.picker.Picker" />
     <inherits name="org.jboss.errai.validation.Validation" />
     <inherits name="org.hibernate.validator.HibernateValidator" />
 
