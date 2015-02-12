@@ -293,7 +293,9 @@ public class BindableListWrapper<M> implements List<M> {
           final List<M> source = new ArrayList<M>(list);
           if (index == -1)  return; 
           
-          source.set(index, null);
+          // yikes! we do this to alter the source list (otherwise the change event won't get fired).
+          source.add(null);
+          
           for (BindableListChangeHandler<M> handler : handlers) {
             handler.onItemChanged(source, index, (M) event.getSource());
           }
