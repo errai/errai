@@ -105,8 +105,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
       cache.clear();
     }
     
-    public void push(MetaClass clazz) {
-      cache.put(clazz.getFullyQualifiedName(), clazz);
+    public void push(String key, MetaClass clazz) {
+      cache.put(key, clazz);
     }
     
     public MetaClass get(String name) {
@@ -117,14 +117,10 @@ public class GWTClass extends AbstractMetaClass<JType> {
   final static GWTClassCache cache = CacheUtil.getCache(GWTClassCache.class);
   
   public static MetaClass newInstance(final TypeOracle oracle, final JType type) {
-    if (type.isGenericType() != null || type.isParameterized() != null) {
-      return newUncachedInstance(oracle, type);
-    }
-    
-    MetaClass clazz = cache.get(type.getQualifiedSourceName());
+    MetaClass clazz = cache.get(type.getParameterizedQualifiedSourceName());
     if (clazz == null) {
       clazz = newUncachedInstance(oracle, type);
-      cache.push(clazz);
+      cache.push(type.getParameterizedQualifiedSourceName(), clazz);
     }
     
     return clazz;
