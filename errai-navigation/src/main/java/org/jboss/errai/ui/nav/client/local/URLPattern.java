@@ -81,7 +81,7 @@ public class URLPattern {
       String toReplace = mr.getGroup(0);
       String key = mr.getGroup(1);
       if (toReplace.contains(key)) {
-        url = url.replace(toReplace, state.get(key).iterator().next());
+        url = url.replace(toReplace, URL.encodePathSegment(state.get(key).iterator().next()));
       }
       else {
         throw new IllegalStateException("Path parameter list did not contain required parameter " + mr.getGroup(1));

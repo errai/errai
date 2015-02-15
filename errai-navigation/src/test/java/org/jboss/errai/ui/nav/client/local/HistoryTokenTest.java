@@ -14,6 +14,7 @@ public class HistoryTokenTest extends GWTTestCase {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     patternMatcher = new URLPatternMatcher();
+    patternMatcher.add("PageWithPath/{path}", "PageWithPath");
     patternMatcher.add("PageName", "PageName");
     patternMatcher.add("Pa;ge=Na&me", "EscapedPage");
     htFactory = new HistoryTokenFactory(patternMatcher);
@@ -46,6 +47,17 @@ public class HistoryTokenTest extends GWTTestCase {
     assertEquals("Unexpected state map contents: " + token.getState(), 1, token.getState().size());
     assertEquals("Unexpected state map contents: " + token.getState(), 1, token.getState().get("k=ey").size());
     assertEquals("v&a=lue", token.getState().get("k=ey").iterator().next());
+  }
+
+  public void testPathThatNeedsEscaping() throws Exception {
+    Multimap<String, String> state = ImmutableMultimap.<String, String>builder().put("path", "p=&ath").build();
+    String encodedToken = htFactory.createHistoryToken("PageWithPath", state).toString();
+
+    HistoryToken token = patternMatcher.parseURL(encodedToken);
+    assertEquals("PageWithPath", token.getPageName());
+    assertEquals("Unexpected state map contents: " + token.getState(), 1, token.getState().size());
+    assertEquals("Unexpected state map contents: " + token.getState(), 1, token.getState().get("path").size());
+    assertEquals("p=&ath", token.getState().get("path").iterator().next());
   }
 
   public void testPageNameThatNeedsEscaping() throws Exception {
