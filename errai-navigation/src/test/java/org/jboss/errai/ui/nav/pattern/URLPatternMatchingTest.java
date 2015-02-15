@@ -25,6 +25,7 @@ public class URLPatternMatchingTest {
     testPatterns.put("{var1}/some/{var2}/{var3}", "MultipleVarsURL");
     testPatterns.put("{var}", "OnlyVarURL");
     testPatterns.put("some/{var}/", "TrailingSlashURL");
+    testPatterns.put("путь/道/道路/переменная:{var}", "NonAsciiCharsURL");
     
     for(Entry<String, String> entry : testPatterns.entrySet()) {
       matcher.add(entry.getKey(), entry.getValue());
@@ -81,4 +82,9 @@ public class URLPatternMatchingTest {
     assertEquals("NoVarsURL", matcher.getPageName(testURL));
   }
 
+  @Test
+  public void matchesNonAsciiChars() throws Exception {
+    String testURL = "%D0%BF%D1%83%D1%82%D1%8C/%E9%81%93/%E9%81%93%E8%B7%AF/%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D0%B0%D1%8F%3Avalue";
+    assertEquals("NonAsciiCharsURL", matcher.getPageName(testURL));
+  }
 }
