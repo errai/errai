@@ -44,15 +44,9 @@ public final class ClassScanner {
     @Override
     public void clear() {
       subtypesCache.clear();
-      if (reloadableClasses != null) {
-        reloadableClasses.clear();
-      }
-      if (reloadableClassNames != null) {
-        reloadableClassNames.clear();
-      }
-      if (reloadablePackages != null) {
-        reloadablePackages.clear();
-      }
+      reloadableClasses.clear();
+      reloadableClassNames.clear();
+      reloadablePackages.clear();
     }
   }
   final static CacheHolder cache = CacheUtil.getCache(CacheHolder.class);
