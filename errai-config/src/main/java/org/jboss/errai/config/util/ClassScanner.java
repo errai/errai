@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
@@ -39,7 +40,7 @@ public final class ClassScanner {
     final Map<MetaClass, Collection<MetaClass>> subtypesCache = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
     final Collection<MetaClass> reloadableClasses =  new CopyOnWriteArrayList<MetaClass>();
     final Collection<String> reloadableClassNames =  new CopyOnWriteArrayList<String>();
-    final Collection<String> reloadablePackages =  new CopyOnWriteArrayList<String>();
+    final Set<String> reloadablePackages =  new CopyOnWriteArraySet<String>();
 
     @Override
     public void clear() {
@@ -293,12 +294,22 @@ public final class ClassScanner {
 
     final Collection<MetaClass> classes = new ArrayList<MetaClass>();
     final Collection<String> classNames = new ArrayList<String>();
+    
     for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
-      for (String reloadablePackage : cache.reloadablePackages) {
-        final String fqcn = clazz.getFullyQualifiedName();
-        if (fqcn.startsWith(reloadablePackage)) {
-          classes.add(clazz);
-          classNames.add(fqcn);
+      final String fqcn = clazz.getFullyQualifiedName();
+
+      if (cache.reloadablePackages.contains(clazz.getPackageName())) {
+        classes.add(clazz);
+        classNames.add(fqcn);
+      }
+      else {
+        for (String reloadablePackage : cache.reloadablePackages) {
+          if (fqcn.startsWith(reloadablePackage)) {
+            classes.add(clazz);
+            classNames.add(fqcn);
+            cache.reloadablePackages.add(clazz.getPackageName());
+            break;
+          }
         }
       }
     }
