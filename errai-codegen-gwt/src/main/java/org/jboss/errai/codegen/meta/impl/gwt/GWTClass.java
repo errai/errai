@@ -41,6 +41,7 @@ import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.reflections.scanners.AbstractScanner;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.ext.typeinfo.JArrayType;
@@ -98,19 +99,39 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   
   public static class GWTClassCache implements CacheStore {
-    private Map<String, MetaClass> cache = new ConcurrentHashMap<String, MetaClass>();
-    
+    private Map<String, MetaClass> reloadableClasses = new ConcurrentHashMap<String, MetaClass>();
+
+    // Classes in .jar files can't change between refreshes so we can hold on to them
+    private Map<String, MetaClass> classesInJar = new ConcurrentHashMap<String, MetaClass>();
+
     @Override
     public void clear() {
-      cache.clear();
+      reloadableClasses.clear();
     }
-    
-    public void push(String key, MetaClass clazz) {
-      cache.put(key, clazz);
+
+    public void put(String name, MetaClass clazz) {
+      if (AbstractScanner.isInJar(name) && !name.contains("<")) {
+        classesInJar.put(name, clazz);
+      }
+      else { 
+        reloadableClasses.put(name, clazz);
+      }
     }
-    
+
     public MetaClass get(String name) {
-      return cache.get(name);
+      MetaClass clazz = classesInJar.get(name); 
+      if (clazz != null) {
+        if (AbstractScanner.isInJar(name)) {
+          return clazz;
+        }
+        else {
+          classesInJar.remove(name);
+          return null;
+        }
+      }
+      else {
+        return reloadableClasses.get(name);  
+      }
     }
   }
   
@@ -120,7 +141,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     MetaClass clazz = cache.get(type.getParameterizedQualifiedSourceName());
     if (clazz == null) {
       clazz = newUncachedInstance(oracle, type);
-      cache.push(type.getParameterizedQualifiedSourceName(), clazz);
+      cache.put(type.getParameterizedQualifiedSourceName(), clazz);
     }
     
     return clazz;

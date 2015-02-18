@@ -1,8 +1,11 @@
 package org.jboss.errai.reflections.scanners;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Multimap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import javassist.bytecode.ClassFile;
 
 import org.jboss.errai.reflections.Configuration;
 import org.jboss.errai.reflections.ReflectionsException;
@@ -11,15 +14,18 @@ import org.jboss.errai.reflections.scanners.reg.ScannerRegistry;
 import org.jboss.errai.reflections.util.Utils;
 import org.jboss.errai.reflections.vfs.Vfs;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Multimap;
 
-@SuppressWarnings({"RawUseOfParameterizedType", "unchecked"})
 public abstract class AbstractScanner implements Scanner {
-
-	private Configuration configuration;
+    private static final Set<String> classesNotInJar = new CopyOnWriteArraySet<String>();
+  
+    private Configuration configuration;
 	private Multimap<String, String> store;
 	private Predicate<String> resultFilter = Predicates.alwaysTrue(); //accept all by default
+	
+
 	
 	public AbstractScanner() {
 	  /*
@@ -46,6 +52,13 @@ public abstract class AbstractScanner implements Scanner {
         try {
             inputStream = file.openInputStream();
             final Object cls = configuration.getMetadataAdapter().createClassObject(inputStream);
+            String fp = file.getFullPath();
+            if (fp != null && !fp.contains(".jar")) {
+                String className = ((ClassFile) cls).getName();
+                if (!classesNotInJar.contains(className)) {
+                  classesNotInJar.add(className);
+                }
+            }
             scan(cls);
         } catch (IOException e) {
             throw new ReflectionsException("could not create class file from " + file.getName(), e);
@@ -85,12 +98,15 @@ public abstract class AbstractScanner implements Scanner {
         this.setResultFilter(filter); return this;
     }
 
-    //
     protected boolean acceptResult(final String fqn) {
 		return fqn != null && getResultFilter().apply(fqn);
 	}
 
 	protected MetadataAdapter getMetadataAdapter() {
 		return configuration.getMetadataAdapter();
+	}
+	
+	public static boolean isInJar(String className) {
+	  return !(classesNotInJar.contains(className));
 	}
 }
