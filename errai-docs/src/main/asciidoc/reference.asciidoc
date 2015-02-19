@@ -1058,10 +1058,6 @@ public class TestService implements MessageCallback {
 }
 ----
 
-[[sid-20938805]]
-
-=== Client Logging and Error Handling
-
 [[sid-23036473]]
 
 === Wire Protocol (J.REP)
@@ -7820,11 +7816,23 @@ sl4j is logging abstraction. Using the slf4j api, you can add log statements to 
 
 === Client-Side Setup
 
-The client-side slf4j code uses the link:$$http://www.gwtproject.org/doc/latest/DevGuideLogging.html$$[GWT Logging] as the back-end. Using slf4j in client-side code has two steps:
+The client-side slf4j code uses the link:$$http://www.gwtproject.org/doc/latest/DevGuideLogging.html$$[GWT Logging] as the back-end. Using slf4j in client-side code has three steps:
 
-. Add the errai-common artifact as a maven dependency to your project
+* Add the errai-common artifact as a maven dependency to your project
 
-. Inherit the gwt module [code]+org.jboss.errai.common.ErraiCommon+
+* Inherit the gwt module [code]+org.jboss.errai.common.ErraiCommon+
++
+[source,xml]
+----
+  <inherits name="org.jboss.errai.common.ErraiCommon" />
+----
+* Enable logging and configure the log level in your gwt.xml module descriptor:
++
+[source,xml]
+----
+  <set-property name="gwt.logging.enabled" value="TRUE"/>
+  <set-property name="gwt.logging.logLevel" value="ALL"/>    
+----
 
 [[sid-74908675_Logging-ErraiClientSideLogHandlers]]
 
@@ -7836,7 +7844,6 @@ In the ErraiCommon module, we have disabled the built-in GWT log handlers and pr
 * _ErraiConsoleLogHandler_ : prints statements to the web console in the browser
 * _ErraiDevelopmentModeLogHandler_ : prints statements in the Development Mode window
 * _ErraiFirebugLogHandler_ : prints statements to the console in Firefox These loggers are all enabled by default and set to handle all log levels.
-
 
 [[sid-74908675_Logging-ConfiguringErraiClientSideLogHandlers]]
 
