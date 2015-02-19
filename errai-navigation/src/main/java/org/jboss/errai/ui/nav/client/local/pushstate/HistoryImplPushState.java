@@ -66,7 +66,7 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
   }
   
   private void nativeUpdate(final String historyToken) {
-    String newPushStateToken = CodeServerParameterHelper.append(encodeFragment(historyToken));
+    String newPushStateToken = CodeServerParameterHelper.append(historyToken);
     if (!newPushStateToken.startsWith("/")) {
       newPushStateToken = "/" + newPushStateToken;
     }
@@ -84,7 +84,6 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
   private void updateHistoryToken(String path) {
     String[] split = path.split("\\?");
     String token = split[0];
-    token = (token.length() > 0) ? decodeFragment(token) : "";
     token = (token.startsWith("/")) ? token.substring(1) : token;
 
     String queryString = (split.length == 2) ? split[1] : "";
@@ -134,16 +133,6 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
       historyToken : token
     };
     $wnd.history.pushState(state, $doc.title, token);
-  }-*/;
-
-  private native String encodeFragment(String fragment) /*-{
-    // encodeURI() does *not* encode the '#' character.
-    return encodeURI(fragment).replace("#", "%23");
-  }-*/;
-  
-  private native String decodeFragment(String encodedFragment) /*-{
-    // decodeURI() does *not* decode the '#' character.
-    return decodeURI(encodedFragment.replace("%23", "#"));
   }-*/;
 
   /**

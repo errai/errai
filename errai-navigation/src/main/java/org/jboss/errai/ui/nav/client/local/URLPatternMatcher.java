@@ -1,9 +1,13 @@
 package org.jboss.errai.ui.nav.client.local;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.google.common.base.Splitter;
+import com.google.common.escape.Escaper;
+import com.google.common.net.UrlEscapers;
 import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
 
 import com.google.common.collect.BiMap;
@@ -43,40 +47,54 @@ public class URLPatternMatcher {
   }
 
 
- /**
-  * Generates a {@link URLPattern} from a {@link Page#path()}
-  * @param urlTemplate The {@link Page#path()}
-  * @return A {@link URLPattern} used to match URLs
-  */
+  /**
+   * Generates a {@link URLPattern} from a {@link Page#path()}
+   * @param urlTemplate The {@link Page#path()}
+   * @return A {@link URLPattern} used to match URLs
+   */
   public static URLPattern generatePattern(String urlTemplate) {
     RegExp regex = RegExp.compile(URLPattern.paramRegex, "g");
     List<String> paramList = new ArrayList<String>();
 
     MatchResult mr = null;
+    Escaper escaper = UrlEscapers.urlFormParameterEscaper();
     StringBuilder sb = new StringBuilder();
 
     // Ensure matching at beginning of line
     sb.append("^");
 
-    int endOfPreviousPattern = 0;
-    int startOfNextPattern = 0;
+    // Split url path components
+    Iterator<String> urlTemplateParts = Splitter.on("/").split(urlTemplate).iterator();
 
-    while ((mr = regex.exec(urlTemplate)) != null) {
-      addParamName(paramList, mr);
-      startOfNextPattern = mr.getIndex();
-      
-      // Append any string literal that may occur in the URL path 
-      // before the next parameter.
-      sb.append(urlTemplate, endOfPreviousPattern, startOfNextPattern);
-      
-      // Append regex for matching the parameter value
-      sb.append(URLPattern.urlSafe);
-      
-      endOfPreviousPattern = regex.getLastIndex();
+    // Iterate over path components
+    while (urlTemplateParts.hasNext()) {
+      String urlTemplatePart = urlTemplateParts.next();
+
+      int endOfPreviousPattern = 0;
+      int startOfNextPattern = 0;
+
+      while ((mr = regex.exec(urlTemplatePart)) != null) {
+        addParamName(paramList, mr);
+        startOfNextPattern = mr.getIndex();
+
+        // Append and encode any string literal that may occur in the URL path
+        // before the next parameter.
+        sb.append(escaper.escape(urlTemplatePart.substring(endOfPreviousPattern, startOfNextPattern)));
+
+        // Append regex for matching the parameter value
+        sb.append(URLPattern.urlSafe);
+
+        endOfPreviousPattern = regex.getLastIndex();
+      }
+
+      // Append and encode any remaining trailing string literals
+      sb.append(escaper.escape(urlTemplatePart.substring(endOfPreviousPattern)));
+
+      // Append path separator for non last component
+      if (urlTemplateParts.hasNext()) {
+        sb.append("/");
+      }
     }
-
-    // Append any remaining trailing string literals
-    sb.append(urlTemplate, endOfPreviousPattern, urlTemplate.length());
 
     // Ensure matching at end of line
     sb.append("$");
@@ -89,9 +107,9 @@ public class URLPatternMatcher {
     paramList.add(mr.getGroup(1));
   }
 
-/**
- * Creates a {@link HistoryToken} by parsing a URL path. This path should never include the application context.
- */
+  /**
+   * Creates a {@link HistoryToken} by parsing a URL path. This path should never include the application context.
+   */
   public HistoryToken parseURL(String url) {
     Builder<String, String> mapBuilder = ImmutableMultimap.builder();
     String keyValuePairs, pageInfo;
@@ -99,24 +117,23 @@ public class URLPatternMatcher {
     int indexOfSemicolon = url.indexOf(';');
 
     if (indexOfSemicolon > 0) {
-      pageInfo = URL.decodePathSegment(url.substring(0, indexOfSemicolon));
+      pageInfo = url.substring(0, indexOfSemicolon);
       keyValuePairs = url.substring(indexOfSemicolon + 1);
-    }
-    else {
-      pageInfo = URL.decodePathSegment(url);
+    } else {
+      pageInfo = url;
       keyValuePairs = null;
     }
 
     String pageName = parseValues(pageInfo, mapBuilder);
     if (pageName == null)
-      throw new PageNotFoundException("Invalid URL \"" + URL.decodePathSegment(url) + "\" could not be mapped to any page.");
-    
+      throw new PageNotFoundException("Invalid URL \"" + url + "\" could not be mapped to any page.");
+
     if (keyValuePairs != null) {
       parseKeyValuePairs(keyValuePairs, mapBuilder);
     }
 
     Multimap<String, String> state = mapBuilder.build();
-    return new HistoryToken(URL.decodePathSegment(pageName.toString()), ImmutableMultimap.copyOf(state), getURLPattern(pageName));
+    return new HistoryToken(pageName, ImmutableMultimap.copyOf(state), getURLPattern(pageName));
   }
 
   private String parseValues(String rawURIPath, Builder<String, String> builder) {
@@ -130,11 +147,11 @@ public class URLPatternMatcher {
 
     MatchResult mr = pattern.getRegex().exec(rawURIPath);
     for (int keyIndex = 0; keyIndex < pattern.getParamList().size(); keyIndex++) {
-      builder.put(pattern.getParamList().get(keyIndex), mr.getGroup(keyIndex + 1));
+      builder.put(pattern.getParamList().get(keyIndex), URL.decodePathSegment(mr.getGroup(keyIndex + 1)));
     }
     return pageName;
   }
-  
+
   private void parseKeyValuePairs(String rawKeyValueString, Builder<String, String> builder) {
     StringBuilder key = new StringBuilder();
     StringBuilder value = new StringBuilder();
