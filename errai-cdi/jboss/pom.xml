@@ -18,13 +18,13 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-client-local-class-hider</artifactId>      
+      <artifactId>errai-client-local-class-hider</artifactId>
     </dependency>
 
     <!-- JBoss -->
     <dependency>
       <groupId>org.wildfly</groupId>
-      <artifactId>wildfly-cli</artifactId>      
+      <artifactId>wildfly-cli</artifactId>
       <exclusions>
         <exclusion>
           <groupId>org.wildfly</groupId>
@@ -34,8 +34,15 @@
     </dependency>
 
     <dependency>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-embedded</artifactId>
+      <version>8.1.0.Final</version>
+    </dependency>
+
+
+    <dependency>
       <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-dist</artifactId>      
+      <artifactId>jboss-as-dist</artifactId>
       <type>zip</type>
     </dependency>
 
