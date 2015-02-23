@@ -93,8 +93,10 @@ public class JacksonTransformer {
   private static JSONValue toJackson(JSONValue val, String key, JSONObject parent, Map<String, JSONValue> objectCache) {
     JSONObject obj;
     if ((obj = val.isObject()) != null) {
+      JSONValue encType = obj.get(ENCODED_TYPE);
       JSONValue objectIdVal = obj.get(OBJECT_ID);
-      if (objectIdVal != null) {
+      JSONValue objectVal = obj.get(QUALIFIED_VALUE);
+      if (objectIdVal != null && objectVal == null) {
         String objectId = objectIdVal.isString().stringValue();
         if (!objectId.equals("-1")) {
           JSONValue backRef = objectCache.get(objectId);
@@ -111,8 +113,6 @@ public class JacksonTransformer {
           }
         }
       }
-
-      JSONValue encType = obj.get(ENCODED_TYPE);
       obj.put(OBJECT_ID, null);
       obj.put(ENCODED_TYPE, null);
 
