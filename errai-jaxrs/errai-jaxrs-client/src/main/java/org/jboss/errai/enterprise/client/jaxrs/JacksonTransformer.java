@@ -95,21 +95,22 @@ public class JacksonTransformer {
     if ((obj = val.isObject()) != null) {
       JSONValue encType = obj.get(ENCODED_TYPE);
       JSONValue objectIdVal = obj.get(OBJECT_ID);
-      JSONValue objectVal = obj.get(QUALIFIED_VALUE);
-      if (objectIdVal != null && objectVal == null) {
+      if (objectIdVal != null && encType != null) {
         String objectId = objectIdVal.isString().stringValue();
+        String cacheKey = objectId + "/" + encType.isString().stringValue();
         if (!objectId.equals("-1")) {
-          JSONValue backRef = objectCache.get(objectId);
+          JSONValue backRef = objectCache.get(cacheKey);
           if (backRef != null) {
             if (parent != null) {
-              parent.put(key, backRef);
+              obj = backRef.isObject();
+              parent.put(key, obj);
             }
             else {
               return backRef.isObject();
             }
           }
           else {
-            objectCache.put(objectId, obj);
+            objectCache.put(cacheKey, obj);
           }
         }
       }
