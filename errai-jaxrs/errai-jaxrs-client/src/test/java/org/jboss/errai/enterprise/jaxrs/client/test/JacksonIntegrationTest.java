@@ -70,12 +70,15 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     final User friend2 =
         new User(14l, "friend2-first", "friend2-last", 2, Gender.FEMALE, null);
 
-    user.setPetNames(new ArrayList<String>() {
+    ArrayList<String> petNames = new ArrayList<String>() {
       {
         add("pet1");
         add("pet2");
       }
-    });
+    };
+    user.setPetNames(petNames);
+    user.setPetNames2(petNames);
+    
     user.setFriends(new ArrayList<User>() {
       {
         add(friend1);

@@ -48,6 +48,8 @@ public class User {
   private User parentRef; // This is to test back references
 
   private List<String> petNames = new ArrayList<String>();
+  private List<String> petNames2 = new ArrayList<String>(); // This is to test back references of collections
+
   private List<User> friends = new ArrayList<User>();
   private List<Integer> favoriteNumbers = new ArrayList<Integer>();
 
@@ -133,6 +135,14 @@ public class User {
     this.petNames = petNames;
   }
 
+  public List<String> getPetNames2() {
+    return petNames2;
+  }
+
+  public void setPetNames2(List<String> petNames2) {
+    this.petNames2 = petNames2;
+  }
+  
   public List<User> getFriends() {
     return friends;
   }
@@ -223,6 +233,7 @@ public class User {
     result = prime * result + ((parent == null) ? 0 : parent.hashCode());
     result = prime * result + ((parentRef == null) ? 0 : parentRef.hashCode());
     result = prime * result + ((petNames == null) ? 0 : petNames.hashCode());
+    result = prime * result + ((petNames2 == null) ? 0 : petNames2.hashCode());
     return result;
   }
 
@@ -317,15 +328,21 @@ public class User {
     }
     else if (!petNames.equals(other.petNames))
       return false;
+    if (petNames2 == null) {
+      if (other.petNames2 != null)
+        return false;
+    }
+    else if (!petNames2.equals(other.petNames2))
+      return false;
     return true;
   }
 
   @Override
   public String toString() {
     return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender
-        + ", parent=" + parent + ", parentRef=" + parentRef + ", petNames=" + petNames + ", friends=" + friends
-        + ", favoriteNumbers=" + favoriteNumbers + ", friendsNameMap=" + friendsNameMap + ", friendsMap=" + friendsMap
-        + ", age=" + age + ", alive=" + alive + ", date=" + date + "]";
+            + ", parent=" + parent + ", parentRef=" + parentRef + ", petNames=" + petNames + ", petNames2=" + petNames2
+            + ", friends=" + friends + ", favoriteNumbers=" + favoriteNumbers + ", friendsNameMap=" + friendsNameMap
+            + ", friendsMap=" + friendsMap + ", age=" + age + ", alive=" + alive + ", date=" + date + "]";
   }
 
 }
