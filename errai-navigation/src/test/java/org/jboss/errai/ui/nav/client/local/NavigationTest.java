@@ -485,7 +485,19 @@ public class NavigationTest extends AbstractErraiCDITest {
     History.newItem("page_b_with_state;uuid=newstate", true);
     assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
   }
-  
+
+  public void testForNonAsciiPageStateParameters() throws Exception {
+    String pageName = "PageWithComplexPathParameters";
+    Builder<String, String> builder = ImmutableMultimap.builder();
+    builder.put("var1", "параметр パラメーター 参数");
+    builder.put("var2", "123");
+
+    Multimap<String, String> pageStateMap = builder.build();
+    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "pagename/path/some:параметр パラメーター "
+                                                                            + "参数thing/öther123 thing", decodedToken);
+  }
+
   public void testForEmptyContextWithoutPushState() throws Exception {
     runPostAttachTests(new Runnable() {
 
