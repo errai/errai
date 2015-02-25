@@ -92,7 +92,6 @@ public class URLPattern {
       return url;
     }
 
-    // TODO: Why is this encoded?
     StringBuilder urlBuilder = new StringBuilder(URL.encodePathSegment(url));
     urlBuilder.append(';');
 
