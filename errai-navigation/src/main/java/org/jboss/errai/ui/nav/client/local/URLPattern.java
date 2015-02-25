@@ -31,7 +31,7 @@ public class URLPattern {
    * {@link urlSafe} A
    * regular expression that checks if a typed URL only contains permitted URL characters.
    */
-  public static final String urlSafe = "([A-Za-z0-9$\\-_.+!*'(),%]+)";
+  public static final String urlSafe = "([^/]+)";
 
   public URLPattern(RegExp regex, List<String> paramList, String urlTemplate) {
     this.regex = regex;
@@ -81,7 +81,7 @@ public class URLPattern {
       String toReplace = mr.getGroup(0);
       String key = mr.getGroup(1);
       if (toReplace.contains(key)) {
-        url = url.replace(toReplace, URL.encodePathSegment(state.get(key).iterator().next()));
+        url = url.replace(toReplace, state.get(key).iterator().next());
       }
       else {
         throw new IllegalStateException("Path parameter list did not contain required parameter " + mr.getGroup(1));
@@ -91,7 +91,8 @@ public class URLPattern {
     if (state.keySet().size() == paramList.size()) {
       return url;
     }
-    
+
+    // TODO: Why is this encoded?
     StringBuilder urlBuilder = new StringBuilder(URL.encodePathSegment(url));
     urlBuilder.append(';');
 
