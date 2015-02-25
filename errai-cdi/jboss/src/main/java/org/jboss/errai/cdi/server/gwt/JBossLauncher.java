@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.BindException;
-
+import java.util.Properties;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
@@ -38,6 +38,7 @@ public class JBossLauncher extends ServletContainerLauncher {
   private final String CLASS_HIDING_JAVA_AGENT_PROPERTY = "errai.jboss.javaagent.path";
   private final String APP_CONTEXT_PROPERTY = "errai.dev.context";
   private final String JBOSS_JAVA_OPTS_PROPERTY = "errai.jboss.javaopts";
+  private final String HIDDEN_PATTERN_PROPERTY = "errai.jboss.hidden.pattern";
 
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
   private static final String STANDALONE_CONFIGURATION = "standalone" + File.separator + "configuration";
@@ -54,12 +55,13 @@ public class JBossLauncher extends ServletContainerLauncher {
     final String JBOSS_HOME = System.getProperty(JBOSS_HOME_PROPERTY);
     final String DEBUG_PORT = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
     final String TEMPLATE_CONFIG_FILE = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
-    final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
-    final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
-    String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "");
+    final String JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
+    final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "ROOT");
+    final String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "-XX:MaxPermSize=256m");
+    final String HIDDEN_PATTERN = System.getProperty(HIDDEN_PATTERN_PROPERTY);
+    final String CLASS_HIDING_JAVA_AGENT = resolveClassHidingJavaAgent( JAVA_AGENT, HIDDEN_PATTERN );
 
     validateJbossHome(JBOSS_HOME);
-    validateClassHidingJavaAgent(CLASS_HIDING_JAVA_AGENT);
 
     try {
       createTempConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, JBOSS_HOME, port);
@@ -126,15 +128,59 @@ public class JBossLauncher extends ServletContainerLauncher {
     }
   }
 
-  private void validateClassHidingJavaAgent(final String CLASS_HIDING_JAVA_AGENT) throws UnableToCompleteException {
-    if (CLASS_HIDING_JAVA_AGENT == null) {
+  private String resolveClassHidingJavaAgent( final String agent,
+                                              final String hiddenPattern ) throws UnableToCompleteException {
+    if (agent != null){
+      if (hiddenPattern == null || hiddenPattern.isEmpty()){
+          return agent;
+      }
+      return agent + "=classPattern=" + hiddenPattern;
+    }
+
+    logger.log(
+            Type.INFO,
+            "The local path to the artifact errai.org.jboss:class-local-class-hider:jar not provided. Trying to find it..." );
+
+    final String userHome = System.getProperty( "user.home" );
+    if (userHome == null) {
+      logger.log(
+              Type.ERROR,
+              "Couldn't determine user.home directory.");
+      throw new UnableToCompleteException();
+    }
+
+    final InputStream propertiesStream = Thread.currentThread().getContextClassLoader().getResourceAsStream( "META-INF/maven/org.jboss.errai/errai-cdi-jboss/pom.properties" );
+
+    if (propertiesStream == null) {
+      logger.log(
+              Type.ERROR,
+              "Couldn't resolve current Errai version.");
+      throw new UnableToCompleteException();
+    }
+
+    final Properties properties = new Properties();
+    try {
+        properties.load( propertiesStream );
+    } catch ( final IOException ignored ) {
+    }
+
+    final String version =  properties.getProperty( "version" );
+    final String localRepo = userHome + "/.m2/repository";
+    final String hider = localRepo + "/org/jboss/errai/errai-client-local-class-hider/" + version + "/errai-client-local-class-hider-" + version + ".jar";
+    if (!new File(hider).exists()){
       logger.log(
               Type.ERROR,
               String.format(
-                      "The local path to the artifact errai.org.jboss:class-local-class-hider:jar must be given as the property %s",
+                      "Couldn't resolve artifact errai.org.jboss:class-local-class-hider:jar - %s",
                       CLASS_HIDING_JAVA_AGENT_PROPERTY));
       throw new UnableToCompleteException();
     }
+
+    if (hiddenPattern == null || hiddenPattern.isEmpty()) {
+      return hider;
+    }
+
+    return hider + "=classPattern=" + hiddenPattern;
   }
 
   private void validateJbossHome(final String JBOSS_HOME) throws UnableToCompleteException {
