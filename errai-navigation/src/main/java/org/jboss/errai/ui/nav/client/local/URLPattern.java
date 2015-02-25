@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
@@ -73,43 +74,62 @@ public class URLPattern {
    */
   public String printURL(ImmutableMultimap<String, String> state) {
     RegExp re = RegExp.compile(paramRegex, "g");
-    String url = this.urlTemplate;
+    StringBuilder sb = new StringBuilder();
     
     MatchResult mr;
 
-    while ((mr = re.exec(this.urlTemplate)) != null) {
-      String toReplace = mr.getGroup(0);
-      String key = mr.getGroup(1);
-      if (toReplace.contains(key)) {
-        url = url.replace(toReplace, URL.encodePathSegment(state.get(key).iterator().next()));
-      }
-      else {
-        throw new IllegalStateException("Path parameter list did not contain required parameter " + mr.getGroup(1));
-      }
-    }
+    Iterator<String> urlTemplateParts = Splitter.on("/").split(this.urlTemplate).iterator();
+    
+    while (urlTemplateParts.hasNext()) {
+      String urlTemplatePart = urlTemplateParts.next();
+      
+      int endOfPreviousPattern = 0;
+      int startOfNextPattern = 0;
 
-    if (state.keySet().size() == paramList.size()) {
-      return url;
+      while ((mr = re.exec(urlTemplatePart)) != null) {
+        String toReplace = mr.getGroup(0);
+        String key = mr.getGroup(1);
+
+        startOfNextPattern = mr.getIndex();
+
+        if (toReplace.contains(key)) {
+          sb.append(URL.encodePathSegment(urlTemplatePart.substring(endOfPreviousPattern, startOfNextPattern)));
+          sb.append(URL.encodePathSegment(state.get(key).iterator().next()));
+        } else {
+          throw new IllegalStateException("Path parameter list did not contain required parameter " + mr.getGroup(1));
+        }
+
+        endOfPreviousPattern = re.getLastIndex();
+      }
+
+      sb.append(URL.encodePathSegment(urlTemplatePart.substring(endOfPreviousPattern)));
+      
+      if (urlTemplateParts.hasNext()) {
+        sb.append("/");
+      }
     }
     
-    StringBuilder urlBuilder = new StringBuilder(URL.encodePathSegment(url));
-    urlBuilder.append(';');
+    if (state.keySet().size() == paramList.size()) {
+      return sb.toString();
+    }
+
+    sb.append(';');
 
     Iterator<Entry<String, String>> itr = state.entries().iterator();
 
     while (itr.hasNext()) {
       Entry<String, String> pageStateField = itr.next();
       if (!paramList.contains(pageStateField.getKey())) {
-        urlBuilder.append(URL.encodePathSegment(pageStateField.getKey()));
-        urlBuilder.append('=');
-        urlBuilder.append(URL.encodePathSegment(pageStateField.getValue()));
+        sb.append(URL.encodePathSegment(pageStateField.getKey()));
+        sb.append('=');
+        sb.append(URL.encodePathSegment(pageStateField.getValue()));
         
         if (itr.hasNext())
-          urlBuilder.append('&');
+          sb.append('&');
       }
       
     }
-    return urlBuilder.toString();
+    return sb.toString();
   }
 
   @Override
