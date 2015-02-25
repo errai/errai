@@ -36,7 +36,6 @@ public class JBossLauncher extends ServletContainerLauncher {
   private final String JBOSS_DEBUG_PORT_PROPERTY = "errai.jboss.debug.port";
   private final String TEMPLATE_CONFIG_FILE_PROPERTY = "errai.jboss.config.file";
   private final String CLASS_HIDING_JAVA_AGENT_PROPERTY = "errai.jboss.javaagent.path";
-  private final String APP_CONTEXT_PROPERTY = "errai.dev.context";
   private final String JBOSS_JAVA_OPTS_PROPERTY = "errai.jboss.javaopts";
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
 
@@ -52,7 +51,6 @@ public class JBossLauncher extends ServletContainerLauncher {
     final String DEBUG_PORT = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
     final String TEMPLATE_CONFIG_FILE = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
     final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
-    final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
     String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "");
 
     final String jbossHome = JBossUtil.getJBossHome(logger);
@@ -111,7 +109,7 @@ public class JBossLauncher extends ServletContainerLauncher {
     logger.branch(Type.INFO, "Creating servlet container controller...");
 
     try {
-      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, DEPLOYMENT_CONTEXT,
+      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, JBossUtil.getDeploymentContext(),
               logger.peek(), process);
       logger.log(Type.INFO, "Controller created");
       logger.unbranch();
