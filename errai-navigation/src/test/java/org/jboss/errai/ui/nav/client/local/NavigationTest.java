@@ -291,7 +291,7 @@ public class NavigationTest extends AbstractErraiCDITest {
 
         assertEquals("Navigation panel should be child of newParent", newParent, navigation.getContentPanel()
                 .asWidget().getParent());
-        assertEquals("Navigation panel shoudl not be attached to the RootPanel", -1,
+        assertEquals("Navigation panel should not be attached to the RootPanel", -1,
                 RootPanel.get().getWidgetIndex(navigation.getContentPanel()));
       }
     }, TIMEOUT, 500);
@@ -410,7 +410,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testURLWithNonAsciiCharset() throws Exception {
-    String url = "page/123/параметр パラメーター 参数;var3=4";
+    String url = "page/123/%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%20%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%83%BC%20%E5%8F%82%E6%95%B0;var3=4";
     HistoryToken encodedToken = htFactory.parseURL(url);
     assertEquals("Unexpected state map contents: " + encodedToken.getState(), "123", encodedToken.getState()
             .get("var1").iterator().next());
@@ -420,6 +420,17 @@ public class NavigationTest extends AbstractErraiCDITest {
             .iterator().next());
   }
 
+  public void testPageStateWithNonAsciiParamAndNoExtraParams() throws Exception {
+    String pageName = "PageWithPathParameters";
+    Builder<String, String> builder = ImmutableMultimap.builder();
+    builder.put("var1", "123");
+    builder.put("var2", "параметр パラメーター 参数");
+
+    Multimap<String, String> pageStateMap = builder.build();
+    String decodedToken = htFactory.createHistoryToken(pageName, pageStateMap).toString();
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%20%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%83%BC%20%E5%8F%82%E6%95%B0", decodedToken);
+  }
+  
   public void testPageStateWithNonAsciiParam() throws Exception {
     String pageName = "PageWithPathParameters";
     Builder<String, String> builder = ImmutableMultimap.builder();
@@ -428,8 +439,9 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var3", "4");
 
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
-    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/параметр パラメーター 参数;var3=4", decodedToken);
+
+    String decodedToken = htFactory.createHistoryToken(pageName, pageStateMap).toString();
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%20%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%83%BC%20%E5%8F%82%E6%95%B0;var3=4", decodedToken);
   }
 
   public void testPageStateWithOneExtraParam() throws Exception {
@@ -440,7 +452,7 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var3", "4");
     
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = htFactory.createHistoryToken(pageName, pageStateMap).toString();
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4", decodedToken);
   }
   
@@ -453,7 +465,7 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var4", "thing");
     
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = htFactory.createHistoryToken(pageName, pageStateMap).toString();
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
   }
   
