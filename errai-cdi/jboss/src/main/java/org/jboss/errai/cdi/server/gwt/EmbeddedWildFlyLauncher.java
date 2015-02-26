@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.as.embedded.EmbeddedServerFactory;
 import org.jboss.as.embedded.StandaloneServer;
 import org.jboss.errai.cdi.server.as.JBossServletContainerAdaptor;
@@ -29,6 +30,11 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
   private static final String CLIENT_LOCAL_CLASS_PATTERN_PROPERTY = "errai.client.local.class.pattern";
   private static final String DEFAULT_CLIENT_LOCAL_CLASS_PATTERN = ".*/client/local/.*";
   
+  private static final String ERRAI_SCANNER_HINT_START = 
+          "    <!-- These exclusions were added by Errai to avoid deploying client-side classes to the server -->\n";
+  private static final String ERRAI_SCANNER_HINT_END = 
+          "    <!-- End of Errai exclusions -->\n";
+  
   private static final String DEVMODE_BEANS_XML_TEMPLATE = 
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<beans xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">\n" + 
@@ -43,9 +49,11 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     System.setProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager");
   }
   
+  private StackTreeLogger logger;
+  
   @Override
   public ServletContainer start(final TreeLogger treeLogger, final int port, final File appRootDir) throws BindException, Exception {
-    final StackTreeLogger logger = new StackTreeLogger(treeLogger);
+    logger = new StackTreeLogger(treeLogger);
     try {
       System.setProperty("jboss.http.port", "" + port);
       
@@ -79,6 +87,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     File classesDir = new File(webInfDir, "classes");
     
     StringBuilder exclusions = new StringBuilder();
+    exclusions.append(ERRAI_SCANNER_HINT_START);
     for (File clientLocalClass : FileUtils.listFiles(appRootDir, new ClientLocalFileFilter(), TrueFileFilter.INSTANCE)) {
       String className = clientLocalClass.getAbsolutePath()
               .replace(classesDir.getAbsolutePath(), "")
@@ -87,6 +96,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
               .substring(1);
       exclusions.append(DEVMODE_BEANS_XML_EXCLUSION_TEMPLATE.replace("$CLASSNAME", className));
     }
+    exclusions.append(ERRAI_SCANNER_HINT_END);
     
     File beansXml = new File(webInfDir, "beans.xml");
     String beansXmlContent;
@@ -95,6 +105,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     }
     else {
       beansXmlContent = FileUtils.readFileToString(beansXml);
+      beansXmlContent = removeExistingErraiExclusions(beansXmlContent);
       if (beansXmlContent.contains(exclusions)) 
         return;
       
@@ -104,8 +115,29 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
       else {
         beansXmlContent = beansXmlContent.replace("</beans>", "  <scan>\n" + exclusions + "  </scan>\n</beans>");
       }
+      validateBeansXml(beansXmlContent);
     }
     FileUtils.write(beansXml, beansXmlContent);
+  }
+  
+  private void validateBeansXml(String beansXmlContent) {
+    if (beansXmlContent.contains("beans_1_0.xsd")) {
+      logger.log(Type.WARN, "Your beans.xml file doesn't not allow for CDI 1.1! "
+              + "Please remove the CDI 1.0 XML Schema.");
+    }
+  }
+  
+  private String removeExistingErraiExclusions(String beansXmlContent) {
+    String oldExclusions = StringUtils.substringBetween(beansXmlContent, 
+            ERRAI_SCANNER_HINT_START, ERRAI_SCANNER_HINT_END);
+    
+    beansXmlContent = beansXmlContent.replace(ERRAI_SCANNER_HINT_START, "");
+    if (oldExclusions != null) {
+      beansXmlContent = beansXmlContent.replace(oldExclusions, "");
+    }
+    beansXmlContent = beansXmlContent.replace(ERRAI_SCANNER_HINT_END, "");
+    
+    return beansXmlContent;
   }
   
   private class ClientLocalFileFilter implements IOFileFilter {
