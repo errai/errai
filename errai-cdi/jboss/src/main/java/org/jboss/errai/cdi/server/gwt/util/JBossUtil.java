@@ -69,7 +69,7 @@ public class JBossUtil {
   }
 
   public static String getDeploymentContext() {
-    return System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
+    return System.getProperty(APP_CONTEXT_PROPERTY, "ROOT");
   }
 
 }
