@@ -184,6 +184,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       validateDefaultPagePresent(pages, pageRoles);
       validateUnique(pageRoles);
       validateExistingRolesPresent(pages, pageRoles);
+      validateSafePagePath(pages);
 
       renderNavigationToDotFile(pageNames, pageRoles);
     }
@@ -242,6 +243,21 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         }
       }
     }
+  }
+
+  private void validateSafePagePath(Collection<MetaClass> pages) {
+    for (final MetaClass page : pages) {
+      String pageName = getPageName(page);
+      String path = getPageURL(page, pageName);
+
+      if (!path.equals(pageName)) {
+        if (path.contains(";") || path.contains("=") || path.contains("&")) {
+          throw new GenerationException("Invalid page path for page " + pageName + ". Page paths must not contain "
+                   + "semicolons(;), ampersands(&) or equal signs(=).");
+        }
+      }
+    }
+
   }
 
   private void createValidationError(Collection<MetaClass> pages, Class<?> role) {
