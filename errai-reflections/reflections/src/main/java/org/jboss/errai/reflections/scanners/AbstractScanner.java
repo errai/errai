@@ -2,8 +2,9 @@ package org.jboss.errai.reflections.scanners;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javassist.bytecode.ClassFile;
 
@@ -19,7 +20,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Multimap;
 
 public abstract class AbstractScanner implements Scanner {
-    private static final Set<String> classesNotInJar = new CopyOnWriteArraySet<String>();
+    private static final Set<String> classesNotInJar = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
   
     private Configuration configuration;
 	private Multimap<String, String> store;
