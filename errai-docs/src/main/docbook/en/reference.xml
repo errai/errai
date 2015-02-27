@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2015-02-12</date>
+    <date>2015-02-19</date>
     
     
     
@@ -1058,10 +1058,6 @@ MessageBuilder.createMessage()
 }</programlisting>
 </section>
 </section>
-</section>
-<section id="sid-20938805">
-<title>Client Logging and Error Handling</title>
-
 </section>
 <section id="sid-23036473">
 <title>Wire Protocol (J.REP)</title>
@@ -5637,7 +5633,10 @@ public class HelloWorldForm extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-Internationalization%28i18n%29">
 <title>Internationalization (i18n)</title>
-<simpara>User interfaces often need to be available in multiple languages. To get started with Errai&#8217;s internationalization support, simply put the <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.</simpara>
+<simpara>User interfaces often need to be available in different languages. Errai&#8217;s i18n support makes it easier for you to publish your web app in multiple languages. This section explains how to use this feature in your application.</simpara>
+<section id="_html_template_translation">
+<title>HTML Template Translation</title>
+<simpara>To get started with Errai&#8217;s internationalization support, simply put the <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.</simpara>
 <simpara>Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called <literal><phrase role="code">errai-bundle-all.json</phrase></literal> and put it in your <literal><phrase role="code">.errai</phrase></literal> directory. You can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.</simpara>
 <simpara>The translation bundle files use the same naming scheme as Java (e.g. <literal><phrase role="code">bundle_nl_BE.json</phrase></literal> for Belgian Dutch and <literal><phrase role="code">bundle_nl.json</phrase></literal> for plain Dutch). Errai will also generate a file called <literal><phrase role="code">errai-bundle-missing.json</phrase></literal> in the <literal><phrase role="code">.errai</phrase></literal> folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations:</simpara>
 <programlisting language="java" linenumbering="unnumbered">{
@@ -5701,6 +5700,49 @@ public class NavBar extends Composite {
         navigation.goTo(navigation.getCurrentPage().name());
       }
     });</programlisting>
+</section>
+<section id="_translationkey_and_translationservice">
+<title>TranslationKey and TranslationService</title>
+<simpara>The <literal><phrase role="code">@TranslationKey</phrase></literal> annotation and <literal><phrase role="code">TranslationService</phrase></literal> class extend Errai&#8217;s i18n support to Java code. They provide a mechanism for developers to declare translation strings from within their GWT application code (as opposed to the HTML templates).</simpara>
+<simpara>To do this, developers must annotate a field which represents the translation key with <literal><phrase role="code">@TranslationKey</phrase></literal> annotation. This key will then map to a value in the translation bundle file. Once the field is annotated appropriately, the developer must directly invoke the TranslationService&#8217;s format() method. This method call will perform a lookup in the translation service of the value mapped to the provided key. Note that value substitution using the <literal>{N}</literal> format is supported.</simpara>
+<simpara>As an example, consider the following code:</simpara>
+<programlisting language="java" linenumbering="unnumbered">package org.example.ui.client.local;
+
+public class AppMessages {
+
+   @TranslationKey(defaultValue = "I guess something happened!")
+   public static final String CUSTOM_MESSAGE = "app.custom-message";
+
+   @TranslationKey(defaultValue = "Hey {0}, I just told you something happened!")
+   public static final String CUSTOM_MESSAGE_WITH_NAME = "app.custom-message-with-name";
+}</programlisting>
+<programlisting language="java" linenumbering="unnumbered">package org.example.ui.client.local;
+
+@Dependent
+@Templated
+public class CustomComponent extends Composite {
+
+   @Inject
+   private TranslationService translationService;
+
+   @Inject
+   @DataField
+   private Button someAction;
+
+   @EventHandler("someAction")
+   private void doLogin(ClickEvent event) {
+
+      // do some action that may require a notification sent to the user
+
+      String messageToUser = translationService.format(AppMessages.CUSTOM_MESSAGE);
+      Window.alert(messageToUser);
+
+      String username = getCurrentUserName();
+      String messageToUserWithName = translationService.format(AppMessages.CUSTOM_MESSAGE_WITH_NAME, username);
+      Window.alert(messageToUserWithName);
+   }
+}</programlisting>
+</section>
 </section>
 <section id="sid-51806600_ErraiUI-ExtendedstylingwithLESS">
 <title>Extended styling with LESS</title>
@@ -7243,8 +7285,9 @@ public class NavBar extends Composite {
 </section>
 <section id="sid-74908675_Logging-ClientSideSetup">
 <title>Client-Side Setup</title>
-<simpara>The client-side slf4j code uses the <ulink url="http://www.gwtproject.org/doc/latest/DevGuideLogging.html">GWT Logging</ulink> as the back-end. Using slf4j in client-side code has two steps:</simpara>
-<orderedlist numeration="arabic">
+<simpara>The client-side slf4j code uses the <ulink url="http://www.gwtproject.org/doc/latest/DevGuideLogging.html">GWT Logging</ulink> as the back-end. Using slf4j in client-side code has three steps:</simpara>
+
+<itemizedlist>
   
     <listitem>
       <simpara>Add the errai-common artifact as a maven dependency to your project</simpara>
@@ -7254,9 +7297,22 @@ public class NavBar extends Composite {
     <listitem>
       <simpara>Inherit the gwt module <literal><phrase role="code">org.jboss.errai.common.ErraiCommon</phrase></literal></simpara>
       
+<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.common.ErraiCommon" /&gt;</programlisting>
+
+      
     </listitem>
   
-</orderedlist>
+    <listitem>
+      <simpara>Enable logging and configure the log level in your gwt.xml module descriptor:</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">  &lt;set-property name="gwt.logging.enabled" value="TRUE"/&gt;
+  &lt;set-property name="gwt.logging.logLevel" value="ALL"/&gt;</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
 <section id="sid-74908675_Logging-ErraiClientSideLogHandlers">
 <title>Errai Client-Side Log Handlers</title>
 <simpara>In the ErraiCommon module, we have disabled the built-in GWT log handlers and provided four handlers of our own:</simpara>
