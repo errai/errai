@@ -38,7 +38,7 @@ public final class ClassScanner {
   public static class CacheHolder implements CacheStore {
     final Map<MetaClass, Collection<MetaClass>> subtypesCache = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
     final Collection<MetaClass> reloadableClasses =  new CopyOnWriteArrayList<MetaClass>();
-    final Collection<String> reloadableClassNames =  new CopyOnWriteArrayList<String>();
+    final Set<String> reloadableClassNames =  Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     final Set<String> reloadablePackages =  Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     @Override
