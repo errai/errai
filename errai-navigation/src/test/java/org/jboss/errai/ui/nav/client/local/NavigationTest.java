@@ -428,7 +428,7 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var3", "4");
 
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap).toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/параметр パラメーター 参数;var3=4", decodedToken);
   }
 
@@ -440,7 +440,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var3", "4");
     
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
+                                                               .toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4", decodedToken);
   }
   
@@ -453,7 +454,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var4", "thing");
     
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
+                                                               .toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
   }
   
@@ -493,7 +495,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var2", "123");
 
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
+                                                               .toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "pagename/path/some:параметр パラメーター "
                                                                             + "参数thing/öther123 thing", decodedToken);
   }

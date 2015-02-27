@@ -74,14 +74,16 @@ public class URLPattern {
   public String printURL(ImmutableMultimap<String, String> state) {
     RegExp re = RegExp.compile(paramRegex, "g");
     String url = this.urlTemplate;
-    
+
     MatchResult mr;
 
     while ((mr = re.exec(this.urlTemplate)) != null) {
       String toReplace = mr.getGroup(0);
       String key = mr.getGroup(1);
       if (toReplace.contains(key)) {
-        url = url.replace(toReplace, state.get(key).iterator().next());
+        // Encode all the characters we use to parse URLs.
+        String encodedValue = URLPattern.encodeParsingCharacters(state.get(key).iterator().next());
+        url = url.replace(toReplace, encodedValue);
       }
       else {
         throw new IllegalStateException("Path parameter list did not contain required parameter " + mr.getGroup(1));
@@ -92,7 +94,7 @@ public class URLPattern {
       return url;
     }
 
-    StringBuilder urlBuilder = new StringBuilder(URL.encodePathSegment(url));
+    StringBuilder urlBuilder = new StringBuilder(url);
     urlBuilder.append(';');
 
     Iterator<Entry<String, String>> itr = state.entries().iterator();
@@ -100,9 +102,10 @@ public class URLPattern {
     while (itr.hasNext()) {
       Entry<String, String> pageStateField = itr.next();
       if (!paramList.contains(pageStateField.getKey())) {
-        urlBuilder.append(URL.encodePathSegment(pageStateField.getKey()));
+        // Encode the parts of the value that may interfere with parsing
+        urlBuilder.append(URLPattern.encodeParsingCharacters(pageStateField.getKey()));
         urlBuilder.append('=');
-        urlBuilder.append(URL.encodePathSegment(pageStateField.getValue()));
+        urlBuilder.append(URLPattern.encodeParsingCharacters(pageStateField.getValue()));
         
         if (itr.hasNext())
           urlBuilder.append('&');
@@ -115,5 +118,31 @@ public class URLPattern {
   @Override
   public String toString() {
     return urlTemplate;
+  }
+
+  /**
+   * Replaces the characters used for parsing with their encoded equivalents.
+   * The characters ";", "/", "&" and "=" are used in URLPattern and URLPatternMatcher to parse the given URL.
+   * Hence any occurrences of these characters in the actual page state values are 'escaped' so that it doesn't
+   * interfere with our URL parsing.
+   *
+   * @param plainValue The string that may contain any parsing characters.
+   * @return The same value with the appropriate characters 'escaped'.
+   */
+  static String encodeParsingCharacters(String plainValue) {
+    return plainValue.replaceAll(";","%3B").replaceAll("/","%2F").replaceAll("&", "%26")
+             .replaceAll("=", "%3D");
+  }
+
+  /**
+   * This method is the converse of {@link URLPattern#encodeParsingCharacters}.
+   * It 'un-escapes' all the parsing characters encoded by {@link URLPattern#encodeParsingCharacters}.
+   *
+   * @param escapedValue The string where the characters ";", "/", "&" and "=" have been encoded.
+   * @return The same string where all the encoded values are replaced by the actual characters.
+   */
+  static String decodeParsingCharacters(String escapedValue) {
+    return escapedValue.replaceAll("%3B",";").replaceAll("%2F", "/").replaceAll("%26", "&")
+             .replaceAll("%3D", "=");
   }
 }
