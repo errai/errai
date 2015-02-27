@@ -296,8 +296,9 @@ public final class ClassScanner {
     
     for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
       final String fqcn = clazz.getFullyQualifiedName();
-
-      if (cache.reloadablePackages.contains(clazz.getPackageName())) {
+      final String pkg = clazz.getPackageName();
+      
+      if (pkg !=null && cache.reloadablePackages.contains(pkg)) {
         classes.add(clazz);
         classNames.add(fqcn);
       }
@@ -306,7 +307,9 @@ public final class ClassScanner {
           if (fqcn.startsWith(reloadablePackage)) {
             classes.add(clazz);
             classNames.add(fqcn);
-            cache.reloadablePackages.add(clazz.getPackageName());
+            if (pkg != null) {
+              cache.reloadablePackages.add(pkg);
+            }
             break;
           }
         }
