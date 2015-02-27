@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
@@ -40,7 +39,7 @@ public final class ClassScanner {
     final Map<MetaClass, Collection<MetaClass>> subtypesCache = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
     final Collection<MetaClass> reloadableClasses =  new CopyOnWriteArrayList<MetaClass>();
     final Collection<String> reloadableClassNames =  new CopyOnWriteArrayList<String>();
-    final Set<String> reloadablePackages =  new CopyOnWriteArraySet<String>();
+    final Set<String> reloadablePackages =  Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     @Override
     public void clear() {
