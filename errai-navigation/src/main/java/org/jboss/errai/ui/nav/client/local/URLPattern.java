@@ -8,9 +8,12 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.user.client.Window;
 
 /**
  * Used to extract page state values from the URL path.
+ * This class generates a URL where the page state values are appropriately encoded for parsing. Thus the URL must be
+ * appropriately decoded. See @see URLPattern#decodeParsingCharacters() below.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  * @author Divya Dadlani <ddadlani@redhat.com>
@@ -21,15 +24,16 @@ public class URLPattern {
   private final List<String> paramList;
   private final RegExp regex;
   private final String urlTemplate;
+
   /**
-   * {@link paramRegex} A regular expression that checks for parameters declared in a URL template. 
-   * For example, in the URL {@code}/pageName/{id}/info{@code}, {@link paramRegex} would match 'id'.
+   * A regular expression that checks for parameters declared in a URL template.
+   * For example, in the URL {@code}/pageName/{id}/info{@code}, paramRegex would match 'id'.
    */
   static final String paramRegex = "\\{([^}]+)\\}";
   
   /**
-   * {@link urlSafe} A
-   * regular expression that checks if a typed URL only contains permitted URL characters.
+   * A regular expression that we use to match a path parameter value. Since the value can contain any characters,
+   * this regex matches everything. Any characters that we use for parsing will later be encoded.
    */
   public static final String urlSafe = "([^/]+)";
 
@@ -63,8 +67,10 @@ public class URLPattern {
   }
 
   /**
-   * Uses the state map to construct the encoded web-safe URL for this pattern. Values in state that are not predefined 
+   * Uses the state map to construct the encoded URL for this pattern. Values in state that are not predefined
    * path parameters (see {@link #getParamList()}) will be appended as key-value pairs.
+   * Note that this method only encodes the URL in a format that can be parsed by {@see URLPatternMatcher#parseURL()
+   * parseURL()}.
    * 
    * @param state
    * @throws IllegalStateException
