@@ -136,7 +136,7 @@ public class URLPattern {
    * @return The same value with the appropriate characters 'escaped'.
    */
   static String encodeParsingCharacters(String plainValue) {
-    return plainValue.replaceAll(";","%3B").replaceAll("/","%2F").replaceAll("&", "%26")
+    return plainValue.replaceAll("%", "%25").replaceAll(";","%3B").replaceAll("/","%2F").replaceAll("&", "%26")
              .replaceAll("=", "%3D");
   }
 
@@ -149,6 +149,6 @@ public class URLPattern {
    */
   static String decodeParsingCharacters(String escapedValue) {
     return escapedValue.replaceAll("%3B",";").replaceAll("%2F", "/").replaceAll("%26", "&")
-             .replaceAll("%3D", "=");
+             .replaceAll("%3D", "=").replace("%25", "%");
   }
 }
