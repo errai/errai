@@ -52,7 +52,13 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
         final Marshaller<Object> marshallerInstance = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v));
         if (marshallerInstance == null) {
           if (MessageParts.Throwable.name().equals(key)) {
-            impl.put(key, new Throwable(v.isObject().get("message").isString().stringValue()));
+            EJValue msg = v.isObject().get("message");
+            if (!msg.isNull() && msg.isString() != null) {
+              impl.put(key, new Throwable(msg.isString().stringValue()));  
+            }
+            else {
+              impl.put(key, new Throwable("No details provided"));
+            }
             continue;
           }
           else {
