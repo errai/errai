@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Comment;
@@ -62,12 +65,16 @@ import javax.enterprise.util.TypeLiteral;
  */
 public class StatementBuilder extends AbstractStatementBuilder implements StatementBegin {
 
+  private static final Pattern THIS_OR_SUPPER_PATTERN = Pattern.compile("(this|super)");
+  private static final Pattern THIS_PATTERN = Pattern.compile("(this.)(.)*");
+  
   public StatementBuilder(final Context context) {
     super(context);
 
     if (context != null) {
       for (final Variable v : context.getDeclaredVariables()) {
-        if (v.getName().matches("(this|super)")) continue;
+    	  Matcher m = THIS_OR_SUPPER_PATTERN.matcher(v.getName());
+    	  if(m.matches()) continue;
         appendCallElement(new DeclareVariable(v));
       }
       appendCallElement(new ResetCallElement());
@@ -195,9 +202,10 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   @Override
   public VariableReferenceContextualStatementBuilder loadVariable(final String name, final Object... indexes) {
-    if (name.matches("(this.)(.)*"))
+    Matcher m = THIS_PATTERN.matcher(name);
+    if (m.matches()) {
       return loadClassMember(name.replaceFirst("(this.)", ""), indexes);
-
+    }
     appendCallElement(new LoadVariable(name, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
