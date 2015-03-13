@@ -46,10 +46,12 @@ public class LoggingHandlerConfigurator implements EntryPoint {
     // users on older GWT versions with the pop-up window or force them to
     // disable the logger themselves.
     Handler[] logHandlers = logger.getHandlers();
-    for (Handler logHandler : logHandlers) {
-      if (logHandler instanceof HasWidgetsLogHandler) {
-        logger.removeHandler(logHandler);
-        ((HasWidgetsLogHandler)logHandler).clear();
+    if (logHandlers != null) {
+      for (Handler logHandler : logHandlers) {
+        if (logHandler instanceof HasWidgetsLogHandler) {
+          logger.removeHandler(logHandler);
+          ((HasWidgetsLogHandler)logHandler).clear();
+        }
       }
     }
 
