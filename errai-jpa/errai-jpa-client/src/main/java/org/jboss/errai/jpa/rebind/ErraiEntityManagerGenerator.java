@@ -185,7 +185,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       entityTypes.add(mt.getJavaType());
 
       // first, create a variable for the EntityType
-      String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners);
+      String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners, classBuilder);
 
       MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
 
@@ -241,18 +241,23 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         new ErraiPersistenceUnitInfo(managedTypeNames), properties);
   }
 
-  private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm, List<MetaClass> globalListeners) {
+  private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm, List<MetaClass> globalListeners, ClassStructureBuilder<?> classBuilder) {
     MetaClass met = MetaClassFactory.get(et.getJavaType());
     pmm.append(Stmt.codeComment(
         "**\n" +
         "** EntityType for " + et.getJavaType().getName() + "\n" +
         "**"));
     String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
+    
+    String entityTypeMethodName = "createEntityType"+et.getJavaType().getName().replace('.', '_');
+    
 
+    // entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType()))
+    
     AnonymousClassStructureBuilder entityTypeSubclass =
         Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
             .extend();
-
+    
     if (!java.lang.reflect.Modifier.isAbstract(et.getJavaType().getModifiers())) {
       entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
           .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
@@ -260,10 +265,18 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     }
 
     generateLifecycleEventDeliveryMethods(met, entityTypeSubclass, globalListeners);
+    
+    MethodBlockBuilder<?> cmm = classBuilder.privateMethod(MetaClassFactory.get(ErraiEntityType.class,
+        new ParameterizedEntityType(et.getJavaType())), entityTypeMethodName);
+    cmm.append(Stmt.declareVariable(ErraiEntityType.class).named("entityTypeSubclass")
+        .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
+    cmm.append(Stmt.loadVariable("entityTypeSubclass").returnValue());
+    cmm.finish();
 
     pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
         .named(entityTypeVarName)
-        .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
+        .initializeWith(Stmt.loadVariable("this").invoke(entityTypeMethodName)));
+    
     return entityTypeVarName;
   }
 
