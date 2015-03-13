@@ -186,22 +186,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
       // first, create a variable for the EntityType
       String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners, classBuilder);
-
-      MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
-
-      // now, snapshot all the EntityType's attributes, adding them as we go
-      for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
-        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
-            EntityType.class, ManagedType.class, Type.class);
-        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
-      }
-      for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
-        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
-            EntityType.class, ManagedType.class, Type.class);
-        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
-      }
+      classBuilder.privateField(entityTypeVarName, ErraiEntityType.class).finish();
 
       // register this entity type with all its supertypes which are also entities
       Class<?> superclass = mt.getJavaType();
@@ -248,11 +233,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         "** EntityType for " + et.getJavaType().getName() + "\n" +
         "**"));
     String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
-    
-    String entityTypeMethodName = "createEntityType"+et.getJavaType().getName().replace('.', '_');
-    
-
-    // entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType()))
+    String entityTypeMethodName = "createEntityType_"+et.getJavaType().getName().replace('.', '_');
     
     AnonymousClassStructureBuilder entityTypeSubclass =
         Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
@@ -268,14 +249,29 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     
     MethodBlockBuilder<?> cmm = classBuilder.privateMethod(MetaClassFactory.get(ErraiEntityType.class,
         new ParameterizedEntityType(et.getJavaType())), entityTypeMethodName);
-    cmm.append(Stmt.declareVariable(ErraiEntityType.class).named("entityTypeSubclass")
+    cmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal().named("entityType")
         .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
-    cmm.append(Stmt.loadVariable("entityTypeSubclass").returnValue());
+    
+    MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
+
+    // now, snapshot all the EntityType's attributes, adding them as we go
+    for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
+      Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
+          attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
+          EntityType.class, ManagedType.class, Type.class);
+      cmm.append(Stmt.loadVariable("entityType").invoke("addAttribute", attribSnapshot));
+    }
+    for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
+      Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
+          attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
+          EntityType.class, ManagedType.class, Type.class);
+      cmm.append(Stmt.loadVariable("entityType").invoke("addAttribute", attribSnapshot));
+    }
+    
+    cmm.append(Stmt.loadVariable("entityType").returnValue());
     cmm.finish();
 
-    pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
-        .named(entityTypeVarName)
-        .initializeWith(Stmt.loadVariable("this").invoke(entityTypeMethodName)));
+    pmm.append(Stmt.loadVariable(entityTypeVarName).assignValue(Stmt.loadVariable("this").invoke(entityTypeMethodName)));
     
     return entityTypeVarName;
   }
