@@ -72,16 +72,16 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public boolean isUnsatisfied() {
-      Collection<IOCBeanDef<?>> beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
+      Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
       return beanDefs.isEmpty(); 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public boolean isAmbiguous() {
-      Collection<IOCBeanDef<?>> beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
+      Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
       return beanDefs.size() > 1;
     }
 
