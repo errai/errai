@@ -140,7 +140,7 @@
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <treeLogger>true</treeLogger>
-          <strict>false</strict>
+          <strict>true</strict>
         </configuration>
         <executions>
           <execution>

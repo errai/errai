@@ -135,7 +135,7 @@
           <extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>          
-          <strict>false</strict>
+          <strict>true</strict>
         </configuration>
         <executions>
           <execution>

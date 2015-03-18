@@ -273,7 +273,7 @@
           <extraJvmArgs>${argLine} -Xmx1g</extraJvmArgs>
           <disableCastChecking>true</disableCastChecking>
           <hostedWebapp>src/main/webapp/</hostedWebapp>          
-          <strict>false</strict>
+          <strict>true</strict>
         </configuration>
         <executions>
           <execution>

@@ -335,7 +335,7 @@
           </execution>
         </executions>
         <configuration>
-          <strict>false</strict>
+          <strict>true</strict>
           <logLevel>INFO</logLevel>
           <noServer>false</noServer>
           <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
