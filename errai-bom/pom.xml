@@ -72,6 +72,7 @@
     <hsqldb.version>1.8.0.7</hsqldb.version>
     <jackson.mapper.asl.version>1.9.12</jackson.mapper.asl.version>
     <javaee.api.version>6.0</javaee.api.version>
+    <javassist.version>3.19.0-GA</javassist.version>
     <javax.inject.version>1</javax.inject.version>
     <javax.jsr250.version>1.0</javax.jsr250.version>
     <javax.persitence.api.version>1.0</javax.persitence.api.version>
@@ -951,7 +952,7 @@
       <dependency>
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
-        <version>${version.org.javassist}</version>
+        <version>${javassist.version}</version>
       </dependency>
 
       <dependency>
