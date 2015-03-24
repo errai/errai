@@ -256,6 +256,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
     // Mutating the list element should cause a property change event for the list
     TestModelWithBindableTypeList element = binder.getModel().getList().get(0);
+    
+    // Guards against regressions of ERRAI-848: no list operation should re-wrap an element proxy and add
+    // additional change handlers
+    binder.getModel().getList().contains(element);
     element.setId("id-change");
     
     assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());

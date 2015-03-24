@@ -283,29 +283,29 @@ public class BindableListWrapper<M> implements List<M> {
   private Object convertToProxy(Object element) {
     if (BindableProxyFactory.isBindableType(element)) {
       element = BindableProxyFactory.getBindableProxy(element, InitialState.FROM_MODEL);
+      final BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getAgent();
       
-      // Register a property change handler on the element to fire a change
-      // event for the list when the element changes
-      PropertyChangeHandler<Object> handler = new PropertyChangeHandler<Object>() {
-        @Override
-        public void onPropertyChange(PropertyChangeEvent<Object> event) {
-          final int index = list.indexOf(event.getSource());
-          final List<M> source = new ArrayList<M>(list);
-          if (index == -1)  return; 
-          
-          // yikes! we do this to alter the source list (otherwise the change event won't get fired).
-          source.add(null);
-          
-          for (BindableListChangeHandler<M> handler : handlers) {
-            handler.onItemChanged(source, index, (M) event.getSource());
+      if (!elementChangeHandlers.containsKey(agent)) {
+        // Register a property change handler on the element to fire a change
+        // event for the list when the element changes
+        PropertyChangeHandler<Object> handler = new PropertyChangeHandler<Object>() {
+          @Override
+          public void onPropertyChange(PropertyChangeEvent<Object> event) {
+            final int index = list.indexOf(event.getSource());
+            final List<M> source = new ArrayList<M>(list);
+            if (index == -1)  return; 
+            
+            // yikes! we do this to alter the source list (otherwise the change event won't get fired).
+            source.add(null);
+            
+            for (BindableListChangeHandler<M> handler : handlers) {
+              handler.onItemChanged(source, index, (M) event.getSource());
+            }
           }
-        }
-      };
-      
-      BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getAgent();
-      
-      agent.addPropertyChangeHandler(handler);
-      elementChangeHandlers.put(agent, handler);
+        };
+        agent.addPropertyChangeHandler(handler);
+        elementChangeHandlers.put(agent, handler);
+      }
     }
     return element;
   }
