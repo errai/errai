@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity.SomeEnum;
 
 /**
  * Implementation of {@link QueryParamTestService} returning test data.
@@ -96,5 +97,10 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
 
   @Override
   public void headWithQueryParam(long id) {}
+
+  @Override
+  public List<SomeEnum> getWithQueryParamListOfEnums(List<SomeEnum> id) {
+    return id;
+  }
 
 }

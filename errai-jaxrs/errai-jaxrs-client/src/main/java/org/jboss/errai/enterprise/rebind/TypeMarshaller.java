@@ -99,7 +99,9 @@ public class TypeMarshaller {
     public static boolean canHandle(MetaClass type, String mimeType) {
       boolean canHandle = false;
       if (("text/plain".equals(mimeType) && type.asUnboxed().isPrimitive())
-          || type.equals(MetaClassFactory.get(String.class)) || type.equals(MetaClassFactory.get(Date.class))) {
+          || type.equals(MetaClassFactory.get(String.class)) 
+          || type.equals(MetaClassFactory.get(Date.class))
+          || type.isEnum()) {
         canHandle = true;
       }
       return canHandle;
