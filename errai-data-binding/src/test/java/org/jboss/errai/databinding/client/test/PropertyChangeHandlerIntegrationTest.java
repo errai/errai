@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.jboss.errai.databinding.client.BindableProxy;
@@ -173,6 +174,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong previous value in event", null, valueHandler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel().getChild().getChild(), valueHandler.getEvents().get(0).getSource());
   }
+  
   @Test
   public void testPropertyChangeHandlingWithWildcardAndPropertyChain() {
     MockHandler handler = new MockHandler();
@@ -537,5 +539,30 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     });
     binder.getModel().setValue("value");
     assertEquals("Should have received exactly one event", 1, events.size());
+  }
+  
+  @Test
+  public void testMutateHandlersInPropertyChangeEvent() {
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    final List<PropertyChangeEvent<?>> observedEvents = new ArrayList<PropertyChangeEvent<?>>();
+    
+    final PropertyChangeHandler<String> handler = new PropertyChangeHandler<String>() {
+      @Override
+      public void onPropertyChange(PropertyChangeEvent<String> event) {
+        observedEvents.add(event);
+        binder.addPropertyChangeHandler(new MockHandler());
+      }
+    };
+    binder.addPropertyChangeHandler(handler);
+    binder.addPropertyChangeHandler("value", handler);
+    
+    try {
+      binder.getModel().setValue("test");
+    } 
+    catch (ConcurrentModificationException e) {
+      fail("Failed to mutate property change handlers in change event");
+    }
+    assertEquals("Should have received exactly 2 change events", 2, observedEvents.size());
   }
 }
