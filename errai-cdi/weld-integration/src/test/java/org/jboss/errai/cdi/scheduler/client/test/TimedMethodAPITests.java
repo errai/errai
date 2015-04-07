@@ -51,13 +51,17 @@ public class TimedMethodAPITests extends AbstractErraiCDITest {
             System.out.println("**destroying bean***");
 
             final int count = instance.getCount();
-            assertTrue("timer did not run", count > 0);
+            assertTrue("repeating timer did not run", count > 0);
+            
+            final int delayedCount = instance.getDelayedCount();
+            assertEquals("delayed timer should have run exactly one time", delayedCount, 1);
 
             new Timer() {
               @Override
               public void run() {
-                System.out.println("**confirming timer stopped**");
+                System.out.println("**confirming timers stopped**");
                 assertEquals("timer did not stop", count, instance.getCount());
+                assertEquals("delayed timer should have run exactly one time", instance.getDelayedCount(), 1);
                 finishTest();
               }
             }.schedule(2000);

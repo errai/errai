@@ -72,7 +72,6 @@ public class TimedExtension extends IOCDecoratorExtension<Timed> {
       final Statement timerVar = Stmt.declareFinalVariable(timerVarName, Timer.class, timerDecl);
 
       final List<Statement> statements = new ArrayList<Statement>();
-      //  statements.add(timerVar);
 
       final Statement timerExec;
       switch (timed.type()) {
@@ -81,12 +80,7 @@ public class TimedExtension extends IOCDecoratorExtension<Timed> {
           break;
         default:
         case DELAYED:
-          timerExec = Stmt.loadVariable(timerVarName).invoke("schedule",
-              Arith.expr(
-                  Stmt.invokeStatic(System.class, "currentTimeMillis"),
-                  ArithmeticOperator.Addition,
-                  timeUnit.toMillis(interval))
-          );
+          timerExec = Stmt.loadVariable(timerVarName).invoke("schedule", timeUnit.toMillis(interval));
           break;
       }
 
