@@ -18,8 +18,8 @@ import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
- * Acts as a an adaptor between gwt's ServletContainer interface and a JBoss AS
- * 7 instance.
+ * Acts as a an adaptor between gwt's ServletContainer interface and a JBoss
+ * AS/WildFly instance.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -81,7 +81,8 @@ public class JBossServletContainerAdaptor extends ServletContainer {
       attemptCommandContextConnection(MAX_RETRIES);
 
       try {
-        // Undeploy the app in case the container wasn't stopped correctly
+        // Undeploy the app in case the container/devmode wasn't shutdown correctly which should
+        // have removed the deployment (see stop method).
         removeDeployment();
         
         /*
