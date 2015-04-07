@@ -22,6 +22,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  * 7 instance.
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JBossServletContainerAdaptor extends ServletContainer {
 
@@ -80,6 +81,9 @@ public class JBossServletContainerAdaptor extends ServletContainer {
       attemptCommandContextConnection(MAX_RETRIES);
 
       try {
+        // Undeploy the app in case the container wasn't stopped correctly
+        removeDeployment();
+        
         /*
          * Need to add deployment resource to specify exploded archive
          *
@@ -133,13 +137,11 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     try {
       logger.branch(Type.INFO, String.format("Removing %s from deployments...", getAppName()));
 
-      final ModelNode operation = Operations.createRemoveOperation(new ModelNode().add(ClientConstants.DEPLOYMENT,
-              getAppName()));
-      ModelNode result = ctx.getModelControllerClient().execute(operation);
+      ModelNode result = removeDeployment();
       if (!Operations.isSuccessfulOutcome(result)) {
         logger.log(
                 Type.ERROR,
-                String.format("Could not shutdown AS:\nInput:\n%s\nOutput:\n%s", operation.toJSONString(false),
+                String.format("Could not undeploy AS:\nInput:\n%s\nOutput:\n%s", getAppName(),
                         result.toJSONString(false)));
         throw new UnableToCompleteException();
       }
@@ -156,6 +158,12 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     }
   }
 
+  private ModelNode removeDeployment() throws IOException {
+    final ModelNode operation = Operations.createRemoveOperation(
+            new ModelNode().add(ClientConstants.DEPLOYMENT, getAppName()));
+    return ctx.getModelControllerClient().execute(operation);
+  }
+  
   private void attemptCommandContextConnection(final int maxRetries)
           throws UnableToCompleteException {
 
@@ -287,5 +295,5 @@ public class JBossServletContainerAdaptor extends ServletContainer {
 
     return command;
   }
-
+  
 }

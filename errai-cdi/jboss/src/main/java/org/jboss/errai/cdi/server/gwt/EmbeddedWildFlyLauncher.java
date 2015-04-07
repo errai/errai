@@ -64,6 +64,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
       prepareBeansXml(appRootDir);
       JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, 
               JBossUtil.getDeploymentContext(), logger.peek(), null);
+      
       return controller;
     }
     catch (UnableToCompleteException e) {
