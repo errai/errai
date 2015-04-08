@@ -137,69 +137,23 @@ When it is finished, you should see the GWT Development Mode runtime window appe
 .GWT Development Mode running on Windows
 image::author/download/attachments/54493220/DevModeWindows.png[]
 
-Next, click the _Launch Default Browser_ button. If you have have never used GWT before on your computer, you may get an error when your browser loads as shown in _Figure 2_ .
-
-[[img-missing-plugin]]
-.Missing plugin error
-image::author/download/attachments/54493220/MissingPluginWindows.png[]
-
-Click the blue button that says _Download the GWT Developer Plugin_ to download the plugin. Run the installer to install the plugin for your browser.
-
-[IMPORTANT]
-.Direct download of plugin
-====
-If you get a 404 Error for Internet Explorer when clicking the link, you can download the latest plugin for your browser directly from these links:
-
-* link:$$http://google-web-toolkit.googlecode.com/svn-history/trunk/plugins/ie/prebuilt/gwt-dev-plugin-x86.msi$$[Internet Explorer 32-bit]
-* link:$$http://google-web-toolkit.googlecode.com/svn-history/trunk/plugins/ie/prebuilt/gwt-dev-plugin-x64.msi$$[Internet Explorer 64-bit]
-====
-
-Once you have configured your browser for development with GWT, and after loading the app with the _Launch Default Browser_ button, you should see the application load.
+Next, click the _Launch Default Browser_ button. You should now see the application load.
 
 If you are using errai-tutorial, you should see a page with a complaint form.
 
 If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".
 
-That's it! You've got your first Errai Application up and running. In the next section we'll learn how to run super devmode. Otherwise, skip to the section afterwards to setup your IDE.
-
-==== Running your app in Super Devmode
-
-Regular Devmode requires a special browser plugin to run client-side code in a as Java. Super Devmode is an alternative method that compiles code to javascript to be run natively in any browser. With browsers that support source-mapping, it is possible to debug with lines from your original source code within the browser.
-
-To run super devmode you will need to open two terminals in your project. In the first enter:
-
-----
-mvn clean gwt:run
-----
-
-This will launch a classic devmode server for hosting server-side resources. In the second enter:
-
-----
-mvn gwt:run-codeserver
-----
-
-This will launch the super devmode codeserver that hosts compiled GWT code. When the super devmode codeserver is finished compiling your GWT module, it will display a message like this:
-
-----
-The code server is ready.
-Next, visit: http://localhost:9876
-----
-
-Go to the displayed link and copy the two bookmarks *Dev Mode On* and *Dev Mode Off*.
-
-After completing the above, you may run your application as follows:
-
-1. Go to the classic devmode window and click *Copy Link*.
-
-2. Paste the link in to the browser, but **remove** the query paramters (i.e. `?gwt.codesvr=...`).
-
-3. Go to the link. You may see prompts saying that your GWT module needs to be recompiled.
-
-4. Click the *Dev Mode On* bookmark you copied previously. You should see a prompt to compile your GWT module. Click *Compile* to do so.
-
-5. Once the super devmode server has completed, your application should be running.
+That's it! You've got your first Errai Application up and running. The next sections will describe how to set up your app with your IDE.
 
 [[sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse]]
+
+==== Debugging the app in GWT's development mode
+
+To debug your app using GWT's development mode, you will need to start a remote debugger separately and run the following command in your project directory:
+
+----
+mvn clean gwt:debug
+----
 
 ==== Configuring your project for Eclipse
 
@@ -332,6 +286,112 @@ If everything is correct, click _Apply_.
 image::author/download/attachments/54493220/ServerDebugConfig.PNG[width=650]
 
 6. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>>!
+
+===== Debugging in your IDE using the EmbeddedWildFlyLauncher
+
+Errai's _EmbeddedWildFlyLauncher_ provides an embedded WildFly instance within Dev Mode to allow users to debug server- and client-side code simultaneously in a single JVM. Here are the instructions for using it in Eclipse and Intellij IDEA Ultimate Edition:
+
+====== Configuring Eclipse to use the embedded WildFly launcher
+
+This method requires the Google Plugin for Eclipse (GPE). You can find the instructions to download and install it link:$$https://developers.google.com/eclipse/docs/download$$[here].
+
+Here are the steps to setup a run/debug configuration using the embedded WildFly launcher:
+
+1. Ensure that your app is using the Google Web Toolkit. Right-click on your project in Eclipse, and select Google -> Web Toolkit Settings, and make sure that the "Use Google Web Toolkit" box is checked and the appropriate GWT SDK is selected.
++
+.Google Web Toolkit Settings
+image::author/download/attachments/gpe/EclipseProjectGWTSettings.png[width=650]
+
+2. Set up a Web Application run/debug configuration as follows: 
+
++
+Create a new Web Application run/debug configuration, select your Errai app in the Project field and set `com.google.gwt.dev.DevMode` as the main class:
++
+.Dev Mode Configuration: Main tab
+image::author/download/attachments/gpe/EclipseWebAppMain.png[width=650]
+
+3. In the _Server_ tab, check the 'Run built-in server' checkbox, and enter the port number `8888`.
++
+.Dev Mode Configuration: Server tab
+image::author/download/attachments/gpe/EclipseWebAppServer.png[width=650]
+
+4. Select _Super Development Mode_ in the GWT tab, and add your web app's module under _Available Modules_.
++
+.Dev Mode Configuration: GWT tab
+image::author/download/attachments/gpe/EclipseWebAppGWT.png[width=650]
+
+5. Under the _Arguments_ tab, enter the following arguments. Replace the war directory and the fully qualified app name with those of your own application:
++
+.Program Arguments
+----
+-superDevMode -remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -logLevel INFO -codeServerPort 9997 -port 8888 org.jboss.errai.demo.App -war /home/ddadlani/errai-tutorial/src/main/webapp -server org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher org.jboss.errai.demo.App
+----
++
+.VM arguments
+----
+-Xmx2048m -XX:MaxPermSize=512M -Derrai.jboss.home=/home/ddadlani/errai-tutorial/target/wildfly-8.2.0.Final/
+----
++
+where `errai.jboss.home` points to your own WildFly installation.
++
+.Dev Mode Configuration: Arguments tab
+image::author/download/attachments/gpe/EclipseWebAppArguments.png[width=650]
+
+
+[IMPORTANT]
+.Copy of WildFly in the target/ directory
+====
+If you wish to download and install WildFly into the _target/_ directory of your web app, you will need to run `mvn process-resources` prior to running or debugging your app. To do this, you can set up a Maven build configuration in Eclipse and specify _Goals_: "process-resources".
+====
+
+That's it! To debug your application within Eclipse, simply select your debug configuration and hit _Debug_. This will start GWT's dev mode as well as the debugger within Eclipse.
+
+====== Debugging client-side JavaScript from within Eclipse
+
+To debug your client-side JavaScript from within Eclipse using the embedded WildFly launcher, you will need to use the SDBG plugin for GWT Super Dev Mode. More information can be found http://sdbg.github.io/[here].
+
+===== Configuring Intellij IDEA (Ultimate Edition) to use the embedded WildFly launcher
+
+The Ultimate Edition for Intellij IDEA comes with a built-in GWT plugin that allows you to run and debug GWT apps specifically. We can configure the plugin to use the embedded WildFly launcher for debugging ease, in order to debug both server and client-side code in one debug session. This section describes how to set up a GWT run/debug configuration within Intellij IDEA:
+
+1. If you have not already done so, add a GWT facet to your main module. Instructions to add a GWT facet to an existing module can be found https://www.jetbrains.com/idea/help/adding-a-gwt-facet-to-a-module.html[here].
+
+2. On the top right hand corner of your Intellij IDEA session, select the dropdown box labeled _Edit Configurations_ to create a new run/debug configuration.
++
+.Edit Run/Debug Configuration
+image::author/download/attachments/intellij/IntellijEditConfig.png[width=450]
+
+3. Press the `+` button under GWT Configurations to create a new GWT configuration. Check the _Super Dev Mode_ checkbox and select the name of your module. Fill out the following parameters in the corresponding boxes:
++
+.VM Options
+----
+-Xmx2048m -XX:MaxPermSize=512M -Derrai.jboss.home=/home/ddadlani/errai-tutorial/target/wildfly-8.2.0.Final/
+----
++
+where `errai.jboss.home` points to your WildFly installation directory.
++
+.Dev Mode Parameters
+----
+-server org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher
+----
++
+.GWT Run/Debug Configuration for Intellij IDEA
+image::author/download/attachments/intellij/IntellijGWTConfig.png[width=650]
+
+4. Select the _Default_ server and make sure the start page is _index.html_. Select your browser and check the _with JavaScript debugger_ box to take advantage of Intellij IDEA's built-in JavaScript tooling.
+
+5. Click on the `+` button under _Before Launch_ and select the _Make_ option. This will tell Intellij to compile your project before launching Dev Mode.
+
+[IMPORTANT]
+.Copy of WildFly in the target/ directory
+====
+If you wish to download and install WildFly into the _target/_ directory of your web app, you will need to run `mvn process-resources` prior to running or debugging your app. To do this, you can add a Maven goal to the _Before Launch_ task list. Click the `+` button as before, select _Run Maven Goal_ and in the _Command Line_ field, enter "process-resources". Ensure that the working directory is the same as your project directory before clicking "OK".
+====
+
+To run or debug your app, select this configuration in the top right corner of Intellij IDEA and click the 'Run' or 'Debug' buttons next to it. Your app should start up in Dev Mode within Intellij automatically and you should be able to use Intellij's own debugger to debug your code.
+
+Now that you have everything set up, it's time to move on to coding!
+
 
 [[sid-54493502]]
 
