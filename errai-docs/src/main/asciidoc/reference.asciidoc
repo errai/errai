@@ -118,12 +118,13 @@ Keep an eye out for tips in the proceeding sections on how you can use the Errai
 ====
 
 [[sid-54493220_GettingStartedwithErrai-RunningtheappinGWT]]
+==== Running and Debugging with GWT's Super Dev mode
 
-==== Running the app in GWT's development mode
+As of GWT 2.7, we use Super Dev Mode to run your app in hosted mode during development. link:$$http://www.gwtproject.org/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode$$[GWT's Super Dev Mode] allows for code-refresh development cycles. Simply change a client-side class and refresh the browser to see your changes. You can also debug client and server side code in your IDE of choice. These sections will describe how to use Super Dev Mode to develop and debug your web app.
 
-link:$$http://www.gwtproject.org/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode$$[GWT's development mode] allows for code-refresh development cycles. Simply change a client-side class and refresh the browser to see your changes. You can also debug client and server side code in your IDE of choice.
+===== Running the app in GWT
 
-Change into the newly created project directory and type the following:
+Change into your web app's project directory and type the following:
 
 ----
 mvn clean gwt:run
@@ -131,10 +132,10 @@ mvn clean gwt:run
 
 This will begin the download of all the dependencies required to develop with and run Errai. It may take a few minutes to complete the download.
 
-When it is finished, you should see the GWT Development Mode runtime window appear as shown in _Figure 1_ running on Windows.
+When it is finished, you should see the GWT Development Mode runtime window appear as shown in _Figure 1_.
 
 [[img-gwt-dev]]
-.GWT Development Mode running on Windows
+.GWT Development Mode
 image::author/download/attachments/54493220/DevModeWindows.png[]
 
 Next, click the _Launch Default Browser_ button. You should now see the application load.
@@ -147,7 +148,7 @@ That's it! You've got your first Errai Application up and running. The next sect
 
 [[sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse]]
 
-==== Debugging the app in GWT's development mode
+===== Debugging the app in GWT
 
 To debug your app using GWT's development mode, you will need to start a remote debugger separately and run the following command in your project directory:
 
@@ -155,7 +156,9 @@ To debug your app using GWT's development mode, you will need to start a remote 
 mvn clean gwt:debug
 ----
 
-==== Configuring your project for Eclipse
+==== Running and Debugging in Eclipse using Maven tooling
+
+There are two ways to configure your project in your IDE. One option is to use the built-in Maven tooling to set up Maven run and debug configurations within your IDE. The other option is to download and use GWT tooling that is available for your IDE, and create custom run/debug configurations with that. Note that for Intellij IDEA, the GWT tooling is only available for users of the Ultimate Edition.
 
 [NOTE]
 .Read the previous section!
@@ -171,7 +174,7 @@ This next section assumes you have followed the instructions in the previous sec
 
 ===== Maven Integration for Eclipse (m2e)
 
-The project that was made in the last section is a Maven project. Thus, we will be relying on Maven to manage our project model throughout this guide. As such, we will want to install Maven tooling in the IDE. If you have not already installed m2e in Eclipse, you will want to do so now.
+This section will walk you through using Maven tooling for running and debugging your app within Eclipse. If you have not already installed m2e in Eclipse, you will want to do so now.
 
 To install the Maven tooling, use the following steps:
 
@@ -287,11 +290,11 @@ image::author/download/attachments/54493220/ServerDebugConfig.PNG[width=650]
 
 6. That's it! You've successfully imported your Errai project into Eclipse. Now, on to <<sid-54493502,coding>>!
 
-===== Debugging in your IDE using the EmbeddedWildFlyLauncher
+==== Running and Debugging in your IDE using GWT tooling
 
 Errai's _EmbeddedWildFlyLauncher_ provides an embedded WildFly instance within Dev Mode to allow users to debug server- and client-side code simultaneously in a single JVM. Here are the instructions for using it in Eclipse and Intellij IDEA Ultimate Edition:
 
-====== Configuring Eclipse to use the embedded WildFly launcher
+===== Configuring your app to use the Google Plugin for Eclipse
 
 This method requires the Google Plugin for Eclipse (GPE). You can find the instructions to download and install it link:$$https://developers.google.com/eclipse/docs/download$$[here].
 
@@ -315,42 +318,50 @@ image::author/download/attachments/gpe/EclipseWebAppMain.png[width=650]
 .Dev Mode Configuration: Server tab
 image::author/download/attachments/gpe/EclipseWebAppServer.png[width=650]
 
-4. Select _Super Development Mode_ in the GWT tab, and add your web app's module under _Available Modules_.
+4. Select _Super Development Mode_ in the GWT tab, and add your GWT module under _Available Modules_.
 +
 .Dev Mode Configuration: GWT tab
 image::author/download/attachments/gpe/EclipseWebAppGWT.png[width=650]
 
-5. Under the _Arguments_ tab, enter the following arguments. Replace the war directory and the fully qualified app name with those of your own application:
+5. Under the _Arguments_ tab, there are two fields, _Program arguments_ and _VM arguments_. In the _Program arguments_ field, amend the `server` flag as follows:
 +
 .Program Arguments
 ----
--superDevMode -remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -logLevel INFO -codeServerPort 9997 -port 8888 org.jboss.errai.demo.App -war /home/ddadlani/errai-tutorial/src/main/webapp -server org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher org.jboss.errai.demo.App
+-server org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher 
 ----
++
+Make sure the following VM arguments are set:
 +
 .VM arguments
 ----
 -Xmx2048m -XX:MaxPermSize=512M -Derrai.jboss.home=/home/ddadlani/errai-tutorial/target/wildfly-8.2.0.Final/
 ----
 +
-where `errai.jboss.home` points to your own WildFly installation.
+where `errai.jboss.home` points to your own WildFly installation. This can either be your local WildFly installation directory, or in the _target/_ directory of your app. For the Errai Tutorial app, `errai.jboss.home` points to the WildFly installation within the _target/_ directory, which is redownloaded and installed as part of the build. See <<wildfly-install-eclipse, below>> for information on how to automatically download WildFly into the _target/_ directory prior to running Super Dev Mode.
 +
 .Dev Mode Configuration: Arguments tab
 image::author/download/attachments/gpe/EclipseWebAppArguments.png[width=650]
 
-
+[[wildfly-install-eclipse]]
 [IMPORTANT]
 .Copy of WildFly in the target/ directory
 ====
-If you wish to download and install WildFly into the _target/_ directory of your web app, you will need to run `mvn process-resources` prior to running or debugging your app. To do this, you can set up a Maven build configuration in Eclipse and specify _Goals_: "process-resources".
+If you wish to automatically download and install WildFly as part of your build into the _target/_ directory of your web app, you will need to run `mvn process-resources` prior to running or debugging your app. To do this, you can set up a Maven build configuration in Eclipse and specify _Goals_: "process-resources". You can then run the Maven configuration prior to running GWT's Super Dev Mode.
 ====
 
 That's it! To debug your application within Eclipse, simply select your debug configuration and hit _Debug_. This will start GWT's dev mode as well as the debugger within Eclipse.
 
 ====== Debugging client-side JavaScript from within Eclipse
 
-To debug your client-side JavaScript from within Eclipse using the embedded WildFly launcher, you will need to use the SDBG plugin for GWT Super Dev Mode. More information can be found http://sdbg.github.io/[here].
+If you wish to debug your client-side JavaScript as Java code from within Eclipse, you will need to use the SDBG plugin for GWT Super Dev Mode. More information can be found http://sdbg.github.io/[here].
 
-===== Configuring Intellij IDEA (Ultimate Edition) to use the embedded WildFly launcher
+===== Configuring your app to use Intellij IDEA's GWT tooling
+
+[NOTE]
+.Intellij IDEA Community Edition users
+====
+The inbuilt GWT tooling for Intellij IDEA is only available in the Ultimate Edition. If you are using the Community Edition, you will not have access to the GWT plugin.
+====
 
 The Ultimate Edition for Intellij IDEA comes with a built-in GWT plugin that allows you to run and debug GWT apps specifically. We can configure the plugin to use the embedded WildFly launcher for debugging ease, in order to debug both server and client-side code in one debug session. This section describes how to set up a GWT run/debug configuration within Intellij IDEA:
 
@@ -368,7 +379,7 @@ image::author/download/attachments/intellij/IntellijEditConfig.png[width=450]
 -Xmx2048m -XX:MaxPermSize=512M -Derrai.jboss.home=/home/ddadlani/errai-tutorial/target/wildfly-8.2.0.Final/
 ----
 +
-where `errai.jboss.home` points to your WildFly installation directory.
+where `errai.jboss.home` points to your WildFly installation directory. This can either be your local WildFly installation directory, or in the _target/_ directory of your app. For the Errai Tutorial app, `errai.jboss.home` points to the WildFly installation within the _target/_ directory, which is redownloaded and installed as part of the build. See <<wildfly-install-intellij, below>> for information on how to automatically download WildFly into the _target/_ directory prior to running Super Dev Mode.
 +
 .Dev Mode Parameters
 ----
@@ -382,10 +393,11 @@ image::author/download/attachments/intellij/IntellijGWTConfig.png[width=650]
 
 5. Click on the `+` button under _Before Launch_ and select the _Make_ option. This will tell Intellij to compile your project before launching Dev Mode.
 
+[[wildfly-install-intellij]]
 [IMPORTANT]
 .Copy of WildFly in the target/ directory
 ====
-If you wish to download and install WildFly into the _target/_ directory of your web app, you will need to run `mvn process-resources` prior to running or debugging your app. To do this, you can add a Maven goal to the _Before Launch_ task list. Click the `+` button as before, select _Run Maven Goal_ and in the _Command Line_ field, enter "process-resources". Ensure that the working directory is the same as your project directory before clicking "OK".
+If you wish to automatically download and install WildFly as part of your build into the _target/_ directory of your web app, you will need to run `mvn process-resources` prior to running or debugging your app. To do this, you can add a Maven goal to the _Before Launch_ task list. Click the `+` button as before, select _Run Maven Goal_ and in the _Command Line_ field, enter "process-resources". Ensure that the working directory is the same as your project directory before clicking "OK". Intellij IDEA will then run the Maven goal prior to starting Super Dev Mode.
 ====
 
 To run or debug your app, select this configuration in the top right corner of Intellij IDEA and click the 'Run' or 'Debug' buttons next to it. Your app should start up in Dev Mode within Intellij automatically and you should be able to use Intellij's own debugger to debug your code.
