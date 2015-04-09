@@ -90,12 +90,15 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     StringBuilder exclusions = new StringBuilder();
     exclusions.append(ERRAI_SCANNER_HINT_START);
     for (File clientLocalClass : FileUtils.listFiles(appRootDir, new ClientLocalFileFilter(), TrueFileFilter.INSTANCE)) {
-      String className = clientLocalClass.getAbsolutePath()
-              .replace(classesDir.getAbsolutePath(), "")
-              .replace(".class", "")
-              .replace(File.separator, ".")
-              .substring(1);
-      exclusions.append(DEVMODE_BEANS_XML_EXCLUSION_TEMPLATE.replace("$CLASSNAME", className));
+      final String className = clientLocalClass.getAbsolutePath();
+      if (className.endsWith(".class")) {
+        String exclusion = className
+          .replace(classesDir.getAbsolutePath(), "")
+          .replace(".class", "")
+          .replace(File.separator, ".")
+          .substring(1);
+        exclusions.append(DEVMODE_BEANS_XML_EXCLUSION_TEMPLATE.replace("$CLASSNAME", exclusion));
+      }
     }
     exclusions.append(ERRAI_SCANNER_HINT_END);
     
