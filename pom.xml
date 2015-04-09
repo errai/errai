@@ -67,7 +67,7 @@
   </issueManagement>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <guice.version>3.0</guice.version>
     <guava.version>17.0</guava.version>
     <appengine.version>1.7.6</appengine.version>
@@ -79,6 +79,7 @@
   </properties>
 
   <modules>
+    <module>errai-internal-bom</module>
     <module>errai-bom</module>
     <module>errai-common</module>
     <module>errai-javax-enterprise</module>
