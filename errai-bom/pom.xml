@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jboss.integration-platform</groupId>
     <artifactId>jboss-integration-platform-parent</artifactId>
-    <version>6.0.0.CR17</version>
+    <version>6.0.0.CR26</version>
     <relativePath></relativePath>
   </parent>
 
@@ -32,6 +32,8 @@
   
   <!-- !!! The only single place for Errai project to define versions is here !!! -->
   <!-- Keep versions property names in alphabetical order, please -->
+  <!-- Try to use version properties already definied in jboss-integration-platform-parent 
+  instead of defining a new ones -->
   <properties>
     <apache.commons.lang.version>3.2.1</apache.commons.lang.version>
     <apache.geronimo.spec.1.1.interceptor.version>1.0</apache.geronimo.spec.1.1.interceptor.version>
@@ -72,10 +74,9 @@
     <hsqldb.version>1.8.0.7</hsqldb.version>
     <jackson.mapper.asl.version>1.9.12</jackson.mapper.asl.version>
     <javaee.api.version>6.0</javaee.api.version>
-    <javassist.version>3.19.0-GA</javassist.version>
-    <javax.inject.version>1</javax.inject.version>
+    <javassist.version>3.19.0-GA</javassist.version>    
     <javax.jsr250.version>1.0</javax.jsr250.version>
-    <javax.persitence.api.version>1.0</javax.persitence.api.version>
+    <javax.persitence.api.version>1.0</javax.persitence.api.version>    
     <jboss.dist.version>7.1.1.Final</jboss.dist.version>
     <jboss.ejb.api.spec.version>1.0.2.Final</jboss.ejb.api.spec.version>
     <jboss.interceptors.api12.spec.version>1.0.0.Alpha3</jboss.interceptors.api12.spec.version>
@@ -83,7 +84,7 @@
     <jboss.remoting.version>4.0.0.Final</jboss.remoting.version>
     <jboss.servlet.api.spec30.version>1.0.0.Final</jboss.servlet.api.spec30.version>
     <jboss.shrinkwrap.api.version>1.0.0-beta-5</jboss.shrinkwrap.api.version>
-    <jboss.spec.jboss.javaee.6.0.version>3.0.3.Final</jboss.spec.jboss.javaee.6.0.version>
+    <jboss.spec.jboss.javaee.7.0.version>1.0.2.Final</jboss.spec.jboss.javaee.7.0.version>
     <jboss.vfs.version>3.0.1.GA</jboss.vfs.version>
     <jboss.web.version>7.0.16.Final</jboss.web.version>
     <jboss.xnio.version>3.2.0.Final</jboss.xnio.version>
@@ -91,8 +92,7 @@
     <jsoup.version>1.7.1</jsoup.version>
     <jsr305.version>1.3.9</jsr305.version>
     <keycloak.version>1.0.4.Final</keycloak.version>
-    <lesscss.version>1.3.3</lesscss.version>
-    <log4.version>1.2.16</log4.version>
+    <lesscss.version>1.3.3</lesscss.version>    
     <mockito.core.version>1.9.5</mockito.core.version>
     <mojo.executor.version>2.2.0</mojo.executor.version>
     <mvel.version>2.1.7.Final</mvel.version>
@@ -130,14 +130,11 @@
   </organization>
   <dependencyManagement>
 
-    <dependencies>
-      <!-- JBoss distributes a complete set of Java EE 6 APIs including a Bill of Materials (BOM). A BOM specifies the versions of a "stack" (or a collection) of artifacts. We use this here so that we 
-        always get the correct versions of artifacts. Here we use the jboss-javaee-6.0 stack (you can read this as the JBoss stack of the Java EE 6 APIs), and we use version 3.0.2.Final which is the latest release 
-        of the stack. You can actually use this stack with any version of JBoss AS that implements Java EE 6, not just JBoss AS 7! -->
+    <dependencies>      
       <dependency>
         <groupId>org.jboss.spec</groupId>
-        <artifactId>jboss-javaee-6.0</artifactId>
-        <version>${jboss.spec.jboss.javaee.6.0.version}</version>
+        <artifactId>jboss-javaee-7.0</artifactId>
+        <version>${jboss.spec.jboss.javaee.7.0.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -417,7 +414,7 @@
       <dependency>
         <groupId>org.hibernate.javax.persistence</groupId>
         <artifactId>hibernate-jpa-2.0-api</artifactId>
-        <version>${hibernate.jpa20.api.version}</version>
+        <version>${version.org.hibernate.javax.persistence.hibernate-jpa-2.0-api}</version>
       </dependency>
 
       <dependency>
@@ -745,7 +742,7 @@
       <dependency>
         <groupId>javax.inject</groupId>
         <artifactId>javax.inject</artifactId>
-        <version>${javax.inject.version}</version>
+        <version>${version.javax.inject}</version>
       </dependency>
 
       <dependency>
