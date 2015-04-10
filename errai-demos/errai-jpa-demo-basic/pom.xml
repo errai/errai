@@ -118,6 +118,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Errai Core -->
     <dependency>
       <groupId>org.jboss.errai</groupId>

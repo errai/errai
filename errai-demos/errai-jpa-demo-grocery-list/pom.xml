@@ -58,6 +58,7 @@
     <jetty.version>6.1.26</jetty.version>
     <slf4j.version>1.7.10</slf4j.version>
     <cdiapi.version>1.2</cdiapi.version>
+    <guice.version>3.0</guice.version>
     <servletapi.version>1.0.2.Final</servletapi.version>
     <gwt.version>2.7.0</gwt.version>
     <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
@@ -148,6 +149,13 @@
       <artifactId>cdi-api</artifactId>
       <version>${cdiapi.version}</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <scope>provided</scope>
+      <version>${guice.version}</version>
     </dependency>
 
     <!-- Errai Core -->

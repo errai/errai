@@ -159,6 +159,12 @@
         </dependency>
 
         <dependency>
+          <groupId>com.google.inject</groupId>
+          <artifactId>guice</artifactId>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
           <!-- After the CDI project merge-into-parent, the JBossJNDI class 
             in this project wouldn't compile in Eclipse anymore. This dependency fixes 
             the compile error without changing the semantics of the build result. However, 
@@ -256,6 +262,12 @@
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
           <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>com.google.inject</groupId>
+          <artifactId>guice</artifactId>
+          <scope>provided</scope>
         </dependency>
 
         <!-- Errai Core -->

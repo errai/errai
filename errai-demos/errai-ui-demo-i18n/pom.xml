@@ -99,6 +99,7 @@
     
     <!-- TODO figure out how to force all these things to provided scope without doing it explicitly in EVERY SINGLE ERRAI PROJECT!!!!111!!!!1 -->
     <!-- Don't deploy any of this -->
+    <dependency><groupId>com.google.inject</groupId><artifactId>guice</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>com.google.guava</groupId><artifactId>guava-gwt</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>javax.annotation</groupId><artifactId>jsr250-api</artifactId><scope>provided</scope></dependency>
