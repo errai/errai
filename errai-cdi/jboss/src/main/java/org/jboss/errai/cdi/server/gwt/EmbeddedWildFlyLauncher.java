@@ -24,6 +24,14 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 /**
  * A {@link ServletContainerLauncher} controlling an embedded WildFly instance.
  * 
+ * This launcher will add exclusions for client-side classes to the project's
+ * beans.xml. These classes are not needed on the server and are going to cause
+ * class loading issues if deployed (i.e. because they reference GWT classes
+ * that are not present at runtime). By default, classes in packages under
+ * /client/local will be considered client-side but this can be configured using
+ * the system property errai.client.local.class.pattern. Existing exclusions
+ * will stay intact. If no beans.xml is present, a new one will be created.
+ * 
  * @author Christian Sadilek <christian.sadilek@gmail.com>
  */
 public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
