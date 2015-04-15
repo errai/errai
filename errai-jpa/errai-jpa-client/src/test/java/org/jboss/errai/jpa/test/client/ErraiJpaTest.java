@@ -27,6 +27,7 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.LocalStorage;
@@ -113,7 +114,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testNonClientEntityIsNotInEntityManager() {
     try {
       // we cannot use the class name to test here since the class is not available in client side code generation
-      ((ErraiMetamodel)getEntityManager().getMetamodel()).entity("org.jboss.errai.jpa.test.not.on.gwt.path.NonClientEntity");
+      ((ErraiMetamodel)getEntityManager().getMetamodel()).entity("org.jboss.errai.jpa.test.not.on.gwt.path"
+                                                                   + ".NonClientEntity");
       // it's actually more likely that the whole code generation thing fails
       fail("NonClientEntity was included");
     } catch (IllegalArgumentException ex) {
@@ -562,7 +564,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
     em.flush();
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PreRemove.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PreRemove.class));
-    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostRemove.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostRemove
+                                                                                                        .class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostRemove.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
@@ -664,7 +667,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
     em.merge(album);
     em.flush();
 
-    // events should be delivered to the merge target (the newly loaded managed instance) -- NOT album, which remains detached
+    // events should be delivered to the merge target (the newly loaded managed instance) -- NOT album, which remains
+    // detached
     Album mergeTarget = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PostLoad.class));
@@ -802,7 +806,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     String originalZentityJson = LocalStorage.get(key.toJson());
     JSONObject jsonEntity = JSONParser.parseStrict(originalZentityJson).isObject();
     assertTrue("Sanity check failed: didn't find primitiveInt stored in backend entry: " + originalZentityJson,
-            jsonEntity.containsKey("primitiveInt"));
+                jsonEntity.containsKey("primitiveInt"));
 
     // this actually removes the key from the object
     jsonEntity.put("primitiveInt", null);
@@ -959,7 +963,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
       public void onPropertyChange(PropertyChangeEvent<Long> event) {
         if (event.getPropertyName().equals("id")) {
           eventAlbum.setId(event.getNewValue());
-        } else {
+        }
+        else {
           fail("Unexpected property change event received for: " + event.getPropertyName());
         }
       }
