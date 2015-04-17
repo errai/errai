@@ -8188,7 +8188,7 @@ ErraiApp.properties acts both as a marker file for JARs that contain Errai-enabl
 
 ==== As a Marker File
 
-_An_ [code]++ErraiApp.properties++_file must appear at the root of each classpath location that contains an Errai module._ The contents of JAR and directory classpath entries that do not contain an [code]+ErraiApp.properties+ are effectively invisible to Errai's classpath scanner.
+_An_ [code]++ErraiApp.properties++ _file must appear at the root of each classpath location that contains an Errai module._ The contents of JAR and directory classpath entries that do not contain an [code]+ErraiApp.properties+ are effectively invisible to Errai's classpath scanner.
 
 [[sid-5931354_ErraiApp.properties-AsaConfigurationFile]]
 
@@ -8229,6 +8229,11 @@ Errai also supports configuring portable types in [code]+ErraiApp.properties+ as
 * _errai.ioc.blacklist_ specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).
 
 * _errai.ioc.whitelist_ when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).
+
+===== Errai JPA Configuration
+* _errai.jpa.whitelist_ specifies a whitespace-separated list of fully-qualified class names that should be included in Errai JPA's scanning and in the Entity Manager. Any entities that are not part of the whitelist are ignored by Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*). 
+
+* _errai.jpa.blacklist_ specifies a whitespace-separated list of fully-qualified class names that should be excluded from Errai JPA's scanning. This can be used for client-side entities that do not use Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*). The blacklist has priority over the whitelist. This means that if a class is part of both the blacklist and the whitelist, the class will be blacklisted, i.e. ignored by Errai JPA.
 
 [[sid-5931338]]
 
