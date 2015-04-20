@@ -5254,8 +5254,8 @@ public class User {
 public class UserWidget {
   @Inject @AutoBound DataBinder<User> user;
   @Inject @Bound TextBox name;
-  @Inject @Bound("dob") DatePicker dateOfBirth;
-  @Inject @Bound("address.city") TextBox city;
+  @Inject @Bound(property="dob") DatePicker dateOfBirth;
+  @Inject @Bound(property="address.city") TextBox city;
 }
 ----
 
@@ -6065,8 +6065,8 @@ public class User {
 public class UserWidget extends Composite {
   @Inject @AutoBound DataBinder<User> user;
   @Inject @Bound TextBox name;
-  @Inject @Bound("dob") DatePicker dateOfBirth;
-  @Inject @Bound("address.city") TextBox city;
+  @Inject @Bound(property="dob") DatePicker dateOfBirth;
+  @Inject @Bound(property="address.city") TextBox city;
 }
 ----
 
@@ -6085,8 +6085,8 @@ Often you will need to bind a list of model objects so that every object in the 
 public class UserWidget extends Composite implements HasModel<User> {
   @Inject @AutoBound DataBinder<User> userBinder;
   @Inject @Bound TextBox name;
-  @Inject @Bound("dob") DatePicker dateOfBirth;
-  @Inject @Bound("address.city") TextBox city;
+  @Inject @Bound(property="dob") DatePicker dateOfBirth;
+  @Inject @Bound(property="address.city") TextBox city;
 
   public User getModel() {
     userBinder.getModel();
