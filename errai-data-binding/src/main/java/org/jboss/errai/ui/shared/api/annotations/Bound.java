@@ -20,10 +20,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
-
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 
@@ -89,6 +87,14 @@ public @interface Bound {
   // The NO_CONVERTER class needs to be fully qualified here to work around a JDK bug:
   // http://bugs.sun.com/view_bug.do?bug_id=6512707
   Class<? extends Converter> converter() default org.jboss.errai.ui.shared.api.annotations.Bound.NO_CONVERTER.class;
+
+  /**
+   * The event type fired by the @Bound widget, which should trigger an update in the model property.
+   * If omitted, the corresponding model property will be updated on a {@link com.google.gwt.event
+   * .logical.shared.ValueChangeEvent}
+   */
+
+  boolean onKeyUp() default false;
 
   static abstract class NO_CONVERTER implements Converter {}
 }

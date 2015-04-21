@@ -198,7 +198,41 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    */
   public DataBinder<T> bind(final Widget widget, final String property,
           @SuppressWarnings("rawtypes") final Converter converter) {
+    // default binding without registering KeyUp events
+    return bind(widget, property, converter, false);
+  }
 
+  /**
+   * Binds the provided widget to the specified property of the model instance associated with this
+   * {@link DataBinder}. If the provided widget already participates in another binding managed by
+   * this {@link DataBinder}, a {@link WidgetAlreadyBoundException} will be thrown.
+   *
+   * @param widget
+   *          The widget the model instance should be bound to, must not be null.
+   * @param property
+   *          The name of the model property that should be used for the binding, following Java
+   *          bean conventions. Chained (nested) properties are supported and must be dot (.)
+   *          delimited (e.g. customer.address.street). Must not be null.
+   * @param converter
+   *          The converter to use for the binding, null if default conversion should be used (see
+   *          {@link Convert}).
+   * @param bindOnKeyUp
+   *          A boolean value that allows models bound to text-based widgets to be updated on a
+   *          {@link com.google.gwt.event.dom.client.KeyUpEvent} as well as the default {@link com.google.gwt.event
+   *          .logical.shared.ValueChangeEvent}
+   *          
+   * @return the same {@link DataBinder} instance to support call chaining.
+   * @throws NonExistingPropertyException
+   *           If the {@code model} does not have a property with the given name.
+   * @throws InvalidPropertyExpressionException
+   *           If the provided property chain expression is invalid.
+   * @throws WidgetAlreadyBoundException
+   *           If the provided {@code widget} is already bound to a property of the model.
+   * @throws InvalidBindEventException
+   *           If the bindOnKeyUp flag is true and the {@code widget} does not extend ValueBoxBase.
+   */
+  public DataBinder<T> bind(final Widget widget, final String property,
+                             final Converter converter, final boolean bindOnKeyUp) {
     Assert.notNull(widget);
     Assert.notNull(property);
 
@@ -206,7 +240,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(proxy), initialState);
     }
 
-    Binding binding = getAgent().bind(widget, property, converter);
+    Binding binding = getAgent().bind(widget, property, converter, bindOnKeyUp);
     bindings.put(property, binding);
     return this;
   }

@@ -29,9 +29,12 @@ import org.jboss.errai.databinding.client.DeclarativeBindingModule;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingBinder;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingModel;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingParams;
+import org.jboss.errai.databinding.client.DeclarativeBindingModuleWithKeyUpEvent;
+import org.jboss.errai.databinding.client.InvalidBindEventException;
 import org.jboss.errai.databinding.client.ListOfStringWidget;
 import org.jboss.errai.databinding.client.ModuleWithInjectedBindable;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.InjectedDataBinderModuleBoundOnKeyUp;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.SingletonBindable;
 import org.jboss.errai.databinding.client.TestModel;
@@ -52,12 +55,16 @@ import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.junit.Test;
 
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Tests functionality provided by the {@link DataBinder} API.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
@@ -968,5 +975,90 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     
     model.getList().remove("1");
     assertEquals("Widget not properly updated", 0, widget.getValue().size());
+  }
+
+  @Test
+  public void testDeclarativeBindingWithKeyUpBindingEvent() {
+    DeclarativeBindingModule module =
+        IOC.getBeanManager().lookupBean(DeclarativeBindingModuleWithKeyUpEvent.class).getInstance();
+
+    TestModel model = module.getModel();
+    model.setAge(1);
+    assertEquals("Widget not properly updated", model.getAge(), new Integer(module.getAge().getValue()));
+
+    module.getAge().setValue("6");
+    // fire key event manually
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false,
+                                                              KeyCodes.KEY_NUM_SIX), module.getAge());
+    assertEquals("Model not properly updated", module.getAge().getValue(), model.getAge().toString());
+  }
+
+  @Test
+  public void testDeclarativeBindingWithKeyUpEventAndChainedProperty () {
+    DeclarativeBindingModule module =
+      IOC.getBeanManager().lookupBean(DeclarativeBindingModuleWithKeyUpEvent.class).getInstance();
+
+    TestModel model = module.getModel();
+    model.getChild().setName("model change");
+    assertEquals("Widget not properly updated", model.getChild().getName(), module.getNameTextBox().getValue());
+
+    module.getNameTextBox().setValue("widget name");
+    // fire key event manually
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_E), module
+                                                                                                            .getNameTextBox());
+    assertEquals("Model and widget do not match", module.getNameTextBox().getValue(), model.getChild().getName());
+  }
+
+  @Test
+  public void testInjectedDatabinderWithKeyUpEvent () {
+     InjectedDataBinderModuleBoundOnKeyUp module =
+        IOC.getBeanManager().lookupBean(InjectedDataBinderModuleBoundOnKeyUp.class).getInstance();
+
+    TestModel model = module.getModel();
+    TextBox nameTextBox = module.getNameTextBox();
+
+    model.setName("model change");
+    assertEquals("Widget not properly updated", "model change", nameTextBox.getText());
+
+    nameTextBox.setValue("UI change", true);
+    // fire key event manually
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_E),
+                              nameTextBox);
+
+    assertEquals("Model not properly updated", "UI change", model.getName());
+  }
+
+  @Test
+  public void testUnbindingWithKeyUpEvent() {
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
+    TextBox textBox = new TextBox();
+    TestModel model = binder.bind(textBox, "value", null, true).getModel();
+
+    textBox.setValue("UI change");
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_E), textBox);
+    assertEquals("Model not properly updated", textBox.getValue(), model.getValue());
+
+    binder.unbind("value");
+
+    model.setValue("model change");
+    // textBox value should be same as before
+    assertEquals("Widget should not have been updated because unbind was called", "UI change", textBox.getText());
+
+    textBox.setValue("Another UI change", true);
+    // model value should be same as before
+    assertEquals("Model should not have been updated because unbind was called", "model change", model.getValue());
+
+  }
+
+  @Test
+  public void testBindingNonTextWidgetOnUnhandledEvent() {
+    CheckBox checkBox = new CheckBox();
+    try {
+      // bind non-ValueBoxBase widget on KeyUpEvents
+      DataBinder.forType(TestModel.class).bind(checkBox, "active", null, true);
+      fail("Widgets that do not extend ValueBoxBase should not bind on KeyUpEvents.");
+    } catch (InvalidBindEventException e) {
+      // this is the expected behavior
+    }
   }
 }

@@ -18,7 +18,9 @@ package org.jboss.errai.databinding.client;
 
 import static org.jboss.errai.databinding.client.api.Convert.toModelValue;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +34,15 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -99,7 +104,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Binds the provided widget to the specified property (or property chain) of the model instance
    * associated with this proxy (see {@link DataBinder#setModel(Object, InitialState)}).
-   * 
+   *
    * @param widget
    *          the widget to bind to, must not be null.
    * @param property
@@ -109,12 +114,33 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @return binding the created binding.
    */
   public Binding bind(final Widget widget, final String property, final Converter converter) {
+    return bind(widget, property, converter, false);
+  }
+
+    /**
+   * Binds the provided widget to the specified property (or property chain) of the model instance
+   * associated with this proxy (see {@link DataBinder#setModel(Object, InitialState)}).
+   *
+   * @param widget
+   *          the widget to bind to, must not be null.
+   * @param property
+   *          the property of the model to bind the widget to, must not be null.
+   * @param converter
+   *          the converter to use for this binding, null if default conversion should be used.
+   * @param bindOnKeyUp
+   *          flag indicating that the property should be updated when the widget fires a {@link com.google.gwt
+   *          .event.dom.client.KeyUpEvent} along with the default {@link com.google.gwt.event.logical.shared
+   *          .ValueChangeEvent}.
+   * @return binding the created binding.
+   */
+  public Binding bind(final Widget widget, final String property, final Converter converter, final boolean
+                                                                                               bindOnKeyUp) {
     validatePropertyExpr(property);
 
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       DataBinder nested = createNestedBinder(property);
-      nested.bind(widget, property.substring(dotPos + 1), converter);
+      nested.bind(widget, property.substring(dotPos + 1), converter, bindOnKeyUp);
       Binding binding = new Binding(property, widget, converter, null);
       bindings.put(property, binding);
       return binding;
@@ -130,9 +156,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
     }
 
-    HandlerRegistration handlerRegistration = null;
-    if (widget instanceof HasValue) {
-      handlerRegistration = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
+    Collection<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
+
+      if (widget instanceof HasValue) {
+        HandlerRegistration valueHandlerReg = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
         @Override
         public void onValueChange(ValueChangeEvent event) {
           Object oldValue = proxy.get(property);
@@ -141,14 +168,36 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
         }
       });
-    }
-    else if (!(widget instanceof HasText) && !(widget instanceof TakesValue)) {
+        handlerRegistrations.add(valueHandlerReg);
+     }
+      else if (!(widget instanceof HasText) && !(widget instanceof TakesValue)) {
       // implementing TakesValue implies HasValue since HasValue extends the TakesValue interface...
       throw new RuntimeException("Widget must implement either " + TakesValue.class.getName() +
           " or " + HasText.class.getName() + "!");
-    }
+      }
 
-    Binding binding = new Binding(property, widget, converter, handlerRegistration);
+      if (bindOnKeyUp) {
+        if (widget instanceof ValueBoxBase) {
+          HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) widget).addKeyUpHandler(new KeyUpHandler() {
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+              Object oldValue = proxy.get(property);
+              Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, ((ValueBoxBase) widget)
+                                                                                              .getText(), converter);
+              proxy.set(property, newValue);
+              updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
+            }
+          });
+          handlerRegistrations.add(keyUpHandlerReg);
+        } else {
+          throw new InvalidBindEventException("Cannot bind widget " + widget.toString() + " on KeyUpEvents, "
+                                          + widget.toString() + " is not an instance of ValueBoxBase");
+        }
+      }
+
+
+    Binding binding = new Binding(property, widget, converter, handlerRegistrations);
     bindings.put(property, binding);
 
     if (propertyTypes.get(property).isList()) {
@@ -232,7 +281,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         binder.unbind(property.substring(dotPos + 1));
       }
     }
-    binding.removeHandler();
+    binding.removeHandlers();
     bindings.remove(property, binding);
 
     if (bindings.isEmpty()) {
