@@ -14,6 +14,8 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public class JBossUtil {
   private static final String APP_CONTEXT_PROPERTY = "errai.dev.context";
   private static final String JBOSS_HOME_PROPERTY = "errai.jboss.home";
+  public static final String USERS_PROPERTY_FILE = "application-users.properties";
+  public static final String ROLES_PROPERTY_FILE = "application-roles.properties";
   public static final String STANDALONE_CONFIGURATION = "standalone" + File.separator + "configuration";
 
   public static String getJBossHome(final StackTreeLogger logger) throws UnableToCompleteException {

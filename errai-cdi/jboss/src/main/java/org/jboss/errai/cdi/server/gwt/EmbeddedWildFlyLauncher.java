@@ -2,10 +2,12 @@ package org.jboss.errai.cdi.server.gwt;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.BindException;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +55,9 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
   
   private static final String DEVMODE_BEANS_XML_EXCLUSION_TEMPLATE = "    <exclude name = \"$CLASSNAME\" />\n";
   
+  private static final String ERRAI_PROPERTIES_HINT_START = "#Errai-Start\n";
+  private static final String ERRAI_PROPERTIES_HINT_END = "\n#Errai-End\n";
+          
   static { 
     System.setProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager");
   }
@@ -70,6 +75,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
       embeddedWildFly.start();
       
       prepareBeansXml(appRootDir);
+      prepareUsersAndRoles(jbossHome);
       JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, 
               JBossUtil.getDeploymentContext(), logger.peek(), null);
       
@@ -81,6 +87,49 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     }
   }
   
+  /**
+   * Reads application-users.properties and application-roles.properties from
+   * the classpath and amends the corresponding files under
+   * standalone/configuration. This allows applications to specify users and
+   * roles for development mode.
+   */
+  private void prepareUsersAndRoles(final String jbossHome) {
+    InputStream usersStream = 
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.USERS_PROPERTY_FILE);
+    
+    if (usersStream != null) {
+      writeConfigurationPropertyFile(JBossUtil.USERS_PROPERTY_FILE, jbossHome, usersStream);
+    }
+    
+    InputStream rolesStream = 
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.ROLES_PROPERTY_FILE);
+    
+    if (rolesStream != null) {
+      writeConfigurationPropertyFile(JBossUtil.ROLES_PROPERTY_FILE, jbossHome, rolesStream);
+    }
+  }
+  
+  private void writeConfigurationPropertyFile(final String propertyFileName, final String jbossHome, final InputStream in) {
+    final File propertyDir = new File(jbossHome, JBossUtil.STANDALONE_CONFIGURATION);
+    final File propertyFile = new File(propertyDir, propertyFileName);
+    try {
+      String content = FileUtils.readFileToString(propertyFile);
+      String erraiContent = StringUtils.substringBetween(content, ERRAI_PROPERTIES_HINT_START, ERRAI_PROPERTIES_HINT_END);
+      
+      content = content.replace(ERRAI_PROPERTIES_HINT_START, "");
+      if (erraiContent != null) {
+        content = content.replace(erraiContent, "");
+      }
+      content = content.replace(ERRAI_PROPERTIES_HINT_END, "");
+      content += ERRAI_PROPERTIES_HINT_START + IOUtils.toString(in, (String) null) + ERRAI_PROPERTIES_HINT_END;
+      FileUtils.write(propertyFile, content);
+    } 
+    catch (IOException e) {
+      throw new RuntimeException("Failed to write " + 
+              JBossUtil.USERS_PROPERTY_FILE + " in " + propertyFile.getAbsolutePath());
+    }
+  }
+
   /**
    * Writes a new or updates an existing beans.xml file to add exclusions for
    * client-only classes. We do this to avoid class loading problems on
