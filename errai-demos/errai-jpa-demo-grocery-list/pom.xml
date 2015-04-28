@@ -159,11 +159,7 @@
         <exclusion>
           <groupId>javax.inject</groupId>
           <artifactId>javax.inject</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.annotation</groupId>
-          <artifactId>jsr250-api</artifactId>
-        </exclusion>
+        </exclusion>        
       </exclusions>
     </dependency>
     <dependency>
@@ -174,11 +170,7 @@
         <exclusion>
           <groupId>javax.inject</groupId>
           <artifactId>javax.inject</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.annotation</groupId>
-          <artifactId>jsr250-api</artifactId>
-        </exclusion>
+        </exclusion>        
       </exclusions>
     </dependency>
     <dependency>
@@ -526,11 +518,7 @@
             <exclusion>
               <groupId>javax.inject</groupId>
               <artifactId>javax.inject</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>javax.annotation</groupId>
-              <artifactId>jsr250-api</artifactId>
-            </exclusion>
+            </exclusion>            
           </exclusions>
         </dependency>
 

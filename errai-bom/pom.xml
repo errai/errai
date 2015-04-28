@@ -75,7 +75,6 @@
     <jackson.mapper.asl.version>1.9.12</jackson.mapper.asl.version>
     <javaee.api.version>7.0</javaee.api.version>
     <javassist.version>3.19.0-GA</javassist.version>    
-    <javax.jsr250.version>1.0</javax.jsr250.version>
     <javax.persitence.api.version>1.0</javax.persitence.api.version>    
     <jboss.dist.version>7.1.1.Final</jboss.dist.version>
     <jboss.ejb.api.spec.version>1.0.2.Final</jboss.ejb.api.spec.version>
@@ -361,13 +360,7 @@
         <groupId>org.jboss.web</groupId>
         <artifactId>jbossweb</artifactId>         
         <version>${jboss.web.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>javax.annotation</groupId>
-        <artifactId>jsr250-api</artifactId>
-        <version>${javax.jsr250.version}</version>
-      </dependency>
+      </dependency>      
 
       <dependency>
         <groupId>dom4j</groupId>
