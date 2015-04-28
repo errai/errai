@@ -19,12 +19,15 @@ package org.jboss.errai.security.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 
+import org.jboss.errai.security.shared.api.RequiredRolesProvider;
+import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User.StandardUserProperties;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.AuthenticationException;
@@ -37,8 +40,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.RelationshipManager;
-import org.picketlink.idm.model.basic.Grant;
-import org.picketlink.idm.model.basic.Role;
+import org.picketlink.idm.model.IdentityType;
 import org.picketlink.idm.query.RelationshipQuery;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,6 +49,8 @@ public class PicketLinkUserMappingTest {
   @Mock Identity mockIdentity;
   @Mock RelationshipManager mockRelationshipManager;
   @Mock DefaultLoginCredentials mockLoginCredentials;
+  @Mock RequiredRolesProvider requiredRolesProvider;
+  @Mock PicketLinkBasicModelServices basicModelServices;
 
   @SuppressWarnings("rawtypes")
   @Mock RelationshipQuery mockQuery;
@@ -55,9 +59,9 @@ public class PicketLinkUserMappingTest {
   private PicketLinkAuthenticationService plAuthService;
 
   /**
-   * Sets up generic behaviour that's mostly right for all the tests: you can
-   * log in successfully with any credentials, and the resulting user has a
-   * first name, last name, email address, and no group memberships.
+   * Sets up generic behavior that's mostly right for all the tests: you can log
+   * in successfully with any credentials, and the resulting user has a first
+   * name, last name, email address, and no group memberships.
    * <p>
    * Look at the tests to see how to override these things on an individual basis.
    */
@@ -74,7 +78,9 @@ public class PicketLinkUserMappingTest {
     when(mockIdentity.isLoggedIn()).thenReturn(true);
 
     when(mockQuery.getResultList()).thenReturn(Collections.emptyList());
-    when(mockRelationshipManager.createRelationshipQuery( any(Class.class) )).thenReturn(mockQuery);
+    when(mockRelationshipManager.createRelationshipQuery(any(Class.class))).thenReturn(mockQuery);
+    when(requiredRolesProvider.getRoles()).thenReturn(Collections.<org.jboss.errai.security.shared.api.Role> emptySet());
+    when(basicModelServices.hasRole(any(IdentityType.class), any(String.class))).thenReturn(false);
   }
 
   @Test
@@ -99,13 +105,27 @@ public class PicketLinkUserMappingTest {
 
   @Test
   public void loginShouldRetainRolesFromPicketLink() {
-    List<Grant> plRoles = Arrays.asList(
-            new Grant(null, new Role("meadow")),
-            new Grant(null, new Role("barn")));
-    when(mockQuery.getResultList()).thenReturn(plRoles);
+    HashSet<org.jboss.errai.security.shared.api.Role> erraiRoles = new HashSet<org.jboss.errai.security.shared.api.Role>(Arrays.asList(new RoleImpl("meadow"), new RoleImpl("barn")));
+    when(requiredRolesProvider.getRoles()).thenReturn(erraiRoles);
+
+    when(basicModelServices.hasRole(any(IdentityType.class), eq("meadow"))).thenReturn(true);
+    when(basicModelServices.hasRole(any(IdentityType.class), eq("barn"))).thenReturn(true);
 
     plAuthService.login("cow", "moo");
     assertTrue(((UserImpl)plAuthService.getUser()).hasAllRoles("meadow", "barn"));
     assertEquals(2, plAuthService.getUser().getRoles().size());
+  }
+
+  @Test
+  public void loginShouldRetainRolesFromPicketLinkThatUserActuallyHas() {
+    HashSet<org.jboss.errai.security.shared.api.Role> erraiRoles = new HashSet<org.jboss.errai.security.shared.api.Role>(Arrays.asList(new RoleImpl("meadow"), new RoleImpl("barn")));
+    when(requiredRolesProvider.getRoles()).thenReturn(erraiRoles);
+
+    when(basicModelServices.hasRole(any(IdentityType.class), eq("meadow"))).thenReturn(false);
+    when(basicModelServices.hasRole(any(IdentityType.class), eq("barn"))).thenReturn(true);
+
+    plAuthService.login("cow", "moo");
+    assertTrue(((UserImpl) plAuthService.getUser()).hasAllRoles("barn"));
+    assertEquals(1, plAuthService.getUser().getRoles().size());
   }
 }

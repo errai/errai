@@ -30,8 +30,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.security.shared.api.RequiredRolesProvider;
 import org.jboss.errai.security.shared.api.Role;
-import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.AlreadyLoggedInException;
@@ -42,11 +42,8 @@ import org.picketlink.Identity;
 import org.picketlink.Identity.AuthenticationResult;
 import org.picketlink.authentication.UserAlreadyLoggedInException;
 import org.picketlink.credential.DefaultLoginCredentials;
-import org.picketlink.idm.RelationshipManager;
 import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.model.Attribute;
-import org.picketlink.idm.model.basic.Grant;
-import org.picketlink.idm.query.RelationshipQuery;
 
 /**
  * PicketLink version of the AuthenticationService and default implementation.
@@ -61,10 +58,13 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   private Identity identity;
 
   @Inject
-  private RelationshipManager relationshipManager;
+  private PicketLinkBasicModelServices basicModelServices;
 
   @Inject
   private DefaultLoginCredentials credentials;
+
+  @Inject
+  private RequiredRolesProvider requiredRolesProvider;
 
   @Override
   public User login(String username, String password) {
@@ -140,11 +140,10 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
     Set<Role> roles = new HashSet<Role>();
 
     if (identity.isLoggedIn()) {
-      RelationshipQuery<Grant> query =
-              relationshipManager.createRelationshipQuery(Grant.class);
-      query.setParameter(Grant.ASSIGNEE, identity.getAccount());
-      for (final Grant grant : query.getResultList()) {
-        roles.add(new RoleImpl(grant.getRole().getName()));
+      for (Role role : requiredRolesProvider.getRoles()) {
+        if (basicModelServices.hasRole(identity.getAccount(), role.getName())) {
+          roles.add(role);
+        }
       }
     }
 
