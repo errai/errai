@@ -30,11 +30,10 @@ import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingBinder;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingModel;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingParams;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleWithKeyUpEvent;
-import org.jboss.errai.databinding.client.InvalidBindEventException;
+import org.jboss.errai.databinding.client.InjectedDataBinderModuleBoundOnKeyUp;
 import org.jboss.errai.databinding.client.ListOfStringWidget;
 import org.jboss.errai.databinding.client.ModuleWithInjectedBindable;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
-import org.jboss.errai.databinding.client.InjectedDataBinderModuleBoundOnKeyUp;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.SingletonBindable;
 import org.jboss.errai.databinding.client.TestModel;
@@ -1010,7 +1009,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testInjectedDatabinderWithKeyUpEvent () {
+  public void testInjectedDataBinderWithKeyUpEvent () {
      InjectedDataBinderModuleBoundOnKeyUp module =
         IOC.getBeanManager().lookupBean(InjectedDataBinderModuleBoundOnKeyUp.class).getInstance();
 
@@ -1057,7 +1056,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
       // bind non-ValueBoxBase widget on KeyUpEvents
       DataBinder.forType(TestModel.class).bind(checkBox, "active", null, true);
       fail("Widgets that do not extend ValueBoxBase should not bind on KeyUpEvents.");
-    } catch (InvalidBindEventException e) {
+    } catch (Exception e) {
       // this is the expected behavior
     }
   }

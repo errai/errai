@@ -26,13 +26,15 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 
 /**
- * Indicates that an annotated widget should automatically be bound to a property of a data model
- * associated with a {@link DataBinder} (see {@link AutoBound} and {@link Model}).
+ * Indicates that an annotated widget should automatically be bound to a
+ * property of a data model associated with a {@link DataBinder} (see
+ * {@link AutoBound} and {@link Model}).
  * <p>
- * The annotated widget can either be a field, method or constructor parameter or a method return
- * value and must implement either {@link HasText}, {@link HasValue} or {@link TakesValue}. Note 
- * that a {@link Bound} field can but does not have to be injected. The following example shows 
- * all valid use cases for the {@link Bound} annotation.
+ * The annotated widget can either be a field, method or constructor parameter
+ * or a method return value and must implement either {@link HasText},
+ * {@link HasValue} or {@link TakesValue}. Note that a {@link Bound} field can
+ * but does not have to be injected. The following example shows all valid use
+ * cases for the {@link Bound} annotation.
  * 
  * <pre>
  *      public class MyBean {
@@ -62,8 +64,9 @@ import com.google.gwt.user.client.ui.HasValue;
  *      }
  * </pre>
  * 
- * If no property is specified, the widget is bound to the data model property with the same name as
- * the field, parameter or method which is the target of this annotation.
+ * If no property is specified, the widget is bound to the data model property
+ * with the same name as the field, parameter or method which is the target of
+ * this annotation.
  * <p>
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -75,26 +78,28 @@ import com.google.gwt.user.client.ui.HasValue;
 public @interface Bound {
 
   /**
-   * The name of the data model property (or a property chain) to bind the widget to, following Java
-   * bean conventions. If omitted, the widget will be bound to the data model property with the same
-   * name as the field, parameter or method which is the target of this annotation.
+   * The name of the data model property (or a property chain) to bind the
+   * widget to, following Java bean conventions. If omitted, the widget will be
+   * bound to the data model property with the same name as the field, parameter
+   * or method which is the target of this annotation.
    */
   String property() default "";
 
   /**
    * The {@link Converter} to use when setting values on the model or widget.
    */
-  // The NO_CONVERTER class needs to be fully qualified here to work around a JDK bug:
-  // http://bugs.sun.com/view_bug.do?bug_id=6512707
+  // The NO_CONVERTER class needs to be fully qualified here to work around a
+  // JDK bug: http://bugs.sun.com/view_bug.do?bug_id=6512707
   Class<? extends Converter> converter() default org.jboss.errai.ui.shared.api.annotations.Bound.NO_CONVERTER.class;
 
+  static abstract class NO_CONVERTER implements Converter {
+  }
+
   /**
-   * The event type fired by the @Bound widget, which should trigger an update in the model property.
-   * If omitted, the corresponding model property will be updated on a {@link com.google.gwt.event
-   * .logical.shared.ValueChangeEvent}
+   * A flag indicating whether or not the data model property should be updated
+   * when the widget fires a {@link com.google.gwt.event.dom.client.KeyUpEvent},
+   * in addition to the default
+   * {@link com.google.gwt.event.logical.shared.ValueChangeEvent}.
    */
-
   boolean onKeyUp() default false;
-
-  static abstract class NO_CONVERTER implements Converter {}
 }

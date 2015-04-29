@@ -17,8 +17,8 @@
 package org.jboss.errai.databinding.client;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
+
 import org.jboss.errai.databinding.client.api.Converter;
 
 import com.google.gwt.event.shared.HandlerRegistration;
