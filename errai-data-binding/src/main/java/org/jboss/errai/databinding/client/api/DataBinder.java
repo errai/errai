@@ -292,9 +292,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
     if (bindings.isEmpty()) {
       // Proxies without bindings will be removed from the cache to make sure
-      // the garbage collector
-      // can do its job (see BindableProxyFactory#removeCachedProxyForModel). We
-      // throw away the
+      // the garbage collector can do its job (see
+      // BindableProxyFactory#removeCachedProxyForModel). We throw away the
       // reference to the proxy to force a new lookup in case this data binder
       // will be reused.
       unwrapProxy();
@@ -321,9 +320,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     }
 
     // Proxies without bindings will be removed from the cache to make sure the
-    // garbage collector
-    // can do its job (see BindableProxyFactory#removeCachedProxyForModel). We
-    // throw away the
+    // garbage collector can do its job (see
+    // BindableProxyFactory#removeCachedProxyForModel). We throw away the
     // reference to the proxy to force a new lookup in case this data binder
     // will be reused.
     unwrapProxy();

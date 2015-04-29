@@ -214,6 +214,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (widget instanceof HasValue) {
       HandlerRegistration valueHandlerReg = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
+
         @Override
         public void onValueChange(ValueChangeEvent event) {
           updater.update(event.getValue());
