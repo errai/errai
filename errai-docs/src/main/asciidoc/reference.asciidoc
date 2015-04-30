@@ -5275,6 +5275,44 @@ The [code]+@Bound+ annotation further allows to specify a converter to use for t
 private TextBox date;
 ----
 
+==== Updating model values on UI text changes
+
+By default, Errai DataBinding updates model values when the corresponding Widget fires a ValueChangeEvent. For text-based widgets, this means that the model values are updated only once the widget loses focus. However in some cases, you may also need to update a model's value as soon as the text changes in the Widget.
+
+Errai allows you to do this by setting the [code]+onKeyUp+ flag in the [code]+@Bound+ annotation. *_Note that this parameter can only be used on Widgets that extend GWT's ValueBoxBase widget_*. Setting this parameter to [code]+true+ will cause the model value to update on a KeyUpEvent as well as the default ValueChangeEvent. This will result in the model object being updated as soon as any text is entered/removed from the Widget. You can specify this as follows:
+
+[source, java]
+----
+@Inject
+@Bound(onKeyUp = true)
+private TextBox name;
+----
+
+You can also achieve the same effect using programmatic bindings. To do this, you can use the method [code]+DataBinder.bind(Widget widget, String property, Converter converter, boolean bindOnKeyUp)+. As an example, take a look at the following code snippet:
+
+[source, java]
+----
+@Inject
+DataBinder<Model> binder;
+
+@Inject
+private TextBox nameTextBox;
+
+...
+
+@PostConstruct
+public void onLoad() {
+  binder.bind(nameTextBox, "name", converter, true);
+}
+
+----
+
+[IMPORTANT]
+.Text Based Widgets
+====
+Binding on key events is only valid for text-based Widgets, i.e. those that extend ValueBoxBase. Errai DataBinding will throw an exception if the onKeyUp parameter is set on any non-ValueBoxBased Widgets.
+====
+
 [[sid-51282340_DataBinding-Replacingamodelobject]]
 
 ==== Replacing a model object
