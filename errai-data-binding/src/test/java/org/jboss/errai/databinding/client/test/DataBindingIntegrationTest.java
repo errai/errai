@@ -1060,4 +1060,38 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
       // this is the expected behavior
     }
   }
+
+  @Test
+  public void testKeyUpWithMultipleWidgetsBoundToChainedProperty() {
+    TextBox textBox = new TextBox();
+    Label label = new Label();
+
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.name", null, true)
+                        .bind(label, "child.name").getModel();
+
+    textBox.setValue("new value");
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_E), textBox);
+
+    assertEquals("Model not updated", textBox.getValue(), model.getChild().getName());
+    assertEquals("Second widget not updated", textBox.getValue(), label.getText());
+  }
+
+  @Test
+  public void testBidirectionalChainedKeyUpEventBinding() {
+    TextBox tb1 = new TextBox();
+    TextBox tb2 = new TextBox();
+
+    DataBinder.forType(TestModel.class).bind(tb1, "child.name", null, true)
+      .bind(tb2, "child.name", null, true);
+
+    tb1.setValue("change in tb1");
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_NUM_ONE), tb1);
+
+    assertEquals("Second widget not updated", tb1.getValue(), tb2.getValue());
+
+    tb2.setValue("change in tb2");
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_NUM_TWO), tb2);
+
+    assertEquals("First widget not updated", tb2.getValue(), tb1.getValue());
+  }
 }

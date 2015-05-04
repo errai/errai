@@ -423,8 +423,12 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     // replay all bindings
     final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
     for (Binding b : this.bindings.values()) {
+      // must be checked before unbind() removes the handlers
+      boolean bindOnKeyUp = b.hasKeyUpBinding();
+
       newProxy.getAgent().unbind(b);
-      bindings.put(b.getProperty(), newProxy.getAgent().bind(b.getWidget(), b.getProperty(), b.getConverter()));
+      bindings.put(b.getProperty(), newProxy.getAgent()
+                                      .bind(b.getWidget(), b.getProperty(), b.getConverter(), bindOnKeyUp));
     }
     this.bindings = bindings;
     this.proxy = (T) newProxy;

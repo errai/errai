@@ -16,11 +16,10 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.util.Collection;
-import java.util.Iterator;
-
+import java.util.Map;
 import org.jboss.errai.databinding.client.api.Converter;
-
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -35,14 +34,14 @@ public final class Binding {
   private final String property;
   private final Widget widget;
   private final Converter<?, ?> converter;
-  private final Collection<HandlerRegistration> handlerRegistrations;
+  private final Map<Class<? extends GwtEvent>, HandlerRegistration> handlerMap;
 
-  public Binding(String property, Widget widget, Converter<?, ?> converter, Collection<HandlerRegistration>
-                                                                              handlerRegistrations) {
+  public Binding(String property, Widget widget, Converter<?, ?> converter,
+                  Map<Class<? extends GwtEvent>, HandlerRegistration> handlerMap) {
     this.property = property;
     this.widget = widget;
     this.converter = converter;
-    this.handlerRegistrations = handlerRegistrations;
+    this.handlerMap = handlerMap;
   }
 
   public String getProperty() {
@@ -57,23 +56,27 @@ public final class Binding {
     return widget;
   }
 
-  public Collection<HandlerRegistration> getHandlerRegistrations() {
-    return handlerRegistrations;
+  public Map<Class<? extends GwtEvent>, HandlerRegistration> getHandlerMap() {
+    return handlerMap;
   }
 
   public void removeHandlers() {
-    if (handlerRegistrations != null) {
-      Iterator<HandlerRegistration> itr = handlerRegistrations.iterator();
-      while (itr.hasNext()) {
-        itr.next().removeHandler();
-        itr.remove();
-      }
-    }
+   if (handlerMap != null) {
+     for (Map.Entry entry : handlerMap.entrySet()) {
+       HandlerRegistration hr = (HandlerRegistration) entry.getValue();
+       hr.removeHandler();
+     }
+     handlerMap.clear();
+   }
   }
 
   @Override
   public String toString() {
     return "Binding [property=" + property + ", widget=" + widget + "]";
+  }
+
+  public boolean hasKeyUpBinding() {
+    return (handlerMap != null && handlerMap.containsKey(KeyUpEvent.class));
   }
 
 }

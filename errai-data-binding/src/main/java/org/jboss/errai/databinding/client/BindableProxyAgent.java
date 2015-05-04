@@ -18,9 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import static org.jboss.errai.databinding.client.api.Convert.toModelValue;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +36,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.HasText;
@@ -169,7 +168,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
     }
 
-    Collection<HandlerRegistration> handlerRegistrations = addWidgetHandlers(widget, bindOnKeyUp, new ModelUpdater() {
+    Map<Class <? extends GwtEvent>, HandlerRegistration> handlerMap = addWidgetHandlers(widget, bindOnKeyUp, new ModelUpdater() {
       @Override
       public void update(final Object value) {
         final Object oldValue = proxy.get(property);
@@ -179,7 +178,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
     });
 
-    Binding binding = new Binding(property, widget, converter, handlerRegistrations);
+    Binding binding = new Binding(property, widget, converter, handlerMap);
     bindings.put(property, binding);
 
     if (propertyTypes.get(property).isList()) {
@@ -207,10 +206,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          model in response to UI changes.
    * @return collection of event handler registrations.
    */
-  private Collection<HandlerRegistration> addWidgetHandlers(final Widget widget, final boolean bindOnKeyUp,
-          final ModelUpdater updater) {
+  private Map<Class<? extends GwtEvent>, HandlerRegistration> addWidgetHandlers(final Widget widget,
+                                                              final boolean bindOnKeyUp, final ModelUpdater updater) {
 
-    Collection<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
+    HashMap<Class<? extends GwtEvent>, HandlerRegistration> handlerMap =
+                                                          new HashMap<Class<? extends GwtEvent>, HandlerRegistration>();
 
     if (widget instanceof HasValue) {
       HandlerRegistration valueHandlerReg = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
@@ -220,7 +220,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           updater.update(event.getValue());
         }
       });
-      handlerRegistrations.add(valueHandlerReg);
+      handlerMap.put(ValueChangeEvent.class, valueHandlerReg);
     }
     else if (!(widget instanceof HasText) && !(widget instanceof TakesValue)) {
       throw new RuntimeException("Widget must implement either " + TakesValue.class.getName() + " or "
@@ -236,7 +236,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
             updater.update(((ValueBoxBase) widget).getText());
           }
         });
-        handlerRegistrations.add(keyUpHandlerReg);
+        handlerMap.put(KeyUpEvent.class, keyUpHandlerReg);
       }
       else {
         throw new RuntimeException("Cannot bind widget " + widget.toString() + " on KeyUpEvents, " + widget.toString()
@@ -244,7 +244,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
     }
 
-    return handlerRegistrations;
+    return handlerMap;
   }
 
   /**
