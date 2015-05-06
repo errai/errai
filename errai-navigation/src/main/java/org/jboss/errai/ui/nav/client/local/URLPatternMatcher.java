@@ -31,7 +31,7 @@ public class URLPatternMatcher {
 
   /**
    * Adds the allowed URL template as specified in the {@link Page#path()} by the developer.
-   * 
+   *
    * @param urlTemplate
    *          The page URL pattern specified in the {@link Page#path()}.
    * @param pageName
@@ -42,7 +42,7 @@ public class URLPatternMatcher {
     pageMap.put(urlPattern, pageName);
   }
 
-  
+
  /**
   * Generates a {@link URLPattern} from a {@link Page#path()}
   * @param urlTemplate The {@link Page#path()}
@@ -52,7 +52,7 @@ public class URLPatternMatcher {
     RegExp regex = RegExp.compile(URLPattern.paramRegex, "g");
     List<String> paramList = new ArrayList<String>();
 
-    MatchResult mr = null;
+    MatchResult mr;
     StringBuilder sb = new StringBuilder();
 
     // Ensure matching at beginning of line
@@ -81,14 +81,13 @@ public class URLPatternMatcher {
     // Ensure matching at end of line
     sb.append("$");
 
-    URLPattern urlPattern = new URLPattern(RegExp.compile(sb.toString()), paramList, urlTemplate);
-    return urlPattern;
+    return new URLPattern(RegExp.compile(sb.toString()), paramList, urlTemplate);
   }
 
   private static void addParamName(List<String> paramList, MatchResult mr) {
     paramList.add(mr.getGroup(1));
   }
-  
+
 /**
  * Creates a {@link HistoryToken} by parsing a URL path. This path should never include the application context.
  */
@@ -99,24 +98,25 @@ public class URLPatternMatcher {
     int indexOfSemicolon = url.indexOf(';');
 
     if (indexOfSemicolon > 0) {
-      pageInfo = URL.decodePathSegment(url.substring(0, indexOfSemicolon));
+      pageInfo = url.substring(0, indexOfSemicolon);
       keyValuePairs = url.substring(indexOfSemicolon + 1);
     }
     else {
-      pageInfo = URL.decodePathSegment(url);
+      pageInfo = url;
       keyValuePairs = null;
     }
 
     String pageName = parseValues(pageInfo, mapBuilder);
     if (pageName == null)
-      throw new PageNotFoundException("Invalid URL \"" + URL.decodePathSegment(url) + "\" could not be mapped to any page.");
+      throw new PageNotFoundException("Invalid URL \"" + URLPattern.decodeParsingCharacters(url) + "\" could not be mapped to any page.");
     
     if (keyValuePairs != null) {
-     parseKeyValuePairs(keyValuePairs, mapBuilder);
+      parseKeyValuePairs(keyValuePairs, mapBuilder);
     }
-    
+
     Multimap<String, String> state = mapBuilder.build();
-    return new HistoryToken(URL.decodePathSegment(pageName.toString()), ImmutableMultimap.copyOf(state), getURLPattern(pageName));
+    return new HistoryToken(pageName, ImmutableMultimap.copyOf(state),
+                             getURLPattern(pageName));
   }
 
   private String parseValues(String rawURIPath, Builder<String, String> builder) {
@@ -130,7 +130,8 @@ public class URLPatternMatcher {
 
     MatchResult mr = pattern.getRegex().exec(rawURIPath);
     for (int keyIndex = 0; keyIndex < pattern.getParamList().size(); keyIndex++) {
-      builder.put(pattern.getParamList().get(keyIndex), mr.getGroup(keyIndex + 1));
+      builder.put(URLPattern.decodeParsingCharacters(pattern.getParamList().get(keyIndex)), URLPattern
+             .decodeParsingCharacters(mr.getGroup(keyIndex + 1)));
     }
     return pageName;
   }
@@ -146,7 +147,7 @@ public class URLPatternMatcher {
     for (int i = 0, n = rawKeyValueString.length(); i < n; i++) {
       char ch = rawKeyValueString.charAt(i);
       if (ch == '&') {
-        builder.put(URL.decodePathSegment(key.toString()), URL.decodePathSegment(value.toString()));
+        builder.put(URLPattern.decodeParsingCharacters(key.toString()), URLPattern.decodeParsingCharacters(value.toString()));
         key = new StringBuilder();
         value = new StringBuilder();
         sb = key;
@@ -159,7 +160,7 @@ public class URLPatternMatcher {
       }
     }
     // we've got a key-value pair that still isn't in the map builder
-    builder.put(URL.decodePathSegment(key.toString()), URL.decodePathSegment(value.toString()));
+    builder.put(URLPattern.decodeParsingCharacters(key.toString()), URLPattern.decodeParsingCharacters(value.toString()));
   }
 
   /**
@@ -170,13 +171,13 @@ public class URLPatternMatcher {
     URLPattern urlPattern = getURLPattern(defaultPage);
     if (urlPattern == null)
       throw new IllegalArgumentException("Page " + defaultPage + " must be added to URLPatternMatcher before it can be set as Default Page.");
-    
+
     if (urlPattern.getParamList().size() > 0)
       throw new IllegalArgumentException("Cannot set a default page that has path parameters.");
-    
+
     this.defaultPageName = defaultPage;
   }
-  
+
   /**
    * @param pageName The name of the page corresponding to the {@link URLPattern}
    * @return The {@link URLPattern} for the given page name.

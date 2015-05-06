@@ -10,7 +10,7 @@
      <when-type-is class="org.jboss.errai.ui.nav.client.local.spi.NavigationGraph"/>
    </generate-with>
    
-   <replace-with class="org.jboss.errai.ui.nav.client.local.SimpleNavigationPanel">
+   <replace-with class="org.jboss.errai.ui.nav.client.local.DefaultNavigatingContainer">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/>
    </replace-with>
 

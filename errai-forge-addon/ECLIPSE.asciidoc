@@ -48,7 +48,7 @@ image:images/forge-licensing.png[]
 
 ===== 4. Install the Errai Forge Addon
 
-.. In Eclipse, press _Ctrl_ + _5_ to activate the Forge Plugin. It may take a few moments to load when first called.
+.. In Eclipse, press _Ctrl_ + _4_ to activate the Forge Plugin. It may take a few moments to load when first called.
 
 .. In the Forge text field, type _install_ and select _Install an Addon_.
 +

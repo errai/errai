@@ -761,9 +761,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
   
   private String _hashString;
+  static final private String MetaClassName = MetaClass.class.getName();
+
   public String hashString() {
     if (_hashString == null) {
-      _hashString = MetaClass.class.getName().concat(":").concat(getFullyQualifiedName());
+      _hashString = MetaClassName + ":" + getFullyQualifiedName();
       if (getParameterizedType() != null) {
         _hashString += getParameterizedType().toString();
       }
@@ -771,14 +773,18 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _hashString;
   }
   
+  private Integer _hashCode;
+
   @Override
   public int hashCode() {
-    return hashString().hashCode();
+    if (_hashCode != null)
+      return _hashCode;
+    return _hashCode = hashString().hashCode();
   }
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
+	  return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
   @Override

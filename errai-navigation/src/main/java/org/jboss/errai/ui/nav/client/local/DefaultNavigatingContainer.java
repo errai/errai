@@ -24,9 +24,9 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Piotr Kosmowski
  */
-public class SimpleNavigationPanel implements NavigatingContainer {
+public class DefaultNavigatingContainer implements NavigatingContainer {
 
-    private final SimplePanel panel = new SimplePanel();
+    private final SimplePanel panel = new NavigationPanel();
 
     @Override
     public Widget getWidget() {

@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
@@ -31,17 +32,25 @@ import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public final class ClassScanner {
   public static class CacheHolder implements CacheStore {
     final Map<MetaClass, Collection<MetaClass>> subtypesCache = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
+    final Collection<MetaClass> reloadableClasses =  new CopyOnWriteArrayList<MetaClass>();
+    final Set<String> reloadableClassNames =  Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    final Set<String> reloadablePackages =  Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     @Override
     public void clear() {
       subtypesCache.clear();
+      reloadableClasses.clear();
+      reloadableClassNames.clear();
+      reloadablePackages.clear();
     }
   }
-
+  final static CacheHolder cache = CacheUtil.getCache(CacheHolder.class);
+  
   private static final ThreadLocal<Boolean> reflectionScanLocal = new ThreadLocal<Boolean>() {
     @Override
     protected Boolean initialValue() {
@@ -246,8 +255,6 @@ public final class ClassScanner {
   public static Collection<MetaClass> getSubTypesOf(final MetaClass metaClass, final GeneratorContext genCtx) {
     final MetaClass root = metaClass.getErased();
 
-    final CacheHolder cache = CacheUtil.getCache(CacheHolder.class);
-
     if (cache.subtypesCache.containsKey(root)) {
       return cache.subtypesCache.get(root);
     }
@@ -276,31 +283,45 @@ public final class ClassScanner {
     return result;
   }
 
-  private static Set<String> reloadablePackages = null;
-
   private static Collection<MetaClass> getAllReloadableCachedClasses(final GeneratorContext context) {
-    if (reloadablePackages == null) {
-      reloadablePackages = RebindUtils.getReloadablePackageNames(context);
+    if (cache.reloadablePackages.isEmpty()) {
+      cache.reloadablePackages.addAll(RebindUtils.getReloadablePackageNames(context));
+    }
+    if (!cache.reloadableClasses.isEmpty()) {
+      return cache.reloadableClasses;
     }
 
-    Collection<MetaClass> clazzes = new ArrayList<MetaClass>();
+    final Collection<MetaClass> classes = new ArrayList<MetaClass>();
+    final Collection<String> classNames = new ArrayList<String>();
+    
     for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
-      for (String reloadablePackage : reloadablePackages) {
-        if (clazz.getFullyQualifiedName().startsWith(reloadablePackage)) {
-          clazzes.add(clazz);
+      final String fqcn = clazz.getFullyQualifiedName();
+      final String pkg = clazz.getPackageName();
+      
+      if (pkg !=null && cache.reloadablePackages.contains(pkg)) {
+        classes.add(clazz);
+        classNames.add(fqcn);
+      }
+      else {
+        for (String reloadablePackage : cache.reloadablePackages) {
+          if (fqcn.startsWith(reloadablePackage)) {
+            classes.add(clazz);
+            classNames.add(fqcn);
+            if (pkg != null) {
+              cache.reloadablePackages.add(pkg);
+            }
+            break;
+          }
         }
       }
     }
-    return clazzes;
+    cache.reloadableClasses.addAll(classes);
+    cache.reloadableClassNames.addAll(classNames);
+    return classes;
   }
 
   private static boolean isReloadable(Class<?> clazz) {
-    for (String reloadablePackage : reloadablePackages) {
-      if (clazz.getName().startsWith(reloadablePackage)) {
-        return true;
-      }
-    }
-    return false;
+    return cache.reloadableClassNames.contains(clazz.getName());
   }
 
   private static void filterResultsClass(final Collection<MetaClass> result, final Set<String> packages,

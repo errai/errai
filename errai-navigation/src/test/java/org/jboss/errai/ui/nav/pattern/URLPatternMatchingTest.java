@@ -25,8 +25,10 @@ public class URLPatternMatchingTest {
     testPatterns.put("{var1}/some/{var2}/{var3}", "MultipleVarsURL");
     testPatterns.put("{var}", "OnlyVarURL");
     testPatterns.put("some/{var}/", "TrailingSlashURL");
-    
-    for(Entry<String, String> entry : testPatterns.entrySet()) {
+    testPatterns.put("путь/道/道路/переменная:{var}", "NonAsciiCharsURL");
+    testPatterns.put("some/{var1}and{var2}/other", "MultipleVarsInSegmentURL");
+
+    for (Entry<String, String> entry : testPatterns.entrySet()) {
       matcher.add(entry.getKey(), entry.getValue());
     }
     
@@ -81,4 +83,15 @@ public class URLPatternMatchingTest {
     assertEquals("NoVarsURL", matcher.getPageName(testURL));
   }
 
+  @Test
+  public void matchesNonAsciiChars() throws Exception {
+    String testURL = "путь/道/道路/переменная:value";
+    assertEquals("NonAsciiCharsURL", matcher.getPageName(testURL));
+  }
+
+  @Test
+  public void matchesPatternWithMultipleVariablesInSegment() throws Exception {
+    String testURL = "some/eg1andeg2/other";
+    assertEquals("MultipleVarsInSegmentURL", matcher.getPageName(testURL));
+  }
 }

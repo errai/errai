@@ -110,8 +110,13 @@ public final class MetaClassFactory {
     });
   }
 
+  private static MetaClassCache cache;
+  
   public static MetaClassCache getMetaClassCache() {
-    return CacheUtil.getCache(MetaClassCache.class);
+    if (cache == null) { 
+      cache = CacheUtil.getCache(MetaClassCache.class);
+    }
+    return cache;
   }
 
   public static MetaClass get(final String fullyQualifiedClassName, final boolean erased) {

@@ -5,7 +5,7 @@
   <name>Errai::JPA::Demos::GroceryList</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jpa-demo-grocery-list</artifactId>
-  <version>3.1.1-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -53,18 +53,15 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <weld.version>1.1.6.Final</weld.version>
-    <mvel.version>2.1.7.Final</mvel.version>
-    <jetty.version>6.1.25</jetty.version>
-    <slf4j.version>1.6.1</slf4j.version>
-    <log4j.version>1.2.16</log4j.version>
-    <cdiapi.version>1.0-SP4</cdiapi.version>
-    <servletapi.version>1.0.0.Final</servletapi.version>
-    <jbosslogging.version>3.1.0.GA</jbosslogging.version>
-    <gwt.version>2.6.1</gwt.version>
-    <uel.impl.version>2.1.2-b04</uel.impl.version>
-    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+    <weld.version>2.2.9.Final</weld.version>
+    <mvel.version>2.2.4.Final</mvel.version>
+    <jetty.version>6.1.26</jetty.version>
+    <slf4j.version>1.7.10</slf4j.version>
+    <cdiapi.version>1.2</cdiapi.version>
+    <servletapi.version>1.0.2.Final</servletapi.version>
+    <gwt.version>2.7.0</gwt.version>
+    <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
+    <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <argLine></argLine>
   </properties>
 
@@ -140,12 +137,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
-      <artifactId>gwt-incubator</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
       <artifactId>jboss-servlet-api_3.0_spec</artifactId>
       <version>${servletapi.version}</version>
@@ -168,11 +159,7 @@
         <exclusion>
           <groupId>javax.inject</groupId>
           <artifactId>javax.inject</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.annotation</groupId>
-          <artifactId>jsr250-api</artifactId>
-        </exclusion>
+        </exclusion>        
       </exclusions>
     </dependency>
     <dependency>
@@ -183,11 +170,7 @@
         <exclusion>
           <groupId>javax.inject</groupId>
           <artifactId>javax.inject</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.annotation</groupId>
-          <artifactId>jsr250-api</artifactId>
-        </exclusion>
+        </exclusion>        
       </exclusions>
     </dependency>
     <dependency>
@@ -369,6 +352,18 @@
 
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
+          <artifactId>weld-servlet</artifactId>
+          <version>${weld.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>com.google.gwt</groupId>
+          <artifactId>gwt-codeserver</artifactId>
+          <version>${gwt.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet-core</artifactId>
           <version>${weld.version}</version>
           <scope>provided</scope>
@@ -523,11 +518,7 @@
             <exclusion>
               <groupId>javax.inject</groupId>
               <artifactId>javax.inject</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>javax.annotation</groupId>
-              <artifactId>jsr250-api</artifactId>
-            </exclusion>
+            </exclusion>            
           </exclusions>
         </dependency>
 

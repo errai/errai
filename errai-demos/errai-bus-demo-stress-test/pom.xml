@@ -5,7 +5,7 @@
   <name>Errai::Bus::Demos::StressTest</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-bus-demo-stress-test</artifactId>
-  <version>3.1.1-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -61,7 +61,7 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.6.1</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.7.0</maven.gwt.plugin.version> 
   </properties>
 
   <dependencyManagement>
@@ -129,8 +129,8 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
-        <version>${maven.gwt.plugin.version}</version>
+        <artifactId>gwt-maven-plugin</artifactId>  
+        <version>${maven.gwt.plugin.version}</version>      
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>App.html</runTarget>
@@ -140,7 +140,7 @@
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <treeLogger>true</treeLogger>
-          <strict>false</strict>
+          <strict>true</strict>
         </configuration>
         <executions>
           <execution>
@@ -277,8 +277,7 @@
         <!-- TODO figure out how to force all these things to provided scope without doing it explicitly in EVERY SINGLE ERRAI PROJECT!!!!111!!!!1 -->
         <!-- Don't deploy any of this -->
         <dependency><groupId>com.google.guava</groupId><artifactId>guava-gwt</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>javax.annotation</groupId><artifactId>jsr250-api</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>        
         <dependency><groupId>javax.enterprise</groupId><artifactId>cdi-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>javax.inject</groupId><artifactId>javax.inject</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>javax.validation</groupId><artifactId>validation-api</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>

@@ -409,6 +409,29 @@ public class NavigationTest extends AbstractErraiCDITest {
             .iterator().next());
   }
 
+  public void testURLWithNonAsciiCharset() throws Exception {
+    String url = "page/123/параметр パラメーター 参数;var3=4";
+    HistoryToken encodedToken = htFactory.parseURL(url);
+    assertEquals("Unexpected state map contents: " + encodedToken.getState(), "123", encodedToken.getState()
+            .get("var1").iterator().next());
+    assertEquals("Unexpected state map contents: " + encodedToken.getState(), "параметр パラメーター 参数",
+            encodedToken.getState().get("var2").iterator().next());
+    assertEquals("Unexpected state map contents: " + encodedToken.getState(), "4", encodedToken.getState().get("var3")
+            .iterator().next());
+  }
+
+  public void testPageStateWithNonAsciiParam() throws Exception {
+    String pageName = "PageWithPathParameters";
+    Builder<String, String> builder = ImmutableMultimap.builder();
+    builder.put("var1", "123");
+    builder.put("var2", "параметр パラメーター 参数");
+    builder.put("var3", "4");
+
+    Multimap<String, String> pageStateMap = builder.build();
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/параметр パラメーター 参数;var3=4", decodedToken);
+  }
+
   public void testPageStateWithOneExtraParam() throws Exception {
     String pageName = "PageWithPathParameters";
     Builder<String, String> builder = ImmutableMultimap.builder();
@@ -417,7 +440,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var3", "4");
     
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
+                                                               .toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4", decodedToken);
   }
   
@@ -430,7 +454,8 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var4", "thing");
     
     Multimap<String, String> pageStateMap = builder.build();
-    String decodedToken = URL.decodePathSegment(htFactory.createHistoryToken(pageName, pageStateMap).toString());
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
+                                                               .toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
   }
   
@@ -462,7 +487,20 @@ public class NavigationTest extends AbstractErraiCDITest {
     History.newItem("page_b_with_state;uuid=newstate", true);
     assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
   }
-  
+
+  public void testForNonAsciiPagePath() throws Exception {
+    String pageName = "PageWithNonAsciiPath";
+    Builder<String, String> builder = ImmutableMultimap.builder();
+    builder.put("var1", "параметр パラメーター 参数");
+    builder.put("var2", "123");
+
+    Multimap<String, String> pageStateMap = builder.build();
+    String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
+                                                               .toString());
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "pagename/path/some:параметр パラメーター "
+                                                                            + "参数thing/öther123 thing", decodedToken);
+  }
+
   public void testForEmptyContextWithoutPushState() throws Exception {
     runPostAttachTests(new Runnable() {
 
@@ -473,5 +511,11 @@ public class NavigationTest extends AbstractErraiCDITest {
       }
       
     }, TIMEOUT, 500);
+  }
+  
+  public void testNavigationPanelInjection() {
+    NavigationPanelTestApp app = 
+            IOC.getBeanManager().lookupBean(NavigationPanelTestApp.class).getInstance();
+    assertNotNull(app.getNavigationPanel());
   }
 }

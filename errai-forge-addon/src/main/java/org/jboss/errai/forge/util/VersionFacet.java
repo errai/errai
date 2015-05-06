@@ -52,6 +52,7 @@ public class VersionFacet extends AbstractFacet<Project> implements ProjectFacet
     versionMap.put(DependencyArtifact.War.toString(), new ConstantVersion("2.2"));
     versionMap.put(DependencyArtifact.WildflyPlugin.toString(), new ConstantVersion("1.0.2.Final"));
     versionMap.put(DependencyArtifact.Surefire.toString(), new ConstantVersion("2.2"));
+    versionMap.put(DependencyArtifact.EclipseMavenPlugin.toString(), new ConstantVersion("1.0.0"));
 
     // Dependencies for test generation
     versionMap.put(DependencyArtifact.GwtMockito.toString(), new ConstantVersion("1.1.3"));
@@ -74,9 +75,12 @@ public class VersionFacet extends AbstractFacet<Project> implements ProjectFacet
         if (erraiVersion.startsWith("3.0")) {
           return "2.5.1";
         }
-        // Addon only supports 3.x, so this is handles version greater than 3.0
-        else {
+        else if (erraiVersion.startsWith("3.1.0")) {
           return "2.6.1";
+        }
+        // Addon only supports 3.x, so this handles versions greater than 3.1.0
+        else {
+          return "2.7.0";
         }
       }
     });

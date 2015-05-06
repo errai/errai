@@ -20,7 +20,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-
 /**
  * @author Mike Brock
  */
@@ -32,6 +31,12 @@ public class InstanceTestBean {
   @Inject
   private Instance<DependentBeanA> injectDependentBeanA;
 
+  @Inject
+  private Instance<UnmanagedBean> unmanagedBean;
+
+  @Inject
+  private Instance<InterfaceA> ambiguousBean;
+
   public Instance<ApplicationScopedBeanA> getInjectApplicationScoped() {
     return injectApplicationScoped;
   }
@@ -39,4 +44,13 @@ public class InstanceTestBean {
   public Instance<DependentBeanA> getInjectDependentBeanA() {
     return injectDependentBeanA;
   }
+
+  public Instance<UnmanagedBean> getUnmanagedBean() {
+    return unmanagedBean;
+  }
+
+  public Instance<InterfaceA> getAmbiguousBean() {
+    return ambiguousBean;
+  }
+
 }

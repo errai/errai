@@ -9,6 +9,9 @@ import java.lang.annotation.Target;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.jboss.errai.ui.client.local.spi.TemplateProvider;
+import org.jboss.errai.ui.shared.ServerTemplateProvider;
+
 import com.google.gwt.user.client.ui.Composite;
 
 /**
@@ -18,8 +21,8 @@ import com.google.gwt.user.client.ui.Composite;
  * {@link Composite} widget must be retrieved via {@link Inject} or {@link Instance} references in bean classes.
  * 
  * <p>
- * Unless otherwise specified in the {@link #value()} attribute, a corresponding ComponentName.html file must be placed
- * in the same directory on the class-path as the custom ComponentName type.
+ * Unless otherwise specified in the {@link #value()} and {@link #provider()} attributes, a corresponding 
+ * ComponentName.html file must be placed in the same directory on the class-path as the custom ComponentName type.
  * <p>
  * <b>Example:</b>
  * <p>
@@ -52,9 +55,10 @@ import com.google.gwt.user.client.ui.Composite;
  * <p>
  * 
  * <p>
- * Each element with a <code>data-field</code> attribute may be bound to a field, method, or constructor parameter in
- * the annotated class, using the {@link DataField} annotation. Events triggered by elements or widgets in the template
- * may be handled using the {@link EventHandler} annotation to specify handler methods.
+ * Each element with a <code>id</code>, <code>data-field</code> or <code>class</code> attribute may be bound to a 
+ * field, method, or constructor parameter in the annotated class, using the {@link DataField} annotation. Events 
+ * triggered by elements or widgets in the template may be handled using the {@link EventHandler} annotation to 
+ * specify handler methods.
  * <p>
  * 
  * <pre>
@@ -119,6 +123,7 @@ import com.google.gwt.user.client.ui.Composite;
  * <b>See also:</b> {@link DataField}, {@link Bound}, {@link AutoBound}, {@link EventHandler}, {@link SinkNative}
  * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented
 @Target(ElementType.TYPE)
@@ -133,8 +138,19 @@ public @interface Templated
     * qualified class name of the annotated type, plus `.html`. If the fragment is omitted, composition will be
     * performed using the first single element found (and all inner HTML) in the specified template.
     * <p>
-    * The fragment corresponds to an element with matching <code>data-field</code> value. If specified, this single
-    * element (and all inner HTML) will be used as the root of the widget.
+    * The fragment corresponds to an element with matching <code>id</code>, <code>data-field</code> or 
+    * <code>class</code> attribute. If specified, this singleelement (and all inner HTML) will be used as the root 
+    * of the widget.
     */
    String value() default "";
+
+   /**
+   * Specifies a {@link TemplateProvider} that is used to supply a template at run-time i.e. 
+   * {@link ServerTemplateProvider}. By default, and if omitted, templates must be present at compile-time at the 
+   * class-path location specified by {@link #value()}. 
+   */
+   Class<? extends TemplateProvider> provider() default 
+     org.jboss.errai.ui.shared.api.annotations.Templated.DEFAULT_PROVIDER.class;
+   
+   static abstract class DEFAULT_PROVIDER implements TemplateProvider {}
 }

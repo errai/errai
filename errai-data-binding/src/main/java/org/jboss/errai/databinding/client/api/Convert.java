@@ -28,9 +28,9 @@ import org.jboss.errai.databinding.client.ConverterRegistrationKey;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
-import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -278,8 +278,8 @@ public class Convert {
   private static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
     Class widgetValueType = null;
     
-    if (widget instanceof HasValue) {
-      Object value = ((HasValue) widget).getValue();
+    if (widget instanceof TakesValue) {
+      Object value = ((TakesValue) widget).getValue();
       if (value != null) {
         widgetValueType = value.getClass();
       }

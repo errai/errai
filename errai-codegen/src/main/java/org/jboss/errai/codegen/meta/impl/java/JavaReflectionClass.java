@@ -129,14 +129,18 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return getEnclosedMetaObject().getCanonicalName();
   }
 
+  private String _packageName = null;
   @Override
   public String getPackageName() {
-    String packageName = null;
+    if (_packageName != null) {
+      return _packageName;
+    }
+    
     final Package pack = getEnclosedMetaObject().getPackage();
     if (pack != null) {
-      packageName = pack.getName();
+      _packageName = pack.getName();
     }
-    return packageName;
+    return _packageName;
   }
 
   private MetaMethod[] fromMethodArray(final Method[] methods) {
@@ -152,8 +156,14 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
+  private MetaMethod[] _methodCache = null;
+  
   @Override
   public MetaMethod[] getMethods() {
+    if (_methodCache != null) {
+      return _methodCache;
+    }
+    
     final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
 
     Class<?> type = getEnclosedMetaObject();
@@ -186,7 +196,8 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
     while ((type = type.getSuperclass()) != null);
 
-    return meths.toArray(new MetaMethod[meths.size()]);
+    _methodCache = meths.toArray(new MetaMethod[meths.size()]);
+    return _methodCache;
   }
 
   private transient volatile MetaMethod[] _declaredMethodCache;
@@ -355,14 +366,21 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return _interfacesCache = metaClassList.toArray(new MetaClass[metaClassList.size()]);
   }
 
+  private MetaClass _superClass;
+  
   @Override
   public MetaClass getSuperClass() {
+    if (_superClass != null)
+      return _superClass;
+
     if (getGenericSuperClass() != null) {
-      return parameterizedAs(getEnclosedMetaObject().getSuperclass(), typeParametersOf(getGenericSuperClass().getTypeParameters()));
+      _superClass = parameterizedAs(getEnclosedMetaObject().getSuperclass(), typeParametersOf(getGenericSuperClass()
+              .getTypeParameters()));
     }
     else {
-      return newInstance(getEnclosedMetaObject().getSuperclass());
+      _superClass = newInstance(getEnclosedMetaObject().getSuperclass());
     }
+    return _superClass;
   }
 
   @Override

@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Parameter;
@@ -37,6 +39,9 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.reflections.scanners.AbstractScanner;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.ext.typeinfo.JArrayType;
@@ -60,6 +65,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 public class GWTClass extends AbstractMetaClass<JType> {
   protected final Annotation[] annotations;
   protected TypeOracle oracle;
+  private String fqcn;
 
   static {
     GenUtil.addClassAlias(GWTClass.class);
@@ -91,8 +97,54 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
   }
 
+  
+  public static class GWTClassCache implements CacheStore {
+    private Map<String, MetaClass> reloadableClasses = new ConcurrentHashMap<String, MetaClass>();
+
+    // Classes in .jar files can't change between refreshes so we can hold on to them
+    private Map<String, MetaClass> classesInJar = new ConcurrentHashMap<String, MetaClass>();
+
+    @Override
+    public void clear() {
+      reloadableClasses.clear();
+    }
+
+    public void put(String name, MetaClass clazz) {
+      if (AbstractScanner.isInJar(name) && !name.contains("<")) {
+        classesInJar.put(name, clazz);
+      }
+      else { 
+        reloadableClasses.put(name, clazz);
+      }
+    }
+
+    public MetaClass get(String name) {
+      MetaClass clazz = classesInJar.get(name); 
+      if (clazz != null) {
+        if (AbstractScanner.isInJar(name)) {
+          return clazz;
+        }
+        else {
+          classesInJar.remove(name);
+          return null;
+        }
+      }
+      else {
+        return reloadableClasses.get(name);  
+      }
+    }
+  }
+  
+  final static GWTClassCache cache = CacheUtil.getCache(GWTClassCache.class);
+  
   public static MetaClass newInstance(final TypeOracle oracle, final JType type) {
-    return newUncachedInstance(oracle, type);
+    MetaClass clazz = cache.get(type.getParameterizedQualifiedSourceName());
+    if (clazz == null) {
+      clazz = newUncachedInstance(oracle, type);
+      cache.put(type.getParameterizedQualifiedSourceName(), clazz);
+    }
+    
+    return clazz;
   }
 
   public static MetaClass newInstance(final TypeOracle oracle, final String type) {
@@ -105,7 +157,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newUncachedInstance(final TypeOracle oracle, final JType type) {
-
     return new GWTClass(oracle, type, false);
   }
 
@@ -172,17 +223,22 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public String getFullyQualifiedName() {
+    if (fqcn != null)  {
+      return fqcn;
+    }
+      
     if (isArray()) {
       if (getOuterComponentType().isPrimitive()) {
-        return getInternalName();
+        fqcn = getInternalName();
       }
       else {
-        return getInternalName().replace('/', '.');
+        fqcn = getInternalName().replace('/', '.');
       }
     }
     else {
-      return getEnclosedMetaObject().getQualifiedBinaryName();
+      fqcn = getEnclosedMetaObject().getQualifiedBinaryName();
     }
+    return fqcn;
   }
 
   @Override
@@ -195,9 +251,15 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return getEnclosedMetaObject().getJNISignature();
   }
 
+  private String _packageName = null;
   @Override
   public String getPackageName() {
-    return getEnclosedMetaObject().isClassOrInterface().getPackage().getName();
+    if (_packageName != null) {
+      return _packageName;
+    }
+    
+    _packageName = getEnclosedMetaObject().isClassOrInterface().getPackage().getName();
+    return _packageName;
   }
 
   private static MetaMethod[] fromMethodArray(final TypeOracle oracle, final JMethod[] methods) {
@@ -228,8 +290,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
   private static final List<MetaMethod> overrideMethods =
       Arrays.asList(MetaClassFactory.get(Object.class).getMethods());
 
+  private MetaMethod[] _methodsCache = null;
+  
   @Override
   public MetaMethod[] getMethods() {
+    if (_methodsCache != null) {
+      return _methodsCache;
+    }
+    
     final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
     meths.addAll(getSpecialTypeMethods());
 
@@ -261,8 +329,9 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
     while ((type = type.getSuperclass()) != null && !type.getQualifiedSourceName().equals("java.lang.Object"));
     meths.addAll(overrideMethods);
-
-    return meths.toArray(new MetaMethod[meths.size()]);
+    _methodsCache = meths.toArray(new MetaMethod[meths.size()]);
+    
+    return _methodsCache;
   }
 
   @Override
@@ -292,7 +361,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
     JClassType type = getEnclosedMetaObject().isClass();
     while (type != null) {
       for (JField field : type.getFields()) {
-        if (field.isPublic()) {
+        // In GWT 2.7 java.lang.Object contains two public fields castableTypeMap and typeMarker that we don't want.
+        if (field.isPublic() && !field.getEnclosingType().getQualifiedSourceName().equals("java.lang.Object")) {
           fields.add(new GWTField(oracle, field));
         }
       }
@@ -398,8 +468,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return declaredClasses;
   }
 
+  private MetaClass[] _intefacesCache = null;
+  
   @Override
   public MetaClass[] getInterfaces() {
+    if (_intefacesCache != null) {
+      return _intefacesCache;
+    }
+    
     final JClassType jClassType = getEnclosedMetaObject().isClassOrInterface();
     if (jClassType == null)
       return new MetaClass[0];
@@ -410,7 +486,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
       metaClassList.add(new GWTClass(oracle, type, false));
     }
 
-    return metaClassList.toArray(new MetaClass[metaClassList.size()]);
+    _intefacesCache = metaClassList.toArray(new MetaClass[metaClassList.size()]);
+    return _intefacesCache;
   }
 
   @Override
@@ -431,7 +508,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-    return newUncachedInstance(oracle, type);
+    return newInstance(oracle, type);
   }
 
   @Override

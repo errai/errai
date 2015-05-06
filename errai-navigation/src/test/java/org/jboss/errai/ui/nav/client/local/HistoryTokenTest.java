@@ -14,6 +14,7 @@ public class HistoryTokenTest extends GWTTestCase {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     patternMatcher = new URLPatternMatcher();
+    patternMatcher.add("PageWithPath/{path}", "PageWithPath");
     patternMatcher.add("PageName", "PageName");
     patternMatcher.add("Pa;ge=Na&me", "EscapedPage");
     htFactory = new HistoryTokenFactory(patternMatcher);
@@ -48,18 +49,15 @@ public class HistoryTokenTest extends GWTTestCase {
     assertEquals("v&a=lue", token.getState().get("k=ey").iterator().next());
   }
 
-  public void testPageNameThatNeedsEscaping() throws Exception {
-    Multimap<String, String> state = ImmutableMultimap.<String, String>builder().put("key", "value").build();
-    String encodedToken = htFactory.createHistoryToken("EscapedPage", state).toString();
+  public void testPathThatNeedsEscaping() throws Exception {
+    Multimap<String, String> state = ImmutableMultimap.<String, String>builder().put("path", "p=&/%2Fath").build();
+    String encodedToken = htFactory.createHistoryToken("PageWithPath", state).toString();
+
     HistoryToken token = patternMatcher.parseURL(encodedToken);
-    assertEquals("EscapedPage", token.getPageName());
-    assertEquals(encodedToken, token.toString());
- 
-    String encodePathSegment = URL.encodePathSegment("Pa;ge=Na&me") + ";key=value";
-    assertEquals(encodePathSegment, encodedToken);
+    assertEquals("PageWithPath", token.getPageName());
     assertEquals("Unexpected state map contents: " + token.getState(), 1, token.getState().size());
-    assertEquals("Unexpected state map contents: " + token.getState(), 1, token.getState().get("key").size());
-    assertEquals("value", token.getState().get("key").iterator().next());
+    assertEquals("Unexpected state map contents: " + token.getState(), 1, token.getState().get("path").size());
+    assertEquals("p=&/%2Fath", token.getState().get("path").iterator().next());
   }
 
   public void testToStringNoParams() throws Exception {
@@ -69,14 +67,14 @@ public class HistoryTokenTest extends GWTTestCase {
 
   public void testToString1Param() throws Exception {
     String encodedToken = htFactory.createHistoryToken("PageName",
-            ImmutableMultimap.<String, String>of("p1", "v1"))
+            ImmutableMultimap.of("p1", "v1"))
             .toString();
     assertEquals("PageName;p1=v1", encodedToken);
   }
 
   public void testToString2Params() throws Exception {
     String encodedToken = htFactory.createHistoryToken("PageName",
-            ImmutableMultimap.<String, String>of("p1", "v1", "p2", "v2"))
+            ImmutableMultimap.of("p1", "v1", "p2", "v2"))
             .toString();
     assertEquals("PageName;p1=v1&p2=v2", encodedToken);
   }

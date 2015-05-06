@@ -16,6 +16,7 @@ import org.jboss.errai.cdi.server.gwt.util.SimpleTranslator;
 import org.jboss.errai.cdi.server.gwt.util.SimpleTranslator.AttributeEntry;
 import org.jboss.errai.cdi.server.gwt.util.SimpleTranslator.Tag;
 import org.jboss.errai.cdi.server.gwt.util.StackTreeLogger;
+import org.jboss.errai.cdi.server.gwt.util.JBossUtil;
 
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
@@ -32,17 +33,13 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public class JBossLauncher extends ServletContainerLauncher {
 
   // Property names
-  private final String JBOSS_HOME_PROPERTY = "errai.jboss.home";
   private final String JBOSS_DEBUG_PORT_PROPERTY = "errai.jboss.debug.port";
   private final String TEMPLATE_CONFIG_FILE_PROPERTY = "errai.jboss.config.file";
   private final String CLASS_HIDING_JAVA_AGENT_PROPERTY = "errai.jboss.javaagent.path";
-  private final String APP_CONTEXT_PROPERTY = "errai.dev.context";
   private final String JBOSS_JAVA_OPTS_PROPERTY = "errai.jboss.javaopts";
-
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
-  private static final String STANDALONE_CONFIGURATION = "standalone" + File.separator + "configuration";
 
-  StackTreeLogger logger;
+  private StackTreeLogger logger;
 
   @Override
   public ServletContainer start(TreeLogger treeLogger, int port, File appRootDir) throws BindException, Exception {
@@ -51,18 +48,16 @@ public class JBossLauncher extends ServletContainerLauncher {
     logger.branch(Type.INFO, "Starting launcher...");
 
     // Get properties
-    final String JBOSS_HOME = System.getProperty(JBOSS_HOME_PROPERTY);
     final String DEBUG_PORT = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
     final String TEMPLATE_CONFIG_FILE = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
     final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
-    final String DEPLOYMENT_CONTEXT = System.getProperty(APP_CONTEXT_PROPERTY, "webapp");
     String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "");
 
-    validateJbossHome(JBOSS_HOME);
+    final String jbossHome = JBossUtil.getJBossHome(logger);
     validateClassHidingJavaAgent(CLASS_HIDING_JAVA_AGENT);
 
     try {
-      createTempConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, JBOSS_HOME, port);
+      createTempConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, jbossHome, port);
       logger.log(Type.INFO,
               String.format("Created temporary config file %s, copied from %s.", TMP_CONFIG_FILE, TEMPLATE_CONFIG_FILE));
     }
@@ -73,7 +68,7 @@ public class JBossLauncher extends ServletContainerLauncher {
               e);
     }
 
-    final String JBOSS_START = getStartScriptName(JBOSS_HOME);
+    final String JBOSS_START = JBossUtil.getStartScriptName(jbossHome);
 
     Process process;
     try {
@@ -85,9 +80,9 @@ public class JBossLauncher extends ServletContainerLauncher {
       }
       ProcessBuilder builder = new ProcessBuilder(JBOSS_START, "-c", TMP_CONFIG_FILE);
 
-      logger.log(Type.INFO, String.format("Adding JBOSS_HOME=%s to instance environment", JBOSS_HOME));
+      logger.log(Type.INFO, String.format("Adding JBOSS_HOME=%s to instance environment", jbossHome));
       // Necessary for JBoss AS instance to startup
-      builder.environment().put("JBOSS_HOME", JBOSS_HOME);
+      builder.environment().put("JBOSS_HOME", jbossHome);
 
       // Allows JVM to be debugged
       builder.environment().put(
@@ -114,7 +109,7 @@ public class JBossLauncher extends ServletContainerLauncher {
     logger.branch(Type.INFO, "Creating servlet container controller...");
 
     try {
-      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, DEPLOYMENT_CONTEXT,
+      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, JBossUtil.getDeploymentContext(),
               logger.peek(), process);
       logger.log(Type.INFO, "Controller created");
       logger.unbranch();
@@ -137,50 +132,9 @@ public class JBossLauncher extends ServletContainerLauncher {
     }
   }
 
-  private void validateJbossHome(final String JBOSS_HOME) throws UnableToCompleteException {
-    if (JBOSS_HOME == null || JBOSS_HOME.equals("")) {
-      logger.log(
-              Type.ERROR,
-              String.format(
-                      "No value for %s was given: The root directory of your Jboss installation must be provided through the property %s in your pom.xml",
-                      JBOSS_HOME_PROPERTY, JBOSS_HOME_PROPERTY));
-      throw new UnableToCompleteException();
-    }
-    
-    /*
-     * Check that start script and configuration folder exist.
-     */
-    final File[] files = new File[] {
-            new File(JBOSS_HOME),
-            new File(getStartScriptName(JBOSS_HOME)),
-            new File(JBOSS_HOME, STANDALONE_CONFIGURATION)
-    };
-    
-    boolean isValid = true;
-    for (int i = 0; i < files.length; i++) {
-      if (!files[i].exists()) {
-        isValid = false;
-        break;
-      }
-    }
-    
-    if (!isValid) {
-      logger.branch(Type.ERROR, String.format("The errai.jboss.home directory, %s, does not appear to be home to a Jboss or Wildfly instance.", JBOSS_HOME));
-      
-      for (int i = 0; i < files.length; i++) {
-        if (!files[i].exists()) {
-          logger.log(Type.ERROR, String.format("%s not found.", files[i].getAbsolutePath()));
-        }
-      }
-      logger.unbranch();
-      
-      throw new UnableToCompleteException();
-    }
-  }
-
   private void createTempConfigFile(String fromName, String toName, String jBossHome, int port) throws IOException,
           UnableToCompleteException {
-    File configDir = new File(jBossHome, STANDALONE_CONFIGURATION);
+    File configDir = new File(jBossHome, JBossUtil.STANDALONE_CONFIGURATION);
     File from = new File(configDir, fromName);
     File to = new File(configDir, toName);
 
@@ -222,13 +176,6 @@ public class JBossLauncher extends ServletContainerLauncher {
       inStream.close();
       outStream.close();
     }
-  }
-
-  private String getStartScriptName(String jbossHome) {
-    final String script = System.getProperty("os.name").toLowerCase().contains("windows") ? "standalone.bat"
-            : "standalone.sh";
-
-    return String.format("%s%cbin%c%s", jbossHome, File.separatorChar, File.separatorChar, script);
   }
 
   private void inheritIO(final InputStream in, final OutputStream to) {

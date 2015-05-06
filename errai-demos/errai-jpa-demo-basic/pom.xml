@@ -5,7 +5,7 @@
   <groupId>org.jboss.errai.demos</groupId>
   <name>Errai::JPA::Demos::Basic</name>
   <artifactId>errai-jpa-demo-basic</artifactId>
-  <version>3.1.1-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -61,8 +61,8 @@
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.6.1</maven.gwt.plugin.version>
+    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version> 
+    <maven.gwt.plugin.version>2.7.0</maven.gwt.plugin.version>   
     <jetty.version>6.1.25</jetty.version>
     <weld.version>1.1.6.Final</weld.version>
   </properties>
@@ -506,10 +506,10 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
+        <artifactId>gwt-maven-plugin</artifactId> 
         <version>${maven.gwt.plugin.version}</version>
         <configuration>
-          <strict>false</strict>
+          <strict>true</strict>
           <logLevel>INFO</logLevel>
           <runTarget>index.html</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100</extraJvmArgs>

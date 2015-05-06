@@ -5,7 +5,7 @@
   <name>Errai</name>
   <groupId>org.jboss.errai</groupId>
   <artifactId>errai-parent</artifactId>
-  <version>3.1.1-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.jboss.integration-platform</groupId>
     <artifactId>jboss-integration-platform-parent</artifactId>
-    <version>6.0.0.CR16</version>
+    <version>6.0.0.CR26</version>
   </parent>
 
   <developers>
@@ -68,7 +68,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gwt.maven.version>2.6.1</gwt.maven.version>
     <guice.version>3.0</guice.version>
     <guava.version>17.0</guava.version>
     <appengine.version>1.7.6</appengine.version>
@@ -80,6 +79,7 @@
   </properties>
 
   <modules>
+    <module>errai-internal-bom</module>
     <module>errai-bom</module>
     <module>errai-common</module>
     <module>errai-javax-enterprise</module>
@@ -141,7 +141,7 @@
       <dependency>
         <groupId>org.jboss.integration-platform</groupId>
         <artifactId>jboss-integration-platform-bom</artifactId>
-        <version>6.0.0.CR16</version>
+        <version>6.0.0.CR26</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -163,7 +163,7 @@
     <plugins>
       <plugin>
         <groupId>org.jboss.errai</groupId>
-        <artifactId>jacoco-gwt-maven-plugin</artifactId>
+        <artifactId>jacoco-gwt-maven-plugin</artifactId>        
         <executions>
           <execution>
             <id>jacoco-initialize</id>
@@ -291,8 +291,7 @@
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
-          <artifactId>gwt-maven-plugin</artifactId>
-          <version>${gwt.maven.version}</version>
+          <artifactId>gwt-maven-plugin</artifactId>              
           <executions>
             <execution>
               <goals>
@@ -455,7 +454,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
+                    <versionRange>[2.6.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>

@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
 import org.junit.Test;
 
 import com.google.gwt.http.client.Response;
@@ -71,6 +72,14 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     List<Long> longs = Arrays.asList(1l,2l,3l);
     call(QueryParamTestService.class,
         new AssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", longs)).getWithQueryParamListOfLongs(longs);
+  }
+  
+  @Test
+  public void testGetWithQueryParamListOfEnums() {
+    List<EnumMapEntity.SomeEnum> enums = Arrays.asList(EnumMapEntity.SomeEnum.ENUM_VALUE);
+    call(QueryParamTestService.class,
+        new AssertionCallback<List<EnumMapEntity.SomeEnum>>(
+                "@GET with List<Enum> as @QueryParam failed", enums)).getWithQueryParamListOfEnums(enums);
   }
   
   @Test

@@ -84,9 +84,7 @@ public class BoundAnnotationChecker extends AbstractProcessor {
       }
       else {
         TypeMirror modelType = modelTypes.get(0);
-        Set<String> modelPropertyNames = getPropertyNames(modelType);
         for (Element boundElement : classWithItsBoundThings.getValue()) {
-          
           String configuredProperty = AnnotationProcessors.
                   extractAnnotationStringValue(elements, getAnnotation(boundElement, TypeNames.BOUND), "property");
           
@@ -96,15 +94,15 @@ public class BoundAnnotationChecker extends AbstractProcessor {
           switch (boundElement.getKind()) {
           case FIELD:
           case PARAMETER:
-            if (!modelPropertyNames.contains(boundProperty)) {
+            if (!isValidPropertyChain(modelType, boundProperty)) {
               processingEnv.getMessager().printMessage(
-                      Kind.ERROR, "The model type " + ((DeclaredType) modelType).asElement().getSimpleName() + " does not have property \"" + boundElement.getSimpleName() + "\"",
+                      Kind.ERROR, "The model type " + ((DeclaredType) modelType).asElement().getSimpleName() + " does not have property \"" + boundProperty + "\"",
                       boundElement, getAnnotation(boundElement, TypeNames.BOUND));
             }
             break;
           case METHOD:
             String propertyName = propertyNameOfMethod(boundElement);
-            if (!modelPropertyNames.contains(propertyName)) {
+            if (!isValidPropertyChain(modelType, propertyName)) {
               processingEnv.getMessager().printMessage(
                       Kind.ERROR, "The model type " + ((DeclaredType) modelType).asElement().getSimpleName() + " does not have property \"" + propertyName + "\"",
                       boundElement, getAnnotation(boundElement, TypeNames.BOUND));
@@ -143,6 +141,25 @@ public class BoundAnnotationChecker extends AbstractProcessor {
 //            result.add(typeOfDataBinder(param.asType()));
 //          }
 //        }
+    }
+    return result;
+  }
+  
+  /**
+   * Returns the type of the provided property in the given model type.
+   */
+  private TypeMirror getPropertyType(TypeMirror modelType, String property) {
+    final Elements elements = processingEnv.getElementUtils();
+    final Types types = processingEnv.getTypeUtils();
+
+    TypeMirror result = null;
+    for (Element el : ElementFilter.methodsIn(elements.getAllMembers((TypeElement) types.asElement(modelType)))) {
+      String methodName = el.getSimpleName().toString();
+      if (methodName.toLowerCase().equals("get" + property.toLowerCase()) || 
+              methodName.toLowerCase().equals("is" + property.toLowerCase())) {
+        result = ((ExecutableElement) el).getReturnType();
+        break;
+      }
     }
     return result;
   }
@@ -199,5 +216,34 @@ public class BoundAnnotationChecker extends AbstractProcessor {
   private TypeMirror typeOfDataBinder(TypeMirror dataBinderDeclaration) {
     // in a superclass, this could return a type variable or a wildcard
     return ((DeclaredType) dataBinderDeclaration).getTypeArguments().get(0);
+  }
+  
+  /**
+   * Returns true if and only if the given property chain is a valid property
+   * expression rooted in the given bindable type.
+   * 
+   * @param bindableType
+   *          The root type the given property chain is resolved against. Not
+   *          null.
+   * @param propertyChain
+   *          The data binding property chain to validate. Not null.
+   * @return True if the given property chain is resolvable from the given
+   *         bindable type.
+   */
+  private boolean isValidPropertyChain(TypeMirror bindableType, String propertyChain) {
+    int dotPos = propertyChain.indexOf(".");
+    if (dotPos <= 0) {
+      return getPropertyNames(bindableType).contains(propertyChain);
+    }
+    else {
+      String thisProperty = propertyChain.substring(0, dotPos);
+      String moreProperties = propertyChain.substring(dotPos + 1);
+      if (!getPropertyNames(bindableType).contains(thisProperty)) {
+        return false;
+      }
+      
+      TypeMirror propertyType = getPropertyType(bindableType, thisProperty);
+      return isValidPropertyChain(propertyType, moreProperties);
+    }
   }
 }

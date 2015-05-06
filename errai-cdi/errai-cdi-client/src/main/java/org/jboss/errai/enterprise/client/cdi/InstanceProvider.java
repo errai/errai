@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -71,13 +72,17 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public boolean isUnsatisfied() {
-      return false;
+      Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
+      return beanDefs.isEmpty(); 
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public boolean isAmbiguous() {
-      return false;
+      Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
+      return beanDefs.size() > 1;
     }
 
     @Override
@@ -85,6 +90,7 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
       return Collections.emptyList().iterator();
     }
 
+    
     @Override
     public Object get() {
       final IOCBeanDef bean = IOC.getBeanManager().lookupBean(type, qualifiers);

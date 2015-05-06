@@ -372,6 +372,9 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public void onItemChanged(List<M> oldList, int index, M item) {
+    if (oldList.get(index) == item) 
+      return;
+    
     for (int i = index; i < items.size(); i++) {
       addAndReplaceWidget(index, i);
     }

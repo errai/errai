@@ -18,7 +18,9 @@ package org.jboss.errai.databinding.client;
 
 import static org.jboss.errai.databinding.client.api.Convert.toModelValue;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -32,32 +34,38 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the target model and bound
- * widgets in sync.
+ * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the
+ * target model and bound widgets in sync.
  * <p>
  * An agent will:
  * <ul>
- * <li>Carry out an initial state sync between the bound widgets and the target model, if specified
- * (see {@link DataBinder#DataBinder(Object, InitialState)})</li>
+ * <li>Carry out an initial state sync between the bound widgets and the target
+ * model, if specified (see {@link DataBinder#DataBinder(Object, InitialState)})
+ * </li>
  * 
  * <li>Update the bound widget when a setter method is invoked on the model (see
- * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for widgets that either
- * implement {@link HasValue} or {@link HasText})</li>
+ * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for
+ * widgets that either implement {@link TakesValue} or {@link HasText})</li>
  * 
- * <li>Update the bound widgets when a non-accessor method is invoked on the model (by comparing all
- * bound properties to detect changes). See {@link #updateWidgetsAndFireEvents()}. Works for widgets
- * that either implement {@link HasValue} or {@link HasText})</li>
+ * <li>Update the bound widgets when a non-accessor method is invoked on the
+ * model (by comparing all bound properties to detect changes). See
+ * {@link #updateWidgetsAndFireEvents()}. Works for widgets that either
+ * implement {@link TakesValue} or {@link HasText})</li>
  * 
- * <li>Update the target model in response to value change events (only works for bound widgets that
- * implement {@link HasValue})</li>
+ * <li>Update the target model in response to value change events (only works
+ * for bound widgets that implement {@link HasValue})</li>
  * <ul>
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -79,6 +87,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final T target;
   InitialState initialState;
 
+  /**
+   * Updates a bound property of a model in response to UI changes.
+   */
+  private interface ModelUpdater {
+    public void update(Object value);
+  }
+
   BindableProxyAgent(BindableProxy<T> proxy, T target, InitialState initialState) {
     this.proxy = proxy;
     this.target = target;
@@ -86,8 +101,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Copies the values of all properties to be able to compare them in case they change outside a
-   * setter method.
+   * Copies the values of all properties to be able to compare them in case they
+   * change outside a setter method.
    */
   void copyValues() {
     for (String property : propertyTypes.keySet()) {
@@ -96,24 +111,49 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Binds the provided widget to the specified property (or property chain) of the model instance
-   * associated with this proxy (see {@link DataBinder#setModel(Object, InitialState)}).
-   * 
+   * Binds the provided widget to the specified property (or property chain) of
+   * the model instance associated with this proxy (see
+   * {@link DataBinder#setModel(Object, InitialState)}).
+   *
    * @param widget
    *          the widget to bind to, must not be null.
    * @param property
    *          the property of the model to bind the widget to, must not be null.
    * @param converter
-   *          the converter to use for this binding, null if default conversion should be used.
+   *          the converter to use for this binding, null if default conversion
+   *          should be used.
    * @return binding the created binding.
    */
   public Binding bind(final Widget widget, final String property, final Converter converter) {
+    return bind(widget, property, converter, false);
+  }
+
+  /**
+   * Binds the provided widget to the specified property (or property chain) of
+   * the model instance associated with this proxy (see
+   * {@link DataBinder#setModel(Object, InitialState)}).
+   *
+   * @param widget
+   *          the widget to bind to, must not be null.
+   * @param property
+   *          the property of the model to bind the widget to, must not be null.
+   * @param converter
+   *          the converter to use for this binding, null if default conversion
+   *          should be used.
+   * @param bindOnKeyUp
+   *          a flag indicating that the property should be updated when the
+   *          widget fires a {@link com.google.gwt .event.dom.client.KeyUpEvent}
+   *          along with the default
+   *          {@link com.google.gwt.event.logical.shared .ValueChangeEvent}.
+   * @return binding the created binding.
+   */
+  public Binding bind(final Widget widget, final String property, final Converter converter, final boolean bindOnKeyUp) {
     validatePropertyExpr(property);
 
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       DataBinder nested = createNestedBinder(property);
-      nested.bind(widget, property.substring(dotPos + 1), converter);
+      nested.bind(widget, property.substring(dotPos + 1), converter, bindOnKeyUp);
       Binding binding = new Binding(property, widget, converter, null);
       bindings.put(property, binding);
       return binding;
@@ -129,24 +169,17 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
     }
 
-    HandlerRegistration handlerRegistration = null;
-    if (widget instanceof HasValue) {
-      handlerRegistration = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
-        @Override
-        public void onValueChange(ValueChangeEvent event) {
-          Object oldValue = proxy.get(property);
-          Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, event.getValue(), converter);
-          proxy.set(property, newValue);
-          updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
-        }
-      });
-    }
-    else if (!(widget instanceof HasText)) {
-      throw new RuntimeException("Widget must implement either " + HasValue.class.getName() +
-          " or " + HasText.class.getName() + "!");
-    }
+    Collection<HandlerRegistration> handlerRegistrations = addWidgetHandlers(widget, bindOnKeyUp, new ModelUpdater() {
+      @Override
+      public void update(final Object value) {
+        final Object oldValue = proxy.get(property);
+        final Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, value, converter);
+        proxy.set(property, newValue);
+        updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
+      }
+    });
 
-    Binding binding = new Binding(property, widget, converter, handlerRegistration);
+    Binding binding = new Binding(property, widget, converter, handlerRegistrations);
     bindings.put(property, binding);
 
     if (propertyTypes.get(property).isList()) {
@@ -158,14 +191,72 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Creates a data binder for a nested property to support property chains. The nested data binder
-   * is initialized with the current value of the specified property, or with a new instance of the
-   * property type if the value is null. The proxy's value for this property is then replaced with
-   * the proxy managed by the nested data binder.
+   * Adds the required event handlers to the provided widget. A
+   * {@link ValueChangeHandler} is added by default, a {@link KeyUpHandler} is
+   * added if bindOnKeyUp is true.
+   *
+   * @param widget
+   *          the bound widget, must not be null.
+   * @param bindOnKeyUp
+   *          a flag indicating that the property should be updated when the
+   *          widget fires a {@link com.google.gwt.event.dom.client.KeyUpEvent}
+   *          , in addition to the default
+   *          {@link com.google.gwt.event.logical.shared.ValueChangeEvent}.
+   * @param updater
+   *          A {@link ModelUpdater} that updates the bound property of the
+   *          model in response to UI changes.
+   * @return collection of event handler registrations.
+   */
+  private Collection<HandlerRegistration> addWidgetHandlers(final Widget widget, final boolean bindOnKeyUp,
+          final ModelUpdater updater) {
+
+    Collection<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
+
+    if (widget instanceof HasValue) {
+      HandlerRegistration valueHandlerReg = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
+
+        @Override
+        public void onValueChange(ValueChangeEvent event) {
+          updater.update(event.getValue());
+        }
+      });
+      handlerRegistrations.add(valueHandlerReg);
+    }
+    else if (!(widget instanceof HasText) && !(widget instanceof TakesValue)) {
+      throw new RuntimeException("Widget must implement either " + TakesValue.class.getName() + " or "
+              + HasText.class.getName() + "!");
+    }
+
+    if (bindOnKeyUp) {
+      if (widget instanceof ValueBoxBase) {
+        HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) widget).addKeyUpHandler(new KeyUpHandler() {
+
+          @Override
+          public void onKeyUp(KeyUpEvent event) {
+            updater.update(((ValueBoxBase) widget).getText());
+          }
+        });
+        handlerRegistrations.add(keyUpHandlerReg);
+      }
+      else {
+        throw new RuntimeException("Cannot bind widget " + widget.toString() + " on KeyUpEvents, " + widget.toString()
+                + " is not an instance of ValueBoxBase");
+      }
+    }
+
+    return handlerRegistrations;
+  }
+
+  /**
+   * Creates a data binder for a nested property to support property chains. The
+   * nested data binder is initialized with the current value of the specified
+   * property, or with a new instance of the property type if the value is null.
+   * The proxy's value for this property is then replaced with the proxy managed
+   * by the nested data binder.
    * 
    * @param property
-   *          the property of the model to bind the widget to, must not be null. The property must
-   *          be of a @Bindable type.
+   *          the property of the model to bind the widget to, must not be null.
+   *          The property must be of a @Bindable type.
    */
   private DataBinder createNestedBinder(final String property) {
     String bindableProperty = property.substring(0, property.indexOf("."));
@@ -177,7 +268,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (!propertyTypes.get(bindableProperty).isBindable()) {
       throw new RuntimeException("The type of property " + bindableProperty + " ("
-            + propertyTypes.get(bindableProperty).getType().getName() + ") is not a @Bindable type!");
+              + propertyTypes.get(bindableProperty).getType().getName() + ") is not a @Bindable type!");
     }
 
     if (binder == null) {
@@ -204,11 +295,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private void validatePropertyExpr(String property) {
     if (property.startsWith(".") || property.endsWith(".")) {
       throw new InvalidPropertyExpressionException(
-          "Binding expression (property chain) cannot start or end with '.' : " + property);
+              "Binding expression (property chain) cannot start or end with '.' : " + property);
     }
     if (property.contains("*.")) {
       throw new InvalidPropertyExpressionException("Wildcards can only appear at the end of property expressions : "
-          + property);
+              + property);
     }
   }
 
@@ -230,7 +321,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         binder.unbind(property.substring(dotPos + 1));
       }
     }
-    binding.removeHandler();
+    binding.removeHandlers();
     bindings.remove(property, binding);
 
     if (bindings.isEmpty()) {
@@ -239,17 +330,16 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Updates all bound widgets if necessary (if a bound property's value has changed). This method
-   * is invoked in case a bound property changed outside the property's write method (when using a
-   * non accessor method).
+   * Updates all bound widgets if necessary (if a bound property's value has
+   * changed). This method is invoked in case a bound property changed outside
+   * the property's write method (when using a non accessor method).
    */
   void updateWidgetsAndFireEvents() {
     for (String property : propertyTypes.keySet()) {
       Object knownValue = knownValues.get(property);
       Object actualValue = proxy.get(property);
 
-      if ((knownValue == null && actualValue != null) ||
-          (knownValue != null && !knownValue.equals(actualValue))) {
+      if ((knownValue == null && actualValue != null) || (knownValue != null && !knownValue.equals(actualValue))) {
 
         DataBinder nestedBinder = binders.get(property);
         if (nestedBinder != null) {
@@ -262,7 +352,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Updates all bound widgets and fires the corresponding {@link PropertyChangeEvent}.
+   * Updates all bound widgets and fires the corresponding
+   * {@link PropertyChangeEvent}.
    * 
    * @param <P>
    *          The property type of the changed property.
@@ -278,7 +369,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Updates all bound widgets and fires the corresponding {@link PropertyChangeEvent}.
+   * Updates all bound widgets and fires the corresponding
+   * {@link PropertyChangeEvent}.
    * 
    * @param <P>
    *          The property type of the changed property.
@@ -289,11 +381,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param newValue
    *          The new value of the property.
    * @param excluding
-   *          A widget reference that does not need to be updated (the origin of the value change
-   *          event).
+   *          A widget reference that does not need to be updated (the origin of
+   *          the value change event).
    */
   private <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue,
-      final Widget excluding) {
+          final Widget excluding) {
 
     for (Binding binding : bindings.get(property)) {
       Widget widget = binding.getWidget();
@@ -302,16 +394,15 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (widget == excluding)
         continue;
 
-      if (widget instanceof HasValue) {
-        HasValue hv = (HasValue) widget;
-        Object widgetValue =
-            Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converter);
+      if (widget instanceof TakesValue) {
+        TakesValue hv = (TakesValue) widget;
+        Object widgetValue = Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converter);
         hv.setValue(widgetValue);
       }
       else if (widget instanceof HasText) {
         HasText ht = (HasText) widget;
-        Object widgetValue =
-            Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converter);
+        Object widgetValue = Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue,
+                converter);
         ht.setText((String) widgetValue);
       }
     }
@@ -339,13 +430,14 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Synchronizes the state of the provided widgets and model property based on the value of the
-   * provided {@link InitialState}.
+   * Synchronizes the state of the provided widgets and model property based on
+   * the value of the provided {@link InitialState}.
    * 
    * @param widget
    *          The widget to synchronize. Must not be null.
    * @param property
-   *          The name of the model property that should be synchronized. Must not be null.
+   *          The name of the model property that should be synchronized. Must
+   *          not be null.
    * @param converter
    *          The converter specified for the property binding. Null allowed.
    */
@@ -355,8 +447,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (initialState != null) {
       Object value = proxy.get(property);
-      if (widget instanceof HasValue) {
-        value = initialState.getInitialValue(value, ((HasValue) widget).getValue());
+      if (widget instanceof TakesValue) {
+        value = initialState.getInitialValue(value, ((TakesValue) widget).getValue());
       }
       else if (widget instanceof HasText) {
         value = initialState.getInitialValue(value, ((HasText) widget).getText());
@@ -374,13 +466,14 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Ensures that the given list property is wrapped in a {@link BindableListWrapper}, so changes to
-   * the list become observable.
+   * Ensures that the given list property is wrapped in a
+   * {@link BindableListWrapper}, so changes to the list become observable.
    * 
    * @param property
    *          the name of the list property
    * 
-   * @return a new the wrapped (proxied) list or the provided list if already proxied
+   * @return a new the wrapped (proxied) list or the provided list if already
+   *         proxied
    */
   private List ensureBoundListIsProxied(String property) {
     List newList = ensureBoundListIsProxied(property, (List) proxy.get(property));
@@ -389,15 +482,16 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Ensures that the given list property is wrapped in a {@link BindableListWrapper}, so changes to
-   * the list become observable.
+   * Ensures that the given list property is wrapped in a
+   * {@link BindableListWrapper}, so changes to the list become observable.
    * 
    * @param property
    *          the name of the list property
    * @param list
    *          the list that needs to be proxied
    * 
-   * @return a new the wrapped (proxied) list or the provided list if already proxied
+   * @return a new the wrapped (proxied) list or the provided list if already
+   *         proxied
    */
   List ensureBoundListIsProxied(final String property, final List list) {
     if (!(list instanceof BindableListWrapper) && bindings.containsKey(property) && list != null) {
@@ -432,8 +526,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the {@link PropertyChangeHandlerSupport} object of this agent containing all change
-   * handlers that have been registered for the corresponding model proxy.
+   * Returns the {@link PropertyChangeHandlerSupport} object of this agent
+   * containing all change handlers that have been registered for the
+   * corresponding model proxy.
    * 
    * @return propertyChangeHandlerSupport object, never null.
    */
@@ -499,11 +594,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Merges the provided {@link PropertyChangeHandler}s of the provided agent instance. If a handler
-   * instance is already registered on this agent, it will NOT be added again.
+   * Merges the provided {@link PropertyChangeHandler}s of the provided agent
+   * instance. If a handler instance is already registered on this agent, it
+   * will NOT be added again.
    * 
    * @param pchs
-   *          the instance who's change handlers will be merged, must not be null.
+   *          the instance who's change handlers will be merged, must not be
+   *          null.
    */
   public void mergePropertyChangeHandlers(PropertyChangeHandlerSupport pchs) {
     Assert.notNull(pchs);
@@ -524,8 +621,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Compares property values between this agent and the provided agent recursively and fires
-   * {@link PropertyChangeEvent}s for all differences.
+   * Compares property values between this agent and the provided agent
+   * recursively and fires {@link PropertyChangeEvent}s for all differences.
    * 
    * @param other
    *          the agent to compare against.
@@ -535,8 +632,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       Object curValue = knownValues.get(property);
       Object oldValue = other.knownValues.get(property);
 
-      if ((curValue == null && oldValue != null) ||
-          (curValue != null && !curValue.equals(oldValue))) {
+      if ((curValue == null && oldValue != null) || (curValue != null && !curValue.equals(oldValue))) {
 
         DataBinder nestedBinder = binders.get(property);
         DataBinder otherNestedBinder = (DataBinder) other.binders.get(property);

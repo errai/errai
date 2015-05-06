@@ -200,10 +200,12 @@ public class CDIExtensionPoints implements Extension {
 
     // veto on client side implementations that contain CDI annotations
     // (i.e. @Observes) Otherwise Weld might try to invoke on them
-    if (vetoClasses.contains(type.getJavaClass().getName())
-            || (type.getJavaClass().getPackage().getName().matches("(^|.*\\.)client(?!\\.shared)(\\..*)?")
-            && !type.getJavaClass().isInterface())) {
-      log.debug("Vetoing processed type: " + type.getJavaClass().getName());
+    Class<?> javaClass = type.getJavaClass();
+    Package pkg = javaClass.getPackage();
+    if (vetoClasses.contains(javaClass.getName())
+            || (pkg != null && pkg.getName().matches("(^|.*\\.)client(?!\\.shared)(\\..*)?")
+            && !javaClass.isInterface())) {
+      log.debug("Vetoing processed type: " + javaClass.getName());
       event.veto();
     }
   }
@@ -276,7 +278,7 @@ public class CDIExtensionPoints implements Extension {
    * Registers beans (type and method services) as they become available from the bean manager.
    */
   private class StartupCallback implements Runnable {
-    private final Set<Object> registered = new HashSet<Object>();
+    private final Set<Object> toRegister = new HashSet<Object>();
     private final BeanManager beanManager;
     private final MessageBus bus;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -287,7 +289,7 @@ public class CDIExtensionPoints implements Extension {
       this.beanManager = beanManager;
       this.bus = bus;
       this.scheduledExecutorService = scheduledExecutorService;
-      registered.addAll(managedTypes.getDelegateClasses());
+      toRegister.addAll(managedTypes.getDelegateClasses());
 
       this.expiryTime = System.currentTimeMillis() + (timeOutInSeconds * 1000);
     }
@@ -316,7 +318,7 @@ public class CDIExtensionPoints implements Extension {
         throw new RuntimeException("failed to discover beans: " + managedTypes.getDelegateClasses());
       }
 
-      if (registered.isEmpty()) {
+      if (toRegister.isEmpty()) {
         scheduledExecutorService.shutdown();
         return;
       }
@@ -324,19 +326,25 @@ public class CDIExtensionPoints implements Extension {
       // As each delegate becomes available, register all the associated services (type and method)
       for (final Class<?> delegateClass : managedTypes.getDelegateClasses()) {
         try {
-          if (!registered.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
+          if (!toRegister.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
             continue;
           }
         } 
         catch(Throwable t) {
           continue;
         }
-        registered.remove(delegateClass);
         
         for (final ServiceParser svcParser : managedTypes.getDelegateServices(delegateClass)) {
-          final Object delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
+          final Object delegateInstance;
+          try {
+            delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
+          } 
+          catch (IllegalStateException t) {
+            // handle WELD-001332: BeanManager method getReference() is not available during application initialization
+            // try again later...
+            return;
+          }
           final MessageCallback callback = svcParser.getCallback(delegateInstance);
-          
           if (callback != null) {
             if (svcParser.isLocal()) {
               bus.subscribeLocal(svcParser.getServiceName(), callback);
@@ -346,6 +354,7 @@ public class CDIExtensionPoints implements Extension {
             }
           }
         }
+        toRegister.remove(delegateClass);
       }
     }
   }

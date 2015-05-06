@@ -57,7 +57,7 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
     this.IOCExtensions = decs;
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public boolean doTask(final InjectionContext ctx) {
     Annotation annotation = null;
@@ -126,9 +126,9 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
           break;
       }
 
-      for (final Statement stmt : dec.generateDecorator(
+      for (final Object stmt : dec.generateDecorator(
           new InjectableInstance(annotation, taskType, constructor, method, field, type, parm, injector, ctx))) {
-        ctx.getProcessingContext().append(stmt);
+        ctx.getProcessingContext().append((Statement)stmt);
       }
       injector.updateProxies();
     }

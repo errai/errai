@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2014-12-02</date>
+    <date>2015-04-08</date>
     
     
     
@@ -110,14 +110,16 @@ public class App {
 </section>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">
-<title>Running the app in GWT&#8217;s development mode</title>
-<simpara><ulink url="http://www.gwtproject.org/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode">GWT&#8217;s development mode</ulink> allows for code-refresh development cycles. Simply change a client-side class and refresh the browser to see your changes. You can also debug client and server side code in your IDE of choice.</simpara>
-<simpara>Change into the newly created project directory and type the following:</simpara>
+<title>Running and Debugging with GWT&#8217;s Super Dev mode</title>
+<simpara>As of GWT 2.7, we use Super Dev Mode to run your app in hosted mode during development. <ulink url="http://www.gwtproject.org/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode">GWT&#8217;s Super Dev Mode</ulink> allows for code-refresh development cycles. Simply change a client-side class and refresh the browser to see your changes. You can also debug client and server side code in your IDE of choice. These sections will describe how to use Super Dev Mode to develop and debug your web app.</simpara>
+<section id="_running_the_app_in_gwt">
+<title>Running the app in GWT</title>
+<simpara>Change into your web app&#8217;s project directory and type the following:</simpara>
 <screen>mvn clean gwt:run</screen>
 <simpara>This will begin the download of all the dependencies required to develop with and run Errai. It may take a few minutes to complete the download.</simpara>
-<simpara>When it is finished, you should see the GWT Development Mode runtime window appear as shown in <emphasis>Figure 1</emphasis> running on Windows.</simpara>
+<simpara>When it is finished, you should see the GWT Development Mode runtime window appear as shown in <emphasis>Figure 1</emphasis>.</simpara>
 <figure id="img-gwt-dev">
-<title>GWT Development Mode running on Windows</title>
+<title>GWT Development Mode</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/DevModeWindows.png"/>
@@ -125,84 +127,20 @@ public class App {
     <textobject><phrase>DevModeWindows</phrase></textobject>
   </mediaobject>
 </figure>
-<simpara>Next, click the <emphasis>Launch Default Browser</emphasis> button. If you have have never used GWT before on your computer, you may get an error when your browser loads as shown in <emphasis>Figure 2</emphasis> .</simpara>
-<figure id="img-missing-plugin">
-<title>Missing plugin error</title>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="author/download/attachments/54493220/MissingPluginWindows.png"/>
-    </imageobject>
-    <textobject><phrase>MissingPluginWindows</phrase></textobject>
-  </mediaobject>
-</figure>
-<simpara>Click the blue button that says <emphasis>Download the GWT Developer Plugin</emphasis> to download the plugin. Run the installer to install the plugin for your browser.</simpara>
-<important>
-<title>Direct download of plugin</title>
-<simpara>If you get a 404 Error for Internet Explorer when clicking the link, you can download the latest plugin for your browser directly from these links:</simpara>
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara><ulink url="http://google-web-toolkit.googlecode.com/svn-history/trunk/plugins/ie/prebuilt/gwt-dev-plugin-x86.msi">Internet Explorer 32-bit</ulink></simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara><ulink url="http://google-web-toolkit.googlecode.com/svn-history/trunk/plugins/ie/prebuilt/gwt-dev-plugin-x64.msi">Internet Explorer 64-bit</ulink></simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-</important>
-<simpara>Once you have configured your browser for development with GWT, and after loading the app with the <emphasis>Launch Default Browser</emphasis> button, you should see the application load.</simpara>
+<simpara>Next, click the <emphasis>Launch Default Browser</emphasis> button. You should now see the application load.</simpara>
 <simpara>If you are using errai-tutorial, you should see a page with a complaint form.</simpara>
 <simpara>If you followed the instructions for using the Errai Forge plugin, there should be a blank page with an alert saying "Hello World!".</simpara>
-<simpara>That&#8217;s it! You&#8217;ve got your first Errai Application up and running. In the next section we&#8217;ll learn how to run super devmode. Otherwise, skip to the section afterwards to setup your IDE.</simpara>
-</section>
-<section id="_running_your_app_in_super_devmode">
-<title>Running your app in Super Devmode</title>
-<simpara>Regular Devmode requires a special browser plugin to run client-side code in a as Java. Super Devmode is an alternative method that compiles code to javascript to be run natively in any browser. With browsers that support source-mapping, it is possible to debug with lines from your original source code within the browser.</simpara>
-<simpara>To run super devmode you will need to open two terminals in your project. In the first enter:</simpara>
-<screen>mvn clean gwt:run</screen>
-<simpara>This will launch a classic devmode server for hosting server-side resources. In the second enter:</simpara>
-<screen>mvn gwt:run-codeserver</screen>
-<simpara>This will launch the super devmode codeserver that hosts compiled GWT code. When the super devmode codeserver is finished compiling your GWT module, it will display a message like this:</simpara>
-<screen>The code server is ready.
-Next, visit: http://localhost:9876</screen>
-<simpara>Go to the displayed link and copy the two bookmarks <emphasis role="strong">Dev Mode On</emphasis> and <emphasis role="strong">Dev Mode Off</emphasis>.</simpara>
-<simpara>After completing the above, you may run your application as follows:</simpara>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>Go to the classic devmode window and click <emphasis role="strong">Copy Link</emphasis>.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Paste the link in to the browser, but <emphasis role="strong">remove</emphasis> the query paramters (i.e. <literal>?gwt.codesvr=...</literal>).</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Go to the link. You may see prompts saying that your GWT module needs to be recompiled.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Click the <emphasis role="strong">Dev Mode On</emphasis> bookmark you copied previously. You should see a prompt to compile your GWT module. Click <emphasis role="strong">Compile</emphasis> to do so.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Once the super devmode server has completed, your application should be running.</simpara>
-      
-    </listitem>
-  
-</orderedlist>
+<simpara>That&#8217;s it! You&#8217;ve got your first Errai Application up and running. The next sections will describe how to set up your app with your IDE.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">
-<title>Configuring your project for Eclipse</title>
+<title>Debugging the app in GWT</title>
+<simpara>To debug your app using GWT&#8217;s development mode, you will need to start a remote debugger separately and run the following command in your project directory:</simpara>
+<screen>mvn clean gwt:debug</screen>
+</section>
+</section>
+<section id="_running_and_debugging_in_eclipse_using_maven_tooling">
+<title>Running and Debugging in Eclipse using Maven tooling</title>
+<simpara>There are two ways to configure your project in your IDE. One option is to use the built-in Maven tooling to set up Maven run and debug configurations within your IDE. The other option is to download and use GWT tooling that is available for your IDE, and create custom run/debug configurations with that. Note that for Intellij IDEA, the GWT tooling is only available for users of the Ultimate Edition.</simpara>
 <note>
 <title>Read the previous section!</title>
 <simpara>This next section assumes you have followed the instructions in the previous section. As such, we assume you have created an Errai project using the Errai Forge plugin or a copy of the errai-tutorial project, which we&#8217;ll be importing into your IDE.</simpara>
@@ -213,7 +151,7 @@ Next, visit: http://localhost:9876</screen>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-MavenIntegrationforEclipse%28m2e%29">
 <title>Maven Integration for Eclipse (m2e)</title>
-<simpara>The project that was made in the last section is a Maven project. Thus, we will be relying on Maven to manage our project model throughout this guide. As such, we will want to install Maven tooling in the IDE. If you have not already installed m2e in Eclipse, you will want to do so now.</simpara>
+<simpara>This section will walk you through using Maven tooling for running and debugging your app within Eclipse. If you have not already installed m2e in Eclipse, you will want to do so now.</simpara>
 <simpara>To install the Maven tooling, use the following steps:</simpara>
 <orderedlist numeration="arabic">
   
@@ -543,6 +481,199 @@ Next, visit: http://localhost:9876</screen>
     </listitem>
   
 </orderedlist>
+</section>
+</section>
+<section id="_running_and_debugging_in_your_ide_using_gwt_tooling">
+<title>Running and Debugging in your IDE using GWT tooling</title>
+<simpara>Errai&#8217;s <emphasis>EmbeddedWildFlyLauncher</emphasis> provides an embedded WildFly instance within Dev Mode to allow users to debug server- and client-side code simultaneously in a single JVM. Here are the instructions for using it in Eclipse and Intellij IDEA Ultimate Edition:</simpara>
+<section id="_configuring_your_app_to_use_the_google_plugin_for_eclipse">
+<title>Configuring your app to use the Google Plugin for Eclipse</title>
+<simpara>This method requires the Google Plugin for Eclipse (GPE). You can find the instructions to download and install it <ulink url="https://developers.google.com/eclipse/docs/download">here</ulink>.</simpara>
+<simpara>Here are the steps to setup a run/debug configuration using the embedded WildFly launcher:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Ensure that your app is using the Google Web Toolkit. Right-click on your project in Eclipse, and select Google &#8594; Web Toolkit Settings, and make sure that the "Use Google Web Toolkit" box is checked and the appropriate GWT SDK is selected.</simpara>
+      
+<figure>
+<title>Google Web Toolkit Settings</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/gpe/EclipseProjectGWTSettings.png" contentwidth="650"/>
+    </imageobject>
+    <textobject><phrase>EclipseProjectGWTSettings</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Set up a Web Application run/debug configuration as follows:</simpara>
+      
+<simpara>Create a new Web Application run/debug configuration, select your Errai app in the Project field and set <literal>com.google.gwt.dev.DevMode</literal> as the main class:</simpara>
+<figure>
+<title>Dev Mode Configuration: Main tab</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/gpe/EclipseWebAppMain.png" contentwidth="650"/>
+    </imageobject>
+    <textobject><phrase>EclipseWebAppMain</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>In the <emphasis>Server</emphasis> tab, check the <emphasis>Run built-in server</emphasis> checkbox, and enter the port number <literal>8888</literal>.</simpara>
+      
+<figure>
+<title>Dev Mode Configuration: Server tab</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/gpe/EclipseWebAppServer.png" contentwidth="650"/>
+    </imageobject>
+    <textobject><phrase>EclipseWebAppServer</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Select <emphasis>Super Development Mode</emphasis> in the GWT tab, and add your GWT module under <emphasis>Available Modules</emphasis>.</simpara>
+      
+<figure>
+<title>Dev Mode Configuration: GWT tab</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/gpe/EclipseWebAppGWT.png" contentwidth="650"/>
+    </imageobject>
+    <textobject><phrase>EclipseWebAppGWT</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Under the <emphasis>Arguments</emphasis> tab, there are two fields, <emphasis>Program arguments</emphasis> and <emphasis>VM arguments</emphasis>. In the <emphasis>Program arguments</emphasis> field, amend the <literal>server</literal> flag as follows:</simpara>
+      
+<formalpara>
+<title>Program Arguments</title>
+<para>
+<screen>-server org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</screen>
+</para>
+</formalpara>
+<simpara>Make sure the following VM arguments are set:</simpara>
+<formalpara>
+<title>VM arguments</title>
+<para>
+<screen>-Xmx2048m -XX:MaxPermSize=512M -Derrai.jboss.home=/home/ddadlani/errai-tutorial/target/wildfly-8.2.0.Final/</screen>
+</para>
+</formalpara>
+<simpara>where <literal>errai.jboss.home</literal> points to your own WildFly installation. This can either be your local WildFly installation directory, or in the <emphasis>target/</emphasis> directory of your app. For the Errai Tutorial app, <literal>errai.jboss.home</literal> points to the WildFly installation within the <emphasis>target/</emphasis> directory, which is redownloaded and installed as part of the build. See <link linkend="wildfly-install-eclipse">below</link> for information on how to automatically download WildFly into the <emphasis>target/</emphasis> directory prior to running Super Dev Mode.</simpara>
+<figure>
+<title>Dev Mode Configuration: Arguments tab</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/gpe/EclipseWebAppArguments.png" contentwidth="650"/>
+    </imageobject>
+    <textobject><phrase>EclipseWebAppArguments</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+</orderedlist>
+<important id="wildfly-install-eclipse">
+<title>Copy of WildFly in the target/ directory</title>
+<simpara>If you wish to automatically download and install WildFly as part of your build into the <emphasis>target/</emphasis> directory of your web app, you will need to run <literal>mvn process-resources</literal> prior to running or debugging your app. To do this, you can set up a Maven build configuration in Eclipse and specify <emphasis>Goals</emphasis>: "process-resources". You can then run the Maven configuration prior to running GWT&#8217;s Super Dev Mode.</simpara>
+</important>
+<simpara>That&#8217;s it! To debug your application within Eclipse, simply select your debug configuration and hit <emphasis>Debug</emphasis>. This will start GWT&#8217;s dev mode as well as the debugger within Eclipse.</simpara>
+<section id="_debugging_client_side_javascript_from_within_eclipse">
+<title>Debugging client-side JavaScript from within Eclipse</title>
+<simpara>If you wish to debug your client-side JavaScript as Java code from within Eclipse, you will need to use the SDBG plugin for GWT Super Dev Mode. More information can be found <ulink url="http://sdbg.github.io/">here</ulink>.</simpara>
+</section>
+</section>
+<section id="_configuring_your_app_to_use_intellij_idea_s_gwt_tooling">
+<title>Configuring your app to use Intellij IDEA&#8217;s GWT tooling</title>
+<note>
+<title>Intellij IDEA Community Edition users</title>
+<simpara>The inbuilt GWT tooling for Intellij IDEA is only available in the Ultimate Edition. If you are using the Community Edition, you will not have access to the GWT plugin.</simpara>
+</note>
+<simpara>The Ultimate Edition for Intellij IDEA comes with a built-in GWT plugin that allows you to run and debug GWT apps specifically. We can configure the plugin to use the embedded WildFly launcher for debugging ease, in order to debug both server and client-side code in one debug session. This section describes how to set up a GWT run/debug configuration within Intellij IDEA:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>If you have not already done so, add a GWT facet to your main module. Instructions to add a GWT facet to an existing module can be found <ulink url="https://www.jetbrains.com/idea/help/adding-a-gwt-facet-to-a-module.html">here</ulink>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>On the top right hand corner of your Intellij IDEA session, select the dropdown box labeled <emphasis>Edit Configurations</emphasis> to create a new run/debug configuration.</simpara>
+      
+<figure>
+<title>Edit Run/Debug Configuration</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/intellij/IntellijEditConfig.png" contentwidth="450"/>
+    </imageobject>
+    <textobject><phrase>IntellijEditConfig</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Press the <literal>+</literal> button under GWT Configurations to create a new GWT configuration. Check the <emphasis>Super Dev Mode</emphasis> checkbox and select the name of your module. Fill out the following parameters in the corresponding boxes:</simpara>
+      
+<formalpara>
+<title>VM Options</title>
+<para>
+<screen>-Xmx2048m -XX:MaxPermSize=512M -Derrai.jboss.home=/home/ddadlani/errai-tutorial/target/wildfly-8.2.0.Final/</screen>
+</para>
+</formalpara>
+<simpara>where <literal>errai.jboss.home</literal> points to your WildFly installation directory. This can either be your local WildFly installation directory, or in the <emphasis>target/</emphasis> directory of your app. For the Errai Tutorial app, <literal>errai.jboss.home</literal> points to the WildFly installation within the <emphasis>target/</emphasis> directory, which is redownloaded and installed as part of the build. See <link linkend="wildfly-install-intellij">below</link> for information on how to automatically download WildFly into the <emphasis>target/</emphasis> directory prior to running Super Dev Mode.</simpara>
+<formalpara>
+<title>Dev Mode Parameters</title>
+<para>
+<screen>-server org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</screen>
+</para>
+</formalpara>
+<figure>
+<title>GWT Run/Debug Configuration for Intellij IDEA</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="author/download/attachments/intellij/IntellijGWTConfig.png" contentwidth="650"/>
+    </imageobject>
+    <textobject><phrase>IntellijGWTConfig</phrase></textobject>
+  </mediaobject>
+</figure>
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Select the <emphasis>Default</emphasis> server and make sure the start page is <emphasis>index.html</emphasis>. Select your browser and check the <emphasis>with JavaScript debugger</emphasis> box to take advantage of Intellij IDEA&#8217;s built-in JavaScript tooling.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Click on the <literal>+</literal> button under <emphasis>Before Launch</emphasis> and select the <emphasis>Make</emphasis> option. This will tell Intellij to compile your project before launching Dev Mode.</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+<important id="wildfly-install-intellij">
+<title>Copy of WildFly in the target/ directory</title>
+<simpara>If you wish to automatically download and install WildFly as part of your build into the <emphasis>target/</emphasis> directory of your web app, you will need to run <literal>mvn process-resources</literal> prior to running or debugging your app. To do this, you can add a Maven goal to the <emphasis>Before Launch</emphasis> task list. Click the <literal>+</literal> button as before, select <emphasis>Run Maven Goal</emphasis> and in the <emphasis>Command Line</emphasis> field, enter "process-resources". Ensure that the working directory is the same as your project directory before clicking "OK". Intellij IDEA will then run the Maven goal prior to starting Super Dev Mode.</simpara>
+</important>
+<simpara>To run or debug your app, select this configuration in the top right corner of Intellij IDEA and click the <emphasis>Run</emphasis> or <emphasis>Debug</emphasis> buttons next to it. Your app should start up in Dev Mode within Intellij automatically and you should be able to use Intellij&#8217;s own debugger to debug your code.</simpara>
+<simpara>Now that you have everything set up, it&#8217;s time to move on to coding!</simpara>
 </section>
 </section>
 <section id="sid-54493502">
@@ -1058,10 +1189,6 @@ MessageBuilder.createMessage()
 }</programlisting>
 </section>
 </section>
-</section>
-<section id="sid-20938805">
-<title>Client Logging and Error Handling</title>
-
 </section>
 <section id="sid-23036473">
 <title>Wire Protocol (J.REP)</title>
@@ -4708,7 +4835,7 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
 </section>
 <section id="sid-51282340_DataBinding-PropertyChangeHandlers">
 <title>Property Change Handlers</title>
-<simpara>In some cases keeping the model and the UI in sync is not enough. Errai&#8217;s <literal><phrase role="code">DataBinder</phrase></literal> allows for the registration of <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g <literal><phrase role="code">"customer.address.*"</phrase></literal> ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g <literal><phrase role="code">"customer.\*\*"</phrase></literal>).</simpara>
+<simpara>In some cases keeping the model and the UI in sync is not enough. Errai&#8217;s <literal><phrase role="code">DataBinder</phrase></literal> allows for the registration of <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g <literal><phrase role="code">"customer.address.*"</phrase></literal> ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g <literal><phrase role="code">"customer.**"</phrase></literal> or just <literal><phrase role="code">"**"</phrase></literal>) .</simpara>
 <simpara>This provides a uniform notification mechanism for model and UI value changes. <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> can be used to carry out any additional logic that might be necessary after a model or UI value has changed.</simpara>
 <programlisting language="java" linenumbering="unnumbered">dataBinder.addPropertyChangeHandler(new PropertyChangeHandler() {
   @Override
@@ -5637,7 +5764,10 @@ public class HelloWorldForm extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-Internationalization%28i18n%29">
 <title>Internationalization (i18n)</title>
-<simpara>User interfaces often need to be available in multiple languages. To get started with Errai&#8217;s internationalization support, simply put the <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.</simpara>
+<simpara>User interfaces often need to be available in different languages. Errai&#8217;s i18n support makes it easier for you to publish your web app in multiple languages. This section explains how to use this feature in your application.</simpara>
+<section id="_html_template_translation">
+<title>HTML Template Translation</title>
+<simpara>To get started with Errai&#8217;s internationalization support, simply put the <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.</simpara>
 <simpara>Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called <literal><phrase role="code">errai-bundle-all.json</phrase></literal> and put it in your <literal><phrase role="code">.errai</phrase></literal> directory. You can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.</simpara>
 <simpara>The translation bundle files use the same naming scheme as Java (e.g. <literal><phrase role="code">bundle_nl_BE.json</phrase></literal> for Belgian Dutch and <literal><phrase role="code">bundle_nl.json</phrase></literal> for plain Dutch). Errai will also generate a file called <literal><phrase role="code">errai-bundle-missing.json</phrase></literal> in the <literal><phrase role="code">.errai</phrase></literal> folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations:</simpara>
 <programlisting language="java" linenumbering="unnumbered">{
@@ -5681,7 +5811,7 @@ public class NavBar extends Composite {
   ListWidget&lt;Locale, LanguageItem&gt; language;
 
   @AfterInitialization
-  public void buildLangaugeList() {
+  public void buildLanguageList() {
     language.setItems(new ArrayList&lt;Locale&gt;(selector.getSupportedLocales()));
   }
 
@@ -5701,6 +5831,49 @@ public class NavBar extends Composite {
         navigation.goTo(navigation.getCurrentPage().name());
       }
     });</programlisting>
+</section>
+<section id="_translationkey_and_translationservice">
+<title>TranslationKey and TranslationService</title>
+<simpara>The <literal><phrase role="code">@TranslationKey</phrase></literal> annotation and <literal><phrase role="code">TranslationService</phrase></literal> class extend Errai&#8217;s i18n support to Java code. They provide a mechanism for developers to declare translation strings from within their GWT application code (as opposed to the HTML templates).</simpara>
+<simpara>To do this, developers must annotate a field which represents the translation key with <literal><phrase role="code">@TranslationKey</phrase></literal> annotation. This key will then map to a value in the translation bundle file. Once the field is annotated appropriately, the developer must directly invoke the TranslationService&#8217;s format() method. This method call will perform a lookup in the translation service of the value mapped to the provided key. Note that value substitution using the <literal>{N}</literal> format is supported.</simpara>
+<simpara>As an example, consider the following code:</simpara>
+<programlisting language="java" linenumbering="unnumbered">package org.example.ui.client.local;
+
+public class AppMessages {
+
+   @TranslationKey(defaultValue = "I guess something happened!")
+   public static final String CUSTOM_MESSAGE = "app.custom-message";
+
+   @TranslationKey(defaultValue = "Hey {0}, I just told you something happened!")
+   public static final String CUSTOM_MESSAGE_WITH_NAME = "app.custom-message-with-name";
+}</programlisting>
+<programlisting language="java" linenumbering="unnumbered">package org.example.ui.client.local;
+
+@Dependent
+@Templated
+public class CustomComponent extends Composite {
+
+   @Inject
+   private TranslationService translationService;
+
+   @Inject
+   @DataField
+   private Button someAction;
+
+   @EventHandler("someAction")
+   private void doLogin(ClickEvent event) {
+
+      // do some action that may require a notification sent to the user
+
+      String messageToUser = translationService.format(AppMessages.CUSTOM_MESSAGE);
+      Window.alert(messageToUser);
+
+      String username = getCurrentUserName();
+      String messageToUserWithName = translationService.format(AppMessages.CUSTOM_MESSAGE_WITH_NAME, username);
+      Window.alert(messageToUserWithName);
+   }
+}</programlisting>
+</section>
 </section>
 <section id="sid-51806600_ErraiUI-ExtendedstylingwithLESS">
 <title>Extended styling with LESS</title>
@@ -7031,47 +7204,52 @@ public class NavBar extends Composite {
 </section>
 <section id="_setup">
 <title>Setup</title>
-<simpara>To add Keycloak integration to your application:</simpara>
-<orderedlist numeration="arabic">
+<note>
+<title>Make sure to check out the Errai Security Demo.</title>
+<simpara>This demo can be configured to work with Keycloak in just a few simple steps as outlined in the <ulink url="https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo">README file</ulink>!</simpara>
+</note>
+<simpara>To start from scratch and add Keycloak integration to your application:</simpara>
+
+<itemizedlist>
   
     <listitem>
       <simpara>Setup a Keycloak server. Please consult the <ulink url="http://keycloak.jboss.org/docs.html">Keycloak documentation</ulink> for details on how this is achieved.</simpara>
       
-<orderedlist numeration="loweralpha">
+    </listitem>
   
     <listitem>
-      <simpara>As part of your setup you should create a new realm for your application.</simpara>
+      <simpara>Start the Keycloak server.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Add roles and users to your realm.</simpara>
+      <simpara>Go to the <ulink url="https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo">Keycloak Administrative Console</ulink> (i.e. <ulink url="http://localhost:8080/auth/admin/)">http://localhost:8080/auth/admin/)</ulink> (the username and password are both <emphasis role="strong">admin</emphasis> on first use).</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>In your new realm you should create a new application (you can also use OAuth).</simpara>
+      <simpara>Click <emphasis role="strong">Add Realm</emphasis> and create a custom realm for your application.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>After creating your application select it from the list and make sure to adjust the following settings as appropriate:</simpara>
+      <simpara>Select the <emphasis role="strong">Applications</emphasis> tab and click <emphasis role="strong">Add Application</emphasis>, then fill in the following to add the application to this realm:</simpara>
       
 
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis role="strong">Redirect URI</emphasis>&#8201;&#8212;&#8201;You should use this to whitelist pages that will be redirected to after a successful login.</simpara>
+      <simpara><literal>Name</literal>: the name of your application (i.e. errai-security-demo)</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis role="strong">Claims</emphasis>&#8201;&#8212;&#8201;You will need to explicitly enable any information about users that your application requires access to.</simpara>
+      <simpara><literal>Access Type</literal>: public</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis role="strong">Scope</emphasis>&#8201;&#8212;&#8201;Move any roles that users in your app <emphasis role="strong">may</emphasis> possess to the "Assigned Roles". (Note: moving the roles to "Assigned Roles" does not mean <emphasis role="strong">all</emphasis> users will have this role. It does mean that these roles will be visible to your app for users that do have them.)</simpara>
+      <simpara><literal>Redirect URI</literal>: the url of your application (i.e. <literal>http://localhost:8080/[your-application]/*</literal>)</simpara>
       
     </listitem>
   
@@ -7082,17 +7260,56 @@ public class NavBar extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>After adjusting the settings for your app, go to the <emphasis role="strong">Installation</emphasis> tab and select "keycloak.json" in the <emphasis role="strong">Format Option</emphasis> list. Copy this into a "keycloak.json" file in your <literal>WEB-INF</literal> directory.</simpara>
+      <simpara>After saving your application, choose the new application in the menu and make sure the following are set:</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>In the <emphasis role="strong">Roles</emphasis> tab add your custom roles.</simpara>
       
     </listitem>
   
-</orderedlist>
+    <listitem>
+      <simpara>In the <emphasis role="strong">Installation</emphasis> tab choose the format option <literal>keycloak.json</literal> and copy the contents in your <literal>WEB-INF/keycloak.json</literal> file.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
 
       
     </listitem>
   
     <listitem>
-      <simpara>Add the <literal>errai-security-keycloak</literal> jar to your project. In maven, the dependency is <literal>org.jboss.errai:errai-security-keycloak</literal>.</simpara>
+      <simpara>Click on <emphasis role="strong">Users</emphasis> on the side-panel to add a user:</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Fill out the <literal>Username</literal>, <literal>Email</literal>, <literal>First Name</literal>, and <literal>Last Name</literal> with any values.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>After saving go to the <emphasis role="strong">Credentials</emphasis> tab and set a password.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Go to the <emphasis role="strong">Role Mappings</emphasis> tab. Add <literal>at least one</literal> role to the <literal>Assigned Roles</literal> for your application (scroll down to <literal>Application Roles</literal> and select your application to do this).</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add the <literal>errai-security-keycloak</literal> jar to your project and make sure it&#8217;s being deployed to the server. In maven, the dependency is <literal>org.jboss.errai:errai-security-keycloak</literal>.</simpara>
       
     </listitem>
   
@@ -7110,26 +7327,23 @@ public class NavBar extends Composite {
     <listitem>
       <simpara>Configure the <literal>ErraiLoginRedirectFilter</literal> in your <literal>web.xml</literal>.</simpara>
       
-<orderedlist numeration="loweralpha">
+
+<itemizedlist>
   
     <listitem>
       <simpara>Create a filter-mapping of this filter onto a path that will act as a url to the Keycloak login page. For example, if your deployed app is called <literal>my-app</literal> and you wanted <literal>&lt;server-uri&gt;/my-app/app-login</literal> as your login url then you would add the following:</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <programlisting language="xml" linenumbering="unnumbered">  &lt;filter-mapping&gt;
     &lt;filter-name&gt;ErraiLoginRedirectFilter&lt;/filter-name&gt;
     &lt;url-pattern&gt;/app-login&lt;/url-pattern&gt;
   &lt;/filter-mapping&gt;</programlisting>
-<orderedlist numeration="loweralpha">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>Add a security-constraint to login url. This is what actually causes the redirection to Keycloak. All the filter does is redirect back to your app (which happens after the login completes). For the previous example, the constraint would look like this:</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <programlisting language="xml" linenumbering="unnumbered">  &lt;security-constraint&gt;
     &lt;web-resource-collection&gt;
       &lt;web-resource-name&gt;Login&lt;/web-resource-name&gt;
@@ -7139,14 +7353,13 @@ public class NavBar extends Composite {
       &lt;role-name&gt;*&lt;/role-name&gt;
     &lt;/auth-constraint&gt;
   &lt;/security-constraint&gt;</programlisting>
-<orderedlist numeration="loweralpha">
+
+      
+    </listitem>
   
     <listitem>
       <simpara>Optionally configure the URL that the <literal>ErraiLoginRedirectFilter</literal> redirects to. You can do this with the <literal>redirectLocation</literal> param, which takes a path relative to the app context:</simpara>
       
-    </listitem>
-  
-</orderedlist>
 <programlisting language="xml" linenumbering="unnumbered">  &lt;filter&gt;
     &lt;filter-name&gt;ErraiLoginRedirectFilter&lt;/filter-name&gt;
     &lt;init-param&gt;
@@ -7158,12 +7371,18 @@ public class NavBar extends Composite {
       
     </listitem>
   
+</itemizedlist>
+
+
+      
+    </listitem>
+  
     <listitem>
       <simpara>Set the login method to use Keycloak in you <literal>web.xml</literal>:</simpara>
       
 <programlisting language="xml" linenumbering="unnumbered">  &lt;login-config&gt;
     &lt;auth-method&gt;KEYCLOAK&lt;/auth-method&gt;
-    &lt;realm-name&gt;example&lt;/realm-name&gt;
+    &lt;realm-name&gt;[your-realm-name]&lt;/realm-name&gt;
   &lt;/login-config&gt;</programlisting>
 
       
@@ -7179,7 +7398,8 @@ public class NavBar extends Composite {
       
     </listitem>
   
-</orderedlist>
+</itemizedlist>
+
 <important>
 <title>All users must have at least one role</title>
 <simpara>With this configuration all users must have at least a single role, or else they will not be redirected propertly. Unfortunately, there is no way to define a security-constraint that only requires authentication. The simplest solution is to add a default role to your realm.</simpara>
@@ -7196,8 +7416,9 @@ public class NavBar extends Composite {
 </section>
 <section id="sid-74908675_Logging-ClientSideSetup">
 <title>Client-Side Setup</title>
-<simpara>The client-side slf4j code uses the <ulink url="http://www.gwtproject.org/doc/latest/DevGuideLogging.html">GWT Logging</ulink> as the back-end. Using slf4j in client-side code has two steps:</simpara>
-<orderedlist numeration="arabic">
+<simpara>The client-side slf4j code uses the <ulink url="http://www.gwtproject.org/doc/latest/DevGuideLogging.html">GWT Logging</ulink> as the back-end. Using slf4j in client-side code has three steps:</simpara>
+
+<itemizedlist>
   
     <listitem>
       <simpara>Add the errai-common artifact as a maven dependency to your project</simpara>
@@ -7207,9 +7428,22 @@ public class NavBar extends Composite {
     <listitem>
       <simpara>Inherit the gwt module <literal><phrase role="code">org.jboss.errai.common.ErraiCommon</phrase></literal></simpara>
       
+<programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.common.ErraiCommon" /&gt;</programlisting>
+
+      
     </listitem>
   
-</orderedlist>
+    <listitem>
+      <simpara>Enable logging and configure the log level in your gwt.xml module descriptor:</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">  &lt;set-property name="gwt.logging.enabled" value="TRUE"/&gt;
+  &lt;set-property name="gwt.logging.logLevel" value="ALL"/&gt;</programlisting>
+
+      
+    </listitem>
+  
+</itemizedlist>
+
 <section id="sid-74908675_Logging-ErraiClientSideLogHandlers">
 <title>Errai Client-Side Log Handlers</title>
 <simpara>In the ErraiCommon module, we have disabled the built-in GWT log handlers and provided four handlers of our own:</simpara>

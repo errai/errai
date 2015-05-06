@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>cdi-integration-parent</artifactId>
-    <version>3.1.1-SNAPSHOT</version>
+    <version>3.2.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -283,11 +283,7 @@
             <exclusion>
               <groupId>javax.inject</groupId>
               <artifactId>javax.inject</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>javax.annotation</groupId>
-              <artifactId>jsr250-api</artifactId>
-            </exclusion>
+            </exclusion>            
           </exclusions>        
         </dependency>
         

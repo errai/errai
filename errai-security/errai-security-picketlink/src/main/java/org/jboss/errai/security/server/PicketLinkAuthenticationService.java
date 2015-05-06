@@ -30,6 +30,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.api.RpcContext;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.RoleImpl;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -126,6 +127,7 @@ public class PicketLinkAuthenticationService implements AuthenticationService {
   @Override
   public void logout() {
     identity.logout();
+    RpcContext.getHttpSession().invalidate();
   }
 
   @Override

@@ -12,6 +12,11 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.common.client.api.Assert;
 
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Timer;
 
 public class BusReconnectBackoffTest extends AbstractErraiTest {
@@ -33,107 +38,133 @@ public class BusReconnectBackoffTest extends AbstractErraiTest {
   @Override
   protected void gwtTearDown() throws Exception {
     bus.removeTransportErrorHandler(transportErrorCounter);
-    changeSimulatedErrorCode(0);
+    Runnable tearDown = new Runnable() {
+      @Override
+      public void run() {
+      }
+    };
+    changeSimulatedErrorCode(0, tearDown);
     super.gwtTearDown();
   }
 
   public void testBusReconnectFrequencyWhenIdle() {
-    runAfterInit(60000, new Runnable() {
+    runAfterInit(90000, new Runnable() {
       @Override
       public void run() {
-        changeSimulatedErrorCode(404);
-
-        final long startTime = System.currentTimeMillis();
-
-        new Timer() {
-
+        Runnable test = new Runnable() {
           @Override
           public void run() {
-            final int totalRetries = transportErrorCounter.getTotalRetryCount();
-            final long elapsedClockTime = System.currentTimeMillis() - startTime;
-
-            double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
-
-            System.out.println(transportErrorCounter);
-            System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
-            assertTrue(retriesPerSecond < 3);
-
-            if (elapsedClockTime > 16000) {
-              finishTest();
-              cancel();
-            }
+            final long startTime = System.currentTimeMillis();
+    
+            new Timer() {
+    
+              @Override
+              public void run() {
+                final int totalRetries = transportErrorCounter.getTotalRetryCount();
+                final long elapsedClockTime = System.currentTimeMillis() - startTime;
+    
+                double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
+    
+                System.out.println(transportErrorCounter);
+                System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
+                assertTrue(retriesPerSecond < 3);
+    
+                if (elapsedClockTime > 16000) {
+                  finishTest();
+                  cancel();
+                }
+              }
+            }.scheduleRepeating(2000);
           }
-        }.scheduleRepeating(2000);
+        };
+        changeSimulatedErrorCode(404, test);
       }
     });
   }
 
   public void testBusReconnectFrequencyWhenSending() {
-    runAfterInit(60000, new Runnable() {
+    runAfterInit(90000, new Runnable() {
       @Override
       public void run() {
-        changeSimulatedErrorCode(404);
-
-        MessageBuilder.createMessage().toSubject("TestService3").done()
-        .repliesTo(new MessageCallback() {
-
-          @Override
-          public void callback(Message message) {
-            System.out.println("I just totally got a " + message);
-            finishTest();
-          }
-        }).sendNowWith(bus);
-
-        final long startTime = System.currentTimeMillis();
-
-        new Timer() {
-
-          @Override
+        Runnable test = new Runnable() {
           public void run() {
-            final int totalRetries = transportErrorCounter.getTotalRetryCount();
-            final long elapsedClockTime = System.currentTimeMillis() - startTime;
-
-            double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
-
-            System.out.println(transportErrorCounter);
-            System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
-
-            // NOTE TO MAINTAINERS: Hi! If this assertion fails, it could be
-            // because throttling is broken, but it might also be because
-            // transport handlers left over from the previous test have not been
-            // shut down properly, when the bus was reset between tests. Or they
-            // have been shut down but their stop() method isn't entirely
-            // effective. Especially suspect would be pending timers that don't
-            // get canceled when you call stop().
-            assertTrue("Retries per second is now " + retriesPerSecond, retriesPerSecond < 3);
-
-            if (elapsedClockTime > 16000) {
-              finishTest();
-              cancel();
-            }
+            MessageBuilder.createMessage().toSubject("TestService3").done()
+            .repliesTo(new MessageCallback() {
+    
+              @Override
+              public void callback(Message message) {
+                System.out.println("I just totally got a " + message);
+                finishTest();
+              }
+            }).sendNowWith(bus);
+    
+            final long startTime = System.currentTimeMillis();
+    
+            new Timer() {
+    
+              @Override
+              public void run() {
+                final int totalRetries = transportErrorCounter.getTotalRetryCount();
+                final long elapsedClockTime = System.currentTimeMillis() - startTime;
+    
+                double retriesPerSecond = totalRetries / (elapsedClockTime / 1000.0);
+    
+                System.out.println(transportErrorCounter);
+                System.out.println(elapsedClockTime + "ms elapsed; retries per second is now " + retriesPerSecond);
+    
+                // NOTE TO MAINTAINERS: Hi! If this assertion fails, it could be
+                // because throttling is broken, but it might also be because
+                // transport handlers left over from the previous test have not been
+                // shut down properly, when the bus was reset between tests. Or they
+                // have been shut down but their stop() method isn't entirely
+                // effective. Especially suspect would be pending timers that don't
+                // get canceled when you call stop().
+                assertTrue("Retries per second is now " + retriesPerSecond, retriesPerSecond < 3);
+    
+                if (elapsedClockTime > 16000) {
+                  finishTest();
+                  cancel();
+                }
+              }
+            }.scheduleRepeating(2000);
           }
-        }.scheduleRepeating(2000);
+        };
+        changeSimulatedErrorCode(404, test);
       }
     });
   }
 
   /**
-   * Sends a synchronous request to the server which sets the servlet filter to
+   * Sends a request to the server which sets the servlet filter to
    * respond to further requests with the given HTTP status code.
-   * <p>
-   * This method blocks until the HTTP request has been completed, so the new
-   * error code is already in effect when this method returns. You don't have to
-   * use any nasty callbacks or delays!
    *
    * @param newCode
    *          The HTTP status code that will be sent in response to all
    *          subsequent ErraiBus requests.
+   * @para runnable
+   *          The runnable to execute after the response was received. 
    */
-  private native void changeSimulatedErrorCode(int newCode)/*-{
-    var xhReq = new XMLHttpRequest();
-    xhReq.open("GET", "errorSimulator.erraiBus?errorCode=" + newCode, false);
-    xhReq.send();
-  }-*/;
+  private void changeSimulatedErrorCode(int newCode, final Runnable runnable) {
+    RequestBuilder request = new RequestBuilder(RequestBuilder.GET, "errorSimulator.erraiBus?errorCode=" + newCode);
+    try {
+      request.setCallback(new RequestCallback() {
+
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+          runnable.run();
+        }
+
+        @Override
+        public void onError(Request request, Throwable exception) {
+          throw new RuntimeException(exception);
+        }
+      });
+      request.send();
+    } 
+    catch (RequestException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   private class TransportErrorCounter implements TransportErrorHandler {
 

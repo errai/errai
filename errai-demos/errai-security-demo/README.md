@@ -68,7 +68,7 @@ This demo has to users:
 
 ### Keycloak Integration
 
-This demo also features Keycloak integration. To preview this you will need a Keycloak server. You can download a fully-configured in the [Keycloak appliance zip file](http://sourceforge.net/projects/keycloak/files/1.0-beta-3/keycloak-appliance-dist-all-1.0-beta-3.zip/download). To run this server, unzip the file, `cd` into the directory, then run `keycloak/bin/standalone.sh`.
+This demo also features Keycloak integration. To preview this you will need a Keycloak server. You can download a fully-configured [Keycloak appliance zip file](http://sourceforge.net/projects/keycloak/files/1.0.4.Final/keycloak-appliance-dist-all-1.0.4.Final.zip/download). To run this server, unzip the file, `cd` into the directory, then run `keycloak/bin/standalone.sh`.
 
 The following instructions assume you are using the Keycloak server from the link above.
 
@@ -76,7 +76,9 @@ The following instructions assume you are using the Keycloak server from the lin
 
 1. Go to the [Keycloak Administrative Console](http://localhost:8080/auth/admin/) (the username and password are both *admin*).
 
-1. Select the *Applications* tab and click *Add Application* and fill in the following:
+1. Click *Add Realm* and create a custom realm called *demo*. 
+
+1. Select the *Applications* tab and click *Add Application* and fill in the following to add the application to this realm:
 
   * **Name** : errai-security-demo
 
@@ -84,21 +86,23 @@ The following instructions assume you are using the Keycloak server from the lin
 
   * **Redirect URI** : http://localhost:8080/errai-security-demo/\*
 
-1. After saving, click on the new application in the menu and make sure the following are set:
+1. After saving, choose the new application in the menu and make sure the following are set:
 
-  * In the *Claims* tab allow *Username*, *Name*, *Email*.
+  * In the *Claims* tab allow *Username*, *Name*, *Email* (should be on by default).
 
-  * In the *Scope* tab move the *user* and *admin* roles from *Available Roles* to *Assigned Roles*.
+  * In the *Roles* tab add two roles *user* and *admin*.
+  
+  * In the *Installation* tab choose the format option *keycloak.json* and copy the contents in your *WEB-INF/keycloak.json* file.
 
-1. In the *Users* tab click *Add User*.
+1. Click on *Users* on the side-panel and add a user:
 
   * Fill in the *Username*, *Email*, *First Name*, and *Last Name* with any values.
 
   * After saving go to the *Credentials* tab and set a password.
 
-  * Go to the *Role Mappings* tab. Add add *atleast one* role the *Assigned Roles*.
+  * Go to the *Role Mappings* tab. Add *at least one* role to the *Assigned Roles* for your application (scroll down to *Application Roles*). For this demo map the admin role to a user named *john*.
 
-1. Uncomment the login-method tag in `errai-security-demo/src/main/webapp/WEB-INF/web.xml`.
+1. Uncomment the login-config element in `errai-security-demo/src/main/webapp/WEB-INF/web.xml`.
 
 1. While the Keycloak server is running, run `mvn clean package wildfly:deploy` which will build the demo and deploy it to the running Wildfly server.
 

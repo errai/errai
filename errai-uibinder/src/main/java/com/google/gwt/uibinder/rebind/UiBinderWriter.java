@@ -15,6 +15,25 @@
  */
 package com.google.gwt.uibinder.rebind;
 
+import java.beans.Introspector;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.jboss.errai.ioc.client.api.PackageTarget;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
@@ -25,6 +44,7 @@ import com.google.gwt.core.ext.typeinfo.JPrimitiveType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.dev.resource.ResourceOracle;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.TagName;
 import com.google.gwt.event.dom.client.DomEvent;
@@ -52,25 +72,6 @@ import com.google.gwt.uibinder.rebind.model.OwnerField;
 import com.google.gwt.user.client.ui.IsRenderable;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RenderableStamper;
-
-import org.jboss.errai.ioc.client.api.PackageTarget;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import java.beans.Introspector;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * Writer for UiBinder generated classes.
@@ -359,10 +360,13 @@ public class UiBinderWriter implements Statements {
   private final String binderUri;
   private final boolean isRenderer;
 
+  private final ResourceOracle resourceOracle;
+  
   public UiBinderWriter(JClassType baseClass, String implClassName, String templatePath,
       TypeOracle oracle, MortalLogger logger, FieldManager fieldManager,
       MessagesWriter messagesWriter, DesignTimeUtils designTime, UiBinderContext uiBinderCtx,
-      boolean useSafeHtmlTemplates, boolean useLazyWidgetBuilders, String binderUri)
+      boolean useSafeHtmlTemplates, boolean useLazyWidgetBuilders, String binderUri, 
+      ResourceOracle resourceOracle)
       throws UnableToCompleteException {
     this.baseClass = baseClass;
     this.implClassName = implClassName;
@@ -376,6 +380,7 @@ public class UiBinderWriter implements Statements {
     this.useSafeHtmlTemplates = useSafeHtmlTemplates;
     this.useLazyWidgetBuilders = useLazyWidgetBuilders;
     this.binderUri = binderUri;
+    this.resourceOracle = resourceOracle;
 
     this.htmlTemplates = new HtmlTemplatesWriter(fieldManager, logger);
 
@@ -1365,9 +1370,8 @@ public class UiBinderWriter implements Statements {
         bundleClass.getPackageName(), bundleClass.getClassName(), bundleClass.getFieldName());
 
     // Allow GWT.create() to init the field, the default behavior
-
     FieldWriter rootField = new UiBinderParser(this, messages, fieldManager, oracle, bundleClass,
-            binderUri, uiBinderCtx).parse(elem);
+            binderUri, uiBinderCtx, resourceOracle).parse(elem);
 
     fieldManager.validate();
 

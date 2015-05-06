@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 @TestOnly @EntryPoint
 public class JpaTestClient {
 
-  static JpaTestClient INSTANCE;
+  public static JpaTestClient INSTANCE;
 
-  @Inject EntityManager entityManager;
+  @Inject public EntityManager entityManager;
   
   private final Logger logger;
 

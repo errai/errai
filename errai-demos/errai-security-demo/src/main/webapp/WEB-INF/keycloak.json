@@ -1,8 +1,9 @@
 {
   "realm": "demo",
-  "realm-public-key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCrVrCuTtArbgaZzL1hvh0xtL5mc7o0NqPVnYXkLvgcwiC3BjLGw1tGEGoJaXDuSaRllobm53JBhjx33UNv+5z/UMG4kytBWxheNVKnL6GgqlNabMaFfPLPCF8kAgKnsi79NMo+n6KnSY8YeUmec/p2vjO2NjsSAVcWEQMVhJ31LwIDAQAB",
+  "realm-public-key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCv+0texARLuMHhocIlnoRWyZATwcPo8j4gI+68lpHlyJ6uIgST/GO1OcklqZPLJ97/ZXrh/8O/zLekgUIOj3uYIgxQ8H6WQGNAdQIBfP4DMmzFJBrswMyiZBhffXFsUBkk3DY4CF4usQ2cNiT39UvPSC4IDMYj+akkf0GKU8c9DQIDAQAB",
   "auth-server-url": "http://localhost:8080/auth",
-  "ssl-not-required": true,
+  "ssl-required": "external",
   "resource": "errai-security-demo",
-  "public-client": true
+  "public-client": true,
+  "use-resource-role-mappings": true
 }

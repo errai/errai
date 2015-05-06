@@ -28,6 +28,7 @@ import javax.enterprise.context.Dependent;
 @Dependent
 public class BeanWithTimedMethod {
   private int count;
+  private int delayedCount;
 
   @Timed(timeUnit = TimeUnit.MILLISECONDS, interval = 500, type = TimerType.REPEATING)
   public void foo() {
@@ -35,7 +36,16 @@ public class BeanWithTimedMethod {
     count++;
   }
 
+  @Timed(timeUnit = TimeUnit.MILLISECONDS, interval = 500, type = TimerType.DELAYED)
+  public void bar() {
+    delayedCount++;
+  }
+  
   public int getCount() {
     return count;
+  }
+  
+  public int getDelayedCount() {
+    return delayedCount;
   }
 }

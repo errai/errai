@@ -53,9 +53,11 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.ioc.util.PropertiesUtil;
 import org.jboss.errai.jpa.client.local.*;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -65,7 +67,16 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   private final static String GENERATED_PACKAGE = ErraiEntityManager.class.getPackage().getName();
   private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManagerFactory";
+  private final static String JPA_WHITELIST_PROPERTY =  "errai.jpa.whitelist";
+  private final static String JPA_BLACKLIST_PROPERTY = "errai.jpa.blacklist";
   private static final List<Class<? extends Annotation>> LIFECYCLE_EVENT_TYPES;
+   private static final String[] implicitWhitelist = { "org.jboss.errai.*", "com.google.gwt.*" };
+
+  // Classes in the whitelist are managed by Errai JPA
+  private static Set<String> whitelist;
+
+  // Classes in the blacklist are ignored by Errai JPA
+  private static Set<String> blacklist;
 
   static {
     List<Class<? extends Annotation>> l = new ArrayList<Class<? extends Annotation>>();
@@ -103,6 +114,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     EntityManager em = emf.createEntityManager();
     Metamodel mm = em.getMetamodel();
 
+    blacklist = new HashSet<String>();
+    whitelist = new HashSet<String>();
+    populateExclusionLists();
+
     final ClassStructureBuilder<?> classBuilder =
         Implementations.implement(ErraiEntityManagerFactory.class, GENERATED_CLASS_NAME);
 
@@ -126,7 +141,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
     // collect solitary named query annotations
     for (Class<?> queryClass : scanner.getTypesAnnotatedWith(NamedQuery.class, RebindUtils
-        .findTranslatablePackages(context))) {
+                                                                                 .findTranslatablePackages(context))) {
       namedQueries.add(queryClass.getAnnotation(NamedQuery.class));
     }
 
@@ -167,7 +182,19 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
     return classBuilder.toJavaString();
   }
+  
+  private void populateExclusionLists() {
+    Collection<String> whiteListedEntities = PropertiesUtil.getPropertyValues(JPA_WHITELIST_PROPERTY, "\\s");
+    for (final String item : whiteListedEntities) {
+      whitelist.add(item);
+    }
+    Collection<String> blackListedEntities = PropertiesUtil.getPropertyValues(JPA_BLACKLIST_PROPERTY, "\\s");
+    for (final String item : blackListedEntities) {
+      blacklist.add(item);
+    }
 
+  }
+  
   private void generateCreateMetamodelMethod(
       final ClassStructureBuilder<?> classBuilder, Metamodel mm) {
     // cmm = "create metamodel method"
@@ -175,47 +202,37 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     cmm.append(Stmt.declareVariable("metamodel", Stmt.newObject(ErraiMetamodel.class)));
 
     List<MetaClass> globalEntityListeners = new ArrayList<MetaClass>();
-    for (Class<?> globalListener : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GlobalEntityListener.class)) {
+    for (Class<?> globalListener : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GlobalEntityListener
+                                                                                                  .class)) {
       globalEntityListeners.add(MetaClassFactory.get(globalListener));
     }
 
     final Set<Class<?>> entityTypes = new HashSet<Class<?>>();
     for (final ManagedType<?> mt : ClassSorter.supertypesFirst(mm.getEntities())) {
-      EntityType<?> et = (EntityType<?>) mt;
-      entityTypes.add(mt.getJavaType());
 
-      // first, create a variable for the EntityType
-      String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners);
+        EntityType<?> et = (EntityType<?>) mt;
+        if (isIncluded(MetaClassFactory.get(et.getJavaType()))) {
+          entityTypes.add(mt.getJavaType());
 
-      MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
+        // first, create a variable for the EntityType
+        String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners, classBuilder);
+        classBuilder.privateField(entityTypeVarName, ErraiEntityType.class).finish();
 
-      // now, snapshot all the EntityType's attributes, adding them as we go
-      for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
-        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
-            EntityType.class, ManagedType.class, Type.class);
-        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
-      }
-      for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
-        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
-            EntityType.class, ManagedType.class, Type.class);
-        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
-      }
-
-      // register this entity type with all its supertypes which are also entities
-      Class<?> superclass = mt.getJavaType();
-      while (superclass != null) {
-        if (entityTypes.contains(superclass)) {
-          cmm.append(Stmt.loadVariable(entitySnapshotVarName(superclass)).invoke("addSubtype", Stmt.loadVariable(entityTypeVarName)));
+        // register this entity type with all its supertypes which are also entities
+        Class<?> superclass = mt.getJavaType();
+        while (superclass != null) {
+          if (entityTypes.contains(superclass)) {
+            cmm.append(Stmt.loadVariable(entitySnapshotVarName(superclass))
+                         .invoke("addSubtype", Stmt.loadVariable(entityTypeVarName)));
+          }
+          superclass = superclass.getSuperclass();
         }
-        superclass = superclass.getSuperclass();
-      }
 
-      // XXX using StringStatement because this gives OutOfScopeException for metamodel:
-      // pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType",
-      // Variable.get(entityTypeVarName)));
-      cmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
+        // XXX using StringStatement because this gives OutOfScopeException for metamodel:
+        // pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType",
+        // Variable.get(entityTypeVarName)));
+        cmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
+      }
     }
 
     // XXX using StringStatement because this gives OutOfScopeException for metamodel:
@@ -224,6 +241,28 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
     cmm.append(Stmt.loadVariable("metamodel").returnValue());
     cmm.finish();
+  }
+  
+  public boolean isIncluded(final MetaClass type) {
+    return isWhitelisted(type) && !isBlacklisted(type);
+  }
+
+  public boolean isWhitelisted(final MetaClass type) {
+    if (whitelist.isEmpty()) {
+      return true;
+    }
+
+    final SimplePackageFilter implicitFilter = new SimplePackageFilter(Arrays.asList(implicitWhitelist));
+    final SimplePackageFilter whitelistFilter = new SimplePackageFilter(whitelist);
+    final String fullName = type.getFullyQualifiedName();
+
+    return implicitFilter.apply(fullName) || whitelistFilter.apply(fullName);
+  }
+
+  public boolean isBlacklisted(final MetaClass type) {
+    final SimplePackageFilter blacklistFilter = new SimplePackageFilter(blacklist);
+    final String fullName = type.getFullyQualifiedName();
+    return blacklistFilter.apply(fullName);
   }
 
   public static EntityManagerFactory createHibernateEntityManagerFactory(TreeLogger logger, GeneratorContext context) {
@@ -241,18 +280,19 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         new ErraiPersistenceUnitInfo(managedTypeNames), properties);
   }
 
-  private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm, List<MetaClass> globalListeners) {
+  private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm, List<MetaClass> globalListeners, ClassStructureBuilder<?> classBuilder) {
     MetaClass met = MetaClassFactory.get(et.getJavaType());
     pmm.append(Stmt.codeComment(
         "**\n" +
         "** EntityType for " + et.getJavaType().getName() + "\n" +
         "**"));
     String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
-
+    String entityTypeMethodName = "createEntityType_"+et.getJavaType().getName().replace('.', '_');
+    
     AnonymousClassStructureBuilder entityTypeSubclass =
         Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
             .extend();
-
+    
     if (!java.lang.reflect.Modifier.isAbstract(et.getJavaType().getModifiers())) {
       entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
           .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
@@ -260,10 +300,33 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     }
 
     generateLifecycleEventDeliveryMethods(met, entityTypeSubclass, globalListeners);
-
-    pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
-        .named(entityTypeVarName)
+    
+    MethodBlockBuilder<?> cmm = classBuilder.privateMethod(MetaClassFactory.get(ErraiEntityType.class,
+        new ParameterizedEntityType(et.getJavaType())), entityTypeMethodName);
+    cmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal().named("entityType")
         .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
+    
+    MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
+
+    // now, snapshot all the EntityType's attributes, adding them as we go
+    for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
+      Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
+          attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
+          EntityType.class, ManagedType.class, Type.class);
+      cmm.append(Stmt.loadVariable("entityType").invoke("addAttribute", attribSnapshot));
+    }
+    for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
+      Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
+          attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
+          EntityType.class, ManagedType.class, Type.class);
+      cmm.append(Stmt.loadVariable("entityType").invoke("addAttribute", attribSnapshot));
+    }
+    
+    cmm.append(Stmt.loadVariable("entityType").returnValue());
+    cmm.finish();
+
+    pmm.append(Stmt.loadVariable(entityTypeVarName).assignValue(Stmt.loadVariable("this").invoke(entityTypeMethodName)));
+    
     return entityTypeVarName;
   }
 

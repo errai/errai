@@ -69,7 +69,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.gen2.picker.client.SliderBar;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.events.place.PlaceChangeMapEvent;
@@ -86,305 +85,328 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
 
 @Dependent
 @Templated("#main")
 @Page
 public class StorePage extends Composite {
 
-    private static final Projection DEFAULT_PROJECTION = new Projection("EPSG:4326");
-    public static final int DEFAULT_RADIUS = 100;
+  private static final Projection DEFAULT_PROJECTION = new Projection(
+          "EPSG:4326");
+  public static final int DEFAULT_RADIUS = 25;
 
-    @Inject
-    private EntityManager em;
+  @Inject
+  private EntityManager em;
 
-    @Inject
-    private @DataField SimplePanel mapContainer;
+  @Inject
+  private @DataField SimplePanel mapContainer;
 
-    @Inject
-    private @DataField Button saveButton;
+  @Inject
+  private @DataField Button saveButton;
 
-    @Inject
-    private @AutoBound DataBinder<Store> storeBinder;
+  @Inject
+  private @AutoBound DataBinder<Store> storeBinder;
 
-    @Inject
-    private @DataField TextBox locationSearchBox;
+  @Inject
+  private @DataField TextBox locationSearchBox;
 
-    @Inject
-    private @Bound @DataField TextBox name;
+  @Inject
+  private @Bound @DataField TextBox name;
 
-    @Inject
-    private @Bound @DataField TextBox address;
+  @Inject
+  private @Bound @DataField TextBox address;
 
-    @Inject
-    private @Bound @DataField SliderBar radius;
+  @Inject
+  private @Bound @DataField ValueListBox<Integer> radius;
 
-    @Inject
-    private @DataField SuggestBox addDepartment;
+  @Inject
+  private @DataField SuggestBox addDepartment;
 
-    @Inject
-    private @DataField DepartmentList departmentList;
+  @Inject
+  private @DataField DepartmentList departmentList;
 
-    @Inject
-    private LocationProvider locationProvider;
+  @Inject
+  private LocationProvider locationProvider;
 
-    private @PageState("id") Long requestedStoreId;
+  private @PageState("id") Long requestedStoreId;
 
-    @Inject
-    private TransitionTo<StoresPage> backToStoresPage;
+  @Inject
+  private TransitionTo<StoresPage> backToStoresPage;
 
-    @Inject
-    private GeoFencingProvider geoFencingProvider;
+  @Inject
+  private GeoFencingProvider geoFencingProvider;
 
-    private Marker marker;
-    private Markers markers;
-    private Vector vectorLayer;
-    private ModifyFeature modifyControl;
+  private Marker marker;
+  private Markers markers;
+  private Vector vectorLayer;
+  private ModifyFeature modifyControl;
 
-    @PageShown
-    private void setup() {
+  @PageShown
+  private void setup() {
 
-        // if a store was requested, retrieve it here (otherwise, we're editing a new, blank store instance)
-        if (requestedStoreId != null) {
-            Store found = em.find(Store.class, requestedStoreId);
-            if (found == null) {
-                Window.alert("No such store: " + requestedStoreId);
-                backToStoresPage.go();
-            }
-            storeBinder.setModel(found, InitialState.FROM_MODEL);
+    // if a store was requested, retrieve it here (otherwise, we're editing a
+    // new, blank store instance)
+    if (requestedStoreId != null) {
+      Store found = em.find(Store.class, requestedStoreId);
+      if (found == null) {
+        Window.alert("No such store: " + requestedStoreId);
+        backToStoresPage.go();
+      }
+      storeBinder.setModel(found, InitialState.FROM_MODEL);
+      radius.setValue(Integer.valueOf(DEFAULT_RADIUS));
+    }
+
+    departmentList.setItems(storeBinder.getModel().getDepartments());
+    MultiWordSuggestOracle dso = (MultiWordSuggestOracle) addDepartment
+            .getSuggestOracle();
+    for (Department d : em.createNamedQuery("allDepartments", Department.class)
+            .getResultList()) {
+      dso.add(d.getName());
+    }
+    addDepartment.getValueBox().addKeyPressHandler(new KeyPressHandler() {
+      @Override
+      public void onKeyPress(KeyPressEvent event) {
+        if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+          if (addDepartment.getText().trim().length() == 0)
+            return;
+          Department department = Department.resolve(em,
+                  addDepartment.getText());
+          if (!storeBinder.getModel().getDepartments().contains(department)) {
+            storeBinder.getModel().getDepartments().add(department);
+            departmentList.setItems(storeBinder.getModel().getDepartments());
+          }
+          addDepartment.setText("");
         }
+      }
+    });
 
-        departmentList.setItems(storeBinder.getModel().getDepartments());
-        MultiWordSuggestOracle dso = (MultiWordSuggestOracle) addDepartment.getSuggestOracle();
-        for (Department d : em.createNamedQuery("allDepartments", Department.class).getResultList()) {
-            dso.add(d.getName());
-        }
-        addDepartment.getValueBox().addKeyPressHandler(new KeyPressHandler() {
-            @Override
-            public void onKeyPress(KeyPressEvent event) {
-                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-                    if (addDepartment.getText().trim().length() == 0)
-                        return;
-                    Department department = Department.resolve(em, addDepartment.getText());
-                    if (!storeBinder.getModel().getDepartments().contains(department)) {
-                        storeBinder.getModel().getDepartments().add(department);
-                        departmentList.setItems(storeBinder.getModel().getDepartments());
-                    }
-                    addDepartment.setText("");
-                }
-            }
-        });
+    GoogleMapBootstrapper.whenReady(new Runnable() {
+      @Override
+      public void run() {
+        MapOptions defaultMapOptions = new MapOptions();
+        defaultMapOptions.setNumZoomLevels(16);
+        final MapWidget mapWidget = new MapWidget("100%", "100%",
+                defaultMapOptions);
+        mapContainer.add(mapWidget);
+        final Map map = mapWidget.getMap();
 
-        GoogleMapBootstrapper.whenReady(new Runnable() {
-            @Override
-            public void run() {
-                MapOptions defaultMapOptions = new MapOptions();
-                defaultMapOptions.setNumZoomLevels(16);
-                final MapWidget mapWidget = new MapWidget("100%", "100%", defaultMapOptions);
-                mapContainer.add(mapWidget);
-                final Map map = mapWidget.getMap();
+        OSM osm = OSM.Mapnik("Mapnik");
+        osm.setIsBaseLayer(true);
+        map.addLayer(osm);
+        vectorLayer = new Vector("Fence");
+        map.addLayer(vectorLayer);
+        markers = new Markers("Markers");
+        map.addLayer(markers);
+        map.addControl(new OverviewMap());
+        map.addControl(new ScaleLine());
 
-                OSM osm = OSM.Mapnik("Mapnik");
-                osm.setIsBaseLayer(true);
-                map.addLayer(osm);
-                vectorLayer = new Vector("Fence");
-                map.addLayer(vectorLayer);
-                markers = new Markers("Markers");
-                map.addLayer(markers);
-                map.addControl(new OverviewMap());
-                map.addControl(new ScaleLine());
-
-                ModifyFeatureOptions featureOptions = new ModifyFeatureOptions();
-                featureOptions.setMode(ModifyFeature.RESIZE);
-                featureOptions.onModificationEnd(new ModifyFeature.OnModificationEndListener() {
-                    @Override
-                    public void onModificationEnd(VectorFeature vectorFeature) {
-                        float diameter = vectorFeature.getGeometry().getBounds().getWidth();
-                        storeBinder.getModel().setRadius(diameter / 2);
-                    }
+        ModifyFeatureOptions featureOptions = new ModifyFeatureOptions();
+        featureOptions.setMode(ModifyFeature.RESIZE);
+        featureOptions
+                .onModificationEnd(new ModifyFeature.OnModificationEndListener() {
+                  @Override
+                  public void onModificationEnd(VectorFeature vectorFeature) {
+                    int diameter = Math.round(vectorFeature.getGeometry()
+                            .getBounds().getWidth());
+                    storeBinder.getModel().setRadius(diameter / 2);
+                  }
                 });
 
-                storeBinder.addPropertyChangeHandler("radius", new PropertyChangeHandler<Double>() {
-                    @Override
-                    public void onPropertyChange(PropertyChangeEvent<Double> event) {
-                        reDrawGeoFence(map);
-                    }
+        storeBinder.addPropertyChangeHandler("radius",
+                new PropertyChangeHandler<Integer>() {
+                  @Override
+                  public void onPropertyChange(
+                          PropertyChangeEvent<Integer> event) {
+                    reDrawGeoFence(map);
+                  }
                 });
 
-                modifyControl = new ModifyFeature(vectorLayer, featureOptions);
-                map.addControl(modifyControl);
+        modifyControl = new ModifyFeature(vectorLayer, featureOptions);
+        map.addControl(modifyControl);
+
+        placeMarkerAtStoreLocation(map);
+
+        map.addMapMoveEndListener(new MapMoveEndListener() {
+
+          @Override
+          public void onMapMoveEnd(MapMoveEndEvent eventObject) {
+            Bounds extent = map.getExtent();
+            extent.transform(DEFAULT_PROJECTION, new Projection("EPSG:900913"));
+
+            // set up autocomplete search box for this place
+            AutocompleteType[] types = new AutocompleteType[2];
+            types[0] = AutocompleteType.ESTABLISHMENT;
+            types[1] = AutocompleteType.GEOCODE;
+
+            AutocompleteOptions options = AutocompleteOptions.newInstance();
+            options.setTypes(types);
+            LatLng sw = LatLng.newInstance(extent.getLowerLeftX(),
+                    extent.getLowerLeftY());
+            LatLng ne = LatLng.newInstance(extent.getUpperRightX(),
+                    extent.getUpperRightY());
+            options.setBounds(LatLngBounds.newInstance(sw, ne));
+
+            final Autocomplete autoComplete = Autocomplete.newInstance(
+                    locationSearchBox.getElement(), options);
+
+            autoComplete.addPlaceChangeHandler(new PlaceChangeMapHandler() {
+              @Override
+              public void onEvent(PlaceChangeMapEvent event) {
+                PlaceResult result = autoComplete.getPlace();
+                PlaceGeometry geometry = result.getGeometry();
+                LatLng center = geometry.getLocation();
+
+                Store store = storeBinder.getModel();
+                store.setName(result.getName());
+                store.setAddress(result.getFormatted_Address());
+                store.setLatitude(center.getLatitude());
+                store.setLongitude(center.getLongitude());
+                store.setRadius(DEFAULT_RADIUS);
 
                 placeMarkerAtStoreLocation(map);
-
-                map.addMapMoveEndListener(new MapMoveEndListener() {
-
-                    @Override
-                    public void onMapMoveEnd(MapMoveEndEvent eventObject) {
-                        Bounds extent = map.getExtent();
-                        extent.transform(DEFAULT_PROJECTION, new Projection("EPSG:900913"));
-
-                        // set up autocomplete search box for this place
-                        AutocompleteType[] types = new AutocompleteType[2];
-                        types[0] = AutocompleteType.ESTABLISHMENT;
-                        types[1] = AutocompleteType.GEOCODE;
-
-                        AutocompleteOptions options = AutocompleteOptions.newInstance();
-                        options.setTypes(types);
-                        LatLng sw = LatLng.newInstance(extent.getLowerLeftX(), extent.getLowerLeftY());
-                        LatLng ne = LatLng.newInstance(extent.getUpperRightX(), extent.getUpperRightY());
-                        options.setBounds(LatLngBounds.newInstance(sw, ne));
-
-                        final Autocomplete autoComplete = Autocomplete.newInstance(locationSearchBox.getElement(), options);
-
-                        autoComplete.addPlaceChangeHandler(new PlaceChangeMapHandler() {
-                            @Override
-                            public void onEvent(PlaceChangeMapEvent event) {
-                                PlaceResult result = autoComplete.getPlace();
-                                PlaceGeometry geometry = result.getGeometry();
-                                LatLng center = geometry.getLocation();
-
-                                Store store = storeBinder.getModel();
-                                store.setName(result.getName());
-                                store.setAddress(result.getFormatted_Address());
-                                store.setLatitude(center.getLatitude());
-                                store.setLongitude(center.getLongitude());
-                                store.setRadius(DEFAULT_RADIUS);
-
-                                placeMarkerAtStoreLocation(map);
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }
-
-    @PageHidden
-    public void cleanup() {
-        if (mapContainer.getWidget() != null) {
-            mapContainer.getWidget().removeFromParent();
-        }
-    }
-
-    @EventHandler("saveButton")
-    private void save(ClickEvent e) {
-        Store store = storeBinder.getModel();
-        
-        if (!isValidName(store.getName())) {
-          return;
-        }
-        
-        em.merge(store);
-        em.flush();
-
-        Region region = new Region((int) store.getId(), store.getLatitude(), store.getLongitude(), (int) store.getRadius());
-        geoFencingProvider.addRegion(region);
-
-        backToStoresPage.go();
-    }
-
-    /**
-     * If the store's location is set to something reasonable (that is, not 0 degrees north, 0 degrees east), this method
-     * centers the map on that location and places a marker on it. Otherwise, this method tries to center the map on the user's
-     * current location.
-     *
-     * @param map the map to place the marker on
-     */
-    private void placeMarkerAtStoreLocation(final Map map) {
-        // first remove old marker, if any
-        if (marker != null) {
-            markers.removeMarker(marker);
-            marker = null;
-        }
-
-        LatLng center = getStoreLocation();
-        if (center != null) {
-            Size size = new Size(25, 22);
-            Pixel pixel = new Pixel(-15, -11);
-            Icon icon = new Icon("img/marker.png", size, pixel);
-            marker = new Marker(convertPoint(map.getProjection(), center), icon);
-            markers.addMarker(marker);
-
-            centerMap(map, center, 15);
-            reDrawGeoFence(map);
-        }
-        else {
-            locationProvider.getCurrentPosition(new LocationCallback() {
-                @Override
-                public void onSuccess(LatLng result) {
-                    centerMap(map, result, 13);
-                }
+              }
             });
+          }
+        });
+      }
+    });
+  }
+
+  @PageHidden
+  public void cleanup() {
+    if (mapContainer.getWidget() != null) {
+      mapContainer.getWidget().removeFromParent();
+    }
+  }
+
+  @EventHandler("saveButton")
+  private void save(ClickEvent e) {
+    Store store = storeBinder.getModel();
+
+    if (!isValidName(store.getName())) {
+      return;
+    }
+
+    em.merge(store);
+    em.flush();
+
+    Region region = new Region((int) store.getId(), store.getLatitude(),
+            store.getLongitude(), (int) store.getRadius());
+    geoFencingProvider.addRegion(region);
+
+    backToStoresPage.go();
+  }
+
+  /**
+   * If the store's location is set to something reasonable (that is, not 0
+   * degrees north, 0 degrees east), this method centers the map on that
+   * location and places a marker on it. Otherwise, this method tries to center
+   * the map on the user's current location.
+   *
+   * @param map
+   *          the map to place the marker on
+   */
+  private void placeMarkerAtStoreLocation(final Map map) {
+    // first remove old marker, if any
+    if (marker != null) {
+      markers.removeMarker(marker);
+      marker = null;
+    }
+
+    LatLng center = getStoreLocation();
+    if (center != null) {
+      Size size = new Size(25, 22);
+      Pixel pixel = new Pixel(-15, -11);
+      Icon icon = new Icon("img/marker.png", size, pixel);
+      marker = new Marker(convertPoint(map.getProjection(), center), icon);
+      markers.addMarker(marker);
+
+      centerMap(map, center, 15);
+      reDrawGeoFence(map);
+    }
+    else {
+      locationProvider.getCurrentPosition(new LocationCallback() {
+        @Override
+        public void onSuccess(LatLng result) {
+          centerMap(map, result, 13);
         }
+      });
     }
+  }
 
-    private void reDrawGeoFence(Map map) {
-        LonLat center = map.getCenter();
-        center.transform(map.getProjection(), DEFAULT_PROJECTION.getProjectionCode());
-        removeGeoFence();
+  private void reDrawGeoFence(Map map) {
+    LonLat center = map.getCenter();
+    center.transform(map.getProjection(),
+            DEFAULT_PROJECTION.getProjectionCode());
+    removeGeoFence();
 
-        Point[] points = new Point[40];
+    Point[] points = new Point[40];
 
-        int angle = 0;
-        for (int i = 0; i < 40; i++) {
-            angle += 360 / 40;
-            double radius = storeBinder.getModel().getRadius();
-            LonLat lonLat = LonLat.narrowToLonLat(destinationVincenty(center.lon(), center.lat(), angle, radius));
-            lonLat.transform("EPSG:4326", map.getProjection());
-            points[i] = new Point(lonLat.lon(), lonLat.lat());
-        }
-        LinearRing ring = new LinearRing(points);
-        Polygon polygon = new Polygon(new LinearRing[] { ring });
-
-        vectorLayer.addFeature(new VectorFeature(polygon));
-        modifyControl.activate();
+    int angle = 0;
+    for (int i = 0; i < 40; i++) {
+      angle += 360 / 40;
+      double radius = storeBinder.getModel().getRadius() * 1000;
+      LonLat lonLat = LonLat.narrowToLonLat(destinationVincenty(center.lon(),
+              center.lat(), angle, radius));
+      lonLat.transform("EPSG:4326", map.getProjection());
+      points[i] = new Point(lonLat.lon(), lonLat.lat());
     }
+    LinearRing ring = new LinearRing(points);
+    Polygon polygon = new Polygon(new LinearRing[] { ring });
 
-    private void removeGeoFence() {
-        if (vectorLayer.getFeatures() != null) {
-            for (VectorFeature vectorFeature : vectorLayer.getFeatures()) {
-                vectorLayer.removeFeature(vectorFeature);
-            }
-        }
+    vectorLayer.addFeature(new VectorFeature(polygon));
+    modifyControl.activate();
+  }
+
+  private void removeGeoFence() {
+    if (vectorLayer.getFeatures() != null) {
+      for (VectorFeature vectorFeature : vectorLayer.getFeatures()) {
+        vectorLayer.removeFeature(vectorFeature);
+      }
     }
+  }
 
-    private native JSObject destinationVincenty(double lon, double lat, int angle, double distance) /*-{
-        return $wnd.OpenLayers.Util.destinationVincenty(
-                new $wnd.OpenLayers.LonLat(lon, lat), angle, distance);
-    }-*/;
+  private native JSObject destinationVincenty(double lon, double lat,
+          int angle, double distance) /*-{
+                                      return $wnd.OpenLayers.Util.destinationVincenty(
+                                      new $wnd.OpenLayers.LonLat(lon, lat), angle, distance);
+                                      }-*/;
 
-    private void centerMap(Map map, LatLng center, int zoomLevel) {
-        LonLat lonlat = convertPoint(map.getProjection(), center);
-        map.setCenter(lonlat, zoomLevel);
+  private void centerMap(Map map, LatLng center, int zoomLevel) {
+    LonLat lonlat = convertPoint(map.getProjection(), center);
+    map.setCenter(lonlat, zoomLevel);
+  }
+
+  private LonLat convertPoint(String mapProjection, LatLng center) {
+    LonLat lonlat = new LonLat(center.getLongitude(), center.getLatitude());
+    lonlat.transform(DEFAULT_PROJECTION.getProjectionCode(), mapProjection);
+    return lonlat;
+  }
+
+  /**
+   * Returns the store's geolocation if it's been set, or null if the store
+   * location has not been set.
+   */
+  private LatLng getStoreLocation() {
+    Store store = storeBinder.getModel();
+    if (store.getLatitude() != 0.0 || store.getLongitude() != 0.0) {
+      return LatLng.newInstance(store.getLatitude(), store.getLongitude());
     }
-
-    private LonLat convertPoint(String mapProjection, LatLng center) {
-        LonLat lonlat = new LonLat(center.getLongitude(), center.getLatitude());
-        lonlat.transform(DEFAULT_PROJECTION.getProjectionCode(), mapProjection);
-        return lonlat;
+    else {
+      return null;
     }
+  }
 
-    /**
-     * Returns the store's geolocation if it's been set, or null if the store location has not been set.
-     */
-    private LatLng getStoreLocation() {
-        Store store = storeBinder.getModel();
-        if (store.getLatitude() != 0.0 || store.getLongitude() != 0.0) {
-            return LatLng.newInstance(store.getLatitude(), store.getLongitude());
-        }
-        else {
-            return null;
-        }
-    }
-    
-    protected boolean isValidName(String name) {
-      if (name == null)
-        return false;
-      else if (name.isEmpty())
-        return false;
-      else if (name.matches(".*\\w.*"))   //if name.getText() contains at least one word character
-        return true;
-      
+  protected boolean isValidName(String name) {
+    if (name == null)
       return false;
-    }
+    else if (name.isEmpty())
+      return false;
+    else if (name.matches(".*\\w.*")) // if name.getText() contains at least one
+                                      // word character
+      return true;
+
+    return false;
+  }
 }

@@ -16,6 +16,9 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.jboss.errai.databinding.client.api.Converter;
 
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -32,13 +35,14 @@ public final class Binding {
   private final String property;
   private final Widget widget;
   private final Converter<?, ?> converter;
-  private final HandlerRegistration handlerRegistration;
+  private final Collection<HandlerRegistration> handlerRegistrations;
 
-  public Binding(String property, Widget widget, Converter<?, ?> converter, HandlerRegistration handlerRegistration) {
+  public Binding(String property, Widget widget, Converter<?, ?> converter, Collection<HandlerRegistration>
+                                                                              handlerRegistrations) {
     this.property = property;
     this.widget = widget;
     this.converter = converter;
-    this.handlerRegistration = handlerRegistration;
+    this.handlerRegistrations = handlerRegistrations;
   }
 
   public String getProperty() {
@@ -53,13 +57,17 @@ public final class Binding {
     return widget;
   }
 
-  public HandlerRegistration getHandlerRegistration() {
-    return handlerRegistration;
+  public Collection<HandlerRegistration> getHandlerRegistrations() {
+    return handlerRegistrations;
   }
 
-  public void removeHandler() {
-    if (handlerRegistration != null) {
-      handlerRegistration.removeHandler();
+  public void removeHandlers() {
+    if (handlerRegistrations != null) {
+      Iterator<HandlerRegistration> itr = handlerRegistrations.iterator();
+      while (itr.hasNext()) {
+        itr.next().removeHandler();
+        itr.remove();
+      }
     }
   }
 
