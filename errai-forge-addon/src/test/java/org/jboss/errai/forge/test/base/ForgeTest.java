@@ -52,7 +52,7 @@ public abstract class ForgeTest {
   public static final String DEPENDENCY = "org.jboss.errai.forge:errai-forge-addon";
   public static final String ADDON_GROUP = "org.jboss.forge.addon";
   // TODO Programmatically lookup the Errai version this test is running in.
-  public static final String ERRAI_TEST_VERSION = "3.1.0-SNAPSHOT";
+  public static final String ERRAI_TEST_VERSION = "3.2.0-SNAPSHOT";
 
   @Inject
   protected ProjectFactory projectFactory;
