@@ -43,7 +43,7 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@WebFilter(filterName="ErraiUserCookieFilter")
+@WebFilter(filterName = "ErraiUserCookieFilter", urlPatterns = { "/index.jsp", "/index.html" })
 public class UserCookieFilter implements Filter {
 
   static {
