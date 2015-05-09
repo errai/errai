@@ -38,7 +38,9 @@ public class ErraiAppPropertiesProducer {
   @ErraiAppProperties
   public Properties getErraiAppProperties() {
     final Properties properties = new Properties();
-    final InputStream erraiAppPropertiesStream = ClassLoader.getSystemResourceAsStream("ErraiApp.properties");
+    
+    final InputStream erraiAppPropertiesStream = 
+            getClass().getClassLoader().getResourceAsStream("ErraiApp.properties");
     try {
       if (erraiAppPropertiesStream != null) {
         properties.load(erraiAppPropertiesStream);
