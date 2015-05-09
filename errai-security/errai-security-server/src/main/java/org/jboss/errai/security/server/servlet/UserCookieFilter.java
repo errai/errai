@@ -86,7 +86,7 @@ public class UserCookieFilter implements Filter {
    */
   private boolean maybeSetUserCookie(final HttpServletResponse response) {
     if (properties.containsKey(USER_COOKIE_ENABLED)) {
-      final Boolean userCookieEnabled = (Boolean) properties.get(USER_COOKIE_ENABLED);
+      final Boolean userCookieEnabled = Boolean.parseBoolean(properties.getProperty(USER_COOKIE_ENABLED));
       if (userCookieEnabled) {
         final Cookie userCookie = new Cookie(UserCookieEncoder.USER_COOKIE_NAME,
                 UserCookieEncoder.toCookieValue(keycloakAuthService.getUser()));
