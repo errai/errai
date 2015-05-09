@@ -65,9 +65,9 @@ public class UserCookieFilterTest {
   @Mock
   private AuthenticationService mockAuthService;
 
-  private void setUserCookieKeyInPropertiesMock(final Properties properties, final boolean value) {
+  private void setUserCookieKeyInPropertiesMock(final Properties properties, final String value) {
     when(properties.containsKey(USER_COOKIE_ENABLED)).thenReturn(true);
-    when(properties.get(USER_COOKIE_ENABLED)).thenReturn(value);
+    when(properties.getProperty(USER_COOKIE_ENABLED)).thenReturn(value);
   }
 
   @Test
@@ -81,7 +81,7 @@ public class UserCookieFilterTest {
 
   @Test
   public void doNotSetCookieIfPropertySetToFalse() throws Exception {
-    setUserCookieKeyInPropertiesMock(properties, false);
+    setUserCookieKeyInPropertiesMock(properties, "false");
 
     userFilter.init(mockConfig);
     userFilter.doFilter(mockRequest, mockResponse, mockChain);
@@ -92,7 +92,7 @@ public class UserCookieFilterTest {
 
   @Test
   public void setCookieIfPropertySetToTrue() throws Exception {
-    setUserCookieKeyInPropertiesMock(properties, true);
+    setUserCookieKeyInPropertiesMock(properties, "true");
 
     userFilter.init(mockConfig);
     userFilter.doFilter(mockRequest, mockResponse, mockChain);
