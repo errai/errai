@@ -51,7 +51,7 @@ public class UserCookieFilter implements Filter {
   }
 
   @Inject
-  private AuthenticationService keycloakAuthService;
+  private AuthenticationService authService;
 
   @Inject
   @ErraiAppProperties
@@ -89,7 +89,7 @@ public class UserCookieFilter implements Filter {
       final Boolean userCookieEnabled = Boolean.parseBoolean(properties.getProperty(USER_COOKIE_ENABLED));
       if (userCookieEnabled) {
         final Cookie userCookie = new Cookie(UserCookieEncoder.USER_COOKIE_NAME,
-                UserCookieEncoder.toCookieValue(keycloakAuthService.getUser()));
+                UserCookieEncoder.toCookieValue(authService.getUser()));
         response.addCookie(userCookie);
         return true;
       }
