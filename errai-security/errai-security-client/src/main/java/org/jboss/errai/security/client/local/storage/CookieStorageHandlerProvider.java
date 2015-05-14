@@ -16,10 +16,13 @@
  */
 package org.jboss.errai.security.client.local.storage;
 
+import java.util.MissingResourceException;
+
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -27,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.user.client.Cookies;
 
 @IOCProvider
@@ -35,10 +39,26 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
 
   private static final Logger logger = LoggerFactory.getLogger(CookieStorageHandlerProvider.class);
 
-  private static class NoopStorageHandler implements UserStorageHandler {
+  private static class ReadOnlyStorageHandler implements UserStorageHandler {
+    private static final String ERRAI_SECURITY_CONTEXT_DICTIONARY = "errai_security_context";
+    private static final String DICTIONARY_USER = "user";
+
     @Override
     public User getUser() {
-      return null;
+      User user = null;
+      try {
+        // If the GWT app's host page is behind a login page, the server
+        // can set the currently authenticated user by providing the
+        // errai_security_context variable as part of the host page. This way
+        // the Errai app can bootstrap and the already authenticated user
+        // instance is immediately injectable (without contacting the server
+        // first).
+        Dictionary dictionary = Dictionary.getDictionary(ERRAI_SECURITY_CONTEXT_DICTIONARY);
+        user = (User) Marshalling.fromJSON(dictionary.get(DICTIONARY_USER));
+      } catch (MissingResourceException mre) {
+        // Writing the errai_security_context variable is optional.
+      }
+      return user;
     }
 
     @Override
@@ -64,8 +84,7 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
         else {
           return null;
         }
-      }
-      catch (RuntimeException e) {
+      } catch (RuntimeException e) {
         logger.warn("Failed to retrieve current user from a cookie.", e);
         Cookies.removeCookie(UserCookieEncoder.USER_COOKIE_NAME);
         return null;
@@ -79,9 +98,10 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
           logger.debug("Storing " + user + " in cookie cache.");
           final String json = UserCookieEncoder.toCookieValue(user);
           Cookies.setCookie(UserCookieEncoder.USER_COOKIE_NAME, json);
-        }
-        catch (RuntimeException ex) {
-          logger.warn("Failed to store user in cookie cache. Subsequent visits to this app will redirect to login screen even if the session is still valid.", ex);
+        } catch (RuntimeException ex) {
+          logger.warn(
+                  "Failed to store user in cookie cache. Subsequent visits to this app will redirect to login screen even if the session is still valid.",
+                  ex);
         }
       }
       else {
@@ -99,7 +119,7 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
       return new UserCookieStorageHandlerImpl();
     }
     else {
-      return new NoopStorageHandler();
+      return new ReadOnlyStorageHandler();
     }
   }
 
