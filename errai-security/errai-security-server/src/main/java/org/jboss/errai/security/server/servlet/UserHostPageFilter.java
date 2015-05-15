@@ -4,7 +4,6 @@ import static org.jboss.errai.security.Properties.USER_ON_HOSTPAGE_ENABLED;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Properties;
 
@@ -65,10 +64,9 @@ public class UserHostPageFilter implements Filter {
       final CharResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response);
       chain.doFilter(request, wrappedResponse);
 
-      final PrintStream outputStream = new PrintStream(response.getOutputStream());
-
       final User user = authenticationService.getUser();
-
+      final String output;
+      
       if (user != null) {
         final String injectedScript = "<script>var " + 
                 SecurityConstants.ERRAI_SECURITY_CONTEXT_DICTIONARY + "  = {\"" +
@@ -77,13 +75,15 @@ public class UserHostPageFilter implements Filter {
 
         final Document document = Jsoup.parse(wrappedResponse.toString());
         document.head().append(injectedScript);
-        outputStream.print(document.html());
+        output = document.html();
       }
       else {
-        outputStream.print(wrappedResponse.toString());
+        output = wrappedResponse.toString();
       }
-
-      outputStream.close();
+      
+      byte[] outputBytes = output.getBytes("UTF-8");
+      response.setContentLength(outputBytes.length);
+      response.getOutputStream().write(outputBytes);
     }
   }
 
