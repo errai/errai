@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.jboss.errai.security.shared.api.SecurityConstants;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.slf4j.Logger;
@@ -39,13 +40,11 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
 
   private static final Logger logger = LoggerFactory.getLogger(CookieStorageHandlerProvider.class);
 
-  CookieStorageHandlerProvider() {
-    MarshallerFramework.initializeDefaultSessionProvider();
-  }
-
   private static class ReadOnlyStorageHandler implements UserStorageHandler {
-    private static final String ERRAI_SECURITY_CONTEXT_DICTIONARY = "errai_security_context";
-    private static final String DICTIONARY_USER = "user";
+
+    ReadOnlyStorageHandler() {
+      MarshallerFramework.initializeDefaultSessionProvider();
+    }
 
     @Override
     public User getUser() {
@@ -57,9 +56,10 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
         // the Errai app can bootstrap and the already authenticated user
         // instance is immediately injectable (without contacting the server
         // first).
-        Dictionary dictionary = Dictionary.getDictionary(ERRAI_SECURITY_CONTEXT_DICTIONARY);
-        user = (User) Marshalling.fromJSON(dictionary.get(DICTIONARY_USER));
-      } catch (MissingResourceException mre) {
+        Dictionary dictionary = Dictionary.getDictionary(SecurityConstants.ERRAI_SECURITY_CONTEXT_DICTIONARY);
+        user = (User) Marshalling.fromJSON(dictionary.get(SecurityConstants.DICTIONARY_USER));
+      } 
+      catch (MissingResourceException mre) {
         // Writing the errai_security_context variable is optional.
       }
       return user;
@@ -72,6 +72,10 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
 
   private static class UserCookieStorageHandlerImpl implements UserStorageHandler {
 
+    UserCookieStorageHandlerImpl() {
+      MarshallerFramework.initializeDefaultSessionProvider();
+    }
+    
     @Override
     public User getUser() {
       try {

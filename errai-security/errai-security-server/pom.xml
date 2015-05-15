@@ -46,9 +46,15 @@
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>jaxrs-api</artifactId>
     </dependency>
+    
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-cdi</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
     </dependency>
 
     <!-- Test Deps -->
