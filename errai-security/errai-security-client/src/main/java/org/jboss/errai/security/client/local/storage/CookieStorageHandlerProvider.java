@@ -39,6 +39,10 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
 
   private static final Logger logger = LoggerFactory.getLogger(CookieStorageHandlerProvider.class);
 
+  CookieStorageHandlerProvider() {
+    MarshallerFramework.initializeDefaultSessionProvider();
+  }
+
   private static class ReadOnlyStorageHandler implements UserStorageHandler {
     private static final String ERRAI_SECURITY_CONTEXT_DICTIONARY = "errai_security_context";
     private static final String DICTIONARY_USER = "user";
@@ -67,10 +71,6 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
   }
 
   private static class UserCookieStorageHandlerImpl implements UserStorageHandler {
-
-    UserCookieStorageHandlerImpl() {
-      MarshallerFramework.initializeDefaultSessionProvider();
-    }
 
     @Override
     public User getUser() {
