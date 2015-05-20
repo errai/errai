@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.server.websocket.jsr356.configuration;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.bus.server.websocket.jsr356.filter.FilterLookup;
 
 import javax.servlet.http.HttpSession;

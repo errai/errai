@@ -14,7 +14,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.w3c.dom.Document;

@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 

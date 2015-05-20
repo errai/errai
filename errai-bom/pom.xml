@@ -34,8 +34,7 @@
   <!-- Keep versions property names in alphabetical order, please -->
   <!-- Try to use version properties already definied in jboss-integration-platform-parent 
   instead of defining a new ones -->
-  <properties>
-    <apache.commons.lang.version>3.2.1</apache.commons.lang.version>
+  <properties>    
     <apache.geronimo.spec.1.1.interceptor.version>1.0</apache.geronimo.spec.1.1.interceptor.version>
     <apache.httpcomponents.httpcore.version>4.2.1</apache.httpcomponents.httpcore.version>
     <apache.maven.artifact.version>3.0.5</apache.maven.artifact.version>
@@ -153,7 +152,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>${apache.commons.lang.version}</version>
+        <version>${version.org.apache.commons.lang3}</version>
       </dependency>
 
       <dependency>
@@ -584,12 +583,6 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>${version.commons-io}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>${version.commons-lang}</version>
       </dependency>
 
       <dependency>

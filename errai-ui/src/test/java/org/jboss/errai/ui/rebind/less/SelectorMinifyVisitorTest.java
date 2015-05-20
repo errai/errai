@@ -6,7 +6,7 @@ import com.google.gwt.dev.util.DefaultTextOutput;
 import com.google.gwt.resources.css.CssGenerationVisitor;
 import com.google.gwt.resources.css.GenerateCssAst;
 import com.google.gwt.resources.css.ast.CssStylesheet;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import java.net.URISyntaxException;

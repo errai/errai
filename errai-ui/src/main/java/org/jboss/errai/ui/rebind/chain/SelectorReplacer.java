@@ -5,7 +5,7 @@ import org.w3c.dom.Element;
 
 import java.util.Map;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * @author edewit@redhat.com

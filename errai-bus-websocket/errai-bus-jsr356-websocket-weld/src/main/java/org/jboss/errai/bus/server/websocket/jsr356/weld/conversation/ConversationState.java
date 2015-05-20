@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.server.websocket.jsr356.weld.conversation;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
