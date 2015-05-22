@@ -16,7 +16,7 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
   @Test
   public void testInsertAndReplaceNested() {
     ExtendedTemplateTestApp app = IOC.getBeanManager().lookupBean(ExtendedTemplateTestApp.class).getInstance();
-    assertNotNull(app.getComponent());
+    assertNotNull(app.getExtComponent());
 
     System.out.println("DUMPING: " + Document.get().getBody().getInnerHTML());
 
@@ -29,12 +29,18 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
     assertNotNull(Document.get().getElementById("c3"));
     assertEquals("This will be rendered inside label c3", Document.get().getElementById("c3").getInnerText());
 
-    assertNotNull("Field in base template should be initialized", app.getComponent().getC2Base());
-    assertFalse("Field in base template should not be attached", app.getComponent().getC2Base().isAttached());
+    assertNotNull("Field in base template should be initialized", app.getExtComponent().getC2Base());
+    assertFalse("Field in base template should not be attached", app.getExtComponent().getC2Base().isAttached());
 
-    assertNotNull("Field in extension template should be initialized", app.getComponent().getC2());
-    assertTrue("Field in extension template should be attached", app.getComponent().getC2().isAttached());
+    assertNotNull("Field in extension template should be initialized", app.getExtComponent().getC2());
+    assertTrue("Field in extension template should be attached", app.getExtComponent().getC2().isAttached());
 
-    assertFalse(app.getComponent().getElement().getInnerHTML().contains("This will not be rendered"));
+    assertFalse(app.getExtComponent().getElement().getInnerHTML().contains("This will not be rendered"));
+
+    assertNotNull(app.getSecondExtComponent());
+    assertNotNull(app.getSecondExtComponent().getC2());
+    assertNotNull(app.getSecondExtComponent().getContent3());
+
   }
+
 }

@@ -392,7 +392,7 @@ public class IOCConfigProcessor {
                 return true;
               }
 
-              if (injectors.size() == 1) {
+              if (!injectors.isEmpty()) {
                 injector = injectors.get(0);
               }
               else {
@@ -663,7 +663,7 @@ public class IOCConfigProcessor {
         final List<Injector> injectors = injectionContext.getInjectors(type);
         final Injector injector;
 
-        if (injectors.size() == 1) {
+        if (!injectors.isEmpty()) {
           injector = injectors.get(0);
         }
         else {
