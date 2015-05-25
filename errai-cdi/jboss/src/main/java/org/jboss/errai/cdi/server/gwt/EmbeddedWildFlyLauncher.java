@@ -41,14 +41,14 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
   private static final String DEFAULT_CLIENT_LOCAL_CLASS_PATTERN = ".*/client/local/.*";
   
   private static final String ERRAI_SCANNER_HINT_START = 
-          "    <!-- These exclusions were added by Errai to avoid deploying client-side classes to the server -->\n";
+          "\n    <!-- These exclusions were added by Errai to avoid deploying client-side classes to the server -->\n";
   private static final String ERRAI_SCANNER_HINT_END = 
           "    <!-- End of Errai exclusions -->\n";
   
   private static final String DEVMODE_BEANS_XML_TEMPLATE = 
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<beans xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">\n" + 
-          "  <scan>\n" +
+          "  <scan>" +
           "$EXCLUSIONS" +
           "  </scan>\n" + 
        "</beans>";
@@ -171,10 +171,10 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
         return;
       
       if (beansXmlContent.contains("<scan>")) {
-        beansXmlContent = beansXmlContent.replace("<scan>", "<scan>\n" + exclusions);
+        beansXmlContent = beansXmlContent.replace("<scan>", "<scan>" + exclusions);
       }
       else {
-        beansXmlContent = beansXmlContent.replace("</beans>", "  <scan>\n" + exclusions + "  </scan>\n</beans>");
+        beansXmlContent = beansXmlContent.replace("</beans>", "  <scan>" + exclusions + "  </scan>\n</beans>");
       }
       validateBeansXml(beansXmlContent);
     }
