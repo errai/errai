@@ -3,6 +3,9 @@ package org.jboss.errai.ui.nav.client.local;
 import org.jboss.errai.ui.nav.client.local.pushstate.HistoryImplPushState;
 import org.jboss.errai.ui.nav.client.local.pushstate.PushStateUtil;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -40,7 +43,13 @@ public class HistoryWrapper {
         @Override
         public void onValueChange(ValueChangeEvent<String> event) {
           checkInitialDocTitle();
-          setDocTitle(getDocTitleByToken(event.getValue()));
+          final String title = getDocTitleByToken(event.getValue());
+          setDocTitle(title);
+          Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                setDocTitle(title); // other ValueChangeHandlers may affect docTitle somehow
+            }});
         }
       };
 
