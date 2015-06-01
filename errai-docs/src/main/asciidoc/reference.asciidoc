@@ -7820,8 +7820,8 @@ To start from scratch and add Keycloak integration to your application:
 
 * Click *Add Realm* and create a custom realm for your application.
 
-* Select the *Applications* tab and click *Add Application*, then fill in the following to add the application to this realm:
-  ** `Name`: the name of your application (i.e. errai-security-demo)
+* Select the *Clients* tab and click *Create*, then fill in the following to add the client application to this realm:
+  ** `Client ID`: the name of your client application (i.e. errai-security-demo)
   ** `Access Type`: public
   ** `Redirect URI`: the url of your application (i.e. `http://localhost:8080/[your-application]/*`)
   
@@ -9786,6 +9786,10 @@ Here are the steps you'll need to take to get your project running after you upd
 * If you are using Errai to compile LESS/CSS files you will need to declare a `StyleDescriptor` listing the resources to compile in the desired order. This change was made to provide a deterministic and configurable order of styles in the generated CSS.
 
 * Errai 3.1+ targets CDI 1.1 containers by default (i.e. WildFly 8+). If you wish to deploy to a CDI 1.0 container (i.e AS7, EAP6) you will have to downgrade the errai-weld-integration.jar to 3.0.4.Final. You can still use all of Errai's latest features and use the 3.1+ versions of all other Errai jars.
+
+=== Upgrading to Errai 3.2 from 3.1
+
+Starting from Errai 3.2.0.Final, Errai Security only supports Keycloak 1.2.0.Final and higher. Errai Security is no longer compatible with earlier versions of Keycloak. 
 
 [[sid-5833087]]
 

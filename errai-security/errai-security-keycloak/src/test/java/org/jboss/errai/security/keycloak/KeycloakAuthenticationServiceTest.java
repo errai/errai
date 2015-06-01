@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
+import org.keycloak.representations.AddressClaimSet;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -94,8 +95,6 @@ public class KeycloakAuthenticationServiceTest {
 
   private static final String BIRTHDATE = "January 1st, 1970";
 
-  private static final String ADDRESS = "123 Fake Street";
-  
   private static final String ERRAI_APP = "http://some-errai-app";
 
   private AssertMap keycloakAssertionMap;
@@ -137,27 +136,27 @@ public class KeycloakAuthenticationServiceTest {
   private void setUserProperties(final AccessToken accessToken) {
     accessToken.setPreferredUsername(PREFERRED_USERNAME);
 
-    accessToken.setAddress(ADDRESS);
+    accessToken.setAddress(new AddressClaimSet());
     accessToken.setBirthdate(BIRTHDATE);
-    accessToken.setCountry(COUNTRY);
+    accessToken.getAddress().setCountry(COUNTRY);
     accessToken.setEmail(EMAIL);
     accessToken.setEmailVerified(EMAIL_VERIFIED);
     accessToken.setFamilyName(FAMILY_NAME);
-    accessToken.setFormattedAddress(FORMATTED_ADDRESS);
+    accessToken.getAddress().setFormattedAddress(FORMATTED_ADDRESS);
     accessToken.setGender(GENDER);
     accessToken.setGivenName(GIVEN_NAME);
     accessToken.setLocale(LOCALE);
-    accessToken.setLocality(LOCALITY);
+    accessToken.getAddress().setLocality(LOCALITY);
     accessToken.setMiddleName(MIDDLE_NAME);
     accessToken.setName(NAME);
     accessToken.setNickName(NICK_NAME);
     accessToken.setPhoneNumber(PHONE_NUMBER);
     accessToken.setPhoneNumberVerified(PHONE_NUMBER_VERIFIED);
     accessToken.setPicture(PICTURE);
-    accessToken.setPostalCode(POSTAL_CODE);
+    accessToken.getAddress().setPostalCode(POSTAL_CODE);
     accessToken.setProfile(PROFILE);
-    accessToken.setRegion(REGION);
-    accessToken.setStreetAddress(STREET_ADDRESS);
+    accessToken.getAddress().setRegion(REGION);
+    accessToken.getAddress().setStreetAddress(STREET_ADDRESS);
     accessToken.setWebsite(WEBSITE);
     accessToken.setZoneinfo(ZONE_INFO);
 
@@ -177,7 +176,6 @@ public class KeycloakAuthenticationServiceTest {
   private void verifyUserProperties(final User user, final AssertMap map) {
     assertEquals(PREFERRED_USERNAME, user.getIdentifier());
 
-    map.get(KeycloakPropertyNames.ADDRESS).doAssertion(ADDRESS, user.getProperty(KeycloakPropertyNames.ADDRESS));
     map.get(KeycloakPropertyNames.BIRTHDATE).doAssertion(BIRTHDATE, user.getProperty(KeycloakPropertyNames.BIRTHDATE));
     map.get(KeycloakPropertyNames.COUNTRY).doAssertion(COUNTRY, user.getProperty(KeycloakPropertyNames.COUNTRY));
     map.get(StandardUserProperties.EMAIL).doAssertion(EMAIL, user.getProperty(StandardUserProperties.EMAIL));
@@ -316,8 +314,8 @@ public class KeycloakAuthenticationServiceTest {
 
   @Test
   public void createdKeycloakUserDoesNotHaveUnavailableProperties() throws Exception {
-    securityContext.getToken().setAddress(null);
-    keycloakAssertionMap.put(KeycloakPropertyNames.ADDRESS, new Assertion() {
+    securityContext.getToken().setLocale(null);
+    keycloakAssertionMap.put(KeycloakPropertyNames.LOCALE, new Assertion() {
       @Override
       public void doAssertion(final Object expected, final Object observed) {
         assertNull(observed);

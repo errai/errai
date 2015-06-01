@@ -71,6 +71,4 @@ public class KeycloakPropertyNames {
 
   public static final String AUDIENCE = "audience";
 
-  public static final String ADDRESS = "address";
-
 }

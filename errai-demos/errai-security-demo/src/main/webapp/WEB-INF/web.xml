@@ -62,10 +62,10 @@
   </security-constraint>
 
 <!-- Uncomment the login-config if you are using a Keycloak server -->
-<!--   <login-config> -->
-<!--     <auth-method>KEYCLOAK</auth-method> -->
-<!--     <realm-name>demo</realm-name> -->
-<!--   </login-config> -->
+   <login-config>
+     <auth-method>KEYCLOAK</auth-method>
+     <realm-name>demo</realm-name>
+   </login-config>
   
   <security-role>
     <role-name>user</role-name>

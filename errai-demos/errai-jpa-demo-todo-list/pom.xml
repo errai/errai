@@ -84,10 +84,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.picketlink</groupId>
-      <artifactId>picketlink-idm-simple-schema</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-tools</artifactId>
     </dependency>

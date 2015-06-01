@@ -16,7 +16,6 @@
  */
 package org.jboss.errai.security.keycloak;
 
-import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.ADDRESS;
 import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.AUDIENCE;
 import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.BIRTHDATE;
 import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.COUNTRY;
@@ -61,6 +60,7 @@ import org.jboss.errai.security.shared.exception.FailedAuthenticationException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.AddressClaimSet;
 
 /**
  * <p>
@@ -189,30 +189,33 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
     properties.add(new KeycloakProperty(StandardUserProperties.FIRST_NAME, accessToken.getGivenName()));
     properties.add(new KeycloakProperty(StandardUserProperties.LAST_NAME, accessToken.getFamilyName()));
     properties.add(new KeycloakProperty(StandardUserProperties.EMAIL, accessToken.getEmail()));
-    properties.add(new KeycloakProperty(ADDRESS, accessToken.getAddress()));
     properties.add(new KeycloakProperty(AUDIENCE, accessToken.getAudience()));
     properties.add(new KeycloakProperty(BIRTHDATE, accessToken.getBirthdate()));
-    properties.add(new KeycloakProperty(COUNTRY, accessToken.getCountry()));
-    properties.add(new KeycloakProperty(FORMATTED_ADDRESS, accessToken.getFormattedAddress()));
     properties.add(new KeycloakProperty(GENDER, accessToken.getGender()));
     properties.add(new KeycloakProperty(LOCALE, accessToken.getLocale()));
-    properties.add(new KeycloakProperty(LOCALITY, accessToken.getLocality()));
     properties.add(new KeycloakProperty(MIDDLE_NAME, accessToken.getMiddleName()));
     properties.add(new KeycloakProperty(NAME, accessToken.getName()));
     properties.add(new KeycloakProperty(NICKNAME, accessToken.getNickName()));
     properties.add(new KeycloakProperty(PHONENUMBER, accessToken.getPhoneNumber()));
     properties.add(new KeycloakProperty(PICTURE, accessToken.getPicture()));
-    properties.add(new KeycloakProperty(POSTAL_CODE, accessToken.getPostalCode()));
     properties.add(new KeycloakProperty(PREFERRED_USERNAME, accessToken.getPreferredUsername()));
     properties.add(new KeycloakProperty(PROFILE, accessToken.getProfile()));
-    properties.add(new KeycloakProperty(REGION, accessToken.getRegion()));
-    properties.add(new KeycloakProperty(STREET_ADDRESS, accessToken.getStreetAddress()));
     properties.add(new KeycloakProperty(SUBJECT, accessToken.getSubject()));
     properties.add(new KeycloakProperty(WEBSITE, accessToken.getWebsite()));
     properties.add(new KeycloakProperty(ZONE_INFO, accessToken.getZoneinfo()));
     properties.add(new KeycloakProperty(EMAIL_VERIFIED, String.valueOf(accessToken.getEmailVerified())));
     properties.add(new KeycloakProperty(PHONENUMBER_VERIFIED, String.valueOf(accessToken.getPhoneNumberVerified())));
 
+    // populate address properties
+    AddressClaimSet address = accessToken.getAddress();
+      if (address != null) {
+        properties.add(new KeycloakProperty(COUNTRY, accessToken.getAddress().getCountry()));
+        properties.add(new KeycloakProperty(FORMATTED_ADDRESS, accessToken.getAddress().getFormattedAddress()));
+        properties.add(new KeycloakProperty(LOCALITY, accessToken.getAddress().getLocality()));
+        properties.add(new KeycloakProperty(POSTAL_CODE, accessToken.getAddress().getPostalCode()));
+        properties.add(new KeycloakProperty(REGION, accessToken.getAddress().getRegion()));
+        properties.add(new KeycloakProperty(STREET_ADDRESS, accessToken.getAddress().getStreetAddress()));
+      }
     return properties;
   }
 
