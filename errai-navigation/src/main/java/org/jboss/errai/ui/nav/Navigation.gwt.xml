@@ -15,7 +15,7 @@
    </replace-with>
    
    <replace-with class="org.jboss.errai.ui.nav.client.local.pushstate.PathProviderImpl">
-     <when-type-is class="org.jboss.errai.ui.nav.client.local.pushstate.PathProviderInterface" />
+     <when-type-is class="org.jboss.errai.ui.nav.client.local.pushstate.PathProvider" />
    </replace-with>
 
 </module>

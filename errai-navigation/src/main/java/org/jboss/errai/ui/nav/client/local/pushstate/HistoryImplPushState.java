@@ -59,9 +59,9 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
 
   public boolean init(final String pathPrefix) {
     // read default path prefix
-    final PathProviderInterface pathProvider = ((pathPrefix == null || pathPrefix.isEmpty())
-            ? GWT.<PathProviderInterface>create(PathProviderInterface.class)
-            : new PathProviderInterface() {
+    final PathProvider pathProvider = ((pathPrefix == null || pathPrefix.isEmpty())
+            ? GWT.<PathProvider>create(PathProvider.class)
+            : new PathProvider() {
                 @Override
                 public String getPathPrefix() {
                     return pathPrefix;
