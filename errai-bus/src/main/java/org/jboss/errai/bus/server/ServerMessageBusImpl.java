@@ -1128,7 +1128,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       HttpServletRequest.class.getName());
   
               String websocketScheme = "ws";
-              if (request.getScheme().equals("https") || useSecureWebsocket) {
+              if (request.getScheme().equals("https") || useSecureWebsocket || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"))) {
                 websocketScheme = "wss";
                 log.debug("use secure websocket");
               }
