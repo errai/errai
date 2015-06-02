@@ -216,8 +216,9 @@ public class MarshallerGeneratorFactory {
         continue;
       }
 
-      final Class<? extends Marshaller> marshallerCls = mappingContext.getDefinitionsFactory().getDefinition(clsName)
-          .getClientMarshallerClass();
+      final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clsName);
+      final Class<? extends Marshaller> marshallerCls = (target == MarshallerOutputTarget.GWT) ?
+              definition.getClientMarshallerClass() : definition.getServerMarshallerClass();
 
       if (marshallerCls == null) {
         continue;
