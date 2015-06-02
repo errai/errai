@@ -33,6 +33,12 @@
     <url>http://www.jboss.org</url>
   </organization>
 
+  <developers>
+    <developer>
+      <name>Errai team</name>
+    </developer>    
+  </developers>
+
   <!-- IMPORTANT: Do not declare any build things here! -->
   <build/>
 
