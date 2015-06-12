@@ -47,8 +47,11 @@ import java.util.Set;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.api.RpcContext;
 import org.jboss.errai.security.keycloak.extension.Filtered;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.RoleImpl;
@@ -56,6 +59,7 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.User.StandardUserProperties;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.exception.AlreadyLoggedInException;
+import org.jboss.errai.security.shared.exception.AuthenticationException;
 import org.jboss.errai.security.shared.exception.FailedAuthenticationException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.keycloak.KeycloakSecurityContext;
@@ -133,6 +137,13 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   public void logout() {
     if (keycloakIsLoggedIn()) {
       keycloakLogout();
+      
+      try {
+        if (RpcContext.getMessage() != null)
+          ((HttpServletRequest) RpcContext.getServletRequest()).logout();
+      } catch (ServletException e) {
+        throw new AuthenticationException("An error occurred while attempting to log out of Keycloak.");
+      }
     }
     else if (wrappedAuthService.isLoggedIn()) {
       wrappedAuthService.logout();
