@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import static org.jboss.errai.databinding.client.api.Convert.toModelValue;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -315,10 +316,16 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
-      String bindableProperty = property.substring(0, dotPos);
-      DataBinder binder = binders.get(bindableProperty);
+      final String bindableProperty = property.substring(0, dotPos);
+      final DataBinder binder = binders.get(bindableProperty);
       if (binder != null) {
-        binder.unbind(property.substring(dotPos + 1));
+        final BindableProxyAgent<T> nestedAgent = ((BindableProxy<T>) binder.getModel()).getAgent();
+        final Collection<Binding> nestedBindings = nestedAgent.bindings.get(property.substring(dotPos + 1));
+        for (Binding nestedBinding : nestedBindings.toArray(new Binding[nestedBindings.size()])) {
+          if (binding.getWidget() == nestedBinding.getWidget()) {
+            nestedAgent.unbind(nestedBinding);
+          }
+        }
       }
     }
     binding.removeHandlers();
