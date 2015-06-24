@@ -206,6 +206,8 @@ public interface TestSerializationRPCService {
   public EntityWithInheritedTypeVariable<String> testEntityWithInheritedTypeVariable(EntityWithInheritedTypeVariable<String> entity);
 
   public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(GenericEntityWithConstructorMapping<String> entity);
+  
+  public <A extends GenericEntity<R>, R extends Student> R testIncrediblyGenericRpcMethod(A arg);
 
   public EntityWithUnderscore_InClassName testEntityWithUnderscore_InClassName(EntityWithUnderscore_InClassName e);
 

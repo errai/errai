@@ -2321,4 +2321,22 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  public void testIncrediblyGenericRpcMethod() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        GenericEntity<Student> arg = new GenericEntity<Student> ();
+        arg.setField(new Student(1, "smart"));
+        
+        MessageBuilder.createCall(new RemoteCallback<Student>() {
+          @Override
+          public void callback(Student response) {
+            assertEquals("smarter", response.getName());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testIncrediblyGenericRpcMethod(arg);
+      }
+    });
+  }
 }

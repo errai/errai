@@ -63,6 +63,7 @@ import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
 import org.jboss.errai.bus.client.tests.support.Outer;
 import org.jboss.errai.bus.client.tests.support.Outer2;
+import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
@@ -504,5 +505,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public Outer2 testBackReferenceOrderingWithMapsToInverted(Outer2 entity) {
     return entity;
+  }
+
+  @Override
+  public <A extends GenericEntity<R>, R extends Student> R testIncrediblyGenericRpcMethod(A arg) {
+    arg.getField().setName("smarter");
+    return arg.getField();
   }
 }
