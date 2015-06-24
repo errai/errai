@@ -283,7 +283,7 @@ public class BindableListWrapper<M> implements List<M> {
   private Object convertToProxy(Object element) {
     if (BindableProxyFactory.isBindableType(element)) {
       element = BindableProxyFactory.getBindableProxy(element, InitialState.FROM_MODEL);
-      final BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getAgent();
+      final BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getBindableProxyAgent();
       
       if (!elementChangeHandlers.containsKey(agent)) {
         // Register a property change handler on the element to fire a change
@@ -315,7 +315,7 @@ public class BindableListWrapper<M> implements List<M> {
       return;
     }
     
-    final BindableProxyAgent<?> agent= ((BindableProxy<?>) element).getAgent();
+    final BindableProxyAgent<?> agent= ((BindableProxy<?>) element).getBindableProxyAgent();
     removeElementChangeHandler(agent);
   }
   

@@ -319,7 +319,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       final String bindableProperty = property.substring(0, dotPos);
       final DataBinder binder = binders.get(bindableProperty);
       if (binder != null) {
-        final BindableProxyAgent<T> nestedAgent = ((BindableProxy<T>) binder.getModel()).getAgent();
+        final BindableProxyAgent<T> nestedAgent = ((BindableProxy<T>) binder.getModel()).getBindableProxyAgent();
         final Collection<Binding> nestedBindings = nestedAgent.bindings.get(property.substring(dotPos + 1));
         for (Binding nestedBinding : nestedBindings.toArray(new Binding[nestedBindings.size()])) {
           if (binding.getWidget() == nestedBinding.getWidget()) {
@@ -644,8 +644,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         DataBinder nestedBinder = binders.get(property);
         DataBinder otherNestedBinder = (DataBinder) other.binders.get(property);
         if (nestedBinder != null && otherNestedBinder != null) {
-          BindableProxyAgent nestedAgent = ((BindableProxy<T>) nestedBinder.getModel()).getAgent();
-          BindableProxyAgent otherNestedAgent = ((BindableProxy<T>) otherNestedBinder.getModel()).getAgent();
+          BindableProxyAgent nestedAgent = ((BindableProxy<T>) nestedBinder.getModel()).getBindableProxyAgent();
+          BindableProxyAgent otherNestedAgent = ((BindableProxy<T>) otherNestedBinder.getModel()).getBindableProxyAgent();
           nestedAgent.fireChangeEvents(otherNestedAgent);
         }
 

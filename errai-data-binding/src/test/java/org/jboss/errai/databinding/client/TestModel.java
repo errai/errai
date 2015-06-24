@@ -53,7 +53,6 @@ public class TestModel {
   private String oldValue;
 
   // test for the case there's a field name collision in the generated proxy
-  @SuppressWarnings("unused")
   private String agent;
 
   private BigDecimal amountDec;
@@ -179,6 +178,15 @@ public class TestModel {
 
   public void setAmountInt(BigInteger amountInt) {
     this.amountInt = amountInt;
+  }
+  
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-840
+  public String getAgent() {
+    return agent;
+  }
+
+  public void setAgent(String agent) {
+    this.agent = agent;
   }
 
   // This guards against regressions of https://issues.jboss.org/browse/ERRAI-479

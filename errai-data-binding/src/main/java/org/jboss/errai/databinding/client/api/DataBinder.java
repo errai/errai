@@ -404,15 +404,15 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     InitialState newInitState = (initialState != null) ? initialState : getAgent().getInitialState();
     if (model instanceof BindableProxy) {
       newProxy = (BindableProxy<T>) model;
-      newProxy.getAgent().setInitialState(newInitState);
+      newProxy.getBindableProxyAgent().setInitialState(newInitState);
     }
     else {
       newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model, newInitState);
     }
 
-    newProxy.getAgent().mergePropertyChangeHandlers(propertyChangeHandlerSupport);
+    newProxy.getBindableProxyAgent().mergePropertyChangeHandlers(propertyChangeHandlerSupport);
     if (fireChangeEvents) {
-      newProxy.getAgent().fireChangeEvents(getAgent());
+      newProxy.getBindableProxyAgent().fireChangeEvents(getAgent());
     }
 
     if (newProxy != this.proxy) {
@@ -426,8 +426,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       // must be checked before unbind() removes the handlers
       boolean bindOnKeyUp = b.hasKeyUpBinding();
 
-      newProxy.getAgent().unbind(b);
-      bindings.put(b.getProperty(), newProxy.getAgent()
+      newProxy.getBindableProxyAgent().unbind(b);
+      bindings.put(b.getProperty(), newProxy.getBindableProxyAgent()
                                       .bind(b.getWidget(), b.getProperty(), b.getConverter(), bindOnKeyUp));
     }
     this.bindings = bindings;
@@ -490,7 +490,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   @SuppressWarnings("unchecked")
   private BindableProxyAgent<T> getAgent() {
     ensureProxied();
-    return ((BindableProxy<T>) this.proxy).getAgent();
+    return ((BindableProxy<T>) this.proxy).getBindableProxyAgent();
   }
 
   @SuppressWarnings("unchecked")
