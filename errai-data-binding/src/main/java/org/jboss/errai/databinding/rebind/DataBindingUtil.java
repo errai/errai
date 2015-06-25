@@ -301,9 +301,25 @@ public class DataBindingUtil {
    */
   public static Set<MetaClass> getConfiguredBindableTypes() {
     if (configuredBindableTypes != null) {
-      return configuredBindableTypes;
+        configuredBindableTypes = refreshConfiguredBindableTypes();
+    } else {
+        configuredBindableTypes = findConfiguredBindableTypes();
     }
     
+    return configuredBindableTypes;
+  }
+
+  private static Set<MetaClass> refreshConfiguredBindableTypes() {
+    final Set<MetaClass> refreshedTypes = new HashSet<MetaClass>(configuredBindableTypes.size());
+
+    for (final MetaClass clazz : configuredBindableTypes) {
+      refreshedTypes.add(MetaClassFactory.get(clazz.getFullyQualifiedName()));
+    }
+
+    return refreshedTypes;
+  }
+
+  private static Set<MetaClass> findConfiguredBindableTypes() {
     Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
     final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
     for (URL url : erraiAppProperties) {
@@ -337,8 +353,7 @@ public class DataBindingUtil {
         }
       }
     }
-    
-    configuredBindableTypes = bindableTypes;
-    return configuredBindableTypes;
+
+    return bindableTypes;
   }
 }
