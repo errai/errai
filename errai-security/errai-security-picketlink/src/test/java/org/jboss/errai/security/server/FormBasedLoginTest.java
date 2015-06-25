@@ -9,6 +9,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jboss.errai.security.Properties;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.junit.Test;
@@ -95,6 +96,8 @@ public class FormBasedLoginTest extends BaseSecurityFilterTest {
 
   @Test
   public void successfulFormBasedLoginShouldGetUserCookieInResponse() throws Exception {
+    when(properties.containsKey(Properties.USER_COOKIE_ENABLED)).thenReturn(true);
+    when(properties.getProperty(Properties.USER_COOKIE_ENABLED)).thenReturn("true");
     final UserImpl user = new UserImpl("this is the username we logged in with");
 
     setRequestAsLogin(user.getIdentifier(), "password");

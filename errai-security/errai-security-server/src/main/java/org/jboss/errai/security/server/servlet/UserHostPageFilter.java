@@ -15,10 +15,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.security.server.properties.ErraiAppProperties;
 import org.jboss.errai.security.shared.api.SecurityConstants;
@@ -35,7 +35,6 @@ import org.jsoup.nodes.Document;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@WebFilter(filterName = "ErraiUserHostPageFilter", urlPatterns = { "/index.jsp", "/index.html" })
 public class UserHostPageFilter implements Filter {
 
   @Inject
@@ -47,6 +46,8 @@ public class UserHostPageFilter implements Filter {
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
+    // Ensure Errai marshalling is initialized
+    MappingContextSingleton.get();
   }
 
   @Override

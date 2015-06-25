@@ -16,6 +16,9 @@
  */
 package org.jboss.errai.security.server.properties;
 
+import static org.jboss.errai.security.Properties.USER_ON_HOSTPAGE_ENABLED;
+import static org.jboss.errai.security.Properties.USER_COOKIE_ENABLED;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -45,6 +48,16 @@ public class ErraiAppPropertiesProducer {
       if (erraiAppPropertiesStream != null) {
         properties.load(erraiAppPropertiesStream);
         erraiAppPropertiesStream.close();
+        
+        if (!properties.containsKey(USER_ON_HOSTPAGE_ENABLED) && 
+                !properties.containsKey(USER_COOKIE_ENABLED)) {
+          // This is due to the backport of the user_on_hostpage fix in 3.2:
+          // - The user_cookie_enabled property did not exist in 3.0 
+          // - We want to avoid having to add this property to every single app which is why we 
+          // programmatically default to true
+          // More details:  https://bugzilla.redhat.com/show_bug.cgi?id=1222570
+          properties.setProperty(USER_COOKIE_ENABLED, "true");
+        }
       }
     }
     catch (IOException e) {

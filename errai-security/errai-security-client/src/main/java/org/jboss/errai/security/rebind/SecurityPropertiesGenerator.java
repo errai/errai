@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.security.Properties;
 import org.jboss.errai.security.client.local.storage.SecurityProperties;
 
 import com.google.gwt.core.ext.GeneratorContext;
@@ -29,8 +30,6 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 
 @GenerateAsync(SecurityProperties.class)
 public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
-
-  public static final String USER_COOKIE_ENABLED_PROP = "errai.security.user_cookie_enabled";
 
   private static final String PACKAGE_NAME = SecurityProperties.class.getPackage().getName();
   private static final String CLASS_NAME = SecurityProperties.class.getSimpleName() + "Impl";
@@ -57,18 +56,25 @@ public class SecurityPropertiesGenerator extends AbstractAsyncGenerator {
   }
 
   private boolean isLocalStorageSettingEnabled() {
-    final String localStorageSetting = EnvUtil.getEnvironmentConfig().getFrameworkProperties()
-            .get(USER_COOKIE_ENABLED_PROP);
+    final String userCookieEnabled = EnvUtil.getEnvironmentConfig().getFrameworkProperties()
+            .get(Properties.USER_COOKIE_ENABLED);
+    final String userOnHostPageEnabled = EnvUtil.getEnvironmentConfig().getFrameworkProperties()
+            .get(Properties.USER_ON_HOSTPAGE_ENABLED);
+    
     final boolean isLocalStorageAllowed;
-    if (localStorageSetting == null || localStorageSetting.equals("false")) {
+    
+    if (userCookieEnabled == null && userOnHostPageEnabled == null) {
+      isLocalStorageAllowed = true;
+    }
+    else if (userCookieEnabled == null || userCookieEnabled.equals("false")) {
       isLocalStorageAllowed = false;
     }
-    else if (localStorageSetting.equals("true")) {
+    else if (userCookieEnabled.equals("true")) {
       isLocalStorageAllowed = true;
     }
     else {
-      throw new IllegalStateException("The ErraiApp property, " + USER_COOKIE_ENABLED_PROP
-              + ", must have a value of \"true\" or \"false\". Given: " + localStorageSetting);
+      throw new IllegalStateException("The ErraiApp property, " + Properties.USER_COOKIE_ENABLED
+              + ", must have a value of \"true\" or \"false\". Given: " + userCookieEnabled);
     }
 
     return isLocalStorageAllowed;

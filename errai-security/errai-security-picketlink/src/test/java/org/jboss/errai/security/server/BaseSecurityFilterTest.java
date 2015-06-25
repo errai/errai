@@ -1,16 +1,16 @@
 package org.jboss.errai.security.server;
 
-import static org.jboss.errai.security.server.FormAuthenticationScheme.*;
-import static org.mockito.Mockito.*;
-import static org.picketlink.authentication.web.AuthenticationFilter.*;
+import static org.jboss.errai.security.server.FormAuthenticationScheme.HOST_PAGE_INIT_PARAM;
+import static org.jboss.errai.security.server.FormAuthenticationScheme.LOGIN_PAGE_INIT_PARAM;
+import static org.mockito.Mockito.when;
+import static org.picketlink.authentication.web.AuthenticationFilter.FORCE_REAUTHENTICATION_INIT_PARAM;
+
+import java.util.Properties;
 
 import javax.enterprise.inject.Instance;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.errai.marshalling.client.Marshalling;
-import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.security.server.mock.MockFilterConfig;
 import org.jboss.errai.security.server.mock.MockHttpServletRequest;
 import org.jboss.errai.security.server.mock.MockHttpSession;
@@ -74,6 +74,9 @@ public abstract class BaseSecurityFilterTest {
 
   @Mock
   protected AuthenticationService authService;
+  
+  @Mock
+  protected Properties properties;
 
   @InjectMocks
   protected FormAuthenticationScheme formAuthenticationScheme;

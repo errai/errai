@@ -1,9 +1,13 @@
 package org.jboss.errai.security.server;
 
+import static org.jboss.errai.security.Properties.USER_COOKIE_ENABLED;
+import static org.jboss.errai.security.Properties.USER_ON_HOSTPAGE_ENABLED;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -13,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.security.server.properties.ErraiAppProperties;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.picketlink.authentication.web.HTTPAuthenticationScheme;
@@ -32,6 +37,10 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
 
   @Inject
   private AuthenticationService authenticationService;
+  
+  @Inject
+  @ErraiAppProperties
+  private Properties properties;
 
   /**
    * URI of the GWT host page, relative to the servlet container root (so it starts with '/' and includes the context
@@ -112,11 +121,13 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
 
   @Override
   public boolean postAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Cookie erraiUserCacheCookie = new Cookie(
-            UserCookieEncoder.USER_COOKIE_NAME,
-            UserCookieEncoder.toCookieValue(authenticationService.getUser()));
-    response.addCookie(erraiUserCacheCookie);
-
+    
+    if (isUserCookieEnabled()) {
+      Cookie erraiUserCacheCookie = new Cookie(UserCookieEncoder.USER_COOKIE_NAME,
+              UserCookieEncoder.toCookieValue(authenticationService.getUser()));
+      response.addCookie(erraiUserCacheCookie);
+    }
+    
     StringBuilder redirectTarget = new StringBuilder(hostPageUri);
     String extraParams = extractParameters(request);
     if (extraParams.length() > 0) {
@@ -127,6 +138,13 @@ public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
     return false;
   }
 
+  private boolean isUserCookieEnabled() {
+    if (properties.containsKey(USER_COOKIE_ENABLED)) {
+      return Boolean.parseBoolean(properties.getProperty(USER_COOKIE_ENABLED));
+    }
+    return false;
+  }
+  
   /**
    * Extracts all parameters except the username and password into a URL-encoded query string. The string does not begin
    * or end with a "&amp;".
