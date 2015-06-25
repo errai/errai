@@ -19,6 +19,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.security.server.properties.ErraiAppProperties;
 import org.jboss.errai.security.shared.api.SecurityConstants;
@@ -47,6 +48,8 @@ public class UserHostPageFilter implements Filter {
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
+    // Initialize server side marshaller
+    MappingContextSingleton.get();
   }
 
   @Override
