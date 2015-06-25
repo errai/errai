@@ -163,5 +163,10 @@ public interface JacksonTestService {
   
   @GET
   @Path("/ids")
-  public String getWithQueryParamListOfStrings(@QueryParam("id") List<String> ids);
+  public String getWithQueryParamListOfStrings(
+          @QueryParam("id") List<String> ids);
+
+  @POST
+  @Path("/TypeInfo")
+  public String postJsonFormatEnhancer(String jackson);
 }

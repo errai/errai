@@ -46,6 +46,19 @@ import com.google.gwt.json.client.JSONValue;
  */
 public class JacksonTransformer {
   private JacksonTransformer() {};
+  
+  public static interface JsonFormatEnhancer {
+    public JSONObject toEncode(JSONObject obj);
+
+    public JSONObject fromEncode(JSONObject obj);
+  }
+
+  private static JsonFormatEnhancer jsonFormatEnhancer = null;
+
+  public static void setJsonFormatEnhancer(
+          JsonFormatEnhancer jsonFormatEnhancer) {
+    JacksonTransformer.jsonFormatEnhancer = jsonFormatEnhancer;
+  }
 
   /**
    * Transforms Errai JSON into a Jackson compatible JSON.
@@ -113,6 +126,9 @@ public class JacksonTransformer {
             objectCache.put(cacheKey, obj);
           }
         }
+      }
+      if (jsonFormatEnhancer != null) {
+        jsonFormatEnhancer.toEncode(obj);
       }
       obj.put(OBJECT_ID, null);
       obj.put(ENCODED_TYPE, null);
@@ -231,6 +247,9 @@ public class JacksonTransformer {
 
     if ((obj = val.isObject()) != null) {
       obj.put(OBJECT_ID, new JSONString(new Integer(++objectId[0]).toString()));
+      if (jsonFormatEnhancer != null) {
+        jsonFormatEnhancer.fromEncode(obj);
+      }
 
       for (String k : obj.keySet()) {
         fromJackson(obj.get(k), k, obj, objectId);
