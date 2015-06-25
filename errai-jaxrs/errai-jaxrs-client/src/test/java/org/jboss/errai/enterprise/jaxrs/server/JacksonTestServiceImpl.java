@@ -177,7 +177,7 @@ public class JacksonTestServiceImpl implements JacksonTestService {
   @Override
   public String postJacksonTypeInfo(String jackson) {
     ObjectMapper mapper = new ObjectMapper();
-    System.out.println(jackson);
+    
     mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY); // all non-final types
     mapper.registerSubtypes(new NamedType(SubEntity.class));
     try {

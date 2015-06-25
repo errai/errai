@@ -381,35 +381,43 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
   
   @Test
   public void testJacksonMarshallingOfEntityWithCustomTypeInfo() {
-    delayTestFinish(5000);
-    final Entity entity = new SubEntity("post-entity");
-    JacksonTransformer.setJsonTypeInfoProvider(new JacksonTransformer.CustomJsonConverter() {
+    delayTestFinish(5000);    
+    final JacksonTransformer.CustomJsonConverter converter = new JacksonTransformer.CustomJsonConverter() {
 		
 		@Override
 		public void toEncode(JSONObject obj) {
-			 obj.put("@class", obj.get(ENCODED_TYPE));
-			
+			 obj.put("@class", obj.get(ENCODED_TYPE));		
 		}
 		
 		@Override
 		public void fromEncode(JSONObject obj) {
-			 obj.put(ENCODED_TYPE, obj.get("@class"));
-			
+			 obj.put(ENCODED_TYPE, obj.get("@class"));			
 		}
-	});
-    String jackson = MarshallingWrapper.toJSON(entity);
-    call(JacksonTestService.class,
-        new RemoteCallback<String>() {
-          @Override
-          public void callback(String jackson) {
-        	JacksonTransformer.setJsonTypeInfoProvider(null);
-            assertNotNull("Server failed to parse JSON using Jackson", jackson);
-            @SuppressWarnings("unchecked")
-            Entity result = MarshallingWrapper.fromJSON(jackson, SubEntity.class);            
-            assertEquals(entity, result);
-            
-            finishTest();
-          }        
-        }).postJacksonTypeInfo(jackson);
+	};
+    
+    JacksonTransformer.setJsonTypeInfoProvider(converter);
+    try{
+    	final Entity entity = new SubEntity("post-entity");
+	    String jackson = MarshallingWrapper.toJSON(entity);
+	    call(JacksonTestService.class,
+	        new RemoteCallback<String>() {
+	          @Override
+	          public void callback(String jackson) {
+	        	assertNotNull("Server failed to parse JSON using Jackson", jackson);
+	        	JacksonTransformer.setJsonTypeInfoProvider(converter);
+	            try{
+	            	@SuppressWarnings("unchecked")
+	            	Entity result = MarshallingWrapper.fromJSON(jackson, SubEntity.class);            
+	            	assertEquals(entity, result);
+	            } finally{
+	            	JacksonTransformer.setJsonTypeInfoProvider(null);
+	            }
+	            
+	            finishTest();
+	          }        
+	        }).postJacksonTypeInfo(jackson);
+    } finally{
+    	JacksonTransformer.setJsonTypeInfoProvider(null);
+    }
   }
 }
