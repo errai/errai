@@ -5,7 +5,7 @@
   <groupId>org.jboss.errai.demos</groupId>
   <name>Errai::CDI::Demos::MVP</name>
   <artifactId>errai-cdi-demo-mvp</artifactId>
-  <version>3.0.5-SNAPSHOT</version>
+  <version>3.0.5.Final</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
