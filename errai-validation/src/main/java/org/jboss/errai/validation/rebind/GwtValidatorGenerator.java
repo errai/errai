@@ -136,6 +136,9 @@ class GwtValidatorGenerator {
       for (MetaMethod method : ClassScanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
         beans.put(method.getDeclaringClass(), method.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
       }
+      for (MetaClass type : ClassScanner.getTypesAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
+        beans.put(type, type.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
+      }
     }
 
     return beans;

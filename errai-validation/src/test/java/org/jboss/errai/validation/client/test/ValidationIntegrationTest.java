@@ -27,6 +27,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.validation.client.BeanValidator;
+import org.jboss.errai.validation.client.ClassLevelConstraintBean;
 import org.jboss.errai.validation.client.ModuleWithInjectedValidator;
 import org.jboss.errai.validation.client.TestGroup;
 import org.jboss.errai.validation.client.TestModel;
@@ -205,4 +206,13 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Expected no constraint violations", 0, violations.size());
   }
 
+  public void testValidationOfTypeWithClassLevelValidationAnnotation() {
+    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    ClassLevelConstraintBean type = new ClassLevelConstraintBean();
+    Set<ConstraintViolation<ClassLevelConstraintBean>> violations = validator.validate(type);
+    assertEquals("Expected one constraint violation", 1, violations.size());
+    type.setId(5);
+    violations = validator.validate(type);
+    assertEquals("Expected no constraint violations", 0, violations.size());
+  }
 }
