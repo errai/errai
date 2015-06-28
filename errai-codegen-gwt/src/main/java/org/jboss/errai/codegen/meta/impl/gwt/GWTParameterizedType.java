@@ -48,6 +48,11 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
       else if (parm.isTypeParameter() != null) {
         types.add(new GWTTypeVariable(oracle, parm.isTypeParameter()));
       }
+      else if (parm.isArray() != null
+              && parm.isArray().getComponentType().isTypeParameter() != null) {
+        // is generic array. Erase to Object[]
+        types.add(GWTClass.newInstance(oracle, parm.isArray().getErasedType()));
+      }
       else if (parm.isClassOrInterface() != null
               || parm.isEnum() != null
               || parm.isPrimitive() != null
