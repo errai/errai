@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2015-06-02</date>
+    <date>2015-07-03</date>
     
     
     
@@ -723,7 +723,7 @@ public class Bar {
   }
 }</programlisting>
 <simpara>We have added a field of the type <literal><phrase role="code">Foo</phrase></literal> which we declared earlier, and we have annotated it with <literal><phrase role="code">javax.inject.Inject</phrase></literal>. This tells the container to inject an instance of <literal><phrase role="code">Foo</phrase></literal> into our bean. Since our <literal><phrase role="code">Foo</phrase></literal> bean is of the dependent scope, the bean manager will actually create a <emphasis>new</emphasis> instance of <literal><phrase role="code">Foo</phrase></literal> and pass it in.</simpara>
-<simpara>This scope of the newly instantiated <literal><phrase role="code">Foo</phrase></literal> is <emphasis>dependent</emphasis> on the scope that it was injected into. In this case, the application scope. On the other hand, if we were to turn around an inject <literal><phrase role="code">Bar</phrase></literal> into <literal><phrase role="code">Foo</phrase></literal> , the behaviour is quite different.</simpara>
+<simpara>This scope of the newly instantiated <literal><phrase role="code">Foo</phrase></literal> is <emphasis>dependent</emphasis> on the scope that it was injected into. In this case, the application scope. On the other hand, if we were to turn around an inject <literal><phrase role="code">Bar</phrase></literal> into <literal><phrase role="code">Foo</phrase></literal>, the behaviour is quite different.</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class Foo {
   @Inject Bar bar;
 
@@ -814,7 +814,7 @@ public class Bar {
 <simpara>But before we dive into the details, let&#8217;s look at some use cases.</simpara>
 <section id="sid-5931280_MessagingAPIBasics-SendingMessageswiththeClientBus">
 <title>Sending Messages with the Client Bus</title>
-<simpara>In order to send a message from a client you need to create a <literal><phrase role="code">Message</phrase></literal> and send it through an instance of <literal><phrase role="code">MessageBus</phrase></literal> . In this simple example we send it to the subject <emphasis>HelloWorldService</emphasis>.</simpara>
+<simpara>In order to send a message from a client you need to create a <literal><phrase role="code">Message</phrase></literal> and send it through an instance of <literal><phrase role="code">MessageBus</phrase></literal>. In this simple example we send it to the subject <emphasis>HelloWorldService</emphasis>.</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class HelloWorld implements EntryPoint {
 
   // Get an instance of the RequestDispatcher
@@ -1106,7 +1106,7 @@ MessageBuilder.createMessage()
 </section>
 <section id="sid-5931309">
 <title>Asynchronous Message Tasks</title>
-<simpara>In some applications, it may be necessary or desirable to delay transmission of, or continually stream data to a remote client or group of clients (or from a client to the server). In cases like this, you can utilize the <literal><phrase role="code">replyRepeating()</phrase></literal> , <literal><phrase role="code">replyDelayed()</phrase></literal> , <literal><phrase role="code">sendRepeating()</phrase></literal> and <literal><phrase role="code">sendDelayed()</phrase></literal> methods in the <literal><phrase role="code">MessageBuilder</phrase></literal>.</simpara>
+<simpara>In some applications, it may be necessary or desirable to delay transmission of, or continually stream data to a remote client or group of clients (or from a client to the server). In cases like this, you can utilize the <literal><phrase role="code">replyRepeating()</phrase></literal>, <literal><phrase role="code">replyDelayed()</phrase></literal>, <literal><phrase role="code">sendRepeating()</phrase></literal> and <literal><phrase role="code">sendDelayed()</phrase></literal> methods in the <literal><phrase role="code">MessageBuilder</phrase></literal>.</simpara>
 <simpara>Delayed TasksSending a task with a delay is straight forward. Simply utilize the appropriate method (either <literal><phrase role="code">replyDelayed()</phrase></literal> or <literal><phrase role="code">sendDelayed()</phrase></literal>).</simpara>
 <programlisting language="java" linenumbering="unnumbered">  MessageBuilder.createConversation(msg)
     .toSubject("FunSubject")
@@ -1203,7 +1203,7 @@ MessageBuilder.createMessage()
   {"ToSubject" : "SomeOtherEndpoint", "Value" : "SomeOtherValue"}
 ]</programlisting>
 </example>
-<simpara>Here we see an example of a J.REP payload containing two messages. One bound for an endpoint named <literal><phrase role="code">"SomeEndpoint"</phrase></literal> and the other bound for the endpoint <literal><phrase role="code">"SomeOtherEndpoint"</phrase></literal> . They both include a payload element <literal><phrase role="code">"Value"</phrase></literal> which contain strings. Let&#8217;s take a look at the anatomy of an individual message.</simpara>
+<simpara>Here we see an example of a J.REP payload containing two messages. One bound for an endpoint named <literal><phrase role="code">"SomeEndpoint"</phrase></literal> and the other bound for the endpoint <literal><phrase role="code">"SomeOtherEndpoint"</phrase></literal>. They both include a payload element <literal><phrase role="code">"Value"</phrase></literal> which contain strings. Let&#8217;s take a look at the anatomy of an individual message.</simpara>
 <example>
 <title>An J.REP Message</title>
 <programlisting language="java" linenumbering="unnumbered">{
@@ -1765,7 +1765,7 @@ public class HelloWorldService implements MessageCallback {
 &lt;/context-param&gt;</programlisting>
 <simpara>This will work for the sideband-server as well as JBoss AS7 and WildFly based websocket support.</simpara>
 <important>
-<title>Dont forget to configure your reverse-proxy or appliance to handle websocket connections with SSL!</title>
+<title>Don&#8217;t forget to configure your reverse-proxy or appliance to handle websocket connections with SSL!</title>
 <simpara>To use this kind of configuration you have to configure your reverse-proxy or appliance to use HTTPS (SSL / TLS).</simpara>
 </important>
 </section>
@@ -1955,7 +1955,7 @@ public class SignupServiceShadow implements SignupService {
     System.out.println(this.timeService.getTime());
   }
 }</programlisting>
-<simpara>In order to inject <literal><phrase role="code">TimeService</phrase></literal> , you must annotate it with <literal><phrase role="code">@ApplicationScoped</phrase></literal> or the Errai DI container will not acknowledge the type as a bean.</simpara>
+<simpara>In order to inject <literal><phrase role="code">TimeService</phrase></literal>, you must annotate it with <literal><phrase role="code">@ApplicationScoped</phrase></literal> or the Errai DI container will not acknowledge the type as a bean.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class TimeService {
 }</programlisting>
@@ -1965,7 +1965,7 @@ public class TimeService {
 </tip>
 <section id="sid-5931407">
 <title>Container Wiring</title>
-<simpara>In contrast to <ulink url="http://code.google.com/p/google-gin/">Gin</ulink> , the Errai IOC container does not provide a programmatic way of creating and configuring injectors. Instead, container-level binding rules are defined by implementing a <literal><phrase role="code">Provider</phrase></literal> , which is scanned for and auto-discovered by the container.</simpara>
+<simpara>In contrast to <ulink url="http://code.google.com/p/google-gin/">Gin</ulink> , the Errai IOC container does not provide a programmatic way of creating and configuring injectors. Instead, container-level binding rules are defined by implementing a <literal><phrase role="code">Provider</phrase></literal>, which is scanned for and auto-discovered by the container.</simpara>
 <simpara>A <literal><phrase role="code">Provider</phrase></literal> is essentially a factory which produces type instances within in the container, and defers instantiation responsibility for the provided type to the provider implementation. Top-level providers use the standard <literal><phrase role="code">javax.inject.Provider&lt;T&gt;</phrase></literal> interface.</simpara>
 <simpara>Types made available as <emphasis>top-level</emphasis> providers will be available for injection in any managed component within the container.</simpara>
 <simpara>Out of the box, Errai IOC implements these default top-level providers, all defined in the <literal><phrase role="code">org.jboss.errai.ioc.client.api.builtin</phrase></literal> package:</simpara>
@@ -1988,7 +1988,7 @@ public class TimeService {
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">IOCBeanManagerProvider :</phrase></literal> Makes Errai&#8217;s client-side bean manager, <literal><phrase role="code">ClientBeanManager</phrase></literal> , available for injection.</simpara>
+      <simpara><literal><phrase role="code">IOCBeanManagerProvider :</phrase></literal> Makes Errai&#8217;s client-side bean manager, <literal><phrase role="code">ClientBeanManager</phrase></literal>, available for injection.</simpara>
       
     </listitem>
   
@@ -2314,7 +2314,7 @@ private void updateTime() {
   }
 }</programlisting>
 </example>
-<simpara>In this example we lookup a bean class named <literal><phrase role="code">SimpleBean</phrase></literal> . This example will succeed assuming that <literal><phrase role="code">SimpleBean</phrase></literal> is unambiguous. If the bean is ambiguous and requires qualification, you can do a qualified lookup like so:</simpara>
+<simpara>In this example we lookup a bean class named <literal><phrase role="code">SimpleBean</phrase></literal>. This example will succeed assuming that <literal><phrase role="code">SimpleBean</phrase></literal> is unambiguous. If the bean is ambiguous and requires qualification, you can do a qualified lookup like so:</simpara>
 <example>
 <title>Looking up beans with qualifiers</title>
 <programlisting language="java" linenumbering="unnumbered">MyQualifier qual = new MyQualifier() {
@@ -2463,7 +2463,7 @@ public class SimpleBean {
   }
 }</programlisting>
 </example>
-<simpara>In this example we pass the instance of <literal><phrase role="code">AnotherBean,</phrase></literal> created as a dependency of <literal><phrase role="code">SimpleBean,</phrase></literal> to the bean manager for destruction. Because this bean was created at the same time as its parent, its destruction will also result in the destruction of <literal><phrase role="code">SimpleBean</phrase></literal>; thus, this action will result in the <literal><phrase role="code">@PreDestroy</phrase></literal>[code]<literal>cleanUp()</literal> method of <literal><phrase role="code">SimpleBean</phrase></literal> being invoked.</simpara>
+<simpara>In this example we pass the instance of <literal><phrase role="code">AnotherBean</phrase></literal>, created as a dependency of <literal><phrase role="code">SimpleBean</phrase></literal>, to the bean manager for destruction. Because this bean was created at the same time as its parent, its destruction will also result in the destruction of <literal><phrase role="code">SimpleBean</phrase></literal>; thus, this action will result in the <literal><phrase role="code">@PreDestroy</phrase></literal> <literal><phrase role="code">cleanUp()</phrase></literal> method of <literal><phrase role="code">SimpleBean</phrase></literal> being invoked.</simpara>
 <section id="sid-22872238_BeanLifecycle-Disposers">
 <title>Disposers</title>
 <simpara>Another way which beans can be destroyed is through the use of the injectable <literal><phrase role="code">org.jboss.errai.ioc.client.api.Disposer&lt;T&gt;</phrase></literal> class. The class provides a straight forward way of disposing of bean type.</simpara>
@@ -2849,7 +2849,7 @@ public class MyComposite extends Composite {
 <itemizedlist>
   
     <listitem>
-      <simpara>If an entity type has a field called <literal><phrase role="code">foo</phrase></literal>, then that entity has a property called <literal><phrase role="code">foo</phrase></literal> unless the field is marked <literal><phrase role="code">static</phrase></literal> or [code]+transient.</simpara>
+      <simpara>If an entity type has a field called <literal><phrase role="code">foo</phrase></literal>, then that entity has a property called <literal><phrase role="code">foo</phrase></literal> unless the field is marked <literal><phrase role="code">static</phrase></literal> or <literal><phrase role="code">transient</phrase></literal>.</simpara>
       
     </listitem>
   
@@ -3026,7 +3026,7 @@ public class Person {
 <section id="sid-5931328_Marshalling-AliasedMappingsofExistingInterfaceContracts">
 <title>Aliased Mappings of Existing Interface Contracts</title>
 <simpara>The marshalling framework supports and promotes the concept of marshalling by interface contract, where possible. For instance, the framework ships with a marshaller which can marshall data to and from the <literal><phrase role="code">java.util.List</phrase></literal> interface. Instead of having custom marshallers for classes such as <literal><phrase role="code">ArrayList</phrase></literal> and <literal><phrase role="code">LinkedList</phrase></literal>, by default, these implementations are merely aliased to the <literal><phrase role="code">java.util.List</phrase></literal> marshaller.</simpara>
-<simpara>There are two distinct ways to go about doing this. The most straightforward is to specify which marshaller to alias when declaring your class is <literal><phrase role="code">@Portable</phrase></literal> .</simpara>
+<simpara>There are two distinct ways to go about doing this. The most straightforward is to specify which marshaller to alias when declaring your class is <literal><phrase role="code">@Portable</phrase></literal>.</simpara>
 <programlisting language="java" linenumbering="unnumbered">package org.foo.client;
 
 @Portable(aliasOf = java.util.List.class)
@@ -3039,7 +3039,7 @@ public MyListImpl extends ArrayList {
                                  org.foo.client.MyMapImpl-&gt;java.util.Map</programlisting>
 <simpara>The list of classes is whitespace-separated so that it may be split across lines.</simpara>
 <simpara>The example above shows the equivalent mapping for the <literal><phrase role="code">MyListImpl</phrase></literal> class from the previous example, as well as a mapping of a class to the <literal><phrase role="code">java.util.Map</phrase></literal> marshaller.</simpara>
-<simpara>The syntax of the mapping is as follows: <literal><phrase role="code">&lt;class_to_map&gt;</phrase></literal><emphasis>&#8594;</emphasis>[code]<literal>&lt;contract_to_map_to&gt;</literal>.</simpara>
+<simpara>The syntax of the mapping is as follows: <literal><phrase role="code">&lt;class_to_map&gt;</phrase></literal><emphasis>&#8594;</emphasis><literal><phrase role="code">&lt;contract_to_map_to&gt;</phrase></literal>.</simpara>
 <important>
 <title>Aliases do not inherit fields!</title>
 <simpara>When you alias a class to another marshalling contract, extended fields of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.</simpara>
@@ -3077,7 +3077,7 @@ public MyListImpl extends ArrayList {
 <simpara>Let us construct this object like so:</simpara>
 <programlisting language="java" linenumbering="unnumbered">  MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
   entity.setSuperNickname("coo");</programlisting>
-<simpara>It is clear that we may rely on this object&#8217;s two getter methods to extract the totality of its state. But due to the fact that the <literal><phrase role="code">mySuperName</phrase></literal> field is final, the only way to properly construct this object is to call its only public constructor and pass in the desired value of <literal><phrase role="code">mySuperName</phrase></literal> .</simpara>
+<simpara>It is clear that we may rely on this object&#8217;s two getter methods to extract the totality of its state. But due to the fact that the <literal><phrase role="code">mySuperName</phrase></literal> field is final, the only way to properly construct this object is to call its only public constructor and pass in the desired value of <literal><phrase role="code">mySuperName</phrase></literal>.</simpara>
 <simpara>Let us consider how we could go about telling the marshalling framework to pull this off:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@CustomMapping
 public MySuperCustomEntityMapping extends MappingDefinition {
@@ -3110,17 +3110,17 @@ public MySuperCustomEntityMapping extends MappingDefinition {
     </listitem>
   
     <listitem>
-      <simpara>Using the <literal><phrase role="code">WriteMapping</phrase></literal> class, we have indicated to the marshaller framework how to write the <literal><phrase role="code">"mySuperNickname"</phrase></literal> field, using the <literal><phrase role="code">String.class</phrase></literal> marshaller, and using the setter method <literal><phrase role="code">setMySuperNickname</phrase></literal> .</simpara>
+      <simpara>Using the <literal><phrase role="code">WriteMapping</phrase></literal> class, we have indicated to the marshaller framework how to write the <literal><phrase role="code">"mySuperNickname"</phrase></literal> field, using the <literal><phrase role="code">String.class</phrase></literal> marshaller, and using the setter method <literal><phrase role="code">setMySuperNickname</phrase></literal>.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Using the <literal><phrase role="code">ReadMapping</phrase></literal> class, we have indicated to the marshaller framework how to read the <literal><phrase role="code">"mySuperName"</phrase></literal> field, using the <literal><phrase role="code">String.class</phrase></literal> marshaller, and using the getter method <literal><phrase role="code">getMySuperName</phrase></literal> .</simpara>
+      <simpara>Using the <literal><phrase role="code">ReadMapping</phrase></literal> class, we have indicated to the marshaller framework how to read the <literal><phrase role="code">"mySuperName"</phrase></literal> field, using the <literal><phrase role="code">String.class</phrase></literal> marshaller, and using the getter method <literal><phrase role="code">getMySuperName</phrase></literal>.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Using the <literal><phrase role="code">ReadMapping</phrase></literal> class, we have indicated to the marshaller framework how to read the <literal><phrase role="code">"mySuperNickname"</phrase></literal> field, using the <literal><phrase role="code">String.class</phrase></literal> marshaller, and using the getter method <literal><phrase role="code">getMySuperNickname</phrase></literal> .</simpara>
+      <simpara>Using the <literal><phrase role="code">ReadMapping</phrase></literal> class, we have indicated to the marshaller framework how to read the <literal><phrase role="code">"mySuperNickname"</phrase></literal> field, using the <literal><phrase role="code">String.class</phrase></literal> marshaller, and using the getter method <literal><phrase role="code">getMySuperNickname</phrase></literal>.</simpara>
       
     </listitem>
   
@@ -3430,7 +3430,7 @@ public class LongRunningServiceImpl implements LongRunningService {
     </listitem>
   
     <listitem>
-      <simpara>Errai IoC and CDI providers that allow you to <literal><phrase role="code">@Inject</phrase></literal> instances of {{Caller&lt;T&gt;} (the same API used in Errai RPC)}</simpara>
+      <simpara>Errai IoC and CDI providers that allow you to <literal><phrase role="code">@Inject</phrase></literal> instances of <literal><phrase role="code">Caller&lt;T&gt;</phrase></literal> (the same API used in Errai RPC)</simpara>
       
     </listitem>
   
@@ -3897,7 +3897,7 @@ public class MyCacheInterceptor implements RestClientInterceptor {
     </listitem>
   
     <listitem>
-      <simpara>Much of the Metamodel API ( <literal><phrase role="code">Metamodel</phrase></literal>, <literal><phrase role="code">EntityType</phrase></literal>, <literal><phrase role="code">SingularAttribute</phrase></literal>, <literal><phrase role="code">PluralAttribute</phrase></literal> , etc.)</simpara>
+      <simpara>Much of the Metamodel API ( <literal><phrase role="code">Metamodel</phrase></literal>, <literal><phrase role="code">EntityType</phrase></literal>, <literal><phrase role="code">SingularAttribute</phrase></literal>, <literal><phrase role="code">PluralAttribute</phrase></literal>, etc.)</simpara>
       
     </listitem>
   
@@ -3917,8 +3917,8 @@ public class MyCacheInterceptor implements RestClientInterceptor {
 <title>Manual Setup</title>
 <simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai JPA to your project.</simpara>
 </note>
-<section id="_inf_persistence_xml">
-<title>INF/persistence.xml</title>
+<section id="_meta_inf_persistence_xml">
+<title>META-INF/persistence.xml</title>
 <simpara>Errai ignores META-INF/persistence.xml for purposes of client-side JPA. Instead, Errai scans all Java packages that are part of your GWT modules for classes annotated with <literal><phrase role="code">@Entity</phrase></literal>. This allows you the freedom of defining a persistence.xml that includes both shared entity classes that you use on the client and the server, plus server-only entities that are defined in a server-only package.</simpara>
 </section>
 <section id="sid-54493688_ErraiJPA-DeclaringanEntityClass">
@@ -4211,7 +4211,7 @@ public class Main {
 <title>Detaching Entity Instances from the Entity Manager</title>
 <simpara>For every entity instance in the managed state, changes to the attribute values of that entity are persisted to local storage whenever the entity manager is flushed. To prevent this automatic updating from happening, you can <emphasis>detach</emphasis> an entity from the entity manager. When an instance is detached, it is not deleted. All information about it remains in persistent storage. The next time that entity is retrieved, the entity manager will create a new and separate managed instance for it.</simpara>
 <simpara>To detach one particular object along with all related objects whose cascade rules say so, call <literal><phrase role="code">EntityManager.detach()</phrase></literal> and pass in that object.</simpara>
-<simpara>To detach all objects from the entity manager at once, call <literal><phrase role="code">EntityManager.detachAll()</phrase></literal> .</simpara>
+<simpara>To detach all objects from the entity manager at once, call <literal><phrase role="code">EntityManager.detachAll()</phrase></literal>.</simpara>
 </section>
 <section id="sid-54493688_ErraiJPA-TestingifanEntityisintheManagedState">
 <title>Testing if an Entity is in the Managed State</title>
@@ -4377,7 +4377,7 @@ public class StandaloneLifecycleListener {
 <simpara>To access the JPA Metamodel, call the <literal><phrase role="code">EntityManager.getMetamodel()</phrase></literal> method. For details on what can be done with the stock JPA metamodel, see the API&#8217;s javadoc or consult the JPA specification.</simpara>
 <section id="sid-54493688_ErraiJPA-ErraiExtensionstoJPAMetamodelAPI">
 <title>Errai Extensions to JPA Metamodel API</title>
-<simpara>Wherever you obtain an instance of <literal><phrase role="code">SingularAttribute</phrase></literal> from the metamodel API, you can down-cast it to <literal><phrase role="code">ErraiSingularAttribute</phrase></literal>. Likewise, you can down-cast any <literal><phrase role="code">PluralAttribute</phrase></literal> to <literal><phrase role="code">ErraiPluralAttribute</phrase></literal> .</simpara>
+<simpara>Wherever you obtain an instance of <literal><phrase role="code">SingularAttribute</phrase></literal> from the metamodel API, you can down-cast it to <literal><phrase role="code">ErraiSingularAttribute</phrase></literal>. Likewise, you can down-cast any <literal><phrase role="code">PluralAttribute</phrase></literal> to <literal><phrase role="code">ErraiPluralAttribute</phrase></literal>.</simpara>
 <simpara>In either case, you can read the value of an arbitrary attribute by calling <literal><phrase role="code">ErraiAttribute.get()</phrase></literal> and passing in the entity instance. You can set any attribute&#8217;s value by calling <literal><phrase role="code">ErraiAttribute.set()</phrase></literal>, passing in the entity instance and the new value.</simpara>
 <simpara>In addition to <literal><phrase role="code">get()</phrase></literal> and <literal><phrase role="code">set()</phrase></literal>, <literal><phrase role="code">ErraiPluralAttribute</phrase></literal> also has the <literal><phrase role="code">createEmptyCollection()</phrase></literal> method, which creates an empty collection of the correct interface type for the given attribute.</simpara>
 </section>
@@ -4553,9 +4553,9 @@ public class Item {
 
   // getters and setters omitted
 }</programlisting>
-<simpara>To summarize: there are three entity types: <literal><phrase role="code">User</phrase></literal>, <literal><phrase role="code">GroceryList</phrase></literal>, and <literal><phrase role="code">Item</phrase></literal> . Each <literal><phrase role="code">GroceryList</phrase></literal> belongs to a <literal><phrase role="code">User</phrase></literal> and has a list of <literal><phrase role="code">Item</phrase></literal> objects.</simpara>
+<simpara>To summarize: there are three entity types: <literal><phrase role="code">User</phrase></literal>, <literal><phrase role="code">GroceryList</phrase></literal>, and <literal><phrase role="code">Item</phrase></literal>. Each <literal><phrase role="code">GroceryList</phrase></literal> belongs to a <literal><phrase role="code">User</phrase></literal> and has a list of <literal><phrase role="code">Item</phrase></literal> objects.</simpara>
 <note>
-<simpara>All the entities involved in the data synchronization request must be marshallable via Errai Marshalling. This is normally accomplished by adding the <literal><phrase role="code">@Portable</phrase></literal> annotation to each JPA entity class, but it is also acceptable to list them in <literal><phrase role="code">ErraiApp.properties</phrase></literal> . See the <link linkend="sid-5931328">Marshalling</link> section for more details.</simpara>
+<simpara>All the entities involved in the data synchronization request must be marshallable via Errai Marshalling. This is normally accomplished by adding the <literal><phrase role="code">@Portable</phrase></literal> annotation to each JPA entity class, but it is also acceptable to list them in <literal><phrase role="code">ErraiApp.properties</phrase></literal>. See the <link linkend="sid-5931328">Marshalling</link> section for more details.</simpara>
 </note>
 <simpara>Now let&#8217;s say we want to synchronize the data for all of a user&#8217;s grocery lists. This will make them available for offline use through Errai JPA, and at the same time it will update the server with the latest changes made on the client. Ultimately, the sync operation is accomplished via an annotated method or an asynchronous call into <literal>ClientSyncManager</literal>, but first we have to prepare a few things on the client and the server.</simpara>
 </section>
@@ -4852,7 +4852,7 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
 </section>
 <section id="sid-51282340_DataBinding-DeclarativeBinding">
 <title>Declarative Binding</title>
-<simpara>Programmatic binding as described above (see <link linkend="sid-51282340_DataBinding-CreatingBindings">Creating Bindings</link> ) can be tedious when working with UI components that contain a large number of input fields. Errai provides an annotation-driven binding API that can be used to create bindings automatically which cuts a lot of boilerplate code. The declarative API will work in any <link linkend="sid-5931402">Errai IOC</link> managed bean (including <link linkend="sid-51806600">Errai UI</link> templates). Simply inject a data binder or model object and declare the bindings using <literal><phrase role="code">@Bound</phrase></literal> .</simpara>
+<simpara>Programmatic binding as described above (see <link linkend="sid-51282340_DataBinding-CreatingBindings">Creating Bindings</link> ) can be tedious when working with UI components that contain a large number of input fields. Errai provides an annotation-driven binding API that can be used to create bindings automatically which cuts a lot of boilerplate code. The declarative API will work in any <link linkend="sid-5931402">Errai IOC</link> managed bean (including <link linkend="sid-51806600">Errai UI</link> templates). Simply inject a data binder or model object and declare the bindings using <literal><phrase role="code">@Bound</phrase></literal>.</simpara>
 <simpara>Here is a simple example using an injected model object provided by the <literal><phrase role="code">@Model</phrase></literal> annotation (field injection is used here, but constructor and method injection are supported as well):</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Dependent
 public class CustomerView {
@@ -4954,7 +4954,7 @@ public void onLoad() {
 <section id="sid-51282340_DataBinding-Replacingamodelobject">
 <title>Replacing a model object</title>
 <simpara>The injected model objects in the examples above are always proxies to the actual model since method invocations on these objects need to trigger additional logic for updating the UI. Special care needs to be taken in case a model object should be replaced.</simpara>
-<simpara>When working with an <literal><phrase role="code">@AutoBound DataBinder</phrase></literal> , simply calling <literal><phrase role="code">setModel()</phrase></literal> on the <literal><phrase role="code">DataBinder</phrase></literal> will be enough to replace the underlying model instance. However, when working with <literal><phrase role="code">@Model</phrase></literal> the instance cannot be replaced directly. Errai provides a special method level annotation <literal><phrase role="code">@ModelSetter</phrase></literal> that will allow replacing the model instance. Here&#8217;s an example:</simpara>
+<simpara>When working with an <literal><phrase role="code">@AutoBound DataBinder</phrase></literal>, simply calling <literal><phrase role="code">setModel()</phrase></literal> on the <literal><phrase role="code">DataBinder</phrase></literal> will be enough to replace the underlying model instance. However, when working with <literal><phrase role="code">@Model</phrase></literal> the instance cannot be replaced directly. Errai provides a special method level annotation <literal><phrase role="code">@ModelSetter</phrase></literal> that will allow replacing the model instance. Here&#8217;s an example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Dependent
 public class CustomerView {
   @Inject @Model
@@ -5025,7 +5025,8 @@ private Validator validator;</programlisting>
 <section id="sid-51282340_DataBinding-ExcludingClassesfromValidation">
 <title>Excluding Classes from Validation</title>
 <simpara>By default, Errai scans the entire classpath for classes with constraints. But sometimes it is necessary or desirable to exclude some shared classes from being validated on the client side. This can be done by adding a list of classes and package masks to the ErraiApp.properties file like so:</simpara>
-<programlisting language="ini" linenumbering="unnumbered"># The following blacklists the class some.fully.qualified.ClassName and all classes in some.package.mask (and subpackages thereof).
+<programlisting language="ini" linenumbering="unnumbered"># The following blacklists the class some.fully.qualified.ClassName and all classes
+# in some.package.mask (and subpackages thereof).
 errai.validation.blacklist = some.fully.qualified.ClassName \
                              some.package.mask.*</programlisting>
 </section>
@@ -5085,7 +5086,7 @@ public class Application {
 </section>
 <section id="sid-51806600_ErraiUI-Createa@TemplatedCompositecomponent">
 <title>Create a @Templated Composite component</title>
-<simpara>Custom components in Errai UI are single classes extending from <literal><phrase role="code">com.google.gwt.user.client.ui.Composite</phrase></literal> , and must be annotated with @Templated.</simpara>
+<simpara>Custom components in Errai UI are single classes extending from <literal><phrase role="code">com.google.gwt.user.client.ui.Composite</phrase></literal>, and must be annotated with @Templated.</simpara>
 <section id="sid-51806600_ErraiUI-Basiccomponent">
 <title>Basic component</title>
 <programlisting language="java" linenumbering="unnumbered">@Templated
@@ -5109,7 +5110,7 @@ public class LoginForm extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-CreateanHTMLtemplate">
 <title>Create an HTML template</title>
-<simpara>Templates in Errai UI may be designed either as an HTML snippet or as a full HTML document. You can even take an existing HTML page and use it as a template. With either approach, the <literal><phrase role="code">id</phrase></literal> , <literal><phrase role="code">class</phrase></literal> , and <literal><phrase role="code">data-field</phrase></literal> attributes in the template identify elements by name. These elements and their children are used in the Composite component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.</simpara>
+<simpara>Templates in Errai UI may be designed either as an HTML snippet or as a full HTML document. You can even take an existing HTML page and use it as a template. With either approach, the <literal><phrase role="code">id</phrase></literal>, <literal><phrase role="code">class</phrase></literal>, and <literal><phrase role="code">data-field</phrase></literal> attributes in the template identify elements by name. These elements and their children are used in the Composite component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.</simpara>
 <simpara>We will begin by creating a simple HTML login form to accompany our <literal><phrase role="code">@Templated LoginForm</phrase></literal> composite component.</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;form&gt;
   &lt;legend&gt;Log in to your account&lt;/legend&gt;
@@ -5125,12 +5126,12 @@ public class LoginForm extends Composite {
 &lt;/form&gt;</programlisting>
 <section id="sid-51806600_ErraiUI-SelectatemplatefromalargerHTMLfile">
 <title>Select a template from a larger HTML file</title>
-<simpara>Or as a full HTML document which may be more easily previewed during design without running the application; however, in this case we must also specify the location of our component&#8217;s root DOM Element using a <literal><phrase role="code">"data-field"</phrase></literal> , <literal><phrase role="code">id</phrase></literal> , or <literal><phrase role="code">class</phrase></literal> attribute matching the value of the @Templated annotation. There is no limit to how many component classes may share a given HTML template.</simpara>
+<simpara>Or as a full HTML document which may be more easily previewed during design without running the application; however, in this case we must also specify the location of our component&#8217;s root DOM Element using a <literal><phrase role="code">"data-field"</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attribute matching the value of the @Templated annotation. There is no limit to how many component classes may share a given HTML template.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html#login-form")
 public class LoginForm extends Composite {
-   /* Specifies that &lt;... id="login-form"&gt; be used as the root Element of this Widget  */
+   /* Specifies that &lt;... id="login-form"&gt; be used as the root Element of this Widget */
 }</programlisting>
-<simpara>Notice the corresponding HTML <literal><phrase role="code">id</phrase></literal> attribute in the form Element below (we could have used <literal><phrase role="code">data-field</phrase></literal> or <literal><phrase role="code">class</phrase></literal> instead). Note that multiple components may use the same template provided that they specify a corresponding <literal><phrase role="code">data-field</phrase></literal> , <literal><phrase role="code">id</phrase></literal> , or <literal><phrase role="code">class</phrase></literal> attribute. Also note that two or more components may share the same DOM elements; there is no conflict since components each receive a unique copy of the template DOM rooted at the designated element at runtime (or from the root element if a fragment is not specified.)</simpara>
+<simpara>Notice the corresponding HTML <literal><phrase role="code">id</phrase></literal> attribute in the form Element below (we could have used <literal><phrase role="code">data-field</phrase></literal> or <literal><phrase role="code">class</phrase></literal> instead). Note that multiple components may use the same template provided that they specify a corresponding <literal><phrase role="code">data-field</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attribute. Also note that two or more components may share the same DOM elements; there is no conflict since components each receive a unique copy of the template DOM rooted at the designated element at runtime (or from the root element if a fragment is not specified.)</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
@@ -5161,7 +5162,7 @@ public class LoginForm extends Composite {
 <simpara>For example&#8217;s sake, the component below could also use the same template. All it needs to do is reference the template name, and specify a fragment.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html#theme-footer")
 public class Footer extends Composite {
-   /* Specifies that &lt;... id="theme-footer"&gt; be used as the root Element of this Widget  */
+   /* Specifies that &lt;... id="theme-footer"&gt; be used as the root Element of this Widget */
 }</programlisting>
 </section>
 </section>
@@ -5170,14 +5171,15 @@ public class Footer extends Composite {
 <simpara>Now that we have created the @Templated Composite component and an HTML template, we can start wiring in functionality and behavior; this is done by annotating fields and methods to replace specific sub-elements of the template DOM with other Widgets. We can even replace portions of the template with other Errai UI Widgets!</simpara>
 <section id="sid-51806600_ErraiUI-AnnotateWidgetsinthetemplatewith@DataField">
 <title>Annotate Widgets in the template with @DataField</title>
-<simpara>In order to composite Widgets into the template DOM, you annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a correspondingly named <literal><phrase role="code">data-field</phrase></literal> , <literal><phrase role="code">id</phrase></literal> , or <literal><phrase role="code">class</phrase></literal> attribute. This informs Errai UI which element in the template the Widget should replace. All replacements happen while the @Templated Composite component is being constructed; thus, fields annotated with @DataField must either be {{@Inject}}ed or provide their own Widget or Element instances in field initializers.</simpara>
+<simpara>In order to composite Widgets into the template DOM, you annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a correspondingly named <literal><phrase role="code">data-field</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attribute. This informs Errai UI which element in the template the Widget should replace. All replacements happen while the @Templated Composite component is being constructed; thus, fields annotated with @DataField must either be <literal><phrase role="code">@Inject</phrase></literal>ed or provide their own Widget or Element instances in field initializers.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class LoginForm extends Composite {
-   // This element must be initialized manually because Element is not @Inject-able*/
+   // This element must be initialized manually because Element is not @Inject-able
    @DataField
    private Element form = DOM.createForm();
 
-   // If not otherwise specified, the name to match in the HTML template defaults to the name of the field; in this case, the name would be "username"
+   // If not otherwise specified, the name to match in the HTML template defaults
+   // to the name of the field; in this case, the name would be "username"
    @Inject
    @DataField
    private TextBox username;
@@ -5206,26 +5208,23 @@ public class LoginForm extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>If there is an element in the HTML template with attribute <literal><phrase role="code">data-field=name</phrase></literal> , the Java reference will point to this element. If there is more than one such element, the Java reference points to the first.</simpara>
+      <simpara>If there is an element in the HTML template with attribute <literal><phrase role="code">data-field=name</phrase></literal>, the Java reference will point to this element. If there is more than one such element, the Java reference points to the first.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Otherwise, if there is an element in the HTML template with attribute <literal><phrase role="code">id=name</phrase></literal> , the Java reference will point to this element. If there is more than one such element, the Java reference points to the first.</simpara>
+      <simpara>Otherwise, if there is an element in the HTML template with attribute <literal><phrase role="code">id=name</phrase></literal>, the Java reference will point to this element. If there is more than one such element, the Java reference points to the first.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Otherwise, if there is an element in the HTML template with a CSS style class <literal><phrase role="code">name</phrase></literal> , the Java reference will point to this element. If there is more than one such element, the Java reference points to the first. For elements with more than one CSS style, each style name is considered individually. For example:</simpara>
+      <simpara>Otherwise, if there is an element in the HTML template with a CSS style class <literal><phrase role="code">name</phrase></literal>, the Java reference will point to this element. If there is more than one such element, the Java reference points to the first. For elements with more than one CSS style, each style name is considered individually. For example:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">   &lt;div class="eat drink be-merry"&gt;</programlisting>
+<simpara>matches Java references named <literal><phrase role="code">eat</phrase></literal>, <literal><phrase role="code">drink</phrase></literal>, or <literal><phrase role="code">be-merry</phrase></literal>.</simpara>
+
       
     </listitem>
-  
-</orderedlist>
-<programlisting language="java" linenumbering="unnumbered">
-   &lt;div class="eat drink be-merry"&gt;
-</programlisting>
-<simpara>matches Java references named <literal><phrase role="code">eat</phrase></literal> , <literal><phrase role="code">drink</phrase></literal> , or <literal><phrase role="code">be-merry</phrase></literal> .</simpara>
-<orderedlist numeration="arabic">
   
     <listitem>
       <simpara>If no matching element is found by this point, it is an error.</simpara>
@@ -5233,17 +5232,17 @@ public class LoginForm extends Composite {
     </listitem>
   
 </orderedlist>
-<simpara>If more than one Java reference matches the same HTML element in the template, it is an error. For example, given a template containing the element <literal><phrase role="code">&lt;div class="eat drink be-merry"&gt;</phrase></literal> , the following Java code is in error:</simpara>
+<simpara>If more than one Java reference matches the same HTML element in the template, it is an error. For example, given a template containing the element <literal><phrase role="code">&lt;div class="eat drink be-merry"&gt;</phrase></literal>, the following Java code is in error:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class ErroneousTemplate extends Composite {
- @Inject @DataField
- private Label eat;
+   @Inject @DataField
+   private Label eat;
 
- @Inject @DataField
- private Label drink;
+   @Inject @DataField
+   private Label drink;
 }</programlisting>
 <simpara>because both fields <literal><phrase role="code">eat</phrase></literal> and <literal><phrase role="code">drink</phrase></literal> refer to the same HTML <literal><phrase role="code">div</phrase></literal> element.</simpara>
-<simpara>So now we must ensure there are <literal><phrase role="code">data-field</phrase></literal> , <literal><phrase role="code">id</phrase></literal> , or <literal><phrase role="code">class</phrase></literal> attributes in the right places in our template HTML file. This, combined with the @DataField annotation in our Composite component allow Errai UI to determine where and what should be composited when creating component instances.</simpara>
+<simpara>So now we must ensure there are <literal><phrase role="code">data-field</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attributes in the right places in our template HTML file. This, combined with the @DataField annotation in our Composite component allow Errai UI to determine where and what should be composited when creating component instances.</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;form id="form"&gt;
   &lt;legend&gt;Log in to your account&lt;/legend&gt;
 
@@ -5322,7 +5321,7 @@ This text will be ignored.</programlisting>
 </section>
 <section id="sid-51806600_ErraiUI-InnertextandinnerHTML%28preservedwhencomponentimplementsHasTextorHasHTML%29">
 <title>Inner text and inner HTML (preserved when component implements HasText or HasHTML)</title>
-<simpara>Additionally, because <literal><phrase role="code">Label</phrase></literal> implements both <literal><phrase role="code">HasText</phrase></literal> and <literal><phrase role="code">HasHTML</phrase></literal> (only one is required,) the contents of this &lt;span&gt; "field-1" Element in the template were preserved; however, this would not have been the case if the <literal><phrase role="code">@DataField</phrase></literal> specified for the element did not implement <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal> . In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a <literal><phrase role="code">@DataField</phrase></literal> reference, or ensure that the Widget being composited implements <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal>.</simpara>
+<simpara>Additionally, because <literal><phrase role="code">Label</phrase></literal> implements both <literal><phrase role="code">HasText</phrase></literal> and <literal><phrase role="code">HasHTML</phrase></literal> (only one is required,) the contents of this &lt;span&gt; "field-1" Element in the template were preserved; however, this would not have been the case if the <literal><phrase role="code">@DataField</phrase></literal> specified for the element did not implement <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal>. In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a <literal><phrase role="code">@DataField</phrase></literal> reference, or ensure that the Widget being composited implements <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal>.</simpara>
 </section>
 </section>
 <section id="sid-51806600_ErraiUI-Eventhandlers">
@@ -5371,7 +5370,7 @@ public class WidgetHandlerComponent extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-GWTeventsonDOMElements">
 <title>GWT events on DOM Elements</title>
-<simpara>Errai UI also makes it possible to handle GWT events on native Elements which are specified as a <literal><phrase role="code">@DataField</phrase></literal> in the component class. This is useful when a full GWT Widget is not available for a given Element, or for GWT events that might not normally be available on a given Element type. This could occur, for instance, when clicking on a <literal><phrase role="code">&lt;div&gt;</phrase></literal> , which would normally not have the ability to receive the GWT <literal><phrase role="code">ClickEvent</phrase></literal> , and would otherwise require creating a custom DIV Widget to handle such an event.</simpara>
+<simpara>Errai UI also makes it possible to handle GWT events on native Elements which are specified as a <literal><phrase role="code">@DataField</phrase></literal> in the component class. This is useful when a full GWT Widget is not available for a given Element, or for GWT events that might not normally be available on a given Element type. This could occur, for instance, when clicking on a <literal><phrase role="code">&lt;div&gt;</phrase></literal>, which would normally not have the ability to receive the GWT <literal><phrase role="code">ClickEvent</phrase></literal>, and would otherwise require creating a custom DIV Widget to handle such an event.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class ElementHandlerComponent extends Composite {
 
@@ -5386,7 +5385,7 @@ public class ElementHandlerComponent extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-NativeDOMeventsonElements">
 <title>Native DOM events on Elements</title>
-<simpara>The last approach is handles the case where native DOM events must be handled, but no such GWT event handler exists for the given event type. Alternatively, it can also be used for situations where Elements in the template should receive events, but no handle to the Element the component class is necessary (aside from the event handling itself.) Native DOM events do not require a corresponding <literal><phrase role="code">@DataField</phrase></literal> be configured in the class; only the HTML <literal><phrase role="code">data-field</phrase></literal> , <literal><phrase role="code">id</phrase></literal> , or <literal><phrase role="code">class</phrase></literal> template attribute is required.</simpara>
+<simpara>The last approach is handles the case where native DOM events must be handled, but no such GWT event handler exists for the given event type. Alternatively, it can also be used for situations where Elements in the template should receive events, but no handle to the Element the component class is necessary (aside from the event handling itself.) Native DOM events do not require a corresponding <literal><phrase role="code">@DataField</phrase></literal> be configured in the class; only the HTML <literal><phrase role="code">data-field</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> template attribute is required.</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;div&gt;
    &lt;a id="link" href="/page"&gt;this is a hyperlink&lt;/a&gt;
    &lt;div data-field="div"&gt; Some content &lt;/div&gt;
@@ -5528,7 +5527,7 @@ public class LoginForm extends AbstractForm { <co id="CO1-1"/>
 <section id="sid-51806600_ErraiUI-DataBinding">
 <title>Data Binding</title>
 <simpara>A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks require a significant amount of boilerplate code which can be alleviated by Errai. Errai&#8217;s <link linkend="sid-51282340">data binding module</link> provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when used together with Errai UI.</simpara>
-<simpara>In the following example, all <literal><phrase role="code">@DataFields</phrase></literal> annotated with <literal><phrase role="code">@Bound</phrase></literal> have their contents bound to properties of the data model (a <literal><phrase role="code">User</phrase></literal> object). The model object is injected and annotated with <literal><phrase role="code">@Model</phrase></literal>, which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected <literal><phrase role="code">DataBinder</phrase></literal> instance annotated with <literal><phrase role="code">@AutoBound</phrase></literal> , see <link linkend="sid-51282340_DataBinding-DeclarativeBinding">Declarative Binding</link> for details.</simpara>
+<simpara>In the following example, all <literal><phrase role="code">@DataFields</phrase></literal> annotated with <literal><phrase role="code">@Bound</phrase></literal> have their contents bound to properties of the data model (a <literal><phrase role="code">User</phrase></literal> object). The model object is injected and annotated with <literal><phrase role="code">@Model</phrase></literal>, which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected <literal><phrase role="code">DataBinder</phrase></literal> instance annotated with <literal><phrase role="code">@AutoBound</phrase></literal>, see <link linkend="sid-51282340_DataBinding-DeclarativeBinding">Declarative Binding</link> for details.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class LoginForm extends Composite {
 
@@ -5549,7 +5548,7 @@ public class LoginForm extends Composite {
    @DataField
    private Button submit = new Button();
 }</programlisting>
-<simpara>Now the user object and the <literal><phrase role="code">username</phrase></literal> and <literal><phrase role="code">password</phrase></literal> fields in the UI are automatically kept in sync. No event handling code needs to be written to update the user object in response to input field changes and no code needs to be written to update the UI fields when the model object changes. So, with the above annotations in place, it will always be true that <literal><phrase role="code">user.getUsername().equals(username.getText())</phrase></literal> and <literal><phrase role="code">user.getPassword().equals(password.getText())</phrase></literal> .</simpara>
+<simpara>Now the user object and the <literal><phrase role="code">username</phrase></literal> and <literal><phrase role="code">password</phrase></literal> fields in the UI are automatically kept in sync. No event handling code needs to be written to update the user object in response to input field changes and no code needs to be written to update the UI fields when the model object changes. So, with the above annotations in place, it will always be true that <literal><phrase role="code">user.getUsername().equals(username.getText())</phrase></literal> and <literal><phrase role="code">user.getPassword().equals(password.getText())</phrase></literal>.</simpara>
 <section id="sid-51806600_ErraiUI-Default%2CSimple%2CandChainedPropertyBindings">
 <title>Default, Simple, and Chained Property Bindings</title>
 <simpara>By default, bindings are determined by matching field names to property names on the model object. In the example above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model ( <literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal>). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
@@ -5587,7 +5586,7 @@ public class UserWidget extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-BindingofLists">
 <title>Binding of Lists</title>
-<simpara>Often you will need to bind a list of model objects so that every object in the list is bound to a corresponding widget. This task can be accomplished using Errai UI&#8217;s <literal><phrase role="code">ListWidget</phrase></literal> class. Here&#8217;s an example of binding a list of users using the <literal><phrase role="code">UserWidget</phrase></literal> class from the previous example. First, we need to enhance <literal><phrase role="code">UserWidget</phrase></literal> to implement <literal><phrase role="code">HasModel</phrase></literal> .</simpara>
+<simpara>Often you will need to bind a list of model objects so that every object in the list is bound to a corresponding widget. This task can be accomplished using Errai UI&#8217;s <literal><phrase role="code">ListWidget</phrase></literal> class. Here&#8217;s an example of binding a list of users using the <literal><phrase role="code">UserWidget</phrase></literal> class from the previous example. First, we need to enhance <literal><phrase role="code">UserWidget</phrase></literal> to implement <literal><phrase role="code">HasModel</phrase></literal>.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class UserWidget extends Composite implements HasModel&lt;User&gt; {
   @Inject @AutoBound DataBinder&lt;User&gt; userBinder;
@@ -5635,7 +5634,7 @@ public class MyComposite extends Composite {
 }</programlisting>
 <section id="sid-51806600_ErraiUI-Bindinglistswith@Bound">
 <title>Binding lists with @Bound</title>
-<simpara>An instance of <literal><phrase role="code">ListWidget</phrase></literal> can also participate in automatic bindings using <literal><phrase role="code">@Bound</phrase></literal> . In this case, <literal><phrase role="code">setItems</phrase></literal> never needs to be called manually. The bound list property and displayed items will automatically be kept in sync. In the example below a list of user roles is bound to a <literal><phrase role="code">ListWidget</phrase></literal> that displays and manages a <literal><phrase role="code">RoleWidget</phrase></literal> for each role in the list. Every change to the list returned by <literal><phrase role="code">user.getRoles()</phrase></literal> will now trigger a corresponding update in the UI.</simpara>
+<simpara>An instance of <literal><phrase role="code">ListWidget</phrase></literal> can also participate in automatic bindings using <literal><phrase role="code">@Bound</phrase></literal>. In this case, <literal><phrase role="code">setItems</phrase></literal> never needs to be called manually. The bound list property and displayed items will automatically be kept in sync. In the example below a list of user roles is bound to a <literal><phrase role="code">ListWidget</phrase></literal> that displays and manages a <literal><phrase role="code">RoleWidget</phrase></literal> for each role in the list. Every change to the list returned by <literal><phrase role="code">user.getRoles()</phrase></literal> will now trigger a corresponding update in the UI.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class UserDetailView extends Composite {
 
@@ -6176,10 +6175,10 @@ public class ItemPage extends VerticalPanel {
   // Anything goes...
 }</programlisting>
 <simpara></simpara>
-<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal> ; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal> , or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a URL properly.)</simpara>
+<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal> ; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal>, or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a URL properly.)</simpara>
 <simpara>A page widget can have any number of <literal><phrase role="code">@PageState</phrase></literal> fields. The fields can be of any primitive or boxed primitive type (except <literal><phrase role="code">char</phrase></literal> or <literal><phrase role="code">Character</phrase></literal> ), <literal><phrase role="code">String</phrase></literal>, or a <literal><phrase role="code">Collection</phrase></literal>, <literal><phrase role="code">List</phrase></literal>, or <literal><phrase role="code">Set</phrase></literal> of the allowable scalar types. Nested collections are not supported.</simpara>
 <simpara><literal><phrase role="code">@PageState</phrase></literal> fields can be private, protected, default access, or public. They are always updated by direct field access; never via a setter method. The updates occur just before the <literal><phrase role="code">@PageShowing</phrase></literal> method is invoked.</simpara>
-<simpara>In addition to receiving page state information via direct writes to <literal><phrase role="code">@PageState</phrase></literal> fields, you can also receive the whole Multimap in the <literal><phrase role="code">@PageShowing</phrase></literal> and <literal><phrase role="code">@PageShown</phrase></literal> methods through a parameter of type <literal><phrase role="code">HistoryToken</phrase></literal> . Whether or not a lifecycle method has such a parameter, the <literal><phrase role="code">@PageState</phrase></literal> fields will still be written as usual.</simpara>
+<simpara>In addition to receiving page state information via direct writes to <literal><phrase role="code">@PageState</phrase></literal> fields, you can also receive the whole Multimap in the <literal><phrase role="code">@PageShowing</phrase></literal> and <literal><phrase role="code">@PageShown</phrase></literal> methods through a parameter of type <literal><phrase role="code">HistoryToken</phrase></literal>. Whether or not a lifecycle method has such a parameter, the <literal><phrase role="code">@PageState</phrase></literal> fields will still be written as usual.</simpara>
 <simpara>Page state values are represented in the URL in place of the corresponding parameter variables declared in the URL template (the <literal><phrase role="code">path</phrase></literal> field of the <literal><phrase role="code">@Page</phrase></literal> annotation. See <link linkend="sid-54493676_ErraiUINavigation-DeclaringaPage">Declaring a Page</link>). If a parameter variable is declared in the URL template and is missing from the actual typed URL, it will cause a navigation error as Errai will not be able to match the typed URL to any template.</simpara>
 <simpara>Any additional path parameters not found in the URL template are appended as key=value pairs separated by the ampersand ( <literal><phrase role="code">&amp;</phrase></literal> ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a <literal><phrase role="code">@PageState</phrase></literal> field is absent from the state information passed to the page, the framework writes a default value: <literal><phrase role="code">null</phrase></literal> for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the <literal><phrase role="code">HistoryToken</phrase></literal> class.</simpara>
 <simpara>To illustrate this further, consider the following example:</simpara>
@@ -6197,7 +6196,7 @@ public class ItemPage extends VerticalPanel {
 
   // Anything goes...
 }</programlisting>
-<simpara>Given the host <literal><phrase role="code">"www.company.com"</phrase></literal>, the context <literal>store</literal>, and a state map with the values <literal><phrase role="code">itemID=4231</phrase></literal> , <literal><phrase role="code">customerID=9364</phrase></literal> , and <literal><phrase role="code">storeID=0032</phrase></literal> , the following URL will be generated:
+<simpara>Given the host <literal><phrase role="code">"www.company.com"</phrase></literal>, the context <literal>store</literal>, and a state map with the values <literal><phrase role="code">itemID=4231</phrase></literal>, <literal><phrase role="code">customerID=9364</phrase></literal>, and <literal><phrase role="code">storeID=0032</phrase></literal>, the following URL will be generated:
 <literal><phrase role="code">www.company.com/store/#item/4231/9364;storeID=0032</phrase></literal></simpara>
 <simpara>If the value for storeID is undefined, the URL will be <literal>www.company.com/store/#item/4231/9364;storeID=0</literal> .</simpara>
 <simpara>If the URL typed into the browser is <literal>www.company.com/store/#item/4231;storeID=0032</literal>, it will cause a navigation error (assuming there is no other page by this url) because there is a missing path parameter.</simpara>
@@ -6234,11 +6233,11 @@ public class WelcomePage extends Composite {
 <programlisting language="xml" linenumbering="unnumbered">&lt;div&gt;
   &lt;a data-field="itemLink"&gt;Go to Item List Page&lt;/a&gt;
 &lt;/div&gt;</programlisting>
-<simpara>You can inject any number of links into a page. The only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal> . When the user clicks the link Errai will transition to the item list page.</simpara>
+<simpara>You can inject any number of links into a page. The only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal>. When the user clicks the link Errai will transition to the item list page.</simpara>
 </section>
 <section id="sid-54493676_ErraiUINavigation-DeclaringaManualLink">
 <title>Declaring a Manual Link</title>
-<simpara>Sometimes it is necessary to manually transition between pages (such as in response to an event being fired). To declare a manual link from one page to another, inject an instance of <literal><phrase role="code">TransitionTo&lt;P&gt;</phrase></literal> , where <literal><phrase role="code">P</phrase></literal> is the class of the target page.</simpara>
+<simpara>Sometimes it is necessary to manually transition between pages (such as in response to an event being fired). To declare a manual link from one page to another, inject an instance of <literal><phrase role="code">TransitionTo&lt;P&gt;</phrase></literal>, where <literal><phrase role="code">P</phrase></literal> is the class of the target page.</simpara>
 <simpara>This code declares a manual transition from the welcome page to the item list page:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 public class WelcomePage extends Composite {
@@ -6247,7 +6246,7 @@ public class WelcomePage extends Composite {
 
 }</programlisting>
 <simpara>You do not need to implement the <literal><phrase role="code">TransitionTo</phrase></literal> interface yourself; the framework creates the appropriate instance for you.</simpara>
-<simpara>As with <literal><phrase role="code">TransitionAnchor</phrase></literal>, the only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal> .</simpara>
+<simpara>As with <literal><phrase role="code">TransitionAnchor</phrase></literal>, the only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal>.</simpara>
 </section>
 <section id="sid-54493676_ErraiUINavigation-FollowingaManualLink">
 <title>Following a Manual Link</title>
@@ -6388,7 +6387,7 @@ public class NavigationErrorHandlerSetter {
 </section>
 <section id="sid-54493676_ErraiUINavigation-ViewingtheGeneratedNavigationGraph">
 <title>Viewing the Generated Navigation Graph</title>
-<simpara>Because the pages and links in an Errai Navigation application are declared structurally, the framework gets a complete picture of the app&#8217;s navigation structure at compile time. This knowledge is saved out during compilation (and at page reload when in Dev Mode) to the file <literal><phrase role="code">.errai/navgraph.gv</phrase></literal> . You can view the navigation graph using any tool that understands the GraphViz (also known as DOT) file format.</simpara>
+<simpara>Because the pages and links in an Errai Navigation application are declared structurally, the framework gets a complete picture of the app&#8217;s navigation structure at compile time. This knowledge is saved out during compilation (and at page reload when in Dev Mode) to the file <literal><phrase role="code">.errai/navgraph.gv</phrase></literal>. You can view the navigation graph using any tool that understands the GraphViz (also known as DOT) file format.</simpara>
 <simpara>One popular open source tool that can display GraphViz/DOT files is <ulink url="http://www.graphviz.org/">GraphViz</ulink> . Free downloads are available for all major operating systems.</simpara>
 <simpara>When rendered, a navigation graph looks like this:</simpara>
 <figure>
@@ -7589,10 +7588,10 @@ public class HandlerLevelAdjuster {
 <programlisting language="xml" linenumbering="unnumbered">&lt;script type="text/javascript"&gt;
   erraiSystemLoghandlerLevel = "INFO";
 &lt;/script&gt;</programlisting>
-<simpara>The possible log levels correspond to those in <literal><phrase role="code">java.util.logging.Level</phrase></literal> .</simpara>
+<simpara>The possible log levels correspond to those in <literal><phrase role="code">java.util.logging.Level</phrase></literal>.</simpara>
 <important>
 <title>Logging Levels</title>
-<simpara>If you are increasing the logging level of an Errai log handler, you will also need to increase the <literal>gwt.logging.logLevel</literal> (set in your \*.gwt.xml). Handlers will not receive log records that are lower than the GWT log level, which is set to <emphasis role="strong">INFO</emphasis> in <literal>ErraiCommon.gwt.xml</literal>.</simpara>
+<simpara>If you are increasing the logging level of an Errai log handler, you will also need to increase the <literal>gwt.logging.logLevel</literal> (set in your <literal>*.gwt.xml</literal>). Handlers will not receive log records that are lower than the GWT log level, which is set to <emphasis role="strong">INFO</emphasis> in <literal>ErraiCommon.gwt.xml</literal>.</simpara>
 </important>
 </section>
 <section id="sid-74908675_Logging-FormatString">
@@ -7953,7 +7952,7 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>errai.dispatcher.implementation</emphasis> specifies the dispatcher implementation to be used by the bus. There are two implementations which come with Errai out of the box: the <literal><phrase role="code">SimpleDispatcher</phrase></literal> and the <literal><phrase role="code">AsyncDispatcher</phrase></literal> . See ERRAI:Dispatcher Implementations for more information about the differences between the two.</simpara>
+      <simpara><emphasis>errai.dispatcher.implementation</emphasis> specifies the dispatcher implementation to be used by the bus. There are two implementations which come with Errai out of the box: the <literal><phrase role="code">SimpleDispatcher</phrase></literal> and the <literal><phrase role="code">AsyncDispatcher</phrase></literal>. See ERRAI:Dispatcher Implementations for more information about the differences between the two.</simpara>
       
     </listitem>
   
@@ -7984,7 +7983,7 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>errai.bus.buffer_size</emphasis> The total size of the transmission buffer, in megabytes. If this attribute is specified along with <literal><phrase role="code">errai.bus.buffer_segment_count</phrase></literal> , then the segment count is inferred by the calculation <literal><phrase role="code">buffer_segment_count / buffer_size}. If {{errai.bus.buffer_segment_count</phrase></literal> is also defined, it will be ignored in the presence of this property. Default value: 32.</simpara>
+      <simpara><emphasis>errai.bus.buffer_size</emphasis> The total size of the transmission buffer, in megabytes. If this attribute is specified along with <literal><phrase role="code">errai.bus.buffer_segment_count</phrase></literal>, then the segment count is inferred by the calculation <literal><phrase role="code">buffer_segment_count / buffer_size</phrase></literal>. If <literal><phrase role="code">errai.bus.buffer_segment_count</phrase></literal> is also defined, it will be ignored in the presence of this property. Default value: 32.</simpara>
       
     </listitem>
   
@@ -7994,12 +7993,12 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.bus.buffer_segment_count</emphasis> The number of segments in absolute terms. If this attribute is specified in the absence of <literal><phrase role="code">errai.bus.buffer_size</phrase></literal> , the buffer size is inferred by the calculation <literal><phrase role="code">buffer_segment_size / buffer_segment_count</phrase></literal> .</simpara>
+      <simpara><emphasis>errai.bus.buffer_segment_count</emphasis> The number of segments in absolute terms. If this attribute is specified in the absence of <literal><phrase role="code">errai.bus.buffer_size</phrase></literal>, the buffer size is inferred by the calculation <literal><phrase role="code">buffer_segment_size / buffer_segment_count</phrase></literal>.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.bus.buffer_allocation_mode</emphasis> Buffer allocation mode. Allowed values are <literal><phrase role="code">direct</phrase></literal> and <literal><phrase role="code">heap</phrase></literal> . Direct allocation puts buffer memory outside of the JVM heap, while heap allocation uses buffer memory inside the Java heap. For most situations, heap allocation is preferable. However, if the application is data intensive and requires a substantially large buffer, it is preferable to use a direct buffer. From a throughput perspective, current JVM implementations pay about a 20% performance penalty for direct-allocated memory access. However, your application may show better scaling characteristics with direct buffers. Benchmarking under real load conditions is the only way to know the optimal setting for your use case and expected load. Default value: <literal><phrase role="code">direct</phrase></literal> .</simpara>
+      <simpara><emphasis>errai.bus.buffer_allocation_mode</emphasis> Buffer allocation mode. Allowed values are <literal><phrase role="code">direct</phrase></literal> and <literal><phrase role="code">heap</phrase></literal>. Direct allocation puts buffer memory outside of the JVM heap, while heap allocation uses buffer memory inside the Java heap. For most situations, heap allocation is preferable. However, if the application is data intensive and requires a substantially large buffer, it is preferable to use a direct buffer. From a throughput perspective, current JVM implementations pay about a 20% performance penalty for direct-allocated memory access. However, your application may show better scaling characteristics with direct buffers. Benchmarking under real load conditions is the only way to know the optimal setting for your use case and expected load. Default value: <literal><phrase role="code">direct</phrase></literal>.</simpara>
       
     </listitem>
   
@@ -8012,12 +8011,12 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>errai.bus.enable_clustering</emphasis> A boolean indicating whether or not Errai&#8217;s server side bus should attempt to orchestrate with its peers. The orchestration mechanism is dependent on the configured clustering provider (e.g. UDP based multicast discovery in case of the default JGroups provider). The default value is <literal><phrase role="code">false</phrase></literal> .</simpara>
+      <simpara><emphasis>errai.bus.enable_clustering</emphasis> A boolean indicating whether or not Errai&#8217;s server side bus should attempt to orchestrate with its peers. The orchestration mechanism is dependent on the configured clustering provider (e.g. UDP based multicast discovery in case of the default JGroups provider). The default value is <literal><phrase role="code">false</phrase></literal>.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.bus.clustering_provider</emphasis> The fully qualified class name of the clustering provider implementation. A class that implements <literal><phrase role="code">org.jboss.errai.bus.server.cluster.ClusteringProvider</phrase></literal> . Currently the only build-in provider is the <literal><phrase role="code">org.jboss.errai.bus.server.cluster.jgroups.JGroupsClusteringProvider</phrase></literal> .</simpara>
+      <simpara><emphasis>errai.bus.clustering_provider</emphasis> The fully qualified class name of the clustering provider implementation. A class that implements <literal><phrase role="code">org.jboss.errai.bus.server.cluster.ClusteringProvider</phrase></literal>. Currently the only build-in provider is the <literal><phrase role="code">org.jboss.errai.bus.server.cluster.jgroups.JGroupsClusteringProvider</phrase></literal>.</simpara>
       
     </listitem>
   
@@ -8050,18 +8049,17 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
 #errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
 errai.dispatcher_implementation=org.jboss.errai.bus.server.AsyncDispatcher
 
-#
-## Worker pool size. This is the number of threads the asynchronous worker pool should provide for
-processing
-## incoming messages. This option is only valid when using the AsyncDispatcher implementation.
+##
+## Worker pool size. This is the number of threads the asynchronous worker pool should
+## provide for processing incoming messages. This option is only valid when using
+## the AsyncDispatcher implementation.
 ##
 errai.async.thread_pool_size=5
 
 ##
-## Worker timeout (in seconds). This defines the time that a single asychronous process may run,
-before the worker pool
-## terminates it and reclaims the thread. This option is only valid when using the AsyncDispatcher
-implementation.
+## Worker timeout (in seconds). This defines the time that a single asychronous process
+## may run, before the worker pool terminates it and reclaims the thread. This option
+## is only valid when using the AsyncDispatcher implementation.
 ##
 errai.async.worker.timeout=5</programlisting>
 </section>
@@ -8069,7 +8067,7 @@ errai.async.worker.timeout=5</programlisting>
 <section id="sid-5931338_Messaging%28ErraiBus%29Configuration-ServletConfiguration">
 <title>Servlet Configuration</title>
 <simpara>Errai has several different implementations for HTTP traffic to and from the bus. We provide a universally-compatible blocking implementation that provides fully synchronous communication to/from the server-side bus. Where this introduces scalability problems, we have implemented many webserver-specific implementations that take advantage of the various proprietary APIs to provide true asynchrony.</simpara>
-<simpara>These included implementations are packaged at: <literal><phrase role="code">org.jboss.errai.bus.server.servlet</phrase></literal> .</simpara>
+<simpara>These included implementations are packaged at: <literal><phrase role="code">org.jboss.errai.bus.server.servlet</phrase></literal>.</simpara>
 <important>
 <title>One is Enough!</title>
 <simpara>You should use just one of the options below. Configuring multiple ErraiServlet implementations in the same application will lead to unpredictable behaviour!</simpara>
@@ -8077,7 +8075,7 @@ errai.async.worker.timeout=5</programlisting>
 </important>
 <note>
 <title>Rolling your own security? Beware!</title>
-<simpara>All of the following examples use a wildcard mapping for <literal><phrase role="code">\*.erraiBus</phrase></literal> with no path prefix. This allows Errai Bus to communicate from any point in your application&#8217;s URI hierarchy, which allows bus communication to work properly no matter where you choose to put your GWT host page.</simpara>
+<simpara>All of the following examples use a wildcard mapping for <literal><phrase role="code">*.erraiBus</phrase></literal> with no path prefix. This allows Errai Bus to communicate from any point in your application&#8217;s URI hierarchy, which allows bus communication to work properly no matter where you choose to put your GWT host page.</simpara>
 <simpara>For example, all of the following are equivalent from Errai&#8217;s point of view:</simpara>
 
 <itemizedlist>
@@ -8119,7 +8117,7 @@ errai.async.worker.timeout=5</programlisting>
 </section>
 <section id="sid-5931338_Messaging%28ErraiBus%29Configuration-DefaultBlockingServletconfiguredasFilter">
 <title>DefaultBlockingServlet configured as Filter</title>
-<simpara>Alternatively, the DefaultBlockingServlet can be deployed as a Servlet Filter. This may be necessary in cases where an existing filter is configured in the web application, and that filter interferes with the Errai Bus requests. In this case, configuring DefaultBlockingServlet to handle <literal><phrase role="code">\*.erraiBus</phrase></literal> requests ahead of other filters in web.xml will solve the problem:</simpara>
+<simpara>Alternatively, the DefaultBlockingServlet can be deployed as a Servlet Filter. This may be necessary in cases where an existing filter is configured in the web application, and that filter interferes with the Errai Bus requests. In this case, configuring DefaultBlockingServlet to handle <literal><phrase role="code">*.erraiBus</phrase></literal> requests ahead of other filters in web.xml will solve the problem:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;filter&gt;
   &lt;filter-name&gt;ErraiServlet&lt;/filter-name&gt;
   &lt;filter-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/filter-class&gt;
@@ -8146,7 +8144,7 @@ errai.async.worker.timeout=5</programlisting>
 </section>
 <section id="sid-5931338_Messaging%28ErraiBus%29Configuration-StandardAsyncServlet">
 <title>StandardAsyncServlet</title>
-<simpara>This implementation leverages asynchronous support in Servlet 3.0 to allow for threadless pausing of port connections. Note that <literal><phrase role="code">&lt;async-supported&gt;true&lt;/async-supported&gt;</phrase></literal> has to be added to the servlet definition in <literal><phrase role="code">web.xml</phrase></literal> .</simpara>
+<simpara>This implementation leverages asynchronous support in Servlet 3.0 to allow for threadless pausing of port connections. Note that <literal><phrase role="code">&lt;async-supported&gt;true&lt;/async-supported&gt;</phrase></literal> has to be added to the servlet definition in <literal><phrase role="code">web.xml</phrase></literal>.</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;servlet&gt;
   &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
   &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.StandardAsyncServlet&lt;/servlet-class&gt;
@@ -8288,7 +8286,7 @@ errai.async.worker.timeout=5</programlisting>
   &lt;artifactId&gt;errai-jpa-client&lt;/artifactId&gt;
   &lt;version&gt;${errai.version}&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
-<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-jpa-client-${errai.version}.jar</phrase></literal> , Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.</simpara>
+<simpara>If you are not using Maven for dependency management, add <literal><phrase role="code">errai-jpa-client-${errai.version}.jar</phrase></literal>, Hibernate 4.1.1, and Google Guava for GWT 12.0 to your compile-time classpath.</simpara>
 </section>
 <section id="sid-54493688_ErraiJPA-GWTModuleDescriptor">
 <title>GWT Module Descriptor</title>
@@ -12823,7 +12821,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 </section>
 <section id="sid-32473113_Troubleshooting%26FAQ-I%27mgetting%22java.lang.RuntimeException%3ATherearenoproxyprovidersregisteredyet.%22inmy@PostConstructmethod%21">
 <title>I&#8217;m getting "java.lang.RuntimeException: There are no proxy providers registered yet." in my @PostConstruct method!</title>
-<simpara><emphasis>Answer:</emphasis> You can&#8217;t invoke RPC methods via <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> or by other means until after the Errai Bus has finished its initial handshake. Try changing your <literal><phrase role="code">@PostConstruct</phrase></literal> annotation to <literal><phrase role="code">@AfterInitialization</phrase></literal> . This will cause your method to be invoked later after the bus handshake has completed.</simpara>
+<simpara><emphasis>Answer:</emphasis> You can&#8217;t invoke RPC methods via <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> or by other means until after the Errai Bus has finished its initial handshake. Try changing your <literal><phrase role="code">@PostConstruct</phrase></literal> annotation to <literal><phrase role="code">@AfterInitialization</phrase></literal>. This will cause your method to be invoked later after the bus handshake has completed.</simpara>
 <simpara>If this doesn&#8217;t help, it is also possible that the proxies were never generated in the first place. Check in <literal><phrase role="code">.errai/RpcProxyLoaderImpl.java</phrase></literal> to see if proxy code exists for the <literal><phrase role="code">@Remote</phrase></literal> and/or <literal><phrase role="code">@Path</phrase></literal> interface in question. If not, your <literal><phrase role="code">@Remote</phrase></literal> interfaces were not present on the GWT compiler&#8217;s classpath when your application module was compiled. Double-check your GWT compilation classpath: all <literal><phrase role="code">@Remote</phrase></literal> interfaces must be visible to (in or inherited by) the GWT module that contains the <literal><phrase role="code">Caller&lt;?&gt;</phrase></literal> types. Pay special attention that your <literal><phrase role="code">@Remote</phrase></literal> and <literal><phrase role="code">@Path</phrase></literal> interfaces are not in a package excluded from the GWT module (by default, every subpackage other than <literal><phrase role="code">client</phrase></literal> and <literal><phrase role="code">shared</phrase></literal> is invisible to the GWT compiler).</simpara>
 </section>
 <section id="_why_do_i_get_a_404_not_found_page_if_i_try_to_navigate_to_my_web_page_by_typing_in_the_url_or_refreshing_the_page">
@@ -12838,7 +12836,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <simpara>This chapter contains important information for migrating to newer versions of Errai. If you experience any problems, don&#8217;t hesitate to get in touch with us. See <link linkend="sid-5833089">Reporting problems</link> .</simpara>
 <section id="sid-21758204">
 <title>Upgrading from 1.* to 2.0</title>
-<simpara>The first issues that will arise after replacing the jars or after changing the version numbers in the <literal><phrase role="code">pom.xml</phrase></literal> are unresolved package imports. This is due to refactorings that became necessary when the project grew. Most of these import problems can be resolved automatically by modern IDEs (Organize Imports). So, this should replace <literal><phrase role="code">org.jboss.errai.bus.client.protocols.*</phrase></literal> with <literal><phrase role="code">org.jboss.errai.common.client.protocols.\*</phrase></literal> for example.</simpara>
+<simpara>The first issues that will arise after replacing the jars or after changing the version numbers in the <literal><phrase role="code">pom.xml</phrase></literal> are unresolved package imports. This is due to refactorings that became necessary when the project grew. Most of these import problems can be resolved automatically by modern IDEs (Organize Imports). So, this should replace <literal><phrase role="code">org.jboss.errai.bus.client.protocols.*</phrase></literal> with <literal><phrase role="code">org.jboss.errai.common.client.protocols.*</phrase></literal> for example.</simpara>
 <simpara>The following is a list of manual steps that have to be carried out when upgrading:</simpara>
 
 <itemizedlist>
@@ -12854,7 +12852,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>Errai CDI projects must now use the <literal><phrase role="code">SimpleDispatcher</phrase></literal> instead of the <literal><phrase role="code">AsynDispatcher</phrase></literal> . This has to be configured in <link linkend="sid-5931338">Messaging (Errai Bus) Configuration</link> .</simpara>
+      <simpara>Errai CDI projects must now use the <literal><phrase role="code">SimpleDispatcher</phrase></literal> instead of the <literal><phrase role="code">AsynDispatcher</phrase></literal>. This has to be configured in <link linkend="sid-5931338">Messaging (Errai Bus) Configuration</link> .</simpara>
       
     </listitem>
   
@@ -12889,7 +12887,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>If the project was built using an early version of an Errai archetype the configuration of the maven-gwt-plugin has to be modified to contain the <literal><phrase role="code">&lt;hostedWebapp&gt;path-to-your-standard-webapp-folder&lt;/hostedWebapp&gt;</phrase></literal> . This is usually either <literal><phrase role="code">war</phrase></literal> or <literal><phrase role="code">src/main/webapp</phrase></literal> .</simpara>
+      <simpara>If the project was built using an early version of an Errai archetype the configuration of the maven-gwt-plugin has to be modified to contain the <literal><phrase role="code">&lt;hostedWebapp&gt;path-to-your-standard-webapp-folder&lt;/hostedWebapp&gt;</phrase></literal>. This is usually either <literal><phrase role="code">war</phrase></literal> or <literal><phrase role="code">src/main/webapp</phrase></literal>.</simpara>
       
     </listitem>
   
