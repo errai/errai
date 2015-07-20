@@ -114,14 +114,25 @@ public class UserHostPageFilter implements Filter {
       super(response);
     }
 
+    @Override
     public ServletOutputStream getOutputStream() throws IOException {
       return outputStream;
     }
 
+    @Override
     public PrintWriter getWriter() throws IOException {
       return writer;
     }
 
+    @Override
+    public void flushBuffer() throws IOException {
+      // Don't remove this override!
+      // When intercepting static content, WAS 8.5.5.5 prematurely calls this
+      // method to flush the output stream before we can calculate the content
+      // length (see above).
+    }
+
+    @Override
     public String toString() {
       return charWriter.toString();
     }
