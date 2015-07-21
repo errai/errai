@@ -7709,6 +7709,12 @@ errai.security.user_cookie_enabled=true
 
 With this option enabled the `User` will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.
 
+[WARNING]
+.User cookie is deprecated
+====
+For users with many roles, the serialized string may be too large to fit in a cookie. For this reason, the user cookie is not recommended and is kept only for backwards compatibility.
+====
+
 [IMPORTANT]
 .User is stored in plain text
 ====
@@ -7794,6 +7800,16 @@ public class NavBar extends Composite {
 
 === Form Based Login
 
+==== Errai Security Cookie
+
+[WARNING]
+.User cookie is deprecated
+====
+For users with many roles, the serialized string may be too large to fit in a cookie. For this reason, the user cookie is not recommended and is kept only for backwards compatibility.
+
+For the recommended approach to form-based login, please skip to the section on the <<ErraiUserHostPageFilter>>.
+====
+
 If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. The `errai-security-server` jar contains a servlet filter for encoding the currently authenticated user as a cookie in the http response. Here are the steps for setting this up:
 
 . Create a login page using an html form that posts to a servlet-filter. If you are using Errai Security with PicketLink you will want to use the `org.picketlink.authentication.web.AuthenticationFilter` servlet-filter. Otherwise, you will need to implement one yourself that authenticates the user by calling `AuthenticationService.login(String, String)` method.
@@ -7817,6 +7833,27 @@ If this filter maps to the same URL as the filter for authentication, this filte
 ====
 
 . Make sure this is in your ErraiApp.properties file: `errai.security.user_cookie_enabled=true`
+
+[[ErraiUserHostPageFilter]]
+==== Errai User Host Page Filter
+
+The `errai-security-server` jar contains a servlet filter for encoding the currently authenticated user in an html page. By configuring this filter for your GWT host page, a user will be logged-in as soon as your Errai app loads. Here are the steps for setting this up:
+
+. Add the following to your ErraiApp.properties: `errai.security.user_on_hostpage_enabled=true`
+
+. Create a login page using an html form that posts to a servlet-filter. If you are using Errai Security with PicketLink you will want to use the `org.picketlink.authentication.web.AuthenticationFilter` servlet-filter. Otherwise, you will need to implement one yourself that authenticates the user by calling the `AuthenticationService.login(String, String)` method.
+
+. Add this filter-mapping.
++
+[source,xml]
+----
+  <filter-mapping>
+    <filter-name>ErraiUserHostPageFilter</filter-name>
+    <url-mapping>/gwt-host-page.html</url-mapping>
+  </filter-mapping>
+----
++
+The mapped URL should be that of your GWT Host Page.
 
 === Using an Alternative to PicketLink
 

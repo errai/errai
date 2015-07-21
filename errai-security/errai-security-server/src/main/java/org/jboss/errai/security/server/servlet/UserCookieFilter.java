@@ -41,9 +41,11 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  * Sets the Errai user cookie if the {@link org.jboss.errai.security.Properties#USER_COOKIE_ENABLED}
  * property is set to true. This filter should be used on the host page of Errai an application.
  *
+ * @deprecated Use {@link UserHostPageFilter} for form based login.
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @WebFilter(filterName = "ErraiUserCookieFilter", urlPatterns = { "/index.jsp", "/index.html" })
+@Deprecated
 public class UserCookieFilter implements Filter {
 
   static {
