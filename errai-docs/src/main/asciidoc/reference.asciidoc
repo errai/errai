@@ -5540,7 +5540,7 @@ With default values, @Templated informs Errai UI to look in the current package 
 ----
 @Templated("my-template.html")
 public class LoginForm extends Composite {
-   /* looks for my-template.html in LoginForm's package */
+   /* Looks for my-template.html in LoginForm's package */
 }
 ----
 
@@ -5551,7 +5551,45 @@ Fully qualified template paths are also supported, but must begin with a leading
 ----
 @Templated("/org/example/my-template.html")
 public class LoginForm extends Composite {
-   /* looks for my-template.html in package org.example */
+   /* Looks for my-template.html in package org.example */
+}
+----
+
+==== Template providers
+
+The previous examples specify template files at compile time, but it is possible to use templates provided at runtime using a `TemplateProvider`. These providers run asynchronously so that it is possible to fetch templates via HTTP requests. In fact Errai UI contains an implementation, `ServerTemplateProvider`, that fetches templates using the `@Templated` value as a url.
+
+[source, java]
+----
+@Templated(value="home.html", provider=ServerTemplateProvider.class)
+public class LoginForm extends Composite {
+  /* Makes an HTTP request for the relative path "home.html" */
+}
+----
+
+Custom implementations can also be used.
+
+[source, java]
+----
+@Templated(provider=MyTemplateProvider.class)
+public class LoginForm extends Composite {
+  /* Makes an HTTP request for the relative path "home.html" */
+}
+
+@Dependent
+public class MyTemplateProvider implements TemplateProvider {
+
+  @Override
+  public void provideTemplate(String location, TemplateRenderingCallback renderingCallback) {
+    String template;
+
+    /*
+     * Generate the template String.
+     * Note: The location parameter is the value from the @Templated annotation.
+     */
+    
+    renderingCallback.renderTemplate(template);
+  }
 }
 ----
 
