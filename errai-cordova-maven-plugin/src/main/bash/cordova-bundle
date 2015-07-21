@@ -43,8 +43,8 @@ tar zcvf ../project-template.tar.gz .
 cd ..
 if [[ "$1" == *SNAPSHOT* ]]
 then
-  mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/content/repositories/snapshots/ -DrepositoryId=jboss-snapshots-repository -DgroupId=org.jboss.errai -DartifactId=errai-cordova-template -Dversion=$1 -Dpackaging=tar.gz
+  /Library/apache-maven-3.0.5/bin/mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/content/repositories/snapshots/ -DrepositoryId=jboss-snapshots-repository -DgroupId=org.jboss.errai -DartifactId=errai-cordova-template -Dversion=$1 -Dpackaging=tar.gz
 else
   sed -e "s/\$VERSION/"$1"/g" pom.xml > pomFile.xml
-  mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/ -DrepositoryId=jboss-releases-repository -DpomFile=pomFile.xml -Dpackaging=tar.gz
+  /Library/apache-maven-3.0.5/bin/mvn deploy:deploy-file -Dfile=project-template.tar.gz  -Durl=https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/ -DrepositoryId=jboss-releases-repository -DpomFile=pomFile.xml -Dpackaging=tar.gz
 fi
