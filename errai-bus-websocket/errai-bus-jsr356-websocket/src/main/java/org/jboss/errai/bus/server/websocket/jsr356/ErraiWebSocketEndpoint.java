@@ -47,7 +47,16 @@ public class ErraiWebSocketEndpoint {
   @OnMessage
   public void onMessage(String message, Session session) {
     final ErraiWebSocketChannel channel = CHANNELS.get(session.getId());
-    channel.doErraiMessage(message);
+    /*
+     * Fix for ERRAI-866: There is a chrome bug that can cause empty messages to
+     * be sent. (See:
+     * https://code.google.com/p/chromium/issues/detail?id=510016&colspec=ID%
+     * 20Pri%20M%20Stars%20ReleaseBlock%20Cr%20Status%20Owner%20Summary%20OS%
+     * 20Modified)
+     */
+    if (!message.isEmpty()) {
+      channel.doErraiMessage(message);
+    }
   }
 
   @OnClose
