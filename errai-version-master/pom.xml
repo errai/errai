@@ -5,7 +5,7 @@
   <name>Errai version master BOM</name>
   <groupId>org.jboss.errai.bom</groupId>
   <artifactId>errai-version-master</artifactId>
-  <version>3.0.6.Final</version>
+  <version>3.0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <url>http://jboss.org/errai/errai</url>
