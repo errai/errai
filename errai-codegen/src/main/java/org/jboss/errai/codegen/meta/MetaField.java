@@ -82,11 +82,11 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
         sb.append(anno.toString()).append(" ");
       }
     }
-    
+
     sb.append(GenUtil.scopeOf(this).getCanonicalName()).append(" ")
     .append(GenUtil.modifiersOf(this).toJavaString()).append(" ")
     .append(this.getType()).append(" ").append(getName());
-    
+
     return sb.toString();
   }
 
@@ -133,7 +133,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
    */
   public Field asField() {
     try {
-      final Class<?> aClass = Class.forName(getDeclaringClass().getFullyQualifiedName());
+      final Class<?> aClass = getDeclaringClass().asClass();
       return aClass.getDeclaredField(getName());
     }
     catch (Throwable e) {
@@ -177,7 +177,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     public MetaClass getDeclaringClass() {
       return componentType;
     }
-    
+
     @Override
     public String getDeclaringClassName() {
       return componentType.getFullyQualifiedName();
