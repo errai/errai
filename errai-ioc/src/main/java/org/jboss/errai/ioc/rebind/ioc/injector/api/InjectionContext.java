@@ -21,7 +21,18 @@ import static java.util.Collections.unmodifiableCollection;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Stereotype;
@@ -396,14 +407,14 @@ public class InjectionContext {
     final SimplePackageFilter implicitFilter = new SimplePackageFilter(Arrays.asList(implicitWhitelist));
     final SimplePackageFilter whitelistFilter = new SimplePackageFilter(whitelist);
     final String fullName = type.getFullyQualifiedName();
-    
+
     return implicitFilter.apply(fullName) || whitelistFilter.apply(fullName);
   }
 
   public boolean isBlacklisted(final MetaClass type) {
     final SimplePackageFilter blacklistFilter = new SimplePackageFilter(blacklist);
     final String fullName = type.getFullyQualifiedName();
-    
+
     return blacklistFilter.apply(fullName);
   }
 
@@ -519,7 +530,7 @@ public class InjectionContext {
         if (iface.getFullyQualifiedName()
             .equals("com.google.gwt.user.cellview.client.AbstractCellTable$TableSectionChangeHandler"))
           continue;
-        
+
         if (processedTypes.add(iface)) {
           final Injector injectorDelegate =
               getInjectorFactory().getQualifyingTypeInjector(iface, injector, iface.getParameterizedType());
@@ -721,8 +732,14 @@ public class InjectionContext {
                                                         final HasAnnotations hasAnnotations) {
 
     final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
-    final Set<Annotation> annotationSet
-        = new HashSet<Annotation>(Arrays.asList(hasAnnotations.getAnnotations()));
+
+    for (final Annotation a : hasAnnotations.getAnnotations()) {
+      if (annotationsForElementType.contains(a.annotationType())) {
+        return a;
+      }
+    }
+
+    final Set<Annotation> annotationSet = new HashSet<Annotation>();
 
     fillInStereotypes(annotationSet, hasAnnotations.getAnnotations(), false);
 
