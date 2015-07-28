@@ -35,6 +35,26 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
+      <dependency>
+       <groupId>org.eclipse.aether</groupId>
+       <artifactId>aether-api</artifactId>
+       <version>0.9.0.M2</version>
+      </dependency>
+      <dependency>
+       <groupId>org.eclipse.aether</groupId>
+       <artifactId>aether-impl</artifactId>
+       <version>0.9.0.M2</version>
+      </dependency>
+      <dependency>
+       <groupId>org.eclipse.aether</groupId>
+       <artifactId>aether-spi</artifactId>
+       <version>0.9.0.M2</version>
+      </dependency>
+      <dependency>
+       <groupId>org.eclipse.aether</groupId>
+       <artifactId>aether-util</artifactId>
+       <version>0.9.0.M2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -86,6 +106,11 @@
       <type>pom</type>
       <scope>test</scope>
       <!--There is a problem with Aether https://issues.jboss.org/browse/SHRINKRES-174 -->
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model-builder</artifactId>
+      <version>3.1.1</version>
     </dependency>
     <dependency>
       <artifactId>maven-aether-provider</artifactId>
