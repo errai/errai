@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-security</artifactId>
-    <version>3.2.0.Final</version>
+    <version>3.2.1-SNAPSHOT</version>
   </parent>
   <artifactId>errai-security-client</artifactId>
   <name>Errai::Security::Client</name>
