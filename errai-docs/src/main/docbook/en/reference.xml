@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2015-07-03</date>
+    <date>2015-07-28</date>
     
     
     
@@ -73,13 +73,13 @@
 <title>Creating your first project</title>
 <important>
 <title>Maven Required</title>
-<simpara>The first thing you&#8217;ll need to do if you have not already, is <ulink url="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">install Maven</ulink> . If you have not already installed Maven, do so now.</simpara>
+<simpara>The first thing you&#8217;ll need to do if you have not already, is <ulink url="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">install Maven</ulink>. If you have not already installed Maven, do so now.</simpara>
 <simpara>Warning: If you use maven2, you will run into this problem: <ulink url="https://community.jboss.org/thread/177645">https://community.jboss.org/thread/177645</ulink></simpara>
 </important>
 <simpara>You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">errai tutorial demo</ulink>) or by building an app with the Errai Forge Addon:</simpara>
 <section id="sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication">
 <title>Start from a working example application</title>
-<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">demo</ulink>. Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link> .</simpara>
+<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">demo</ulink>. Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link>.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">
 <title>Starting with the Errai Forge Addon</title>
@@ -204,7 +204,7 @@ public class App {
     </listitem>
   
     <listitem>
-      <simpara>Accept the defaults by clicking <emphasis>Next</emphasis> , and then accept the User License Agreement to begin the installation.</simpara>
+      <simpara>Accept the defaults by clicking <emphasis>Next</emphasis>, and then accept the User License Agreement to begin the installation.</simpara>
       
     </listitem>
   
@@ -270,7 +270,7 @@ public class App {
     </listitem>
   
     <listitem>
-      <simpara>When the import process has finished, you should see your project imported within the Eclipse <emphasis>Project Explorer</emphasis> . If you are using errai-tutorial, the <literal><phrase role="code">App</phrase></literal> class should be visible within the <literal><phrase role="code">client</phrase></literal> package.</simpara>
+      <simpara>When the import process has finished, you should see your project imported within the Eclipse <emphasis>Project Explorer</emphasis>. If you are using errai-tutorial, the <literal><phrase role="code">App</phrase></literal> class should be visible within the <literal><phrase role="code">client</phrase></literal> package.</simpara>
       
 <figure>
 <title>App.java</title>
@@ -375,7 +375,7 @@ public class App {
       <simpara>At this point, you should try running your new configuration to make sure everything is in working order. To run your app, find the run configuration under the <emphasis>Run As</emphasis> menu in the toolbar.</simpara>
       
 <figure>
-<title>Run Gwt Development Mode from Eclipse</title>
+<title>Run GWT Development Mode from Eclipse</title>
   <mediaobject>
     <imageobject>
       <imagedata fileref="author/download/attachments/54493220/UseGwtRunConfiguration.PNG" contentwidth="650"/>
@@ -691,7 +691,7 @@ public class App {
 <simpara>This guide does not assume any past experience with CDI. However, you may wish to consider reading the <ulink url="http://docs.jboss.org/weld/reference/1.1.5.Final/en-US/html/">Weld Documentation</ulink> in addition to this guide.</simpara>
 <section id="sid-54493502_AGentleIntroductiontoCDI-YourFirstBean">
 <title>Your First Bean</title>
-<simpara>A bean in CDI is merely a POJO (Plain Old Java Object), for the most part. In the context of CDI, any plain, default constructable class is a member of the <emphasis>dependent scope</emphasis> . Don&#8217;t worry too much about what that means for now. Let&#8217;s just go ahead and make one:</simpara>
+<simpara>A bean in CDI is merely a POJO (Plain Old Java Object), for the most part. In the context of CDI, any plain, default constructable class is a member of the <emphasis>dependent scope</emphasis>. Don&#8217;t worry too much about what that means for now. Let&#8217;s just go ahead and make one:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class Foo {
   public String getName() {
     return "Mr. Foo";
@@ -713,7 +713,7 @@ public class Bar {
   }
 }</programlisting>
 <simpara>That was <emphasis>almost</emphasis> as easy as making the last bean. The difference between this bean and the last, is <literal><phrase role="code">Bar</phrase></literal> will actually be instantiated by the container automatically, and <literal><phrase role="code">Foo</phrase></literal> will not.</simpara>
-<simpara>So what can we do with <literal><phrase role="code">Foo</phrase></literal> ? Well, let&#8217;s go ahead and get familiar with dependency injection, shall we?</simpara>
+<simpara>So what can we do with <literal><phrase role="code">Foo</phrase></literal>? Well, let&#8217;s go ahead and get familiar with dependency injection, shall we?</simpara>
 <programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class Bar {
   @Inject Foo foo;
@@ -974,7 +974,7 @@ public class HelloWorldService implements MessageCallback {
       System.out.println("Hello, me!");
     }
   }</programlisting>
-<simpara>To create a local receiver using through programmatic service registration, use the <literal><phrase role="code">subscribeLocal()</phrase></literal> method in place of <literal><phrase role="code">subscribe()</phrase></literal> :</simpara>
+<simpara>To create a local receiver using through programmatic service registration, use the <literal><phrase role="code">subscribeLocal()</phrase></literal> method in place of <literal><phrase role="code">subscribe()</phrase></literal>:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public void registerLocalService(MessageBus bus) {
   bus.subscribeLocal("LocalBroadcastReceiver", new MessageCallback() {
     public void callback(Message message) {
@@ -1008,7 +1008,7 @@ public class HelloWorldService implements MessageCallback {
     .toSubject("ObjectService").signalling()
     .with(MessageParts.ReplyTo, "ClientEndpoint")
     .noErrorHandling().sendNowWith(dispatcher);</programlisting>
-<simpara>And the conversational code on the server (for service <emphasis>ObjectService</emphasis> ):</simpara>
+<simpara>And the conversational code on the server (for service <emphasis>ObjectService</emphasis>):</simpara>
 <programlisting language="java" linenumbering="unnumbered">  MessageBuilder.createConversation(message)
     .subjectProvided().signalling()
     .with("Records", records)
@@ -1062,7 +1062,7 @@ public class HelloWorldService implements MessageCallback {
 <section id="sid-5931306">
 <title>Handling Errors</title>
 <simpara>Asynchronous messaging necessitates the need for asynchronous error handling. Luckily, support for handling errors is built directly into the <literal><phrase role="code">MessageBuilder</phrase></literal> API, utilizing the <literal><phrase role="code">ErrorCallback</phrase></literal> interface. In the examples shown in previous exceptions, error handing has been glossed over with aubiquitous usage of the <literal><phrase role="code">noErrorHandling()</phrase></literal> method while building messaging. We chose to require the explicit use of such a method to remind developers of the fact that they are responsible for their own error handling, requiring you to explicitly make the decision to forego handling potential errors.</simpara>
-<simpara>As a general rule, you should <emphasis>always handle your errors</emphasis> . It will lead to faster and quicker identification of problems with your applications if you have error handlers, and generally help you build more robust code.</simpara>
+<simpara>As a general rule, you should <emphasis>always handle your errors</emphasis>. It will lead to faster and quicker identification of problems with your applications if you have error handlers, and generally help you build more robust code.</simpara>
 <programlisting language="java" linenumbering="unnumbered">MessageBuilder.createMessage()
     .toSubject("HelloWorldService")
     .signalling()
@@ -1213,7 +1213,7 @@ MessageBuilder.createMessage()
   "ReplyTo" : "MyTopicSubscriberReplyTo"
 }</programlisting>
 </example>
-<simpara>The message shows a very vanilla J.REP message. The keys of the JSON Object represent individual <emphasis>message parts</emphasis> , with the values representing their corresponding values. The standard J.REP protocol encompasses a set of standard message parts and values, which for the purposes of this specification we&#8217;ll collectively refer to as the protocol verbs.</simpara>
+<simpara>The message shows a very vanilla J.REP message. The keys of the JSON Object represent individual <emphasis>message parts</emphasis>, with the values representing their corresponding values. The standard J.REP protocol encompasses a set of standard message parts and values, which for the purposes of this specification we&#8217;ll collectively refer to as the protocol verbs.</simpara>
 <simpara>The following table describes all of the message parts that a J.REP capable client is expected to understand:</simpara>
 <informaltable frame="all"
     rowsep="1" colsep="1">
@@ -1406,7 +1406,7 @@ MessageBuilder.createMessage()
     <textobject><phrase>FederationTopology</phrase></textobject>
   </mediaobject>
 </figure>
-<simpara>It is possible for <emphasis>Client A</emphasis> to send messages to the subjects <emphasis>ServiceA</emphasis> and <emphasis>ServiceB</emphasis> . But it is not possible to address messages to <emphasis>ServiceC</emphasis> . Conversely, <emphasis>Client B</emphasis> can address messages to <emphasis>ServiceC</emphasis> and <emphasis>ServiceB</emphasis> , but not <emphasis>ServiceA</emphasis> .</simpara>
+<simpara>It is possible for <emphasis>Client A</emphasis> to send messages to the subjects <emphasis>ServiceA</emphasis> and <emphasis>ServiceB</emphasis>. But it is not possible to address messages to <emphasis>ServiceC</emphasis>. Conversely, <emphasis>Client B</emphasis> can address messages to <emphasis>ServiceC</emphasis> and <emphasis>ServiceB</emphasis>, but not <emphasis>ServiceA</emphasis>.</simpara>
 </section>
 <section id="sid-23036473_WireProtocol%28J.REP%29-BusManagementandHandshakingProtocols">
 <title>Bus Management and Handshaking Protocols</title>
@@ -1648,7 +1648,7 @@ public class HelloWorldService implements MessageCallback {
 <simpara>The important part is <literal><phrase role="code">org.apache.coyote.http11.Http11AprProtocol</phrase></literal>. You should <emphasis role="strong">NOT</emphasis> be seeing <literal><phrase role="code">org.apache.coyote.http11.Http11Protocol</phrase></literal>. You might have to install the Tomcat native library if not already available on your system.</simpara>
 </important>
 <simpara>You will then need to configure the servlet in your application&#8217;s <literal><phrase role="code">web.xml</phrase></literal> which will provide WebSocket upgrade support within AS7.</simpara>
-<simpara>Add the following to the <literal><phrase role="code">web.xml</phrase></literal> :</simpara>
+<simpara>Add the following to the <literal><phrase role="code">web.xml</phrase></literal>:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;context-param&gt;
   &lt;param-name&gt;websockets-enabled&lt;/param-name&gt;
   &lt;param-value&gt;true&lt;/param-value&gt;
@@ -1965,7 +1965,7 @@ public class TimeService {
 </tip>
 <section id="sid-5931407">
 <title>Container Wiring</title>
-<simpara>In contrast to <ulink url="http://code.google.com/p/google-gin/">Gin</ulink> , the Errai IOC container does not provide a programmatic way of creating and configuring injectors. Instead, container-level binding rules are defined by implementing a <literal><phrase role="code">Provider</phrase></literal>, which is scanned for and auto-discovered by the container.</simpara>
+<simpara>In contrast to <ulink url="http://code.google.com/p/google-gin/">Gin</ulink>, the Errai IOC container does not provide a programmatic way of creating and configuring injectors. Instead, container-level binding rules are defined by implementing a <literal><phrase role="code">Provider</phrase></literal>, which is scanned for and auto-discovered by the container.</simpara>
 <simpara>A <literal><phrase role="code">Provider</phrase></literal> is essentially a factory which produces type instances within in the container, and defers instantiation responsibility for the provided type to the provider implementation. Top-level providers use the standard <literal><phrase role="code">javax.inject.Provider&lt;T&gt;</phrase></literal> interface.</simpara>
 <simpara>Types made available as <emphasis>top-level</emphasis> providers will be available for injection in any managed component within the container.</simpara>
 <simpara>Out of the box, Errai IOC implements these default top-level providers, all defined in the <literal><phrase role="code">org.jboss.errai.ioc.client.api.builtin</phrase></literal> package:</simpara>
@@ -1973,42 +1973,42 @@ public class TimeService {
 <itemizedlist>
   
     <listitem>
-      <simpara><literal><phrase role="code">CallerProvider :</phrase></literal> Makes RPC <literal><phrase role="code">Caller&lt;T&gt;</phrase></literal> objects available for injection.</simpara>
+      <simpara><literal><phrase role="code">CallerProvider</phrase></literal>: Makes RPC <literal><phrase role="code">Caller&lt;T&gt;</phrase></literal> objects available for injection.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">DisposerProvider :</phrase></literal> Makes Errai IoC <literal><phrase role="code">Disposer&lt;T&gt;</phrase></literal> objects available for injection.</simpara>
+      <simpara><literal><phrase role="code">DisposerProvider</phrase></literal>: Makes Errai IoC <literal><phrase role="code">Disposer&lt;T&gt;</phrase></literal> objects available for injection.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">InitBallotProvider :</phrase></literal> Makes instances of <literal><phrase role="code">InitBallot</phrase></literal> available for injection.</simpara>
+      <simpara><literal><phrase role="code">InitBallotProvider</phrase></literal>: Makes instances of <literal><phrase role="code">InitBallot</phrase></literal> available for injection.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">IOCBeanManagerProvider :</phrase></literal> Makes Errai&#8217;s client-side bean manager, <literal><phrase role="code">ClientBeanManager</phrase></literal>, available for injection.</simpara>
+      <simpara><literal><phrase role="code">IOCBeanManagerProvider</phrase></literal>: Makes Errai&#8217;s client-side bean manager, <literal><phrase role="code">ClientBeanManager</phrase></literal>, available for injection.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">MessageBusProvider :</phrase></literal> Makes Errai&#8217;s client-side <literal><phrase role="code">MessageBus</phrase></literal> singleton available for injection.</simpara>
+      <simpara><literal><phrase role="code">MessageBusProvider</phrase></literal>: Makes Errai&#8217;s client-side <literal><phrase role="code">MessageBus</phrase></literal> singleton available for injection.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">RequestDispatcherProvider :</phrase></literal> Makes an instance of the <literal><phrase role="code">RequestDispatcher</phrase></literal> available for injection.</simpara>
+      <simpara><literal><phrase role="code">RequestDispatcherProvider</phrase></literal>: Makes an instance of the <literal><phrase role="code">RequestDispatcher</phrase></literal> available for injection.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">RootPanelProvider :</phrase></literal> Makes GWT&#8217;s <literal><phrase role="code">RootPanel</phrase></literal> singleton injectable.</simpara>
+      <simpara><literal><phrase role="code">RootPanelProvider</phrase></literal>: Makes GWT&#8217;s <literal><phrase role="code">RootPanel</phrase></literal> singleton injectable.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><literal><phrase role="code">SenderProvider :</phrase></literal> Makes MessageBus <literal><phrase role="code">Sender&lt;T&gt;</phrase></literal> objects available for injection.</simpara>
+      <simpara><literal><phrase role="code">SenderProvider</phrase></literal>: Makes MessageBus <literal><phrase role="code">Sender&lt;T&gt;</phrase></literal> objects available for injection.</simpara>
       
     </listitem>
   
@@ -2285,8 +2285,8 @@ private void updateTime() {
 <section id="sid-21627016">
 <title>Client-Side Bean Manager</title>
 <simpara>It may be necessary at times to manually obtain instances of beans managed by Errai IOC from outside the container managed scope or creating a hard dependency from your bean. Errai IOC provides a simple client-side bean manager for handling these scenarios: <literal><phrase role="code">org.jboss.errai.ioc.client.container.ClientBeanManager</phrase></literal>.</simpara>
-<simpara>As you might expect, you can inject a bean manager instance into any of your managed beans. If you use Errai IOC in its default mode you will need to inject the synchronous bean manager ( <literal><phrase role="code">org.jboss.errai.ioc.client.container.SyncBeanManager</phrase></literal> ).</simpara>
-<simpara>If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager (<literal><phrase role="code">org.jboss.errai.ioc.client.container.async.AsyncBeanManager</phrase></literal>) instead. Asynchronous IOC brings support for <ulink url="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html">code splitting</ulink> . That means that any bean annotated with <literal><phrase role="code">@LoadAsync</phrase></literal> can be compiled into a separate JavaScript file that&#8217;s downloaded when the bean is first needed on the client. <literal><phrase role="code">@LoadAsync</phrase></literal> also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same JavaScript file.</simpara>
+<simpara>As you might expect, you can inject a bean manager instance into any of your managed beans. If you use Errai IOC in its default mode you will need to inject the synchronous bean manager (<literal><phrase role="code">org.jboss.errai.ioc.client.container.SyncBeanManager</phrase></literal>).</simpara>
+<simpara>If you have asynchronous IOC mode enabled simply inject the asynchronous bean manager (<literal><phrase role="code">org.jboss.errai.ioc.client.container.async.AsyncBeanManager</phrase></literal>) instead. Asynchronous IOC brings support for <ulink url="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html">code splitting</ulink>. That means that any bean annotated with <literal><phrase role="code">@LoadAsync</phrase></literal> can be compiled into a separate JavaScript file that&#8217;s downloaded when the bean is first needed on the client. <literal><phrase role="code">@LoadAsync</phrase></literal> also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same JavaScript file.</simpara>
 <example>
 <title>Injecting the client-side bean manager</title>
 <programlisting language="java" linenumbering="unnumbered">public MyManagedBean {
@@ -2380,7 +2380,7 @@ public class UserManagementImpl implements UserManagement {
      // do user listy things!
   }
 }</programlisting>
-<simpara>You can specify a mock implementation of this class by implementing its common parent type ( <literal><phrase role="code">UserManagement</phrase></literal> ) and annotating that class with the <literal><phrase role="code">@TestMock</phrase></literal> annotation inside your test package like so:</simpara>
+<simpara>You can specify a mock implementation of this class by implementing its common parent type (<literal><phrase role="code">UserManagement</phrase></literal>) and annotating that class with the <literal><phrase role="code">@TestMock</phrase></literal> annotation inside your test package like so:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@TestMock @ApplicationScoped
 public class MockUserManagementImpl implements UserManagement {
   public List&lt;User&gt; listUsers() {
@@ -2548,7 +2548,7 @@ public class SimpleBean {
 </section>
 <section id="sid-21758054">
 <title>Events</title>
-<simpara>Any CDI managed component may produce and consume <ulink url="http://docs.jboss.org/weld/reference/latest/en-US/html/events.html">events</ulink> . This allows beans to interact in a completely decoupled fashion. Beans consume events by registering for a particular event type and optional qualifiers. The Errai CDI extension simply extends this concept into the client tier. A GWT client application can simply register an <literal><phrase role="code">Observer</phrase></literal> for a particular event type and thus receive events that are produced on the server-side. Likewise and using the same API, GWT clients can produce events that are consumed by a server-side observer.</simpara>
+<simpara>Any CDI managed component may produce and consume <ulink url="http://docs.jboss.org/weld/reference/latest/en-US/html/events.html">events</ulink>. This allows beans to interact in a completely decoupled fashion. Beans consume events by registering for a particular event type and optional qualifiers. The Errai CDI extension simply extends this concept into the client tier. A GWT client application can simply register an <literal><phrase role="code">Observer</phrase></literal> for a particular event type and thus receive events that are produced on the server-side. Likewise and using the same API, GWT clients can produce events that are consumed by a server-side observer.</simpara>
 <simpara>Let&#8217;s take a look at an example.</simpara>
 <example>
 <title>FraudClient.java</title>
@@ -2799,7 +2799,7 @@ public class MyComposite extends Composite {
   }
 }</programlisting>
 </example>
-<simpara>For more information on CDI producers, see the <ulink url="http://docs.jboss.org/cdi/spec/1.0/html/">CDI specification</ulink> and the <ulink url="http://seamframework.org/Weld/WeldDocumentation">WELD reference documentation</ulink> .</simpara>
+<simpara>For more information on CDI producers, see the <ulink url="http://docs.jboss.org/cdi/spec/1.0/html/">CDI specification</ulink> and the <ulink url="http://seamframework.org/Weld/WeldDocumentation">WELD reference documentation</ulink>.</simpara>
 </section>
 <section id="sid-53118110">
 <title>Safe dynamic lookup</title>
@@ -3226,7 +3226,7 @@ public class MyRemoteServiceImpl implements MyRemoteService {
   }
  }, MyRemoteService.class).isEveryoneHappy();
 </programlisting>
-<simpara>In the above example, we declare a remote callback that receives a Boolean, to correspond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However, <emphasis>don&#8217;t be tempted to write code like this</emphasis> :</simpara>
+<simpara>In the above example, we declare a remote callback that receives a Boolean, to correspond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However, <emphasis>don&#8217;t be tempted to write code like this</emphasis>:</simpara>
 <programlisting language="java" linenumbering="unnumbered"> boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
 <simpara>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</simpara>
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-ProxyInjection">
@@ -3590,7 +3590,7 @@ public interface CustomerService {
 <simpara>The above class implements the shared interface. Since it performs database and/or filesystem operations to manipulate the persistent data store, it is not GWT translatable, and it&#8217;s therefore kept in a package that is not part of the GWT module.</simpara>
 <important>
 <title>Save typing and reduce duplication</title>
-<simpara>Note that all JAX-RS annotations ( <literal><phrase role="code">@Path</phrase></literal>, <literal><phrase role="code">@GET</phrase></literal>, <literal><phrase role="code">@Consumes</phrase></literal>, and so on) can be inherited from the interface. You do not need to repeat these annotations in your resource implementation classes.</simpara>
+<simpara>Note that all JAX-RS annotations (<literal><phrase role="code">@Path</phrase></literal>, <literal><phrase role="code">@GET</phrase></literal>, <literal><phrase role="code">@Consumes</phrase></literal>, and so on) can be inherited from the interface. You do not need to repeat these annotations in your resource implementation classes.</simpara>
 </important>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-CreatingRequests">
@@ -3897,7 +3897,7 @@ public class MyCacheInterceptor implements RestClientInterceptor {
     </listitem>
   
     <listitem>
-      <simpara>Much of the Metamodel API ( <literal><phrase role="code">Metamodel</phrase></literal>, <literal><phrase role="code">EntityType</phrase></literal>, <literal><phrase role="code">SingularAttribute</phrase></literal>, <literal><phrase role="code">PluralAttribute</phrase></literal>, etc.)</simpara>
+      <simpara>Much of the Metamodel API (<literal><phrase role="code">Metamodel</phrase></literal>, <literal><phrase role="code">EntityType</phrase></literal>, <literal><phrase role="code">SingularAttribute</phrase></literal>, <literal><phrase role="code">PluralAttribute</phrase></literal>, etc.)</simpara>
       
     </listitem>
   
@@ -3984,8 +3984,8 @@ public class Genre {
 }</programlisting>
 <section id="sid-54493688_ErraiJPA-EntityAttributes">
 <title>Entity Attributes</title>
-<simpara>The state of fields and JavaBeans properties of entities are generally persisted with the entity instance. These persistent things are called <emphasis>attributes</emphasis> .</simpara>
-<simpara>JPA Attributes are subdivided into two main types: <emphasis>singular</emphasis> and <emphasis>plural</emphasis> . Singular attributes are scalar types like <literal><phrase role="code">Integer</phrase></literal> or <literal><phrase role="code">String</phrase></literal>. Plural attributes are collection values, such as <literal><phrase role="code">List&lt;Integer&gt;</phrase></literal> or <literal><phrase role="code">Set&lt;String&gt;</phrase></literal>.</simpara>
+<simpara>The state of fields and JavaBeans properties of entities are generally persisted with the entity instance. These persistent things are called <emphasis>attributes</emphasis>.</simpara>
+<simpara>JPA Attributes are subdivided into two main types: <emphasis>singular</emphasis> and <emphasis>plural</emphasis>. Singular attributes are scalar types like <literal><phrase role="code">Integer</phrase></literal> or <literal><phrase role="code">String</phrase></literal>. Plural attributes are collection values, such as <literal><phrase role="code">List&lt;Integer&gt;</phrase></literal> or <literal><phrase role="code">Set&lt;String&gt;</phrase></literal>.</simpara>
 <simpara>The values of singular attributes (and the elements of plural attributes) can be of any application-defined entity type or a JPA Basic type. The JPA basic types are all of the Java primitive types, all boxed primitives, enums, BigInteger, BigDecimal, String, Date (<literal><phrase role="code">java.util.Date</phrase></literal> or <literal><phrase role="code">java.sql.Date</phrase></literal>), Time, and Timestamp.</simpara>
 <simpara>You can direct JPA to read and write your entity&#8217;s attributes by direct field access or via JavaBeans property access methods (that is, "getters and setters"). Direct field access is the default. To request property access, annotate the class with <literal><phrase role="code">@Access(AccessType.PROPERTY)</phrase></literal>. If using direct field access, attribute-specific JPA annotations should be on the fields themselves; when using property access, the attribute-specific annotations should be on the getter method for that property.</simpara>
 </section>
@@ -4835,7 +4835,7 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
 </section>
 <section id="sid-51282340_DataBinding-PropertyChangeHandlers">
 <title>Property Change Handlers</title>
-<simpara>In some cases keeping the model and the UI in sync is not enough. Errai&#8217;s <literal><phrase role="code">DataBinder</phrase></literal> allows for the registration of <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g <literal><phrase role="code">"customer.address.*"</phrase></literal> ). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g <literal><phrase role="code">"customer.**"</phrase></literal> or just <literal><phrase role="code">"**"</phrase></literal>) .</simpara>
+<simpara>In some cases keeping the model and the UI in sync is not enough. Errai&#8217;s <literal><phrase role="code">DataBinder</phrase></literal> allows for the registration of <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> for specific properties, property expressions or all properties of a bound model. A property expression can be a property chain such as customer.address.street. It can end in a wildcard to indicate that changes of any property of the corresponding bean should be observed (e.g <literal><phrase role="code">"customer.address.*"</phrase></literal>). A double wildcard can be used at the end of a property expression to register a cascading change handler for any nested property (e.g <literal><phrase role="code">"customer.**"</phrase></literal> or just <literal><phrase role="code">"**"</phrase></literal>).</simpara>
 <simpara>This provides a uniform notification mechanism for model and UI value changes. <literal><phrase role="code">PropertyChangeHandlers</phrase></literal> can be used to carry out any additional logic that might be necessary after a model or UI value has changed.</simpara>
 <programlisting language="java" linenumbering="unnumbered">dataBinder.addPropertyChangeHandler(new PropertyChangeHandler() {
   @Override
@@ -4852,7 +4852,7 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
 </section>
 <section id="sid-51282340_DataBinding-DeclarativeBinding">
 <title>Declarative Binding</title>
-<simpara>Programmatic binding as described above (see <link linkend="sid-51282340_DataBinding-CreatingBindings">Creating Bindings</link> ) can be tedious when working with UI components that contain a large number of input fields. Errai provides an annotation-driven binding API that can be used to create bindings automatically which cuts a lot of boilerplate code. The declarative API will work in any <link linkend="sid-5931402">Errai IOC</link> managed bean (including <link linkend="sid-51806600">Errai UI</link> templates). Simply inject a data binder or model object and declare the bindings using <literal><phrase role="code">@Bound</phrase></literal>.</simpara>
+<simpara>Programmatic binding as described above (see <link linkend="sid-51282340_DataBinding-CreatingBindings">Creating Bindings</link>) can be tedious when working with UI components that contain a large number of input fields. Errai provides an annotation-driven binding API that can be used to create bindings automatically which cuts a lot of boilerplate code. The declarative API will work in any <link linkend="sid-5931402">Errai IOC</link> managed bean (including <link linkend="sid-51806600">Errai UI</link> templates). Simply inject a data binder or model object and declare the bindings using <literal><phrase role="code">@Bound</phrase></literal>.</simpara>
 <simpara>Here is a simple example using an injected model object provided by the <literal><phrase role="code">@Model</phrase></literal> annotation (field injection is used here, but constructor and method injection are supported as well):</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Dependent
 public class CustomerView {
@@ -4884,7 +4884,7 @@ public class CustomerView {
 <simpara>In both examples above an instance of the <literal><phrase role="code">Customer</phrase></literal> model is automatically bound to the corresponding UI widgets based on matching field names. The model object and the UI fields will automatically be kept in sync. The widgets are inferred from all enclosing fields and methods annotated with <literal><phrase role="code">@Bound</phrase></literal> of the class that defines the <literal><phrase role="code">@AutoBound DataBinder</phrase></literal> or <literal><phrase role="code">@Model</phrase></literal> and all its super classes.</simpara>
 <section id="sid-51282340_DataBinding-Default%2CSimple%2CandChainedPropertyBindings">
 <title>Default, Simple, and Chained Property Bindings</title>
-<simpara>By default, bindings are determined by matching field names to property names on the model object. In the examples above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model ( <literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal>). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
+<simpara>By default, bindings are determined by matching field names to property names on the model object. In the examples above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model (<literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal>). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
 <simpara>The following example illustrates all three scenarios:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Bindable
 public class Address {
@@ -4976,7 +4976,7 @@ public class CustomerView {
 </section>
 <section id="sid-51282340_DataBinding-Beanvalidation">
 <title>Bean validation</title>
-<simpara>Java bean validation (JSR 303) provides a declarative programming model for validating entities. More details and examples can be found <ulink url="http://docs.jboss.org/hibernate/validator/4.3/reference/en-US/html_single/">here</ulink> . Errai provides a bean validation module that makes <literal><phrase role="code">Validator</phrase></literal> instances injectable and work well with Errai&#8217;s data binding module. The following line needs to be added to the GWT module descriptor to inherit Errai&#8217;s bean validation module:</simpara>
+<simpara>Java bean validation (JSR 303) provides a declarative programming model for validating entities. More details and examples can be found <ulink url="http://docs.jboss.org/hibernate/validator/4.3/reference/en-US/html_single/">here</ulink>. Errai provides a bean validation module that makes <literal><phrase role="code">Validator</phrase></literal> instances injectable and work well with Errai&#8217;s data binding module. The following line needs to be added to the GWT module descriptor to inherit Errai&#8217;s bean validation module:</simpara>
 <example>
 <title>App.gwt.xml</title>
 <programlisting language="xml" linenumbering="unnumbered">&lt;inherits name="org.jboss.errai.validation.Validation" /&gt;
@@ -5044,7 +5044,7 @@ errai.validation.blacklist = some.fully.qualified.ClassName \
 </tip>
 <note id="sid-51806600_ErraiUI-WorkingDemo">
 <title>Manual Setup</title>
-<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai UI to your project. If you work better by playing with a finished product, you can see a simple client-server project <ulink url="https://github.com/errai/summit-demo-2013">implemented using Errai UI here</ulink> .</simpara>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai UI to your project. If you work better by playing with a finished product, you can see a simple client-server project <ulink url="https://github.com/errai/summit-demo-2013">implemented using Errai UI here</ulink>.</simpara>
 </note>
 </section>
 <section id="sid-51806600_ErraiUI-UseErraiUICompositecomponents">
@@ -5099,12 +5099,41 @@ public class LoginForm extends Composite {
 <simpara>With default values, @Templated informs Errai UI to look in the current package for a parallel <literal><phrase role="code">".html"</phrase></literal> template next to the Composite component Class; however, the template name may be overridden by passing a String into the @Templated annotation, like so:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html")
 public class LoginForm extends Composite {
-   /* looks for my-template.html in LoginForm's package */
+   /* Looks for my-template.html in LoginForm's package */
 }</programlisting>
 <simpara>Fully qualified template paths are also supported, but must begin with a leading <emphasis>/</emphasis>:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("/org/example/my-template.html")
 public class LoginForm extends Composite {
-   /* looks for my-template.html in package org.example */
+   /* Looks for my-template.html in package org.example */
+}</programlisting>
+</section>
+<section id="_template_providers">
+<title>Template providers</title>
+<simpara>The previous examples specify template files at compile time, but it is possible to use templates provided at runtime using a <literal>TemplateProvider</literal>. These providers run asynchronously so that it is possible to fetch templates via HTTP requests. In fact Errai UI contains an implementation, <literal>ServerTemplateProvider</literal>, that fetches templates using the <literal>@Templated</literal> value as a url.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated(value="home.html", provider=ServerTemplateProvider.class)
+public class LoginForm extends Composite {
+  /* Makes an HTTP request for the relative path "home.html" */
+}</programlisting>
+<simpara>Custom implementations can also be used.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated(provider=MyTemplateProvider.class)
+public class LoginForm extends Composite {
+  /* Makes an HTTP request for the relative path "home.html" */
+}
+
+@Dependent
+public class MyTemplateProvider implements TemplateProvider {
+
+  @Override
+  public void provideTemplate(String location, TemplateRenderingCallback renderingCallback) {
+    String template;
+
+    /*
+     * Generate the template String.
+     * Note: The location parameter is the value from the @Templated annotation.
+     */
+
+    renderingCallback.renderTemplate(template);
+  }
 }</programlisting>
 </section>
 </section>
@@ -5551,7 +5580,7 @@ public class LoginForm extends Composite {
 <simpara>Now the user object and the <literal><phrase role="code">username</phrase></literal> and <literal><phrase role="code">password</phrase></literal> fields in the UI are automatically kept in sync. No event handling code needs to be written to update the user object in response to input field changes and no code needs to be written to update the UI fields when the model object changes. So, with the above annotations in place, it will always be true that <literal><phrase role="code">user.getUsername().equals(username.getText())</phrase></literal> and <literal><phrase role="code">user.getPassword().equals(password.getText())</phrase></literal>.</simpara>
 <section id="sid-51806600_ErraiUI-Default%2CSimple%2CandChainedPropertyBindings">
 <title>Default, Simple, and Chained Property Bindings</title>
-<simpara>By default, bindings are determined by matching field names to property names on the model object. In the example above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model ( <literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal>). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
+<simpara>By default, bindings are determined by matching field names to property names on the model object. In the example above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model (<literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal>). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
 <simpara>The following example illustrates all three scenarios:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Bindable
 public class Address {
@@ -5810,7 +5839,7 @@ public class HelloWorldForm extends Composite {
 <programlisting language="java" linenumbering="unnumbered">{
     "Widget.welcome": "Willkommen bei Errai-ui i18n."
 }</programlisting>
-<simpara>Because your templates are designer templates and can contain some mock data that doesn&#8217;t need to be translated, Errai has the ability to indicate that with an attribute <literal><phrase role="code">data-role=dummy</phrase></literal> :</simpara>
+<simpara>Because your templates are designer templates and can contain some mock data that doesn&#8217;t need to be translated, Errai has the ability to indicate that with an attribute <literal><phrase role="code">data-role=dummy</phrase></literal>:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;div id=navbar data-role=dummy&gt;
   &lt;div class="navbar navbar-fixed-top"&gt;
     &lt;div class=navbar-inner&gt;
@@ -5825,7 +5854,7 @@ public class HelloWorldForm extends Composite {
   &lt;/div&gt;
 &lt;/div&gt;</programlisting>
 <simpara>Here the template fills out a navbar with dummy elements, useful for creating a design, adding <literal><phrase role="code">data-role=dummy</phrase></literal> will not only exclude it form being translated it will also strip the children nodes from the template that will be used by the application.</simpara>
-<simpara>When you have setup a translation of your application Errai will look at the browser locale and select the locale, if it&#8217;s available, if not it will use the default ( <literal><phrase role="code">bundle.json</phrase></literal> ). If the users of your application need to be able to switch the language manually, Errai offers a pre build component you can easily add to your page: <literal><phrase role="code">LocaleListBox</phrase></literal> will render a Listbox with all available languages. If you want more control of what this language selector looks like there is also a <literal><phrase role="code">LocaleSelector</phrase></literal> that you can use to query and select the locale for example:</simpara>
+<simpara>When you have setup a translation of your application Errai will look at the browser locale and select the locale, if it&#8217;s available, if not it will use the default (<literal><phrase role="code">bundle.json</phrase></literal>). If the users of your application need to be able to switch the language manually, Errai offers a pre build component you can easily add to your page: <literal><phrase role="code">LocaleListBox</phrase></literal> will render a Listbox with all available languages. If you want more control of what this language selector looks like there is also a <literal><phrase role="code">LocaleSelector</phrase></literal> that you can use to query and select the locale for example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class NavBar extends Composite {
 
@@ -6025,7 +6054,7 @@ public class MyStyleDescriptor {
   
 </itemizedlist>
 
-<simpara>The <literal><phrase role="code">Navigation</phrase></literal> singleton owns a GWT Panel called the <emphasis>navigation panel</emphasis> . This panel always contains a widget corresponding to the fragment ID (the part after the # symbol) in the browser&#8217;s location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser&#8217;s location bar is updated to reflect the new current page.</simpara>
+<simpara>The <literal><phrase role="code">Navigation</phrase></literal> singleton owns a GWT Panel called the <emphasis>navigation panel</emphasis>. This panel always contains a widget corresponding to the fragment ID (the part after the # symbol) in the browser&#8217;s location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser&#8217;s location bar is updated to reflect the new current page.</simpara>
 <section id="sid-54493676_ErraiUINavigation-DeclaringaPage">
 <title>Declaring a Page</title>
 <simpara>To declare a page, annotate any subclass of Widget with the <literal><phrase role="code">@Page</phrase></literal> annotation:</simpara>
@@ -6175,12 +6204,12 @@ public class ItemPage extends VerticalPanel {
   // Anything goes...
 }</programlisting>
 <simpara></simpara>
-<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal> ; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal>, or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a URL properly.)</simpara>
-<simpara>A page widget can have any number of <literal><phrase role="code">@PageState</phrase></literal> fields. The fields can be of any primitive or boxed primitive type (except <literal><phrase role="code">char</phrase></literal> or <literal><phrase role="code">Character</phrase></literal> ), <literal><phrase role="code">String</phrase></literal>, or a <literal><phrase role="code">Collection</phrase></literal>, <literal><phrase role="code">List</phrase></literal>, or <literal><phrase role="code">Set</phrase></literal> of the allowable scalar types. Nested collections are not supported.</simpara>
+<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal>; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal>, or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a URL properly.)</simpara>
+<simpara>A page widget can have any number of <literal><phrase role="code">@PageState</phrase></literal> fields. The fields can be of any primitive or boxed primitive type (except <literal><phrase role="code">char</phrase></literal> or <literal><phrase role="code">Character</phrase></literal>), <literal><phrase role="code">String</phrase></literal>, or a <literal><phrase role="code">Collection</phrase></literal>, <literal><phrase role="code">List</phrase></literal>, or <literal><phrase role="code">Set</phrase></literal> of the allowable scalar types. Nested collections are not supported.</simpara>
 <simpara><literal><phrase role="code">@PageState</phrase></literal> fields can be private, protected, default access, or public. They are always updated by direct field access; never via a setter method. The updates occur just before the <literal><phrase role="code">@PageShowing</phrase></literal> method is invoked.</simpara>
 <simpara>In addition to receiving page state information via direct writes to <literal><phrase role="code">@PageState</phrase></literal> fields, you can also receive the whole Multimap in the <literal><phrase role="code">@PageShowing</phrase></literal> and <literal><phrase role="code">@PageShown</phrase></literal> methods through a parameter of type <literal><phrase role="code">HistoryToken</phrase></literal>. Whether or not a lifecycle method has such a parameter, the <literal><phrase role="code">@PageState</phrase></literal> fields will still be written as usual.</simpara>
 <simpara>Page state values are represented in the URL in place of the corresponding parameter variables declared in the URL template (the <literal><phrase role="code">path</phrase></literal> field of the <literal><phrase role="code">@Page</phrase></literal> annotation. See <link linkend="sid-54493676_ErraiUINavigation-DeclaringaPage">Declaring a Page</link>). If a parameter variable is declared in the URL template and is missing from the actual typed URL, it will cause a navigation error as Errai will not be able to match the typed URL to any template.</simpara>
-<simpara>Any additional path parameters not found in the URL template are appended as key=value pairs separated by the ampersand ( <literal><phrase role="code">&amp;</phrase></literal> ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a <literal><phrase role="code">@PageState</phrase></literal> field is absent from the state information passed to the page, the framework writes a default value: <literal><phrase role="code">null</phrase></literal> for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the <literal><phrase role="code">HistoryToken</phrase></literal> class.</simpara>
+<simpara>Any additional path parameters not found in the URL template are appended as key=value pairs separated by the ampersand (<literal><phrase role="code">&amp;</phrase></literal>) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a <literal><phrase role="code">@PageState</phrase></literal> field is absent from the state information passed to the page, the framework writes a default value: <literal><phrase role="code">null</phrase></literal> for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the <literal><phrase role="code">HistoryToken</phrase></literal> class.</simpara>
 <simpara>To illustrate this further, consider the following example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(path="item/{itemID}/{customerID}")
 public class ItemPage extends VerticalPanel {
@@ -6198,7 +6227,7 @@ public class ItemPage extends VerticalPanel {
 }</programlisting>
 <simpara>Given the host <literal><phrase role="code">"www.company.com"</phrase></literal>, the context <literal>store</literal>, and a state map with the values <literal><phrase role="code">itemID=4231</phrase></literal>, <literal><phrase role="code">customerID=9364</phrase></literal>, and <literal><phrase role="code">storeID=0032</phrase></literal>, the following URL will be generated:
 <literal><phrase role="code">www.company.com/store/#item/4231/9364;storeID=0032</phrase></literal></simpara>
-<simpara>If the value for storeID is undefined, the URL will be <literal>www.company.com/store/#item/4231/9364;storeID=0</literal> .</simpara>
+<simpara>If the value for storeID is undefined, the URL will be <literal>www.company.com/store/#item/4231/9364;storeID=0</literal>.</simpara>
 <simpara>If the URL typed into the browser is <literal>www.company.com/store/#item/4231;storeID=0032</literal>, it will cause a navigation error (assuming there is no other page by this url) because there is a missing path parameter.</simpara>
 </section>
 <section id="_pushstate_functionality">
@@ -6344,7 +6373,7 @@ public class OverallPageStructure extends Composite {
   }
 
 }</programlisting>
-<simpara>Then in your GWT module descriptor you need to override the default navigation panel ( <literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal>) by adding:</simpara>
+<simpara>Then in your GWT module descriptor you need to override the default navigation panel (<literal><phrase role="code">org.jboss.errai.ui.nav.client.local.NavigatingContainer</phrase></literal>) by adding:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;replace-with class="com.company.application.client.NavigatingPanel"&gt;
   &lt;when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/&gt;
 &lt;/replace-with&gt;</programlisting>
@@ -6388,7 +6417,7 @@ public class NavigationErrorHandlerSetter {
 <section id="sid-54493676_ErraiUINavigation-ViewingtheGeneratedNavigationGraph">
 <title>Viewing the Generated Navigation Graph</title>
 <simpara>Because the pages and links in an Errai Navigation application are declared structurally, the framework gets a complete picture of the app&#8217;s navigation structure at compile time. This knowledge is saved out during compilation (and at page reload when in Dev Mode) to the file <literal><phrase role="code">.errai/navgraph.gv</phrase></literal>. You can view the navigation graph using any tool that understands the GraphViz (also known as DOT) file format.</simpara>
-<simpara>One popular open source tool that can display GraphViz/DOT files is <ulink url="http://www.graphviz.org/">GraphViz</ulink> . Free downloads are available for all major operating systems.</simpara>
+<simpara>One popular open source tool that can display GraphViz/DOT files is <ulink url="http://www.graphviz.org/">GraphViz</ulink>. Free downloads are available for all major operating systems.</simpara>
 <simpara>When rendered, a navigation graph looks like this:</simpara>
 <figure>
 <title>Navigation Graph</title>
@@ -6476,7 +6505,7 @@ public class KitchenSinkClient extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>Notification ( <ulink url="http://docs.phonegap.com/en/edge/cordova_notification_notification.md.html#Notification">see documentation on phonegap site</ulink> )</simpara>
+      <simpara>Notification (<ulink url="http://docs.phonegap.com/en/edge/cordova_notification_notification.md.html#Notification">see documentation on phonegap site</ulink>)</simpara>
       
     </listitem>
   
@@ -7065,6 +7094,10 @@ public class AdminManagementPage extends SimplePanel {
 <simpara>One option offered by Errai is to persist the <literal>org.jboss.errai.security.shared.api.identity.User</literal> object in a cookie. This can be done by adding the following to <literal>ErraiApp.properties</literal>:</simpara>
 <screen>errai.security.user_cookie_enabled=true</screen>
 <simpara>With this option enabled the <literal>User</literal> will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.</simpara>
+<warning>
+<title>User cookie is deprecated</title>
+<simpara>For users with many roles, the serialized string may be too large to fit in a cookie. For this reason, the user cookie is not recommended and is kept only for backwards compatibility.</simpara>
+</warning>
 <important>
 <title>User is stored in plain text</title>
 <simpara>The <literal>errai.security.user_cookie_enabled=true</literal> setting causes the <literal>User</literal> to be stored in <emphasis role="strong">plain text</emphasis>. That includes the following information:</simpara>
@@ -7161,6 +7194,13 @@ public class NavBar extends Composite {
 </section>
 <section id="_form_based_login">
 <title>Form Based Login</title>
+<section id="_errai_security_cookie">
+<title>Errai Security Cookie</title>
+<warning>
+<title>User cookie is deprecated</title>
+<simpara>For users with many roles, the serialized string may be too large to fit in a cookie. For this reason, the user cookie is not recommended and is kept only for backwards compatibility.</simpara>
+<simpara>For the recommended approach to form-based login, please skip to the section on the <xref linkend="ErraiUserHostPageFilter"/>.</simpara>
+</warning>
 <simpara>If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. The <literal>errai-security-server</literal> jar contains a servlet filter for encoding the currently authenticated user as a cookie in the http response. Here are the steps for setting this up:</simpara>
 <orderedlist numeration="arabic">
   
@@ -7191,6 +7231,36 @@ public class NavBar extends Composite {
     </listitem>
   
 </orderedlist>
+</section>
+<section id="ErraiUserHostPageFilter">
+<title>Errai User Host Page Filter</title>
+<simpara>The <literal>errai-security-server</literal> jar contains a servlet filter for encoding the currently authenticated user in an html page. By configuring this filter for your GWT host page, a user will be logged-in as soon as your Errai app loads. Here are the steps for setting this up:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Add the following to your ErraiApp.properties: <literal>errai.security.user_on_hostpage_enabled=true</literal></simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Create a login page using an html form that posts to a servlet-filter. If you are using Errai Security with PicketLink you will want to use the <literal>org.picketlink.authentication.web.AuthenticationFilter</literal> servlet-filter. Otherwise, you will need to implement one yourself that authenticates the user by calling the <literal>AuthenticationService.login(String, String)</literal> method.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add this filter-mapping.</simpara>
+      
+<programlisting language="xml" linenumbering="unnumbered">  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;ErraiUserHostPageFilter&lt;/filter-name&gt;
+    &lt;url-mapping&gt;/gwt-host-page.html&lt;/url-mapping&gt;
+  &lt;/filter-mapping&gt;</programlisting>
+<simpara>The mapped URL should be that of your GWT Host Page.</simpara>
+
+      
+    </listitem>
+  
+</orderedlist>
+</section>
 </section>
 <section id="_using_an_alternative_to_picketlink">
 <title>Using an Alternative to PicketLink</title>
@@ -7451,7 +7521,7 @@ public class NavBar extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>Inherit the gwt module <literal><phrase role="code">org.jboss.errai.common.ErraiCommon</phrase></literal></simpara>
+      <simpara>Inherit the GWT module <literal><phrase role="code">org.jboss.errai.common.ErraiCommon</phrase></literal></simpara>
       
 <programlisting language="xml" linenumbering="unnumbered">  &lt;inherits name="org.jboss.errai.common.ErraiCommon" /&gt;</programlisting>
 
@@ -7476,22 +7546,22 @@ public class NavBar extends Composite {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>ErraiSystemLogHandler</emphasis> : prints log statements to the terminal in Development Mode</simpara>
+      <simpara><emphasis>ErraiSystemLogHandler</emphasis>: prints log statements to the terminal in Development Mode</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>ErraiConsoleLogHandler</emphasis> : prints statements to the web console in the browser</simpara>
+      <simpara><emphasis>ErraiConsoleLogHandler</emphasis>: prints statements to the web console in the browser</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>ErraiDevelopmentModeLogHandler</emphasis> : prints statements in the Development Mode window</simpara>
+      <simpara><emphasis>ErraiDevelopmentModeLogHandler</emphasis>: prints statements in the Development Mode window</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>ErraiFirebugLogHandler</emphasis> : prints statements to the console in Firefox These loggers are all enabled by default and set to handle all log levels.</simpara>
+      <simpara><emphasis>ErraiFirebugLogHandler</emphasis>: prints statements to the console in Firefox These loggers are all enabled by default and set to handle all log levels.</simpara>
       
     </listitem>
   
@@ -7861,7 +7931,7 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.ioc.enabled.alternatives</emphasis> specifies a whitespace-separated list of fully-qualified class names for <emphasis>alternative beans</emphasis> . See <link linkend="sid-22872133">Alternatives and Mocks</link> for details.</simpara>
+      <simpara><emphasis>errai.ioc.enabled.alternatives</emphasis> specifies a whitespace-separated list of fully-qualified class names for <emphasis>alternative beans</emphasis>. See <link linkend="sid-22872133">Alternatives and Mocks</link> for details.</simpara>
       
     </listitem>
   
@@ -8029,7 +8099,7 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>errai.auto_discover_services</emphasis> A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. <emphasis>This property must be set to true if and only if Errai CDI is not on the classpath</emphasis> . The default value is <literal><phrase role="code">false</phrase></literal>.</simpara>
+      <simpara><emphasis>errai.auto_discover_services</emphasis> A boolean indicating whether or not the Errai bootstrapper should automatically scan for services. <emphasis>This property must be set to true if and only if Errai CDI is not on the classpath</emphasis>. The default value is <literal><phrase role="code">false</phrase></literal>.</simpara>
       
     </listitem>
   
@@ -8188,7 +8258,7 @@ errai.async.worker.timeout=5</programlisting>
   &lt;artifactId&gt;errai-jaxrs-provider&lt;/artifactId&gt;
   &lt;version&gt;${errai.version}&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
-<simpara>Or manually add <literal><phrase role="code">errai-jaxrs-provider-${errai.version}.jar</phrase></literal> in case you&#8217;re not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link> ) .</simpara>
+<simpara>Or manually add <literal><phrase role="code">errai-jaxrs-provider-${errai.version}.jar</phrase></literal> in case you&#8217;re not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link>).</simpara>
 </section>
 <section id="sid-19398997_ErraiJAX-RS-GWTModule">
 <title>GWT Module</title>
@@ -12817,7 +12887,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 </section>
 <section id="sid-32473113_Troubleshooting%26FAQ-WhyamIgetting%22java.lang.ClassFormatError%3AIllegalmethodname%22%3Cinit%3E%24%22inclassorg%2Fxyz%2Fpackage%2FMyClass%22%3F">
 <title>Why am I getting "java.lang.ClassFormatError: Illegal method name "&lt;init&gt;$" in class org/xyz/package/MyClass"?</title>
-<simpara><emphasis>Answer:</emphasis> This error message means that your project has a (direct or indirect) subclass of JavaScriptObject that lacks a protected no-args constructor. All subtypes of JavaScriptObject (also known as <emphasis>overlay types</emphasis> ) must declare a protected no-args constructor, but the error message could be much clearer. There is an issue filed in the GWT project&#8217;s bug tracker for improving the error message: <ulink url="http://code.google.com/p/google-web-toolkit/issues/detail?id=3383">GWT issue 3383</ulink> .</simpara>
+<simpara><emphasis>Answer:</emphasis> This error message means that your project has a (direct or indirect) subclass of JavaScriptObject that lacks a protected no-args constructor. All subtypes of JavaScriptObject (also known as <emphasis>overlay types</emphasis>) must declare a protected no-args constructor, but the error message could be much clearer. There is an issue filed in the GWT project&#8217;s bug tracker for improving the error message: <ulink url="http://code.google.com/p/google-web-toolkit/issues/detail?id=3383">GWT issue 3383</ulink>.</simpara>
 </section>
 <section id="sid-32473113_Troubleshooting%26FAQ-I%27mgetting%22java.lang.RuntimeException%3ATherearenoproxyprovidersregisteredyet.%22inmy@PostConstructmethod%21">
 <title>I&#8217;m getting "java.lang.RuntimeException: There are no proxy providers registered yet." in my @PostConstruct method!</title>
@@ -12827,13 +12897,13 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <section id="_why_do_i_get_a_404_not_found_page_if_i_try_to_navigate_to_my_web_page_by_typing_in_the_url_or_refreshing_the_page">
 <title>Why do I get a "404 - Not Found" page if I try to navigate to my web page by typing in the URL or refreshing the page?</title>
 <simpara><emphasis>Answer:</emphasis> There are two reasons that could cause this behaviour:</simpara>
-<simpara>You may not have declared a default page for Errai pushState to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <link linkend="sid-54493676_ErraiUINavigation-HowitWorks">Errai UI Navigation - How it Works &#8594; PushState Functionality</link> .</simpara>
-<simpara>If that doesn&#8217;t work, check to see if you have explicitly declared the application web context in your GWT host page. See <link linkend="sid-54493676">Errai UI Navigation - How it Works &#8594; PushState Functionality</link> .</simpara>
+<simpara>You may not have declared a default page for Errai pushState to navigate to in the case of a page not found error. For example, to navigate to the GWT host page by default, add the following lines to your web.xml file. See <link linkend="sid-54493676_ErraiUINavigation-HowitWorks">Errai UI Navigation - How it Works &#8594; PushState Functionality</link>.</simpara>
+<simpara>If that doesn&#8217;t work, check to see if you have explicitly declared the application web context in your GWT host page. See <link linkend="sid-54493676">Errai UI Navigation - How it Works &#8594; PushState Functionality</link>.</simpara>
 </section>
 </chapter>
 <chapter id="sid-21758202">
 <title>Upgrade Guide</title>
-<simpara>This chapter contains important information for migrating to newer versions of Errai. If you experience any problems, don&#8217;t hesitate to get in touch with us. See <link linkend="sid-5833089">Reporting problems</link> .</simpara>
+<simpara>This chapter contains important information for migrating to newer versions of Errai. If you experience any problems, don&#8217;t hesitate to get in touch with us. See <link linkend="sid-5833089">Reporting problems</link>.</simpara>
 <section id="sid-21758204">
 <title>Upgrading from 1.* to 2.0</title>
 <simpara>The first issues that will arise after replacing the jars or after changing the version numbers in the <literal><phrase role="code">pom.xml</phrase></literal> are unresolved package imports. This is due to refactorings that became necessary when the project grew. Most of these import problems can be resolved automatically by modern IDEs (Organize Imports). So, this should replace <literal><phrase role="code">org.jboss.errai.bus.client.protocols.*</phrase></literal> with <literal><phrase role="code">org.jboss.errai.common.client.protocols.*</phrase></literal> for example.</simpara>
@@ -12842,7 +12912,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <itemizedlist>
   
     <listitem>
-      <simpara>@ExposedEntity became @Portable ( <literal><phrase role="code">org.jboss.errai.common.client.api.annotations.Portable</phrase></literal> ). See <link linkend="sid-5931328">Marshalling</link> for details.</simpara>
+      <simpara>@ExposedEntity became @Portable (<literal><phrase role="code">org.jboss.errai.common.client.api.annotations.Portable</phrase></literal>). See <link linkend="sid-5931328">Marshalling</link> for details.</simpara>
       
     </listitem>
   
@@ -12852,12 +12922,12 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>Errai CDI projects must now use the <literal><phrase role="code">SimpleDispatcher</phrase></literal> instead of the <literal><phrase role="code">AsynDispatcher</phrase></literal>. This has to be configured in <link linkend="sid-5931338">Messaging (Errai Bus) Configuration</link> .</simpara>
+      <simpara>Errai CDI projects must now use the <literal><phrase role="code">SimpleDispatcher</phrase></literal> instead of the <literal><phrase role="code">AsynDispatcher</phrase></literal>. This has to be configured in <link linkend="sid-5931338">Messaging (Errai Bus) Configuration</link>.</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>The bootstrap listener (configured in <literal><phrase role="code">WEB-INF/web.xml</phrase></literal> ) for Errai CDI has changed ( <literal><phrase role="code">org.jboss.errai.container.DevModeCDIBootstrap</phrase></literal> is now <literal><phrase role="code">org.jboss.errai.container.CDIServletStateListener</phrase></literal> ).</simpara>
+      <simpara>The bootstrap listener (configured in <literal><phrase role="code">WEB-INF/web.xml</phrase></literal>) for Errai CDI has changed (<literal><phrase role="code">org.jboss.errai.container.DevModeCDIBootstrap</phrase></literal> is now <literal><phrase role="code">org.jboss.errai.container.CDIServletStateListener</phrase></literal>).</simpara>
       
     </listitem>
   
@@ -12901,14 +12971,14 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <itemizedlist>
   
     <listitem>
-      <simpara>Starting with 2.0.CR1 the default for automatic service discovery has been changed in favour of CDI based applications. That means it has to be explicitly turned on for plain bus applications (Errai applications that do not use Errai-CDI). Not doing so will result in <literal><phrase role="code">NoSubscribersToDeliverTo</phrase></literal> exceptions. The snippet below shows how to activate automatic service discovery:
-.web.xml</simpara>
+      <simpara>Starting with 2.0.CR1 the default for automatic service discovery has been changed in favour of CDI based applications. That means it has to be explicitly turned on for plain bus applications (Errai applications that do not use Errai-CDI). Not doing so will result in <literal><phrase role="code">NoSubscribersToDeliverTo</phrase></literal> exceptions. The snippet below shows how to activate automatic service discovery:</simpara>
       
     </listitem>
   
 </itemizedlist>
 
-<informalexample>
+<example>
+<title>web.xml</title>
 <programlisting language="xml" linenumbering="unnumbered">&lt;servlet&gt;
   &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
   &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
@@ -12918,7 +12988,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
   &lt;/init-param&gt;
   &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
 &lt;/servlet&gt;</programlisting>
-</informalexample>
+</example>
 
 <itemizedlist>
   
@@ -12973,7 +13043,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>The whole artifact errai-cdi-jetty has been deleted and is no longer required. Delete the JAR file from your project or remove the corresponding dependency in your pom.xml</simpara>
+      <simpara>The whole artifact errai-cdi-jetty has been deleted and is no longer required. Delete the JAR file from your project or remove the corresponding dependency in your pom.xml.</simpara>
       
     </listitem>
   
@@ -13006,11 +13076,11 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 </chapter>
 <chapter id="sid-5833087">
 <title>Downloads</title>
-<simpara>The distribution packages can be downloaded from jboss.org <ulink url="http://jboss.org/errai/Downloads.html">http://jboss.org/errai/Downloads.html</ulink></simpara>
+<simpara>The distribution packages can be downloaded from jboss.org <ulink url="http://jboss.org/errai/Downloads.html">http://jboss.org/errai/Downloads.html</ulink>.</simpara>
 </chapter>
 <chapter id="sid-5833088">
 <title>Sources</title>
-<simpara>Errai is currently managed using Github. You can clone our repositories from <ulink url="http://github.com/errai">http://github.com/errai</ulink> .</simpara>
+<simpara>Errai is currently managed using GitHub. You can clone our repositories from <ulink url="http://github.com/errai">http://github.com/errai</ulink>.</simpara>
 </chapter>
 <chapter id="sid-5833089">
 <title>Reporting problems</title>
