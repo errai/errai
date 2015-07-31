@@ -35,7 +35,7 @@ public class FilterTest {
     war.addClasses(FooFilter.class, BarFilter.class, CdiDelegationListener.class);
     war.addPackages(true, "org.jboss.errai.bus.server.websocket.jsr356");
     final File[] files = Maven.resolver().loadPomFromFile("./pom.xml", "test-dependency-override")
-            .resolve("org.jboss.errai:errai-bus:3.0-SNAPSHOT", "com.google.guava:guava:13.0.1").withTransitivity()
+            .resolve("org.jboss.errai:errai-bus:?", "com.google.guava:guava:13.0.1").withTransitivity()
             .asFile();
     for (File file : files) {
       war.addAsLibrary(file);
