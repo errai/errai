@@ -46,7 +46,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
                                   final Modifier[] modifiers)  {
 
     final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
-            classBuilder.privateMethod(void.class, PrivateAccessUtil.getPrivateFieldInjectorName(field));
+            classBuilder.packageMethod(void.class, PrivateAccessUtil.getPrivateFieldAccessorName(field));
 
     if (type.getCanonicalName().equals("long")) {
       methodBuilder.annotatedWith(UNSAFE_NATIVE_LONG_ANNOTATION);
@@ -71,7 +71,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
                                   final Modifier[] modifiers) {
 
     final MethodBlockBuilder<? extends ClassStructureBuilder<?>> instance =
-            classBuilder.privateMethod(type, PrivateAccessUtil.getPrivateFieldInjectorName(field));
+            classBuilder.packageMethod(type, PrivateAccessUtil.getPrivateFieldAccessorName(field));
 
     if (!field.isStatic()) {
       instance.parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass().getErased(), "instance")));

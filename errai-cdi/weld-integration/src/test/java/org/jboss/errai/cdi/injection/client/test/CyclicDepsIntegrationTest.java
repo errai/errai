@@ -24,7 +24,6 @@ import org.jboss.errai.cdi.injection.client.Bird;
 import org.jboss.errai.cdi.injection.client.Car;
 import org.jboss.errai.cdi.injection.client.ConsumerBeanA;
 import org.jboss.errai.cdi.injection.client.CycleNodeA;
-import org.jboss.errai.cdi.injection.client.DependentBeanInjectSelf;
 import org.jboss.errai.cdi.injection.client.EquHashCheckCycleA;
 import org.jboss.errai.cdi.injection.client.EquHashCheckCycleB;
 import org.jboss.errai.cdi.injection.client.Petrol;
@@ -75,50 +74,8 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
 
     assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
-    assertSame("unwrapped proxy should be the same as outer instance", beanA,
+    assertSame("unwrapped proxy should be the same as outer instance", getBeanManager().getActualBeanReference(beanA),
         getBeanManager().getActualBeanReference(beanA.getSelf()));
-  }
-
-  public void testCyclingBeanDestroy() {
-    final DependentBeanInjectSelf beanA = getBeanManager()
-        .lookupBean(DependentBeanInjectSelf.class).getInstance();
-
-    assertNotNull(beanA);
-    assertNotNull(beanA.getSelf());
-
-    getBeanManager().destroyBean(beanA);
-
-    assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
-    assertFalse("bean.self should no longer be recognized as proxy",
-        getBeanManager().isProxyReference(beanA.getSelf()));
-  }
-
-  public void testCyclingBeanDestroyViaProxy() {
-    final DependentBeanInjectSelf beanA = getBeanManager()
-        .lookupBean(DependentBeanInjectSelf.class).getInstance();
-
-    assertNotNull(beanA);
-    assertNotNull(beanA.getSelf());
-
-    // destroy via the proxy reference through self
-    getBeanManager().destroyBean(beanA.getSelf());
-
-    assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
-    assertFalse("bean.self should no longer be recognized as proxy",
-        getBeanManager().isProxyReference(beanA.getSelf()));
-  }
-
-  public void testDependentBeanInjectsIntoSelf() {
-    final DependentBeanInjectSelf beanA = getBeanManager()
-        .lookupBean(DependentBeanInjectSelf.class).getInstance();
-
-    assertNotNull(beanA);
-    assertNotNull(beanA.getSelf());
-    assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
-
-    assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
-    assertSame("unwrapped proxy should be the same as outer instance", beanA, getBeanManager()
-        .getActualBeanReference(beanA.getSelf()));
   }
 
   public void testCycleOnProducerBeans() {

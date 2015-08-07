@@ -2,10 +2,9 @@ package org.jboss.errai.ui.nav.client.local;
 
 import java.util.Collection;
 
-import junit.framework.AssertionFailedError;
-
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
@@ -31,7 +30,6 @@ import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -39,6 +37,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
+
+import junit.framework.AssertionFailedError;
 
 public class NavigationTest extends AbstractErraiCDITest {
 
@@ -348,8 +348,8 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testNavigationControl() throws Exception {
-    final PageWithNavigationControl page = IOC.getBeanManager().lookupBean(PageWithNavigationControl.class)
-            .getInstance();
+    final PageWithNavigationControl page = Factory.maybeUnwrapProxy(IOC.getBeanManager().lookupBean(PageWithNavigationControl.class)
+            .getInstance());
 
     navigation.goTo(PageWithNavigationControl.class, ArrayListMultimap.<String, String> create());
     assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
@@ -363,7 +363,7 @@ public class NavigationTest extends AbstractErraiCDITest {
 
   /**
    * Give the bootstrapper time to attach the Navigation content panel to the RootPanel and then run a test.
-   * 
+   *
    * @param test
    *          The test code to be executed after the content panel is attached
    * @param timeout
@@ -397,7 +397,7 @@ public class NavigationTest extends AbstractErraiCDITest {
       }
     }.scheduleRepeating(interval);
   }
-  
+
   public void testURLWithExtraKeyValuePairs() throws Exception {
     String url = "page/123/string;var3=4";
     HistoryToken encodedToken = htFactory.parseURL(url);
@@ -438,13 +438,13 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var1", "123");
     builder.put("var2", "string");
     builder.put("var3", "4");
-    
+
     Multimap<String, String> pageStateMap = builder.build();
     String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
                                                                .toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4", decodedToken);
   }
-  
+
   public void testPageStateWithMultipleExtraParams() throws Exception {
     String pageName = "PageWithPathParameters";
     Builder<String, String> builder = ImmutableMultimap.builder();
@@ -452,38 +452,38 @@ public class NavigationTest extends AbstractErraiCDITest {
     builder.put("var2", "string");
     builder.put("var3", "4");
     builder.put("var4", "thing");
-    
+
     Multimap<String, String> pageStateMap = builder.build();
     String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
                                                                .toString());
     assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
   }
-  
+
   public void testPageReloadWithChangedPageStateUsingGoTo() throws Exception {
     PageBWithState.hitCount = 0;
-    
+
     Builder<String, String> oldBuilder = ImmutableMultimap.builder();
     oldBuilder.put("uuid", "oldstate");
     Multimap<String, String> oldState = oldBuilder.build();
     navigation.goTo(PageBWithState.class, oldState);
     assertEquals("Did not hit @PageShowing method", 1, PageBWithState.hitCount);
-    
+
     Builder<String, String> newBuilder = ImmutableMultimap.builder();
     newBuilder.put("uuid", "newstate");
     Multimap<String, String> newState = newBuilder.build();
     navigation.goTo(PageBWithState.class, newState);
     assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
   }
-  
+
   public void testPageReloadWhenPageStateChangedInURLBar() throws Exception {
     PageBWithState.hitCount = 0;
-    
+
     Builder<String, String> oldBuilder = ImmutableMultimap.builder();
     oldBuilder.put("uuid", "oldstate");
     Multimap<String, String> state = oldBuilder.build();
     navigation.goTo(PageBWithState.class, state);
     assertEquals("Did not hit @PageShowing method", 1, PageBWithState.hitCount);
-    
+
     History.newItem("page_b_with_state;uuid=newstate", true);
     assertEquals("Did not hit @PageShowing method", 2, PageBWithState.hitCount);
   }
@@ -509,12 +509,12 @@ public class NavigationTest extends AbstractErraiCDITest {
         assertFalse(PushStateUtil.isPushStateActivated());
         assertEquals("", Navigation.getAppContext());
       }
-      
+
     }, TIMEOUT, 500);
   }
-  
+
   public void testNavigationPanelInjection() {
-    NavigationPanelTestApp app = 
+    NavigationPanelTestApp app =
             IOC.getBeanManager().lookupBean(NavigationPanelTestApp.class).getInstance();
     assertNotNull(app.getNavigationPanel());
   }

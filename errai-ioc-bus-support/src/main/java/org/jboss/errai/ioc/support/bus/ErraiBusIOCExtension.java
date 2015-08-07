@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.support.bus;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.ShadowService;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -31,12 +31,12 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 @IOCExtension
 public class ErraiBusIOCExtension implements IOCExtensionConfigurator {
   @Override
-  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
     injectionContext.mapElementType(WiringElementType.SingletonBean, Service.class);
     injectionContext.mapElementType(WiringElementType.SingletonBean, ShadowService.class);
   }
 
   @Override
-  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
   }
 }

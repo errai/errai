@@ -19,10 +19,28 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import java.util.List;
 
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
-import org.jboss.errai.ioc.tests.wiring.client.res.*;
+import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBeanInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
+import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
+import org.jboss.errai.ioc.tests.wiring.client.res.DependentOnInnerType;
+import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
+import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableNonPublicPostconstruct;
+import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
+import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton2;
+import org.jboss.errai.ioc.tests.wiring.client.res.TestBeanActivator;
+import org.jboss.errai.ioc.tests.wiring.client.res.TestProviderDependentBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
+import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
 import org.junit.runner.RunWith;
 
 @RunWith(IOCSimulatedTestRunner.class)
@@ -30,6 +48,7 @@ public class BasicIOCTest extends IOCClientTestCase {
 
   static {
     // Force classloading of SimpleBean so the package is discovered.
+    @SuppressWarnings("unused")
     Class<?> cls = SimpleBean.class;
   }
 
@@ -143,7 +162,7 @@ public class BasicIOCTest extends IOCClientTestCase {
     assertTrue(qualInspector.getaQualService().get() instanceof Integer);
     assertTrue(qualInspector.getbQualService().get() instanceof String);
   }
-  
+
   public void testIOCTasks() {
     assertTrue("BeforeTask did not run", BeforeTask.ran);
     assertTrue("AfterTask did not run", AfterTask.ran);
@@ -151,14 +170,14 @@ public class BasicIOCTest extends IOCClientTestCase {
     List<Class<?>> results = TestResultsSingleton.getItemsRun();
     assertTrue("BeforeTask did not run before AfterTask!",
             results.indexOf(BeforeTask.class) < results.indexOf(AfterTask.class));
-    
+
   }
-  
+
   public void testBeanManagerInjectable() {
     BeanManagerDependentBean bean = IOC.getBeanManager().lookupBean(BeanManagerDependentBean.class)
             .getInstance();
-    
-    assertSame(IOC.getBeanManager(), bean.getBeanManager());
+
+    assertSame(IOC.getBeanManager(), Factory.maybeUnwrapProxy(bean.getBeanManager()));
   }
 
   public void testProvidedValueLookup() {
@@ -169,26 +188,36 @@ public class BasicIOCTest extends IOCClientTestCase {
     assertNotNull(dependentBean.getTestProvidedIface());
     assertEquals("foo", dependentBean.getTestProvidedIface().getText());
   }
-  
+
   public void testBeanActivator() {
     TestBeanActivator activator = IOC.getBeanManager().lookupBean(TestBeanActivator.class).getInstance();
     activator.setActived(true);
-    
+
     IOCBeanDef<ActivatedBean> bean = IOC.getBeanManager().lookupBean(ActivatedBean.class);
     assertTrue(bean.isActivated());
 
     activator.setActived(false);
     assertFalse(bean.isActivated());
-    
+
     IOCBeanDef<ActivatedBeanInterface> qualifiedBean = IOC.getBeanManager().lookupBean(ActivatedBeanInterface.class);
     assertFalse(qualifiedBean.isActivated());
-    
+
     activator.setActived(true);
     assertTrue(qualifiedBean.isActivated());
   }
-  
+
   public void testBeanActiveByDefault() {
     IOCBeanDef<BeanManagerDependentBean> bean = IOC.getBeanManager().lookupBean(BeanManagerDependentBean.class);
     assertTrue(bean.isActivated());
+  }
+
+  public void testInjectingStaticInnerClass() {
+    DependentOnInnerType instance = IOC.getBeanManager().lookupBean(DependentOnInnerType.class).getInstance();
+    assertNotNull(instance.getInner());
+  }
+
+  public void testLoadingBeanWithProxiableNonPublicPostConstruct() {
+    final ProxiableNonPublicPostconstruct bean = IOC.getBeanManager().lookupBean(ProxiableNonPublicPostconstruct.class).getInstance();
+    assertTrue(bean.getValue());
   }
 }

@@ -25,9 +25,10 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.LocalStorage;
@@ -82,6 +83,12 @@ public class ErraiJpaTest extends JpaClientTestCase {
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
     new Container().bootstrapContainer();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    Container.reset();
+    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
   }
 
   /**

@@ -186,7 +186,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     final Kayak newKayak = kayakBean.newInstance();
 
     assertNotNull(newKayak);
-    assertFalse("new Kayak should have new ID", kayakBeanInstance.getId() == newKayak.getId());
+    assertNotSame("new Kayak should have new ID", kayakBeanInstance.getId(), newKayak.getId());
   }
 
   public void testComplexConstructorInjectionScenario() {
@@ -229,16 +229,16 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertEquals(fooblieDependentBean1.getFooblieParts(), foobliesParts.get(0));
     assertEquals(fooblieDependentBean2.getFooblieParts(), foobliesParts.get(1));
   }
-  
+
   public void testNormalDependentProducer() throws Exception {
     final DepBeanProducerConsumer bean = IOC.getBeanManager().lookupBean(DepBeanProducerConsumer.class).getInstance();
-    
+
     assertNotNull("Produced injection failed with dependent producer.", bean.getProducable());
   }
-  
+
   public void testPseudoProducer() throws Exception {
     final PseudoBeanProducerConsumer bean = IOC.getBeanManager().lookupBean(PseudoBeanProducerConsumer.class).getInstance();
-    
+
     assertNotNull("Produced injection failed with pseudo-dependent producer.");
   }
 }

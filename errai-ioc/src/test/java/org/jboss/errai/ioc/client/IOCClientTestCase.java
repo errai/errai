@@ -19,7 +19,9 @@ package org.jboss.errai.ioc.client;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -67,6 +69,7 @@ public abstract class IOCClientTestCase extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
+    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
     InitVotes.reset();
 
     super.gwtTearDown();

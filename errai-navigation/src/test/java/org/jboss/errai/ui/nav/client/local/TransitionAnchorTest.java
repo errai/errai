@@ -61,7 +61,7 @@ public class TransitionAnchorTest extends AbstractErraiCDITest {
     OtherPageWithTransitionAnchor page = beanManager.lookupBean(OtherPageWithTransitionAnchor.class).getInstance();
     assertNotNull(page);
     // Navigate to test page
-    nav.goTo(page.getClass(), (Multimap) HashMultimap.create());
+    nav.goTo(OtherPageWithTransitionAnchor.class, (Multimap) HashMultimap.create());
     assertTrue(page.isAttached());
 
     // Disable anchor
@@ -80,18 +80,18 @@ public class TransitionAnchorTest extends AbstractErraiCDITest {
     OtherPageWithTransitionAnchor page = beanManager.lookupBean(OtherPageWithTransitionAnchor.class).getInstance();
     assertNotNull(page);
     // Navigate to test page
-    nav.goTo(page.getClass(), (Multimap) HashMultimap.create());
+    nav.goTo(OtherPageWithTransitionAnchor.class, (Multimap) HashMultimap.create());
     assertTrue(page.isAttached());
-    
+
     // Make sure that click event triggers link while enabled
     ClickEvent.fireNativeEvent(Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false),
             page.getAnchor(), page.getAnchor().getElement());
     assertFalse(page.isAttached());
-    
+
     // Navigate back to test page
-    nav.goTo(page.getClass(), (Multimap) HashMultimap.create());
+    nav.goTo(OtherPageWithTransitionAnchor.class, (Multimap) HashMultimap.create());
     assertTrue(page.isAttached());
-    
+
     // Disable anchor
     page.getAnchor().setEnabled(false);
     // Fire click event

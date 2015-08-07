@@ -511,7 +511,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
             new Modifier[] {});
       }
 
-      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
+      String injectorName = PrivateAccessUtil.getPrivateFieldAccessorName(field);
 
       MetaClass erasedFieldType = field.getType().getErased();
       if (erasedFieldType.isAssignableTo(Collection.class)) {

@@ -17,7 +17,7 @@
 package org.jboss.errai.ui.rebind;
 
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -30,11 +30,11 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 @IOCExtension
 public class TemplatedErraiIOCExtension implements IOCExtensionConfigurator {
   @Override
-  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
     injectionContext.mapElementType(WiringElementType.DependentBean, Templated.class);
   }
 
   @Override
-  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
   }
 }

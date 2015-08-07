@@ -16,6 +16,12 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
@@ -27,11 +33,6 @@ import org.jboss.errai.codegen.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-
-import javax.enterprise.util.TypeLiteral;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -67,13 +68,13 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   }
 
   @Override
-  public BlockBuilder<T> throws_(final Class<? extends Throwable>... exceptionTypes) {
+  public MethodBlockBuilder<T> throws_(final Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
     return this;
   }
 
   @Override
-  public BlockBuilder<T> throws_(final MetaClass... exceptions) {
+  public MethodBlockBuilder<T> throws_(final MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
     return this;
   }
@@ -129,7 +130,7 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
         p.add(MetaClassFactory.get((TypeLiteral) o));
       }
     }
-    
+
     defParameters = DefParameters.fromTypeArray(p.toArray(new MetaClass[p.size()]));
 
     return this;

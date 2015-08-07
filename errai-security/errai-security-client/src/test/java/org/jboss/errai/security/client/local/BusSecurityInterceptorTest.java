@@ -119,6 +119,7 @@ public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterce
     afterLogout(new Runnable() {
       @Override
       public void run() {
+        assertEquals("Test should run after logout!", User.ANONYMOUS, provider.getUser());
         createCall(new RemoteCallback<Void>() {
           @Override
           public void callback(Void response) {
@@ -142,6 +143,7 @@ public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterce
     afterLogout(new Runnable() {
       @Override
       public void run() {
+        assertEquals("Test should run after logout!", User.ANONYMOUS, provider.getUser());
         createCall(new RemoteCallback<Void>() {
           @Override
           public void callback(Void response) {
@@ -247,6 +249,7 @@ public abstract class BusSecurityInterceptorTest extends AbstractSecurityInterce
     afterLogout(new Runnable() {
       @Override
       public void run() {
+        assertEquals("Test should run after logout!", User.ANONYMOUS, provider.getUser());
         assertEquals(0, counter.getCount());
         assertEquals(0, errorCounter.getCount());
         createCall(new RemoteCallback<Void>() {

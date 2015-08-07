@@ -10,17 +10,12 @@ public class PostConstrBeanB {
   @Inject
   PostConstrBeanC postConstrBeanC;
 
-  // required to make proxyable
-  public PostConstrBeanB() {
-  }
-
-  @Inject
-  public PostConstrBeanB(PostConstrBeanA selfRefProxy) {
-    
-  }
-  
   @PostConstruct
   private void postConstr() {
+    // Trigger bean creation since all beans are lazily loaded.
+    postConstrBeanC.noop();
     PostConstructTestUtil.record(PostConstrBeanB.class.getName());
   }
+
+  public void noop() {}
 }

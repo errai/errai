@@ -17,7 +17,7 @@ public class PageWithException extends VerticalPanel {
 
   @PageShowing
   protected void beforeShow() {
-    throw new NullPointerException("");
+    throw new NullPointerException("This is thrown on purpose for a test.");
   }
 
 }

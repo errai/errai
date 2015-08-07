@@ -20,13 +20,15 @@ public class InjectionTestModule {
 
   private InjectionDependentTestBeanC beanC;
 
-  @Inject @New
+  // TODO make decision regarding support of @New
+  @Inject
+//  @New
   private InjectionDependentTestBeanC beacC1;
 
   // test public mutable field injection -- not that this is a terribly good idea.
   @Inject
   public SomeRandomBeanToInject randomBeanToInject;
-  
+
   @PostConstruct
   public void doPostConstruct() {
     postConstructFired = true;

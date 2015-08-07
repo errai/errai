@@ -24,7 +24,7 @@ import javax.inject.Named;
 public class Shop {
   @Produces
   @Expensive
-  @Named
+  @Named("expensiveGift")
   public Necklace getExpensiveGift() {
     return new Necklace(5);
   }

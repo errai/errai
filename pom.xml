@@ -93,7 +93,6 @@
     <module>errai-jaxrs</module>
     <module>errai-ui</module>
     <module>errai-navigation</module>
-    <module>errai-uibinder</module>
     <module>errai-data-binding</module>
     <module>errai-validation</module>
     <module>errai-jpa</module>

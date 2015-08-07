@@ -17,6 +17,9 @@ package org.jboss.errai.enterprise.rebind;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -35,11 +38,10 @@ import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -47,10 +49,11 @@ import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.client.container.DestructionCallback;
+import org.jboss.errai.ioc.client.container.Factory;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 
 import com.google.gwt.core.client.js.JsType;
 
@@ -61,6 +64,7 @@ import com.google.gwt.core.client.js.JsType;
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @CodeDecorator
 public class ObservesExtension extends IOCDecoratorExtension<Observes> {
@@ -69,86 +73,112 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(final InjectableInstance<Observes> instance) {
-    final Context ctx = instance.getInjectionContext().getProcessingContext().getContext();
-    final MetaMethod method = instance.getMethod();
-    final MetaParameter parm = instance.getParm();
+  public void generateDecorator(final Decorable decorable, final FactoryController controller) {
+    final Context ctx = decorable.getCodegenContext();
+    final MetaParameter parm = decorable.getAsParameter();
+    final MetaMethod method = (MetaMethod) parm.getDeclaringMember();
 
-    if (!method.isPublic()) {
-      instance.ensureMemberExposed(PrivateAccessType.Write);
-    }
+    controller.ensureMemberExposed(parm);
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final List<Annotation> annotations = InjectUtil.extractQualifiers(instance);
+    final List<Annotation> annotations = InjectUtil.extractQualifiers(parm);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
     final Set<String> qualifierNames = new HashSet<String>(CDI.getQualifiersPart(qualifiers));
+    final boolean isEnclosingTypeDependent = enclosingTypeIsDependentScoped(decorable);
 
     if (qualifierNames.contains(Any.class.getName())) {
       qualifierNames.remove(Any.class.getName());
     }
 
-    final List<Statement> statements = new ArrayList<Statement>();
+    final MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(parm.getType()));
 
-    // create the destruction callback to deregister the service when the bean is destroyed.
-    final String subscrVar = InjectUtil.getUniqueVarName();
+    AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
+
+    BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
+
+    if (!qualifierNames.isEmpty()) {
+      callBackBlock = callBack.initialize();
+      for (final String qualifierName : qualifierNames) {
+        callBackBlock.append(Stmt.loadClassMember("qualifierSet").invoke("add", qualifierName));
+      }
+      callBack = callBackBlock.finish();
+    }
+
+    final List<Statement> callbackStatements = new ArrayList<Statement>();
+    if (!isEnclosingTypeDependent) {
+      callbackStatements
+              .add(declareFinalVariable("instance", decorable.getDecorableDeclaringType(), castTo(decorable.getEnclosingInjectable().getInjectedType(),
+                      invokeStatic(Factory.class, "maybeUnwrapProxy", controller.contextGetInstanceStmt()))));
+    }
+    callbackStatements.add(decorable.call(Refs.get("event")));
+
+    callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(parm, "event"))
+        .appendAll(callbackStatements)
+        .finish()
+        .publicOverridesMethod("toString")
+        ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
+
+    final List<Statement> initStatements = new ArrayList<Statement>();
+    final List<Statement> destroyStatements = new ArrayList<Statement>();
+    final String subscrVar = method.getName() + "Subscription";
 
     final String subscribeMethod;
-    final BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
-    
+
     if (parm.getType().isAnnotationPresent(JsType.class)) {
       subscribeMethod = "subscribeJsType";
-      callBackBlock = getJsTypeSubscriptionCallback(instance);
+      callBackBlock = getJsTypeSubscriptionCallback(decorable, controller);
     }
     else if (EnvUtil.isPortableType(parm.getType().asClass()) && !EnvUtil.isLocalEventType(parm.getType().asClass())) {
       subscribeMethod = "subscribe";
-      callBackBlock = getSubscriptionCallback(instance);
+      callBackBlock = getSubscriptionCallback(decorable, controller);
     }
     else {
       subscribeMethod = "subscribeLocal";
-      callBackBlock = getSubscriptionCallback(instance);
+      callBackBlock = getSubscriptionCallback(decorable, controller);
     }
 
-    final Statement subscribeStatement =
-        Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
-            .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, subscribeMethod, parmClassName,
-                callBackBlock.finish().finish()));
+    final Statement subscribeStatement = Stmt.create(ctx).invokeStatic(CDI.class, subscribeMethod, parmClassName,
+            callBackBlock.finish().finish());
 
-    statements.add(subscribeStatement);
-
-    // create the destruction callback to deregister the service when the bean is destroyed.
-
-    final MetaClass destructionCallbackType =
-        parameterizedAs(DestructionCallback.class, typeParametersOf(instance.getEnclosingType()));
-
-    final BlockBuilder<AnonymousClassStructureBuilder> destroyMeth
-        = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
-        .publicOverridesMethod("destroy", Parameter.finalOf(instance.getEnclosingType(), "obj"))
-        .append(Stmt.loadVariable(subscrVar).invoke("remove")).append(Stmt.codeComment("WEEEEE!"));
+    if (isEnclosingTypeDependent) {
+      initStatements.add(controller.setReferenceStmt(subscrVar, subscribeStatement));
+      destroyStatements.add(controller.getReferenceStmt(subscrVar, Subscription.class).invoke("remove"));
+    } else {
+      initStatements.add(subscribeStatement);
+    }
 
     for (final Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
       if (!EnvUtil.isLocalEventType(cls)) {
-        final String subscrHandle = InjectUtil.getUniqueVarName();
-        statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
-            .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
-                CDI.getSubjectNameByType(cls.getName()),
-                Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
-        destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
+        final ContextualStatementBuilder routingSubStmt = Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
+                CDI.getSubjectNameByType(cls.getName()), Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"));
+        if (isEnclosingTypeDependent) {
+          final String subscrHandle = subscrVar + "For" + cls.getSimpleName();
+          initStatements.add(controller.setReferenceStmt(subscrHandle, routingSubStmt));
+          destroyStatements.add(
+                  Stmt.nestedCall(controller.getReferenceStmt(subscrHandle, Subscription.class)).invoke("remove"));
+        } else {
+          initStatements.add(routingSubStmt);
+        }
       }
     }
 
-    final Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
-        Refs.get(instance.getInjector().getInstanceVarName()), destroyMeth.finish().finish());
-
-    statements.add(destructionCallback);
-
-    return statements;
+    if (isEnclosingTypeDependent) {
+      controller.addInitializationStatements(initStatements);
+      controller.addDestructionStatements(destroyStatements);
+    } else {
+      controller.addFactoryInitializationStatements(initStatements);
+    }
   }
-  
-  private BlockBuilder<AnonymousClassStructureBuilder> getSubscriptionCallback(final InjectableInstance<Observes> instance) {
-    
-    final MetaParameter parm = instance.getParm();
+
+  private boolean enclosingTypeIsDependentScoped(final Decorable decorable) {
+    return decorable.isEnclosingTypeDependent();
+  }
+
+  private BlockBuilder<AnonymousClassStructureBuilder> getSubscriptionCallback(final Decorable decorable, final FactoryController controller) {
+
+    final MetaParameter parm = decorable.getAsParameter();
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final List<Annotation> annotations = InjectUtil.extractQualifiers(instance);
+    final List<Annotation> annotations = InjectUtil.extractQualifiers(parm);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
     final Set<String> qualifierNames = new HashSet<String>(CDI.getQualifiersPart(qualifiers));
 
@@ -164,30 +194,44 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBack = callBackBlock.finish();
     }
 
+    final List<Statement> fireEventStmts = new ArrayList<Statement>();
+    if (!decorable.isEnclosingTypeDependent()) {
+      fireEventStmts.add(Stmt.declareFinalVariable("instance", decorable.getEnclosingInjectable().getInjectedType(),
+              Stmt.invokeStatic(Factory.class, "maybeUnwrapProxy", controller.contextGetInstanceStmt())));
+    }
+    fireEventStmts.add(decorable.call(Refs.get("event")));
+
     callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(parm, "event"))
-        ._(instance.callOrBind(Refs.get("event")))
+        .appendAll(fireEventStmts)
         .finish()
         .publicOverridesMethod("toString")
         ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
-    
+
     return callBackBlock;
   }
-  
-  private BlockBuilder<AnonymousClassStructureBuilder> getJsTypeSubscriptionCallback(final InjectableInstance<Observes> instance) {
-    
-    final MetaParameter parm = instance.getParm();
+
+  private BlockBuilder<AnonymousClassStructureBuilder> getJsTypeSubscriptionCallback(final Decorable decorable, final FactoryController controller) {
+
+    final MetaParameter parm = decorable.getAsParameter();
     final String parmClassName = parm.getType().getFullyQualifiedName();
 
     final MetaClass callBackType = parameterizedAs(JsTypeEventObserver.class, typeParametersOf(parm.getType()));
     AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
     BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
 
+    final List<Statement> fireEventStmts = new ArrayList<Statement>();
+    if (!decorable.isEnclosingTypeDependent()) {
+      fireEventStmts.add(Stmt.declareFinalVariable("instance", decorable.getEnclosingInjectable().getInjectedType(),
+              Stmt.invokeStatic(Factory.class, "maybeUnwrapProxy", controller.contextGetInstanceStmt())));
+    }
+    fireEventStmts.add(decorable.call(Refs.get("event")));
+
     callBackBlock = callBack.publicOverridesMethod("onEvent", Parameter.finalOf(parm, "event"))
-        ._(instance.callOrBind(Refs.get("event")))
+        .appendAll(fireEventStmts)
         .finish()
         .publicOverridesMethod("toString")
         ._(Stmt.load("JsTypeObserver: " + parmClassName).returnValue());
-    
+
     return callBackBlock;
   }
 }

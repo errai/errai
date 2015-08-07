@@ -95,7 +95,7 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testProducerMethodOnSpecializedBeanNotCalled() {
-    assertEquals(IOC.getBeanManager().lookupBeans(Waste.class).size(), 0);
+    assertEquals(0, IOC.getBeanManager().lookupBeans(Waste.class).size());
 
     try {
       IOC.getBeanManager().lookupBean(Waste.class);

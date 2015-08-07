@@ -30,6 +30,7 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.client.local.res.Counter;
 import org.jboss.errai.security.client.local.res.CountingRemoteCallback;
@@ -51,7 +52,7 @@ import com.google.gwt.user.client.Timer;
  * {@link BusSecurityInterceptorTest}. This test class ensures that the same
  * interceptors are properly generated for jaxrs endpoints (as well as the
  * server-side interceptors).
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest {
@@ -275,8 +276,8 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
 
   private static SecureRestService restCallHelper(final RemoteCallback<Void> callback,
           final RestErrorCallback errorCallback) {
-    final Caller<SecureRestService> caller = IOC.getBeanManager().lookupBean(RestSecurityTestModule.class)
-            .getInstance().restCaller;
+    final Caller<SecureRestService> caller = Factory
+            .maybeUnwrapProxy(IOC.getBeanManager().lookupBean(RestSecurityTestModule.class).getInstance()).restCaller;
 
     if (errorCallback != null) {
       return caller.call(callback, errorCallback);

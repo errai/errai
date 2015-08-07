@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.NamedQuery;
 import javax.persistence.TypedQuery;
@@ -19,6 +18,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
@@ -29,7 +29,17 @@ import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.StorageBackendFactory;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
-import org.jboss.errai.jpa.sync.client.shared.*;
+import org.jboss.errai.jpa.sync.client.shared.ConflictResponse;
+import org.jboss.errai.jpa.sync.client.shared.DataSyncService;
+import org.jboss.errai.jpa.sync.client.shared.DeleteResponse;
+import org.jboss.errai.jpa.sync.client.shared.EntityComparator;
+import org.jboss.errai.jpa.sync.client.shared.IdChangeResponse;
+import org.jboss.errai.jpa.sync.client.shared.JpaAttributeAccessor;
+import org.jboss.errai.jpa.sync.client.shared.NewRemoteEntityResponse;
+import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
+import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
+import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
+import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +49,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-@ApplicationScoped
+@EntryPoint
 public class ClientSyncManager {
 
   private static final Logger logger = LoggerFactory.getLogger(ClientSyncManager.class);
@@ -126,7 +136,7 @@ public class ClientSyncManager {
   public static void resetInstance() {
     INSTANCE = null;
   }
-  
+
   @PostConstruct
   private void setup() {
     expectedStateEm = new ErraiEntityManager(desiredStateEm, new StorageBackendFactory() {
@@ -143,7 +153,7 @@ public class ClientSyncManager {
    * After a successful synchronization, both the expected state and desired state entity managers
    * will yield the same results as the server-side entity manager does for the given query with the
    * given set of parameters.
-   * 
+   *
    * @param queryName
    *          The name of a JPA named query. This query must be defined in a {@link NamedQuery}
    *          annotation that is visible to both the client and server applications. This usually
@@ -233,7 +243,7 @@ public class ClientSyncManager {
         return rawOnError.error(message, throwable);
       }
     };
-    
+
     dataSyncService.call(onSuccess, errorCallback).coldSync(syncSet, syncRequests);
   }
 

@@ -1,10 +1,14 @@
 package org.jboss.tests.errai.jpa.exclusion.client;
 
 import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
+
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.test.client.JpaTestClient;
@@ -38,7 +42,13 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
     // doesn't call onModuleLoad() for us.
     new Container().bootstrapContainer();
   }
-  
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    Container.reset();
+    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+  }
+
   public void testWhiteListedEntityIsInEntityManager() throws Exception {
     try {
       // we cannot use the class name to test here since the class is not available in client side code generation
@@ -52,7 +62,7 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
       fail("WhiteListedEntity was not included in EntityManager");
     }
   }
-  
+
   public void testBlackListedEntityIsNotInEntityManager() throws Exception {
 
     try {
@@ -101,7 +111,7 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
         }
       }
   }
-  
+
   public void testWhiteAndBlackListedEntityIsNotInEntityManager() throws Exception {
     // blacklist overrides whitelist
     try {

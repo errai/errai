@@ -16,6 +16,8 @@
 
 package org.jboss.errai.databinding.client.test;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
@@ -33,6 +35,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.junit.Test;
@@ -41,7 +44,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Tests the functionality provided by the {@link DataBinder} API for property change events.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @SuppressWarnings("unchecked")
@@ -103,21 +106,21 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel().getChild().getChild(),
         handler.getEvents().get(0).getSource());
-    
+
     binder.getModel().getChild().getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
     assertEquals("Should have received exactly two property change events", 2, handler.getEvents().size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(1).getPropertyName());
     assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
     assertEquals("Wrong previous value in event", "UI change", handler.getEvents().get(1).getOldValue());
-    assertEquals("Wrong event source", binder.getModel().getChild().getChild(), 
+    assertEquals("Wrong event source", binder.getModel().getChild().getChild(),
         handler.getEvents().get(1).getSource());
 
     binder.removePropertyChangeHandler("child.child.value", handler);
     textBox.setValue("UI change 2", true);
     assertEquals("Should have received no additional event", 2, handler.getEvents().size());
   }
-  
+
   @Test
   public void testPropertyChangeHandlingWithPropertyChainAndRootInstanceChange() {
     MockHandler childHandler = new MockHandler();
@@ -127,25 +130,25 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.value");
     binder.addPropertyChangeHandler("child", childHandler);
     binder.addPropertyChangeHandler("child.value", valueHandler);
-    
+
     TestModel oldChild = binder.getModel().getChild();
     TestModel newChild = new TestModel("model change");
     binder.getModel().setChild(newChild);
-    
+
     assertEquals("Widget not properly updated", "model change", textBox.getText());
     assertEquals("Should have received exactly one property change event", 1, childHandler.getEvents().size());
     assertEquals("Wrong property name in event", "child", childHandler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", newChild, childHandler.getEvents().get(0).getNewValue());
     assertEquals("Wrong previous value in event", oldChild, childHandler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), childHandler.getEvents().get(0).getSource());
-    
+
     assertEquals("Should have received exactly one property change event", 1, valueHandler.getEvents().size());
     assertEquals("Wrong property name in event", "value", valueHandler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", "model change", valueHandler.getEvents().get(0).getNewValue());
     assertEquals("Wrong previous value in event", null, valueHandler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel().getChild(), valueHandler.getEvents().get(0).getSource());
   }
-  
+
   @Test
   public void testPropertyChangeHandlingWithPropertyChainAndRootInstanceChangeOfTwoLevels() {
     MockHandler childHandler = new MockHandler();
@@ -155,26 +158,26 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("child", childHandler);
     binder.addPropertyChangeHandler("child.child.value", valueHandler);
-    
+
     TestModel oldChild = binder.getModel().getChild();
     TestModel newChild = new TestModel();
     newChild.setChild(new TestModel("model change"));
     binder.getModel().setChild(newChild);
-    
+
     assertEquals("Widget not properly updated", "model change", textBox.getText());
     assertEquals("Should have received exactly one property change event", 1, childHandler.getEvents().size());
     assertEquals("Wrong property name in event", "child", childHandler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", newChild, childHandler.getEvents().get(0).getNewValue());
     assertEquals("Wrong previous value in event", oldChild, childHandler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), childHandler.getEvents().get(0).getSource());
-    
+
     assertEquals("Should have received exactly one property change event", 1, valueHandler.getEvents().size());
     assertEquals("Wrong property name in event", "value", valueHandler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", "model change", valueHandler.getEvents().get(0).getNewValue());
     assertEquals("Wrong previous value in event", null, valueHandler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel().getChild().getChild(), valueHandler.getEvents().get(0).getSource());
   }
-  
+
   @Test
   public void testPropertyChangeHandlingWithWildcardAndPropertyChain() {
     MockHandler handler = new MockHandler();
@@ -211,7 +214,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     TestModelWithListWidget widget = new TestModelWithListWidget();
     DataBinder<TestModelWithList> binder = DataBinder.forType(TestModelWithList.class).bind(widget, "list");
     binder.getModel().setList(null);
-    
+
     binder.addPropertyChangeHandler(handler);
 
     List<String> list = new ArrayList<String>();
@@ -246,24 +249,24 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong property value in event", Arrays.asList("1"), handler.getEvents().get(3).getNewValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(3).getSource());
   }
-  
+
   @Test
   public void testBoundListFiresPropertyChangeEventOnElementChange() {
     MockHandler handler = new MockHandler();
 
-    DataBinder<TestModelWithBindableTypeList> binder = 
+    DataBinder<TestModelWithBindableTypeList> binder =
             DataBinder.forType(TestModelWithBindableTypeList.class).bind(new TextBox(), "list");
     binder.getModel().getList().add(new TestModelWithBindableTypeList("id"));
     binder.addPropertyChangeHandler(handler);
 
     // Mutating the list element should cause a property change event for the list
     TestModelWithBindableTypeList element = binder.getModel().getList().get(0);
-    
+
     // Guards against regressions of ERRAI-848: no list operation should re-wrap an element proxy and add
     // additional change handlers
     binder.getModel().getList().contains(element);
     element.setId("id-change");
-    
+
     assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
     assertEquals("Wrong property name in event", "list", handler.getEvents().get(0).getPropertyName());
     assertTrue("Wrong property value in event",handler.getEvents().get(0).getNewValue().equals(
@@ -271,15 +274,15 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertTrue("Wrong property value in event",handler.getEvents().get(0).getNewValue().equals(
             binder.getModel().getList()));
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
-    
+
     binder.getModel().getList().remove(0);
     assertEquals("Should have received exactly two property change event", 2, handler.getEvents().size());
-    
+
     // Once the element is removed from the list mutations should no longer cause change events
     element.setId("id-change2");
     assertEquals("Should have received no additional property change event", 2, handler.getEvents().size());
   }
-  
+
   @Test
   public void testCascadingPropertyChangeHandlingSetBindingBeforeHandler() {
     MockHandler handler = new MockHandler();
@@ -338,7 +341,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertNull("Previous value should have been null", handler.getEvents().get(1).getOldValue());
     assertEquals("Wrong event source", binder.getModel().getChild().getChild(), handler.getEvents().get(1).getSource());
   }
-  
+
   @Test
   public void testCascadingPropertyChangeHandlingWithPropertyChain() {
     MockHandler handler = new MockHandler();
@@ -404,7 +407,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Widget not properly updated", "model change", textBox.getText());
     assertEquals("Should have received exactly two property change events", 2, handler.getEvents().size());
   }
-  
+
   @Test
   public void testBinderRetainsCascadingPropertyChangeHandlerAfterModelChange() {
     MockHandler handler = new MockHandler();
@@ -500,7 +503,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Should have received no additional event", 2, handler.getEvents().size());
   }
 
-  @Test  
+  @Test
   public void testWildcardFailsIfNotTheEndOfExpression() {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     try {
@@ -512,7 +515,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     }
   }
 
-  @Test  
+  @Test
   public void testDoubleWildcardFailsIfNotTheEndOfExpression() {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     try {
@@ -523,16 +526,16 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
       // expected
     }
   }
-  
+
   @Test
   @SuppressWarnings("rawtypes")
   public void testUpdateWidgetsInChangeHandlerDoesNotCauseRecursion() {
     final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     final List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
-    
+
     binder.addPropertyChangeHandler("value", new PropertyChangeHandler() {
       @Override
-      public void onPropertyChange(PropertyChangeEvent event) {        
+      public void onPropertyChange(PropertyChangeEvent event) {
         ((BindableProxy) binder.getModel()).updateWidgets();
         events.add(event);
       }
@@ -540,13 +543,13 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     binder.getModel().setValue("value");
     assertEquals("Should have received exactly one event", 1, events.size());
   }
-  
+
   @Test
   public void testMutateHandlersInPropertyChangeEvent() {
     final TextBox textBox = new TextBox();
     final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     final List<PropertyChangeEvent<?>> observedEvents = new ArrayList<PropertyChangeEvent<?>>();
-    
+
     final PropertyChangeHandler<String> handler = new PropertyChangeHandler<String>() {
       @Override
       public void onPropertyChange(PropertyChangeEvent<String> event) {
@@ -556,13 +559,39 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     };
     binder.addPropertyChangeHandler(handler);
     binder.addPropertyChangeHandler("value", handler);
-    
+
     try {
       binder.getModel().setValue("test");
-    } 
+    }
     catch (ConcurrentModificationException e) {
       fail("Failed to mutate property change handlers in change event");
     }
     assertEquals("Should have received exactly 2 change events", 2, observedEvents.size());
+  }
+
+  @Test
+  public void testPropertyChangeHandlerIsRemovedIfRemoveCalledAfterUnbind() throws Exception {
+    final RefHolder<Integer> propertyChanges = new RefHolder<Integer>();
+    propertyChanges.set(0);
+    final TextBox textBox = new TextBox();
+    final PropertyChangeHandler<String> testHandler = new PropertyChangeHandler<String>() {
+      @Override
+      public void onPropertyChange(final PropertyChangeEvent<String> event) {
+        propertyChanges.set(propertyChanges.get() + 1);
+      }
+    };
+
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    binder.addPropertyChangeHandler(testHandler);
+    final TestModel model = binder.getModel();
+
+    model.setValue("hello");
+    assertEquals("Precondition failed: The handler should have been invoked for this change.", 1, (int) propertyChanges.get());
+
+    binder.unbind();
+    binder.removePropertyChangeHandler(testHandler);
+
+    model.setValue("good bye");
+    assertEquals("The handler should not have been invoked for this change since remove was called.", 1, (int) propertyChanges.get());
   }
 }

@@ -16,14 +16,14 @@
 
 package org.jboss.errai.cdi.injection.client.test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
-import org.jboss.errai.cdi.injection.client.ApplicationScopedBeanB;
 import org.jboss.errai.cdi.injection.client.Bean;
 import org.jboss.errai.cdi.injection.client.BeanInjectsNonModuleDependentBean;
 import org.jboss.errai.cdi.injection.client.BeanInjectsNonModuleDependentBeanB;
 import org.jboss.errai.cdi.injection.client.DepScopedBeanWithASBeanDep;
-import org.jboss.errai.cdi.injection.client.DependentBeanCycleA;
-import org.jboss.errai.cdi.injection.client.DependentBeanCycleB;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
 import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
 import org.jboss.errai.cdi.injection.client.DestroyA;
@@ -35,9 +35,6 @@ import org.jboss.errai.cdi.injection.client.ServiceC;
 import org.jboss.errai.cdi.injection.client.UnreferencedDependentRootBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -54,7 +51,6 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    DependentBeanCycleB.instanceCount = 1;
     super.gwtSetUp();
   }
 
@@ -67,12 +63,15 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     final DependentScopedBean b3 = beanA.getBean3();
     final DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
 
-    assertTrue("dependent scoped semantics broken", b2.getInstance() > b1.getInstance());
-    assertTrue("dependent scoped semantics broken", b3.getInstance() > b2.getInstance());
+    assertTrue("dependent scoped semantics broken", b1.getInstance() != b2.getInstance());
+    assertTrue("dependent scoped semantics broken", b2.getInstance() != b3.getInstance());
+    assertTrue("dependent scoped semantics broken", b1.getInstance() != b3.getInstance());
 
     assertNotNull("dependent scoped bean with injections was not injected", b4);
     assertNotNull("dependent scoped beans own injections not injected", b4.getBean());
-    assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() > b3.getInstance());
+    assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() != b1.getInstance());
+    assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() != b2.getInstance());
+    assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() != b3.getInstance());
   }
 
   public void testDependentScopesWithTransverseDependentBeans() {
@@ -132,48 +131,6 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     assertNotNull("UnreferencedDependentRootBean was null", applicationScopedBean);
     assertNotNull("Dependent injection was null", applicationScopedBean.getBeanB());
   }
-
-  public void testDependentBeanCycleFromApplicationScopedRoot() {
-    final ApplicationScopedBeanB bean = IOC.getBeanManager()
-            .lookupBean(ApplicationScopedBeanB.class).getInstance();
-
-    assertNotNull("DependentBeanCycleA was null", bean);
-    assertNotNull("dependentScopedBean.dependentBeanCycleA injection was null",
-            bean.getDependentBeanCycleA());
-    assertNotNull("dependentScopedBean.dependentBeanCycleA.dependentBeanCycleB was null",
-            bean.getDependentBeanCycleA().getDependentBeanCycleB());
-    assertEquals("there should have been only one instantiation of DependentBeanCycleB",
-            1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-  }
-
-  public void testDependentBeanCycleFromDependentRoot() {
-    DependentBeanCycleB.instanceCount = 1;
-
-    final DependentBeanCycleB bean = IOC.getBeanManager()
-            .lookupBean(DependentBeanCycleB.class).getInstance();
-
-    assertNotNull("bean was null", bean);
-    assertNotNull("bean.dependentBeanCycleA injection was null",
-            bean.getDependentBeanCycleA());
-    assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
-            bean.getDependentBeanCycleA().getDependentBeanCycleB());
-    assertEquals("there should have been only one instantiation of DependentBeanCycleB",
-            1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-
-    DependentBeanCycleB.instanceCount = 1;
-
-    final DependentBeanCycleA beanA = IOC.getBeanManager()
-            .lookupBean(DependentBeanCycleA.class).getInstance();
-
-    assertNotNull("beanA was null", beanA);
-    assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
-            beanA.getDependentBeanCycleB());
-    assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
-            beanA.getDependentBeanCycleB().getDependentBeanCycleA());
-    assertEquals("there should have been only two instantiations of DependentBeanCycleB",
-            1, beanA.getDependentBeanCycleB().getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-  }
-
 
   public void testDependentBeanCycleWithPreDestroy() {
     final DestroyA bean = IOC.getBeanManager()

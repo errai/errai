@@ -16,16 +16,14 @@
 
 package org.jboss.errai.ioc.client;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.jboss.errai.ioc.client.container.BeanRef;
-import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.ContextManager;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
-import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerSetup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +31,13 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 
 public class Container implements EntryPoint {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(Container.class);
-  
+
   @Override
   public void onModuleLoad() {
     bootstrapContainer();
   }
-
-  // stored for debugging purposes only. overwritten every time the container is bootstrapped.
-  private static BootstrapInjectionContext injectionContext;
 
   public void bootstrapContainer() {
     try {
@@ -62,22 +57,15 @@ public class Container implements EntryPoint {
       }
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-      injectionContext = bootstrapper.bootstrapContainer();
+      final ContextManager contextManager = bootstrapper.bootstrapContainer();
+      final SyncBeanManager beanManager = IOC.getBeanManager();
 
-      final CreationalContext rootContext = injectionContext.getRootContext();
-
-      if (rootContext instanceof AsyncCreationalContext) {
-        ((AsyncCreationalContext) rootContext).finish(new Runnable() {
-          @Override
-          public void run() {
-            finishInit();
-          }
-        });
+      ((SyncBeanManagerSetup) beanManager).setContextManager(contextManager);
+      init = true;
+      for (final Runnable run : afterInit) {
+        run.run();
       }
-      else {
-        ((SimpleCreationalContext) rootContext).finish();
-        finishInit();
-      }
+      afterInit.clear();
     }
     catch (Throwable t) {
       t.printStackTrace();
@@ -88,27 +76,6 @@ public class Container implements EntryPoint {
 
   private static final List<Runnable> afterInit = new ArrayList<Runnable>();
   private static boolean init = false;
-
-  private void finishInit() {
-    init = true;
-    logger.info(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
-    declareDebugFunction();
-    new CallbacksRunnable().run();
-
-    logger.info("bean manager now in service.");
-
-  }
-
-  private static class CallbacksRunnable implements Runnable {
-    @Override
-    public void run() {
-      final Iterator<Runnable> runnableIterator = afterInit.iterator();
-      while (runnableIterator.hasNext()) {
-        runnableIterator.next().run();
-        runnableIterator.remove();
-      }
-    }
-  }
 
   /**
    * Runs the specified {@link Runnable} only after the bean manager has fully initialized. It is generally not
@@ -127,9 +94,9 @@ public class Container implements EntryPoint {
   public static void runAfterInit(final Runnable runnable) {
     if (init) {
       runnable.run();
+    } else {
+      afterInit.add(runnable);
     }
-
-    afterInit.add(runnable);
   }
 
   /**
@@ -141,46 +108,9 @@ public class Container implements EntryPoint {
     runAfterInit(runnable);
   }
 
-  /**
-   * Declares the JavaScript-accessible debugging function to query the status of the bean manager at runtime. The
-   * JSNI method internally calls {@link #displayBeanManagerStatus()}.
-   */
-  private static native void declareDebugFunction() /*-{
-    $wnd.errai_bean_manager_status = function () {
-      @org.jboss.errai.ioc.client.Container::displayBeanManagerStatus()();
-    }
-  }-*/;
-
-  /**
-   * Logs the bean manager status with gwt-slf4j.
-   */
-  private static void displayBeanManagerStatus() {
-    logger.info("BeanManager Status");
-    logger.info("-------------------------------------------------------------------");
-
-    logger.info("[WIRED BEANS]");
-    for (final BeanRef ref : injectionContext.getRootContext().getAllCreatedBeans()) {
-      logger.info(" -> " + ref.getClazz().getName());
-      logger.info("     qualifiers: " + annotationsToString(ref.getAnnotations()) + ")");
-    }
-    logger.info("Total: " + injectionContext.getRootContext().getAllCreatedBeans().size());
-    logger.info("-------------------------------------------------------------------");
+  public static void reset() {
+    init = false;
+    afterInit.clear();
   }
 
-  /**
-   * Converts the specified annotation array to a string representation. Used to display the bean manager status.
-   *
-   * @param annotations
-   *
-   * @return
-   */
-  private static String annotationsToString(final Annotation[] annotations) {
-    final StringBuilder sb = new StringBuilder("[");
-    for (int i = 0; i < annotations.length; i++) {
-      sb.append(annotations[i].annotationType().getName());
-
-      if (i + 1 < annotations.length) sb.append(", ");
-    }
-    return sb.toString();
-  }
 }

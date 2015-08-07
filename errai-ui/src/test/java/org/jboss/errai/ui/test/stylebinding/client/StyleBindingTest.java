@@ -33,6 +33,13 @@ public class StyleBindingTest extends AbstractErraiCDITest {
     return "org.jboss.errai.ui.test.stylebinding.Test";
   }
 
+  @Override
+  protected void gwtSetUp() throws Exception {
+    setRemoteCommunicationEnabled(false);
+    super.gwtSetUp();
+    StyleBindingsRegistry.get().updateStyles();
+  }
+
   public void testStyleBinding() {
     final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
     final StyleBoundTemplate instance = bean.getInstance();
@@ -86,7 +93,7 @@ public class StyleBindingTest extends AbstractErraiCDITest {
 
     assertEquals("hidden", instance.getTestA().getElement().getStyle().getVisibility());
   }
-  
+
   public void testDestroyingBeanCleansUpPropertyChangeHandler() {
     final StyleBindingsRegistry oldReg = StyleBindingsRegistry.get();
     try {
@@ -96,18 +103,18 @@ public class StyleBindingTest extends AbstractErraiCDITest {
           fail("updateStyles should not be called after bean was destroyed");
         }
       };
-      
+
       final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
       final StyleBoundTemplate instance = bean.getInstance();
       TestModel model = instance.getTestModel();
       model.setTestB("");
-      
+
       assertEquals("", instance.getTestB().getText());
       assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
-  
+
       IOC.getBeanManager().destroyBean(instance);
       StyleBindingsRegistry.set(registry);
-      
+
       model.setTestB("0");
       assertEquals("", instance.getTestB().getText());
       assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
@@ -116,5 +123,5 @@ public class StyleBindingTest extends AbstractErraiCDITest {
       StyleBindingsRegistry.set(oldReg);
     }
   }
-  
+
 }

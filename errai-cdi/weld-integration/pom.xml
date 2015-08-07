@@ -405,6 +405,11 @@
           <artifactId>errai-data-binding</artifactId>
           <scope>provided</scope>
         </dependency>        
+        <dependency>
+          <groupId>javax</groupId>
+          <artifactId>javaee-api</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
     </profile>
   </profiles>

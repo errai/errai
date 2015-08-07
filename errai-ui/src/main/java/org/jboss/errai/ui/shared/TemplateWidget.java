@@ -18,6 +18,8 @@ package org.jboss.errai.ui.shared;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.jboss.errai.ioc.client.container.Factory;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Panel;
@@ -25,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Used to merge a {@link Template} onto a {@link Composite} component.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public class TemplateWidget extends Panel {
@@ -34,9 +36,9 @@ public class TemplateWidget extends Panel {
   public TemplateWidget(Element root, Collection<Widget> children) {
     this.setElement(root);
     this.children = children;
-    
+
     for (Widget child : children) {
-      setParentNative(this, child);
+      setParentNative(this, Factory.maybeUnwrapProxy(child));
     }
   }
 

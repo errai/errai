@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
@@ -44,7 +45,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * <p>
  * Configuration is decentralized: it is based on fields and annotations present in other application classes. This
  * configuration is gathered at compile time.
- * 
+ *
  * @see Page
  * @see PageState
  * @see PageShowing
@@ -72,7 +73,7 @@ public class Navigation {
 
     /**
      * Construct a new {@link Request}.
-     * 
+     *
      * @param pageNode
      *          The page node to display. Normally, the implementation of PageNode is generated at compile time based on
      *          a Widget subclass that has been annotated with {@code @Page}. Anything calling this method must ensure
@@ -93,13 +94,13 @@ public class Navigation {
   protected PageNode<IsWidget> currentPage;
 
   protected IsWidget currentWidget;
-  
+
   protected HistoryToken currentPageToken;
-  
+
   private PageNavigationErrorHandler navigationErrorHandler;
 
   private HandlerRegistration historyHandlerRegistration;
-  
+
   private Map<IsWidget, HandlerRegistration> attachHandlerRegistrations = new HashMap<IsWidget, HandlerRegistration>();
 
   @Inject
@@ -119,10 +120,10 @@ public class Navigation {
 
   @Inject
   private NavigationGraph navGraph;
-  
+
   @Inject
   private StateChange<Object> stateChangeEvent;
-  
+
   @Inject
   private HistoryTokenFactory historyTokenFactory;
 
@@ -130,9 +131,9 @@ public class Navigation {
   private void init() {
     if (navGraph.isEmpty())
       return;
-    
+
     final String hash = Window.Location.getHash();
-    
+
     navigationErrorHandler = new DefaultNavigationErrorHandler(this);
 
     historyHandlerRegistration = HistoryWrapper.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -150,7 +151,7 @@ public class Navigation {
             setAppContext(context);
           }
           token = historyTokenFactory.parseURL(event.getValue());
-          
+
           if (currentPage == null || !token.equals(currentPageToken)) {
             PageNode<IsWidget> toPage = navGraph.getPage(token.getPageName());
             navigate(new Request<IsWidget>(toPage, token), false);
@@ -163,9 +164,9 @@ public class Navigation {
         }
       }
     });
-    
+
     maybeConvertHistoryToken(hash);
-    
+
     // finally, we bootstrap the navigation system (this invokes the callback
     // above)
     InitVotes.registerOneTimeInitCallback(new Runnable() {
@@ -178,11 +179,11 @@ public class Navigation {
   }
 
   protected String inferAppContext(String url) {
-    if (!(url.startsWith("/"))) 
+    if (!(url.startsWith("/")))
       url = "/" + url;
-    
+
     int indexOfNextSlash = url.indexOf("/", 1);
-    
+
     if (indexOfNextSlash < 0)
       return "";
     else
@@ -191,7 +192,7 @@ public class Navigation {
 
   /**
    * Set an error handler that is called in case of a {@link PageNotFoundException} error during page navigation.
-   * 
+   *
    * @param handler
    *          An error handler for navigation. Setting this to null assigns the {@link DefaultNavigationErrorHandler}
    */
@@ -214,7 +215,7 @@ public class Navigation {
   /**
    * Looks up the PageNode instance that provides content for the given widget type, sets the state on that page, then
    * makes the widget visible in the content area.
-   * 
+   *
    * @param toPage
    *          The content type of the page node to look up and display. Normally, this is a Widget subclass that has
    *          been annotated with {@code @Page}.
@@ -224,7 +225,7 @@ public class Navigation {
    */
   public <W extends IsWidget> void goTo(Class<W> toPage, Multimap<String, String> state) {
     PageNode<W> toPageInstance = null;
-    
+
     try {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance, state);
@@ -237,12 +238,12 @@ public class Navigation {
       else
         navigationErrorHandler.handleInvalidPageNameError(e, toPageInstance.name());
     }
-    
+
   }
 
   /**
    * Same as {@link #goTo(Class, com.google.common.collect.Multimap)} but then with the page name.
-   * 
+   *
    * @param toPage
    *          the name of the page node to lookup and display.
    */
@@ -261,7 +262,7 @@ public class Navigation {
   /**
    * Looks up the PageNode instance of the page that has the unique role set and makes the widget visible in the content
    * area.
-   * 
+   *
    * @param role
    *          The unique role of the page that needs to be displayed.
    */
@@ -279,7 +280,7 @@ public class Navigation {
 
   /**
    * Return all PageNode instances that have specified pageRole.
-   * 
+   *
    * @param pageRole
    *          the role to find PageNodes by
    * @return All the pageNodes of the pages that have the specific pageRole.
@@ -360,7 +361,7 @@ public class Navigation {
     navigatingContainer.clear();
 
     if (currentPage != null && currentWidget != null) {
-      currentPage.pageHidden(currentWidget);
+      currentPage.pageHidden(Factory.maybeUnwrapProxy(currentWidget));
       currentPage.destroy(currentWidget);
     }
   }
@@ -375,10 +376,10 @@ public class Navigation {
         if (widget == null) {
           throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
         }
-        
+
         maybeAttachContentPanel();
         currentPageToken = request.state;
-        
+
         if ((widget instanceof Composite) && (getCompositeWidget((Composite) widget) == null)) {
           final HandlerRegistration reg = widget.asWidget().addAttachHandler(new Handler() {
             @Override
@@ -402,7 +403,7 @@ public class Navigation {
     if (reg != null) {
       reg.removeHandler();
     }
-    
+
     final NavigationControl control = new NavigationControl(new Runnable() {
       @Override
       public void run() {
@@ -415,7 +416,7 @@ public class Navigation {
               locked = true;
               try {
                 hideCurrentPage();
-                request.pageNode.pageShowing(widget, request.state);
+                request.pageNode.pageShowing(Factory.maybeUnwrapProxy(widget), request.state);
 
                 // Fire IOC lifecycle event to indicate that the state of the
                 // bean has changed.
@@ -426,7 +427,7 @@ public class Navigation {
                 setCurrentPage(request.pageNode);
                 currentWidget = widget;
                 navigatingContainer.setWidget(widget);
-                request.pageNode.pageShown(widget, request.state);
+                request.pageNode.pageShown(Factory.maybeUnwrapProxy(widget), request.state);
               } finally {
                 locked = false;
               }
@@ -442,7 +443,7 @@ public class Navigation {
     });
 
     if (currentPage != null && currentWidget != null && currentWidget.asWidget() == navigatingContainer.getWidget()) {
-      currentPage.pageHiding(currentWidget, control);
+      currentPage.pageHiding(Factory.maybeUnwrapProxy(currentWidget), control);
     }
     else {
       control.proceed();
@@ -451,7 +452,7 @@ public class Navigation {
 
   /**
    * Return the current page that is being displayed.
-   * 
+   *
    * @return the current page
    */
   public PageNode<IsWidget> getCurrentPage() {
@@ -461,7 +462,7 @@ public class Navigation {
   /**
    * Returns the panel that this Navigation object manages. The contents of this panel will be updated by the navigation
    * system in response to PageTransition requests, as well as changes to the GWT navigation system.
-   * 
+   *
    * @return The content panel of this Navigation instance. It is not recommended that client code modifies the contents
    *         of this panel, because this Navigation instance may replace its contents at any time.
    */
@@ -479,7 +480,7 @@ public class Navigation {
 
   /**
    * Just sets the currentPage field. This method exists primarily to get around a generics Catch-22.
-   * 
+   *
    * @param currentPage
    *          the new value for currentPage.
    */
@@ -495,7 +496,7 @@ public class Navigation {
   /**
    * Sets the application context used in pushstate URL paths. This application context should match the deployed
    * application context in your web.xml
-   * 
+   *
    * @param path The context path. Never null.
    */
   public static native void setAppContext(String path) /*-{
@@ -510,7 +511,7 @@ public class Navigation {
   /**
    * Gets the application context used in pushstate URL paths. This application context should match the deployed
    * application context in your web.xml
-   * 
+   *
    * @return The application context. This may return the empty String (but never null). If non-empty, the return value
    *         always ends with a slash.
    */
@@ -520,11 +521,11 @@ public class Navigation {
     else
       return "";
   }
-  
+
   private static native String getAppContextFromHostPage() /*-{
    if ($wnd.erraiApplicationWebContext === undefined) {
-      return null; 
-   } 
+      return null;
+   }
    else if ($wnd.erraiApplicationWebContext.length === 0) {
      return "";
    }
@@ -533,7 +534,7 @@ public class Navigation {
          return $wnd.erraiApplicationWebContext + "/";
        }
        return $wnd.erraiApplicationWebContext;
-     } 
+     }
   }-*/;
 
   private void maybeConvertHistoryToken(String token) {
@@ -541,15 +542,15 @@ public class Navigation {
       if (token == null || token.isEmpty()) {
         return;
       }
-  
+
       if (token.startsWith("#")) {
         token = token.substring(1);
       }
-  
+
       HistoryWrapper.newItem(Window.Location.getPath() + token, false);
     }
   }
-  
+
   private native static IsWidget getCompositeWidget(Composite instance) /*-{
     return instance.@com.google.gwt.user.client.ui.Composite::widget;
   }-*/;

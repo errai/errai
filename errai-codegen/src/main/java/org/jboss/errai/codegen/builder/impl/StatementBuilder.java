@@ -19,6 +19,8 @@ package org.jboss.errai.codegen.builder.impl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Comment;
@@ -55,8 +57,6 @@ import org.jboss.errai.codegen.control.branch.ContinueStatement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 
-import javax.enterprise.util.TypeLiteral;
-
 /**
  * The root of our fluent StatementBuilder API.
  *
@@ -66,8 +66,8 @@ import javax.enterprise.util.TypeLiteral;
 public class StatementBuilder extends AbstractStatementBuilder implements StatementBegin {
 
   private static final Pattern THIS_OR_SUPPER_PATTERN = Pattern.compile("(this|super)");
-  private static final Pattern THIS_PATTERN = Pattern.compile("(this.)(.)*");
-  
+  private static final Pattern THIS_PATTERN = Pattern.compile("(this\\.)(.)*");
+
   public StatementBuilder(final Context context) {
     super(context);
 
@@ -204,7 +204,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   public VariableReferenceContextualStatementBuilder loadVariable(final String name, final Object... indexes) {
     Matcher m = THIS_PATTERN.matcher(name);
     if (m.matches()) {
-      return loadClassMember(name.replaceFirst("(this.)", ""), indexes);
+      return loadClassMember(name.replaceFirst("(this\\.)", ""), indexes);
     }
     appendCallElement(new LoadVariable(name, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
@@ -420,10 +420,12 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     };
   }
 
+  @Override
   public ContextualStatementBuilder castTo(final Class<?> type, final Statement statement) {
     return nestedCall(Cast.to(type, statement));
   }
 
+  @Override
   public ContextualStatementBuilder castTo(final MetaClass type, final Statement statement) {
     return nestedCall(Cast.to(type, statement));
   }

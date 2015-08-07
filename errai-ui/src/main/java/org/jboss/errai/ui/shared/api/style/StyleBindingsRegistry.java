@@ -8,14 +8,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.errai.common.client.api.extension.InitVotes;
+
 import com.google.gwt.user.client.Element;
 
 /**
  * @author Mike Brock
  */
+@SuppressWarnings("deprecation")
 public class StyleBindingsRegistry {
   private static StyleBindingsRegistry INSTANCE = new StyleBindingsRegistry();
 
+  private final Set<Object> instancesWithElementBindings = new HashSet<Object>();
   private final Map<Object, List<Object>> houseKeepingMap = new HashMap<Object, List<Object>>();
   private final Map<Class<? extends Annotation>, List<StyleBindingExecutor>> styleBindings =
       new HashMap<Class<? extends Annotation>, List<StyleBindingExecutor>>();
@@ -24,7 +28,9 @@ public class StyleBindingsRegistry {
   private final Map<Class<? extends Annotation>, Set<Annotation>> mapping =
       new HashMap<Class<? extends Annotation>, Set<Annotation>>();
 
-  public void addStyleBinding(final Object beanInst, final Class<? extends Annotation> annotation,
+  private boolean isInitCallbackRegistered = false;
+
+  public BindingRegistrationHandle addStyleBinding(final Class<? extends Annotation> annotation,
           final StyleBindingExecutor binding) {
 
     List<StyleBindingExecutor> styleBindingList = styleBindings.get(annotation);
@@ -32,11 +38,30 @@ public class StyleBindingsRegistry {
       styleBindings.put(annotation, styleBindingList = new ArrayList<StyleBindingExecutor>());
     }
     styleBindingList.add(binding);
-    recordHouskeepingData(beanInst, binding);
-    updateStyles();
+
+    if (InitVotes.isInitialized()) {
+      updateStyles();
+    } else if (!isInitCallbackRegistered) {
+      isInitCallbackRegistered = true;
+      InitVotes.registerOneTimeInitCallback(new Runnable() {
+        @Override
+        public void run() {
+          updateStyles();
+        }
+      });
+    }
+
+    return new BindingRegistrationHandle() {
+
+      @Override
+      public void cleanup() {
+        styleBindings.get(annotation).remove(binding);
+      }
+    };
   }
 
   public void addElementBinding(final Object beanInst, final Annotation annotation, final Element element) {
+    instancesWithElementBindings.add(beanInst);
     addElementBinding(annotation, new ElementBinding(this, element, beanInst));
   }
 
@@ -75,6 +100,7 @@ public class StyleBindingsRegistry {
       }
 
       houseKeepingMap.remove(beanInst);
+      instancesWithElementBindings.remove(beanInst);
     }
   }
 
@@ -83,9 +109,13 @@ public class StyleBindingsRegistry {
   }
 
   public void updateStyles(Object beanInst) {
+    if (beanInst != null && !instancesWithElementBindings.contains(beanInst)) {
+      return;
+    }
     for (final Map.Entry<Class<? extends Annotation>, List<StyleBindingExecutor>> entry : styleBindings.entrySet()) {
       if (mapping.containsKey(entry.getKey())) {
-        for (final Annotation mappedAnnotation : mapping.get(entry.getKey())) {
+        final Set<Annotation> annoMappings = mapping.get(entry.getKey());
+        for (final Annotation mappedAnnotation : annoMappings) {
           final List<ElementBinding> elementList = elementBindings.get(mappedAnnotation);
           if (elementList != null) {
             for (final ElementBinding binding : elementList) {

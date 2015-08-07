@@ -21,6 +21,7 @@
   <inherits name="org.jboss.errai.common.ErraiCommon"/>
   <inherits name="org.jboss.errai.common.Logging"/>
   <inherits name="javax.enterprise.Support"/>
+  <inherits name="com.google.common.collect.Collect"/>
 
   <entry-point class='org.jboss.errai.ioc.client.Container'/>
 
@@ -35,6 +36,10 @@
 
   <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCEnvironmentGenerator">
     <when-type-assignable class="org.jboss.errai.ioc.client.container.IOCEnvironment"/>
+  </generate-with>
+
+  <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator">
+    <when-type-assignable class="org.jboss.errai.ioc.client.container.Factory"/>
   </generate-with>
 
   <super-source path="compat"/>

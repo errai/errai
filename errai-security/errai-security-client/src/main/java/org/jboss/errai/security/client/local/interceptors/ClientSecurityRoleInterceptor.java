@@ -52,6 +52,12 @@ RemoteCallInterceptor<RemoteCallContext> {
   private final SecurityContext securityContext;
   private final RequiredRolesExtractor roleExtractor;
 
+  // For proxying
+  public ClientSecurityRoleInterceptor() {
+    securityContext = null;
+    roleExtractor = null;
+  }
+
   @Inject
   public ClientSecurityRoleInterceptor(final SecurityContext securityContext, final RequiredRolesExtractor roleExtractor) {
     this.securityContext = securityContext;

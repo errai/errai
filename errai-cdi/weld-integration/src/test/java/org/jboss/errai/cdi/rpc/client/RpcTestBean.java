@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.rpc.client;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -33,6 +34,7 @@ import org.jboss.errai.common.client.api.Caller;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@Startup
 @ApplicationScoped
 public class RpcTestBean {
 

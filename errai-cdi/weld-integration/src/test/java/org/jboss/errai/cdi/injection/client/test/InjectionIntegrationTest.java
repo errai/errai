@@ -6,6 +6,7 @@ import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 import org.jboss.errai.cdi.injection.client.Amex;
 import org.jboss.errai.cdi.injection.client.CreditCardLover;
 import org.jboss.errai.cdi.injection.client.InjectionTestModule;
+import org.jboss.errai.cdi.injection.client.ProducesProxiableOfAbstractType.NotConcrete;
 import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanApples;
 import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanOranges;
 import org.jboss.errai.cdi.injection.client.Visa;
@@ -44,13 +45,6 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
         .lookupBean(InjectionTestModule.class).getInstance();
 
     assertTrue("PostConstruct on InjectionTestModule did not fire", module.isPostConstructFired());
-  }
-
-  public void testNewSemantics() {
-    final InjectionTestModule module = IOC.getBeanManager()
-        .lookupBean(InjectionTestModule.class).getInstance();
-
-    assertFalse("BeanC1 should be @New instance", module.getBeanC() == module.getBeanC1());
   }
 
   public void testMixedInjectionTypes() {
@@ -128,5 +122,12 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
 
     assertSame(alpha, alpha2);
     assertSame(beta, beta2);
+  }
+
+  public void testLoadingProxiedAbstractType() throws Exception {
+    final NotConcrete bean = IOC.getBeanManager().lookupBean(NotConcrete.class).getInstance();
+    assertFalse(bean.getValue());
+    bean.setValueTrue();
+    assertTrue(bean.getValue());
   }
 }

@@ -17,14 +17,14 @@
 package org.jboss.errai.cdi.injection.client;
 
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@Dependent
+@ApplicationScoped
 public class DestroyA {
   private boolean isDestroyed = false;
 
@@ -37,9 +37,9 @@ public class DestroyA {
   }
 
   public void someObserver(@Observes String s) {
-    
+
   }
-  
+
   public DestroyB getTestDestroyB() {
     return testDestroyB;
   }

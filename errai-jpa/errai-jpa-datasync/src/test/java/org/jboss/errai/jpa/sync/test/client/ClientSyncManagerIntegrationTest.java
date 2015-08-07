@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.AssertionFailedError;
-
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -16,8 +14,10 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.CDIClientBootstrap;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
@@ -34,6 +34,8 @@ import org.jboss.errai.jpa.sync.test.client.ioc.DependentScopedSyncBean;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
+
+import junit.framework.AssertionFailedError;
 
 public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
@@ -81,6 +83,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
       IOC.getBeanManager().destroyBean(syncBean);
     }
 
+    Container.reset();
+    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
     InitVotes.reset();
     setRemoteCommunicationEnabled(true);
     super.gwtTearDown();
@@ -429,7 +433,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     final Map<String, Object> parameters = new HashMap<String, Object>();
 
     // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
-    csm.dataSyncService = new Caller<DataSyncService>() {
+    Factory.maybeUnwrapProxy(csm).dataSyncService = new Caller<DataSyncService>() {
 
       @Override
       public DataSyncService call(final RemoteCallback<?> callback) {
@@ -624,7 +628,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
    * Calls ClientSyncManager.coldSync() in a way that no actual server communication happens. The
    * given "fake" server response is returned immediately to the ClientSyncManager's callback
    * function.
-   * 
+   *
    * @param expectedClientRequests
    *          The list of requests that the ClientSyncManager is expected to produce, based on the
    *          current state of its Expected State EntityManager and its Desired State EntityManager.
@@ -644,7 +648,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
    * Calls ClientSyncManager.coldSync() in a way that no actual server communication happens. The
    * given "fake" server response is returned immediately to the ClientSyncManager's callback
    * function.
-   * 
+   *
    * @param expectedClientRequests
    *          The list of requests that the ClientSyncManager is expected to produce, based on the
    *          current state of its Expected State EntityManager and its Desired State EntityManager.

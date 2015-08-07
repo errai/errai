@@ -21,8 +21,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
@@ -41,7 +41,8 @@ import com.google.gwt.user.client.Element;
  * @author edewit@redhat.com
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Singleton
+@EntryPoint
+@SuppressWarnings("deprecation")
 public class RoleStyleBindingProvider {
 
   private final ActiveUserCache userCache;
@@ -55,7 +56,7 @@ public class RoleStyleBindingProvider {
 
   @PostConstruct
   public void init() {
-    StyleBindingsRegistry.get().addStyleBinding(this, RestrictedAccess.class, new AnnotationStyleBindingExecutor() {
+    StyleBindingsRegistry.get().addStyleBinding(RestrictedAccess.class, new AnnotationStyleBindingExecutor() {
       @Override
       public void invokeBinding(final Element element, final Annotation annotation) {
         final User user = userCache.getUser();

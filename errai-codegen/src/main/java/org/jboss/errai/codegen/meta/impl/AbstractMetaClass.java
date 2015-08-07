@@ -22,6 +22,7 @@ import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -361,6 +362,18 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
+  public List<MetaMethod> getDeclaredMethodsAnnotatedWith(Class<? extends Annotation> annotation) {
+    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
+    for (final MetaMethod m : getDeclaredMethods()) {
+      if (m.isAnnotationPresent(annotation)) {
+        methods.add(m);
+      }
+    }
+
+    return Collections.unmodifiableList(methods); // in case we want to cache
+  }
+
+  @Override
   public List<MetaMethod> getMethodsWithMetaAnnotations(final Class<? extends Annotation> annotation) {
     final List<MetaMethod> methods = new ArrayList<MetaMethod>();
     MetaClass scanTarget = this;
@@ -527,6 +540,31 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaParameterizedType getGenericSuperClass() {
     return genericSuperClass;
+  }
+
+  @Override
+  public Collection<MetaClass> getAllSuperTypesAndInterfaces() {
+    final Collection<MetaClass> supersAndIfaces = new ArrayList<MetaClass>();
+    addSuperTypesAndInterfaces(this, supersAndIfaces);
+
+    return supersAndIfaces;
+  }
+
+  private static void addInterfaces(final MetaClass metaClass, final Collection<MetaClass> supersAndIfaces) {
+    for (final MetaClass iface : metaClass.getInterfaces()) {
+      supersAndIfaces.add(iface);
+      addInterfaces(iface, supersAndIfaces);
+    }
+  }
+
+  private static void addSuperTypesAndInterfaces(final MetaClass metaClass, final Collection<MetaClass> supersAndIfaces) {
+    if (metaClass == null) {
+      return;
+    }
+
+    supersAndIfaces.add(metaClass);
+    addSuperTypesAndInterfaces(metaClass.getSuperClass(), supersAndIfaces);
+    addInterfaces(metaClass, supersAndIfaces);
   }
 
   @Override
@@ -725,7 +763,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private String contentString;
-  
+  private int hashContent;
+
   @Override
   public int hashContent() {
     if (contentString == null) {
@@ -753,13 +792,14 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       if (getSuperClass() != null) {
         sb.append(getSuperClass().hashContent());
       }
-      
+
       contentString = sb.toString();
+      hashContent = contentString.hashCode();
     }
-    
-    return contentString.hashCode();
+
+    return hashContent;
   }
-  
+
   private String _hashString;
   static final private String MetaClassName = MetaClass.class.getName();
 
@@ -772,7 +812,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     return _hashString;
   }
-  
+
   private Integer _hashCode;
 
   @Override

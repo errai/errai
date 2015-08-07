@@ -48,17 +48,18 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  * actually needed. This is also an incremental generator. It will only generate
  * code when a portable type has changed or a new one has been introduced.
  * Otherwise, it will use a cached version of the generated marshaller code.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallerGenerator extends IncrementalGenerator {
   private static final Logger log = LoggerFactory.getLogger(MarshallerGenerator.class);
   private final String packageName = MarshallerFramework.class.getPackage().getName();
-  
+
   // We're keeping this cache of portable types to compare their contents and
   // find out if they have changed since the last refresh.
   private static Map<String, MetaClass> cachedPortableTypes = new ConcurrentHashMap<String, MetaClass>();
-  
+  private static Map<String, String> cachedSourceByTypeName = new ConcurrentHashMap<String, String>();
+
   /*
    * A version id. Increment this as needed, when structural changes are made to
    * the generated output, specifically with respect to it's effect on the
@@ -75,27 +76,30 @@ public class MarshallerGenerator extends IncrementalGenerator {
     final String className = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "_Impl";
     final String marshallerTypeName = packageName + "." + className;
     final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
-    
-    if (cachedType != null && cachedType.hashContent() == type.hashContent() 
-            && context.isGeneratorResultCachingEnabled() && !type.isArray()) {
-      log.debug("Reusing cached marshaller for " + fullyQualifiedTypeName);
-      return new RebindResult(RebindMode.USE_ALL_CACHED, marshallerTypeName);
-    }
-    else {
-      final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-      if (printWriter == null) {
-        return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);
-      } 
-      log.debug("Generating marshaller for " + fullyQualifiedTypeName);
-      generateMarshaller(context, type, className, marshallerTypeName, logger, printWriter);
-      cachedPortableTypes.put(fullyQualifiedTypeName, type);
+
+    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+    if (printWriter != null) {
+      if (cachedType != null && cachedType.hashContent() == type.hashContent() && !type.isArray()) {
+        log.debug("Reusing cached marshaller for {}", fullyQualifiedTypeName);
+        printWriter.append(cachedSourceByTypeName.get(fullyQualifiedTypeName));
+        context.commit(logger, printWriter);
+      } else {
+        log.debug("Generating marshaller for {}", fullyQualifiedTypeName);
+        final String generatedSource = generateMarshaller(context, type, className, marshallerTypeName, logger, printWriter);
+        cachedPortableTypes.put(fullyQualifiedTypeName, type);
+        cachedSourceByTypeName.put(fullyQualifiedTypeName, generatedSource);
+      }
+
       return new RebindResult(RebindMode.USE_ALL_NEW, marshallerTypeName);
+    } else {
+      log.debug("Reusing existing marshaller for {}", fullyQualifiedTypeName);
+      return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);
     }
   }
 
-  private void generateMarshaller(final GeneratorContext context, final MetaClass type, final String className,
+  private String generateMarshaller(final GeneratorContext context, final MetaClass type, final String className,
           final String marshallerTypeName, final TreeLogger logger, final PrintWriter printWriter) {
-    
+
     MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
     final MappingStrategy strategy =
         MappingStrategyFactory.createStrategy(true, GeneratorMappingContextFactory.getFor(context, target), type);
@@ -114,8 +118,10 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
     final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
     RebindUtils.writeStringToFile(tmpFile, gen);
-    
+
     context.commit(logger, printWriter);
+
+    return gen;
   }
 
   private String distillTargetTypeName(String marshallerName) {
@@ -156,5 +162,5 @@ public class MarshallerGenerator extends IncrementalGenerator {
   public long getVersionId() {
     return GENERATOR_VERSION_ID;
   }
-  
+
 }

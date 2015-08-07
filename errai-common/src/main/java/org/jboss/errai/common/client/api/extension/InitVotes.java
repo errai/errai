@@ -71,7 +71,7 @@ public final class InitVotes {
   private static boolean _initWait = false;
 
   private static final Object lock = new Object();
-  
+
   private static final Logger logger = LoggerFactory.getLogger(InitVotes.class);
 
   /**
@@ -106,8 +106,8 @@ public final class InitVotes {
 
   /**
    * Specifies the number of milliseconds that will be permitted to transpire until dependencies are
-   * assumed to have failed to satisfy, and thus an error is rendered to the browser console. 
-   * 
+   * assumed to have failed to satisfy, and thus an error is rendered to the browser console.
+   *
    * @param millis
    *          milliseconds.
    */
@@ -124,10 +124,10 @@ public final class InitVotes {
    * arms and begins the startup process. This starts the timer window (see
    * {@link #setTimeoutMillis(int)}) for which all components being waited on are expected to report
    * back that they're ready.
-   * 
+   *
    * @param clazz
    *          a class reference.
-   * 
+   *
    * @see #voteFor(Class)
    */
   public static void waitFor(final Class<?> clazz) {
@@ -155,12 +155,16 @@ public final class InitVotes {
     }
   }
 
+  public static boolean isInitialized() {
+    return init;
+  }
+
   /**
    * Votes for initialization and removes a lock on the initialization of framework services. If the
    * initialization process has been armed and this vote releases the final dependency, the
    * initialization process will be triggered, calling all the registered initialization callbacks.
    * See: {@link #registerPersistentInitCallback(Runnable)}
-   * 
+   *
    * @param clazz
    *          a class reference
    */
@@ -260,7 +264,7 @@ public final class InitVotes {
    * As of Errai 3.0, the callback list is de-duped based on instance to simplify initialization
    * code in modules. You can now safely re-add a Runnable in initialization code as long as it is
    * always guaranteed to be the same instance.*
-   * 
+   *
    * @param runnable
    *          a callback to execute
    */
@@ -280,7 +284,7 @@ public final class InitVotes {
    * registered with {@link #registerPersistentInitCallback(Runnable)} Callback(Runnable)},
    * callbacks registered with this method will only be executed once and will never be used again
    * if framework services are re-initialized.
-   * 
+   *
    * @param runnable
    *          a callback to execute
    */
@@ -291,7 +295,7 @@ public final class InitVotes {
   /**
    * Registers an {@link InitFailureListener} to monitor for initialization failures of the
    * framework or its components.
-   * 
+   *
    * @param failureListener
    *          the instance of the {@link InitFailureListener} to be registered.
    */

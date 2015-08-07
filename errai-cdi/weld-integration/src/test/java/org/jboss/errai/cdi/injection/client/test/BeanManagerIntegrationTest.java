@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.injection.client.test;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -16,9 +17,9 @@ import org.jboss.errai.cdi.injection.client.Cow;
 import org.jboss.errai.cdi.injection.client.CreditCard;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
 import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.injection.client.DisabledAlternativeBean;
 import org.jboss.errai.cdi.injection.client.FoobieScopedBean;
 import org.jboss.errai.cdi.injection.client.FoobieScopedOverriddenBean;
-import org.jboss.errai.cdi.injection.client.HistoryStack;
 import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.InheritedFromAbstractBean;
 import org.jboss.errai.cdi.injection.client.InterfaceA;
@@ -61,6 +62,14 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     }
   };
 
+  private Any anyAnno = new Any() {
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Any.class;
+    }
+  };
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.injection.InjectionTestModule";
@@ -73,7 +82,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
   public void testBeanManagerLookupInheritedScopeBean() {
     final IOCBeanDef<InheritedApplicationScopedBean> bean =
-        IOC.getBeanManager().lookupBean(InheritedApplicationScopedBean.class);
+        IOC.getBeanManager().lookupBean(InheritedApplicationScopedBean.class, anyAnno);
     assertNotNull("inherited application scoped bean did not lookup", bean);
 
     final InheritedApplicationScopedBean beanInst = bean.getInstance();
@@ -138,18 +147,9 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertEquals("did not find exactly one managed implementation of " + InterfaceB.class.getName(), 1, beansC.size());
   }
 
-  @SuppressWarnings("rawtypes")
-  public void testBeanManagerLookupForGenericType() {
-    final IOCBeanDef<HistoryStack> bean = IOC.getBeanManager().lookupBean(HistoryStack.class);
-    assertNotNull("did not find managed bean of generic type " + HistoryStack.class.getName(), bean.getInstance());
-
-    HistoryStack beanInst = bean.getInstance();
-    assertNotNull("did not find injected generic bean", beanInst.getHistoryList());
-  }
-
   public void testBeanManagerAPIs() {
     final SyncBeanManager mgr = IOC.getBeanManager();
-    final IOCBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class);
+    final IOCBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class, anyAnno);
 
     final Set<Annotation> a = bean.getQualifiers();
     assertEquals("there should be two qualifiers", 2, a.size());
@@ -286,11 +286,11 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     };
 
     try {
-      final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class);
+      final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, anyAnno);
       fail("should have thrown an exception, but got: " + bean);
     }
     catch (IOCResolutionException e) {
-      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("multiple matching"));
+      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("Multiple beans matched"));
     }
 
     try {
@@ -298,7 +298,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       fail("should have thrown an exception, but got: " + bean);
     }
     catch (IOCResolutionException e) {
-      assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
+      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("No beans matched"));
     }
   }
 
@@ -400,6 +400,68 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull(foobieScopedOverriddenBean1);
     assertSame(foobieScopedOverriddenBean1, foobieScopedOverriddenBean2);
+  }
+
+  public void testProgrammaticlyRegisteredBeansAreLookedUp() {
+    final SyncBeanManager bm = IOC.getBeanManager();
+    assertEquals("The disabled alternative must not be in the bean manager before being programmatically added.", 0,
+            bm.lookupBeans(DisabledAlternativeBean.class).size());
+
+    bm.registerBean(new IOCBeanDef<DisabledAlternativeBean>() {
+
+      @Override
+      public Class<DisabledAlternativeBean> getType() {
+        return DisabledAlternativeBean.class;
+      }
+
+      @Override
+      public Class<?> getBeanClass() {
+        return DisabledAlternativeBean.class;
+      }
+
+      @Override
+      public Class<? extends Annotation> getScope() {
+        return Dependent.class;
+      }
+
+      @Override
+      public DisabledAlternativeBean getInstance() {
+        return new DisabledAlternativeBean();
+      }
+
+      @Override
+      public DisabledAlternativeBean newInstance() {
+        return new DisabledAlternativeBean();
+      }
+
+      @Override
+      public Set<Annotation> getQualifiers() {
+        return Collections.emptySet();
+      }
+
+      @Override
+      public boolean matches(Set<Annotation> annotations) {
+        return true;
+      }
+
+      @Override
+      public String getName() {
+        return "Name of DisabledAlternative";
+      }
+
+      @Override
+      public boolean isConcrete() {
+        return true;
+      }
+
+      @Override
+      public boolean isActivated() {
+        return true;
+      }
+    });
+
+    assertEquals("Failed to lookup programmatically added bean by type.", 1, bm.lookupBeans(DisabledAlternativeBean.class).size());
+    assertEquals("Failed to lookup programmatically added bean by name.", 1, bm.lookupBeans("Name of DisabledAlternative").size());
   }
 
 

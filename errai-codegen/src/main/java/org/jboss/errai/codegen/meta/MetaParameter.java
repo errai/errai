@@ -27,18 +27,48 @@ public abstract class MetaParameter extends AbstractHasAnnotations {
   public abstract MetaClassMember getDeclaringMember();
 
   private String _hashString;
+  private Integer index = null;
 
   public String hashString() {
     if (_hashString != null) return _hashString;
     return _hashString = MetaParameter.class.getName() + ":" + getName() + ":"
             + getType().getFullyQualifiedName();
   }
-  
+
+  @Override
   public int hashCode() {
     return hashString().hashCode() * 31;
   }
-  
+
+  @Override
   public boolean equals(Object o) {
     return o instanceof  MetaParameter && ((MetaParameter) o).hashString().equals(hashString());
+  }
+
+  public Integer getIndex() {
+    if (index == null) {
+      final MetaClassMember member = getDeclaringMember();
+      final MetaParameter[] params;
+      if (member instanceof MetaMethod) {
+        params = ((MetaMethod) member).getParameters();
+      } else if (member instanceof MetaConstructor) {
+        params = ((MetaConstructor) member).getParameters();
+      } else {
+        throw new RuntimeException("Not yet implemented!");
+      }
+
+      for (int i = 0; i < params.length; i++) {
+        if (params[i] == this || params[i].getName().equals(getName())) {
+          index = i;
+
+          return index;
+        }
+      }
+
+      throw new RuntimeException("Could not find index of parameter " + getName() + " in "
+              + getDeclaringMember().getName() + " in " + getDeclaringMember().getDeclaringClassName());
+    }
+
+    return index;
   }
 }

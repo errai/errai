@@ -82,6 +82,12 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
+    
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-gwt</artifactId>
+      <scope>compile</scope>
+    </dependency>
 
     <dependency>
       <groupId>javax.inject</groupId>
@@ -158,8 +164,7 @@
               <forkMode>pertest</forkMode>
               <argLine>-Xmx1500m -XX:MaxPermSize=500m
                 -Dgwt.gen=/tmp/gwt_test_gen_out/
-                -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug
-                -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+                -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug</argLine>
 
               <systemProperties>
                 <property>

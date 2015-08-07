@@ -342,7 +342,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
                 // Bind via JSNI
                 bindingStatement = Stmt.invokeStatic(classStructureBuilder.getClassDefinition(),
-                    PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                    PrivateAccessUtil.getPrivateFieldAccessorName(field),
                     loadVariable("entity"), val);
               }
 
@@ -613,7 +613,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           }
 
           return Stmt.invokeStatic(classStructureBuilder.getClassDefinition(), PrivateAccessUtil
-              .getPrivateFieldInjectorName(field),
+              .getPrivateFieldAccessorName(field),
               loadVariable("a0"));
         }
       }

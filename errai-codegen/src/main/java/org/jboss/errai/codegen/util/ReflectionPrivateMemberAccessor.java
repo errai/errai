@@ -104,7 +104,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
   public static String initCachedField(final ClassStructureBuilder<?> classBuilder, final MetaField f) {
     createJavaReflectionFieldInitializerUtilMethod(classBuilder);
 
-    final String fieldName = PrivateAccessUtil.getPrivateFieldInjectorName(f) + "_fld";
+    final String fieldName = PrivateAccessUtil.getPrivateFieldAccessorName(f) + "_fld";
 
     if (classBuilder.getClassDefinition().getField(fieldName) != null) {
       return fieldName;
@@ -152,7 +152,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     final String setterName = getReflectionFieldSetterName(field);
 
     final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
-            classBuilder.privateMethod(void.class, PrivateAccessUtil.getPrivateFieldInjectorName(field));
+            classBuilder.privateMethod(void.class, PrivateAccessUtil.getPrivateFieldAccessorName(field));
 
     if (!field.isStatic()) {
       methodBuilder
@@ -187,7 +187,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     final String getterName = getReflectionFieldGetterName(field);
 
     final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
-            classBuilder.privateMethod(field.getType().getErased(), PrivateAccessUtil.getPrivateFieldInjectorName(field));
+            classBuilder.privateMethod(field.getType().getErased(), PrivateAccessUtil.getPrivateFieldAccessorName(field));
 
     if (!field.isStatic()) {
       methodBuilder.parameters(

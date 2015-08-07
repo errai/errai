@@ -26,6 +26,7 @@ import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -66,6 +67,8 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
   protected void gwtTearDown() throws Exception {
     setRemoteCommunicationEnabled(true);
     InitVotes.reset();
+    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    Container.reset();
     super.gwtTearDown();
   }
 

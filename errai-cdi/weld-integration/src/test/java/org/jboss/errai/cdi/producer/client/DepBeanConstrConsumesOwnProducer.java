@@ -1,5 +1,6 @@
 package org.jboss.errai.cdi.producer.client;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -22,7 +23,7 @@ public class DepBeanConstrConsumesOwnProducer {
     this.factory = factory;
   }
 
-  @Produces @Produced
+  @Produces @Produced @ApplicationScoped
   private WrappedThang produceWrappedThing(Thang thing) {
     return new WrappedThang(thing);
   }

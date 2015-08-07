@@ -46,10 +46,14 @@ public class BasePageForLifecycleTracing extends HorizontalPanel {
 
   public static List<Record> lifecycleTracer =  new LinkedList<Record>();
 
-  public Class<? extends Widget> redirectPage;
+  private Class<? extends Widget> redirectPage;
 
   @Inject
   public Navigation navigation;
+
+  public void setRedirectPage(Class<? extends Widget> page) {
+    redirectPage = page;
+  }
 
   protected void doRedirect() {
     if (redirectPage != null) {
