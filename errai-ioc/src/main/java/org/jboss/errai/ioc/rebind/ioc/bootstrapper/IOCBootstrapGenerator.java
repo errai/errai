@@ -63,6 +63,7 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -277,6 +278,10 @@ public class IOCBootstrapGenerator {
     final Class<? extends BootstrapInjectionContext> bootstrapContextClass
         = injectionContext.getProcessingContext().getBootstrapContextClass();
 
+    classBuilder.privateField("windowContext", WindowInjectionContext.class)
+            .modifiers(Modifier.Final)
+            .initializesWith(Stmt.invokeStatic(WindowInjectionContext.class, "createOrGet")).finish();
+    
     classBuilder.privateField(processingContext.getContextVariableReference().getName(),
         processingContext.getContextVariableReference().getType())
         .modifiers(Modifier.Final).initializesWith(Stmt.newObject(bootstrapContextClass)).finish();

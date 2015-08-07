@@ -255,7 +255,7 @@ public abstract class AbstractInjector implements Injector {
       }
 
       final ContextualStatementBuilder statement;
-
+      
       ActivatedBy ab = getInjectedType().getAnnotation(ActivatedBy.class);
       if (ab != null) {
         statement = loadVariable(context.getProcessingContext().getContextVariableReference())

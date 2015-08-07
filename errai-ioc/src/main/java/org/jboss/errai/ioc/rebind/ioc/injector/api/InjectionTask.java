@@ -30,7 +30,10 @@ import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.JsTypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import com.google.gwt.core.client.js.JsType;
 
 public class InjectionTask {
   protected final TaskType taskType;
@@ -116,8 +119,13 @@ public class InjectionTask {
            val = InjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);
          }
          catch (InjectionFailure e) {
-           throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
-                   field.getType(), e.getMessage());
+           if (field.getType().isAnnotationPresent(JsType.class)) {
+             ctx.registerInjector(new JsTypeInjector(field.getType(), ctx));
+             return doTask(ctx);
+           } else {
+             throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
+                     field.getType(), e.getMessage());
+           }
          }
          catch (UnproxyableClassException e) {
            final String err = "your object graph may have cyclical dependencies and the cycle could not be proxied. " +

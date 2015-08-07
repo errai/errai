@@ -30,6 +30,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
+import com.google.gwt.core.client.js.JsType;
+
 /**
  * This injector wraps another injector to create qualifying references based on type parameters and qualifiers
  * to the underlying bean. For instance if two beans implement a common interface, with two different type
@@ -146,8 +148,14 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       final QualifyingMetadata md = delegate.getQualifyingMetadata();
       
-      ActivatedBy ab = delegate.getInjectedType().getAnnotation(ActivatedBy.class);
-      if (ab != null) {
+      final ActivatedBy ab = delegate.getInjectedType().getAnnotation(ActivatedBy.class);
+      
+      if (type.isAnnotationPresent(JsType.class) && delegate.getInjectedType().isAnnotationPresent(JsType.class)) {
+        context.getProcessingContext().appendToEnd(
+                Stmt.loadVariable("windowContext")
+                    .invoke("addSuperTypeAlias", type, delegate.getInjectedType()));
+      }
+      else if (ab != null) {
         context.getProcessingContext().appendToEnd(
             Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
                 .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),

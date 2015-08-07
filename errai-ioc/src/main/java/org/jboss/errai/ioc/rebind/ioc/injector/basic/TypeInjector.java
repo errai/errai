@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
 
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -39,6 +40,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -53,6 +55,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
+
+import com.google.gwt.core.client.js.JsType;
 
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
@@ -134,22 +138,35 @@ public class TypeInjector extends AbstractInjector {
     creationalCallbackVarName = InjectUtil.getNewInjectorName().concat("_")
         .concat(type.getName()).concat("_creational");
 
-     /* get the construction strategy and execute it to wire the bean */
-    getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
-      @Override
-      public void beanConstructed(final ConstructionType constructionType) {
-        final Statement beanRef = Refs.get(instanceVarName);
-
-        callbackBuilder.append(
-            loadVariable("context").invoke("addBean", loadVariable("context").invoke("getBeanReference", load(type),
-                load(qualifyingMetadata.getQualifiers())), beanRef)
-        );
-
-         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
-        setCreated(true);
-      }
-    });
-
+    if (this instanceof JsTypeInjector) {
+      callbackBuilder.append(
+              Stmt.castTo(type, loadVariable("windowContext").invoke("getBean", type.getFullyQualifiedName())).returnValue()
+          );
+    }
+    else {
+      /* get the construction strategy and execute it to wire the bean */
+      getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
+        @Override
+        public void beanConstructed(final ConstructionType constructionType) {
+          final Statement beanRef = Refs.get(instanceVarName);
+  
+          if (type.isAnnotationPresent(JsType.class)) {
+            callbackBuilder.append(
+                    loadVariable("windowContext").invoke("addSingletonBean", type.getFullyQualifiedName(), beanRef)
+                );
+          }
+          else {
+            callbackBuilder.append(
+                loadVariable("context").invoke("addBean", loadVariable("context").invoke("getBeanReference", load(type),
+                    load(qualifyingMetadata.getQualifiers())), beanRef)
+            );
+          }
+  
+           /* mark this injector as injected so we don't go into a loop if there is a cycle. */
+          setCreated(true);
+        }
+      });
+    }
 
     callbackBuilder.appendAll(getAddToEndStatements());
 
@@ -160,7 +177,7 @@ public class TypeInjector extends AbstractInjector {
       callbackBuilder.appendAll(createProxyDeclaration(injectContext));
       callbackBuilder.append(loadVariable(getProxyInstanceVarName()).returnValue());
     }
-    else {
+    else if (!(this instanceof JsTypeInjector)) {
       callbackBuilder.append(loadVariable(instanceVarName).returnValue());
     }
      /* pop the block builder of the stack now that we're done wiring. */
