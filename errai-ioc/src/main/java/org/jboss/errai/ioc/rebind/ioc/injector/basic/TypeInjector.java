@@ -32,7 +32,6 @@ import java.util.Set;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
 
-import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -44,6 +43,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.JsTypeProvider;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
@@ -107,6 +107,7 @@ public class TypeInjector extends AbstractInjector {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void renderProvider(final InjectableInstance injectableInstance) {
     if ((isRendered() && isEnabled()) ||
@@ -116,20 +117,29 @@ public class TypeInjector extends AbstractInjector {
 
     final InjectionContext injectContext = injectableInstance.getInjectionContext();
     final IOCProcessingContext ctx = injectContext.getProcessingContext();
+    final boolean jsType = type.isAnnotationPresent(JsType.class);
 
      /*
      get a parameterized version of the BeanProvider class, parameterized with the type of
      bean it produces.
      */
-    final MetaClass creationCallbackRef = parameterizedAs(BeanProvider.class, typeParametersOf(type));
+    final MetaClass creationCallbackRef = (jsType) ? 
+            parameterizedAs(JsTypeProvider.class, typeParametersOf(type)) : 
+              parameterizedAs(BeanProvider.class, typeParametersOf(type));
 
      /*
      begin building the creational callback, implement the "getInstance" method from the interface
      and assign its BlockBuilder to a callbackBuilder so we can work with it.
      */
-    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
-        = newInstanceOf(creationCallbackRef).extend()
-        .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
+    final AnonymousClassStructureBuilder provider = newInstanceOf(creationCallbackRef).extend();
+    
+    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = (jsType) ?
+        provider.publicOverridesMethod("getBean") :    
+        provider.publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
+        
+    if (jsType) {
+      provider.publicOverridesMethod("isSingleton").append(Stmt.loadLiteral(isSingleton()).returnValue()).finish();
+    }
 
      /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
     ctx.pushBlockBuilder(callbackBuilder);
@@ -140,7 +150,8 @@ public class TypeInjector extends AbstractInjector {
 
     if (this instanceof JsTypeInjector) {
       callbackBuilder.append(
-              Stmt.castTo(type, loadVariable("windowContext").invoke("getBean", type.getFullyQualifiedName())).returnValue()
+              Stmt.castTo(type, loadVariable("windowContext").invoke("getBean", 
+                      type.getFullyQualifiedName())).returnValue()
           );
     }
     else {
@@ -150,12 +161,7 @@ public class TypeInjector extends AbstractInjector {
         public void beanConstructed(final ConstructionType constructionType) {
           final Statement beanRef = Refs.get(instanceVarName);
   
-          if (type.isAnnotationPresent(JsType.class)) {
-            callbackBuilder.append(
-                    loadVariable("windowContext").invoke("addSingletonBean", type.getFullyQualifiedName(), beanRef)
-                );
-          }
-          else {
+          if (!jsType) {
             callbackBuilder.append(
                 loadVariable("context").invoke("addBean", loadVariable("context").invoke("getBeanReference", load(type),
                     load(qualifyingMetadata.getQualifiers())), beanRef)
@@ -190,7 +196,7 @@ public class TypeInjector extends AbstractInjector {
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
         .initializesWith(callbackBuilder.finish().finish()).finish();
 
-    if (isSingleton()) {
+    if (isSingleton() && !jsType) {
        /*
         if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
         method and assign it with SimpleCreationalContext.getInstance().
@@ -202,6 +208,12 @@ public class TypeInjector extends AbstractInjector {
     }
     else {
       registerWithBeanManager(injectContext, null);
+    }
+    
+    if (jsType && !(this instanceof JsTypeInjector)) {
+      ctx.getBootstrapBuilder().privateField(instanceVarName+"_js", JsTypeProvider.class).modifiers(Modifier.Final)
+        .initializesWith(loadVariable("windowContext").invoke("addBean", type.getFullyQualifiedName(), 
+                loadVariable(creationalCallbackVarName))).finish();
     }
 
     setRendered(true);

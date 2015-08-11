@@ -21,12 +21,15 @@ import java.lang.annotation.Annotation;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ioc.client.container.BeanProvider;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.JsTypeProvider;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.SyncBeanManagerSetup;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class SimpleInjectionContext implements BootstrapInjectionContext {
   public static final Object LAZY_INIT_REF = new Object();
 
@@ -38,7 +41,6 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
     rootContext = new SimpleCreationalContext(true, manager, ApplicationScoped.class);
   }
 
-  @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,
                       final BeanProvider callback,
@@ -58,7 +60,6 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
     ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers);
   }
 
-  @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,
                       final BeanProvider callback,
@@ -90,7 +91,6 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
     addBean(type, beanType, callback, instance, qualifiers, name, concrete, null);   
   }
   
-  @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,
                       final BeanProvider callback,
@@ -112,6 +112,59 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
 
     ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers, name, concrete, beanActivatorType);
   }
+  
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final JsTypeProvider jsTypeProvider,
+                      Object instance,
+                      final Annotation[] qualifiers) {
+
+    addBean(type, beanType, wrapJsTypeProvider(jsTypeProvider), instance, qualifiers);
+  }
+
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final JsTypeProvider jsTypeProvider,
+                      Object instance,
+                      final Annotation[] qualifiers,
+                      final String name) {
+
+    addBean(type, beanType, wrapJsTypeProvider(jsTypeProvider), instance, qualifiers);
+  }
+  
+ 
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final JsTypeProvider jsTypeProvider,
+                      Object instance,
+                      final Annotation[] qualifiers,
+                      final String name,
+                      final boolean concrete) {
+
+    addBean(type, beanType, wrapJsTypeProvider(jsTypeProvider), instance, qualifiers, name, concrete, null);   
+  }
+  
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final JsTypeProvider jsTypeProvider,
+                      Object instance,
+                      final Annotation[] qualifiers,
+                      final String name,
+                      final boolean concrete,
+                      final Class beanActivatorType) {
+
+    ((SyncBeanManagerSetup)manager).addBean(type, beanType, wrapJsTypeProvider(jsTypeProvider), instance, qualifiers, name, concrete, beanActivatorType);
+  }
+  
+  private BeanProvider wrapJsTypeProvider(final JsTypeProvider jsTypeProvider) {
+    return new BeanProvider() {
+      @Override
+      public Object getInstance(CreationalContext context) {
+        return jsTypeProvider.getBean();
+      }
+    };
+  }
+
 
   @Override
   public SimpleCreationalContext getRootContext() {

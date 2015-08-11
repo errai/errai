@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.JsTypeProvider;
 
 import com.google.gwt.core.client.js.JsType;
 
@@ -13,7 +14,8 @@ import com.google.gwt.core.client.js.JsType;
  */
 @JsType
 public class WindowInjectionContext {
-  private Map<String, Object> singletonBeans = new HashMap<String, Object>(); 
+  private Map<String, JsTypeProvider<?>> beanProviders = new HashMap<String, JsTypeProvider<?>>();
+  private Map<JsTypeProvider<?>, Object> singletonBeans = new HashMap<JsTypeProvider<?>, Object>();
 
   public static WindowInjectionContext createOrGet() {
     if (!isWindowInjectionContextDefined()) {
@@ -33,28 +35,35 @@ public class WindowInjectionContext {
   public static native boolean isWindowInjectionContextDefined() /*-{
     return !($wnd.injectionContext === undefined);
   }-*/;
-  
-  public void addSingletonBean(final String name, final Object instance) {
-    singletonBeans.put(name, instance);
+
+  public JsTypeProvider<?> addBean(final String name, final JsTypeProvider<?> provider) {
+    return beanProviders.put(name, provider);
   }
-  
+
   public void addSuperTypeAlias(final String superTypeName, final String typeName) {
-    final Object bean = singletonBeans.get(typeName);
-    
-    if (bean != null) {
-      singletonBeans.put(superTypeName, bean);
+    final JsTypeProvider<?> provider = beanProviders.get(typeName);
+
+    if (provider != null) {
+      beanProviders.put(superTypeName, provider);
     }
-    
-    // TODO dependent scope
   }
-  
+
   public Object getBean(final String name) {
-    final Object bean = singletonBeans.get(name);
-    
-    // TODO dependent scope
-    
-    if (bean == null) {
+    final JsTypeProvider<?> provider = beanProviders.get(name);
+
+    if (provider == null) {
       throw new IOCResolutionException("no matching bean instances for: " + name);
+    }
+
+    final Object bean;
+    if (provider.isSingleton()) {
+      if (!singletonBeans.containsKey(provider)) {
+        singletonBeans.put(provider, provider.getBean());
+      }
+      bean = singletonBeans.get(provider);
+    }
+    else {
+      bean = provider.getBean();
     }
     return bean;
   }
