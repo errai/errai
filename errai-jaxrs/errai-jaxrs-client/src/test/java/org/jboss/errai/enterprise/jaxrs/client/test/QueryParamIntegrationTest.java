@@ -18,6 +18,7 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,6 +73,12 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     List<Long> longs = Arrays.asList(1l,2l,3l);
     call(QueryParamTestService.class,
         new AssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", longs)).getWithQueryParamListOfLongs(longs);
+  }
+  
+  @Test
+  public void testGetWithQueryParamListOfLongsPassingNull() {
+    call(QueryParamTestService.class,
+        new AssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", Collections.<Long>emptyList())).getWithQueryParamListOfLongs(null);
   }
   
   @Test
