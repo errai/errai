@@ -170,7 +170,7 @@ public class JaxrsProxyMethodGenerator {
             ContextualStatementBuilder listParam = (queryParam instanceof Parameter) ?
                 Stmt.loadVariable(((Parameter) queryParam).getName()) : Stmt.nestedCall(queryParam);
 
-            block.addStatement(listParam.foreach("p")
+            block.addStatement(listParam.foreachIfNotNull("p")
                 .append(If.not(Stmt.loadVariable("url").invoke("toString").invoke("endsWith", "?"))
                     .append(Stmt.loadVariable("url").invoke(APPEND, "&")).finish())
                 .append(Stmt.loadVariable("url").invoke(APPEND, queryParamName).invoke(APPEND, "=")

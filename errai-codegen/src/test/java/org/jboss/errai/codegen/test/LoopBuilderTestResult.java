@@ -27,6 +27,18 @@ public interface LoopBuilderTestResult {
       "   for (String element : list) {" +
           "\n}";
 
+  public static final String FOREACH_STRING_IN_LIST_NOT_NULL =
+      "   if (list != null) {\n" +
+      "     for (String element : list) {" +
+            "\n}" +
+          "\n}";
+  
+  public static final String FOREACH_OBJECT_IN_LIST_NOT_NULL =
+      "   if (list != null) {\n" +
+      "     for (Object element : list) {" +
+            "\n}" +
+          "\n}";
+  
   public static final String FOREACH_STRING_IN_ARRAY_ONE_STATEMENT =
       "   for (String element : list) {" +
           " \nnew String();" +

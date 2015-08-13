@@ -16,13 +16,12 @@
 
 package org.jboss.errai.codegen.control;
 
+import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
+
 import org.jboss.errai.codegen.AbstractStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
-import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
-
-import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 /**
  * Foreach statement (enhanced for loop).
@@ -34,11 +33,13 @@ public class ForeachLoop extends AbstractStatement {
   private Variable loopVar;
   private String collectionExpr;
   private Statement body;
+  private boolean nullSafe;
 
-  public ForeachLoop(Variable loopVar, String collectionExpr, Statement body) {
+  public ForeachLoop(Variable loopVar, String collectionExpr, Statement body, boolean nullSafe) {
     this.loopVar = loopVar;
     this.collectionExpr = collectionExpr;
     this.body = body;
+    this.nullSafe = nullSafe;
   }
 
   String generatedCache;
@@ -48,9 +49,11 @@ public class ForeachLoop extends AbstractStatement {
     if (generatedCache != null) return generatedCache;
 
     return generatedCache
-            = "for (" + getClassReference(loopVar.getType(), context)
+            = ((nullSafe) ? "if (" + collectionExpr + " != null) {\n" : "")
+            + "for (" + getClassReference(loopVar.getType(), context)
             + " " + loopVar.getName() + " : " + collectionExpr + ") {"
             + "\n\t" + body.generate(context).replaceAll("\n", "\n\t")
-            + "\n}";
+            + "\n}"
+            + ((nullSafe) ? "\n}" : "");
   }
 }

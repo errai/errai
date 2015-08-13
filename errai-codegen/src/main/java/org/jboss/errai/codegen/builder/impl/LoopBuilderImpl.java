@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.builder.ContextualLoopBuilder;
 import org.jboss.errai.codegen.builder.LoopBuilder;
 import org.jboss.errai.codegen.builder.StatementEnd;
 import org.jboss.errai.codegen.builder.WhileBuilder;
+import org.jboss.errai.codegen.builder.callstack.CallElement;
 import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.builder.callstack.ConditionalBlockCallElement;
 import org.jboss.errai.codegen.builder.callstack.DeferredCallElement;
@@ -67,18 +68,37 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
   @Override
   public BlockBuilder<StatementEnd> foreach(final String loopVarName, final MetaClass loopVarType) {
     final BlockStatement body = new BlockStatement();
-
-    appendCallElement(new DeferredCallElement(new DeferredCallback() {
+    appendCallElement(foreachCallElement(body, loopVarName, loopVarType, false));
+    return createLoopBody(body);
+  }
+  
+  private CallElement foreachCallElement(final BlockStatement body, final String loopVarName, final MetaClass loopVarType, final boolean nullSafe) {
+    return new DeferredCallElement(new DeferredCallback() {
       @Override
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
           GenUtil.assertIsIterable(statement);
           final Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType, context);
           final String collection = writer.getCallString();
           writer.reset();
-          writer.append(new ForeachLoop(loopVar, collection, body).generate(Context.create(context)));
+          writer.append(new ForeachLoop(loopVar, collection, body, nullSafe).generate(Context.create(context)));
       }
-    }));
+    });
+  }
+  
+  @Override
+  public BlockBuilder<StatementEnd> foreachIfNotNull(String loopVarName) {
+    return foreachIfNotNull(loopVarName, (MetaClass) null);
+  }
 
+  @Override
+  public BlockBuilder<StatementEnd> foreachIfNotNull(String loopVarName, Class<?> loopVarType) {
+    return foreachIfNotNull(loopVarName, MetaClassFactory.get(loopVarType));
+  }
+
+  @Override
+  public BlockBuilder<StatementEnd> foreachIfNotNull(String loopVarName, MetaClass loopVarType) {
+    final BlockStatement body = new BlockStatement();
+    appendCallElement(foreachCallElement(body, loopVarName, loopVarType, true));
     return createLoopBody(body);
   }
 
@@ -205,4 +225,5 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
     context.addVariable(loopVar);
     return loopVar;
   }
+
 }
