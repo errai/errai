@@ -209,6 +209,30 @@ public class LoopBuilderTest extends AbstractCodegenTest {
     assertEquals("Failed to generate foreach loop using a literal String array",
         FOREACH_LITERAL_STRING_ARRAY, s);
   }
+  
+  @Test
+  public void testForeachLoopWithNullCheck() {
+    String foreachWithListOfStrings = StatementBuilder.create()
+            .declareVariable("list", new TypeLiteral<List<String>>() {})
+            .loadVariable("list")
+            .foreachIfNotNull("element")
+            .finish().toJavaString();
+
+        assertEquals("Failed to generate foreach loop using a List<String> and null check",
+            FOREACH_STRING_IN_LIST_NOT_NULL, foreachWithListOfStrings);
+  }
+  
+  @Test
+  public void testForeachLoopWithNullCheckAndProviderVarType() {
+    String foreachWithListOfStrings = StatementBuilder.create()
+            .declareVariable("list", new TypeLiteral<List<String>>() {})
+            .loadVariable("list")
+            .foreachIfNotNull("element", Object.class)
+            .finish().toJavaString();
+
+        assertEquals("Failed to generate foreach loop using a List<String> and null check",
+            FOREACH_OBJECT_IN_LIST_NOT_NULL, foreachWithListOfStrings);
+  }
 
   @Test
   public void testWhileLoopWithInvalidExpression() {

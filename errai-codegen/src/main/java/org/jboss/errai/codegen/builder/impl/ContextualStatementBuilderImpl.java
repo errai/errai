@@ -88,6 +88,21 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   public BlockBuilder<StatementEnd> foreach(String loopVarName, MetaClass loopVarType) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
   }
+  
+  @Override
+  public BlockBuilder<StatementEnd> foreachIfNotNull(String loopVarName) {
+    return new LoopBuilderImpl(context, callElementBuilder).foreachIfNotNull(loopVarName);
+  }
+
+  @Override
+  public BlockBuilder<StatementEnd> foreachIfNotNull(String loopVarName, Class<?> loopVarType) {
+    return new LoopBuilderImpl(context, callElementBuilder).foreachIfNotNull(loopVarName, loopVarType);
+  }
+
+  @Override
+  public BlockBuilder<StatementEnd> foreachIfNotNull(String loopVarName, MetaClass loopVarType) {
+    return new LoopBuilderImpl(context, callElementBuilder).foreachIfNotNull(loopVarName, loopVarType);
+  }
 
   @Override
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
@@ -170,4 +185,5 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     return "[Statement:" + callElementBuilder + "]";
 
   }
+
 }
