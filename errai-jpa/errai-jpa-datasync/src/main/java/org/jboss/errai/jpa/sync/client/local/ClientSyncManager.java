@@ -249,6 +249,19 @@ public class ClientSyncManager {
   }
 
   /**
+   * Clears the sync in progress flag, to allow future sync operations.
+   * Calling this method does not actually cancel an active sync. 
+   * This typically should only be called after a network failure when there
+   * a sync operation has actually failed, but there is not chance that the
+   * ErrorCallback will actually be called. Reference [Errai-872] for 
+   * more information.
+   */
+  public void clearSyncInProgress()
+  {
+    syncInProgress = false;
+  }
+
+  /**
    * Performs operations on the desired and expected state entity managers to
    * reconcile them with the new information in the given sync response
    * operations.
