@@ -16,7 +16,16 @@
 package org.jboss.errai.enterprise.client.cdi.api;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
@@ -35,6 +44,8 @@ import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
+import org.jboss.errai.enterprise.client.cdi.WindowEventObservers;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,7 +148,7 @@ public class CDI {
     else {
       beanRef = payload;
     }
-
+    
     final Map<String, Object> messageMap = new HashMap<String, Object>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
     messageMap.put(CDIProtocol.BeanType.name(), beanRef.getClass().getName());
@@ -162,8 +173,19 @@ public class CDI {
     return subscribeLocal(eventType, callback, true);
   }
 
+  public static Subscription subscribeJsType(final String eventType, final JsTypeEventObserver<?> callback) {
+    WindowEventObservers.createOrGet().add(eventType, callback);
+     return new Subscription() {
+       @Override
+       public void remove() {
+         // TODO can't unsubscribe per module atm.
+       }
+     };
+  }
+  
   private static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback,
           boolean isLocalOnly) {
+    
     if (!eventObservers.containsKey(eventType)) {
       eventObservers.put(eventType, new ArrayList<AbstractCDIEventCallback<?>>());
     }
@@ -260,11 +282,14 @@ public class CDI {
 
   public static void consumeEventFromMessage(final Message message) {
     final String beanType = message.get(String.class, CDIProtocol.BeanType);
+    final Object beanRef = message.get(Object.class, CDIProtocol.BeanReference);
 
+    WindowEventObservers.createOrGet().fireEvent(beanType, beanRef);
     _fireEvent(beanType, message);
 
     if (lookupTable.containsKey(beanType)) {
       for (final String superType : lookupTable.get(beanType)) {
+        WindowEventObservers.createOrGet().fireEvent(superType, beanRef);
         _fireEvent(superType, message);
       }
     }

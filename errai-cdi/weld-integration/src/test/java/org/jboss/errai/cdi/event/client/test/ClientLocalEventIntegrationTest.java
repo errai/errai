@@ -1,12 +1,18 @@
 package org.jboss.errai.cdi.event.client.test;
 
+import java.util.List;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.cdi.event.client.ClientLocalEventAObserver;
 import org.jboss.errai.cdi.event.client.ClientLocalEventTestModule;
+import org.jboss.errai.cdi.event.client.shared.JsTypeEvent;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
+import org.jboss.errai.enterprise.client.cdi.WindowEventObservers;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -89,6 +95,32 @@ public class ClientLocalEventIntegrationTest extends AbstractErraiCDITest {
         }.scheduleRepeating(200);
       }
     });
+  }
+  
+  public void testJsTypeEventObservable() throws Exception {
+    delayTestFinish(TIMEOUT);
+    new Timer() {
+      @Override
+      public void run() {
+        Container.$(new Runnable() {
+          @Override
+          public void run() {
+            IOC.getBeanManager().lookupBean(ClientLocalEventTestModule.class).getInstance().fireJsTypeEvent();
+          }
+        });
+      }
+    }.schedule(500);
+    
+    new Timer() {
+      @Override
+      public void run() {
+        final List<JsTypeEventObserver<?>> jsTypeObservers = WindowEventObservers.createOrGet().get(JsTypeEvent.class.getName());
+        
+        assertFalse(jsTypeObservers.isEmpty());
+        assertTrue(IOC.getBeanManager().lookupBean(ClientLocalEventAObserver.class).getInstance().isJsTypeEventObserved());
+        finishTest();
+      }
+    }.schedule(3000);
   }
 
 }
