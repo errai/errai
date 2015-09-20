@@ -91,7 +91,7 @@ public class EventDispatcher implements MessageCallback {
 
       switch (CDICommands.valueOf(message.getCommandType())) {
       case RemoteSubscribe:
-        final Class<?> type = Class.forName(typeName);
+        final Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(typeName);
         final ClientObserverMetadata clientObserver = new ClientObserverMetadata(type, annotationTypes);
 
         if (!clientObservers.contains(clientObserver)) {
