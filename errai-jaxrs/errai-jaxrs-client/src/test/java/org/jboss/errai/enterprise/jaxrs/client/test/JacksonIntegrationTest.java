@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -26,19 +28,24 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.enterprise.client.jaxrs.JacksonTransformer;
 import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.BigNumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity.SomeEnum;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ImmutableEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.NumberEntity;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.SubEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
 import org.junit.Test;
+
+import com.google.gwt.json.client.JSONObject;
 
 /**
  * Tests to ensure Errai JAX-RS can marshal/demarshal Jackson generated JSON.
@@ -370,5 +377,47 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             finishTest();
           }        
         }).getWithQueryParamListOfStrings(strings);
+  }
+  
+  @Test
+  public void testJacksonMarshallingOfEntityWithCustomTypeInfo() {
+    delayTestFinish(5000);    
+    final JacksonTransformer.CustomJsonConverter converter = new JacksonTransformer.CustomJsonConverter() {
+		
+		@Override
+		public void toEncode(JSONObject obj) {
+			 obj.put("@class", obj.get(ENCODED_TYPE));		
+		}
+		
+		@Override
+		public void fromEncode(JSONObject obj) {
+			 obj.put(ENCODED_TYPE, obj.get("@class"));			
+		}
+	};
+    
+    JacksonTransformer.setJsonTypeInfoProvider(converter);
+    try{
+    	final Entity entity = new SubEntity("post-entity");
+	    String jackson = MarshallingWrapper.toJSON(entity);
+	    call(JacksonTestService.class,
+	        new RemoteCallback<String>() {
+	          @Override
+	          public void callback(String jackson) {
+	        	assertNotNull("Server failed to parse JSON using Jackson", jackson);
+	        	JacksonTransformer.setJsonTypeInfoProvider(converter);
+	            try{
+	            	@SuppressWarnings("unchecked")
+	            	Entity result = MarshallingWrapper.fromJSON(jackson, SubEntity.class);            
+	            	assertEquals(entity, result);
+	            } finally{
+	            	JacksonTransformer.setJsonTypeInfoProvider(null);
+	            }
+	            
+	            finishTest();
+	          }        
+	        }).postJacksonTypeInfo(jackson);
+    } finally{
+    	JacksonTransformer.setJsonTypeInfoProvider(null);
+    }
   }
 }

@@ -19,12 +19,16 @@ package org.jboss.errai.enterprise.jaxrs.server;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.jsontype.NamedType;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.BigNumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.NumberEntity;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.SubEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 
 /**
@@ -163,6 +167,22 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       User user = mapper.readValue(jackson, User.class);
       user.setJacksonRep(mapper.writeValueAsString(user));
       return user;
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  @Override
+  public String postJacksonTypeInfo(String jackson) {
+    ObjectMapper mapper = new ObjectMapper();
+    
+    mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY); // all non-final types
+    mapper.registerSubtypes(new NamedType(SubEntity.class));
+    try {
+      Entity entity = mapper.readValue(jackson, SubEntity.class);
+      return mapper.writeValueAsString(entity);
     }
     catch (Exception e) {
       e.printStackTrace();
