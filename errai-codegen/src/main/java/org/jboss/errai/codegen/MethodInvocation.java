@@ -173,9 +173,6 @@ public class MethodInvocation extends AbstractStatement {
           resolveTypeVariable(typeParm,
                   ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
         }
-        else {
-          resolveTypeVariable(typeParm, callParmType);
-        }
       }
     }
   }
