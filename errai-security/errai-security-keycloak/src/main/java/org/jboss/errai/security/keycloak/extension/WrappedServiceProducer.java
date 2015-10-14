@@ -16,6 +16,8 @@
  */
 package org.jboss.errai.security.keycloak.extension;
 
+import java.io.Serializable;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -56,8 +58,15 @@ public class WrappedServiceProducer {
     return instance;
   }
 
+  /*
+   * This must implement Serializable or else it will cause deployment errors.
+   * See https://issues.jboss.org/browse/ERRAI-882
+   */
   @Alternative
-  private static class DummyAuthenticationService implements AuthenticationService {
+  private static class DummyAuthenticationService implements AuthenticationService, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Override
     public User login(String username, String password) {
       throw new FailedAuthenticationException(
