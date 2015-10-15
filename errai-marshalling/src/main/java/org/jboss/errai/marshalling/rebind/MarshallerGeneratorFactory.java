@@ -367,8 +367,15 @@ public class MarshallerGeneratorFactory {
         final MappingStrategy strategy = MappingStrategyFactory
             .createStrategy(false, GeneratorMappingContextFactory.getFor(context, target), type);
 
-        String marshallerClassName =
-            MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "Impl";
+        final String marshallerClassName;
+        if (SHORT_MARSHALLER_NAMES) {
+          marshallerClassName = MarshallerGeneratorFactory.SHORT_MARSHALLER_PREFIX
+                  + uniqueGenerator.uniqueName(
+                          NameUtil.shortenDerivedIdentifier(NameUtil.derivedIdentifier(type.getFullyQualifiedName())))
+                  + "Impl";
+        } else {
+          marshallerClassName = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "Impl";
+        }
 
         final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerClassName);
         customMarshaller = marshaller.getClassDefinition();
