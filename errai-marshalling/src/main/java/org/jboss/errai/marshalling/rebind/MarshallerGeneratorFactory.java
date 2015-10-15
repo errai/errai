@@ -50,6 +50,8 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.rebind.NameUtil;
+import org.jboss.errai.common.rebind.UniqueNameGenerator;
 import org.jboss.errai.config.rebind.CommonConfigAttribs;
 import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
@@ -79,7 +81,10 @@ import com.google.gwt.core.shared.GWT;
  */
 public class MarshallerGeneratorFactory {
   public static final String MARSHALLER_NAME_PREFIX = "Marshaller_for_";
+  public static final String SHORT_MARSHALLER_PREFIX = "Marshaller_";
   private static final String MARSHALLERS_VAR = "marshallers";
+  private static final boolean SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_SHORT_IMPL_NAMES, "true"));
+
   private final MarshallerOutputTarget target;
   private final ReachableTypes reachableTypes;
 
@@ -97,6 +102,9 @@ public class MarshallerGeneratorFactory {
 
   private static final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
   private static boolean refresh = false;
+
+  private static final UniqueNameGenerator uniqueGenerator = new UniqueNameGenerator();
+  private static final Map<String, String> leasedNamesByTypeName = new HashMap<String, String>();
 
   long startTime;
 
@@ -271,7 +279,7 @@ public class MarshallerGeneratorFactory {
     generateMarshallers();
 
     getMarshallerMethod.append(conditionalGenerationBlock.finish());
-    
+
     getMarshallerMethod.append(
         If.isNotNull(Stmt.loadVariable("m")).append(
             Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
@@ -412,12 +420,12 @@ public class MarshallerGeneratorFactory {
     final String varName = getVarName(type);
 
     if (!arrayMarshallers.contains(varName)) {
-      final String marshallerClassName = MARSHALLER_NAME_PREFIX + getVarName(type) + "_Impl";
+      final String marshallerClassName = getMarshallerImplClassName(type);
       final InnerClass arrayMarshaller = new InnerClass(generateArrayMarshaller(type, marshallerClassName, gwtTarget));
       classStructureBuilder.declaresInnerClass(arrayMarshaller);
 
       updateConditionalBlock(type);
-      
+
       conditionalGenerationBlock.append(
             Stmt.loadVariable("m").assignValue(
                 Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshaller.getType()), type
@@ -426,6 +434,26 @@ public class MarshallerGeneratorFactory {
     arrayMarshallers.add(varName);
 
     return varName;
+  }
+
+  public static String getMarshallerImplClassName(final MetaClass type) {
+    String implName = leasedNamesByTypeName.get(type.getFullyQualifiedName());
+    if (implName == null) {
+      implName = leaseMarshallerImplClassName(type);
+      leasedNamesByTypeName.put(type.getFullyQualifiedName(), implName);
+    }
+
+    return implName;
+  }
+
+  private static String leaseMarshallerImplClassName(final MetaClass type) {
+    final String varName = getVarName(type);
+
+    if (SHORT_MARSHALLER_NAMES) {
+      return SHORT_MARSHALLER_PREFIX + uniqueGenerator.uniqueName(NameUtil.shortenDerivedIdentifier(varName)) + "_Impl";
+    } else {
+      return MARSHALLER_NAME_PREFIX + varName + "_Impl";
+    }
   }
 
   static BuildMetaClass generateArrayMarshaller(final MetaClass arrayType, final String marshallerClassName, boolean gwtTarget) {
@@ -441,7 +469,7 @@ public class MarshallerGeneratorFactory {
     if (gwtTarget) {
       initMethod = classStructureBuilder.privateMethod(void.class, "lazyInit");
     }
-    
+
     final MetaClass arrayOfArrayType = arrayType.asArrayOf(1);
 
     classStructureBuilder.publicMethod(arrayOfArrayType, "getEmptyArray")
@@ -478,7 +506,7 @@ public class MarshallerGeneratorFactory {
         );
 
     marshallMethodBlock.finish();
-    
+
     if (initMethod != null) {
       initMethod.finish();
     }
@@ -521,7 +549,7 @@ public class MarshallerGeneratorFactory {
     if (initMethod != null) {
       dmBuilder.append(Stmt.loadVariable("this").invoke("lazyInit"));
     }
-    
+
     dmBuilder.append(Stmt
         .declareVariable(arrayType).named("newArray")
         .initializeWith(Stmt.newArray(toMap, dimParms)));
@@ -543,11 +571,11 @@ public class MarshallerGeneratorFactory {
         .parameters(arrayType, MarshallingSession.class).body();
 
     MarshallingGenUtil.ensureMarshallerFieldCreated(classBuilder, null, MetaClassFactory.get(Object.class), initMethod);
-   
+
     if (initMethod != null) {
       mBuilder.append(Stmt.loadVariable("this").invoke("lazyInit"));
     }
-    
+
     mBuilder.append(Stmt.declareVariable(StringBuilder.class).named("sb")
         .initializeWith(Stmt.newObject(StringBuilder.class, "[")))
         .append(autoForLoop("i", Stmt.loadVariable("a0").loadField("length"))
@@ -593,11 +621,11 @@ public class MarshallerGeneratorFactory {
 
     return arrayMarshaller;
   }
-  
+
   private void updateConditionalBlock(final MetaClass type) {
     if (conditionalGenerationBlock == null) {
-      conditionalGenerationBlock = 
-        If.objEquals(Stmt.loadVariable("a0"), Stmt.loadLiteral(type.getFullyQualifiedName())); 
+      conditionalGenerationBlock =
+        If.objEquals(Stmt.loadVariable("a0"), Stmt.loadLiteral(type.getFullyQualifiedName()));
     }
     else {
       conditionalGenerationBlock = conditionalGenerationBlock.finish()
