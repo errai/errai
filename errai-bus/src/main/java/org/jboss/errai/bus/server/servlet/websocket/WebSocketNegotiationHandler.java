@@ -55,6 +55,10 @@ public class WebSocketNegotiationHandler {
           final MessageQueue queue = service.getBus().getQueueBySession(sessionKey);
           queue.setDeliveryHandler(DirectDeliveryHandler.createFor(queueChannel));
           LOGGER.debug("set direct delivery handler on session: {}", session.getSessionId());
+          
+          //In case a connection failure has occurred make sure to resend a successful negotiation message.
+          sendMessage(queueChannel, WebSocketNegotiationMessage.getSuccessfulNegotiation());
+
           return session;
         }
 
@@ -80,6 +84,9 @@ public class WebSocketNegotiationHandler {
           sendMessage(queueChannel, WebSocketNegotiationMessage.getReverseChallenge(reverseToken));
           return null;
         }
+        //TODO Remove me? It doesn't seem like this should be here, the only path to execute this
+        //line is if activationKey == null above, which that results in a getFailedNegotiation(error) being
+        //being sent, so it doesn't make any sense to send a success message right after a failure message?
         sendMessage(queueChannel, WebSocketNegotiationMessage.getSuccessfulNegotiation());
       }
       else {
