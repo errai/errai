@@ -174,6 +174,8 @@ public class SecurityContextImpl implements SecurityContext {
   private void performLoginStatusChangeActions(final User user) {
     StyleBindingsRegistry.get().updateStyles();
     if (user == null) {
+      throw new RuntimeException("The current user should never be null.");
+    } else if (User.ANONYMOUS.equals(user)) {
       logoutEvent.fire(new LoggedOutEvent());
     }
     else {

@@ -475,7 +475,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return true;
 
     if (isArray() && clazz.isArray()) {
-      return getOuterComponentType().equals(clazz.getOuterComponentType())
+      return getOuterComponentType().isAssignableFrom(clazz.getOuterComponentType())
           && getArrayDimensions(this) == getArrayDimensions(clazz);
     }
 

@@ -73,9 +73,9 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  * @author Mike Brock
  */
 public class QualifierEqualityFactoryGenerator extends Generator {
-  
+
   private static final Logger log = LoggerFactory.getLogger(QualifierEqualityFactoryGenerator.class);
-  
+
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
