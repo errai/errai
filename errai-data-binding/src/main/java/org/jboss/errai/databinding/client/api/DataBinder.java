@@ -17,9 +17,7 @@
 package org.jboss.errai.databinding.client.api;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.errai.common.client.api.Assert;
@@ -30,7 +28,9 @@ import org.jboss.errai.databinding.client.Binding;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 import org.jboss.errai.databinding.client.InvalidPropertyExpressionException;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.OneTimeUnsubscribeHandle;
 import org.jboss.errai.databinding.client.PropertyChangeHandlerSupport;
+import org.jboss.errai.databinding.client.PropertyChangeUnsubscribeHandle;
 import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -323,16 +323,6 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       bindings.clear();
     }
 
-    for (final PropertyChangeHandler<?> handler : propertyChangeHandlerSupport.removePropertyChangeHandlers()) {
-      getAgent().removePropertyChangeHandler(handler);
-    }
-
-    final Multimap<String, PropertyChangeHandler<?>> removedSpecificHandlers = propertyChangeHandlerSupport
-            .removeSpecificPropertyChangeHandlers();
-    for (final Entry<String, PropertyChangeHandler<?>> removedEntry : removedSpecificHandlers.entries()) {
-      getAgent().removePropertyChangeHandler(removedEntry.getKey(), removedEntry.getValue());
-    }
-
     // Proxies without bindings will be removed from the cache to make sure the
     // garbage collector can do its job (see
     // BindableProxyFactory#removeCachedProxyForModel). We throw away the
@@ -478,27 +468,30 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
+  public PropertyChangeUnsubscribeHandle addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
     propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
-    getAgent().addPropertyChangeHandler(handler);
+    final PropertyChangeUnsubscribeHandle agentUnsubHandle = getAgent().addPropertyChangeHandler(handler);
+
+    return new OneTimeUnsubscribeHandle() {
+      @Override
+      public void doUnsubscribe() {
+        agentUnsubHandle.unsubscribe();
+      }
+    };
   }
 
   @Override
-  public void removePropertyChangeHandler(PropertyChangeHandler<?> handler) {
-    propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
-    getAgent().removePropertyChangeHandler(handler);
-  }
-
-  @Override
-  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+  public <P> PropertyChangeUnsubscribeHandle addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
     propertyChangeHandlerSupport.addPropertyChangeHandler(property, handler);
-    getAgent().addPropertyChangeHandler(property, handler);
-  }
+    final PropertyChangeUnsubscribeHandle agentUnsubHandle = getAgent().addPropertyChangeHandler(property, handler);
 
-  @Override
-  public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
-    propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
-    getAgent().removePropertyChangeHandler(property, handler);
+    return new OneTimeUnsubscribeHandle() {
+
+      @Override
+      public void doUnsubscribe() {
+        agentUnsubHandle.unsubscribe();
+      }
+    };
   }
 
   @SuppressWarnings("unchecked")

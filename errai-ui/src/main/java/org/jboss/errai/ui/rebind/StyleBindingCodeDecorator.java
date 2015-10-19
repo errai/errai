@@ -34,9 +34,9 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.databinding.client.PropertyChangeUnsubscribeHandle;
 import org.jboss.errai.databinding.rebind.DataBindingUtil;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.Factory;
@@ -124,8 +124,9 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
     if (!controller.hasAttribute(STYLE_BINDING_HOUSEKEEPING_ATTR)) {
       destructionStmts.add(
               Stmt.invokeStatic(StyleBindingsRegistry.class, "get").invoke("cleanAllForBean", Refs.get("instance")));
-      destructionStmts.add((dataBinder != null) ? Stmt.nestedCall(dataBinder.getValueAccessor()).invoke(
-              "removePropertyChangeHandler", controller.getReferenceStmt("bindingChangeHandler", StyleBindingChangeHandler.class)) : EmptyStatement.INSTANCE);
+      if (dataBinder != null) {
+        destructionStmts.add(controller.getReferenceStmt("styleBindingChangeHandlerUnsub", PropertyChangeUnsubscribeHandle.class).invoke("unsubscribe"));
+      }
       controller.setAttribute(STYLE_BINDING_HOUSEKEEPING_ATTR, Boolean.TRUE);
     }
   }
@@ -177,8 +178,8 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
 
         initStmts.add(controller.setReferenceStmt(handlerVarName, newObject(StyleBindingChangeHandler.class)));
         // ERRAI-817 deferred initialization
-        initStmts.add(nestedCall(dataBinder.getValueAccessor()).invoke("addPropertyChangeHandler",
-                controller.getReferenceStmt(handlerVarName, StyleBindingChangeHandler.class)));
+        initStmts.add(controller.setReferenceStmt("styleBindingChangeHandlerUnsub", nestedCall(dataBinder.getValueAccessor()).invoke("addPropertyChangeHandler",
+                controller.getReferenceStmt(handlerVarName, StyleBindingChangeHandler.class))));
       }
     }
     // ERRAI-821 deferred initialization

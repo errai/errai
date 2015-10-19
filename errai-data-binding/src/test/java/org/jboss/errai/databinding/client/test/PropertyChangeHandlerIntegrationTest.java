@@ -16,8 +16,6 @@
 
 package org.jboss.errai.databinding.client.test;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
@@ -26,6 +24,7 @@ import java.util.List;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.InvalidPropertyExpressionException;
 import org.jboss.errai.databinding.client.MockHandler;
+import org.jboss.errai.databinding.client.PropertyChangeUnsubscribeHandle;
 import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.TestModelWithBindableTypeList;
 import org.jboss.errai.databinding.client.TestModelWithList;
@@ -96,7 +95,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
-    binder.addPropertyChangeHandler("child.child.value", handler);
+    final PropertyChangeUnsubscribeHandle unsubHandle = binder.addPropertyChangeHandler("child.child.value", handler);
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", binder.getModel().getChild().getChild().getValue());
@@ -116,7 +115,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong event source", binder.getModel().getChild().getChild(),
         handler.getEvents().get(1).getSource());
 
-    binder.removePropertyChangeHandler("child.child.value", handler);
+    unsubHandle.unsubscribe();
     textBox.setValue("UI change 2", true);
     assertEquals("Should have received no additional event", 2, handler.getEvents().size());
   }
@@ -489,15 +488,15 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
-    binder.addPropertyChangeHandler("child.**", handler);
-    binder.addPropertyChangeHandler("child.child.*", handler);
+    final PropertyChangeUnsubscribeHandle childUnsubHandle = binder.addPropertyChangeHandler("child.**", handler);
+    final PropertyChangeUnsubscribeHandle childChildUnsubHandle = binder.addPropertyChangeHandler("child.child.*", handler);
 
     textBox.setValue("UI change", true);
     assertEquals("Should have received exactly two property change events", 2, handler.getEvents().size());
 
     // Remove the binders
-    binder.removePropertyChangeHandler("child.**", handler);
-    binder.removePropertyChangeHandler("child.child.*", handler);
+    childUnsubHandle.unsubscribe();
+    childChildUnsubHandle.unsubscribe();
 
     textBox.setValue("Second UI change", true);
     assertEquals("Should have received no additional event", 2, handler.getEvents().size());
@@ -582,14 +581,14 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     };
 
     final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
-    binder.addPropertyChangeHandler(testHandler);
+    final PropertyChangeUnsubscribeHandle unsubHandle = binder.addPropertyChangeHandler(testHandler);
     final TestModel model = binder.getModel();
 
     model.setValue("hello");
     assertEquals("Precondition failed: The handler should have been invoked for this change.", 1, (int) propertyChanges.get());
 
     binder.unbind();
-    binder.removePropertyChangeHandler(testHandler);
+    unsubHandle.unsubscribe();
 
     model.setValue("good bye");
     assertEquals("The handler should not have been invoked for this change since remove was called.", 1, (int) propertyChanges.get());
