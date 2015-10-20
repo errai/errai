@@ -103,7 +103,11 @@ class AbstractInjectable extends BaseInjectable {
 
   @Override
   public int hashContent() {
-    // TODO Auto-generated method stub
+    throw new RuntimeException("This method should only be called for concrete injectables.");
+  }
+
+  @Override
+  public boolean loadAsync() {
     throw new RuntimeException("This method should only be called for concrete injectables.");
   }
 }

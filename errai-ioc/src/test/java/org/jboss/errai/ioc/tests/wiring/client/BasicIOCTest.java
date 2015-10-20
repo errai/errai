@@ -19,9 +19,11 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import java.util.List;
 
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBeanInterface;
@@ -42,6 +44,8 @@ import org.jboss.errai.ioc.tests.wiring.client.res.TestProviderDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
 import org.junit.runner.RunWith;
+
+import com.google.gwt.core.shared.GWT;
 
 @RunWith(IOCSimulatedTestRunner.class)
 public class BasicIOCTest extends IOCClientTestCase {
@@ -177,7 +181,8 @@ public class BasicIOCTest extends IOCClientTestCase {
     BeanManagerDependentBean bean = IOC.getBeanManager().lookupBean(BeanManagerDependentBean.class)
             .getInstance();
 
-    assertSame(IOC.getBeanManager(), Factory.maybeUnwrapProxy(bean.getBeanManager()));
+    ClientBeanManager beanManager = (GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync() ? IOC.getAsyncBeanManager() : IOC.getBeanManager());
+    assertSame(beanManager, Factory.maybeUnwrapProxy(bean.getBeanManager()));
   }
 
   public void testProvidedValueLookup() {

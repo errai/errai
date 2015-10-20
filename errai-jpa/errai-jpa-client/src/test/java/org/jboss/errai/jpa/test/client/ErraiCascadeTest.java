@@ -9,7 +9,6 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
@@ -55,7 +54,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   @Override
   protected void gwtTearDown() throws Exception {
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
   }
 
   /**

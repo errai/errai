@@ -17,7 +17,6 @@ import javax.persistence.PreUpdate;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
@@ -63,7 +62,7 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
   @Override
   protected void gwtTearDown() throws Exception {
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
   }
 
   public void testStoreAndFetchAlbumLifecycle() throws Exception {

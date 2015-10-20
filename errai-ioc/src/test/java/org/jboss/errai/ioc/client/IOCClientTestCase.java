@@ -69,7 +69,7 @@ public abstract class IOCClientTestCase extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
     InitVotes.reset();
 
     super.gwtTearDown();

@@ -12,7 +12,6 @@ import javax.persistence.metamodel.EntityType;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.jpa.sync.client.local.ErraiAttributeAccessor;
 import org.jboss.errai.jpa.sync.client.shared.JpaAttributeAccessor;
 import org.jboss.errai.jpa.sync.test.client.entity.MethodAccessedZentity;
@@ -50,7 +49,7 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   @Override
   protected void gwtTearDown() throws Exception {
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
   }
 
   protected EntityManager getEntityManager() {

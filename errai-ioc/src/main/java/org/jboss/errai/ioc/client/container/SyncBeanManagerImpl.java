@@ -38,10 +38,10 @@ import com.google.common.collect.Multimap;
  * and their instances. Since the actual wiring code is generated, the bean manager is populated by the generated
  * code at bootstrap time.
  *
- * @author Mike Brock
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @Alternative
-public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetup {
+public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
   private static final Default DEFAULT = new Default() {
 

@@ -16,8 +16,11 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
-import com.google.gwt.junit.client.GWTTestCase;
-import com.google.gwt.user.client.Timer;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -26,13 +29,9 @@ import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
 
 /**
  * Abstract base class of all Errai CDI integration tests,
@@ -67,7 +66,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
   protected void gwtTearDown() throws Exception {
     setRemoteCommunicationEnabled(true);
     InitVotes.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
     Container.reset();
     super.gwtTearDown();
   }

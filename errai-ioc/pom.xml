@@ -42,13 +42,6 @@
               <goal>test-jar</goal>
             </goals>
             <configuration>
-              <includes>
-                <include>**/AbstractErraiIOCTest.*</include>
-                <include>**/MockIOCGenerator.*</include>
-                <include>**/IOCSimulatedTestRunner.*</include>
-                <include>**/IOCClientTestCase*.*</include>
-                <include>**/*ContainerBootstrapper.*</include>
-              </includes>
             </configuration>
           </execution>
         </executions>

@@ -17,52 +17,54 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.enterprise.inject.Alternative;
 
+import org.jboss.errai.ioc.client.container.BeanManagerSetup;
+import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
+import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 
 /**
- * @author Mike Brock
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @Alternative
-public class AsyncBeanManagerImpl implements AsyncBeanManager {
+public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup {
+
+  private final SyncBeanManagerImpl innerBeanManager = new SyncBeanManagerImpl();
 
   @Override
-  public void destroyBean(Object ref) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+  public void destroyBean(final Object ref) {
+    innerBeanManager.destroyBean(ref);
   }
 
   @Override
-  public boolean isManaged(Object ref) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+  public boolean isManaged(final Object ref) {
+    return innerBeanManager.isManaged(ref);
   }
 
   @Override
-  public Object getActualBeanReference(Object ref) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+  public Object getActualBeanReference(final Object ref) {
+    return innerBeanManager.getActualBeanReference(ref);
   }
 
   @Override
-  public boolean isProxyReference(Object ref) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+  public boolean isProxyReference(final Object ref) {
+    return innerBeanManager.isProxyReference(ref);
   }
 
   @Override
-  public boolean addDestructionCallback(Object beanInstance, DestructionCallback<?> destructionCallback) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+  public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
+    return innerBeanManager.addDestructionCallback(beanInstance, destructionCallback);
   }
 
   @Override
   public void destroyAllBeans() {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+    innerBeanManager.destroyAllBeans();
   }
 
   @Override
@@ -71,27 +73,52 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     throw new RuntimeException("Not yet implemented.");
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Collection<AsyncBeanDef> lookupBeans(String name) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+    final Collection syncBeans = innerBeanManager.lookupBeans(name);
+    final Collection wrapSyncBeans = wrapSyncBeans(syncBeans);
+
+    return wrapSyncBeans;
+  }
+
+  private <T> Collection<AsyncBeanDef<T>> wrapSyncBeans(final Collection<IOCBeanDef<T>> syncBeans) {
+    final Collection<AsyncBeanDef<T>> asyncBeans = new ArrayList<AsyncBeanDef<T>>(syncBeans.size());
+
+    for (final IOCBeanDef<T> syncBean : syncBeans) {
+      asyncBeans.add(new SyncToAsyncBeanDef<T>(syncBean));
+    }
+
+    return asyncBeans;
   }
 
   @Override
-  public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type) {
+    return wrapSyncBeans(innerBeanManager.lookupBeans(type));
   }
 
   @Override
-  public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
+    return wrapSyncBeans(innerBeanManager.lookupBeans(type, qualifiers));
   }
 
   @Override
   public <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
+    final IOCBeanDef<T> syncBean = innerBeanManager.lookupBean(type, qualifiers);
+
+    return new SyncToAsyncBeanDef<T>(syncBean);
+  }
+
+  @Override
+  public void setContextManager(final ContextManager contextManager) {
+    innerBeanManager.setContextManager(contextManager);
+  }
+
+  public void reset() {
+    innerBeanManager.reset();
+  }
+
+  public SyncBeanManager getInnerBeanManager() {
+    return innerBeanManager;
   }
 }

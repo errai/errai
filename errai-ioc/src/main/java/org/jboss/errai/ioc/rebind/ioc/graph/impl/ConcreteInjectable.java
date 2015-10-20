@@ -52,9 +52,12 @@ class ConcreteInjectable extends BaseInjectable {
   boolean requiresProxy = false;
   Integer hashContent = null;
 
-  ConcreteInjectable(final MetaClass type, final Qualifier qualifier, final String factoryName,
-          final Class<? extends Annotation> literalScope, final InjectableType injectorType,
-          final Collection<WiringElementType> wiringTypes) {
+  ConcreteInjectable(final MetaClass type,
+                     final Qualifier qualifier,
+                     final String factoryName,
+                     final Class<? extends Annotation> literalScope,
+                     final InjectableType injectorType,
+                     final Collection<WiringElementType> wiringTypes) {
     super(type, qualifier, factoryName);
     this.literalScope = literalScope;
     this.wiringTypes = wiringTypes;
@@ -79,6 +82,11 @@ class ConcreteInjectable extends BaseInjectable {
   @Override
   public Collection<Dependency> getDependencies() {
     return Collections.<Dependency>unmodifiableCollection(dependencies);
+  }
+
+  @Override
+  public boolean loadAsync() {
+    return wiringTypes.contains(WiringElementType.LoadAsync);
   }
 
   @Override

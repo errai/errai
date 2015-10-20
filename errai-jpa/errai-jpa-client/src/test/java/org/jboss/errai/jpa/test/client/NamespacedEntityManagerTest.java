@@ -5,7 +5,6 @@ import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.backend.LocalStorage;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
@@ -62,7 +61,7 @@ public class NamespacedEntityManagerTest extends JpaClientTestCase {
   @Override
   protected void gwtTearDown() throws Exception {
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
   }
 
   public void testDefaultNamespaceIsolated() throws Exception {

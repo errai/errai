@@ -146,7 +146,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
          prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
 
-              <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+              <argLine>${argLine} -XX:MaxPermSize=512m -Xmx3g -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
 
               <systemProperties>
                 <property>
@@ -159,9 +159,9 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                 </property>
               </systemProperties>
 
-              <excludes>
-                <exclude>**/IOCTests.java</exclude>
-              </excludes>
+              <includes>
+                <include>**/AsyncIOCTests.java</include>
+              </includes>
             </configuration>
           </plugin>
         </plugins>

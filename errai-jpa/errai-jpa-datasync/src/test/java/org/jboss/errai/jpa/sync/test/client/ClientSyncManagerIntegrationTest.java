@@ -17,7 +17,6 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
@@ -84,7 +83,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     }
 
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
     InitVotes.reset();
     setRemoteCommunicationEnabled(true);
     super.gwtTearDown();
@@ -509,7 +508,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
       public DataSyncService call(final RemoteCallback<?> callback) {
         return new DataSyncService() {
 
-          @SuppressWarnings({ "unchecked", "rawtypes" })
+          @SuppressWarnings({ "rawtypes" })
           @Override
           public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
               List<SyncRequestOperation<X>> actualClientRequests) {

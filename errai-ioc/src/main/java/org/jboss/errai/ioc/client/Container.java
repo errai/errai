@@ -19,11 +19,10 @@ package org.jboss.errai.ioc.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.ioc.client.container.BeanManagerSetup;
 import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
-import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerSetup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,15 +51,18 @@ public class Container implements EntryPoint {
 
       logger.info("IOC bootstrapper successfully initialized.");
 
+      final BeanManagerSetup beanManager;
       if (GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync()) {
         logger.info("bean manager initialized in async mode.");
+        beanManager = (BeanManagerSetup) IOC.getAsyncBeanManager();
+      } else {
+        beanManager = (BeanManagerSetup) IOC.getBeanManager();
       }
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
       final ContextManager contextManager = bootstrapper.bootstrapContainer();
-      final SyncBeanManager beanManager = IOC.getBeanManager();
 
-      ((SyncBeanManagerSetup) beanManager).setContextManager(contextManager);
+      beanManager.setContextManager(contextManager);
       init = true;
       for (final Runnable run : afterInit) {
         run.run();

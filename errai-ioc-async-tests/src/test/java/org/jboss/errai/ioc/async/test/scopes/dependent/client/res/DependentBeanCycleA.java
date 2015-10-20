@@ -16,23 +16,23 @@
 
 package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 
-import org.jboss.errai.ioc.client.api.LoadAsync;
-
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+
+import org.jboss.errai.ioc.client.api.LoadAsync;
 
 /**
  * @author Mike Brock
  */
 @Dependent @LoadAsync
 public class DependentBeanCycleA {
-  @Inject DependentBeanCycleB dependentBeanCycleB;
+  @Inject ApplicationScopedBeanA appScopedBeanA;
 
   public boolean preDestroyCalled = false;
 
-  public DependentBeanCycleB getDependentBeanCycleB() {
-    return dependentBeanCycleB;
+  public ApplicationScopedBeanA getApplicationScopedBeanCycleA() {
+    return appScopedBeanA;
   }
 
   @PreDestroy

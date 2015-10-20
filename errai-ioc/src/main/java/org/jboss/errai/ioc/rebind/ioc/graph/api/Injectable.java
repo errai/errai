@@ -24,6 +24,7 @@ import javax.inject.Named;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
@@ -87,6 +88,12 @@ public interface Injectable {
    * @return The wiring element types of this injectable.
    */
   Collection<WiringElementType> getWiringElementTypes();
+
+  /**
+   * @return True iff this injectable should be loaded asynchronously (via code splitting).
+   * @see LoadAsync
+   */
+  boolean loadAsync();
 
   /**
    * @return True if this injectable requires a proxy because of its scope or

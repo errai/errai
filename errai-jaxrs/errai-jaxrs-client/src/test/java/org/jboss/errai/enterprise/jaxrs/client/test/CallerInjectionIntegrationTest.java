@@ -28,7 +28,6 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.junit.Test;
 
 import com.google.gwt.http.client.Request;
@@ -56,7 +55,7 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
   @Override
   protected void gwtTearDown() throws Exception {
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
     super.gwtTearDown();
   }
 

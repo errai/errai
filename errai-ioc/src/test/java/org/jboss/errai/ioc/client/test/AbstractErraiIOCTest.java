@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.client.test;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 
 import com.google.gwt.junit.client.GWTTestCase;
 
@@ -37,7 +36,7 @@ public abstract class AbstractErraiIOCTest extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
     Container.reset();
   }
 

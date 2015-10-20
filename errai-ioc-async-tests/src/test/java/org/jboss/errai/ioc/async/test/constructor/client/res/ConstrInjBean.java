@@ -32,11 +32,14 @@ public class ConstrInjBean {
   }
 
   @Inject
-  public void setPeanutAndCashew(final Peanut peanut, final Cashew cashew) {
+  public void setPeanut(final Peanut peanut) {
     this.peanut = peanut;
+  }
+  
+  @Inject
+  public void setCashew(final Cashew cashew) {
     this.cashew = cashew;
   }
-
 
   public ConstrInjBean getMyself() {
     return myself;

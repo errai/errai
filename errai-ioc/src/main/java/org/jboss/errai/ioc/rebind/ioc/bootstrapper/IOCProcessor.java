@@ -71,6 +71,7 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.api.ScopeContext;
 import org.jboss.errai.ioc.client.container.Context;
 import org.jboss.errai.ioc.client.container.ContextManager;
@@ -458,7 +459,7 @@ public class IOCProcessor {
   private boolean isSimpleton(final MetaClass type) {
     if (type.isAnnotationPresent(Alternative.class) || type.isAnnotationPresent(IOCProvider.class)
             || type.isAnnotationPresent(JsType.class) || type.isAnnotationPresent(Specializes.class)
-            || hasEnablingProperty(type)) {
+            || type.isAnnotationPresent(LoadAsync.class) || hasEnablingProperty(type)) {
       return false;
     }
     if (getDirectScope(type) != null) {
@@ -498,6 +499,10 @@ public class IOCProcessor {
 
     if (type.isAnnotationPresent(Specializes.class)) {
       wiringTypes.add(WiringElementType.Specialization);
+    }
+
+    if (type.isAnnotationPresent(LoadAsync.class)) {
+      wiringTypes.add(WiringElementType.LoadAsync);
     }
 
     return wiringTypes.toArray(new WiringElementType[wiringTypes.size()]);
@@ -813,10 +818,22 @@ public class IOCProcessor {
 
   private boolean isEnabledByProperty(final MetaClass type) {
     final EnabledByProperty anno = type.getAnnotation(EnabledByProperty.class);
-    final boolean propValue = Boolean.getBoolean(anno.value());
+    final boolean propValue = getPropertyValue(anno.value());
     final boolean negated = anno.negated();
 
     return propValue ^ negated;
+  }
+
+  private boolean getPropertyValue(final String propName) {
+    final String propertyValue = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty(propName);
+    if (propertyValue == null) {
+      return false;
+    }
+    try {
+      return Boolean.parseBoolean(propertyValue);
+    } catch (Throwable t) {
+      throw new RuntimeException("Could not parse " + propName + " value, " + propertyValue + ", to boolean.", t);
+    }
   }
 
   private boolean hasEnablingProperty(final MetaClass type) {

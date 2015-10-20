@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.async.test.scopes.dependent.client;
 
-import com.google.gwt.user.client.Timer;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.ApplicationScopedBean;
@@ -9,8 +10,6 @@ import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.Bean;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.BeanInjectsNonModuleDependentBean;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.BeanInjectsNonModuleDependentBeanB;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.DepScopedBeanWithASBeanDep;
-import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.DependentBeanCycleA;
-import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.DependentBeanCycleB;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.DependentScopedBean;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.DependentScopedBeanWithDependencies;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.res.DestroyA;
@@ -23,8 +22,7 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock
@@ -38,7 +36,6 @@ public class AsyncDependentScopeIntegrationTest extends IOCClientTestCase {
 
   @Override
   public void gwtSetUp() throws Exception {
-    DependentBeanCycleB.instanceCount = 1;
     super.gwtSetUp();
   }
 
@@ -187,60 +184,13 @@ public class AsyncDependentScopeIntegrationTest extends IOCClientTestCase {
                 assertNotNull("dependentScopedBean.dependentBeanCycleA injection was null",
                     bean.getDependentBeanCycleA());
                 assertNotNull("dependentScopedBean.dependentBeanCycleA.dependentBeanCycleB was null",
-                    bean.getDependentBeanCycleA().getDependentBeanCycleB());
-                assertEquals("there should have been only one instantiation of DependentBeanCycleB",
-                    1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
+                    bean.getDependentBeanCycleA().getApplicationScopedBeanCycleA());
 
                 finishTest();
               }
             });
       }
     });
-  }
-
-  public void testDependentBeanCycleFromDependentRoot() {
-    delayTestFinish(10000);
-    Container.runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-
-        DependentBeanCycleB.instanceCount = 1;
-
-        IOC.getAsyncBeanManager().lookupBean(DependentBeanCycleB.class)
-            .getInstance(new CreationalCallback<DependentBeanCycleB>() {
-              @Override
-              public void callback(final DependentBeanCycleB bean) {
-                assertNotNull("bean was null", bean);
-                assertNotNull("bean.dependentBeanCycleA injection was null",
-                    bean.getDependentBeanCycleA());
-                assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
-                    bean.getDependentBeanCycleA().getDependentBeanCycleB());
-                assertEquals("there should have been only one instantiation of DependentBeanCycleB",
-                    1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-
-                DependentBeanCycleB.instanceCount = 1;
-
-                IOC.getAsyncBeanManager().lookupBean(DependentBeanCycleA.class)
-                    .getInstance(new CreationalCallback<DependentBeanCycleA>() {
-                      @Override
-                      public void callback(final DependentBeanCycleA beanA) {
-
-                        assertNotNull("beanA was null", beanA);
-                        assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
-                            beanA.getDependentBeanCycleB());
-                        assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
-                            beanA.getDependentBeanCycleB().getDependentBeanCycleA());
-                        assertEquals("there should have been only two instantiations of DependentBeanCycleB",
-                            1, beanA.getDependentBeanCycleB().getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-
-                        finishTest();
-                      }
-                    });
-              }
-            });
-      }
-    });
-
   }
 
   public void testDependentBeanCycleWithPreDestroy() {

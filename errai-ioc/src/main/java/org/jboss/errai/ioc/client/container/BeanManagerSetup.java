@@ -16,6 +16,6 @@
 
 package org.jboss.errai.ioc.client.container;
 
-public interface SyncBeanManagerSetup {
+public interface BeanManagerSetup {
   void setContextManager(ContextManager contextManager);
 }

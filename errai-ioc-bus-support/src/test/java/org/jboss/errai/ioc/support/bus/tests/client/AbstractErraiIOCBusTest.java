@@ -4,7 +4,6 @@ import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 
 /**
  * @author Mike Brock
@@ -26,6 +25,6 @@ public abstract class AbstractErraiIOCBusTest extends AbstractErraiTest {
   protected void gwtTearDown() throws Exception {
     super.gwtTearDown();
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
   }
 }

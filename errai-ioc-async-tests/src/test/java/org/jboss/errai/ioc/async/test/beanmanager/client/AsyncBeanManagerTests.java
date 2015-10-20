@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.async.test.beanmanager.client;
 
+import java.util.Collection;
+
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.ADependent;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.AirDependentBean;
@@ -10,10 +12,10 @@ import org.jboss.errai.ioc.async.test.beanmanager.client.res.Pig;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.TestInterface;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-
-import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -23,6 +25,38 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.async.test.beanmanager.AsyncBeanManagerTests";
+  }
+
+  public void testTypeWithLoadAsyncIsNotAvailableThroughSyncLookup() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(Foo.class);
+      fail("Should not have been able to lookup " + Foo.class.getSimpleName() + " with " + LoadAsync.class.getSimpleName() + " annotation via the SyncBeanManager.");
+    } catch (IOCResolutionException e) {
+    }
+  }
+
+  public void testTypeWithLoadAsyncIsAvailableThroughSyncLookupAfterAsyncLoading() throws Exception {
+    try {
+      testTypeWithLoadAsyncIsNotAvailableThroughSyncLookup();
+    } catch (AssertionError e) {
+      fail("Precondition failed: " + e.getMessage());
+    }
+
+    delayTestFinish(10000);
+    IOC.getAsyncBeanManager().lookupBean(Foo.class).getInstance(new CreationalCallback<Foo>() {
+
+      @Override
+      public void callback(final Foo beanInstance) {
+        try {
+          final Foo instance = IOC.getBeanManager().lookupBean(Foo.class).getInstance();
+          assertEquals(beanInstance, instance);
+          finishTest();
+        } catch (IOCResolutionException e) {
+          fail("Should have been able to perform sync lookup for instance of " + Foo.class.getSimpleName()
+                  + " after async loading.");
+        }
+      }
+    });
   }
 
   public void testAsyncLookup() {
@@ -126,6 +160,7 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
     Container.$(new Runnable() {
       @Override
       public void run() {
+        @SuppressWarnings("rawtypes")
         final Collection<AsyncBeanDef> beans = IOC.getAsyncBeanManager().lookupBeans("animal");
 
         assertEquals("wrong number of beans", 2, beans.size());
@@ -157,6 +192,7 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
   }
 
 
+  @SuppressWarnings("rawtypes")
   private static boolean containsInstanceOf(final Collection<AsyncBeanDef> defs, final Class<?> clazz) {
     for (final AsyncBeanDef def : defs) {
       if (def.getType().equals(clazz)) return true;

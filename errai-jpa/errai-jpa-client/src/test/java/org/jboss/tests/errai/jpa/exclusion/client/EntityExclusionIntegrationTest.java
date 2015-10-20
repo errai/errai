@@ -8,7 +8,6 @@ import javax.persistence.metamodel.EntityType;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.test.client.JpaTestClient;
@@ -46,7 +45,7 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
   @Override
   protected void gwtTearDown() throws Exception {
     Container.reset();
-    ((SyncBeanManagerImpl) IOC.getBeanManager()).reset();
+    IOC.reset();
   }
 
   public void testWhiteListedEntityIsInEntityManager() throws Exception {
