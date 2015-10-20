@@ -16,8 +16,6 @@
 
 package org.jboss.errai.config.rebind;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,6 +29,7 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
+
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -72,14 +71,14 @@ public abstract class MetaClassBridgeUtil {
     if (typeOracle != null) {
       final Map<String, MetaClass> classesToPush = new HashMap<String, MetaClass>(typeOracle.getTypes().length);
       final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));
+      // Need to remove these or else we get issues from annotations and loading
+      // of emulated Object and Class instead of real ones.
+      translatable.remove("java.lang");
+      translatable.remove("java.lang.annotation");
       final Set<String> reloadable = RebindUtils.getReloadablePackageNames(context);
 
-      final Collection<String> skippableTypes = Arrays.asList("java.lang.Object", "java.lang.Class");
       for (final JClassType type : typeOracle.getTypes()) {
-        /*
-         * Object and Class must be skipped so that server-side generated code gets the non-emulated versions of these classes.
-         */
-        if (!translatable.contains(type.getPackage().getName()) || skippableTypes.contains(type.getQualifiedSourceName())) {
+        if (!translatable.contains(type.getPackage().getName())) {
           continue;
         }
 
