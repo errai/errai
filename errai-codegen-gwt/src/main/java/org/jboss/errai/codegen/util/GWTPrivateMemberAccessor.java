@@ -92,32 +92,44 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
                                    final MetaMethod method,
                                    final Modifier[] modifiers) {
 
+    final MetaMethod erasedMethod = method.getDeclaringClass().getErased().getDeclaredMethod(method.getName(),
+            getErasedParamterTypes(method));
+
     final List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
 
-    if (!method.isStatic()) {
-      wrapperDefParms.add(Parameter.of(method.getDeclaringClass().getErased(), "instance"));
+    if (!erasedMethod.isStatic()) {
+      wrapperDefParms.add(Parameter.of(erasedMethod.getDeclaringClass().getErased(), "instance"));
     }
 
-    final List<Parameter> methodDefParms = DefParameters.from(method).getParameters();
+    final List<Parameter> methodDefParms = DefParameters.from(erasedMethod).getParameters();
     wrapperDefParms.addAll(methodDefParms);
 
     Annotation[] annotations = NO_ANNOTATIONS;
-    for (MetaParameter p : method.getParameters()) {
+    for (MetaParameter p : erasedMethod.getParameters()) {
       if (p.getType().getCanonicalName().equals("long")) {
         annotations = new Annotation[] { UNSAFE_NATIVE_LONG_ANNOTATION };
       }
     }
-    if (method.getReturnType().getCanonicalName().equals("long")) {
+    if (erasedMethod.getReturnType().getCanonicalName().equals("long")) {
       annotations = new Annotation[] { UNSAFE_NATIVE_LONG_ANNOTATION };
     }
 
-    classBuilder.publicMethod(method.getReturnType(), PrivateAccessUtil.getPrivateMethodName(method))
+    classBuilder.publicMethod(erasedMethod.getReturnType(), PrivateAccessUtil.getPrivateMethodName(method))
             .annotatedWith(annotations)
             .parameters(DefParameters.fromParameters(wrapperDefParms))
             .modifiers(appendJsni(modifiers))
             .body()
-            ._(StringStatement.of(JSNIUtil.methodAccess(method)))
+            ._(StringStatement.of(JSNIUtil.methodAccess(erasedMethod)))
             .finish();
+  }
+
+  private MetaClass[] getErasedParamterTypes(final MetaMethod method) {
+    final MetaClass[] paramTypes = new MetaClass[method.getParameters().length];
+    for (int i = 0; i < paramTypes.length; i++) {
+      paramTypes[i] = method.getParameters()[i].getType().getErased();
+    }
+
+    return paramTypes;
   }
 
   @Override
