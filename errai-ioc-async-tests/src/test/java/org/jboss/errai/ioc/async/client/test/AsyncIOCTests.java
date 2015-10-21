@@ -39,19 +39,6 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @RunWith(Suite.class)
-//@SuiteClasses({
-//  DecoratorAPITests.class,
-//  IOCLoggingInjectorTest.class,
-//  IOCLifecycleTest.class,
-//  QualifierEqualityTests.class,
-//  QualifierRegressionTests.class,
-//  AlternativeBeanIntegrationTest.class,
-//  BasicIOCTest.class,
-//  BlackListingBeansIntegrationTest.class,
-//  DisposerTest.class,
-//  JsTypeInjectionTest.class,
-//  WhiteListingBeansIntegrationTest.class
-//})
 @SuiteClasses({
   AsyncBeanManagerTests.class,
   AsyncConstructorInjectionTests.class,
