@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 JBoss, by Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.container.async;
-
-import org.jboss.errai.common.client.util.CreationalCallback;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+package org.jboss.errai.ioc.client.container;
 
 /**
+ * Represents a bean definition within the bean manager.
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface AsyncBeanDef<T> extends IOCBeanDef<T> {
+public interface SyncBeanDef<T> extends IOCBeanDef<T> {
 
   /**
    * Returns an instance of the bean within the active scope.
    *
    * @return The bean instance.
    */
-  public void getInstance(CreationalCallback<T> callback);
+  public T getInstance();
 
   /**
-   * Returns a new instance of the bean. Calling this method overrides the underlying scope and instantiates a new
-   * instance of the bean.
+   * Returns a new instance of the bean. Calling this method overrides the underlying scope and
+   * instantiates a new instance of the bean.
    *
    * @return a new instance of the bean.
    */
-  public void newInstance(CreationalCallback<T> callback);
+  public T newInstance();
+
 }

@@ -20,8 +20,11 @@ import static org.jboss.errai.codegen.Parameter.finalOf;
 import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.lang.annotation.Annotation;
@@ -39,6 +42,8 @@ import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
@@ -54,6 +59,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -66,6 +72,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
@@ -78,7 +85,13 @@ import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.ContextManagerImpl;
 import org.jboss.errai.ioc.client.container.DependentScopeContext;
 import org.jboss.errai.ioc.client.container.Factory;
+import org.jboss.errai.ioc.client.container.FactoryHandleImpl;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerSetup;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerSetup.FactoryLoader;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerSetup.FactoryLoaderCallback;
+import org.jboss.errai.ioc.client.container.async.DefaultRunAsyncCallback;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
@@ -151,6 +164,9 @@ public class IOCProcessor {
     declareAndRegisterFactories(processingContext, dependencyGraph, scopeContexts, scopeContextSet, registerFactoriesBody);
     final String contextManagerFieldName = declareContextManagerField(processingContext);
     declareWindowInjectionContextField(processingContext);
+    if (injectionContext.isAsync()) {
+      declareAsyncBeanManagerSetupField(processingContext);
+    }
 
     registerFactoriesBody.finish();
 
@@ -196,6 +212,14 @@ public class IOCProcessor {
   }
 
   @SuppressWarnings("unchecked")
+  private void declareAsyncBeanManagerSetupField(final IOCProcessingContext processingContext) {
+    processingContext.getBootstrapBuilder()
+      .privateField("asyncBeanManagerSetup", AsyncBeanManagerSetup.class)
+      .initializesWith(castTo(AsyncBeanManagerSetup.class, invokeStatic(IOC.class, "getAsyncBeanManager")))
+      .finish();
+  }
+
+  @SuppressWarnings("unchecked")
   private void declareWindowInjectionContextField(final IOCProcessingContext processingContext) {
     processingContext.getBootstrapBuilder().privateField("windowContext", WindowInjectionContext.class)
             .modifiers(Modifier.Final).initializesWith(Stmt.invokeStatic(WindowInjectionContext.class, "createOrGet"))
@@ -221,7 +245,23 @@ public class IOCProcessor {
         }
         curMethod = processingContext.getBootstrapBuilder().privateMethod(void.class, "registerFactories" + methodNumber, contextParamsDeclaration).body();
       }
-      if (!injectable.isContextual()) {
+      maybeDeclareAndProcessInjectable(processingContext, scopeContexts, curMethod, injectable);
+      registeredInThisMethod++;
+    }
+    if (curMethod != null) {
+      curMethod.finish();
+      registerFactoriesBody._(loadVariable("this").invoke("registerFactories" + methodNumber, (Object[]) contextLocalVarInvocation));
+    }
+  }
+
+  private void maybeDeclareAndProcessInjectable(final IOCProcessingContext processingContext,
+          final Map<Class<? extends Annotation>, MetaClass> scopeContexts,
+          @SuppressWarnings("rawtypes") BlockBuilder curMethod, final Injectable injectable) {
+    if (!injectable.isContextual()) {
+      if (injectable.loadAsync()) {
+        final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
+        registerAsyncFactory(injectable, processingContext, curMethod, factoryClass);
+      } else {
         if (injectable.getInjectableType().equals(InjectableType.ExtensionProvided)) {
           declareAndRegisterConcreteInjectable(injectable, processingContext, scopeContexts, curMethod);
           registerFactoryBodyGeneratorForInjectionSite(injectable);
@@ -229,12 +269,51 @@ public class IOCProcessor {
           declareAndRegisterConcreteInjectable(injectable, processingContext, scopeContexts, curMethod);
         }
       }
-      registeredInThisMethod++;
     }
-    if (curMethod != null) {
-      curMethod.finish();
-      registerFactoriesBody._(loadVariable("this").invoke("registerFactories" + methodNumber, (Object[]) contextLocalVarInvocation));
+  }
+
+  private void registerAsyncFactory(final Injectable injectable, final IOCProcessingContext processingContext,
+          @SuppressWarnings("rawtypes") final BlockBuilder curMethod, final MetaClass factoryClass) {
+    final Statement handle = generateFactoryHandle(injectable, curMethod);
+    final Statement loader = generateFactoryLoader(injectable, factoryClass);
+    curMethod._(loadVariable("asyncBeanManagerSetup").invoke("registerAsyncBean", handle, loader));
+  }
+
+  private Statement generateFactoryLoader(final Injectable injectable, final MetaClass factoryClass) {
+    final Statement runAsyncCallback = ObjectBuilder.newInstanceOf(DefaultRunAsyncCallback.class).extend()
+            .publicOverridesMethod("onSuccess")._(loadVariable("callback").invoke("callback",
+                    castTo(Factory.class, invokeStatic(GWT.class, "create", loadLiteral(factoryClass)))))
+            .finish().finish();
+
+    return ObjectBuilder.newInstanceOf(FactoryLoader.class).extend()
+            .publicOverridesMethod("call", finalOf(FactoryLoaderCallback.class, "callback"))
+            ._(invokeStatic(GWT.class, "runAsync", runAsyncCallback)).finish().finish();
+  }
+
+  private Statement generateFactoryHandle(final Injectable injectable,
+          @SuppressWarnings("rawtypes") final BlockBuilder curMethod) {
+    final String handleVarName = "handleFor" + injectable.getFactoryName();
+    curMethod._(declareFinalVariable(handleVarName, FactoryHandleImpl.class, ObjectBuilder.newInstanceOf(FactoryHandleImpl.class)
+                         .withParameters(loadLiteral(injectable.getInjectedType()),
+                                         loadLiteral(injectable.getFactoryName()),
+                                         loadLiteral(injectable.getScope()),
+                                         loadLiteral(false),
+                                         loadLiteral(injectable.getBeanName()))));
+    for (final MetaClass assignable : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
+      curMethod._(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable.asClass())));
     }
+
+    for (final Annotation qualifier : injectable.getQualifier()) {
+      if (qualifier.annotationType().equals(Default.class)) {
+        curMethod._(loadVariable(handleVarName).invoke("addQualifier", loadStatic(QualifierUtil.class, "DEFAULT_ANNOTATION")));
+      } else if (qualifier.annotationType().equals(Any.class)) {
+        curMethod._(loadVariable(handleVarName).invoke("addQualifier", loadStatic(QualifierUtil.class, "ANY_ANNOTATION")));
+      } else {
+        curMethod._(loadVariable(handleVarName).invoke("addQualifier", LiteralFactory.getLiteral(qualifier)));
+      }
+    }
+
+    return loadVariable(handleVarName);
   }
 
   private void registerFactoryBodyGeneratorForInjectionSite(final Injectable injectable) {

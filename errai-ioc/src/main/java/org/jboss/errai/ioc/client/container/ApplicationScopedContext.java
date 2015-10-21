@@ -18,7 +18,9 @@ package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Singleton;
@@ -38,6 +40,13 @@ import org.slf4j.LoggerFactory;
 public class ApplicationScopedContext extends AbstractContext {
 
   private static final Logger logger = LoggerFactory.getLogger(ApplicationScopedContext.class);
+  private static final Set<Class<? extends Annotation>> handledScopes = new HashSet<Class<? extends Annotation>>();
+
+  static {
+    handledScopes.add(ApplicationScoped.class);
+    handledScopes.add(Singleton.class);
+    handledScopes.add(EntryPoint.class);
+  }
 
   private final Map<String, Object> instances = new HashMap<String, Object>();
 
@@ -89,6 +98,11 @@ public class ApplicationScopedContext extends AbstractContext {
   @Override
   public boolean isActive() {
     return true;
+  }
+
+  @Override
+  public boolean handlesScope(final Class<? extends Annotation> scope) {
+    return handledScopes.contains(scope);
   }
 
 }

@@ -20,7 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 
 /**
  *
@@ -28,9 +28,9 @@ import org.jboss.errai.ioc.client.container.IOCBeanDef;
  */
 public class SyncToAsyncBeanDef<T> implements AsyncBeanDef<T> {
 
-  private final IOCBeanDef<T> beanDef;
+  private final SyncBeanDef<T> beanDef;
 
-  public SyncToAsyncBeanDef(final IOCBeanDef<T> beanDef) {
+  public SyncToAsyncBeanDef(final SyncBeanDef<T> beanDef) {
     this.beanDef = beanDef;
   }
 

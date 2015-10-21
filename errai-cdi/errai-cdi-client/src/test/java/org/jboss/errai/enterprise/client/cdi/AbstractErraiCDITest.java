@@ -27,7 +27,7 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -91,7 +91,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
     $wnd.erraiBusRemoteCommunicationEnabled = enabled;
   }-*/;
 
-  protected <T> Collection<IOCBeanDef<T>> getBeans(final Class<T> type,
+  protected <T> Collection<SyncBeanDef<T>> getBeans(final Class<T> type,
                                                    final Annotation... annotations) {
     return IOC.getBeanManager().lookupBeans(type, annotations);
   }

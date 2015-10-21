@@ -81,10 +81,10 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   @Override
   @SuppressWarnings("rawtypes")
   public Collection<AsyncBeanDef> lookupBeans(String name) {
-    final Collection<IOCBeanDef> beanDefs = bm.lookupBeans(name);
+    final Collection<SyncBeanDef> beanDefs = bm.lookupBeans(name);
 
     final List<AsyncBeanDef> asyncBeanDefs = new ArrayList<AsyncBeanDef>();
-    for (final IOCBeanDef beanDef : beanDefs) {
+    for (final SyncBeanDef beanDef : beanDefs) {
       asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
 
@@ -99,10 +99,10 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   @Override
   @SuppressWarnings("unchecked")
   public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
-    final Collection<IOCBeanDef<T>> beanDefs = bm.lookupBeans(type, qualifiers);
+    final Collection<SyncBeanDef<T>> beanDefs = bm.lookupBeans(type, qualifiers);
 
     final List<AsyncBeanDef<T>> asyncBeanDefs = new ArrayList<AsyncBeanDef<T>>();
-    for (final IOCBeanDef<T> beanDef : beanDefs) {
+    for (final SyncBeanDef<T> beanDef : beanDefs) {
       asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
 
@@ -112,12 +112,12 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   @Override
   @SuppressWarnings({ "unchecked" })
   public <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
-    final IOCBeanDef<T> beanDef = bm.lookupBean(type, qualifiers);
+    final SyncBeanDef<T> beanDef = bm.lookupBean(type, qualifiers);
     return createAsyncBeanDef(beanDef);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private AsyncBeanDef createAsyncBeanDef(final IOCBeanDef beanDef) {
+  private AsyncBeanDef createAsyncBeanDef(final SyncBeanDef beanDef) {
     AsyncBeanDef abd = new AsyncBeanDef() {
 
       @Override

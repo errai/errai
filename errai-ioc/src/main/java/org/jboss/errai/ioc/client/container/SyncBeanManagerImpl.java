@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Default;
 
 import org.jboss.errai.ioc.client.QualifierUtil;
 
@@ -43,18 +42,10 @@ import com.google.common.collect.Multimap;
 @Alternative
 public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
-  private static final Default DEFAULT = new Default() {
-
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return Default.class;
-    }
-  };
-
   private ContextManager contextManager;
   private final Multimap<String, FactoryHandle> handlesByTypeName = ArrayListMultimap.create();
   private final Multimap<String, String> typeNamesByName = HashMultimap.create();
-  private final Multimap<String, IOCBeanDef<?>> runtimeBeanDefsByTypeName = ArrayListMultimap.create();
+  private final Multimap<String, SyncBeanDef<?>> runtimeBeanDefsByTypeName = ArrayListMultimap.create();
 
   @Override
   public void destroyBean(Object ref) {
@@ -105,13 +96,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
       if (handle.isEager()) {
         eager.add(handle);
       }
-      for (final Class<?> assignableType : handle.getAssignableTypes()) {
-        handlesByTypeName.put(assignableType.getName(), handle);
-        typeNamesByName.put(assignableType.getName(), assignableType.getName());
-      }
-      if (handle.getBeanName() != null) {
-        typeNamesByName.put(handle.getBeanName(), handle.getActualType().getName());
-      }
+      addFactory(handle);
     }
 
     for (final FactoryHandle handle : eager) {
@@ -119,10 +104,20 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     }
   }
 
+  private void addFactory(final FactoryHandle handle) {
+    for (final Class<?> assignableType : handle.getAssignableTypes()) {
+      handlesByTypeName.put(assignableType.getName(), handle);
+      typeNamesByName.put(assignableType.getName(), assignableType.getName());
+    }
+    if (handle.getBeanName() != null) {
+      typeNamesByName.put(handle.getBeanName(), handle.getActualType().getName());
+    }
+  }
+
   @SuppressWarnings({ "rawtypes" })
   @Override
-  public Collection<IOCBeanDef> lookupBeans(final String name) {
-    final Collection<IOCBeanDef> beanDefs = new ArrayList<IOCBeanDef>();
+  public Collection<SyncBeanDef> lookupBeans(final String name) {
+    final Collection<SyncBeanDef> beanDefs = new ArrayList<SyncBeanDef>();
     for (final String typeName : typeNamesByName.get(name)) {
       beanDefs.addAll(lookupBeansByTypeName(typeName));
     }
@@ -131,17 +126,17 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   }
 
   @Override
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type) {
+  public <T> Collection<SyncBeanDef<T>> lookupBeans(final Class<T> type) {
     return lookupBeansByTypeName(type.getName());
   }
 
   @SuppressWarnings("unchecked")
-  private <T> Collection<IOCBeanDef<T>> lookupBeansByTypeName(final String typeName) {
+  private <T> Collection<SyncBeanDef<T>> lookupBeansByTypeName(final String typeName) {
     final Collection<FactoryHandle> handles = handlesByTypeName.get(typeName);
-    final Collection<IOCBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByTypeName.get(typeName);
+    final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByTypeName.get(typeName);
 
     @SuppressWarnings("rawtypes")
-    final Collection beanDefs = new ArrayList<IOCBeanDef<T>>(handles.size()+runtimeBeanDefs.size());
+    final Collection beanDefs = new ArrayList<SyncBeanDef<T>>(handles.size()+runtimeBeanDefs.size());
     beanDefs.addAll(runtimeBeanDefs);
     for (final FactoryHandle handle : handles) {
       beanDefs.add(new IOCBeanDefImplementation<T>(handle, this.<T>getType(typeName, handle)));
@@ -163,12 +158,12 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   }
 
   @Override
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
+  public <T> Collection<SyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
     final Set<Annotation> qualifierSet = new HashSet<Annotation>(Arrays.asList(qualifiers));
-    final Collection<IOCBeanDef<T>> candidates = lookupBeans(type);
-    final Iterator<IOCBeanDef<T>> iter = candidates.iterator();
+    final Collection<SyncBeanDef<T>> candidates = lookupBeans(type);
+    final Iterator<SyncBeanDef<T>> iter = candidates.iterator();
     while (iter.hasNext()) {
-      final IOCBeanDef<T> beanDef = iter.next();
+      final SyncBeanDef<T> beanDef = iter.next();
       if (!beanDef.matches(qualifierSet)) {
         iter.remove();
       }
@@ -177,31 +172,24 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     return candidates;
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
+  public <T> SyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
     if (qualifiers.length == 0) {
-      qualifiers = new Annotation[] { DEFAULT };
+      qualifiers = new Annotation[] { QualifierUtil.DEFAULT_ANNOTATION };
     }
-    final Collection<IOCBeanDef<T>> resolved = lookupBeans(type, qualifiers);
+    final Collection resolved = lookupBeans(type, qualifiers);
     if (resolved.isEmpty()) {
-      throw new IOCResolutionException("No beans matched " + type.getName() + " with qualifiers " + qualifiers);
+      throw BeanManagerUtil.unsatisfiedResolutionException(type, qualifiers);
     } else if (resolved.size() > 1) {
-      final StringBuilder builder = new StringBuilder();
-      builder.append("Multiple beans matched " + type.getName() + " with qualifiers " + qualifiers + "\n")
-             .append("Found:\n");
-      for (final IOCBeanDef<T> beanDef : resolved) {
-        builder.append("  ")
-               .append(beanDef.toString())
-               .append("\n");
-      }
-      throw new IOCResolutionException(builder.toString());
+      throw BeanManagerUtil.ambiguousResolutionException(type, resolved, qualifiers);
     } else {
-      return resolved.iterator().next();
+      return (SyncBeanDef<T>) resolved.iterator().next();
     }
   }
 
   @Override
-  public <T> void registerBean(final IOCBeanDef<T> beanDef) {
+  public <T> void registerBean(final SyncBeanDef<T> beanDef) {
     runtimeBeanDefsByTypeName.put(beanDef.getType().getName(), beanDef);
     if (beanDef.getName() != null) {
       typeNamesByName.put(beanDef.getName(), beanDef.getType().getName());
@@ -218,7 +206,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     runtimeBeanDefsByTypeName.clear();
   }
 
-  private final class IOCBeanDefImplementation<T> implements IOCBeanDef<T> {
+  private final class IOCBeanDefImplementation<T> implements SyncBeanDef<T> {
     private final FactoryHandle handle;
     private final Class<T> type;
 
@@ -297,5 +285,10 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
         return activator.isActivated();
       }
     }
+  }
+
+  public void addFactory(final Factory<?> factory) {
+    contextManager.addFactory(factory);
+    addFactory(factory.getHandle());
   }
 }

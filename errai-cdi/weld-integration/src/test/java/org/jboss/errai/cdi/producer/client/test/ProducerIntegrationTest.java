@@ -23,7 +23,7 @@ import org.jboss.errai.cdi.producer.client.SingletonProducedBeanDependentBean;
 import org.jboss.errai.cdi.producer.client.Thung;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 /**
@@ -147,7 +147,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testApplicationScopedProducedBeanCanBeLookedUpProgrammatically() {
-    final IOCBeanDef<Thung> thungIOCBeanDef = IOC.getBeanManager().lookupBean(Thung.class);
+    final SyncBeanDef<Thung> thungIOCBeanDef = IOC.getBeanManager().lookupBean(Thung.class);
 
     final Thung thung = thungIOCBeanDef.getInstance();
 
@@ -157,7 +157,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   public void testProducersObserveSingletonScope() {
     final SyncBeanManager beanManager = IOC.getBeanManager();
 
-    final IOCBeanDef<Kayak> kayakBean = beanManager.lookupBean(Kayak.class);
+    final SyncBeanDef<Kayak> kayakBean = beanManager.lookupBean(Kayak.class);
     assertNotNull(kayakBean);
 
     final SingletonProducedBeanDependentBean bean = beanManager.lookupBean(SingletonProducedBeanDependentBean.class)

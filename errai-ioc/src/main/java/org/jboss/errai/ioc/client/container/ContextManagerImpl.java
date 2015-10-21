@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -121,6 +122,24 @@ public class ContextManagerImpl implements ContextManager {
         factory.init(context);
       }
     }
+  }
+
+  @Override
+  public void addFactory(final Factory<?> factory) {
+    final Context context = getContextForScope(factory.getHandle().getScope());
+    context.registerFactory(factory);
+    contextsByFactoryName.put(factory.getHandle().getFactoryName(), context);
+    factory.init(context);
+  }
+
+  private Context getContextForScope(final Class<? extends Annotation> scope) {
+    for (final Context context : contexts) {
+      if (context.handlesScope(scope)) {
+        return context;
+      }
+    }
+
+    throw new RuntimeException("Could not find context for the scope " + scope.getName());
   }
 
 }

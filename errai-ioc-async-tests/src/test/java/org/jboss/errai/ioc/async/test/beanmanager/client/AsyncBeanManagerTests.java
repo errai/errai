@@ -119,7 +119,7 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
   }
 
   public void testLookupDependentBean() {
-    delayTestFinish(10000);
+    delayTestFinish(100000);
 
     Container.$(new Runnable() {
       @Override

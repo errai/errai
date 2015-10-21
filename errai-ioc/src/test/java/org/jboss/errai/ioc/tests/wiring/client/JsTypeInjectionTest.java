@@ -2,7 +2,7 @@ package org.jboss.errai.ioc.tests.wiring.client;
 
 import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
 import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
@@ -57,7 +57,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
     });
     wndContext.addSuperTypeAlias(JsTypeUnimplemented.class.getName(), "fake");
 
-    final IOCBeanDef<JsTypeConsumer> consumer = IOC.getBeanManager().lookupBean(JsTypeConsumer.class);
+    final SyncBeanDef<JsTypeConsumer> consumer = IOC.getBeanManager().lookupBean(JsTypeConsumer.class);
 
     assertSame(ref, ((Proxy<JsTypeUnimplemented>) consumer.getInstance().getIface()).unwrappedInstance());
   }

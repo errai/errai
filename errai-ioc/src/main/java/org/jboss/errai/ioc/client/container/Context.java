@@ -116,6 +116,13 @@ public interface Context {
   Class<? extends Annotation> getScope();
 
   /**
+   * @param scope
+   *          A scope annotation type.
+   * @return True iff this context implementation handles the given scope.
+   */
+  boolean handlesScope(Class<? extends Annotation> scope);
+
+  /**
    * This method is called when a {@link ProxyHelper} attempts to populate a
    * proxy. It is not called when a {@link Proxy} already contains a proxied
    * instance. Therefore, when a {@link Context} becomes inactive it is its
@@ -139,7 +146,7 @@ public interface Context {
   /**
    * Regardless of the behaviour of {@link #getInstance(String)} this method
    * must return a previously non-existent bean instance (to support
-   * {@link IOCBeanDef#newInstance()}.
+   * {@link SyncBeanDef#newInstance()}.
    *
    * @param factoryName
    *          The {@link FactoryHandle#getFactoryName() name} of a factory from

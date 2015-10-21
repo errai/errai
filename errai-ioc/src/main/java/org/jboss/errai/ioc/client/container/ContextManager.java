@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.client.container;
 import java.util.Collection;
 
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 
 /**
  * Provides a single interface for {@link Factory factories} and the
@@ -144,5 +145,14 @@ public interface ContextManager {
    * been initialized and added.
    */
   void finishInit();
+
+  /**
+   * For adding {@link Factory factories} after {@link #finishInit()} has been
+   * called. Used for adding beans with {@link LoadAsync}.
+   *
+   * @param factory
+   *          A {@link Factory} for a type with {@link LoadAsync}.
+   */
+  void addFactory(Factory<?> factory);
 
 }

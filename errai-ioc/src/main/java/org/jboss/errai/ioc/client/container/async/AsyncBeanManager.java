@@ -46,6 +46,7 @@ public interface AsyncBeanManager extends ClientBeanManager {
    *
    * @return and unmodifiable list of all beans with the specified name.
    */
+  @SuppressWarnings("rawtypes")
   Collection<AsyncBeanDef> lookupBeans(String name);
 
   /**

@@ -66,4 +66,9 @@ public class DependentScopeContext extends AbstractContext {
     return true;
   }
 
+  @Override
+  public boolean handlesScope(Class<? extends Annotation> scope) {
+    return Dependent.class.equals(scope);
+  }
+
 }
