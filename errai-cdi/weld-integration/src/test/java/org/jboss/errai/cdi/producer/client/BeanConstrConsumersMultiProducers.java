@@ -3,6 +3,7 @@ package org.jboss.errai.cdi.producer.client;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -39,16 +40,17 @@ public class BeanConstrConsumersMultiProducers {
 
   @Produces
   @Response
+  @ApplicationScoped
   private FooLabel produceResponseLabel() {
     return new FooLabel("<No Response!!!>");
   }
 
-  @Produces @Greets
+  @Produces @Greets @ApplicationScoped
   private static FooLabel produceGreeting() {
     return new FooLabel("Hello, there!!!");
   }
 
-  @Produces @Parts
+  @Produces @Parts @ApplicationScoped
   private static FooLabel produceParting() {
     return new FooLabel("Goodbye, there!!!");
   }

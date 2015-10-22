@@ -164,7 +164,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     resolveSpecializations();
     linkAbstractInjectables();
     resolveDependencies();
-    validateDependentScopedInjectables();
+    validateNoCyclesWithOnlyDependentAndProducerBeans();
     if (removeUnreachable) {
       removeUnreachableConcreteInjectables();
     }
@@ -350,13 +350,13 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     });
   }
 
-  private void validateDependentScopedInjectables() {
+  private void validateNoCyclesWithOnlyDependentAndProducerBeans() {
     final Set<ConcreteInjectable> visiting = new LinkedHashSet<ConcreteInjectable>();
     final Set<ConcreteInjectable> visited = new HashSet<ConcreteInjectable>();
     final Collection<String> problems = new ArrayList<String>();
     for (final ConcreteInjectable injectable : concretesByName.values()) {
       if (injectable.wiringTypes.contains(WiringElementType.DependentBean) && !visited.contains(injectable)) {
-        validateDependentScopedInjectable(injectable, visiting, visited, problems);
+        validateDependentScopedInjectable(injectable, visiting, visited, problems, false);
       }
     }
     if (!problems.isEmpty()) {
@@ -375,28 +375,36 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   }
 
   private void validateDependentScopedInjectable(final ConcreteInjectable injectable, final Set<ConcreteInjectable> visiting,
-          final Set<ConcreteInjectable> visited, final Collection<String> problems) {
+          final Set<ConcreteInjectable> visited, final Collection<String> problems, final boolean onlyConstuctorDeps) {
     if (visiting.contains(injectable)) {
-      problems.add(createDependentCycleMessage(visiting, injectable));
+      problems.add(createCycleMessage(visiting, injectable));
       return;
     }
 
     visiting.add(injectable);
     for (final BaseDependency dep : injectable.dependencies) {
+      if (onlyConstuctorDeps && !dep.dependencyType.equals(DependencyType.Constructor)) {
+        continue;
+      }
+
       final ConcreteInjectable resolved = getResolvedDependency(dep, injectable);
-      if (resolved.wiringTypes.contains(WiringElementType.DependentBean) && !visited.contains(resolved)) {
-        validateDependentScopedInjectable(resolved, visiting, visited, problems);
+      if (!visited.contains(resolved)) {
+        if (dep.dependencyType.equals(DependencyType.ProducerMember)) {
+          validateDependentScopedInjectable(resolved, visiting, visited, problems, true);
+        } else if (resolved.wiringTypes.contains(WiringElementType.DependentBean)) {
+          validateDependentScopedInjectable(resolved, visiting, visited, problems, false);
+        }
       }
     }
     visiting.remove(injectable);
     visited.add(injectable);
   }
 
-  private String createDependentCycleMessage(Set<ConcreteInjectable> visiting, ConcreteInjectable injectable) {
+  private String createCycleMessage(Set<ConcreteInjectable> visiting, ConcreteInjectable injectable) {
     final StringBuilder builder = new StringBuilder();
     boolean cycleStarted = false;
+    boolean hasProducer = false;
 
-    builder.append("Dependent scoped cycle found:\n");
     for (final ConcreteInjectable visitingInjectable : visiting) {
       if (visitingInjectable.equals(injectable)) {
         cycleStarted = true;
@@ -405,7 +413,16 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
         builder.append("\t")
                .append(visitingInjectable.type.getFullyQualifiedName())
                .append("\n");
+        if (visitingInjectable.injectableType.equals(InjectableType.Producer)) {
+          hasProducer = true;
+        }
       }
+    }
+
+    if (hasProducer) {
+      builder.insert(0, "A cycle was found containing a producer and no other normal scoped types:\n");
+    } else {
+      builder.insert(0, "A dependent scoped cycle was found:\n");
     }
 
     return builder.toString();
@@ -449,12 +466,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
       }
       if (!visited.contains(concrete)) {
         for (final BaseDependency dep : concrete.dependencies) {
-          final ConcreteInjectable resolved = resolveDependency(dep, concrete, customProvideds, dependencyProblems);
-          if (resolved != null) {
-            if (dep.dependencyType.equals(DependencyType.Constructor)) {
-              resolved.setRequiresProxyTrue();
-            }
-          }
+          resolveDependency(dep, concrete, customProvideds, dependencyProblems);
         }
       }
     }
