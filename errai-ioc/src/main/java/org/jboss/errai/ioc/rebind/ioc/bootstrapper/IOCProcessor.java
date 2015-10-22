@@ -258,7 +258,7 @@ public class IOCProcessor {
           final Map<Class<? extends Annotation>, MetaClass> scopeContexts,
           @SuppressWarnings("rawtypes") BlockBuilder curMethod, final Injectable injectable) {
     if (!injectable.isContextual()) {
-      if (injectable.loadAsync()) {
+      if (injectionContext.isAsync() && injectable.loadAsync()) {
         final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
         registerAsyncFactory(injectable, processingContext, curMethod, factoryClass);
       } else {

@@ -123,21 +123,20 @@ public class FactoryGenerator extends IncrementalGenerator {
 
     final RebindResult retVal;
     if (pw != null) {
-      generator.generate(factoryBuilder, injectable, graph, injectionContext, logger, generatorContext);
-
       final String factorySource;
       if (isCacheUsable(typeName, injectable)) {
         log.debug("Reusing cached factory for " + typeName);
         factorySource = generatedSourceByFactoryTypeName.get(typeName);
       } else {
         log.debug("Generating factory for " + typeName);
+        generator.generate(factoryBuilder, injectable, graph, injectionContext, logger, generatorContext);
         factorySource = factoryBuilder.toJavaString();
         generatedSourceByFactoryTypeName.put(typeName, factorySource);
         injectablesByFactoryTypeName.put(typeName, injectable);
+
+        writeToDotErraiFolder(factorySimpleClassName, factorySource);
       }
 
-      final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + factorySimpleClassName + ".java");
-      RebindUtils.writeStringToFile(tmpFile, factorySource);
       pw.write(factorySource);
       generatorContext.commit(logger, pw);
 
@@ -152,6 +151,11 @@ public class FactoryGenerator extends IncrementalGenerator {
     log.debug("Factory for {} completed in {}ms. Total factory generation time: {}ms", typeName, ellapsed, totalTime);
 
     return retVal;
+  }
+
+  private void writeToDotErraiFolder(final String factorySimpleClassName, final String factorySource) {
+    final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + factorySimpleClassName + ".java");
+    RebindUtils.writeStringToFile(tmpFile, factorySource);
   }
 
   private boolean isCacheUsable(final String typeName, final Injectable givenInjectable) {
