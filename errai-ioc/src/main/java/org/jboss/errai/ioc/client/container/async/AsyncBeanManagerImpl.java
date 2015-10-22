@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.enterprise.inject.Alternative;
@@ -191,6 +192,21 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     }
   }
 
+  private void unregisterAsyncBean(final FactoryHandle handle) {
+    final String name = (handle.getBeanName() != null ? handle.getBeanName() : handle.getActualType().getName());
+    typeNamesByName.remove(name, handle.getActualType().getName());
+    for (final Class<?> assignable : handle.getAssignableTypes()) {
+      final Iterator<UnloadedFactory> unloadedIter = unloadedByTypeName.get(assignable.getName()).iterator();
+      while (unloadedIter.hasNext()) {
+        final UnloadedFactory unloaded = unloadedIter.next();
+        if (unloaded.getHandle().getFactoryName().equals(handle.getFactoryName())) {
+          unloadedIter.remove();
+          break;
+        }
+      }
+    }
+  }
+
   private static class UnloadedFactory {
     private final FactoryHandle handle;
     private final FactoryLoader<?> loader;
@@ -243,9 +259,9 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
         loader.call(new FactoryLoaderCallback<T>() {
           @Override
           public void callback(final Factory<T> factory) {
-            // TODO remove unloadedFactory
             innerBeanManager.addFactory(factory);
             isLoaded = true;
+            unregisterAsyncBean(factory.getHandle());
             final T instance = performSyncLookup().getInstance();
             callback.callback(instance);
           }
@@ -264,6 +280,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
           public void callback(final Factory<T> factory) {
             innerBeanManager.addFactory(factory);
             isLoaded = true;
+            unregisterAsyncBean(factory.getHandle());
             final T instance = performSyncLookup().newInstance();
             callback.callback(instance);
           }

@@ -139,6 +139,27 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
     });
   }
 
+  public void testDependentBeanNotReturnedTwiceAfterLoading() {
+    delayTestFinish(100000);
+
+    Container.$(new Runnable() {
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(ADependent.class)
+            .getInstance(new CreationalCallback<ADependent>() {
+              @Override
+              public void callback(final ADependent bean) {
+                assertNotNull(bean);
+                assertEquals("foo", bean.testString());
+                assertEquals(1, IOC.getAsyncBeanManager().lookupBeans(ADependent.class).size());
+
+                finishTest();
+              }
+            });
+      }
+    });
+  }
+
   public void testLookupFromSuperTypes() {
     delayTestFinish(10000);
 
