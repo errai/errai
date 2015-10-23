@@ -291,10 +291,22 @@ public class IOCProcessor {
             .publicOverridesMethod("onSuccess")._(loadVariable("callback").invoke("callback",
                     castTo(Factory.class, invokeStatic(GWT.class, "create", loadLiteral(factoryClass)))))
             .finish().finish();
+    final Class<?> fragmentId = getAsyncFragmentId(injectable);
+    final Object[] runAsyncParams = (fragmentId.equals(LoadAsync.NO_FRAGMENT.class) ? new Object[] { runAsyncCallback }
+            : new Object[] { fragmentId, runAsyncCallback });
 
     return ObjectBuilder.newInstanceOf(FactoryLoader.class).extend()
             .publicOverridesMethod("call", finalOf(FactoryLoaderCallback.class, "callback"))
-            ._(invokeStatic(GWT.class, "runAsync", runAsyncCallback)).finish().finish();
+            ._(invokeStatic(GWT.class, "runAsync", runAsyncParams)).finish().finish();
+  }
+
+  private Class<?> getAsyncFragmentId(final Injectable injectable) {
+    final LoadAsync loadAsync = injectable.getInjectedType().getAnnotation(LoadAsync.class);
+    if (loadAsync == null) {
+      return LoadAsync.NO_FRAGMENT.class;
+    } else {
+      return loadAsync.value();
+    }
   }
 
   private Statement generateFactoryHandle(final Injectable injectable,
