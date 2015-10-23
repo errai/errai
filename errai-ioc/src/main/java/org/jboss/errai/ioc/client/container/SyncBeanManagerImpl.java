@@ -217,7 +217,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public String toString() {
-      return "[type=" + type.getName() + ", qualifiers=" + handle.getQualifiers() + "]";
+      return BeanManagerUtil.beanDeftoString(handle);
     }
 
     @Override

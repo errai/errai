@@ -721,50 +721,6 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public String membersToString() {
     final StringBuilder buf = new StringBuilder(512);
 
-    List<Builder> toBuild = new ArrayList<Builder>(fields);
-    final List<Builder> toIterate = new ArrayList<Builder>(toBuild);
-
-    int initialFieldSize;
-
-    final boolean _permissiveMode = GenUtil.isPermissiveMode();
-    GenUtil.setPermissiveMode(true);
-    final StringBuilder fieldRenderBuffer = new StringBuilder(100);
-    if (!fields.isEmpty())
-      buf.append("\n");
-    
-    do {
-      initialFieldSize = fields.size();
-
-      if (fieldRenderBuffer.length() > 0) {
-        fieldRenderBuffer.delete(0, fieldRenderBuffer.length());
-      }
-
-      final Iterator<Builder> fieldIterator = toIterate.iterator();
-      while (fieldIterator.hasNext()) {
-        fieldRenderBuffer.append(fieldIterator.next().toJavaString());
-        if (fieldIterator.hasNext())
-          fieldRenderBuffer.append("\n");
-      }
-
-      toIterate.addAll(0, diffList(fields, toBuild));
-      toBuild = new ArrayList<Builder>(fields);
-    }
-    while (initialFieldSize < fields.size());
-
-    GenUtil.setPermissiveMode(_permissiveMode);
-
-    if (!_permissiveMode) {
-      // verification pass.
-      for (final Builder builder : toBuild) {
-        builder.toJavaString();
-      }
-    }
-
-    buf.append(fieldRenderBuffer.toString());
-
-    if (!fields.isEmpty())
-      buf.append("\n");
-
     final Iterator<InnerClass> innerClassIterator = innerClasses.iterator();
     while (innerClassIterator.hasNext()) {
       buf.append(innerClassIterator.next().generate(context));
@@ -790,7 +746,66 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       if (methodsIterator.hasNext())
         buf.append("\n");
     }
-    return buf.toString();
+
+    final StringBuilder fieldRenderBuffer = renderFieldBuffer();
+
+    if (!fields.isEmpty()) {
+      return fieldRenderBuffer.toString() + buf.toString();
+    } else {
+      return buf.toString();
+    }
+  }
+
+  private StringBuilder renderFieldBuffer() {
+    List<Builder> toBuild = new ArrayList<Builder>(fields);
+    final List<Builder> toIterate = new ArrayList<Builder>(toBuild);
+
+    int initialFieldSize;
+
+    final boolean _permissiveMode = GenUtil.isPermissiveMode();
+    GenUtil.setPermissiveMode(true);
+    final StringBuilder fieldRenderBuffer = new StringBuilder(100);
+    final int bufferStart;
+
+    if (!fields.isEmpty()) {
+      fieldRenderBuffer.append('\n');
+      bufferStart = 1;
+    } else {
+      bufferStart = 0;
+    }
+
+    do {
+      initialFieldSize = fields.size();
+
+      if (fieldRenderBuffer.length() > 0) {
+        fieldRenderBuffer.delete(bufferStart, fieldRenderBuffer.length());
+      }
+
+      final Iterator<Builder> fieldIterator = toIterate.iterator();
+      while (fieldIterator.hasNext()) {
+        fieldRenderBuffer.append(fieldIterator.next().toJavaString());
+        if (fieldIterator.hasNext())
+          fieldRenderBuffer.append("\n");
+      }
+
+      toIterate.addAll(0, diffList(fields, toBuild));
+      toBuild = new ArrayList<Builder>(fields);
+    }
+    while (initialFieldSize < fields.size());
+
+    if (!fields.isEmpty()) {
+      fieldRenderBuffer.append('\n');
+    }
+
+    GenUtil.setPermissiveMode(_permissiveMode);
+
+    if (!_permissiveMode) {
+      // verification pass.
+      for (final Builder builder : toBuild) {
+        builder.toJavaString();
+      }
+    }
+    return fieldRenderBuffer;
   }
 
 

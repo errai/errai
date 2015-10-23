@@ -48,12 +48,6 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   }
 
   @Override
-  public void destroyBean(Object ref, Runnable runnable) {
-    bm.destroyBean(ref);
-    runnable.run();
-  }
-
-  @Override
   public boolean isManaged(Object ref) {
     return bm.isManaged(ref);
   }

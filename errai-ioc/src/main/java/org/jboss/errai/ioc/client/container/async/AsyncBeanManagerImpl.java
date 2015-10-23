@@ -20,10 +20,13 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.enterprise.inject.Alternative;
@@ -85,13 +88,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
   @Override
   public void destroyAllBeans() {
     innerBeanManager.destroyAllBeans();
-  }
-
-  // XXX Do we even need this?
-  @Override
-  public void destroyBean(Object ref, Runnable runnable) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not yet implemented.");
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -158,9 +154,9 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     final Collection beans = lookupBeans(type, qualifiers);
 
     if (beans.size() > 1) {
-      throw BeanManagerUtil.unsatisfiedResolutionException(type, qualifiers);
-    } else if (beans.isEmpty()) {
       throw BeanManagerUtil.ambiguousResolutionException(type, beans, qualifiers);
+    } else if (beans.isEmpty()) {
+      throw BeanManagerUtil.unsatisfiedResolutionException(type, qualifiers);
     } else {
       return (AsyncBeanDef<T>) beans.iterator().next();
     }
@@ -235,32 +231,58 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     private final FactoryHandle handle;
     private final FactoryLoader<T> loader;
     private final Set<String> asyncDependencies = new HashSet<String>();
+
     private boolean loaded = false;
+    private boolean loading = false;
+    private final Queue<Runnable> onLoad = new LinkedList<Runnable>();
 
     public UnloadedFactory(final FactoryHandle handle, final FactoryLoader<T> loader) {
       this.handle = handle;
       this.loader = loader;
     }
 
+    private void loadSelf(final Runnable whenLoaded) {
+      if (loaded) {
+        whenLoaded.run();
+        return;
+      } else if (loading) {
+        onLoad.add(whenLoaded);
+        return;
+      } else {
+        loading = true;
+        loader.call(new FactoryLoaderCallback<T>() {
+          @Override
+          public void callback(final Factory<T> factory) {
+            innerBeanManager.addFactory(factory);
+            unregisterAsyncBean(handle);
+            whenLoaded.run();
+          }
+        });
+      }
+    }
+
     public void load(final Runnable onFinish) {
       if (loaded) {
         onFinish.run();
         return;
+      } else if (loading) {
+        onLoad.add(onFinish);
+        return;
       }
 
-      // Set this true right away to avoid issues with cycles.
-      loaded = true;
+      loading = true;
+      onLoad.add(onFinish);
       final RefHolder<Integer> numLoaded = new RefHolder<Integer>();
       numLoaded.set(0);
       final Collection<UnloadedFactory<?>> unloadedDeps = getUnloadedAsyncDependencies();
 
       for (final UnloadedFactory<?> unloadedDep : unloadedDeps) {
-        unloadedDep.load(new Runnable() {
+        unloadedDep.loadSelf(new Runnable() {
           @Override
           public void run() {
             numLoaded.set(numLoaded.get()+1);
             if (numLoaded.get().equals(unloadedDeps.size()+1)) {
-              onFinish.run();
+              finishLoading(unloadedDeps);
             }
           }
         });
@@ -273,18 +295,51 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
           innerBeanManager.addFactory(factory);
           unregisterAsyncBean(handle);
           if (numLoaded.get().equals(unloadedDeps.size()+1)) {
-            onFinish.run();
+            finishLoading(unloadedDeps);
           }
         }
       });
     }
 
+    protected void finishLoading(final Collection<UnloadedFactory<?>> unloadedDeps) {
+      finishDependencies(unloadedDeps);
+      finishSelf();
+    }
+
+    private void finishDependencies(final Collection<UnloadedFactory<?>> unloadedDeps) {
+      for (final UnloadedFactory<?> unloaded : unloadedDeps) {
+        unloaded.finishSelf();
+      }
+    }
+
+    private void finishSelf() {
+      loading = false;
+      loaded = true;
+      while (!onLoad.isEmpty()) {
+        onLoad.poll().run();
+      }
+    }
+
     private Collection<UnloadedFactory<?>> getUnloadedAsyncDependencies() {
-      final Collection<UnloadedFactory<?>> unloadedDeps = new ArrayList<UnloadedFactory<?>>();
-      for (final String factoryName : asyncDependencies) {
+      final Deque<UnloadedFactory<?>> unloadedDeps = new LinkedList<UnloadedFactory<?>>();
+
+      final Queue<String> bfsQueue = new LinkedList<String>(asyncDependencies);
+      final Set<String> visited = new HashSet<String>();
+      visited.add(handle.getFactoryName());
+
+      while (bfsQueue.size() > 0) {
+        final String factoryName = bfsQueue.poll();
+        if (visited.contains(factoryName)) {
+          continue;
+        }
+
         final UnloadedFactory<?> unloadedDep = unloadedByFactoryName.get(factoryName);
-        if (unloadedDep != null) {
-          unloadedDeps.add(unloadedDep);
+        if (unloadedDep != null && !unloadedDep.loaded) {
+          unloadedDeps.addFirst(unloadedDep);
+          visited.add(factoryName);
+          for (final String dependentFactoryName : unloadedDep.asyncDependencies) {
+            bfsQueue.add(dependentFactoryName);
+          }
         }
       }
 
@@ -386,6 +441,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
       @Override
       public boolean isActivated() {
         return true;
+      }
+
+      @Override
+      public String toString() {
+        return BeanManagerUtil.beanDeftoString(handle);
       }
 
     }

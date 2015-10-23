@@ -28,7 +28,7 @@ public class BeanManagerUtil {
   public static <T> IOCResolutionException ambiguousResolutionException(Class<T> type, final Collection<IOCBeanDef<T>> resolved,
           Annotation... qualifiers) {
     final StringBuilder builder = new StringBuilder();
-    builder.append("Multiple beans matched " + type.getName() + " with qualifiers " + qualifiers + "\n")
+    builder.append("Multiple beans matched " + type.getName() + " with qualifiers " + qualifiersToString(qualifiers) + "\n")
            .append("Found:\n");
     for (final IOCBeanDef<T> beanDef : resolved) {
       builder.append("  ")
@@ -40,7 +40,23 @@ public class BeanManagerUtil {
   }
 
   public static <T> IOCResolutionException unsatisfiedResolutionException(Class<T> type, Annotation... qualifiers) {
-    return new IOCResolutionException("No beans matched " + type.getName() + " with qualifiers " + qualifiers);
+    return new IOCResolutionException("No beans matched " + type.getName() + " with qualifiers " + qualifiersToString(qualifiers));
+  }
+
+  public static String beanDeftoString(final FactoryHandle handle) {
+    return "[type=" + handle.getActualType().getName() + ", qualifiers=" + handle.getQualifiers() + "]";
+  }
+
+  private static String qualifiersToString(final Annotation[] qualifiers) {
+    final StringBuilder builder = new StringBuilder().append("{ ");
+    for (final Annotation qualifier : qualifiers) {
+      builder.append(qualifier.annotationType().getName())
+             .append(", ");
+    }
+    builder.delete(builder.length() - ", ".length(), builder.length());
+    builder.append(" }");
+
+    return builder.toString();
   }
 
 }

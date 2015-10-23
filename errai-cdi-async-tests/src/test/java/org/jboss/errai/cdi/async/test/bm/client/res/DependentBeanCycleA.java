@@ -27,11 +27,11 @@ import javax.inject.Inject;
  */
 @Dependent @LoadAsync
 public class DependentBeanCycleA {
-  @Inject DependentBeanCycleB dependentBeanCycleB;
+  @Inject ApplicationScopedBeanCycleB dependentBeanCycleB;
 
   public boolean preDestroyCalled = false;
 
-  public DependentBeanCycleB getDependentBeanCycleB() {
+  public ApplicationScopedBeanCycleB getDependentBeanCycleB() {
     return dependentBeanCycleB;
   }
 

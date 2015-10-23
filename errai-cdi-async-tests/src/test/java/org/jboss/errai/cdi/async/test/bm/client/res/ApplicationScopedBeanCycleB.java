@@ -14,38 +14,45 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.async.test.cyclic.client.res;
+package org.jboss.errai.cdi.async.test.bm.client.res;
 
-import org.jboss.errai.ioc.client.api.LoadAsync;
-
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.jboss.errai.ioc.client.api.LoadAsync;
 
 /**
  * @author Mike Brock
  */
 @ApplicationScoped @LoadAsync
-public class BeanInjectSelf {
-  private static int counter = 0;
-  private int instance = ++counter;
-  private BeanInjectSelf self;
+public class ApplicationScopedBeanCycleB {
+  @Inject DependentBeanCycleA dependentBeanCycleA;
 
-  // required to make proxyable
-  public BeanInjectSelf() {
+  public static int instanceCount = 1;
+  private int instance;
+  private boolean preDestroy = false;
+
+  @PostConstruct
+  private void postConstruct() {
+    instance = instanceCount++;
   }
 
-  // it makes me angry that I actually had to support this to be consistent with the JSR-299 TCK.
-  // in fact, I find it absurd that I'm not throwing an exception right now.
-  @Inject
-  public BeanInjectSelf(BeanInjectSelf selfRefProxy) {
-    this.self = selfRefProxy;
+  @PreDestroy
+  public void preDestroy() {
+    preDestroy = true;
+  }
+
+  public DependentBeanCycleA getDependentBeanCycleA() {
+    return dependentBeanCycleA;
   }
 
   public int getInstance() {
     return instance;
   }
 
-  public BeanInjectSelf getSelf() {
-    return self;
+  public boolean isPreDestroy() {
+    return preDestroy;
   }
 }

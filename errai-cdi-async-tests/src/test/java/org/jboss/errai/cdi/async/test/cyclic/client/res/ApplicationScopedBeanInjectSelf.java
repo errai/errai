@@ -14,45 +14,36 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.async.test.bm.client.res;
+package org.jboss.errai.cdi.async.test.cyclic.client.res;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@Dependent @LoadAsync
-public class DependentBeanCycleB {
-  @Inject DependentBeanCycleA dependentBeanCycleA;
+@ApplicationScoped @LoadAsync
+public class ApplicationScopedBeanInjectSelf {
+  private static int counter = 0;
+  private int instance = ++counter;
+  private ApplicationScopedBeanInjectSelf self;
 
-  public static int instanceCount = 1;
-  private int instance;
-  private boolean preDestroy = false;
-
-  @PostConstruct
-  private void postConstruct() {
-    instance = instanceCount++;
+  // required to make proxyable
+  public ApplicationScopedBeanInjectSelf() {
   }
 
-  @PreDestroy
-  public void preDestroy() {
-    preDestroy = true;
-  }
-
-  public DependentBeanCycleA getDependentBeanCycleA() {
-    return dependentBeanCycleA;
+  @Inject
+  public ApplicationScopedBeanInjectSelf(ApplicationScopedBeanInjectSelf selfRefProxy) {
+    this.self = selfRefProxy;
   }
 
   public int getInstance() {
     return instance;
   }
 
-  public boolean isPreDestroy() {
-    return preDestroy;
+  public ApplicationScopedBeanInjectSelf getSelf() {
+    return self;
   }
 }

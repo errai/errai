@@ -21,6 +21,6 @@ import org.jboss.errai.ioc.client.api.LoadAsync;
 /**
  * @author Mike Brock
  */
-@LoadAsync
+@LoadAsync @QualB
 public class InheritedApplicationScopedBean extends ApplicationScopedBean {
 }

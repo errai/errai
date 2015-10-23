@@ -68,9 +68,11 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   private final Map<String, ConcreteInjectable> concretesByName = new HashMap<String, ConcreteInjectable>();
   private final List<ConcreteInjectable> specializations = new ArrayList<ConcreteInjectable>();
   private final FactoryNameGenerator nameGenerator = new FactoryNameGenerator();
+  private final boolean async;
 
-  public DependencyGraphBuilderImpl(final QualifierFactory qualFactory) {
+  public DependencyGraphBuilderImpl(final QualifierFactory qualFactory, final boolean async) {
     this.qualFactory = qualFactory;
+    this.async = async;
   }
 
   @Override
@@ -164,12 +166,61 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     resolveSpecializations();
     linkAbstractInjectables();
     resolveDependencies();
-    validateNoCyclesWithOnlyDependentAndProducerBeans();
+    validateConcreteInjectables(createValidators());
     if (removeUnreachable) {
       removeUnreachableConcreteInjectables();
     }
 
     return new DependencyGraphImpl();
+  }
+
+  private Collection<Validator> createValidators() {
+    final Collection<Validator> validators = new ArrayList<Validator>();
+    validators.add(createCycleValidator());
+    if (async) {
+      validators.add(createAsyncValidator());
+    }
+
+    return validators;
+  }
+
+  private Validator createCycleValidator() {
+    return new Validator() {
+
+      private final Set<ConcreteInjectable> visited = new HashSet<ConcreteInjectable>();
+      private final Set<ConcreteInjectable> visiting = new LinkedHashSet<ConcreteInjectable>();
+
+      @Override
+      public boolean canValidate(final ConcreteInjectable injectable) {
+        return injectable.wiringTypes.contains(WiringElementType.DependentBean) && !visited.contains(injectable);
+      }
+
+      @Override
+      public void validate(final ConcreteInjectable injectable, final Collection<String> problems) {
+        validateDependentScopedInjectable(injectable, visiting, visited, problems, false);
+      }
+
+    };
+  }
+
+  private Validator createAsyncValidator() {
+    return new Validator() {
+
+      @Override
+      public boolean canValidate(final ConcreteInjectable injectable) {
+        return !injectable.loadAsync();
+      }
+
+      @Override
+      public void validate(final ConcreteInjectable injectable, final Collection<String> problems) {
+        for (final Dependency dep : injectable.getDependencies()) {
+          if (dep.getInjectable().loadAsync()) {
+            problems.add("The bean " + injectable + " is not @LoadAsync but depends on the @LoadAsync bean " + dep.getInjectable());
+          }
+        }
+      }
+
+    };
   }
 
   private void resolveSpecializations() {
@@ -350,13 +401,13 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     });
   }
 
-  private void validateNoCyclesWithOnlyDependentAndProducerBeans() {
-    final Set<ConcreteInjectable> visiting = new LinkedHashSet<ConcreteInjectable>();
-    final Set<ConcreteInjectable> visited = new HashSet<ConcreteInjectable>();
+  private void validateConcreteInjectables(final Collection<Validator> validators) {
     final Collection<String> problems = new ArrayList<String>();
     for (final ConcreteInjectable injectable : concretesByName.values()) {
-      if (injectable.wiringTypes.contains(WiringElementType.DependentBean) && !visited.contains(injectable)) {
-        validateDependentScopedInjectable(injectable, visiting, visited, problems, false);
+      for (final Validator validator : validators) {
+        if (validator.canValidate(injectable)) {
+          validator.validate(injectable, problems);
+        }
       }
     }
     if (!problems.isEmpty()) {
@@ -365,7 +416,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   }
 
   private String combineProblemMessages(final Collection<String> problems) {
-    final StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder("The following problems were found:\n\n");
     for (final String problem : problems) {
       builder.append(problem)
              .append("\n");
@@ -750,6 +801,11 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
       return concretesByName.size();
     }
 
+  }
+
+  private static interface Validator {
+    boolean canValidate(ConcreteInjectable injectable);
+    void validate(ConcreteInjectable injectable, Collection<String> problems);
   }
 
 }

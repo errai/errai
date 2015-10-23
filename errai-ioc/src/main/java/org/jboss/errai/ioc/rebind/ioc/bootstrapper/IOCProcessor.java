@@ -24,7 +24,6 @@ import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
-import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.lang.annotation.Annotation;
@@ -42,8 +41,6 @@ import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
@@ -59,7 +56,6 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -72,7 +68,6 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
@@ -142,7 +137,7 @@ public class IOCProcessor {
 
     final Collection<MetaClass> allMetaClasses = findRelevantClasses(processingContext);
     log.debug("Found {} classes", allMetaClasses.size());
-    final DependencyGraphBuilder graphBuilder = new DependencyGraphBuilderImpl(qualFactory);
+    final DependencyGraphBuilder graphBuilder = new DependencyGraphBuilderImpl(qualFactory, injectionContext.isAsync());
 
 
     addAllInjectableProviders(graphBuilder);
@@ -323,13 +318,7 @@ public class IOCProcessor {
     }
 
     for (final Annotation qualifier : injectable.getQualifier()) {
-      if (qualifier.annotationType().equals(Default.class)) {
-        curMethod._(loadVariable(handleVarName).invoke("addQualifier", loadStatic(QualifierUtil.class, "DEFAULT_ANNOTATION")));
-      } else if (qualifier.annotationType().equals(Any.class)) {
-        curMethod._(loadVariable(handleVarName).invoke("addQualifier", loadStatic(QualifierUtil.class, "ANY_ANNOTATION")));
-      } else {
-        curMethod._(loadVariable(handleVarName).invoke("addQualifier", LiteralFactory.getLiteral(qualifier)));
-      }
+      curMethod._(loadVariable(handleVarName).invoke("addQualifier", loadLiteral(qualifier)));
     }
 
     return loadVariable(handleVarName);
@@ -675,12 +664,7 @@ public class IOCProcessor {
       final List<MetaMethod> methods = type.getDeclaredMethodsAnnotatedWith(anno);
       for (final MetaMethod method : methods) {
         final Class<? extends Annotation> directScope = getScope(method);
-        final WiringElementType[] wiringTypes;
-        if (method.isAnnotationPresent(Specializes.class)) {
-          wiringTypes = new WiringElementType[] { getWiringTypesForScopeAnnotation(directScope), WiringElementType.Specialization };
-        } else {
-          wiringTypes = new WiringElementType[] { getWiringTypesForScopeAnnotation(directScope) };
-        }
+        final WiringElementType[] wiringTypes = getWiringTypeForProducer(type, method, directScope);
         final Injectable producedInjectable = builder.addInjectable(method.getReturnType(),
                 qualFactory.forSource(method), directScope, InjectableType.Producer, wiringTypes);
         builder.addProducerMemberDependency(producedInjectable, typeInjectable.getInjectedType(), typeInjectable.getQualifier(), method);
@@ -699,6 +683,21 @@ public class IOCProcessor {
         }
       }
     }
+  }
+
+  private WiringElementType[] getWiringTypeForProducer(final MetaClass enclosingClass, final HasAnnotations annotated,
+          final Class<? extends Annotation> directScope) {
+    final List<WiringElementType> wiringTypes = new ArrayList<WiringElementType>();
+
+    wiringTypes.add(getWiringTypesForScopeAnnotation(directScope));
+    if (annotated.isAnnotationPresent(Specializes.class)) {
+      wiringTypes.add(WiringElementType.Specialization);
+    }
+    if (enclosingClass.isAnnotationPresent(LoadAsync.class)) {
+      wiringTypes.add(WiringElementType.LoadAsync);
+    }
+
+    return wiringTypes.toArray(new WiringElementType[wiringTypes.size()]);
   }
 
   private Collection<MetaMethod> getAllDisposesMethods(final MetaClass type) {
@@ -771,7 +770,7 @@ public class IOCProcessor {
         final Class<? extends Annotation> scopeAnno = getScope(field);
         final Injectable producedInjectable = builder.addInjectable(field.getType(),
                 qualFactory.forSource(field), scopeAnno, InjectableType.Producer,
-                getWiringTypesForScopeAnnotation(scopeAnno));
+                getWiringTypeForProducer(type, field, scopeAnno));
         builder.addProducerMemberDependency(producedInjectable, concreteInjectable.getInjectedType(), concreteInjectable.getQualifier(), field);
 
         final Collection<MetaMethod> matchingDisposers = getMatchingMethods(field, disposesMethods);

@@ -24,9 +24,41 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 
-import org.jboss.errai.cdi.async.test.bm.client.res.*;
+import org.jboss.errai.cdi.async.test.bm.client.res.AbstractBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.ActivatedBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.ActivatedBeanInterface;
+import org.jboss.errai.cdi.async.test.bm.client.res.ApplicationScopedBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.CommonInterface;
+import org.jboss.errai.cdi.async.test.bm.client.res.CommonInterfaceB;
+import org.jboss.errai.cdi.async.test.bm.client.res.Cow;
+import org.jboss.errai.cdi.async.test.bm.client.res.CreditCard;
+import org.jboss.errai.cdi.async.test.bm.client.res.DependentScopedBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.async.test.bm.client.res.FoobieScopedBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.FoobieScopedOverriddenBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.InheritedApplicationScopedBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.InheritedFromAbstractBean;
+import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceA;
+import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceB;
+import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceC;
+import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceD;
+import org.jboss.errai.cdi.async.test.bm.client.res.InterfaceRoot;
+import org.jboss.errai.cdi.async.test.bm.client.res.LincolnBar;
+import org.jboss.errai.cdi.async.test.bm.client.res.OuterBeanInterface;
+import org.jboss.errai.cdi.async.test.bm.client.res.Pig;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualA;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualAppScopeBeanA;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualAppScopeBeanB;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualB;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualEnum;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanApples;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanOranges;
+import org.jboss.errai.cdi.async.test.bm.client.res.QualV;
+import org.jboss.errai.cdi.async.test.bm.client.res.TestBeanActivator;
+import org.jboss.errai.cdi.async.test.bm.client.res.Visa;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
@@ -54,7 +86,12 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         final AsyncBeanDef<InheritedApplicationScopedBean> bean =
-            IOC.getAsyncBeanManager().lookupBean(InheritedApplicationScopedBean.class);
+            IOC.getAsyncBeanManager().lookupBean(InheritedApplicationScopedBean.class, new QualB() {
+              @Override
+              public Class<? extends Annotation> annotationType() {
+                return QualB.class;
+              }
+            });
 
         assertNotNull("inherited application scoped bean did not lookup", bean);
 
@@ -173,7 +210,12 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         final AsyncBeanManager mgr = IOC.getAsyncBeanManager();
-        final AsyncBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class);
+        final AsyncBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class, new QualA() {
+          @Override
+          public Class<? extends Annotation> annotationType() {
+            return QualA.class;
+          }
+        });
 
         final Set<Annotation> a = bean.getQualifiers();
         assertEquals("there should be two qualifiers", 2, a.size());
@@ -203,7 +245,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
         };
 
         final Collection<AsyncBeanDef<CommonInterface>> beans
-            = IOC.getAsyncBeanManager().lookupBeans(CommonInterface.class);
+            = IOC.getAsyncBeanManager().lookupBeans(CommonInterface.class, QualifierUtil.ANY_ANNOTATION);
         assertEquals("wrong number of beans", 2, beans.size());
 
         final AsyncBeanDef<CommonInterface> beanA = IOC.getAsyncBeanManager().lookupBean(CommonInterface.class, qualA);
@@ -269,7 +311,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         final Collection<AsyncBeanDef<CommonInterfaceB>> beans
-            = IOC.getAsyncBeanManager().lookupBeans(CommonInterfaceB.class);
+            = IOC.getAsyncBeanManager().lookupBeans(CommonInterfaceB.class, QualifierUtil.ANY_ANNOTATION);
 
         assertEquals("wrong number of beans", 2, beans.size());
 
@@ -311,11 +353,11 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
         };
 
         try {
-          final AsyncBeanDef<CommonInterface> bean = IOC.getAsyncBeanManager().lookupBean(CommonInterface.class);
+          final AsyncBeanDef<CommonInterface> bean = IOC.getAsyncBeanManager().lookupBean(CommonInterface.class, QualifierUtil.ANY_ANNOTATION);
           fail("should have thrown an exception, but got: " + bean);
         }
         catch (IOCResolutionException e) {
-          assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("multiple matching"));
+          assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("Multiple beans matched"));
         }
 
         try {
@@ -323,7 +365,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
           fail("should have thrown an exception, but got: " + bean);
         }
         catch (IOCResolutionException e) {
-          assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
+          assertTrue("wrong exception thrown", e.getMessage().contains("No beans matched"));
         }
 
         finishTest();
@@ -513,7 +555,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
     }
     return false;
   }
-  
+
   public void testBeanActivator() {
     final RefHolder<TestBeanActivator> activatorRef = new RefHolder<TestBeanActivator>();
     // This will happen synchronously as BeanActivators can not be annotated @LoadAsync
@@ -524,23 +566,23 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
         activatorRef.set(beanInstance);
       }
     });
-    
+
     TestBeanActivator activator = activatorRef.get();
     activator.setActived(true);
-    
+
     AsyncBeanDef<ActivatedBean> bean = IOC.getAsyncBeanManager().lookupBean(ActivatedBean.class);
     assertTrue(bean.isActivated());
 
     activator.setActived(false);
     assertFalse(bean.isActivated());
-    
+
     AsyncBeanDef<ActivatedBeanInterface> qualifiedBean = IOC.getAsyncBeanManager().lookupBean(ActivatedBeanInterface.class);
     assertFalse(qualifiedBean.isActivated());
-    
+
     activator.setActived(true);
     assertTrue(qualifiedBean.isActivated());
   }
-  
+
   public void testBeanActiveByDefault() {
     AsyncBeanDef<DependentScopedBean> bean = IOC.getAsyncBeanManager().lookupBean(DependentScopedBean.class);
     assertTrue(bean.isActivated());

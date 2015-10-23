@@ -76,7 +76,7 @@ public class BootstrapInterningCallback implements InterningCallback {
 
 
       final Class<? extends Annotation> aClass = annotation.annotationType();
-      final String fieldName = PrivateAccessUtil.condensify(aClass.getPackage().getName()) +
+      final String fieldName = PrivateAccessUtil.condensify(aClass.getPackage().getName()) + "_" +
           aClass.getSimpleName() + "_" + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
 
       classStructureBuilder.privateField(fieldName, annotation.annotationType())
