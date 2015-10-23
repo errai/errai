@@ -20,10 +20,14 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.inject.Alternative;
+import javax.inject.Provider;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.QualifierUtil;
@@ -33,6 +37,7 @@ import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.FactoryHandle;
+import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
@@ -49,7 +54,8 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
   private final SyncBeanManagerImpl innerBeanManager = new SyncBeanManagerImpl();
 
   private final Multimap<String, String> typeNamesByName = HashMultimap.create();
-  private final Multimap<String, UnloadedFactory> unloadedByTypeName = HashMultimap.create();
+  private final Multimap<String, UnloadedFactory<?>> unloadedByTypeName = HashMultimap.create();
+  private final Map<String, UnloadedFactory<?>> unloadedByFactoryName = new HashMap<String, UnloadedFactory<?>>();
 
   @Override
   public void destroyBean(final Object ref) {
@@ -129,12 +135,12 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private <T> void addUnloadedBeans(final Collection<AsyncBeanDef> beans, final Class<T> type, final String typeName,
           final Annotation... qualifiers) {
-    final Collection<UnloadedFactory> unloadedCandidates = unloadedByTypeName.get(typeName);
+    final Collection<UnloadedFactory<?>> unloadedCandidates = unloadedByTypeName.get(typeName);
     final Collection<Annotation> allOf = Arrays.asList(qualifiers);
     for (final UnloadedFactory unloaded : unloadedCandidates) {
       if (QualifierUtil.matches(allOf, unloaded.getHandle().getQualifiers())) {
         final Class<T> beanType = (Class<T>) (type != null ? type : unloaded.getHandle().getActualType());
-        beans.add(new FactoryLoaderBeanDef<T>(beanType, unloaded.getHandle(), (FactoryLoader<T>) unloaded.getLoader()));
+        beans.add(unloaded.createBeanDef(beanType));
       }
     }
   }
@@ -175,6 +181,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     return innerBeanManager;
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public void registerAsyncBean(final FactoryHandle handle, final FactoryLoader<?> future) {
     final String beanName;
@@ -190,15 +197,17 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     for (final Class<?> assignable : handle.getAssignableTypes()) {
       unloadedByTypeName.put(assignable.getName(), unloaded);
     }
+    unloadedByFactoryName.put(handle.getFactoryName(), unloaded);
   }
 
   private void unregisterAsyncBean(final FactoryHandle handle) {
     final String name = (handle.getBeanName() != null ? handle.getBeanName() : handle.getActualType().getName());
     typeNamesByName.remove(name, handle.getActualType().getName());
+    unloadedByFactoryName.remove(handle.getFactoryName());
     for (final Class<?> assignable : handle.getAssignableTypes()) {
-      final Iterator<UnloadedFactory> unloadedIter = unloadedByTypeName.get(assignable.getName()).iterator();
+      final Iterator<UnloadedFactory<?>> unloadedIter = unloadedByTypeName.get(assignable.getName()).iterator();
       while (unloadedIter.hasNext()) {
-        final UnloadedFactory unloaded = unloadedIter.next();
+        final UnloadedFactory<?> unloaded = unloadedIter.next();
         if (unloaded.getHandle().getFactoryName().equals(handle.getFactoryName())) {
           unloadedIter.remove();
           break;
@@ -207,118 +216,178 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     }
   }
 
-  private static class UnloadedFactory {
-    private final FactoryHandle handle;
-    private final FactoryLoader<?> loader;
+  @Override
+  public void registerAsyncDependency(final String dependentFactoryName, final String dependencyFactoryName) {
+    final UnloadedFactory<?> unloaded = getUnloadedFactory(dependentFactoryName);
+    unloaded.addAsyncDependency(dependencyFactoryName);
+  }
 
-    public UnloadedFactory(final FactoryHandle handle, final FactoryLoader<?> loader) {
+  private UnloadedFactory<?> getUnloadedFactory(final String factoryName) {
+    final UnloadedFactory<?> unloadedFactory = unloadedByFactoryName.get(factoryName);
+    if (unloadedFactory == null) {
+      throw new RuntimeException("No unloaded factory found for " + factoryName);
+    } else {
+      return unloadedFactory;
+    }
+  }
+
+  private class UnloadedFactory<T> {
+    private final FactoryHandle handle;
+    private final FactoryLoader<T> loader;
+    private final Set<String> asyncDependencies = new HashSet<String>();
+    private boolean loaded = false;
+
+    public UnloadedFactory(final FactoryHandle handle, final FactoryLoader<T> loader) {
       this.handle = handle;
       this.loader = loader;
+    }
+
+    public void load(final Runnable onFinish) {
+      if (loaded) {
+        onFinish.run();
+        return;
+      }
+
+      // Set this true right away to avoid issues with cycles.
+      loaded = true;
+      final RefHolder<Integer> numLoaded = new RefHolder<Integer>();
+      numLoaded.set(0);
+      final Collection<UnloadedFactory<?>> unloadedDeps = getUnloadedAsyncDependencies();
+
+      for (final UnloadedFactory<?> unloadedDep : unloadedDeps) {
+        unloadedDep.load(new Runnable() {
+          @Override
+          public void run() {
+            numLoaded.set(numLoaded.get()+1);
+            if (numLoaded.get().equals(unloadedDeps.size()+1)) {
+              onFinish.run();
+            }
+          }
+        });
+      }
+
+      loader.call(new FactoryLoaderCallback<T>() {
+        @Override
+        public void callback(final Factory<T> factory) {
+          numLoaded.set(numLoaded.get()+1);
+          innerBeanManager.addFactory(factory);
+          unregisterAsyncBean(handle);
+          if (numLoaded.get().equals(unloadedDeps.size()+1)) {
+            onFinish.run();
+          }
+        }
+      });
+    }
+
+    private Collection<UnloadedFactory<?>> getUnloadedAsyncDependencies() {
+      final Collection<UnloadedFactory<?>> unloadedDeps = new ArrayList<UnloadedFactory<?>>();
+      for (final String factoryName : asyncDependencies) {
+        final UnloadedFactory<?> unloadedDep = unloadedByFactoryName.get(factoryName);
+        if (unloadedDep != null) {
+          unloadedDeps.add(unloadedDep);
+        }
+      }
+
+      return unloadedDeps;
     }
 
     public FactoryHandle getHandle() {
       return handle;
     }
 
-    public FactoryLoader<?> getLoader() {
-      return loader;
-    }
-  }
-
-  private class FactoryLoaderBeanDef<T> implements AsyncBeanDef<T> {
-
-    boolean isLoaded = false;
-    private final Class<T> type;
-    private final FactoryHandle handle;
-    private final FactoryLoader<T> loader;
-
-    public FactoryLoaderBeanDef(final Class<T> type, final FactoryHandle handle, final FactoryLoader<T> loader) {
-      this.type = type;
-      this.handle = handle;
-      this.loader = loader;
+    public void addAsyncDependency(final String factoryName) {
+      asyncDependencies.add(factoryName);
     }
 
-    @Override
-    public Class<T> getType() {
-      return type;
+    public FactoryLoaderBeanDef createBeanDef(final Class<T> type) {
+      return new FactoryLoaderBeanDef(type);
     }
 
-    @Override
-    public Class<?> getBeanClass() {
-      return handle.getActualType();
-    }
+    private class FactoryLoaderBeanDef implements AsyncBeanDef<T> {
 
-    @Override
-    public Class<? extends Annotation> getScope() {
-      return handle.getScope();
-    }
+      private final Class<T> type;
 
-    @Override
-    public void getInstance(final CreationalCallback<T> callback) {
-      if (!isLoaded) {
-        loader.call(new FactoryLoaderCallback<T>() {
+      public FactoryLoaderBeanDef(final Class<T> type) {
+        this.type = type;
+      }
+
+      @Override
+      public Class<T> getType() {
+        return type;
+      }
+
+      @Override
+      public Class<?> getBeanClass() {
+        return handle.getActualType();
+      }
+
+      @Override
+      public Class<? extends Annotation> getScope() {
+        return handle.getScope();
+      }
+
+      @Override
+      public void getInstance(final CreationalCallback<T> callback) {
+        getInstanceHelper(callback, new Provider<T>() {
           @Override
-          public void callback(final Factory<T> factory) {
-            innerBeanManager.addFactory(factory);
-            isLoaded = true;
-            unregisterAsyncBean(factory.getHandle());
-            final T instance = performSyncLookup().getInstance();
-            callback.callback(instance);
+          public T get() {
+            return performSyncLookup().getInstance();
           }
         });
-      } else {
-        final T instance = performSyncLookup().getInstance();
-        callback.callback(instance);
       }
-    }
 
-    @Override
-    public void newInstance(final CreationalCallback<T> callback) {
-      if (!isLoaded) {
-        loader.call(new FactoryLoaderCallback<T>() {
+      @Override
+      public void newInstance(final CreationalCallback<T> callback) {
+        getInstanceHelper(callback, new Provider<T>() {
           @Override
-          public void callback(final Factory<T> factory) {
-            innerBeanManager.addFactory(factory);
-            isLoaded = true;
-            unregisterAsyncBean(factory.getHandle());
-            final T instance = performSyncLookup().newInstance();
-            callback.callback(instance);
+          public T get() {
+            return performSyncLookup().newInstance();
           }
         });
-      } else {
-        final T instance = performSyncLookup().newInstance();
-        callback.callback(instance);
       }
-    }
 
-    private SyncBeanDef<T> performSyncLookup() {
-      return innerBeanManager.lookupBean(type, handle.getQualifiers().toArray(new Annotation[0]));
-    }
+      private void getInstanceHelper(final CreationalCallback<T> callback, final Provider<T> instanceProvider) {
+        if (!loaded) {
+          load(new Runnable() {
+            @Override
+            public void run() {
+              callback.callback(instanceProvider.get());
+            }
+          });
+        } else {
+          callback.callback(instanceProvider.get());
+        }
+      }
 
-    @Override
-    public Set<Annotation> getQualifiers() {
-      return handle.getQualifiers();
-    }
+      private SyncBeanDef<T> performSyncLookup() {
+        return innerBeanManager.lookupBean(type, handle.getQualifiers().toArray(new Annotation[0]));
+      }
 
-    @Override
-    public boolean matches(final Set<Annotation> annotations) {
-      return QualifierUtil.matches(handle.getQualifiers(), annotations);
-    }
+      @Override
+      public Set<Annotation> getQualifiers() {
+        return handle.getQualifiers();
+      }
 
-    @Override
-    public String getName() {
-      return handle.getBeanName();
-    }
+      @Override
+      public boolean matches(final Set<Annotation> annotations) {
+        return QualifierUtil.matches(handle.getQualifiers(), annotations);
+      }
 
-    @Override
-    public boolean isConcrete() {
-      return true;
-    }
+      @Override
+      public String getName() {
+        return handle.getBeanName();
+      }
 
-    @Override
-    public boolean isActivated() {
-      return true;
-    }
+      @Override
+      public boolean isConcrete() {
+        return true;
+      }
 
+      @Override
+      public boolean isActivated() {
+        return true;
+      }
+
+    }
   }
 }

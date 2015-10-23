@@ -44,14 +44,22 @@ public class ContextManagerImpl implements ContextManager {
 
   @Override
   public <T> T getInstance(final String factoryName) {
-    return contextsByFactoryName.get(factoryName).getInstance(factoryName);
+    return getContext(factoryName).getInstance(factoryName);
+  }
+
+  private Context getContext(final String factoryName) {
+    final Context context = contextsByFactoryName.get(factoryName);
+    if (context == null) {
+      throw new RuntimeException("Could not find a context for the factory " + factoryName);
+    } else {
+      return context;
+    }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getEagerInstance(final String factoryName) {
-    final Context context = contextsByFactoryName.get(factoryName);
-    final T instance = context.<T>getInstance(factoryName);
+    final T instance = getContext(factoryName).<T>getInstance(factoryName);
     if ((instance instanceof Proxy)) {
       ((Proxy<T>) instance).unwrappedInstance();
     }
@@ -61,7 +69,7 @@ public class ContextManagerImpl implements ContextManager {
 
   @Override
   public <T> T getNewInstance(final String factoryName) {
-    return contextsByFactoryName.get(factoryName).getNewInstance(factoryName);
+    return getContext(factoryName).getNewInstance(factoryName);
   }
 
   @Override

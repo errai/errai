@@ -94,6 +94,7 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerSetup.FactoryL
 import org.jboss.errai.ioc.client.container.async.DefaultRunAsyncCallback;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable;
@@ -277,6 +278,12 @@ public class IOCProcessor {
     final Statement handle = generateFactoryHandle(injectable, curMethod);
     final Statement loader = generateFactoryLoader(injectable, factoryClass);
     curMethod._(loadVariable("asyncBeanManagerSetup").invoke("registerAsyncBean", handle, loader));
+    for (final Dependency dep : injectable.getDependencies()) {
+      if (dep.getInjectable().loadAsync()) {
+        curMethod._(loadVariable("asyncBeanManagerSetup").invoke("registerAsyncDependency", injectable.getFactoryName(),
+                dep.getInjectable().getFactoryName()));
+      }
+    }
   }
 
   private Statement generateFactoryLoader(final Injectable injectable, final MetaClass factoryClass) {

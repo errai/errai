@@ -27,6 +27,8 @@ public interface AsyncBeanManagerSetup {
 
   void registerAsyncBean(FactoryHandle handle, FactoryLoader<?> future);
 
+  void registerAsyncDependency(String dependentFactoryName, String dependencyFactoryName);
+
   public static interface FactoryLoaderCallback<T> {
     void callback(Factory<T> factory);
   }
