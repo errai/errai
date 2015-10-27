@@ -87,13 +87,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
   private static final Qualifier UNIVERSAL = new Universal();
 
-  private static final SortedSet<AnnotationWrapper> EMPTY_SORTED_SET = new TreeSet<AnnotationWrapper>();
-
   private final Map<SortedSet<AnnotationWrapper>, NormalQualifier> qualifiers = new HashMap<SortedSet<AnnotationWrapper>, NormalQualifier>();
-
-  {
-    qualifiers.put(EMPTY_SORTED_SET, new NormalQualifier(Collections.<AnnotationWrapper>emptySet()));
-  }
 
   @Override
   public Qualifier forSource(final HasAnnotations annotated) {
@@ -187,11 +181,6 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
   private boolean onlyContainsNamed(final Set<AnnotationWrapper> annos) {
     return annos.size() == 1 && annos.iterator().next().anno.annotationType().equals(Named.class);
-  }
-
-  @Override
-  public Qualifier forUnqualified() {
-    return qualifiers.get(Collections.emptySet());
   }
 
   @Override

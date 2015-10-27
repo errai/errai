@@ -58,12 +58,6 @@ public interface QualifierFactory {
   Qualifier forSink(HasAnnotations annotated);
 
   /**
-   * @return The empty qualifier. This qualifier only satisfies itself, and is
-   *         satisfied by all other qualifiers.
-   */
-  Qualifier forUnqualified();
-
-  /**
    * @return The universal qualifier. This qualifier satisfies all other
    *         qualifiers, and is only satisfied by itself.
    */
