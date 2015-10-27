@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2015-07-28</date>
+    <date>2015-10-27</date>
     
     
     
@@ -7913,6 +7913,11 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
   
     <listitem>
       <simpara><emphasis>errai.marshalling.force_static_marshallers</emphasis> when set to <literal><phrase role="code">true</phrase></literal>, Errai will not use dynamic marshallers. If the generated <literal><phrase role="code">ServerMarshallingFactoryImpl</phrase></literal> cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis>errai.marshalling.short_names</emphasis> when set to true (the default value), Errai will shorten the names of generated marshaller classes (rather than using the long names which encode the fully qualified class names of the types being marshalled). This was added to avoid issues with path length limitations on certain platforms.</simpara>
       
     </listitem>
   
