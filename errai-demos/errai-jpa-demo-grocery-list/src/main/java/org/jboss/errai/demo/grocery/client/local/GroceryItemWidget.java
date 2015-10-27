@@ -113,13 +113,14 @@ public class GroceryItemWidget extends Composite implements HasModel<Item> {
     this.id = NEXT_AVAILABLE_ID;
     NEXT_AVAILABLE_ID++;
     deleteButton.addStyleName("hidden");
+    formHolder.clear();
     formHolder.add(itemEditForm);
     formHolder.addStyleName("hidden");
   }
 
   /**
    * Changes the model object visualized by this class to the given one.
-   * 
+   *
    * @param item
    *          The item that should become the model of this class. Must not be null.
    * @return The proxied version of the given item object, for purposes of data binding. If you intend to make any
@@ -139,7 +140,7 @@ public class GroceryItemWidget extends Composite implements HasModel<Item> {
 
   /**
    * The following functions handle user interaction with the web app
-   * 
+   *
    * @param event
    *          The user-generated interactive event
    */
@@ -252,7 +253,7 @@ public class GroceryItemWidget extends Composite implements HasModel<Item> {
     addedBy.removeAttribute("display");
     addedOn.removeAttribute("display");
   }
-  
+
   /**
    * Close edit form from within widget and update widget data
    * @param item
@@ -261,7 +262,7 @@ public class GroceryItemWidget extends Composite implements HasModel<Item> {
     setModel(item);
     switchToDisplayMode();
   }
-  
+
   @PreDestroy
   private void toBeDestroyed() {
     System.out.println("GroceryItemWidget for " + name + " is being destroyed.");

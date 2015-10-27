@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.common.client.api.WrappedPortable;
+
 /**
  * Normal scoped beans or dependent scoped beans decorated with AOP features
  * will be wrapped in proxies. All proxies produced by a {@link Factory} must
@@ -25,7 +27,7 @@ package org.jboss.errai.ioc.client.container;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface Proxy<T> {
+public interface Proxy<T> extends WrappedPortable {
 
   /**
    * @return Returns this proxy as the type of the instance it is proxying.
@@ -50,13 +52,6 @@ public interface Proxy<T> {
    * @param context The context associated with the {@link Factory} that created this proxy.
    */
   void setContext(Context context);
-
-  /**
-   * If no proxied instance has yet been set, this method will request and instance from the {@link Context} and {@link #setInstance(Object) set} it.
-   *
-   * @return The instance wrapped by this {@link Proxy}.
-   */
-  T unwrappedInstance();
 
   /**
    * Called once after {@link #setInstance(Object)} is called.

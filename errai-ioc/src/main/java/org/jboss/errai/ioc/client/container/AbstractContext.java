@@ -151,11 +151,7 @@ public abstract class AbstractContext implements Context {
   }
 
   private Object maybeUnwrap(Object instance) {
-    if (instance instanceof Proxy) {
-      return ((Proxy<?>) instance).unwrappedInstance();
-    } else {
-      return instance;
-    }
+    return Factory.maybeUnwrapProxy(instance);
   }
 
   @Override

@@ -59,11 +59,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
   @Override
   public Object getActualBeanReference(Object ref) {
-    if (isProxyReference(ref)) {
-      return ((Proxy<?>) ref).unwrappedInstance();
-    } else {
-      return ref;
-    }
+    return Factory.maybeUnwrapProxy(ref);
   }
 
   @Override
@@ -243,7 +239,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
         @SuppressWarnings("unchecked")
         final Proxy<T> proxy = (Proxy<T>) instance;
         // Forces bean to be loaded.
-        proxy.unwrappedInstance();
+        proxy.unwrap();
       }
 
       return instance;

@@ -140,7 +140,7 @@ public abstract class Factory<T> {
   @SuppressWarnings("unchecked")
   public static <P> P maybeUnwrapProxy(P instance) {
     if (instance instanceof Proxy) {
-      return ((Proxy<P>) instance).unwrappedInstance();
+      return (P) ((Proxy<P>) instance).unwrap();
     }
     else {
       return instance;

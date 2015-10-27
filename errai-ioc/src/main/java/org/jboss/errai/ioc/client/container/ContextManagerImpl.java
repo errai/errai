@@ -61,7 +61,7 @@ public class ContextManagerImpl implements ContextManager {
   public <T> T getEagerInstance(final String factoryName) {
     final T instance = getContext(factoryName).<T>getInstance(factoryName);
     if ((instance instanceof Proxy)) {
-      ((Proxy<T>) instance).unwrappedInstance();
+      ((Proxy<T>) instance).unwrap();
     }
 
     return instance;

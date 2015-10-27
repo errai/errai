@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Bool.instanceOf;
 import static org.jboss.errai.codegen.util.PrivateAccessUtil.addPrivateAccessStubs;
 import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldAccessorName;
@@ -102,8 +100,8 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
                       loadVariable(
                               "producerInstance"),
                       Proxy.class))._(loadVariable("producerInstance").assignValue(
-                              castTo(parameterizedAs(Proxy.class, typeParametersOf(producerInjectable.getInjectedType())),
-                                      loadVariable("producerInstance")).invoke("unwrappedInstance")))
+                              castTo(producerInjectable.getInjectedType(), castTo(Proxy.class,
+                                      loadVariable("producerInstance")).invoke("unwrap"))))
               .finish());
     }
 
@@ -161,8 +159,8 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
                       loadVariable(
                               "producerInstance"),
                       Proxy.class))._(loadVariable("producerInstance").assignValue(
-                              castTo(parameterizedAs(Proxy.class, typeParametersOf(producerInjectable.getInjectedType())),
-                                      loadVariable("producerInstance")).invoke("unwrappedInstance")))
+                              castTo(producerInjectable.getInjectedType(), castTo(Proxy.class,
+                                      loadVariable("producerInstance")).invoke("unwrap"))))
               .finish());
     }
 

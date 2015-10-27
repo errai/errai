@@ -404,7 +404,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
   }
 
   private void implementUnwrappedInstance(ClassStructureBuilder<?> proxyImpl, Injectable injectable) {
-    proxyImpl.publicMethod(injectable.getInjectedType(), "unwrappedInstance")
+    proxyImpl.publicMethod(Object.class, "unwrap")
              .body()
              ._(loadVariable("proxyHelper").invoke("getInstance", loadVariable("this")).returnValue())
              .finish();

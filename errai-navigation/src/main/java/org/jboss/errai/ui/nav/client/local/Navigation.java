@@ -14,6 +14,7 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.Factory;
+import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
@@ -157,6 +158,7 @@ public class Navigation {
             navigate(new Request<IsWidget>(toPage, token), false);
           }
         } catch (Exception e) {
+          logger.warn("An error occurred while navigating.", e);
           if (token == null)
             navigationErrorHandler.handleInvalidURLError(e, event.getValue());
           else
@@ -361,7 +363,7 @@ public class Navigation {
     navigatingContainer.clear();
 
     if (currentPage != null && currentWidget != null) {
-      currentPage.pageHidden(Factory.maybeUnwrapProxy(currentWidget));
+      currentPage.pageHidden(currentWidget);
       currentPage.destroy(currentWidget);
     }
   }
@@ -377,28 +379,33 @@ public class Navigation {
           throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
         }
 
+        final W unwrappedWidget = Factory.maybeUnwrapProxy(widget);
         maybeAttachContentPanel();
         currentPageToken = request.state;
 
-        if ((widget instanceof Composite) && (getCompositeWidget((Composite) widget) == null)) {
-          final HandlerRegistration reg = widget.asWidget().addAttachHandler(new Handler() {
+        if ((unwrappedWidget instanceof Composite) && (getCompositeWidget((Composite) unwrappedWidget) == null)) {
+          final HandlerRegistration reg = unwrappedWidget.asWidget().addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
-              if (event.isAttached() && currentWidget != widget) {
-                pageHiding(widget, request, fireEvent);
+              if (event.isAttached() && currentWidget != unwrappedWidget) {
+                pageHiding(unwrappedWidget, request, fireEvent);
               }
             }
           });
-          attachHandlerRegistrations.put(widget, reg);
+          attachHandlerRegistrations.put(unwrappedWidget, reg);
         }
         else {
-          pageHiding(widget, request, fireEvent);
+          pageHiding(unwrappedWidget, request, fireEvent);
         }
       }
     });
   }
 
   private <W extends IsWidget> void pageHiding(final W widget, final Request<W> request, final boolean fireEvent) {
+    if (widget instanceof Proxy) {
+      throw new RuntimeException("Was passed in a proxy, but should always receive an unwrapped widget.");
+    }
+
     HandlerRegistration reg = attachHandlerRegistrations.remove(widget);
     if (reg != null) {
       reg.removeHandler();
@@ -416,7 +423,7 @@ public class Navigation {
               locked = true;
               try {
                 hideCurrentPage();
-                request.pageNode.pageShowing(Factory.maybeUnwrapProxy(widget), request.state);
+                request.pageNode.pageShowing(widget, request.state);
 
                 // Fire IOC lifecycle event to indicate that the state of the
                 // bean has changed.
@@ -427,7 +434,7 @@ public class Navigation {
                 setCurrentPage(request.pageNode);
                 currentWidget = widget;
                 navigatingContainer.setWidget(widget);
-                request.pageNode.pageShown(Factory.maybeUnwrapProxy(widget), request.state);
+                request.pageNode.pageShown(widget, request.state);
               } finally {
                 locked = false;
               }

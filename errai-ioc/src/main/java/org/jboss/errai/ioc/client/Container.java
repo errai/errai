@@ -49,7 +49,6 @@ public class Container implements EntryPoint {
         }
       });
 
-      logger.info("IOC bootstrapper successfully initialized.");
 
       final BeanManagerSetup beanManager;
       if (GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync()) {
@@ -68,11 +67,13 @@ public class Container implements EntryPoint {
         run.run();
       }
       afterInit.clear();
+      logger.info("IOC bootstrapper successfully initialized.");
     }
-    catch (Throwable t) {
-      t.printStackTrace();
-      throw new RuntimeException("critical error in IOC container bootstrap: " + t.getClass().getName() + ": "
-          + t.getMessage());
+    catch (RuntimeException ex) {
+      logger.error("critical error in IOC container bootstrap: " + ex.getClass().getName() + ": "
+          + ex.getMessage());
+
+      throw ex;
     }
   }
 
