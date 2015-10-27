@@ -55,6 +55,11 @@ public class WebSocketNegotiationHandler {
           final MessageQueue queue = service.getBus().getQueueBySession(sessionKey);
           queue.setDeliveryHandler(DirectDeliveryHandler.createFor(queueChannel));
           LOGGER.debug("set direct delivery handler on session: {}", session.getSessionId());
+
+          //See ERRAI-873: In case a connection failure has occurred make sure 
+          //to resend a successful negotiation message.
+          sendMessage(queueChannel, WebSocketNegotiationMessage.getSuccessfulNegotiation());
+
           return session;
         }
 
