@@ -1057,6 +1057,26 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
+  public void testSetModelWithKeyUpEvent() throws Exception {
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
+    TextBox textBox = new TextBox();
+    TestModel model = binder.bind(textBox, "value", null, true).getModel();
+
+    textBox.setValue("UI change");
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_E), textBox);
+    assertEquals("Model not properly updated", textBox.getValue(), model.getValue());
+
+    binder.setModel(new TestModel());
+
+    final String newValue = "new value";
+    textBox.setValue(newValue, false);
+    assertFalse("Model should not have updated, no event should have been fired.", newValue.equals(binder.getModel().getValue()));
+
+    DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_A), textBox);
+    assertEquals("Model should have updated after key up event fired.", newValue, binder.getModel().getValue());
+  }
+
+  @Test
   public void testBindingNonTextWidgetOnUnhandledEvent() {
     CheckBox checkBox = new CheckBox();
     try {

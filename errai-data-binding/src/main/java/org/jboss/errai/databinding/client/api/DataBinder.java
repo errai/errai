@@ -428,7 +428,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
     for (Binding b : this.bindings.values()) {
       // must be checked before unbind() removes the handlers
-      boolean bindOnKeyUp = b.hasKeyUpBinding();
+      boolean bindOnKeyUp = b.needsKeyUpBinding();
 
       newProxy.getBindableProxyAgent().unbind(b);
       bindings.put(b.getProperty(), newProxy.getBindableProxyAgent()
