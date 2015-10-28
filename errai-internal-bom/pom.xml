@@ -227,12 +227,6 @@
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-uibinder</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
         <artifactId>errai-validation</artifactId>
         <version>${project.version}</version>
       </dependency>
