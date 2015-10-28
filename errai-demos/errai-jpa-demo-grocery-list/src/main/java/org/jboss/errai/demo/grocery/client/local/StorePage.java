@@ -52,6 +52,7 @@ import org.jboss.errai.demo.grocery.client.local.map.LocationProvider;
 import org.jboss.errai.demo.grocery.client.local.map.LocationProvider.LocationCallback;
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ui.cordova.geofencing.GeoFencingProvider;
 import org.jboss.errai.ui.cordova.geofencing.Region;
 import org.jboss.errai.ui.nav.client.local.Page;
@@ -90,6 +91,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 @Dependent
 @Templated("#main")
 @Page
+@LoadAsync
 public class StorePage extends Composite {
 
   private static final Projection DEFAULT_PROJECTION = new Projection(
@@ -292,7 +294,7 @@ public class StorePage extends Composite {
     em.flush();
 
     Region region = new Region((int) store.getId(), store.getLatitude(),
-            store.getLongitude(), (int) store.getRadius());
+            store.getLongitude(), store.getRadius());
     geoFencingProvider.addRegion(region);
 
     backToStoresPage.go();

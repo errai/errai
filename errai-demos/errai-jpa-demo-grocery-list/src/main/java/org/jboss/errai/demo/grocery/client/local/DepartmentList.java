@@ -18,13 +18,25 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import java.util.List;
 
+import javax.enterprise.context.Dependent;
+
 import org.jboss.errai.demo.grocery.client.shared.Department;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ui.client.widget.ListWidget;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.DragEnterEvent;
+import com.google.gwt.event.dom.client.DragEnterHandler;
+import com.google.gwt.event.dom.client.DragLeaveEvent;
+import com.google.gwt.event.dom.client.DragLeaveHandler;
+import com.google.gwt.event.dom.client.DragOverEvent;
+import com.google.gwt.event.dom.client.DragOverHandler;
+import com.google.gwt.event.dom.client.DragStartEvent;
+import com.google.gwt.event.dom.client.DragStartHandler;
+import com.google.gwt.event.dom.client.DropEvent;
+import com.google.gwt.event.dom.client.DropHandler;
 
 /**
  * A list of Department objects (each represented by a DepartmentWidget) whose entries can be dragged to rearrange their order.
@@ -33,6 +45,8 @@ import com.google.gwt.event.dom.client.*;
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
+@Dependent
+@LoadAsync
 public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
 
     /**
@@ -128,8 +142,8 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
 
                 }
             }, DropEvent.getType());
-            
-           
+
+
         }
     }
 

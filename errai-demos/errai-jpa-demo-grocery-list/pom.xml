@@ -675,6 +675,7 @@
           <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:+UseNUMA</extraJvmArgs>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>                
+          <compileReport>true</compileReport>
         </configuration>
         <executions>
           <execution>

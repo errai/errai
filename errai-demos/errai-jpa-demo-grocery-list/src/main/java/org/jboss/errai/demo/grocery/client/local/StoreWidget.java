@@ -16,6 +16,32 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ioc.client.api.LoadAsync;
+import org.jboss.errai.ui.client.widget.HasModel;
+import org.jboss.errai.ui.cordova.events.touch.GestureUtility;
+import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapEvent;
+import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapHandler;
+import org.jboss.errai.ui.cordova.events.touch.swipe.SwipeEndEvent;
+import org.jboss.errai.ui.cordova.events.touch.swipe.SwipeEndHandler;
+import org.jboss.errai.ui.cordova.events.touch.swipe.SwipeMoveEvent;
+import org.jboss.errai.ui.cordova.events.touch.swipe.SwipeMoveHandler;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.shared.api.annotations.AutoBound;
+import org.jboss.errai.ui.shared.api.annotations.Bound;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,26 +51,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.demo.grocery.client.shared.Store;
-import org.jboss.errai.ui.client.widget.HasModel;
-import org.jboss.errai.ui.cordova.events.touch.GestureUtility;
-import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapEvent;
-import org.jboss.errai.ui.cordova.events.touch.longtap.LongTapHandler;
-import org.jboss.errai.ui.cordova.events.touch.swipe.*;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.errai.ui.shared.api.annotations.*;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import static com.google.gwt.dom.client.Style.Unit.PX;
 
 @Dependent
 @Templated("#main")
+@LoadAsync
 public class StoreWidget extends Composite implements HasModel<Store> {
 
     @Inject
