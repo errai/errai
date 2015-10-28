@@ -44,11 +44,6 @@ class AbstractInjectable extends BaseInjectable {
   }
 
   @Override
-  public String toString() {
-    return "[AbstractInjectable:" + super.toString() + "]";
-  }
-
-  @Override
   public Class<? extends Annotation> getScope() {
     return null;
   }

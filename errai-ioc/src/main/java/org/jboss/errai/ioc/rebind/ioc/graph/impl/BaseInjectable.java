@@ -51,8 +51,8 @@ abstract class BaseInjectable implements Injectable {
 
   @Override
   public String toString() {
-    return "class=" + getInjectedType() + ", injectorType=" + getInjectableType() + ", qualifier="
-            + getQualifier().toString();
+    return "[class=" + getInjectedType() + ", injectorType=" + getInjectableType() + ", qualifier="
+            + getQualifier().toString() + "]";
   }
 
   @Override

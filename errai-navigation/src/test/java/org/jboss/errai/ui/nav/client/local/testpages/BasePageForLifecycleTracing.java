@@ -49,7 +49,7 @@ public class BasePageForLifecycleTracing extends HorizontalPanel {
   private Class<? extends Widget> redirectPage;
 
   @Inject
-  public Navigation navigation;
+  protected Navigation navigation;
 
   public void setRedirectPage(Class<? extends Widget> page) {
     redirectPage = page;

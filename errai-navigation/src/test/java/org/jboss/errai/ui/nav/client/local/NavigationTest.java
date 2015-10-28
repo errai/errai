@@ -12,6 +12,7 @@ import org.jboss.errai.ui.nav.client.local.pushstate.PushStateUtil;
 import org.jboss.errai.ui.nav.client.local.res.TestNavigationErrorHandler;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+import org.jboss.errai.ui.nav.client.local.testpages.AppScopedPageWithNoLifecycleMethods;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingPageRole;
@@ -517,5 +518,11 @@ public class NavigationTest extends AbstractErraiCDITest {
     NavigationPanelTestApp app =
             IOC.getBeanManager().lookupBean(NavigationPanelTestApp.class).getInstance();
     assertNotNull(app.getNavigationPanel());
+  }
+
+  public void testAppScopedPageWithNoLifecycleMethodsIsLoadedOnNavigation() throws Exception {
+    assertEquals("Precondition failed: the page should not have been loaded before navigation.", 0, AppScopedPageWithNoLifecycleMethods.postConstructCount);
+    navigation.goTo(AppScopedPageWithNoLifecycleMethods.class.getSimpleName());
+    assertEquals("The page bean should have been loaded when the page was displayed", 1, AppScopedPageWithNoLifecycleMethods.postConstructCount);
   }
 }

@@ -512,7 +512,7 @@ public class IOCProcessor {
           final Class<? extends Annotation> directScope = getScope(type);
           final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type),
                   directScope, InjectableType.Type, getWiringTypes(type, directScope));
-          processInjectionPoints(typeInjectable, builder);
+          processInjectionPoints(typeInjectable, builder, problems);
           maybeProcessAsProducer(builder, typeInjectable);
           maybeProcessAsProvider(typeInjectable, builder);
         }
@@ -626,7 +626,7 @@ public class IOCProcessor {
     final MetaClass providerImpl = providerImplInjectable.getInjectedType();
     final MetaMethod providerMethod = providerImpl.getMethod("get", new Class[0]);
     final MetaClass providedType = providerMethod.getReturnType();
-    final Injectable providedInjectable = builder.addInjectable(providedType, qualFactory.forUniversallyQualified(),
+    final Injectable providedInjectable = builder.addInjectable(providedType, qualFactory.forSource(providerMethod),
             Dependent.class, InjectableType.Provider, WiringElementType.Provider, WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
     builder.addProducerMemberDependency(providedInjectable, providerImplInjectable.getInjectedType(), providerImplInjectable.getQualifier(), providerMethod);
   }
@@ -784,37 +784,46 @@ public class IOCProcessor {
     }
   }
 
-  private void processInjectionPoints(final Injectable typeInjectable, final DependencyGraphBuilder builder) {
+  private void processInjectionPoints(final Injectable typeInjectable, final DependencyGraphBuilder builder, final List<String> problems) {
     final MetaClass type = typeInjectable.getInjectedType();
     final MetaConstructor injectableConstructor = getInjectableConstructor(type);
     if (injectableConstructor != null) {
+      if (!injectableConstructor.isPublic()) {
+        problems.add("The constructor of " + typeInjectable.getInjectedType().getFullyQualifiedName() + " annotated with @Inject must be public.");
+      }
       addConstructorInjectionPoints(typeInjectable, injectableConstructor, builder);
     }
-    addFieldInjectionPoints(typeInjectable, builder);
-    addMethodInjectionPoints(typeInjectable, builder);
+    addFieldInjectionPoints(typeInjectable, builder, problems);
+    addMethodInjectionPoints(typeInjectable, builder, problems);
   }
 
-  private void addMethodInjectionPoints(Injectable typeInjectable, DependencyGraphBuilder builder) {
+  private void addMethodInjectionPoints(Injectable typeInjectable, DependencyGraphBuilder builder, final List<String> problems) {
     final MetaClass type = typeInjectable.getInjectedType();
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> inject : injectAnnotations) {
       for (final MetaMethod setter : type.getMethodsAnnotatedWith(inject)) {
         if (setter.getParameters().length != 1) {
-          throw new RuntimeException("The method injection point " + setter.getName() + " in "
+          problems.add("The method injection point " + setter.getName() + " in "
                   + setter.getDeclaringClass().getFullyQualifiedName() + " should have exactly one parameter, not "
                   + setter.getParameters().length + ".");
+        } else {
+          final MetaParameter metaParam = setter.getParameters()[0];
+          builder.addSetterMethodDependency(typeInjectable, metaParam.getType(), qualFactory.forSink(setter), setter);
         }
-        final MetaParameter metaParam = setter.getParameters()[0];
-        builder.addSetterMethodDependency(typeInjectable, metaParam.getType(), qualFactory.forSink(setter), setter);
       }
     }
   }
 
-  private void addFieldInjectionPoints(final Injectable typeInjectable, final DependencyGraphBuilder builder) {
+  private void addFieldInjectionPoints(final Injectable typeInjectable, final DependencyGraphBuilder builder, final List<String> problems) {
+    final boolean noPublicFieldsAllowed = typeInjectable.getWiringElementTypes()
+            .contains(WiringElementType.NormalScopedBean) && !typeInjectable.getScope().equals(EntryPoint.class);
     final MetaClass type = typeInjectable.getInjectedType();
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> inject : injectAnnotations) {
       for (final MetaField field : type.getFieldsAnnotatedWith(inject)) {
+        if (noPublicFieldsAllowed && field.isPublic()) {
+          problems.add("The normal scoped bean " + type.getFullyQualifiedName() + " has a public field " + field.getName());
+        }
         builder.addFieldDependency(typeInjectable, field.getType(), qualFactory.forSink(field), field);
       }
     }

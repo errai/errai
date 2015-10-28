@@ -1,10 +1,8 @@
 package org.jboss.errai.jpa.client.local;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
 
 import com.google.gwt.core.client.GWT;
 
@@ -13,14 +11,13 @@ import com.google.gwt.core.client.GWT;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@IOCProvider
-@Singleton
-public class ErraiEntityManagerProvider implements Provider<EntityManager> {
+@ApplicationScoped
+public class ErraiEntityManagerProducer {
 
   private ErraiEntityManager INSTANCE;
 
-  @Override
-  public EntityManager get() {
+  @IOCProducer
+  public ErraiEntityManager getEntityManager() {
     if (INSTANCE == null) {
       ErraiEntityManagerFactory factory = GWT.create(ErraiEntityManagerFactory.class);
       INSTANCE = factory.createEntityManager();

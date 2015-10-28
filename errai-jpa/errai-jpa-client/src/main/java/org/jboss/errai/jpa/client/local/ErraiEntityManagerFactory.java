@@ -5,7 +5,7 @@ package org.jboss.errai.jpa.client.local;
  * instances of ErraiEntityManager. Users of the Errai framework don't normally
  * need to refer to this type directly; instead, they can
  * {@code @Inject EntityManager} directly into application classes, and allow
- * {@link ErraiEntityManagerProvider} to create factories as necessary.
+ * {@link ErraiEntityManagerProducer} to create factories as necessary.
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */

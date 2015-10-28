@@ -65,11 +65,6 @@ class ConcreteInjectable extends BaseInjectable {
   }
 
   @Override
-  public String toString() {
-    return "[Concrete:" + super.toString() + "]";
-  }
-
-  @Override
   public Class<? extends Annotation> getScope() {
     return literalScope;
   }

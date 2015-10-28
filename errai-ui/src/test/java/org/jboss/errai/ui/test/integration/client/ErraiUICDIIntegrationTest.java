@@ -18,7 +18,12 @@ package org.jboss.errai.ui.test.integration.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.test.integration.client.res.AppScopedTemplatedBean;
+import org.jboss.errai.ui.test.integration.client.res.LazyTestHelper;
+import org.jboss.errai.ui.test.integration.client.res.NestedAppScopedTemplatedBean;
 import org.jboss.errai.ui.test.integration.client.res.TestAppBean;
+
+import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * @author Mike Brock
@@ -34,5 +39,15 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull(bean);
     assertNotNull(bean.getW());
+  }
+
+  public void testAppScopedTemplatedBeanIsLoadedWhenAddedToWidget() throws Exception {
+    final LazyTestHelper testHelper = IOC.getBeanManager().lookupBean(LazyTestHelper.class).getInstance();
+    assertEquals("Precondition failed: the templated bean should not have been loaded yet.", 0, AppScopedTemplatedBean.postConstructCount);
+    assertEquals("Precondition failed: the nested templated bean should not have been loaded yet.", 0, NestedAppScopedTemplatedBean.postConstructCount);
+
+    RootPanel.get().add(testHelper.bean);
+    assertEquals("The templated bean should have been loaded after being added to the RootPanel.", 1, AppScopedTemplatedBean.postConstructCount);
+    assertEquals("The nested templated bean should have been loaded after being added to the RootPanel.", 1, NestedAppScopedTemplatedBean.postConstructCount);
   }
 }

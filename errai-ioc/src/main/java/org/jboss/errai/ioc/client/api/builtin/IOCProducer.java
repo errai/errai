@@ -1,6 +1,6 @@
 /**
  * JBoss, Home of Professional Open Source
- * Copyright 2014, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2015, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -14,18 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.security.client.local.res;
+package org.jboss.errai.ioc.client.api.builtin;
 
-import javax.inject.Inject;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.security.client.shared.SecureRestService;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-@EntryPoint
-public class RestSecurityTestModule {
+import javax.enterprise.inject.Produces;
 
-  @Inject
-  public Caller<SecureRestService> restCaller;
+/**
+ * Indicates that the annotated field or method produces a managed bean.
+ *
+ * @see Produces
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+@Documented
+@Retention(RUNTIME)
+@Target({FIELD, METHOD})
+public @interface IOCProducer {
 
 }

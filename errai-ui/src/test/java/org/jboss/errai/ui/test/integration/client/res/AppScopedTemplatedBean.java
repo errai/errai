@@ -1,6 +1,6 @@
 /**
  * JBoss, Home of Professional Open Source
- * Copyright 2014, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2015, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -14,18 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.security.client.local.res;
+package org.jboss.errai.ui.test.integration.client.res;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.security.client.shared.SecureRestService;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-@EntryPoint
-public class RestSecurityTestModule {
+import com.google.gwt.user.client.ui.Composite;
 
-  @Inject
-  public Caller<SecureRestService> restCaller;
+/**
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+@ApplicationScoped
+@Templated("TestTemplate.html")
+public class AppScopedTemplatedBean extends Composite {
+
+  public static int postConstructCount;
+
+  @Inject @DataField
+  private NestedAppScopedTemplatedBean content;
+
+  @PostConstruct
+  public void init() {
+    postConstructCount++;
+  }
 
 }
