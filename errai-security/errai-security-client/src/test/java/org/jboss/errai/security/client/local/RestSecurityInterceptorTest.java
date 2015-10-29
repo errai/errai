@@ -25,7 +25,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.VoidCallback;
+import org.jboss.errai.common.client.api.NoOpCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
@@ -69,7 +69,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
-        MessageBuilder.createCall(new VoidCallback(), AuthenticationService.class).logout();
+        MessageBuilder.createCall(new NoOpCallback<Void>(), AuthenticationService.class).logout();
       }
     });
     activeUserCache = IOC.getBeanManager().lookupBean(ActiveUserCache.class, new Annotation() {

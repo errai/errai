@@ -19,8 +19,8 @@ package org.jboss.errai.common.client.api;
 /**
  * @author Mike Brock
  */
-public class VoidCallback implements RemoteCallback<Void> {
+public class NoOpCallback<T> implements RemoteCallback<T> {
   @Override
-  public void callback(final Void response) {
+  public void callback(final T response) {
   }
 }
