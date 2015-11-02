@@ -21,7 +21,7 @@ public class BeanConstrConsumesOwnProducer {
     this.wrappedKitten = wrappedKitten;
   }
 
-  @Produces
+  @Produces @ApplicationScoped
   private WrappedKitten producerWrappedKitten(Kitten kitten) {
     return new WrappedKitten(kitten);
   }

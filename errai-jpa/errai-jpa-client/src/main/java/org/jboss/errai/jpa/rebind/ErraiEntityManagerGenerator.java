@@ -700,7 +700,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         // (The write accessor for the field was defined while generating the get() method).
         methodBody.addStatement(
             Stmt.loadVariable("this")
-                .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                .invoke(PrivateAccessUtil.getPrivateFieldAccessorName(field),
                     Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)),
                     Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam))));
 
@@ -762,7 +762,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         // Now generate a call to the private accessor method for the field in question.
         methodBody.addStatement(
             Stmt.loadVariable("this")
-                .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                .invoke(PrivateAccessUtil.getPrivateFieldAccessorName(field),
                     Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)))
                 .returnValue());
 

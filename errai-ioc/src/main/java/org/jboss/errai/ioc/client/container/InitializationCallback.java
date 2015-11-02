@@ -29,5 +29,5 @@ public interface InitializationCallback<T> {
    * Called to perform the initialization task against the specified bean.
    * @param t the bean instance.
    */
-  public void init(T t);
+  public void init(T instance);
 }

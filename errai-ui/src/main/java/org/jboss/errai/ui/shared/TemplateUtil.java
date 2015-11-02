@@ -50,14 +50,14 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Max Barkley <mbarkley@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public final class TemplateUtil {
   private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
-  
+
   private static TranslationService translationService = null;
   public static TranslationService getTranslationService() {
     if (translationService == null) {
@@ -91,7 +91,7 @@ public final class TemplateUtil {
       logger.warning("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
               + field.getElement().getTagName() + "]");
     }
-    
+
     Element parentElement = element.getParentElement();
     try {
       if (field instanceof HasText) {
@@ -109,7 +109,7 @@ public final class TemplateUtil {
 
       boolean hasI18nKey = !field.getElement().getAttribute("data-i18n-key").equals("");
       boolean hasI18nPrefix = !field.getElement().getAttribute("data-i18n-prefix").equals("");
-      
+
       /*
        * Preserve template Element attributes.
        */
@@ -144,7 +144,7 @@ public final class TemplateUtil {
     if (!(component instanceof ListWidget)) {
       initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
     }
-    
+
     DOM.setEventListener(component.getElement(), component);
     StyleBindingsRegistry.get().updateStyles(component);
     AttachEvent.fire(component, true);
@@ -154,14 +154,14 @@ public final class TemplateUtil {
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
     component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
   }-*/;
-  
+
   private static Map<String, Element> templateRoots = new HashMap<String, Element>();
   public static Element getRootTemplateElement(String templateContents, final String templateFileName, final String rootField) {
     String key = templateFileName + "#" + rootField;
     if (templateRoots.containsKey(key)) {
       return cloneWithEmptyParent(templateRoots.get(key));
     }
-    
+
     Element parserDiv = DOM.createDiv();
     parserDiv.setInnerHTML(templateContents);
     if (rootField != null && !rootField.trim().isEmpty()) {
@@ -222,40 +222,40 @@ public final class TemplateUtil {
     CLASS("class"),
     ID("id"),
     DATA_FIELD("data-field");
-    
+
     private final String attributeName;
-    
+
     AttributeType(String attributeName) {
       this.attributeName = attributeName;
     }
-    
+
     public String getAttributeName() {
       return attributeName;
     }
   }
-  
+
   private static class TaggedElement {
     private final AttributeType attributeType;
     private final Element element;
-    
+
     public TaggedElement(AttributeType attributeType, Element element) {
       this.attributeType = attributeType;
       this.element = element;
     }
-    
+
     public AttributeType getAttributeType() {
       return attributeType;
     }
-    
+
     public Element getElement() {
       return element;
     }
   }
-  
+
   /**
    * Called to perform i18n translation on the given template. Add i18n-prefix attribute to root of
    * template to allow translation after bean creation.
-   * 
+   *
    * @param templateRoot
    */
   public static void translateTemplate(String templateFile, Element templateRoot) {
@@ -273,7 +273,7 @@ public final class TemplateUtil {
 
   /**
    * Generate an i18n key prefix from the given template filename.
-   * 
+   *
    * @param templateFile
    */
   public static String getI18nPrefix(String templateFile) {
@@ -283,7 +283,7 @@ public final class TemplateUtil {
   }
 
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
-    
+
     final Map<String, Element> dataFields = new LinkedHashMap<String, Element>();
     final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
 
@@ -311,11 +311,10 @@ public final class TemplateUtil {
         return true;
       }
     });
-    
+
     return dataFields;
   }
 
-  @SuppressWarnings("deprecation")
   public static void setupNativeEventListener(Composite component, Element element, EventListener listener,
           int eventsToSink) {
 
@@ -324,8 +323,8 @@ public final class TemplateUtil {
               + " but the corresponding data-field does not exist!");
     }
     // These casts must stay to maintain compatibility with GWT 2.5.1
-    DOM.setEventListener((com.google.gwt.user.client.Element) element, listener);
-    DOM.sinkEvents((com.google.gwt.user.client.Element) element, eventsToSink);
+    DOM.setEventListener(element, listener);
+    DOM.sinkEvents(element, eventsToSink);
   }
 
   public static <T extends EventHandler> Widget setupPlainElementEventHandler(Composite component, Element element,
@@ -360,34 +359,34 @@ public final class TemplateUtil {
   private static native JsArray<Node> getAttributes(Element elem) /*-{
     return elem.attributes;
   }-*/;
-  
-  private static Element cloneWithEmptyParent(Element element) { 
+
+  private static Element cloneWithEmptyParent(Element element) {
     Element parent = DOM.createDiv();
     Element clone = DOM.clone(element, true);
     parent.appendChild(clone);
     return clone;
   }
-  
+
   private final static class TemplateRequest {
     final Class<?> templateProvider;
     final String location;
     final TemplateRenderingCallback renderingCallback;
-    
+
     TemplateRequest(Class<?> templateProvider, String location, TemplateRenderingCallback renderingCallback) {
       this.templateProvider = templateProvider;
       this.location = location;
       this.renderingCallback = renderingCallback;
     }
   }
-  
+
   private static Queue<TemplateRequest> requests = new LinkedList<TemplateRequest>();
-  
+
   /**
    * Called by the generated IOC bootstrapper if a provider is specified on a
    * templated composite (see {@link Templated#provider()}). This method will
    * make sure that templates will be provided and rendered in invocation order
    * even if a given provider is asynchronous.
-   * 
+   *
    * @param templateProvider
    *          the template provider to use for supplying the template, must not
    *          be null.
@@ -406,7 +405,7 @@ public final class TemplateUtil {
       provideNextTemplate();
     }
   }
-  
+
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private static void provideNextTemplate() {
     if (requests.isEmpty())
@@ -427,14 +426,14 @@ public final class TemplateUtil {
                 provideNextTemplate();
               }
             });
-          } 
+          }
           catch (RuntimeException t) {
             requests.remove();
             throw t;
           }
         }
       });
-    } 
+    }
     catch (IOCResolutionException ioce) {
       requests.remove();
       throw ioce;

@@ -32,4 +32,21 @@ public class DecoratorAPITests extends AbstractErraiIOCTest {
 
     assertEquals(expectedProperties, TestDataCollector.getProperties());
   }
+
+  public void testInitializationStatementsInvoked() throws Exception {
+    final MyDecoratedBean instance = IOC.getBeanManager().lookupBean(MyDecoratedBean.class).getInstance();
+
+    // setFlag(true) should be called by init callback.
+    assertTrue(instance.isFlag());
+  }
+
+  public void testDestructionStatementsInvoked() throws Exception {
+    final MyDecoratedBean instance = IOC.getBeanManager().lookupBean(MyDecoratedBean.class).getInstance();
+
+    // precondition
+    assertTrue(instance.isFlag());
+    IOC.getBeanManager().destroyBean(instance);
+
+    assertFalse(instance.isFlag());
+  }
 }

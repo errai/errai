@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import static org.jboss.errai.databinding.client.api.Convert.toModelValue;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -54,25 +55,25 @@ import com.google.gwt.user.client.ui.Widget;
  * <li>Carry out an initial state sync between the bound widgets and the target
  * model, if specified (see {@link DataBinder#DataBinder(Object, InitialState)})
  * </li>
- * 
+ *
  * <li>Update the bound widget when a setter method is invoked on the model (see
  * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for
  * widgets that either implement {@link TakesValue} or {@link HasText})</li>
- * 
+ *
  * <li>Update the bound widgets when a non-accessor method is invoked on the
  * model (by comparing all bound properties to detect changes). See
  * {@link #updateWidgetsAndFireEvents()}. Works for widgets that either
  * implement {@link TakesValue} or {@link HasText})</li>
- * 
+ *
  * <li>Update the target model in response to value change events (only works
  * for bound widgets that implement {@link HasValue})</li>
  * <ul>
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
+ *
  * @param <T>
  *          The type of the target model being proxied.
- * 
+ *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
@@ -254,7 +255,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * property, or with a new instance of the property type if the value is null.
    * The proxy's value for this property is then replaced with the proxy managed
    * by the nested data binder.
-   * 
+   *
    * @param property
    *          the property of the model to bind the widget to, must not be null.
    *          The property must be of a @Bindable type.
@@ -306,7 +307,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Unbinds the property with the given name.
-   * 
+   *
    * @param property
    *          the name of the model property to unbind, must not be null.
    */
@@ -361,7 +362,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Updates all bound widgets and fires the corresponding
    * {@link PropertyChangeEvent}.
-   * 
+   *
    * @param <P>
    *          The property type of the changed property.
    * @param property
@@ -378,7 +379,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Updates all bound widgets and fires the corresponding
    * {@link PropertyChangeEvent}.
-   * 
+   *
    * @param <P>
    *          The property type of the changed property.
    * @param property
@@ -419,7 +420,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Fires a property change event.
-   * 
+   *
    * @param <P>
    *          The property type of the changed property.
    * @param property
@@ -439,7 +440,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Synchronizes the state of the provided widgets and model property based on
    * the value of the provided {@link InitialState}.
-   * 
+   *
    * @param widget
    *          The widget to synchronize. Must not be null.
    * @param property
@@ -475,10 +476,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Ensures that the given list property is wrapped in a
    * {@link BindableListWrapper}, so changes to the list become observable.
-   * 
+   *
    * @param property
    *          the name of the list property
-   * 
+   *
    * @return a new the wrapped (proxied) list or the provided list if already
    *         proxied
    */
@@ -491,12 +492,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Ensures that the given list property is wrapped in a
    * {@link BindableListWrapper}, so changes to the list become observable.
-   * 
+   *
    * @param property
    *          the name of the list property
    * @param list
    *          the list that needs to be proxied
-   * 
+   *
    * @return a new the wrapped (proxied) list or the provided list if already
    *         proxied
    */
@@ -518,7 +519,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Returns the {@link InitialState} configured when the proxy was created.
-   * 
+   *
    * @return initial state, can be null.
    */
   public InitialState getInitialState() {
@@ -536,7 +537,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * Returns the {@link PropertyChangeHandlerSupport} object of this agent
    * containing all change handlers that have been registered for the
    * corresponding model proxy.
-   * 
+   *
    * @return propertyChangeHandlerSupport object, never null.
    */
   public PropertyChangeHandlerSupport getPropertyChangeHandlers() {
@@ -544,67 +545,78 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public void addPropertyChangeHandler(PropertyChangeHandler handler) {
+  public PropertyChangeUnsubscribeHandle addPropertyChangeHandler(final PropertyChangeHandler handler) {
     propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
+
+    return new OneTimeUnsubscribeHandle() {
+
+      @Override
+      public void doUnsubscribe() {
+        propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
+      }
+    };
   }
 
   @Override
-  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+  public <P> PropertyChangeUnsubscribeHandle addPropertyChangeHandler(final String property, final PropertyChangeHandler<P> handler) {
     validatePropertyExpr(property);
+
+    final Collection<PropertyChangeUnsubscribeHandle> unsubHandles = new ArrayList<PropertyChangeUnsubscribeHandle>();
 
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       DataBinder nested = createNestedBinder(property);
-      nested.addPropertyChangeHandler(property.substring(dotPos + 1), handler);
+      unsubHandles.add(nested.addPropertyChangeHandler(property.substring(dotPos + 1), handler));
     }
     else if (property.equals("*")) {
       propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
+      unsubHandles.add(new PropertyChangeUnsubscribeHandle() {
+
+        @Override
+        public void unsubscribe() {
+          propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
+        }
+      });
     }
     else if (property.equals("**")) {
       for (DataBinder nested : binders.values()) {
-        nested.addPropertyChangeHandler(property, handler);
+        unsubHandles.add(nested.addPropertyChangeHandler(property, handler));
       }
       propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
+      unsubHandles.add(new PropertyChangeUnsubscribeHandle() {
+
+        @Override
+        public void unsubscribe() {
+          propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
+        }
+      });
     }
 
     propertyChangeHandlerSupport.addPropertyChangeHandler(property, handler);
-  }
+    unsubHandles.add(new PropertyChangeUnsubscribeHandle() {
 
-  @Override
-  public void removePropertyChangeHandler(PropertyChangeHandler handler) {
-    propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
-  }
-
-  @Override
-  public void removePropertyChangeHandler(String property, PropertyChangeHandler handler) {
-    validatePropertyExpr(property);
-
-    int dotPos = property.indexOf(".");
-    if (dotPos > 0) {
-      String bindableProperty = property.substring(0, dotPos);
-      DataBinder nested = binders.get(bindableProperty);
-      if (nested != null) {
-        nested.removePropertyChangeHandler(property.substring(dotPos + 1), handler);
+      @Override
+      public void unsubscribe() {
+        propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
       }
-    }
-    else if (property.equals("*")) {
-      propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
-    }
-    else if (property.equals("**")) {
-      for (DataBinder nested : binders.values()) {
-        nested.removePropertyChangeHandler(property, handler);
-      }
-      propertyChangeHandlerSupport.removePropertyChangeHandler(handler);
-    }
+    });
 
-    propertyChangeHandlerSupport.removePropertyChangeHandler(property, handler);
+    return new OneTimeUnsubscribeHandle() {
+
+      @Override
+      public void doUnsubscribe() {
+        for (final PropertyChangeUnsubscribeHandle handle : unsubHandles) {
+          handle.unsubscribe();
+        }
+      }
+    };
   }
 
   /**
    * Merges the provided {@link PropertyChangeHandler}s of the provided agent
    * instance. If a handler instance is already registered on this agent, it
    * will NOT be added again.
-   * 
+   *
    * @param pchs
    *          the instance who's change handlers will be merged, must not be
    *          null.
@@ -630,7 +642,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Compares property values between this agent and the provided agent
    * recursively and fires {@link PropertyChangeEvent}s for all differences.
-   * 
+   *
    * @param other
    *          the agent to compare against.
    */

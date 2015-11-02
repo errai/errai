@@ -18,6 +18,7 @@ package org.jboss.errai.security.client.local.nav;
 
 import java.util.Set;
 
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
@@ -55,9 +56,9 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
       event.veto();
 
       if (!securityContext.hasCachedUser())
-        securityContext.redirectToLoginPage(event.getInstance().getClass());
+        securityContext.redirectToLoginPage(Factory.maybeUnwrapProxy(event.getInstance()).getClass());
       else
-        securityContext.redirectToSecurityErrorPage(event.getInstance().getClass());
+        securityContext.redirectToSecurityErrorPage(Factory.maybeUnwrapProxy(event.getInstance()).getClass());
     }
   }
 

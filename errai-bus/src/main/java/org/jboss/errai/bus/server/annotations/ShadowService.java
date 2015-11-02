@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  * @author Mike Brock
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
+@Target({ElementType.TYPE})
 public @interface ShadowService {
 
   /**

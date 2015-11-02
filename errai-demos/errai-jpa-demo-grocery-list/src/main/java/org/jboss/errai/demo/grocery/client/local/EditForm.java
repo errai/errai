@@ -13,6 +13,7 @@ import javax.validation.ConstraintViolation;
 
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Item;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
@@ -21,13 +22,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.Window;
 
 /**
- * 
+ *
  * @author ddadlani
- * 
+ *
  */
 
 @Dependent
 @Templated("ItemForm.html#form")
+@LoadAsync
 public class EditForm extends Form {
 
   private Item oldItem;
@@ -53,7 +55,7 @@ public class EditForm extends Form {
 
   /**
    * Stores old item and fills in form field suggestions with old item data
-   * 
+   *
    * @param item
    *          The old item values
    */

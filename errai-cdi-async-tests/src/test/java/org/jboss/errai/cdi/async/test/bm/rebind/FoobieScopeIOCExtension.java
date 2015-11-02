@@ -18,7 +18,7 @@ package org.jboss.errai.cdi.async.test.bm.rebind;
 
 import org.jboss.errai.cdi.async.test.bm.client.res.FoobieScope;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -30,11 +30,11 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 @IOCExtension
 public class FoobieScopeIOCExtension implements IOCExtensionConfigurator {
   @Override
-  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
     injectionContext.mapElementType(WiringElementType.DependentBean, FoobieScope.class);
   }
 
   @Override
-  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
   }
 }

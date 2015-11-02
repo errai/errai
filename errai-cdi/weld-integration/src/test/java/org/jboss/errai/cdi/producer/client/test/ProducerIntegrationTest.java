@@ -23,7 +23,7 @@ import org.jboss.errai.cdi.producer.client.SingletonProducedBeanDependentBean;
 import org.jboss.errai.cdi.producer.client.Thung;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 /**
@@ -147,7 +147,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testApplicationScopedProducedBeanCanBeLookedUpProgrammatically() {
-    final IOCBeanDef<Thung> thungIOCBeanDef = IOC.getBeanManager().lookupBean(Thung.class);
+    final SyncBeanDef<Thung> thungIOCBeanDef = IOC.getBeanManager().lookupBean(Thung.class);
 
     final Thung thung = thungIOCBeanDef.getInstance();
 
@@ -157,7 +157,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   public void testProducersObserveSingletonScope() {
     final SyncBeanManager beanManager = IOC.getBeanManager();
 
-    final IOCBeanDef<Kayak> kayakBean = beanManager.lookupBean(Kayak.class);
+    final SyncBeanDef<Kayak> kayakBean = beanManager.lookupBean(Kayak.class);
     assertNotNull(kayakBean);
 
     final SingletonProducedBeanDependentBean bean = beanManager.lookupBean(SingletonProducedBeanDependentBean.class)
@@ -186,7 +186,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     final Kayak newKayak = kayakBean.newInstance();
 
     assertNotNull(newKayak);
-    assertFalse("new Kayak should have new ID", kayakBeanInstance.getId() == newKayak.getId());
+    assertNotSame("new Kayak should have new ID", kayakBeanInstance.getId(), newKayak.getId());
   }
 
   public void testComplexConstructorInjectionScenario() {
@@ -229,16 +229,16 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertEquals(fooblieDependentBean1.getFooblieParts(), foobliesParts.get(0));
     assertEquals(fooblieDependentBean2.getFooblieParts(), foobliesParts.get(1));
   }
-  
+
   public void testNormalDependentProducer() throws Exception {
     final DepBeanProducerConsumer bean = IOC.getBeanManager().lookupBean(DepBeanProducerConsumer.class).getInstance();
-    
+
     assertNotNull("Produced injection failed with dependent producer.", bean.getProducable());
   }
-  
+
   public void testPseudoProducer() throws Exception {
     final PseudoBeanProducerConsumer bean = IOC.getBeanManager().lookupBean(PseudoBeanProducerConsumer.class).getInstance();
-    
+
     assertNotNull("Produced injection failed with pseudo-dependent producer.");
   }
 }

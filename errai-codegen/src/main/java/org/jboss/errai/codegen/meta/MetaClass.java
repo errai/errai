@@ -17,7 +17,10 @@
 package org.jboss.errai.codegen.meta;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -56,6 +59,8 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
    *           if {@code annotation} is null.
    */
   public abstract List<MetaMethod> getMethodsAnnotatedWith(Class<? extends Annotation> annotation);
+
+  public abstract List<MetaMethod> getDeclaredMethodsAnnotatedWith(Class<? extends Annotation> annotation);
 
   public abstract List<MetaMethod> getMethodsWithMetaAnnotations(Class<? extends Annotation> annotation);
 
@@ -125,6 +130,8 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
   public abstract MetaClass[] getInterfaces();
 
   public abstract MetaClass getSuperClass();
+
+  public abstract Collection<MetaClass> getAllSuperTypesAndInterfaces();
 
   public abstract MetaClass getComponentType();
 
@@ -242,7 +249,7 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
   public abstract MetaField getInheritedField(String name);
 
   public abstract BeanDescriptor getBeanDescriptor();
-  
+
   public abstract int hashContent();
 
 }

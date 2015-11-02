@@ -12,9 +12,21 @@ import com.google.gwt.user.client.ui.SimplePanel;
 @Page(role = DefaultPage.class)
 public class PageA extends SimplePanel {
 
-  public int beforeShowCallCount;
+  private int beforeShowCallCount;
   private boolean[] initStateHolder;
-  public boolean initStateWhenBeforeShowWasCalled;
+  private boolean initStateWhenBeforeShowWasCalled;
+
+  public int getBeforeShowCallCount() {
+    return beforeShowCallCount;
+  }
+
+  public boolean[] getInitStateHolder() {
+    return initStateHolder;
+  }
+
+  public boolean isInitStateWhenBeforeShowWasCalled() {
+    return initStateWhenBeforeShowWasCalled;
+  }
 
   @PageShowing
   private void beforeShow() {

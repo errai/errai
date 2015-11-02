@@ -13,6 +13,12 @@ public class AsyncProducerDependentBean {
   private final MaBean maBean;
   private final MaBean maBean2;
 
+  // For proxying
+  public AsyncProducerDependentBean() {
+    maBean = null;
+    maBean2 = null;
+  }
+
   @Inject
   public AsyncProducerDependentBean(final MaBean maBean, final MaBean maBean2) {
     this.maBean = maBean;

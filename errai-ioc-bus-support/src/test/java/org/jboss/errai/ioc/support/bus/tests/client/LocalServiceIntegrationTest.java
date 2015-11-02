@@ -16,25 +16,24 @@
 
 package org.jboss.errai.ioc.support.bus.tests.client;
 
-import com.google.gwt.user.client.Timer;
-
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Local;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.inject.Singleton;
+import com.google.gwt.user.client.Timer;
 
 /**
  * Tests to ensure that local service can only receive local messages.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LocalServiceIntegrationTest extends AbstractErraiIOCBusTest {
-  
-  @Singleton
+
+  @EntryPoint
   @Service
   @Local
   public static class LocalTestCompleteService implements MessageCallback {
@@ -46,7 +45,7 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCBusTest {
     }
   }
 
-  @Singleton
+  @EntryPoint
   @Service
   public static class LocalTestCompleteServiceConfirmation implements MessageCallback {
     static boolean worked = false;
@@ -56,8 +55,9 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCBusTest {
       worked = true;
     }
   }
-  
 
+
+  @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     LocalTestCompleteService.received = false;

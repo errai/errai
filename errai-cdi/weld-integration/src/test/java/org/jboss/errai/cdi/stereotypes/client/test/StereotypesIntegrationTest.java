@@ -13,7 +13,7 @@ import org.jboss.errai.cdi.stereotypes.client.ShetlandPony;
 import org.jboss.errai.cdi.stereotypes.client.Springbok;
 import org.jboss.errai.cdi.stereotypes.client.Tame;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -44,7 +44,7 @@ public class StereotypesIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testOneStereotypeAllowed() {
-    final IOCBeanDef<LongHairedDog> bean = getBeans(LongHairedDog.class).iterator().next();
+    final SyncBeanDef<LongHairedDog> bean = getBeans(LongHairedDog.class).iterator().next();
 
     assertEquals(ApplicationScoped.class, bean.getScope());
   }
@@ -59,7 +59,7 @@ public class StereotypesIntegrationTest extends AbstractErraiCDITest {
   public void testMultipleStereotypesAllowed() {
     assertEquals(1, getBeans(HighlandCow.class, TAME_LITERAL).size());
 
-    final IOCBeanDef<HighlandCow> highlandCow = getBeans(HighlandCow.class, TAME_LITERAL).iterator().next();
+    final SyncBeanDef<HighlandCow> highlandCow = getBeans(HighlandCow.class, TAME_LITERAL).iterator().next();
 
     assertNull(highlandCow.getName());
     assertContains(highlandCow.getQualifiers(), TAME_LITERAL);
@@ -81,7 +81,7 @@ public class StereotypesIntegrationTest extends AbstractErraiCDITest {
     //       is that this bean is not registered at all.
 
 
-    final Collection<IOCBeanDef<ShetlandPony>> beans = getBeans(ShetlandPony.class);
+    final Collection<SyncBeanDef<ShetlandPony>> beans = getBeans(ShetlandPony.class);
 
     // now that experimental support exists (testcase must support both modes)
     if (beans.size() > 1) {
@@ -97,7 +97,7 @@ public class StereotypesIntegrationTest extends AbstractErraiCDITest {
     // NOTE: This is different form the TCK test in that, in Errai, we don't expect non-explicitly declared
     //       and un-reachable beans to be available from the bean manager. Thus, the correct behavior for us
     //       is that this bean is not registered at all.
-    final Collection<IOCBeanDef<MiniatureClydesdale>> beans = getBeans(MiniatureClydesdale.class);
+    final Collection<SyncBeanDef<MiniatureClydesdale>> beans = getBeans(MiniatureClydesdale.class);
 
     // now that experimental support exists (testcase must support both modes)
     if (beans.size() > 1) {

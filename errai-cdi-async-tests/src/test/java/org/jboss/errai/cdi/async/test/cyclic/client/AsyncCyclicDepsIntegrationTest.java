@@ -18,11 +18,10 @@ package org.jboss.errai.cdi.async.test.cyclic.client;
 
 import static org.jboss.errai.ioc.client.container.IOC.getAsyncBeanManager;
 
-import org.jboss.errai.cdi.async.test.cyclic.client.res.BeanInjectSelf;
+import org.jboss.errai.cdi.async.test.cyclic.client.res.ApplicationScopedBeanInjectSelf;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.Car;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.ConsumerBeanA;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.CycleNodeA;
-import org.jboss.errai.cdi.async.test.cyclic.client.res.DependentBeanInjectSelf;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.EquHashCheckCycleA;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.EquHashCheckCycleB;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.Petrol;
@@ -94,38 +93,15 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
-  public void testBeanInjectsIntoSelf() {
-    asyncTest(new Runnable() {
-      @Override
-      public void run() {
-        getAsyncBeanManager().lookupBean(BeanInjectSelf.class)
-            .getInstance(new CreationalCallback<BeanInjectSelf>() {
-              @Override
-              public void callback(final BeanInjectSelf beanA) {
-                assertNotNull(beanA);
-                assertNotNull(beanA.getSelf());
-                assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
-
-                assertTrue("bean.self should be a proxy", getAsyncBeanManager().isProxyReference(beanA.getSelf()));
-                assertSame("unwrapped proxy should be the same as outer instance", beanA,
-                    getAsyncBeanManager().getActualBeanReference(beanA.getSelf()));
-
-                finishTest();
-              }
-            });
-      }
-    });
-  }
-
   public void testCyclingBeanDestroy() {
     asyncTest(new Runnable() {
       @Override
       public void run() {
 
-        getAsyncBeanManager().lookupBean(DependentBeanInjectSelf.class)
-            .getInstance(new CreationalCallback<DependentBeanInjectSelf>() {
+        getAsyncBeanManager().lookupBean(ApplicationScopedBeanInjectSelf.class)
+            .getInstance(new CreationalCallback<ApplicationScopedBeanInjectSelf>() {
               @Override
-              public void callback(final DependentBeanInjectSelf beanA) {
+              public void callback(final ApplicationScopedBeanInjectSelf beanA) {
 
                 assertNotNull(beanA);
                 assertNotNull(beanA.getSelf());
@@ -133,8 +109,6 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
                 getAsyncBeanManager().destroyBean(beanA);
 
                 assertFalse("bean should no longer be managed", getAsyncBeanManager().isManaged(beanA));
-                assertFalse("bean.self should no longer be recognized as proxy",
-                    getAsyncBeanManager().isProxyReference(beanA.getSelf()));
 
                 finishTest();
               }
@@ -147,10 +121,10 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
     asyncTest(new Runnable() {
       @Override
       public void run() {
-        getAsyncBeanManager().lookupBean(DependentBeanInjectSelf.class)
-            .getInstance(new CreationalCallback<DependentBeanInjectSelf>() {
+        getAsyncBeanManager().lookupBean(ApplicationScopedBeanInjectSelf.class)
+            .getInstance(new CreationalCallback<ApplicationScopedBeanInjectSelf>() {
               @Override
-              public void callback(DependentBeanInjectSelf beanA) {
+              public void callback(ApplicationScopedBeanInjectSelf beanA) {
                 assertNotNull(beanA);
                 assertNotNull(beanA.getSelf());
 
@@ -158,8 +132,6 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
                 getAsyncBeanManager().destroyBean(beanA.getSelf());
 
                 assertFalse("bean should no longer be managed", getAsyncBeanManager().isManaged(beanA));
-                assertFalse("bean.self should no longer be recognized as proxy",
-                    getAsyncBeanManager().isProxyReference(beanA.getSelf()));
 
                 finishTest();
               }
@@ -168,22 +140,23 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
-  public void testDependentBeanInjectsIntoSelf() {
+  public void testBeanInjectsIntoSelf() {
     asyncTest(new Runnable() {
       @Override
       public void run() {
-        getAsyncBeanManager().lookupBean(DependentBeanInjectSelf.class)
-            .getInstance(new CreationalCallback<DependentBeanInjectSelf>() {
+        getAsyncBeanManager().lookupBean(ApplicationScopedBeanInjectSelf.class)
+            .getInstance(new CreationalCallback<ApplicationScopedBeanInjectSelf>() {
               @Override
-              public void callback(final DependentBeanInjectSelf beanA) {
+              public void callback(final ApplicationScopedBeanInjectSelf beanA) {
 
                 assertNotNull(beanA);
                 assertNotNull(beanA.getSelf());
                 assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
 
                 assertTrue("bean.self should be a proxy", getAsyncBeanManager().isProxyReference(beanA.getSelf()));
-                assertSame("unwrapped proxy should be the same as outer instance", beanA, getAsyncBeanManager()
-                    .getActualBeanReference(beanA.getSelf()));
+            assertSame("unwrapped proxy should be the same as outer instance",
+                    getAsyncBeanManager().getActualBeanReference(beanA),
+                    getAsyncBeanManager().getActualBeanReference(beanA.getSelf()));
 
                 finishTest();
               }

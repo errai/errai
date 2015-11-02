@@ -16,11 +16,11 @@
 
 package org.jboss.errai.cdi.async.test.cyclic.client.res;
 
-import org.jboss.errai.ioc.client.api.LoadAsync;
+import javax.enterprise.inject.Alternative;
 
 /**
  * @author Mike Brock
  */
-@LoadAsync
+@Alternative
 public class Baz {
 }

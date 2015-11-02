@@ -2,7 +2,10 @@ package org.jboss.errai.ioc.tests.wiring.client;
 
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
+import org.jboss.errai.ioc.tests.wiring.client.res.DependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentBeanWithDisposer;
+import org.jboss.errai.ioc.tests.wiring.client.res.NestedDependentBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.NestedDependentBeanWIthDisposer;
 import org.jboss.errai.ioc.tests.wiring.client.res.SingletonBeanWithDisposer;
 
 /**
@@ -16,38 +19,49 @@ public class DisposerTest extends AbstractErraiIOCTest {
 
   public void testDisposerFailsToDestroyAppScope() {
 
-    SingletonBeanWithDisposer bean = IOC.getBeanManager().lookupBean(SingletonBeanWithDisposer.class).getInstance();
+    final SingletonBeanWithDisposer outerBean = IOC.getBeanManager().lookupBean(SingletonBeanWithDisposer.class).getInstance();
+    assertNotNull(outerBean);
+    assertNotNull(outerBean.getDependentBeanDisposer());
+    final DependentBean innerBean = outerBean.getBean();
+    assertNotNull(innerBean);
 
-    assertNotNull(bean);
-    assertNotNull(bean.getDependentBeanDisposer());
+    outerBean.dispose();
 
-    try {
-      bean.dispose();
-    }
-    catch (IllegalStateException e) {
-      return;
-    }
-
-    assertFalse("bean should have been disposed", IOC.getBeanManager().isManaged(bean.getBean()));
-    assertFalse("outer bean should have been disposed", IOC.getBeanManager().isManaged(bean));
-
-    assertTrue("bean's destructor should have been called", bean.getBean().isPreDestroyCalled());
-
+    assertFalse("inner bean should have been disposed", IOC.getBeanManager().isManaged(innerBean));
+    assertTrue("outer bean should not have been disposed", IOC.getBeanManager().isManaged(outerBean));
+    assertTrue("bean's destructor should have been called", innerBean.isPreDestroyCalled());
   }
 
   public void testDisposerWorksWithDependentScope() {
 
-    DependentBeanWithDisposer bean = IOC.getBeanManager().lookupBean(DependentBeanWithDisposer.class).getInstance();
+    final DependentBeanWithDisposer outerBean = IOC.getBeanManager().lookupBean(DependentBeanWithDisposer.class).getInstance();
+    assertNotNull(outerBean);
+    assertNotNull(outerBean.getDependentBeanDisposer());
+    final DependentBean innerBean = outerBean.getBean();
+    assertNotNull(innerBean);
 
-    assertNotNull(bean);
-    assertNotNull(bean.getDependentBeanDisposer());
+    outerBean.dispose();
 
-    bean.dispose();
+    assertFalse("inner bean should have been disposed", IOC.getBeanManager().isManaged(innerBean));
+    assertTrue("outer bean should not have been disposed", IOC.getBeanManager().isManaged(outerBean));
+    assertTrue("inner bean's destructor should have been called", innerBean.isPreDestroyCalled());
+  }
 
-    assertFalse("bean should have been disposed", IOC.getBeanManager().isManaged(bean.getBean()));
-    assertFalse("outer bean should have been disposed", IOC.getBeanManager().isManaged(bean));
+  public void testDisposerWorksWithNestedDependentScopedBeans() throws Exception {
 
-    assertTrue("bean's destructor should have been called", bean.getBean().isPreDestroyCalled());
+    final NestedDependentBeanWIthDisposer outerBean = IOC.getBeanManager().lookupBean(NestedDependentBeanWIthDisposer.class).getInstance();
+    assertNotNull(outerBean);
+    final NestedDependentBean middleBean = outerBean.getNestedBean();
+    assertNotNull(middleBean);
+    final DependentBean innerBean = middleBean.getBean();
+    assertNotNull(innerBean);
 
+    outerBean.dispose();
+
+    assertTrue("outer bean should not have been disposed", IOC.getBeanManager().isManaged(outerBean));
+    assertFalse("middle bean should have been disposed", IOC.getBeanManager().isManaged(middleBean));
+    assertTrue("middle bean's destructor should have been called", middleBean.isPreDestroyCalled());
+    assertFalse("inner bean should have been disposed", IOC.getBeanManager().isManaged(innerBean));
+    assertTrue("inner bean's destructor should have been called", innerBean.isPreDestroyCalled());
   }
 }

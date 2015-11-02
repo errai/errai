@@ -29,7 +29,7 @@ public interface MethodBlockBuilder<T> extends BlockBuilder<T>,
 
   public MethodBlockBuilder<T> annotatedWith(Annotation... annotations);
 
-  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes);
+  public MethodBlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes);
 
-  public BlockBuilder<T> throws_(MetaClass... exceptions);
+  public MethodBlockBuilder<T> throws_(MetaClass... exceptions);
 }

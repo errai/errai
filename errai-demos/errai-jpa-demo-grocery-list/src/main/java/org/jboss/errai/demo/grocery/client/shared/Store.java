@@ -39,7 +39,7 @@ public class Store {
     private double latitude;
     private double longitude;
 
-    private Integer radius;
+    private Integer radius = 0;
 
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<Department> departments = new ArrayList<Department>();

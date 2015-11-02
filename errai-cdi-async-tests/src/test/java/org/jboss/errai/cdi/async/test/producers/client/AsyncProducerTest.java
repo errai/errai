@@ -98,7 +98,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
     });
   }
 
-  public void testProducerFromDependentBeanIntoDependentBean() {
+  public void testProducerFromBeanIntoBean() {
     asyncTest(new Runnable() {
       @Override
       public void run() {
@@ -151,42 +151,34 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
             final FooblieDependentBean fooblieDependentBean1 = fooblieDependentFuture1.get();
             final FooblieDependentBean fooblieDependentBean2 = fooblieDependentFuture2.get();
 
-            IOC.getAsyncBeanManager().destroyBean(fooblieDependentBean1, new Runnable() {
-              @Override
-              public void run() {
+            IOC.getAsyncBeanManager().destroyBean(fooblieDependentBean1);
+            IOC.getAsyncBeanManager().destroyBean(fooblieDependentBean2);
 
-                IOC.getAsyncBeanManager().destroyBean(fooblieDependentBean2, new Runnable() {
-                  @Override
-                  public void run() {
-                    final List<Fooblie> foobliesResponse = maker.getDestroyedFoobliesResponse();
+            final List<Fooblie> foobliesResponse = maker.getDestroyedFoobliesResponse();
 
-                    assertEquals("there should be two destroyed beans", 2, foobliesResponse.size());
-                    assertEquals(fooblieDependentBean1.getFooblieResponse(), foobliesResponse.get(0));
-                    assertEquals(fooblieDependentBean2.getFooblieResponse(), foobliesResponse.get(1));
+            assertEquals("there should be two destroyed beans", 2, foobliesResponse.size());
+            assertEquals(fooblieDependentBean1.getFooblieResponse(), foobliesResponse.get(0));
+            assertEquals(fooblieDependentBean2.getFooblieResponse(), foobliesResponse.get(1));
 
-                    final List<Fooblie> foobliesGreets = maker.getDestroyedFoobliesGreets();
+            final List<Fooblie> foobliesGreets = maker.getDestroyedFoobliesGreets();
 
-                    assertEquals("there should be two destroyed beans", 2, foobliesGreets.size());
-                    assertEquals(fooblieDependentBean1.getFooblieGreets(), foobliesGreets.get(0));
-                    assertEquals(fooblieDependentBean2.getFooblieGreets(), foobliesGreets.get(1));
+            assertEquals("there should be two destroyed beans", 2, foobliesGreets.size());
+            assertEquals(fooblieDependentBean1.getFooblieGreets(), foobliesGreets.get(0));
+            assertEquals(fooblieDependentBean2.getFooblieGreets(), foobliesGreets.get(1));
 
-                    final List<Fooblie> foobliesParts = maker.getDestroyedFoobliesParts();
+            final List<Fooblie> foobliesParts = maker.getDestroyedFoobliesParts();
 
-                    assertEquals("there should be two destroyed beans", 2, foobliesParts.size());
-                    assertEquals(fooblieDependentBean1.getFooblieParts(), foobliesParts.get(0));
-                    assertEquals(fooblieDependentBean2.getFooblieParts(), foobliesParts.get(1));
+            assertEquals("there should be two destroyed beans", 2, foobliesParts.size());
+            assertEquals(fooblieDependentBean1.getFooblieParts(), foobliesParts.get(0));
+            assertEquals(fooblieDependentBean2.getFooblieParts(), foobliesParts.get(1));
 
-                    finishTest();
-                  }
-                });
-              }
-            });
+            finishTest();
           }
         });
       }
     });
   }
-  
+
   public void testNormalDependentProducer() throws Exception {
     asyncTest(new Runnable() {
       @Override
@@ -202,7 +194,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
       }
     });
   }
-  
+
   public void testPseudoProducer() throws Exception {
     asyncTest(new Runnable() {
       @Override

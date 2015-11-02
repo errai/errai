@@ -10,4 +10,6 @@ public class PostConstrBeanC {
   private void postConstr() {
     PostConstructTestUtil.record(PostConstrBeanC.class.getName());
   }
+
+  public void noop() {}
 }

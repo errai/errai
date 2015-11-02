@@ -14,6 +14,8 @@ public class PostConstrBeanA {
 
   @PostConstruct
   private void postConstr() {
+    // Trigger bean creation since all beans are lazily loaded.
+    postConstrBeanB.noop();
     PostConstructTestUtil.record(PostConstrBeanA.class.getName());
   }
 }

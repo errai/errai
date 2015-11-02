@@ -16,29 +16,22 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
-import org.jboss.errai.codegen.VariableReference;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.ioc.client.BootstrapInjectionContext;
-import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
-import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.common.client.api.Assert;
+
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -53,17 +46,10 @@ public class IOCProcessingContext {
   protected final Stack<BlockBuilder<?>> blockBuilder;
 
   protected final List<Statement> appendToEnd;
-  protected final List<TypeDiscoveryListener> typeDiscoveryListeners;
   protected final Set<MetaClass> discovered = new HashSet<MetaClass>();
 
   protected final TreeLogger treeLogger;
   protected final GeneratorContext generatorContext;
-
-  protected final Variable contextVariable;
-  protected final Class<? extends BootstrapInjectionContext> bootstrapContextClass;
-  protected final Class<? extends CreationalContext> cretionalContextClass;
-
-  protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
   protected final boolean gwtTarget;
 
@@ -78,13 +64,8 @@ public class IOCProcessingContext {
     this.blockBuilder.push(builder.blockBuilder);
 
     this.appendToEnd = new ArrayList<Statement>();
-    this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
     this.packages = builder.packages;
-    this.qualifyingMetadataFactory = builder.qualifyingMetadataFactory;
     this.gwtTarget = builder.gwtTarget;
-    this.bootstrapContextClass = builder.bootstrapClass;
-    this.cretionalContextClass = builder.creationalContextClass;
-    this.contextVariable = Variable.create("injContext", bootstrapContextClass);
   }
 
   public static class Builder {
@@ -95,11 +76,7 @@ public class IOCProcessingContext {
     private ClassStructureBuilder bootstrapBuilder;
     private BlockBuilder<?> blockBuilder;
     private Set<String> packages;
-    private QualifyingMetadataFactory qualifyingMetadataFactory;
     private boolean gwtTarget;
-
-    private Class<? extends BootstrapInjectionContext> bootstrapClass;
-    private Class<? extends CreationalContext> creationalContextClass;
 
     public static Builder create() {
       return new Builder();
@@ -112,16 +89,6 @@ public class IOCProcessingContext {
 
     public Builder generatorContext(final GeneratorContext generatorContext) {
       this.generatorContext = generatorContext;
-      return this;
-    }
-
-    public Builder bootstrapContextClass(final Class<? extends BootstrapInjectionContext> bootstrapClass) {
-      this.bootstrapClass = bootstrapClass;
-      return this;
-    }
-
-    public Builder creationalContextClass(final Class<? extends CreationalContext> creationalContextClass) {
-      this.creationalContextClass = creationalContextClass;
       return this;
     }
 
@@ -150,11 +117,6 @@ public class IOCProcessingContext {
       return this;
     }
 
-    public Builder qualifyingMetadata(final QualifyingMetadataFactory qualifyingMetadataFactory) {
-      this.qualifyingMetadataFactory = qualifyingMetadataFactory;
-      return this;
-    }
-
     public Builder gwtTarget(final boolean gwtTarget) {
       this.gwtTarget = gwtTarget;
       return this;
@@ -168,12 +130,6 @@ public class IOCProcessingContext {
       Assert.notNull("bootstrapBuilder cannot be null", bootstrapBuilder);
       Assert.notNull("blockBuilder cannot be null", blockBuilder);
       Assert.notNull("packages cannot be null", packages);
-      Assert.notNull("bootstrap class must not be null", bootstrapClass);
-      Assert.notNull("creationalContextClass must not be null", creationalContextClass);
-
-      if (qualifyingMetadataFactory == null) {
-        qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
-      }
 
       return new IOCProcessingContext(this);
     }
@@ -237,37 +193,7 @@ public class IOCProcessingContext {
     return generatorContext;
   }
 
-  public VariableReference getContextVariableReference() {
-    return contextVariable.getReference();
-  }
-
   public boolean isGwtTarget() {
     return gwtTarget;
-  }
-
-  public QualifyingMetadataFactory getQualifyingMetadataFactory() {
-    return qualifyingMetadataFactory;
-  }
-
-  public void registerTypeDiscoveryListener(final TypeDiscoveryListener discoveryListener) {
-    this.typeDiscoveryListeners.add(discoveryListener);
-  }
-
-  public void handleDiscoveryOfType(final InjectionPoint injectionPoint, final MetaClass discoveredType) {
-    if (discovered.contains(injectionPoint.getElementTypeOrMethodReturnType())) {
-      return;
-    }
-    for (final TypeDiscoveryListener listener : typeDiscoveryListeners) {
-      listener.onDiscovery(this, injectionPoint, discoveredType);
-    }
-    discovered.add(injectionPoint.getElementTypeOrMethodReturnType());
-  }
-
-  public Class<? extends BootstrapInjectionContext> getBootstrapContextClass() {
-    return bootstrapContextClass;
-  }
-
-  public Class<? extends CreationalContext> getCretionalContextClass() {
-    return cretionalContextClass;
   }
 }

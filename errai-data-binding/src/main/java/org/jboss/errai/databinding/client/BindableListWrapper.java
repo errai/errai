@@ -32,10 +32,10 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
 /**
  * Wraps a List<M> to notify change handlers of all operations that mutate the underlying list.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Max Barkley <mbarkley@redhat.com>
- * 
+ *
  * @param <M>
  */
 @SuppressWarnings("unchecked")
@@ -43,9 +43,12 @@ public class BindableListWrapper<M> implements List<M> {
 
   private final List<M> list;
   private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
-  
-  private final Map<BindableProxyAgent<?>, PropertyChangeHandler<?>> elementChangeHandlers = 
+
+  private final Map<BindableProxyAgent<?>, PropertyChangeHandler<?>> elementChangeHandlers =
           new HashMap<BindableProxyAgent<?>, PropertyChangeHandler<?>>();
+
+  private final Map<PropertyChangeHandler<?>, PropertyChangeUnsubscribeHandle> unsubscribeHandlesByHandler =
+          new HashMap<PropertyChangeHandler<?>, PropertyChangeUnsubscribeHandle>();
 
   public BindableListWrapper(List<M> list) {
     Assert.notNull(list);
@@ -284,7 +287,7 @@ public class BindableListWrapper<M> implements List<M> {
     if (BindableProxyFactory.isBindableType(element)) {
       element = BindableProxyFactory.getBindableProxy(element, InitialState.FROM_MODEL);
       final BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getBindableProxyAgent();
-      
+
       if (!elementChangeHandlers.containsKey(agent)) {
         // Register a property change handler on the element to fire a change
         // event for the list when the element changes
@@ -293,48 +296,53 @@ public class BindableListWrapper<M> implements List<M> {
           public void onPropertyChange(PropertyChangeEvent<Object> event) {
             final int index = list.indexOf(event.getSource());
             final List<M> source = new ArrayList<M>(list);
-            if (index == -1)  return; 
-            
+            if (index == -1)  return;
+
             // yikes! we do this to alter the source list (otherwise the change event won't get fired).
             source.add(null);
-            
+
             for (BindableListChangeHandler<M> handler : handlers) {
               handler.onItemChanged(source, index, (M) event.getSource());
             }
           }
         };
-        agent.addPropertyChangeHandler(handler);
+        unsubscribeHandlesByHandler.put(handler, agent.addPropertyChangeHandler(handler));
         elementChangeHandlers.put(agent, handler);
       }
     }
     return element;
   }
-  
+
   private void removeElementChangeHandler(Object element) {
     if (!BindableProxyFactory.isBindableType(element)) {
       return;
     }
-    
+
     final BindableProxyAgent<?> agent= ((BindableProxy<?>) element).getBindableProxyAgent();
     removeElementChangeHandler(agent);
   }
-  
+
   private void removeElementChangeHandler(BindableProxyAgent<?> agent) {
     Assert.notNull(agent);
-    
+
     PropertyChangeHandler<?> handler = elementChangeHandlers.remove(agent);
     if (handler != null) {
-      agent.removePropertyChangeHandler(handler);
+      PropertyChangeUnsubscribeHandle unsubHandle = unsubscribeHandlesByHandler.remove(handler);
+      if (unsubHandle == null) {
+        throw new RuntimeException("No " + PropertyChangeUnsubscribeHandle.class.getSimpleName() + " was found for the removed handler.");
+      }
+
+      unsubHandle.unsubscribe();
     }
   }
-  
+
   private void removeElementChangeHandlers() {
     List<BindableProxyAgent<?>> agents = new ArrayList<BindableProxyAgent<?>>(elementChangeHandlers.keySet());
     for (BindableProxyAgent<?> agent : agents) {
       removeElementChangeHandler(agent);
     }
   }
-  
+
   @Override
   public int hashCode() {
     return list.hashCode();

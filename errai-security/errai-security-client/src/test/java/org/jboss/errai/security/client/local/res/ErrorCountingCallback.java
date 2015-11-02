@@ -36,7 +36,7 @@ public class ErrorCountingCallback extends BusErrorCallback {
       return false;
     }
     else {
-      return true;
+      throw new AssertionError("Unexpected exception observed.", throwable);
     }
   }
 }

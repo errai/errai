@@ -16,15 +16,15 @@
 
 package org.jboss.errai.ioc.support.bus.client;
 
+import java.lang.annotation.Annotation;
+
+import javax.inject.Singleton;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.ToSubject;
-
-import javax.inject.Singleton;
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock .
@@ -47,17 +47,17 @@ public class SenderProvider implements ContextualTypeProvider<Sender<?>> {
     }
 
     if (typeargs.length != 1) {
-      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
+      throw new RuntimeException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
               " one type parameter. (found: " + typeargs.length + ")");
     }
 
     if (toSubject == null) {
-      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
+      throw new RuntimeException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
               + ToSubject.class.getName() + " qualifier missing at injection point.");
     }
 
     if (typeargs.length != 1) {
-      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
+      throw new RuntimeException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
               " one type parameter. (found: " + typeargs.length + ")");
     }
 

@@ -29,6 +29,7 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
+
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -70,18 +71,18 @@ public abstract class MetaClassBridgeUtil {
     if (typeOracle != null) {
       final Map<String, MetaClass> classesToPush = new HashMap<String, MetaClass>(typeOracle.getTypes().length);
       final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));
-      final Set<String> reloadable = RebindUtils.getReloadablePackageNames(context);
+      // Need to remove these or else we get issues from annotations and loading
+      // of emulated Object and Class instead of real ones.
       translatable.remove("java.lang");
       translatable.remove("java.lang.annotation");
+      final Set<String> reloadable = RebindUtils.getReloadablePackageNames(context);
 
       for (final JClassType type : typeOracle.getTypes()) {
         if (!translatable.contains(type.getPackage().getName())) {
- //         logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Skipping non-translatable " + type.getQualifiedSourceName());
           continue;
         }
 
         if (type.isAnnotation() != null || type.getQualifiedSourceName().equals("java.lang.annotation.Annotation")) {
-   //       logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
 
           if (!MetaClassFactory.canLoadClass(type.getQualifiedBinaryName())) {
             throw new RuntimeException("a new annotation has been introduced (" + type.getQualifiedSourceName() + "); "

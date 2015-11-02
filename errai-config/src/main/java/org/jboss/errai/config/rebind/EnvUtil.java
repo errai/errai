@@ -21,7 +21,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,6 +77,7 @@ public abstract class EnvUtil {
   public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
   public static final String CONFIG_ERRAI_NONSERIALIZABLE_TYPE = "errai.marshalling.nonserializableTypes";
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
+  public static final String CONFIG_ERRAI_IOC_ENABLED_ALTERNATIVES = "errai.ioc.enabled.alternatives";
   public static final String SYSPROP_USE_REACHABILITY_ANALYSIS = "errai.compile.perf.perform_reachability_analysis";
 
   private static volatile Boolean _isJUnitTest;
@@ -146,8 +156,19 @@ public abstract class EnvUtil {
         for (final Object o : props.keySet()) {
           final String key = (String) o;
           final String value = props.getString(key);
-          frameworkProps.put(key, value);
-          
+          if (frameworkProps.containsKey(key)) {
+            if (key.equals(CONFIG_ERRAI_IOC_ENABLED_ALTERNATIVES)) {
+              final String oldValue = frameworkProps.get(key);
+              final String newValue = oldValue + " " + value;
+              frameworkProps.put(key, newValue);
+            } else {
+              log.warn("The property {} has been set multiple times.", key);
+              frameworkProps.put(key, value);
+            }
+          } else {
+            frameworkProps.put(key, value);
+          }
+
           for (final String s : value.split(" ")) {
             if ("".equals(s))
               continue;
@@ -155,7 +176,7 @@ public abstract class EnvUtil {
               try {
                 exposedClasses.add(MetaClassFactory.get(s.trim()));
                 explicitTypes.add(s.trim());
-              } 
+              }
               catch (Exception e) {
                 throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: "
                         + s, e);
@@ -164,7 +185,7 @@ public abstract class EnvUtil {
             else if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
               try {
                 nonportableClasses.add(MetaClassFactory.get(s.trim()));
-              } 
+              }
               catch (Exception e) {
                 throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: "
                         + s, e);
@@ -184,7 +205,7 @@ public abstract class EnvUtil {
                 mappingAliases.put(fromMapping.getName(), toMapping.getName());
                 explicitTypes.add(fromMapping.getName());
                 explicitTypes.add(toMapping.getName());
-              } 
+              }
               catch (Exception e) {
                 throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
               }
@@ -240,14 +261,14 @@ public abstract class EnvUtil {
       final Set<URL> urlList = new HashSet<URL>();
       for (ClassLoader classLoader : Arrays.asList(Thread.currentThread().getContextClassLoader(),
               EnvUtil.class.getClassLoader())) {
-        
+
         Enumeration<URL> resources = classLoader.getResources("ErraiApp.properties");
         while (resources.hasMoreElements()) {
           urlList.add(resources.nextElement());
         }
       }
       return urlList;
-    } 
+    }
     catch (IOException e) {
       throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
     }
@@ -288,7 +309,7 @@ public abstract class EnvUtil {
     }
     return false;
   }
-  
+
   public static boolean isLocalEventType(final Class<?> cls) {
     return cls.isAnnotationPresent(LocalEvent.class);
   }

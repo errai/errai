@@ -32,6 +32,9 @@
     <inherits name="org.jboss.errai.validation.Validation" />
     <inherits name="org.hibernate.validator.HibernateValidator" />
 
+    <set-property name="gwt.logging.logLevel" value="INFO"/>
+    <set-property name="gwt.logging.enabled" value="TRUE"/>
+
     <replace-with class="org.jboss.errai.demo.grocery.client.local.Config">
         <when-type-is class="org.jboss.errai.bus.client.framework.Configuration" />
     </replace-with>

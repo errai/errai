@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.injection.client.test;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -16,9 +17,9 @@ import org.jboss.errai.cdi.injection.client.Cow;
 import org.jboss.errai.cdi.injection.client.CreditCard;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
 import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.injection.client.DisabledAlternativeBean;
 import org.jboss.errai.cdi.injection.client.FoobieScopedBean;
 import org.jboss.errai.cdi.injection.client.FoobieScopedOverriddenBean;
-import org.jboss.errai.cdi.injection.client.HistoryStack;
 import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.InheritedFromAbstractBean;
 import org.jboss.errai.cdi.injection.client.InterfaceA;
@@ -41,7 +42,7 @@ import org.jboss.errai.cdi.injection.client.qualifier.QualV;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
@@ -61,19 +62,27 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     }
   };
 
+  private Any anyAnno = new Any() {
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Any.class;
+    }
+  };
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.injection.InjectionTestModule";
   }
 
   public void testBeanManagerLookupSimple() {
-    final IOCBeanDef<ApplicationScopedBean> bean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
+    final SyncBeanDef<ApplicationScopedBean> bean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
     assertNotNull(bean);
   }
 
   public void testBeanManagerLookupInheritedScopeBean() {
-    final IOCBeanDef<InheritedApplicationScopedBean> bean =
-        IOC.getBeanManager().lookupBean(InheritedApplicationScopedBean.class);
+    final SyncBeanDef<InheritedApplicationScopedBean> bean =
+        IOC.getBeanManager().lookupBean(InheritedApplicationScopedBean.class, anyAnno);
     assertNotNull("inherited application scoped bean did not lookup", bean);
 
     final InheritedApplicationScopedBean beanInst = bean.getInstance();
@@ -93,7 +102,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerLookupBeanFromAbstractRootType() {
-    final IOCBeanDef<AbstractBean> bean = IOC.getBeanManager().lookupBean(AbstractBean.class);
+    final SyncBeanDef<AbstractBean> bean = IOC.getBeanManager().lookupBean(AbstractBean.class);
     assertNotNull("did not find any beans matching", bean);
 
     final AbstractBean beanInst = bean.getInstance();
@@ -107,7 +116,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
    * and transverse interface types.
    */
   public void testBeanManagerLookupForOuterInterfaceRootType() {
-    final IOCBeanDef<OuterBeanInterface> bean = IOC.getBeanManager().lookupBean(OuterBeanInterface.class);
+    final SyncBeanDef<OuterBeanInterface> bean = IOC.getBeanManager().lookupBean(OuterBeanInterface.class);
     assertNotNull("did not find any beans matching", bean);
 
     final OuterBeanInterface beanInst = bean.getInstance();
@@ -117,39 +126,30 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerLookupForOuterInterfacesOfNonAbstractType() {
-    final IOCBeanDef<InterfaceC> beanC = IOC.getBeanManager().lookupBean(InterfaceC.class);
+    final SyncBeanDef<InterfaceC> beanC = IOC.getBeanManager().lookupBean(InterfaceC.class);
     assertNotNull("did not find any beans matching", beanC);
 
-    final IOCBeanDef<InterfaceD> beanD = IOC.getBeanManager().lookupBean(InterfaceD.class);
+    final SyncBeanDef<InterfaceD> beanD = IOC.getBeanManager().lookupBean(InterfaceD.class);
     assertNotNull("did not find any beans matching", beanD);
   }
 
   public void testBeanManagerLookupForExtendedInterfaceType() {
     // This should find ApplicationScopedBeanA, ApplicationScopedBeanB and ApplicationScopedBeanC
-    final Collection<IOCBeanDef<InterfaceRoot>> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
+    final Collection<SyncBeanDef<InterfaceRoot>> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
     assertEquals("did not find all managed implementations of " + InterfaceRoot.class.getName(), 3, beans.size());
 
     // This should find ApplicationScopedBeanA and ApplicationScopedBeanB (InterfaceB extends InterfaceA)
-    final Collection<IOCBeanDef<InterfaceA>> beansB = IOC.getBeanManager().lookupBeans(InterfaceA.class);
+    final Collection<SyncBeanDef<InterfaceA>> beansB = IOC.getBeanManager().lookupBeans(InterfaceA.class);
     assertEquals("did not find both managed implementations of " + InterfaceA.class.getName(), 2, beansB.size());
 
     // This should find only ApplicationScopedBeanB
-    final Collection<IOCBeanDef<InterfaceB>> beansC = IOC.getBeanManager().lookupBeans(InterfaceB.class);
+    final Collection<SyncBeanDef<InterfaceB>> beansC = IOC.getBeanManager().lookupBeans(InterfaceB.class);
     assertEquals("did not find exactly one managed implementation of " + InterfaceB.class.getName(), 1, beansC.size());
-  }
-
-  @SuppressWarnings("rawtypes")
-  public void testBeanManagerLookupForGenericType() {
-    final IOCBeanDef<HistoryStack> bean = IOC.getBeanManager().lookupBean(HistoryStack.class);
-    assertNotNull("did not find managed bean of generic type " + HistoryStack.class.getName(), bean.getInstance());
-
-    HistoryStack beanInst = bean.getInstance();
-    assertNotNull("did not find injected generic bean", beanInst.getHistoryList());
   }
 
   public void testBeanManagerAPIs() {
     final SyncBeanManager mgr = IOC.getBeanManager();
-    final IOCBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class);
+    final SyncBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class, anyAnno);
 
     final Set<Annotation> a = bean.getQualifiers();
     assertEquals("there should be two qualifiers", 2, a.size());
@@ -171,14 +171,14 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
     };
 
-    final Collection<IOCBeanDef<CommonInterface>> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
+    final Collection<SyncBeanDef<CommonInterface>> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
     assertEquals("wrong number of beans", 2, beans.size());
 
-    final IOCBeanDef<CommonInterface> beanA = IOC.getBeanManager().lookupBean(CommonInterface.class, qualA);
+    final SyncBeanDef<CommonInterface> beanA = IOC.getBeanManager().lookupBean(CommonInterface.class, qualA);
     assertNotNull("no bean found", beanA);
     assertTrue("wrong bean looked up", beanA.getInstance() instanceof QualAppScopeBeanA);
 
-    final IOCBeanDef<CommonInterface> beanB = IOC.getBeanManager().lookupBean(CommonInterface.class, qualB);
+    final SyncBeanDef<CommonInterface> beanB = IOC.getBeanManager().lookupBean(CommonInterface.class, qualB);
     assertNotNull("no bean found", beanB);
     assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualAppScopeBeanB);
   }
@@ -218,14 +218,14 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
     };
 
-    final Collection<IOCBeanDef<CommonInterfaceB>> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
+    final Collection<SyncBeanDef<CommonInterfaceB>> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
     assertEquals("wrong number of beans", 2, beans.size());
 
-    final IOCBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualApples);
+    final SyncBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualApples);
     assertNotNull("no bean found", beanA);
     assertTrue("wrong bean looked up", beanA.getInstance() instanceof QualParmAppScopeBeanApples);
 
-    final IOCBeanDef<CommonInterfaceB> beanB = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualOranges);
+    final SyncBeanDef<CommonInterfaceB> beanB = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualOranges);
     assertNotNull("no bean found", beanB);
     assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualParmAppScopeBeanOranges);
   }
@@ -265,14 +265,14 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
     };
 
-    final Collection<IOCBeanDef<CommonInterfaceB>> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
+    final Collection<SyncBeanDef<CommonInterfaceB>> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
     assertEquals("wrong number of beans", 2, beans.size());
 
-    final IOCBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualOrange);
+    final SyncBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualOrange);
     assertNotNull("no bean found", beanA);
     assertFalse("wrong bean looked up", beanA.getInstance() instanceof QualParmAppScopeBeanApples);
 
-    final IOCBeanDef<CommonInterfaceB> beanB = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualApple);
+    final SyncBeanDef<CommonInterfaceB> beanB = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualApple);
     assertNotNull("no bean found", beanB);
     assertFalse("wrong bean looked up", beanB.getInstance() instanceof QualParmAppScopeBeanOranges);
   }
@@ -286,37 +286,37 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     };
 
     try {
-      final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class);
+      final SyncBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, anyAnno);
       fail("should have thrown an exception, but got: " + bean);
     }
     catch (IOCResolutionException e) {
-      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("multiple matching"));
+      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("Multiple beans matched"));
     }
 
     try {
-      final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, wrongAnno);
+      final SyncBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, wrongAnno);
       fail("should have thrown an exception, but got: " + bean);
     }
     catch (IOCResolutionException e) {
-      assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
+      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("No beans matched"));
     }
   }
 
   public void testLookupByName() {
-    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans("animal");
+    final Collection<SyncBeanDef> beans = IOC.getBeanManager().lookupBeans("animal");
 
     assertEquals("wrong number of beans", 2, beans.size());
     assertTrue("should contain a pig", containsInstanceOf(beans, Pig.class));
     assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
 
-    for (IOCBeanDef<?> bean : beans) {
+    for (SyncBeanDef<?> bean : beans) {
       assertEquals("animal", bean.getName());
     }
   }
 
   public void testNameAvailableThroughInterfaceLookup() {
-    Collection<IOCBeanDef<CreditCard>> beans = IOC.getBeanManager().lookupBeans(CreditCard.class);
-    for (IOCBeanDef<CreditCard> bean : beans) {
+    Collection<SyncBeanDef<CreditCard>> beans = IOC.getBeanManager().lookupBeans(CreditCard.class);
+    for (SyncBeanDef<CreditCard> bean : beans) {
       if (bean.getBeanClass().getName().endsWith("Visa")) {
         assertEquals("visa", bean.getName());
       }
@@ -330,28 +330,28 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testNameAvailableThroughConcreteTypeLookup() {
-    Collection<IOCBeanDef<Visa>> beans = IOC.getBeanManager().lookupBeans(Visa.class);
-    for (IOCBeanDef<Visa> bean : beans) {
+    Collection<SyncBeanDef<Visa>> beans = IOC.getBeanManager().lookupBeans(Visa.class);
+    for (SyncBeanDef<Visa> bean : beans) {
       assertNotNull("Missing name on " + bean, bean.getName());
     }
   }
 
   public void testLookupAllBeans() {
-    final Collection<IOCBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class);
+    final Collection<SyncBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class);
 
     assertTrue(!beans.isEmpty());
   }
 
   public void testLookupAllBeansQualified() {
-    final Collection<IOCBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class, QUAL_A);
+    final Collection<SyncBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class, QUAL_A);
 
     assertEquals(1, beans.size());
     assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
   }
 
   public void testReportedScopeCorrect() {
-    final IOCBeanDef<ApplicationScopedBean> appScopeBean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
-    final IOCBeanDef<DependentScopedBean> dependentIOCBean = IOC.getBeanManager().lookupBean(DependentScopedBean.class);
+    final SyncBeanDef<ApplicationScopedBean> appScopeBean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
+    final SyncBeanDef<DependentScopedBean> dependentIOCBean = IOC.getBeanManager().lookupBean(DependentScopedBean.class);
 
     assertEquals(ApplicationScoped.class, appScopeBean.getScope());
     assertEquals(Dependent.class, dependentIOCBean.getScope());
@@ -402,9 +402,71 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertSame(foobieScopedOverriddenBean1, foobieScopedOverriddenBean2);
   }
 
+  public void testProgrammaticlyRegisteredBeansAreLookedUp() {
+    final SyncBeanManager bm = IOC.getBeanManager();
+    assertEquals("The disabled alternative must not be in the bean manager before being programmatically added.", 0,
+            bm.lookupBeans(DisabledAlternativeBean.class).size());
 
-  private static boolean containsInstanceOf(final Collection<IOCBeanDef> defs, final Class<?> clazz) {
-    for (final IOCBeanDef def : defs) {
+    bm.registerBean(new SyncBeanDef<DisabledAlternativeBean>() {
+
+      @Override
+      public Class<DisabledAlternativeBean> getType() {
+        return DisabledAlternativeBean.class;
+      }
+
+      @Override
+      public Class<?> getBeanClass() {
+        return DisabledAlternativeBean.class;
+      }
+
+      @Override
+      public Class<? extends Annotation> getScope() {
+        return Dependent.class;
+      }
+
+      @Override
+      public DisabledAlternativeBean getInstance() {
+        return new DisabledAlternativeBean();
+      }
+
+      @Override
+      public DisabledAlternativeBean newInstance() {
+        return new DisabledAlternativeBean();
+      }
+
+      @Override
+      public Set<Annotation> getQualifiers() {
+        return Collections.emptySet();
+      }
+
+      @Override
+      public boolean matches(Set<Annotation> annotations) {
+        return true;
+      }
+
+      @Override
+      public String getName() {
+        return "Name of DisabledAlternative";
+      }
+
+      @Override
+      public boolean isConcrete() {
+        return true;
+      }
+
+      @Override
+      public boolean isActivated() {
+        return true;
+      }
+    });
+
+    assertEquals("Failed to lookup programmatically added bean by type.", 1, bm.lookupBeans(DisabledAlternativeBean.class).size());
+    assertEquals("Failed to lookup programmatically added bean by name.", 1, bm.lookupBeans("Name of DisabledAlternative").size());
+  }
+
+
+  private static boolean containsInstanceOf(final Collection<SyncBeanDef> defs, final Class<?> clazz) {
+    for (final SyncBeanDef def : defs) {
       if (def.getType().equals(clazz)) return true;
     }
     return false;

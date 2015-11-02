@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client.container;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerImpl;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleEvent;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListener;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleListenerGenerator;
@@ -28,7 +29,7 @@ import com.google.gwt.core.client.GWT;
 /**
  * A simple utility class which provides a static reference in the client to the
  * bean manager.
- * 
+ *
  * @author Mike Brock
  */
 public final class IOC {
@@ -65,15 +66,14 @@ public final class IOC {
 
   /**
    * Returns a reference to the bean manager in the client.
-   * 
+   *
    * @return the singleton instance of the client bean manager.
-   * 
+   *
    * @see SyncBeanManagerImpl
    */
   public static SyncBeanManager getBeanManager() {
     if (inst.beanManager instanceof AsyncBeanManager) {
-      throw new RuntimeException("the bean manager has been initialized in async mode. " +
-              "You must use getAsyncBeanManager()");
+      return ((AsyncBeanManagerImpl) inst.beanManager).getInnerBeanManager();
     }
     return (SyncBeanManagerImpl) inst.beanManager;
   }
@@ -89,7 +89,7 @@ public final class IOC {
   /**
    * Register a {@link LifecycleListenerGenerator} for
    * {@linkplain LifecycleEvent IOC Lifecycle Events}.
-   * 
+   *
    * @param beanType
    *          The type of bean for which {@link LifecycleListener
    *          LifecycleListeners} created by this generator observe.
@@ -99,7 +99,7 @@ public final class IOC {
    */
   public static <T> void registerLifecycleListener(final Class<T> beanType,
           final LifecycleListenerGenerator<T> listenerGenerator) {
-    
+
     getAsyncBeanManager().lookupBean(LifecycleListenerRegistrar.class).getInstance(
             new CreationalCallback<LifecycleListenerRegistrar>() {
 
@@ -109,11 +109,11 @@ public final class IOC {
               }
             });
   }
-  
+
   /**
    * Register a single {@link LifecycleListener} for {@link LifecycleEvent
    * LifecycleEvents} from a single instance.
-   * 
+   *
    * @param instance The instance to be observed.
    * @param listener The listener to be registered.
    */
@@ -131,7 +131,7 @@ public final class IOC {
   /**
    * Unregister a {@link LifecycleListenerGenerator} and all the
    * {@link LifecycleListener LifecycleListeners} created by this generator.
-   * 
+   *
    * @param beanType
    *          The bean type for which this generator created listeners.
    * @param generator
@@ -153,7 +153,7 @@ public final class IOC {
   /**
    * Unregister a single {@link LifecycleListener} for {@link LifecycleEvent
    * LifecycleEvents} from a single instance.
-   * 
+   *
    * @param instance The instance that was observed.
    * @param listener The listener that was registered.
    */
@@ -166,5 +166,18 @@ public final class IOC {
                 registrar.unregisterListener(instance, listener);
               }
             });
+  }
+
+  /**
+   * For testing only. Resets the bean manager.
+   */
+  public static void reset() {
+    if (inst.beanManager instanceof SyncBeanManagerImpl) {
+      ((SyncBeanManagerImpl) inst.beanManager).reset();
+    } else if (inst.beanManager instanceof AsyncBeanManagerImpl) {
+      ((AsyncBeanManagerImpl) inst.beanManager).reset();
+    } else {
+      throw new RuntimeException("Cannot reset bean manager of type " + inst.beanManager.getClass().getName());
+    }
   }
 }

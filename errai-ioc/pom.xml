@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>3.2.2-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -42,13 +42,6 @@
               <goal>test-jar</goal>
             </goals>
             <configuration>
-              <includes>
-                <include>**/AbstractErraiIOCTest.*</include>
-                <include>**/MockIOCGenerator.*</include>
-                <include>**/IOCSimulatedTestRunner.*</include>
-                <include>**/IOCClientTestCase*.*</include>
-                <include>**/*ContainerBootstrapper.*</include>
-              </includes>
             </configuration>
           </execution>
         </executions>
@@ -81,6 +74,12 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-gwt</artifactId>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -158,8 +157,7 @@
               <forkMode>pertest</forkMode>
               <argLine>-Xmx1500m -XX:MaxPermSize=500m
                 -Dgwt.gen=/tmp/gwt_test_gen_out/
-                -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug
-                -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+                -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug</argLine>
 
               <systemProperties>
                 <property>

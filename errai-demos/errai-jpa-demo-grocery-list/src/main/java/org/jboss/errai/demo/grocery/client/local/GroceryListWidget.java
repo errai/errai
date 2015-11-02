@@ -46,7 +46,7 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
 
   @Inject
   EntityManager entityManager;
-  
+
   @Inject
   GroceryList groceryList;
 
@@ -93,12 +93,12 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
     System.out.println("Observed new item");
     this.getValue().add(item);
   }
-  
+
   @SuppressWarnings("unused")
   private void onEditItem(@Observes @Updated Item item) {
     System.out.println("Observed updated item");
   }
-  
+
   @SuppressWarnings("unused")
   private void onDeleteItem(@Observes @Removed Item item) {
     System.out.println("Observed deleted item");
@@ -107,9 +107,9 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
 
   public void refreshListWidget() {
     List<Item> itemList = getAllSortedItems();
-    setItems(itemList);  
+    setItems(itemList);
   }
-  
+
   private List<Item> getAllSortedItems() {
     List<Item> itemList = getAllItems();
 
@@ -119,17 +119,17 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
     else {
       sort(itemList, distanceComparator);
     }
-    
+
     return itemList;
 
   }
-  
+
   @PostConstruct
   private void onInit() {
     List<Item> itemList = getAllSortedItems();
     groceryList.getItems().addAll(itemList);
     setItems(groceryList.getItems());
-    
+
   }
 
   private List<Item> getAllItems() {

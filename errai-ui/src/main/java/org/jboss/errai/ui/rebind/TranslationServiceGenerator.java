@@ -60,7 +60,6 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.reflections.Configuration;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.scanners.ResourcesScanner;
@@ -92,10 +91,10 @@ import com.google.gwt.resources.client.TextResource;
  * Generates a concrete subclass of {@link TranslationService}. This class is responsible for
  * scanning the classpath for all bundles, and then making them available during template
  * translation.
- * 
+ *
  * The {@link TranslationService} can also be used directly in the Errai application by injecting
  * it. This allows translated strings to be used from Errai Java code, not just from templates.
- * 
+ *
  * @author eric.wittmann@redhat.com
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Max Barkley <mbarkley@redhat.com>
@@ -202,6 +201,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     // Now generate code to load up each of the JSON files and register them
     // with the translation service.
+    int i = 0;
     for (String resource : resources) {
       // Generate this component's ClientBundle resource interface
       BuildMetaClass messageBundleResourceInterface = generateMessageBundleResourceInterface(resource);
@@ -209,7 +209,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       classBuilder.getClassDefinition().addInnerClass(new InnerClass(messageBundleResourceInterface));
 
       // Instantiate the ClientBundle MessageBundle resource
-      final String msgBundleVarName = InjectUtil.getUniqueVarName();
+      final String msgBundleVarName = "var" + (i++);
       ctor.append(Stmt.declareVariable(messageBundleResourceInterface).named(msgBundleVarName)
               .initializeWith(Stmt.invokeStatic(GWT.class, "create", messageBundleResourceInterface)));
 
@@ -250,15 +250,15 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       if (bundlePath != null && !completedPaths.contains(bundlePath)) {
         final URL resource = getClass().getClassLoader().getResource(bundlePath);
         if (resource == null) {
-          throw new GenerationException("Failed to load bundle " + bundlePath + 
+          throw new GenerationException("Failed to load bundle " + bundlePath +
                   " defined on class " + bundleClass.getFullyQualifiedName());
         }
-        
+
         final URL classpathElement;
         final String pathRoot = getPathRoot(bundleClass, resource);
         try {
           String urlString = new File(pathRoot).toURI().toURL().toString();
-          
+
           // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
           // a HTML form encoded String, which is why we escape the plus symbols here.
           // Otherwise, they would be decoded into space characters.
@@ -325,7 +325,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Gets the bundle name from the @Bundle annotation.
-   * 
+   *
    * @param bundleAnnotatedClass
    */
   private String getMessageBundlePath(MetaClass bundleAnnotatedClass) {
@@ -346,7 +346,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Gets the name of the {@link MessageBundle} class.
-   * 
+   *
    * @param bundlePath
    */
   private String getMessageBundleTypeName(final String bundlePath) {
@@ -358,7 +358,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   /**
    * Create an inner interface for the given {@link MessageBundle} class and its corresponding JSON
    * resource.
-   * 
+   *
    * @param bundlePath
    *          path to the message bundle
    */
@@ -385,7 +385,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   /**
    * Gets the locale information from the given bundle path. For example, if the bundle path is
    * "org/example/myBundle_en_US.json" then this method will return "en_US".
-   * 
+   *
    * @param bundlePath
    *          path to the message bundle
    */
@@ -410,7 +410,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * Generates all helper files that developers can use to assist with i18n work. This includes the
    * "missing i18n keys" report(s) as well as a set of JSON files that can be used as a
    * starting-point for translations.
-   * 
+   *
    * @param discoveredI18nMap
    *          a map of keys found in all scanned bundles
    * @param translationKeyFieldMap
@@ -418,7 +418,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param destDir
    *          where to write the *.json files
    * @param context
-   *          the generator context          
+   *          the generator context
    */
   protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap,
       Map<String, String> translationKeyFieldMap, File destDir) {
@@ -432,9 +432,9 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
       if (!templatedAnnotatedClass.getAnnotation(Templated.class)
-              .provider().equals(Templated.DEFAULT_PROVIDER.class)) 
+              .provider().equals(Templated.DEFAULT_PROVIDER.class))
         continue;
-      
+
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
       String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
@@ -493,7 +493,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Gets the root node of the template (within a potentially larger template HTML file).
-   * 
+   *
    * @param templateNode
    * @param templateFragment
    */
@@ -517,7 +517,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   /**
    * Gets all of the i18n key/value pairs from the given template root. In other words, returns
    * everything that needs to be translated.
-   * 
+   *
    * @param templateRoot
    * @param i18nPrefix
    */
@@ -529,7 +529,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * Writes out a bundle (JSON) file to the given location.
-   * 
+   *
    * @param i18nValues
    * @param bundleFile
    * @param onlyTheseKeys
@@ -559,7 +559,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   /**
    * A scanner that finds i18n message bundles.
-   * 
+   *
    * @author eric.wittmann@redhat.com
    */
   private static class MessageBundleResourceScanner extends ResourcesScanner {
@@ -568,7 +568,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     /**
      * Constructor.
-     * 
+     *
      * @param bundlePath
      */
     public MessageBundleResourceScanner(Set<String> bundlePaths) {
@@ -593,21 +593,21 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
           return true;
         }
       }
-      
+
       return false;
     }
   }
 
   /**
    * Scanner used to find i18n message bundles on the classpath.
-   * 
+   *
    * @author eric.wittmann@redhat.com
    */
   private static class MessageBundleScanner extends Reflections {
 
     /**
      * Constructor.
-     * 
+     *
      * @param config
      */
     public MessageBundleScanner(Configuration config) {

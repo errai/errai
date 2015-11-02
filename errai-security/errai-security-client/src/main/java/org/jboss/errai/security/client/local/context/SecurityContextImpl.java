@@ -17,7 +17,6 @@
 package org.jboss.errai.security.client.local.context;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
@@ -29,6 +28,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -54,7 +54,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@ApplicationScoped
+@EntryPoint
 public class SecurityContextImpl implements SecurityContext {
 
   /**

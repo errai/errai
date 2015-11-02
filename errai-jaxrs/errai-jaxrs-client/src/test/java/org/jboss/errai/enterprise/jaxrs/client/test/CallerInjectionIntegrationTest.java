@@ -26,6 +26,7 @@ import org.jboss.errai.enterprise.jaxrs.client.TestModule;
 import org.jboss.errai.enterprise.jaxrs.client.shared.UserNotFoundException;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.junit.Test;
 
@@ -34,7 +35,7 @@ import com.google.gwt.http.client.Response;
 
 /**
  * Testing caller injection.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
@@ -49,6 +50,13 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
     super.gwtSetUp();
     new IOCBeanManagerLifecycle().resetBeanManager();
     new Container().bootstrapContainer();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    Container.reset();
+    IOC.reset();
+    super.gwtTearDown();
   }
 
   @Test

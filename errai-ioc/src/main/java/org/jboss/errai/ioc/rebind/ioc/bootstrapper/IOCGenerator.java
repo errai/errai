@@ -74,6 +74,9 @@ public class IOCGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isCacheValid() {
+    // This ensures the logged total build time of factories is reset even if
+    // the BootstrapperImpl is not regenerated.
+    FactoryGenerator.resetTotalTime();
     Collection<MetaClass> newOrUpdated = MetaClassFactory.getAllNewOrUpdatedClasses();
     // filter out generated IOC environment config
     if (newOrUpdated.size() == 1) {
@@ -82,7 +85,7 @@ public class IOCGenerator extends AbstractAsyncGenerator {
         newOrUpdated.clear();
       }
     }
-    
+
     boolean hasAnyChanges =  !newOrUpdated.isEmpty() || !MetaClassFactory.getAllDeletedClasses().isEmpty();
     return hasGenerationCache() && (EnvUtil.isProdMode() || !hasAnyChanges);
   }

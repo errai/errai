@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
@@ -44,6 +45,12 @@ public class IdGeneratorTest extends JpaClientTestCase {
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
     new Container().bootstrapContainer();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    Container.reset();
+    IOC.reset();
   }
 
   /**

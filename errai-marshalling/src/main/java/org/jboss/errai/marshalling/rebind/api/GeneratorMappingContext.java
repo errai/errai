@@ -105,7 +105,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
   
   private static String getPrivateMemberName(final MetaClassMember member) {
     if (member instanceof MetaField) {
-      return PrivateAccessUtil.getPrivateFieldInjectorName((MetaField) member);
+      return PrivateAccessUtil.getPrivateFieldAccessorName((MetaField) member);
     }
     else {
       return PrivateAccessUtil.getPrivateMethodName((MetaMethod) member);

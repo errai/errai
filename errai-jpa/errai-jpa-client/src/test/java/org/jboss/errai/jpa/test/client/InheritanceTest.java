@@ -10,6 +10,7 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
@@ -55,6 +56,12 @@ public class InheritanceTest extends JpaClientTestCase {
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
     new Container().bootstrapContainer();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    Container.reset();
+    IOC.reset();
   }
 
   public void testStoreAndRetrieveConcreteParent() throws Exception {

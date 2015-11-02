@@ -44,14 +44,14 @@ import com.google.gwt.user.client.Timer;
  * <li>Running - data sync operations happen automatically
  * <li>Stopped - no sync happens
  * </ol>
- * 
+ *
  * New instances are in the "not yet started" state. You start them with a call to {@link #start()},
  * and stop them with a call to {@link #stop()}. Once started, a sync worker instance can be stopped
  * but not restarted. Once stopped, a sync worker cannot be restarted.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
+ *
  * @param <E>
  *          The entity type this worker's named query returns.
  */
@@ -62,10 +62,10 @@ public class ClientSyncWorker<E> {
   private static final Logger logger = LoggerFactory.getLogger(ClientSyncWorker.class);
 
   private final List<DataSyncCallback<E>> callbacks = new ArrayList<DataSyncCallback<E>>();
-  
+
   private LifecycleListener<Object> beanlifecycleListener;
   private Object managedBeanInstance;
-  
+
   private final Timer timer;
   private boolean started;
   private boolean stopped;
@@ -143,7 +143,7 @@ public class ClientSyncWorker<E> {
   /**
    * Creates a new ClientSyncWorker which takes responsibility for syncing the results of the named
    * JPA query.
-   * 
+   *
    * @param <E>
    *          The entity type the named query returns.
    * @param queryName
@@ -170,7 +170,7 @@ public class ClientSyncWorker<E> {
    * This constructor is primarily intended for testing. Consider using
    * {@link #create(String, Class, Map, ErrorCallback)} instead, which obtains an instance of
    * ClientSyncManager from the IOC Bean Manager.
-   * 
+   *
    * @param manager
    *          The instance of ClientSyncManager that should be used for all data sync operations.
    * @param queryName
@@ -212,7 +212,7 @@ public class ClientSyncWorker<E> {
   /**
    * Registers the given callback to receive notifications each time a sync operation has been
    * performed.
-   * 
+   *
    * @param onCompletion
    *          the callback to notify of completed sync operations. Must not be null.
    */
@@ -223,10 +223,10 @@ public class ClientSyncWorker<E> {
 
   /**
    * Starts this sync worker if it has not already been started or stopped.
-   * 
+   *
    * @param queryParams
    *          Name-value pairs for all named parameters in the named query. Never null.
-   * 
+   *
    * @throws IllegalStateException
    *           if this sync worker has been stopped.
    */
@@ -243,15 +243,15 @@ public class ClientSyncWorker<E> {
 
   /**
    * Starts this sync worker if it has not already been started or stopped.
-   * 
+   *
    * @param beanInstance
    *          The managed bean instance the observes the sync results and defines the query
    *          parameters.
-   * 
+   *
    * @param queryParamCallback
    *          A {@link QueryParamInitCallback} that provides the query parameters for this
    *          {@link ClientSyncWorker}'s query.
-   * 
+   *
    * @throws IllegalStateException
    *           if this sync worker has been stopped.
    */
@@ -280,12 +280,18 @@ public class ClientSyncWorker<E> {
 
     // Let's give control back so that other parts of the framework have a chance to update fields
     // of the managed bean before we start the first synchronization
-    timer.schedule(500);
+    new Timer() {
+      @Override
+      public void run() {
+        queryParams = queryParamCallback.getQueryParams();
+        timer.run();
+      }
+    }.schedule(500);
   }
 
   /**
    * Stops this sync worker if it is running.
-   * 
+   *
    * @throws IllegalStateException
    *           if this sync worker has not yet been started.
    */

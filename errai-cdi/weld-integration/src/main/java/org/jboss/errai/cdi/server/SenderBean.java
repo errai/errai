@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.server;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.security.ProviderException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,7 +29,6 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.ToSubject;
 import org.jboss.errai.ioc.support.bus.client.ErraiMessageSender;
@@ -42,7 +42,7 @@ public class SenderBean implements Bean {
   private final Set<Annotation> qualifiers;
   private final MessageBus bus;
   private final Set<Type> typesSet;
- 
+
   public SenderBean(final Type type, final Set<Annotation> qualifiers, final MessageBus bus) {
     this.bus = bus;
     this.qualifiers = qualifiers;
@@ -115,7 +115,7 @@ public class SenderBean implements Bean {
 
     return ErraiMessageSender.of(toSubject, replyTo, bus);
   }
-  
+
   private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE
           = "Injection of " + Sender.class.getName() + " implicit bean failed. ";
 

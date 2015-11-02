@@ -17,26 +17,26 @@
 package org.jboss.errai.cdi.async.test.postconstruct.client.res;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@Dependent
+@ApplicationScoped
 public class PostConstrBeanA {
   @Inject
   private PostConstrBeanB postConstrBeanB;
-  
+
   // required to make proxyable
   public PostConstrBeanA() {
   }
 
   @Inject
   public PostConstrBeanA(PostConstrBeanA selfRefProxy) {
-    
+
   }
-  
+
   @PostConstruct
   private void postConstr() {
     PostConstructTestUtil.record(PostConstrBeanA.class.getName());

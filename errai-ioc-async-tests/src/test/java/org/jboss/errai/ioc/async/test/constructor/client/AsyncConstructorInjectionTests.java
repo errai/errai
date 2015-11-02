@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.async.test.constructor.client;
 
-import com.google.gwt.user.client.Timer;
-
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.test.constructor.client.res.ConstrInjBean;
 import org.jboss.errai.ioc.client.Container;
@@ -43,7 +41,7 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
 
                 assertTrue(bean.isPostConstructFired());
 
-                assertSame(bean, IOC.getAsyncBeanManager().getActualBeanReference(bean.getMyself()));
+                assertSame(IOC.getAsyncBeanManager().getActualBeanReference(bean), IOC.getAsyncBeanManager().getActualBeanReference(bean.getMyself()));
 
                 finishTest();
               }

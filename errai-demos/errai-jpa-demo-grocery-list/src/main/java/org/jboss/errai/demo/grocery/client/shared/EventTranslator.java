@@ -17,7 +17,6 @@
 package org.jboss.errai.demo.grocery.client.shared;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.PostPersist;
@@ -27,6 +26,7 @@ import javax.persistence.PostUpdate;
 import org.jboss.errai.demo.grocery.client.shared.qual.New;
 import org.jboss.errai.demo.grocery.client.shared.qual.Removed;
 import org.jboss.errai.demo.grocery.client.shared.qual.Updated;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * A translator that receives JPA entity lifecycle events and refires them as CDI events.
@@ -36,7 +36,7 @@ import org.jboss.errai.demo.grocery.client.shared.qual.Updated;
  *
  * @author jfuerth
  */
-@ApplicationScoped
+@EntryPoint
 public class EventTranslator {
 
     private static EventTranslator INSTANCE;

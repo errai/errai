@@ -16,7 +16,8 @@
 
 package org.jboss.errai.ioc.client;
 
+import org.jboss.errai.ioc.client.container.ContextManager;
 
 public interface Bootstrapper {
-  BootstrapInjectionContext bootstrapContainer();
+  ContextManager bootstrapContainer();
 }

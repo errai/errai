@@ -22,7 +22,7 @@ public class BeanConstrConsumesOwnProducer {
     this.factory = factory;
   }
 
-  @Produces @Produced
+  @Produces @Produced @ApplicationScoped
   private WrappedThing produceWrappedThing(@Produced Thing thing) {
     return new WrappedThing(thing);
   }

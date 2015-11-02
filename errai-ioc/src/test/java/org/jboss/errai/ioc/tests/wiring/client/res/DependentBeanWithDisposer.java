@@ -1,10 +1,9 @@
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.Disposer;
-
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import javax.inject.Singleton;
+
+import org.jboss.errai.ioc.client.api.Disposer;
 
 /**
  * @author Mike Brock

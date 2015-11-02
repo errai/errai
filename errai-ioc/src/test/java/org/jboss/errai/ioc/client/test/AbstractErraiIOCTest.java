@@ -16,9 +16,11 @@
 
 package org.jboss.errai.ioc.client.test;
 
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+
+import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * @author Mike Brock
@@ -30,6 +32,12 @@ public abstract class AbstractErraiIOCTest extends GWTTestCase {
     super.gwtSetUp();
     new IOCBeanManagerLifecycle().resetBeanManager();
     new Container().bootstrapContainer();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    IOC.reset();
+    Container.reset();
   }
 
   protected void $(Runnable runnable) {

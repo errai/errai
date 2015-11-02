@@ -21,10 +21,10 @@ import org.jboss.errai.ui.shared.api.annotations.Bound;
 
 import com.google.gwt.user.client.ui.TextBox;
 
-public class DeclarativeBindingSuperType {
-  
+public abstract class DeclarativeBindingSuperType {
+
   private final TextBox date = new TextBox();
-  
+
   @Bound(property = "lastChanged", converter = BindingDateConverter.class)
   public TextBox getDateTextBox() {
     return date;

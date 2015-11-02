@@ -24,7 +24,10 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * {@link IOCProvider} to make the default navigation panel injectable.
- * 
+ *
+ * This is a contextual type provider so that it only matches NavigationPanel
+ * exactly, and no supertypes.
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @IOCProvider

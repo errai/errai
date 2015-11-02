@@ -32,7 +32,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * {@link Bound} of the class that defines the {@link DataBinder} and all its super classes.
  * <p>
  * There can only be one auto bound {@link DataBinder} per class.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented

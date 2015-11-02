@@ -4,6 +4,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import org.jboss.errai.cdi.event.client.shared.JsTypeEvent;
 import org.jboss.errai.cdi.event.client.shared.PortableLocalEventA;
 import org.jboss.errai.cdi.event.client.shared.PortableLocalEventB;
 import org.jboss.errai.cdi.event.client.test.ClientLocalEventIntegrationTest;
@@ -12,6 +13,7 @@ import org.jboss.errai.cdi.event.client.test.ClientLocalEventIntegrationTest;
 public class ClientLocalEventTestModule {
   @Inject private Event<PortableLocalEventA> eventA;
   @Inject private Event<PortableLocalEventB> eventB;
+  @Inject private Event<JsTypeEvent> jsTypeEvent;
   
   public void fireEventA() {
     PortableLocalEventA payload = new PortableLocalEventA();
@@ -23,5 +25,9 @@ public class ClientLocalEventTestModule {
     PortableLocalEventB payload = new PortableLocalEventB();
     payload.subject = ClientLocalEventIntegrationTest.FAILURE;
     eventB.fire(payload);
+  }
+  
+  public void fireJsTypeEvent() {
+    jsTypeEvent.fire(new JsTypeEvent());
   }
 }

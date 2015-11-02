@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.inject.Alternative;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
+@Alternative
 public class ErraiEntityManager implements EntityManager {
 
   // magic incantation. ooga booga!
@@ -76,7 +78,7 @@ public class ErraiEntityManager implements EntityManager {
    * GeneratedErraiEntityManager subclass.
    */
   final Map<String, TypedQueryFactory> namedQueries;
-  
+
   /**
    * The logging interface.
    */
@@ -85,7 +87,7 @@ public class ErraiEntityManager implements EntityManager {
   /**
    * Constructor for building custom-purpose EntityManager instances. For common
    * usecases, simply use {@code @Inject EntityManager em} and let the
-   * {@link ErraiEntityManagerProvider} handle the prerequisites for you.
+   * {@link ErraiEntityManagerProducer} handle the prerequisites for you.
    */
   public ErraiEntityManager(
           ErraiMetamodel metamodel,

@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Represents the binding of a bean property to a widget and holds all relevant binding-specific
  * metadata.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public final class Binding {
@@ -35,6 +35,7 @@ public final class Binding {
   private final Widget widget;
   private final Converter<?, ?> converter;
   private final Map<Class<? extends GwtEvent>, HandlerRegistration> handlerMap;
+  private final boolean needsKeyUpBinding;
 
   public Binding(String property, Widget widget, Converter<?, ?> converter,
                   Map<Class<? extends GwtEvent>, HandlerRegistration> handlerMap) {
@@ -42,6 +43,7 @@ public final class Binding {
     this.widget = widget;
     this.converter = converter;
     this.handlerMap = handlerMap;
+    needsKeyUpBinding = (handlerMap != null && handlerMap.containsKey(KeyUpEvent.class));
   }
 
   public String getProperty() {
@@ -75,8 +77,8 @@ public final class Binding {
     return "Binding [property=" + property + ", widget=" + widget + "]";
   }
 
-  public boolean hasKeyUpBinding() {
-    return (handlerMap != null && handlerMap.containsKey(KeyUpEvent.class));
+  public boolean needsKeyUpBinding() {
+    return needsKeyUpBinding;
   }
 
 }

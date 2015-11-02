@@ -98,7 +98,7 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
     assertNotNull(b1.getBeanB());
     assertTrue(b1.getBeanB().isPostConstr());
   }
-  
+
   public void testIsUnsatisfied() {
     final InstanceTestBean testBean = getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
     assertNotNull("InstanceTestBean is null", testBean);
@@ -106,14 +106,14 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
     final Instance<UnmanagedBean> instanceUnmanagedBean = testBean.getUnmanagedBean();
     assertNotNull("InstanceTestBean.Instance<UnmanagedBean> is null", instanceUnmanagedBean);
     assertTrue("Unmanaged bean should not be satisfied", instanceUnmanagedBean.isUnsatisfied());
-    
+
     final Instance<ApplicationScopedBeanA> instanceApplicationScopedBean = testBean.getInjectApplicationScoped();
     assertFalse(instanceApplicationScopedBean.isUnsatisfied());
-    
+
     final Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
     assertFalse(instanceDependentBeanA.isUnsatisfied());
   }
-  
+
   public void testIsAmbiguous() {
     final InstanceTestBean testBean = getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
     assertNotNull("InstanceTestBean is null", testBean);
@@ -121,16 +121,16 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
     final Instance<InterfaceA> ambiguousBean = testBean.getAmbiguousBean();
     assertNotNull("InstanceTestBean.Instance<InterfaceA> is null", ambiguousBean);
     assertTrue(ambiguousBean.isAmbiguous());
-    
+
     final Instance<UnmanagedBean> instanceUnmanagedBean = testBean.getUnmanagedBean();
     assertNotNull("InstanceTestBean.Instance<UnmanagedBean> is null", instanceUnmanagedBean);
     assertFalse(instanceUnmanagedBean.isAmbiguous());
-    
+
     final Instance<ApplicationScopedBeanA> instanceApplicationScopedBean = testBean.getInjectApplicationScoped();
     assertFalse(instanceApplicationScopedBean.isAmbiguous());
-    
+
     final Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
     assertFalse(instanceDependentBeanA.isAmbiguous());
   }
-  
+
 }

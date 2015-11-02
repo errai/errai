@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-cdi-demo-tagcloud</artifactId>
-  <version>3.2.2-SNAPSHOT</version>
+  <version>4.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Errai::CDI::Demos::TagCloud</name>
 
@@ -97,11 +97,6 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-weld-integration</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-uibinder</artifactId>
     </dependency>
 
     <dependency>

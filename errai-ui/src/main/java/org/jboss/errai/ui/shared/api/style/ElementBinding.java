@@ -26,6 +26,7 @@ import com.google.gwt.user.client.EventListener;
 /**
  * @author Mike Brock
  */
+@SuppressWarnings("deprecation")
 public class ElementBinding {
   private final Element element;
   private final EventListener newListener;
@@ -36,7 +37,7 @@ public class ElementBinding {
     this.element = element;
     this.originalEventListener = DOM.getEventListener(element);
     this.beanInstance = beanInstance;
-    
+
     this.newListener = new EventListener() {
       @Override
       public void onBrowserEvent(Event event) {
@@ -56,10 +57,10 @@ public class ElementBinding {
   public Element getElement() {
     return element;
   }
-  
+
   public Object getBeanInstance() {
     return beanInstance;
-  }  
+  }
 
   public void clean() {
     if (originalEventListener != null) {

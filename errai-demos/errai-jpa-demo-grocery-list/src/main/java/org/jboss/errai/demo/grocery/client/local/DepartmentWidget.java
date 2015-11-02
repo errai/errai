@@ -16,16 +16,14 @@
  */
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.demo.grocery.client.shared.Department;
-import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ui.client.widget.HasModel;
 
 import com.google.gwt.user.client.ui.Label;
 
-@LoadAsync
-@Dependent
+@Alternative
 public class DepartmentWidget extends Label implements HasModel<Department> {
 
     private Department department;

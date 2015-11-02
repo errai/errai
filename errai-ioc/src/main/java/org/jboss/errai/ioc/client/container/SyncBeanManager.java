@@ -24,14 +24,14 @@ import java.util.Collection;
  */
 public interface SyncBeanManager extends ClientBeanManager {
 
-
   /**
-   * Register a bean with the manager.
+   * Register a bean with the bean manager. The registered bean will be
+   * available for lookup, but will not affect wiring of other beans.
    *
-   * @param bean
-   *     an {@link IOCSingletonBean} reference
+   * @param beanDef
+   *          The bean def to register.
    */
-  <T> IOCBeanDef<T> registerBean(IOCBeanDef<T> bean);
+  <T> void registerBean(SyncBeanDef<T> beanDef);
 
   /**
    * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
@@ -41,7 +41,7 @@ public interface SyncBeanManager extends ClientBeanManager {
    *
    * @return and unmodifiable list of all beans with the specified name.
    */
-  Collection<IOCBeanDef> lookupBeans(String name);
+  Collection<SyncBeanDef> lookupBeans(String name);
 
   /**
    * Looks up all beans of the specified type.
@@ -52,7 +52,7 @@ public interface SyncBeanManager extends ClientBeanManager {
    * @return An unmodifiable list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
    */
-  <T> Collection<IOCBeanDef<T>> lookupBeans(Class<T> type);
+  <T> Collection<SyncBeanDef<T>> lookupBeans(Class<T> type);
 
   /**
    * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
@@ -66,7 +66,7 @@ public interface SyncBeanManager extends ClientBeanManager {
    * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
    *         if no beans match.
    */
-  <T> Collection<IOCBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers);
+  <T> Collection<SyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers);
 
   /**
    * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
@@ -83,5 +83,5 @@ public interface SyncBeanManager extends ClientBeanManager {
    *         Throws an {@link IOCResolutionException} if there is a matching type but none of the
    *         qualifiers match or if more than one bean  matches.
    */
-  <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers);
+  <T> SyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers);
 }

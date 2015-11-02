@@ -17,346 +17,274 @@
 package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.ioc.client.QualifierUtil;
-import org.jboss.errai.ioc.client.SimpleInjectionContext;
-import org.jboss.errai.ioc.client.api.EnabledByProperty;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * A simple bean manager provided by the Errai IOC framework. The manager provides access to all of the wired beans
  * and their instances. Since the actual wiring code is generated, the bean manager is populated by the generated
  * code at bootstrap time.
  *
- * @author Mike Brock
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-@EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
-public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetup {
-  /**
-   * A map of all named beans.
-   */
-  private final Map<String, List<IOCBeanDef>> namedBeans
-      = new HashMap<String, List<IOCBeanDef>>();
+@Alternative
+public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
-  /**
-   * A map of all beans managed by the bean mean manager, keyed by type.
-   */
-  private final Map<Class<?>, List<IOCBeanDef>> beanMap
-      = new HashMap<Class<?>, List<IOCBeanDef>>();
-
-  /**
-   * A map which contains bean instances as keys, and their associated {@link CreationalContext}s as values.
-   */
-  private final Map<Object, CreationalContext> creationalContextMap
-      = new IdentityHashMap<Object, CreationalContext>();
-
-  /**
-   * A map which contains proxied instances as keys, and the underlying proxied bean instances as values.
-   */
-  private final Map<Object, Object> proxyLookupForManagedBeans
-      = new IdentityHashMap<Object, Object>();
-
-  /**
-   * A collection which contains a list of all known concrete bean types being managed. eg. no interface or
-   * abstract types will be present in this collection.
-   */
-  private final Set<String> concreteBeans
-      = new HashSet<String>();
-
-  public SyncBeanManagerImpl() {
-    // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose of
-    // lookups. This modifies the lookup behavior to exclude other non-concrete types from qualified matching.
-    concreteBeans.add("java.lang.Object");
-  }
-
-  private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
-                                                    final Class<?> beanType,
-                                                    final BeanProvider<Object> callback,
-                                                    final Object instance,
-                                                    final Annotation[] qualifiers,
-                                                    final String name,
-                                                    final boolean concrete,
-                                                    final Class<Object> beanActivatorType) {
-
-    return registerBean(IOCSingletonBean.newBean(
-        this, type, beanType, qualifiers, name, concrete, callback, instance, beanActivatorType));
-  }
-
-  private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
-                                                    final Class<?> beanType,
-                                                    final BeanProvider<Object> callback,
-                                                    final Annotation[] qualifiers,
-                                                    final String name,
-                                                    final boolean concrete,
-                                                    final Class<Object> beanActivatorType) {
-
-    return registerBean(IOCDependentBean.newBean(
-        this, type, beanType, qualifiers, name, concrete, callback, beanActivatorType));
-  }
-
-  private void registerSingletonBean(final Class<Object> type,
-                                     final Class<?> beanType,
-                                     final BeanProvider<Object> callback,
-                                     final Object instance,
-                                     final Annotation[] qualifiers,
-                                     final String beanName,
-                                     final boolean concrete,
-                                     final Class<Object> activator) {
-
-
-    _registerNamedBean(beanName, 
-        _registerSingletonBean(type, beanType, callback, instance, qualifiers, beanName, concrete, activator));
-  }
-
-  private void registerDependentBean(final Class<Object> type,
-                                     final Class<?> beanType,
-                                     final BeanProvider<Object> callback,
-                                     final Annotation[] qualifiers,
-                                     final String beanName,
-                                     final boolean concrete,
-                                     final Class<Object> activator) {
-
-    _registerNamedBean(beanName, 
-        _registerDependentBean(type, beanType, callback, qualifiers, beanName, concrete, activator));
-  }
-
-  private void _registerNamedBean(final String name,
-                                  final IOCBeanDef beanDef) {
-    if (beanDef.isConcrete()) {
-      if (!namedBeans.containsKey(name)) {
-        namedBeans.put(name, new ArrayList<IOCBeanDef>());
-      }
-      namedBeans.get(name).add(beanDef);
-    }
-  }
-
+  private ContextManager contextManager;
+  private final Multimap<String, FactoryHandle> handlesByTypeName = ArrayListMultimap.create();
+  private final Multimap<String, String> typeNamesByName = HashMultimap.create();
+  private final Multimap<String, SyncBeanDef<?>> runtimeBeanDefsByTypeName = ArrayListMultimap.create();
 
   @Override
-  public void addBean(final Class<Object> type,
-                      final Class<?> beanType,
-                      final BeanProvider<Object> callback,
-                      final Object instance,
-                      final Annotation[] qualifiers) {
-
-    addBean(type, beanType, callback, instance, qualifiers, null, true, null);
+  public void destroyBean(Object ref) {
+    contextManager.destroy(ref);
   }
 
   @Override
-  public void addBean(final Class<Object> type,
-                      final Class<?> beanType,
-                      final BeanProvider<Object> callback,
-                      final Object instance,
-                      final Annotation[] qualifiers,
-                      final String name) {
-
-    addBean(type, beanType, callback, instance, qualifiers, name, true, null);
+  public boolean isManaged(Object ref) {
+    return contextManager.isManaged(ref);
   }
 
   @Override
-  public void addBean(final Class<Object> type,
-                      final Class<?> beanType,
-                      final BeanProvider<Object> callback,
-                      Object instance,
-                      final Annotation[] qualifiers,
-                      final String name,
-                      final boolean concreteType,
-                      final Class<Object> beanActivatorType) {
-
-    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
-      throw new RuntimeException("you cannot record a lazy initialization reference!");
-    }
-
-    if (concreteType) {
-      concreteBeans.add(type.getName());
-    }
-
-    if (instance != null) {
-      registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType, beanActivatorType);
-    }
-    else {
-      registerDependentBean(type, beanType, callback, qualifiers, name, concreteType, beanActivatorType);
-    }
+  public Object getActualBeanReference(Object ref) {
+    return Factory.maybeUnwrapProxy(ref);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void destroyBean(final Object ref) {
-    final SimpleCreationalContext creationalContext =
-        (SimpleCreationalContext) creationalContextMap.get(getActualBeanReference(ref));
-
-    if (creationalContext == null) {
-      return;
-    }
-
-    creationalContext.destroyContext();
-
-    for (final Object inst : creationalContext.getAllCreatedBeanInstances()) {
-      creationalContextMap.remove(inst);
-      proxyLookupForManagedBeans.remove(inst);
-      proxyLookupForManagedBeans.values().remove(inst);
-    }
-  }
-
-  @Override
-  public boolean isManaged(final Object ref) {
-    return creationalContextMap.containsKey(getActualBeanReference(ref));
-  }
-
-  @Override
-  public Object getActualBeanReference(final Object ref) {
-    if (isProxyReference(ref)) {
-      return proxyLookupForManagedBeans.get(ref);
-    }
-    else {
-      return ref;
-    }
-  }
-
-  @Override
-  public boolean isProxyReference(final Object ref) {
-    return proxyLookupForManagedBeans.containsKey(ref);
-  }
-
-  @Override
-  public void addProxyReference(final Object proxyRef, final Object realRef) {
-    proxyLookupForManagedBeans.put(proxyRef, realRef);
-  }
-
-  @Override
-  public void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
-    creationalContextMap.put(ref, creationalContext);
-  }
-
-  @Override
-  public <T> IOCBeanDef<T> registerBean(final IOCBeanDef<T> bean) {
-    if (!beanMap.containsKey(bean.getType())) {
-      beanMap.put(bean.getType(), new ArrayList<IOCBeanDef>());
-    }
-    beanMap.get(bean.getType()).add(bean);
-    return bean;
-  }
-
-  @Override
-  public Collection<IOCBeanDef> lookupBeans(final String name) {
-    if (!namedBeans.containsKey(name)) {
-      return Collections.emptyList();
-    }
-    else {
-      return namedBeans.get(name);
-    }
-  }
-
-  @Override
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type) {
-    final List<IOCBeanDef> beanList;
-
-    if (type.getName().equals("java.lang.Object")) {
-      beanList = new ArrayList<IOCBeanDef>();
-      for (final List<IOCBeanDef> list : beanMap.values()) {
-        beanList.addAll(list);
-      }
-    }
-    else {
-      beanList = beanMap.get(type);
-    }
-
-    final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
-
-    if (beanList != null) {
-      for (final IOCBeanDef<T> beanDef : beanList) {
-        matching.add(beanDef);
-      }
-    }
-
-    return Collections.unmodifiableList(matching);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifierInstances) {
-    final List<IOCBeanDef> beanList;
-
-    if (type.getName().equals("java.lang.Object")) {
-      beanList = new ArrayList<IOCBeanDef>();
-      for (final List<IOCBeanDef> list : beanMap.values()) {
-        beanList.addAll(list);
-      }
-    }
-    else {
-      beanList = beanMap.get(type);
-    }
-
-    if (beanList == null) {
-      return Collections.emptyList();
-    }
-
-    final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
-
-    final Annotation[] qualifiers = (qualifierInstances == null) ? new Annotation[0] : qualifierInstances;
-      final Set<Annotation> qualifierSet = new HashSet<Annotation>(qualifiers.length * 2);
-      Collections.addAll(qualifierSet, qualifiers);
-
-      final boolean defaultMatch = QualifierUtil.isDefaultAnnotations(qualifierInstances);
-
-      for (final IOCBeanDef iocBean : beanList) {
-        if (defaultMatch || iocBean.matches(qualifierSet)) {
-          matching.add(iocBean);
-        }
-      }
-    if (matching.size() == 1) {
-      return Collections.unmodifiableList(matching);
-    }
-
-    if (matching.size() > 1) {
-      // perform second pass
-      final Iterator<IOCBeanDef<T>> secondIterator = matching.iterator();
-
-      if (concreteBeans.contains(type.getName())) {
-        while (secondIterator.hasNext()) {
-          if (!secondIterator.next().isConcrete())
-            secondIterator.remove();
-        }
-      }
-      else {
-        while (secondIterator.hasNext()) {
-          if (!concreteBeans.contains(secondIterator.next().getBeanClass().getName()))
-            secondIterator.remove();
-        }
-      }
-    }
-
-    return Collections.unmodifiableList(matching);
-  }
-
-  @Override
-  public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
-    final Collection<IOCBeanDef<T>> matching = lookupBeans(type, qualifiers);
-
-    if (matching.size() == 1) {
-      return matching.iterator().next();
-    }
-    else if (matching.isEmpty()) {
-      throw new IOCResolutionException("no matching bean instances for: " + type.getName());
-    }
-    else {
-      throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
-    }
+  public boolean isProxyReference(Object ref) {
+    return ref instanceof Proxy;
   }
 
   @Override
   public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
-    final CreationalContext creationalContext = creationalContextMap.get(beanInstance);
-    if (creationalContext == null) {
-      return false;
-    }
-
-    creationalContext.addDestructionCallback(beanInstance, destructionCallback);
-    return true;
+    return contextManager.addDestructionCallback(beanInstance, destructionCallback);
   }
 
   @Override
   public void destroyAllBeans() {
-    namedBeans.clear();
-    beanMap.clear();
+    // TODO Decide how this should be implemented.
+  }
+
+  @Override
+  public void setContextManager(final ContextManager contextManager) {
+    if (this.contextManager != null) {
+      throw new RuntimeException("The ContextManager must only be set once.");
+    }
+    this.contextManager = contextManager;
+    init();
+  }
+
+  private void init() {
+    final Collection<FactoryHandle> eager = new ArrayList<FactoryHandle>();
+    for (final FactoryHandle handle : contextManager.getAllFactoryHandles()) {
+      if (handle.isEager()) {
+        eager.add(handle);
+      }
+      addFactory(handle);
+    }
+
+    for (final FactoryHandle handle : eager) {
+      contextManager.getEagerInstance(handle.getFactoryName());
+    }
+  }
+
+  private void addFactory(final FactoryHandle handle) {
+    for (final Class<?> assignableType : handle.getAssignableTypes()) {
+      handlesByTypeName.put(assignableType.getName(), handle);
+      typeNamesByName.put(assignableType.getName(), assignableType.getName());
+    }
+    if (handle.getBeanName() != null) {
+      typeNamesByName.put(handle.getBeanName(), handle.getActualType().getName());
+    }
+  }
+
+  @SuppressWarnings({ "rawtypes" })
+  @Override
+  public Collection<SyncBeanDef> lookupBeans(final String name) {
+    final Collection<SyncBeanDef> beanDefs = new ArrayList<SyncBeanDef>();
+    for (final String typeName : typeNamesByName.get(name)) {
+      beanDefs.addAll(lookupBeansByTypeName(typeName));
+    }
+
+    return beanDefs;
+  }
+
+  @Override
+  public <T> Collection<SyncBeanDef<T>> lookupBeans(final Class<T> type) {
+    return lookupBeansByTypeName(type.getName());
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> Collection<SyncBeanDef<T>> lookupBeansByTypeName(final String typeName) {
+    final Collection<FactoryHandle> handles = handlesByTypeName.get(typeName);
+    final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByTypeName.get(typeName);
+
+    @SuppressWarnings("rawtypes")
+    final Collection beanDefs = new ArrayList<SyncBeanDef<T>>(handles.size()+runtimeBeanDefs.size());
+    beanDefs.addAll(runtimeBeanDefs);
+    for (final FactoryHandle handle : handles) {
+      beanDefs.add(new IOCBeanDefImplementation<T>(handle, this.<T>getType(typeName, handle)));
+    }
+
+    return beanDefs;
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> Class<T> getType(final String typeName, final FactoryHandle handle) {
+    for (final Class<?> type : handle.getAssignableTypes()) {
+      if (type.getName().equals(typeName)) {
+        return (Class<T>) type;
+      }
+    }
+
+    throw new RuntimeException("The type " + handle.getActualType().getName() + " was matched for " + typeName
+            + ", but " + typeName + " is not one of it's assingable types.");
+  }
+
+  @Override
+  public <T> Collection<SyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
+    final Set<Annotation> qualifierSet = new HashSet<Annotation>(Arrays.asList(qualifiers));
+    final Collection<SyncBeanDef<T>> candidates = lookupBeans(type);
+    final Iterator<SyncBeanDef<T>> iter = candidates.iterator();
+    while (iter.hasNext()) {
+      final SyncBeanDef<T> beanDef = iter.next();
+      if (!beanDef.matches(qualifierSet)) {
+        iter.remove();
+      }
+    }
+
+    return candidates;
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @Override
+  public <T> SyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
+    if (qualifiers.length == 0) {
+      qualifiers = new Annotation[] { QualifierUtil.DEFAULT_ANNOTATION };
+    }
+    final Collection resolved = lookupBeans(type, qualifiers);
+    if (resolved.isEmpty()) {
+      throw BeanManagerUtil.unsatisfiedResolutionException(type, qualifiers);
+    } else if (resolved.size() > 1) {
+      throw BeanManagerUtil.ambiguousResolutionException(type, resolved, qualifiers);
+    } else {
+      return (SyncBeanDef<T>) resolved.iterator().next();
+    }
+  }
+
+  @Override
+  public <T> void registerBean(final SyncBeanDef<T> beanDef) {
+    runtimeBeanDefsByTypeName.put(beanDef.getType().getName(), beanDef);
+    if (beanDef.getName() != null) {
+      typeNamesByName.put(beanDef.getName(), beanDef.getType().getName());
+    }
+  }
+
+  /**
+   * For testing only.
+   */
+  public void reset() {
+    contextManager = null;
+    typeNamesByName.clear();
+    handlesByTypeName.clear();
+    runtimeBeanDefsByTypeName.clear();
+  }
+
+  private final class IOCBeanDefImplementation<T> implements SyncBeanDef<T> {
+    private final FactoryHandle handle;
+    private final Class<T> type;
+
+    private IOCBeanDefImplementation(final FactoryHandle handle, final Class<T> type) {
+      this.handle = handle;
+      this.type = type;
+    }
+
+    @Override
+    public String toString() {
+      return BeanManagerUtil.beanDeftoString(handle);
+    }
+
+    @Override
+    public Class<T> getType() {
+      return type;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Class<T> getBeanClass() {
+      return (Class<T>) handle.getActualType();
+    }
+
+    @Override
+    public Class<? extends Annotation> getScope() {
+      return handle.getScope();
+    }
+
+    @Override
+    public T getInstance() {
+      final T instance = contextManager.getInstance(handle.getFactoryName());
+      if (instance instanceof Proxy) {
+        @SuppressWarnings("unchecked")
+        final Proxy<T> proxy = (Proxy<T>) instance;
+        // Forces bean to be loaded.
+        proxy.unwrap();
+      }
+
+      return instance;
+    }
+
+    @Override
+    public T newInstance() {
+      return contextManager.getNewInstance(handle.getFactoryName());
+    }
+
+    @Override
+    public Set<Annotation> getQualifiers() {
+      return handle.getQualifiers();
+    }
+
+    @Override
+    public boolean matches(Set<Annotation> annotations) {
+      return QualifierUtil.matches(annotations, handle.getQualifiers());
+    }
+
+    @Override
+    public String getName() {
+      return handle.getBeanName();
+    }
+
+    @Override
+    public boolean isConcrete() {
+      // TODO Auto-generated method stub
+      throw new RuntimeException("Not yet implemented.");
+    }
+
+    @Override
+    public boolean isActivated() {
+      final Class<? extends BeanActivator> activatorType = handle.getBeanActivatorType();
+      if (activatorType == null) {
+        return true;
+      } else {
+        final BeanActivator activator = lookupBean(activatorType).getInstance();
+        return activator.isActivated();
+      }
+    }
+  }
+
+  public void addFactory(final Factory<?> factory) {
+    contextManager.addFactory(factory);
+    addFactory(factory.getHandle());
   }
 }

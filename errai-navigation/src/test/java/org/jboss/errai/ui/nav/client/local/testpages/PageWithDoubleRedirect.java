@@ -14,7 +14,11 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped @Page
 public class PageWithDoubleRedirect extends BasePageForLifecycleTracing {
 
-  public Class<? extends Widget> secondRedirectPage;
+  private Class<? extends Widget> secondRedirectPage;
+
+  public void setSecondRedirectPage(Class<? extends Widget> page) {
+    secondRedirectPage = page;
+  }
 
   @Override
   protected void doRedirect() {

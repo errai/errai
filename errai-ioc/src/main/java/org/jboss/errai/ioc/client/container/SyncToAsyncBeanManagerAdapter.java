@@ -22,16 +22,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.enterprise.inject.Alternative;
+
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 
 /**
  * An adapter that makes the asynchronous bean manager API work with a synchronous bean manager.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@Alternative
 public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
 
   private final SyncBeanManager bm;
@@ -46,12 +48,6 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   }
 
   @Override
-  public void destroyBean(Object ref, Runnable runnable) {
-    bm.destroyBean(ref);
-    runnable.run();
-  }
-
-  @Override
   public boolean isManaged(Object ref) {
     return bm.isManaged(ref);
   }
@@ -59,11 +55,6 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   @Override
   public Object getActualBeanReference(Object ref) {
     return bm.getActualBeanReference(ref);
-  }
-
-  @Override
-  public void addProxyReference(Object proxyRef, Object realRef) {
-    bm.addProxyReference(proxyRef, realRef);
   }
 
   @Override
@@ -77,11 +68,6 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   }
 
   @Override
-  public void addBeanToContext(Object ref, CreationalContext creationalContext) {
-    bm.addBeanToContext(ref, creationalContext);
-  }
-
-  @Override
   public void destroyAllBeans() {
     bm.destroyAllBeans();
   }
@@ -89,10 +75,10 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   @Override
   @SuppressWarnings("rawtypes")
   public Collection<AsyncBeanDef> lookupBeans(String name) {
-    final Collection<IOCBeanDef> beanDefs = bm.lookupBeans(name);
-    
+    final Collection<SyncBeanDef> beanDefs = bm.lookupBeans(name);
+
     final List<AsyncBeanDef> asyncBeanDefs = new ArrayList<AsyncBeanDef>();
-    for (final IOCBeanDef beanDef : beanDefs) {
+    for (final SyncBeanDef beanDef : beanDefs) {
       asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
 
@@ -107,10 +93,10 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   @Override
   @SuppressWarnings("unchecked")
   public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
-    final Collection<IOCBeanDef<T>> beanDefs = bm.lookupBeans(type, qualifiers);
-    
+    final Collection<SyncBeanDef<T>> beanDefs = bm.lookupBeans(type, qualifiers);
+
     final List<AsyncBeanDef<T>> asyncBeanDefs = new ArrayList<AsyncBeanDef<T>>();
-    for (final IOCBeanDef<T> beanDef : beanDefs) {
+    for (final SyncBeanDef<T> beanDef : beanDefs) {
       asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
 
@@ -120,12 +106,12 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   @Override
   @SuppressWarnings({ "unchecked" })
   public <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
-    final IOCBeanDef<T> beanDef = bm.lookupBean(type, qualifiers);
+    final SyncBeanDef<T> beanDef = bm.lookupBean(type, qualifiers);
     return createAsyncBeanDef(beanDef);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private AsyncBeanDef createAsyncBeanDef(final IOCBeanDef beanDef) {
+  private AsyncBeanDef createAsyncBeanDef(final SyncBeanDef beanDef) {
     AsyncBeanDef abd = new AsyncBeanDef() {
 
       @Override
@@ -146,12 +132,6 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
       @Override
       public void getInstance(CreationalCallback callback) {
         callback.callback(beanDef.getInstance());
-      }
-
-      @Override
-      public void getInstance(CreationalCallback callback, AsyncCreationalContext context) {
-        throw new UnsupportedOperationException(
-            "Not supported in SyncOrAsyncBeanManager. Only to be called from generated bootstrapper for specific bean managers!");
       }
 
       @Override

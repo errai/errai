@@ -10,6 +10,7 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.metamodel.EntityType;
 
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.sync.client.local.ErraiAttributeAccessor;
 import org.jboss.errai.jpa.sync.client.shared.JpaAttributeAccessor;
@@ -43,6 +44,12 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
     new Container().bootstrapContainer();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    Container.reset();
+    IOC.reset();
   }
 
   protected EntityManager getEntityManager() {

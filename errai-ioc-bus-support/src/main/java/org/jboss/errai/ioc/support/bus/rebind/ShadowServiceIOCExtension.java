@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.support.bus.rebind;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.api.messaging.Message;
@@ -24,24 +28,19 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.ShadowService;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.VariableReference;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.util.If;
-import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 
 /**
  * @author Mike Brock
@@ -53,19 +52,17 @@ public class ShadowServiceIOCExtension extends IOCDecoratorExtension<ShadowServi
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(final InjectableInstance<ShadowService> ctx) {
-    ctx.ensureMemberExposed(PrivateAccessType.Read);
-
-    final ShadowService shadowService = ctx.getAnnotation();
+  public void generateDecorator(final Decorable decorable, final FactoryController controller) {
+    final ShadowService shadowService = (ShadowService) decorable.getAnnotation();
     String serviceName = null;
 
     Statement subscribeShadowStatement = null;
-    final Class<?> javaClass = ctx.getElementType().asClass();
+    final Class<?> javaClass = decorable.getType().asClass();
     for (final Class<?> intf : javaClass.getInterfaces()) {
       if (intf.isAnnotationPresent(Remote.class)) {
         serviceName = intf.getName() + ":RPC";
 
-        final AnonymousClassStructureBuilder builder = generateMethodDelegates(ctx, intf);
+        final AnonymousClassStructureBuilder builder = generateMethodDelegates(decorable.getAccessStatement(), intf);
 
         subscribeShadowStatement = Stmt.castTo(ClientMessageBus.class,
                 Stmt.invokeStatic(ErraiBus.class, "get")).invoke("subscribeShadow", serviceName, builder.finish());
@@ -73,16 +70,16 @@ public class ShadowServiceIOCExtension extends IOCDecoratorExtension<ShadowServi
     }
     if (serviceName == null) {
       if (shadowService.value().equals("")) {
-        serviceName = ctx.getMemberName();
+        serviceName = decorable.getName();
       } else {
         serviceName = shadowService.value();
       }
 
       subscribeShadowStatement = Stmt.castTo(ClientMessageBus.class,
-              Stmt.invokeStatic(ErraiBus.class, "get")).invoke("subscribeShadow", serviceName, ctx.getValueStatement());
+              Stmt.invokeStatic(ErraiBus.class, "get")).invoke("subscribeShadow", serviceName, decorable.getAccessStatement());
     }
 
-    return Collections.singletonList(subscribeShadowStatement);
+    controller.addInitializationStatements(Collections.singletonList(subscribeShadowStatement));
   }
 
 
@@ -103,7 +100,7 @@ public class ShadowServiceIOCExtension extends IOCDecoratorExtension<ShadowServi
           }
         }
   */
-  private AnonymousClassStructureBuilder generateMethodDelegates(InjectableInstance<ShadowService> ctx, Class<?> intf) {
+  private AnonymousClassStructureBuilder generateMethodDelegates(final Statement accessStatement, Class<?> intf) {
     final BlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(MessageCallback.class).extend()
             .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
             .append(
@@ -118,7 +115,7 @@ public class ShadowServiceIOCExtension extends IOCDecoratorExtension<ShadowServi
       if (ProxyUtil.isMethodInInterface(intf, method)) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
         VariableReference[] objects = new VariableReference[parameterTypes.length];
-        final BlockBuilder<ElseBlockBuilder> blockBuilder = If.cond(Stmt.loadVariable("\"" + ProxyUtil.createCallSignature(intf, method) + "\"").invoke("equals",
+        final BlockBuilder<ElseBlockBuilder> blockBuilder = If.cond(Stmt.loadLiteral(ProxyUtil.createCallSignature(intf, method)).invoke("equals",
                 Stmt.loadVariable("commandType")));
         for (int i = 0; i < parameterTypes.length; i++) {
           Class<?> parameterType = parameterTypes[i];
@@ -130,7 +127,7 @@ public class ShadowServiceIOCExtension extends IOCDecoratorExtension<ShadowServi
         blockBuilder.append(
                 Stmt.try_()
                         .append(
-                                Stmt.nestedCall(ctx.getValueStatement()).invoke(method.getName(), objects)
+                                Stmt.nestedCall(accessStatement).invoke(method.getName(), (Object[]) objects)
                         ).finish()
                         .catch_(Throwable.class, "throwable")
                         .finish());

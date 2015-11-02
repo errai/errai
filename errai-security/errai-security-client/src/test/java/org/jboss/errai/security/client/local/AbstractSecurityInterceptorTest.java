@@ -26,6 +26,8 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.security.client.local.spi.ActiveUserCache;
+import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
@@ -74,9 +76,9 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    timer.cancel();
     ((ClientMessageBusImpl) ErraiBus.get()).removeAllUncaughtExceptionHandlers();
     super.gwtTearDown();
+    timer.cancel();
   }
 
   @Override
@@ -86,7 +88,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
 
   protected void runNavTest(final Runnable runnable) {
     CDI.addPostInitTask(new Runnable() {
-  
+
       @Override
       public void run() {
         InitVotes.registerOneTimeInitCallback(runnable);
@@ -127,16 +129,18 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
     timer.scheduleRepeating(interval);
     timer.run();
   }
-  
+
   protected void afterLogout(final Runnable test) {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
-      
+
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<Void>() {
 
           @Override
           public void callback(Void response) {
+            final ActiveUserCache provider = IOC.getBeanManager().lookupBean(ActiveUserCache.class).getInstance();
+            assertEquals("Calling logout did not log out user from active user cache.", User.ANONYMOUS, provider.getUser());
             test.run();
           }
         }, AuthenticationService.class).logout();

@@ -28,7 +28,7 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 
 @IOCProvider
 @Singleton
@@ -93,7 +93,7 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
     
     @Override
     public Object get() {
-      final IOCBeanDef bean = IOC.getBeanManager().lookupBean(type, qualifiers);
+      final SyncBeanDef bean = IOC.getBeanManager().lookupBean(type, qualifiers);
       if (bean == null) {
         return null;
       }
