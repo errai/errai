@@ -39,13 +39,6 @@
       <version>8.1.0.Final</version>
     </dependency>
 
-
-    <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-dist</artifactId>
-      <type>zip</type>
-    </dependency>
-
     <!-- GWT -->
     <dependency>
       <groupId>com.google.gwt</groupId>
