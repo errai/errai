@@ -75,7 +75,6 @@
     <javaee.api.version>7.0</javaee.api.version>
     <javassist.version>3.19.0-GA</javassist.version>    
     <javax.persitence.api.version>1.0</javax.persitence.api.version>    
-    <jboss.dist.version>7.1.1.Final</jboss.dist.version>
     <jboss.ejb.api.spec.version>1.0.2.Final</jboss.ejb.api.spec.version>
     <jboss.interceptors.api12.spec.version>1.0.0.Alpha3</jboss.interceptors.api12.spec.version>
     <jboss.jaxrs.api.spec.1.1.version>1.0.0.Final</jboss.jaxrs.api.spec.1.1.version>
@@ -316,13 +315,6 @@
         <groupId>org.wildfly</groupId>
         <artifactId>wildfly-cli</artifactId>
         <version>${wildfly.cli.version}</version>        
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.as</groupId>
-        <artifactId>jboss-as-dist</artifactId>
-        <version>${jboss.dist.version}</version>  
-        <type>zip</type>            
       </dependency>
 
       <dependency>
