@@ -152,18 +152,22 @@ public class MarshallerGeneratorFactory {
   }
 
   public String generate(final String packageName, final String clazzName) {
+    return generate(packageName, clazzName, MarshallerGenerationCallback.NO_OP);
+  }
+
+  public String generate(final String packageName, final String clazzName, final MarshallerGenerationCallback callback) {
     final String gen;
     log.info("generating marshaller factory class for " + (((target == MarshallerOutputTarget.GWT) ? "client" : "server") + "..."));
     final long time = System.currentTimeMillis();
     if (target == MarshallerOutputTarget.GWT && refresh) {
       DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
     }
-    gen = _generate(packageName, clazzName);
+    gen = _generate(packageName, clazzName, callback);
     log.info("generated marshaller factory class in " + (System.currentTimeMillis() - time) + "ms.");
     return gen;
   }
 
-  private String _generate(final String packageName, final String clazzName) {
+  private String _generate(final String packageName, final String clazzName, final MarshallerGenerationCallback callback) {
     startTime = System.currentTimeMillis();
 
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
@@ -276,7 +280,7 @@ public class MarshallerGeneratorFactory {
             )
             .append(Stmt.declareVariable("m", Marshaller.class, Stmt.loadLiteral(null)));
 
-    generateMarshallers();
+    generateMarshallers(callback);
 
     getMarshallerMethod.append(conditionalGenerationBlock.finish());
 
@@ -309,7 +313,7 @@ public class MarshallerGeneratorFactory {
     return classStructureBuilder.toJavaString();
   }
 
-  private void generateMarshallers() {
+  private void generateMarshallers(final MarshallerGenerationCallback callback) {
     final Set<MetaClass> exposed = mappingContext.getDefinitionsFactory().getExposedClasses();
 
     for (final MetaClass clazz : exposed) {
@@ -336,6 +340,7 @@ public class MarshallerGeneratorFactory {
       }
 
       addMarshaller(compType);
+      callback.callback(compType);
     }
   }
 

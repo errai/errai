@@ -215,11 +215,6 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   private final String packageName = MarshallerFactory.class.getPackage().getName();
 
   @Override
-  protected boolean isCacheValid() {
-    return false;
-  }
-
-  @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
     logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
@@ -334,8 +329,19 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
 
       return _clientMarshallerCache
           = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT, EnvUtil.getAllReachableClasses(context))
-          .generate(packageName, className);
+          .generate(packageName, className, new MarshallerGenerationCallback() {
+
+            @Override
+            public void callback(final MetaClass marshalledType) {
+              addCacheRelevantClass(marshalledType);
+            }
+          });
     }
+  }
+
+  @Override
+  protected boolean isRelevantNewClass(final MetaClass clazz) {
+    return EnvUtil.isPortableType(clazz);
   }
 
   interface DiscoveryContext {
