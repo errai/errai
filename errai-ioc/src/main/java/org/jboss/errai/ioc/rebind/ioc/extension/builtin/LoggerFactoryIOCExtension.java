@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension.builtin;
 
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -28,7 +31,6 @@ import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -43,12 +45,11 @@ import org.slf4j.LoggerFactory;
 public class LoggerFactoryIOCExtension implements IOCExtensionConfigurator {
 
   @Override
-  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext) {
   }
 
   @Override
-  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext,
-          final IOCProcessor procFactory) {
+  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
     final InjectableHandle handle = new InjectableHandle(MetaClassFactory.get(Logger.class),
             injectionContext.getQualifierFactory().forUniversallyQualified());
     injectionContext.registerInjectableProvider(handle, new InjectableProvider() {
@@ -57,11 +58,11 @@ public class LoggerFactoryIOCExtension implements IOCExtensionConfigurator {
         final Statement loggerValue;
         if (injectionSite.isAnnotationPresent(NamedLogger.class)) {
           final String loggerName = injectionSite.getAnnotation(NamedLogger.class).value();
-          loggerValue = Stmt.invokeStatic(LoggerFactory.class, "getLogger", loggerName);
+          loggerValue = invokeStatic(LoggerFactory.class, "getLogger", loggerName);
         }
         else {
           loggerValue = Stmt.invokeStatic(LoggerFactory.class, "getLogger",
-                  injectionSite.getEnclosingType().asClass());
+                  loadLiteral(injectionSite.getEnclosingType()));
         }
 
         return new AbstractBodyGenerator() {

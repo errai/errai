@@ -24,7 +24,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -91,6 +94,15 @@ public class IOCBootstrapGenerator {
   private static final Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
   private static final Object generatorLock = new Object();
+
+  private static Set<Class<?>> iocExtensions;
+
+  private static List<IOCExtensionConfigurator> extensionConfigurators;
+
+  private static Collection<MetaClass> bootstrapClassCollection;
+
+  @SuppressWarnings("rawtypes")
+  private static Map<Class<? extends IOCDecoratorExtension>, Class<? extends Annotation>> decoratorMap;
 
   public IOCBootstrapGenerator(final GeneratorContext context,
                                final TreeLogger logger,
@@ -203,13 +215,13 @@ public class IOCBootstrapGenerator {
 
   private String generateBootstrappingClassSource(final InjectionContext injectionContext) {
 
-    final IOCProcessor processorFactory = new IOCProcessor(injectionContext);
 
     log.debug("Processing IOC extensions...");
     long start = System.currentTimeMillis();
-    processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
+    processExtensions(context, injectionContext, beforeTasks, afterTasks);
     log.debug("Extensions processed in {}ms", (System.currentTimeMillis() - start));
 
+    final IOCProcessor processorFactory = new IOCProcessor(injectionContext);
     final IOCProcessingContext processingContext = injectionContext.getProcessingContext();
     final ClassStructureBuilder<?> classBuilder = processingContext.getBootstrapBuilder();
     final BlockBuilder<?> blockBuilder = processingContext.getBlockBuilder();
@@ -265,36 +277,22 @@ public class IOCBootstrapGenerator {
 
   public static void processExtensions(final GeneratorContext context,
                                        final InjectionContext injectionContext,
-                                       final IOCProcessor processorFactory,
                                        final List<MetaClass> beforeTasks,
                                        final List<MetaClass> afterTasks) {
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-
-    /*
-    * IOCDecoratorExtension.class
-    */
-    final Set<Class<?>> iocExtensions = scanner
-        .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
-    final List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
-
+    maybeLoadExtensionConfigurators(scanner);
 
     try {
-      for (final Class<?> clazz : iocExtensions) {
-        final Class<? extends IOCExtensionConfigurator> configuratorClass
-            = clazz.asSubclass(IOCExtensionConfigurator.class);
-
-        final IOCExtensionConfigurator configurator = configuratorClass.newInstance();
-        configurator.configure(injectionContext.getProcessingContext(), injectionContext, processorFactory);
-        extensionConfigurators.add(configurator);
-
+      for (final IOCExtensionConfigurator configurator : extensionConfigurators) {
+        configurator.configure(injectionContext.getProcessingContext(), injectionContext);
       }
-    }
-    catch (Exception e) {
-      throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+    } catch (Exception e) {
+      throw new ErraiBootstrapFailure("Unable to run IOC Extension Configurator: " + e.getMessage(), e);
     }
 
-    final Collection<MetaClass> bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class, context);
+
+    maybeLoadBootstrapClassCollection(context);
     for (final MetaClass clazz : bootstrapClassCollection) {
       final IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
@@ -305,44 +303,84 @@ public class IOCBootstrapGenerator {
       }
     }
 
-    /**
-     * CodeDecorator.class
-     */
-    final Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
+    maybeValidateDecorators(scanner);
+
     try {
-      for (final Class<?> clazz : decorators) {
-        @SuppressWarnings("rawtypes")
-        final Class<? extends IOCDecoratorExtension> decoratorClass = clazz.asSubclass(IOCDecoratorExtension.class);
-
-        Class<? extends Annotation> annoType = null;
-        final Type t = decoratorClass.getGenericSuperclass();
-        if (!(t instanceof ParameterizedType)) {
-          throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
-        }
-
-        final ParameterizedType pType = (ParameterizedType) t;
-        if (IOCDecoratorExtension.class.equals(pType.getRawType())) {
-          if (pType.getActualTypeArguments().length == 0
-              || !Annotation.class.isAssignableFrom((Class<?>) pType.getActualTypeArguments()[0])) {
-            throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
-          }
-
-          // noinspection unchecked
-          annoType = ((Class<?>) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
-        }
-
+      for (@SuppressWarnings("rawtypes")
+      final Entry<Class<? extends IOCDecoratorExtension>, Class<? extends Annotation>> entry : decoratorMap.entrySet()) {
         injectionContext.registerDecorator(
-            decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType)
-        );
-
+                entry.getKey().getConstructor(new Class[] { Class.class }).newInstance(entry.getValue()));
       }
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
     }
 
     for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
-      extensionConfigurator.afterInitialization(injectionContext.getProcessingContext(), injectionContext, processorFactory);
+      extensionConfigurator.afterInitialization(injectionContext.getProcessingContext(), injectionContext);
+    }
+  }
+
+  @SuppressWarnings("rawtypes")
+  private static void maybeValidateDecorators(final MetaDataScanner scanner) {
+    if (decoratorMap == null || EnvUtil.isJUnitTest()) {
+      decoratorMap = new HashMap<Class<? extends IOCDecoratorExtension>, Class<? extends Annotation>>();
+      final Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
+      try {
+        for (final Class<?> clazz : decorators) {
+          final Class<? extends IOCDecoratorExtension> decoratorClass = clazz.asSubclass(IOCDecoratorExtension.class);
+
+          Class<? extends Annotation> annoType = null;
+          final Type t = decoratorClass.getGenericSuperclass();
+          if (!(t instanceof ParameterizedType)) {
+            throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
+          }
+
+          final ParameterizedType pType = (ParameterizedType) t;
+          if (IOCDecoratorExtension.class.equals(pType.getRawType())) {
+            if (pType.getActualTypeArguments().length == 0
+                    || !Annotation.class.isAssignableFrom((Class<?>) pType.getActualTypeArguments()[0])) {
+              throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
+            }
+
+            // noinspection unchecked
+            annoType = ((Class<?>) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
+          }
+
+          decoratorMap.put(decoratorClass, annoType);
+
+        }
+      }
+      catch (Exception e) {
+        throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
+      }
+    }
+  }
+
+  private static void maybeLoadBootstrapClassCollection(final GeneratorContext context) {
+    if (bootstrapClassCollection == null || EnvUtil.isJUnitTest()) {
+      bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class, context);
+    }
+  }
+
+  private static void maybeLoadExtensionConfigurators(final MetaDataScanner scanner) {
+    if (iocExtensions == null || extensionConfigurators == null || EnvUtil.isJUnitTest()) {
+      iocExtensions = scanner
+              .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
+      extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
+
+      try {
+        for (final Class<?> clazz : iocExtensions) {
+          final Class<? extends IOCExtensionConfigurator> configuratorClass
+          = clazz.asSubclass(IOCExtensionConfigurator.class);
+
+          final IOCExtensionConfigurator configurator = configuratorClass.newInstance();
+          extensionConfigurators.add(configurator);
+
+        }
+      }
+      catch (Exception e) {
+        throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+      }
     }
   }
 

@@ -55,6 +55,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   private JavaReflectionClass(final Class clazz, final Type type, final boolean erased) {
     super(clazz);
+    _asClassCache = clazz;
     if (!erased) {
       if (type instanceof ParameterizedType) {
         super.parameterizedType = new JavaReflectionParameterizedType((ParameterizedType) type);
@@ -135,7 +136,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     if (_packageName != null) {
       return _packageName;
     }
-    
+
     final Package pack = getEnclosedMetaObject().getPackage();
     if (pack != null) {
       _packageName = pack.getName();
@@ -157,13 +158,13 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   private MetaMethod[] _methodCache = null;
-  
+
   @Override
   public MetaMethod[] getMethods() {
     if (_methodCache != null) {
       return _methodCache;
     }
-    
+
     final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
 
     Class<?> type = getEnclosedMetaObject();
@@ -367,7 +368,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   private MetaClass _superClass;
-  
+
   @Override
   public MetaClass getSuperClass() {
     if (_superClass != null)

@@ -218,7 +218,7 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
     } else {
       offset = 1;
       params = new Object[disposer.getParameters().length+1];
-      params[0] = castTo(disposer.getDeclaringClass(), InjectUtil.constructGetReference("producerInstance", disposer.getDeclaringClass().asClass()));
+      params[0] = castTo(disposer.getDeclaringClass(), InjectUtil.constructGetReference("producerInstance", disposer.getDeclaringClass()));
     }
 
     for (final Dependency dep : disposerParams) {

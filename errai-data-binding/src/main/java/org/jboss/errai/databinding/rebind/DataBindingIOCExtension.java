@@ -35,7 +35,6 @@ import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -58,13 +57,11 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 public class DataBindingIOCExtension implements IOCExtensionConfigurator {
 
   @Override
-  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
-          final IOCProcessor procFactory) {
+  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext) {
   }
 
   @Override
-  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext,
-          final IOCProcessor procFactory) {
+  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
 
     final Collection<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.getGeneratorContext());
 

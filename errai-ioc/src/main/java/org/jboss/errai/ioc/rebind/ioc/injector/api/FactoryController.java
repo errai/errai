@@ -267,6 +267,23 @@ public class FactoryController {
   /**
    * @param name
    *          The name of the property.
+   * @param refType
+   *          The type of the property.
+   * @return A statement to call
+   *         {@link Factory#getReferenceAs(Object, String, Class)} for an
+   *         instance in
+   *         {@link Factory#createInstance(org.jboss.errai.ioc.client.container.ContextManager)}
+   *         and
+   *         {@link Factory#destroyInstance(Object, org.jboss.errai.ioc.client.container.ContextManager)}
+   *         methods.
+   */
+  public ContextualStatementBuilder getReferenceStmt(final String name, final MetaClass refType) {
+    return constructGetReference(name, refType);
+  }
+
+  /**
+   * @param name
+   *          The name of the property.
    * @param value
    *          A statement for the value to be set.
    * @return A statement to call

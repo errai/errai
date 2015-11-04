@@ -30,7 +30,6 @@ import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -57,12 +56,11 @@ import com.google.gwt.user.client.ui.Widget;
 public class WidgetIOCExtension implements IOCExtensionConfigurator {
 
   @Override
-  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessor procFactory) {
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext) {
   }
 
   @Override
-  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext,
-          IOCProcessor procFactory) {
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext) {
     injectionContext.registerSubTypeMatchingInjectableProvider(
             new InjectableHandle(MetaClassFactory.get(Widget.class), injectionContext.getQualifierFactory().forDefault()), new InjectableProvider() {
 

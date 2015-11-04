@@ -52,7 +52,7 @@ import org.mvel2.util.ReflectionUtil;
 public abstract class AbstractMetaClass<T> extends MetaClass {
   private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 
-  private volatile transient Class<?> _asClassCache;
+  protected volatile transient Class<?> _asClassCache;
   private volatile transient MetaClass _boxedCache;
   private volatile transient MetaClass _unboxedCache;
   private volatile transient Boolean _isPrimitiveWrapper;

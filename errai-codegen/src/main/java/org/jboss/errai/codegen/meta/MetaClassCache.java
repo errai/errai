@@ -34,6 +34,9 @@ public class MetaClassCache implements CacheStore {
   private final Map<String, CacheEntry> PRIMARY_CLASS_CACHE
       = new ConcurrentHashMap<String, CacheEntry>(2000);
 
+  private final Map<String, CacheEntry> PERMANENT_CLASS_CACHE
+      = new ConcurrentHashMap<String, CacheEntry>(2000);
+
   private final Map<String, MetaClass> ERASED_CLASS_CACHE
       = new ConcurrentHashMap<String, MetaClass>(2000);
 
@@ -53,6 +56,8 @@ public class MetaClassCache implements CacheStore {
 
     PRIMARY_CLASS_CACHE.clear();
     ERASED_CLASS_CACHE.clear();
+
+    PRIMARY_CLASS_CACHE.putAll(PERMANENT_CLASS_CACHE);
   }
 
   public void updateCache(Map<String, MetaClass> mapToPush) {
@@ -77,7 +82,7 @@ public class MetaClassCache implements CacheStore {
       final CacheEntry previousCacheEntry = backupClassCache.get(entry.getKey());
       if (previousCacheEntry == null || previousCacheEntry.hashCode != newCacheEntry.hashCode) {
         invalidated.add(entry.getKey());
-        
+
         if (previousCacheEntry == null) {
           added.add(entry.getValue());
         }
@@ -96,6 +101,15 @@ public class MetaClassCache implements CacheStore {
         invalidated.add(fqcn);
       }
     }
+  }
+
+  public void pushToPermanentCache(final MetaClass clazz) {
+    pushToPermanentCache(clazz.getFullyQualifiedName(), clazz);
+  }
+
+  public void pushToPermanentCache(final String fullyQualifiedName, final MetaClass clazz) {
+    pushCache(fullyQualifiedName, clazz);
+    PERMANENT_CLASS_CACHE.put(fullyQualifiedName, PRIMARY_CLASS_CACHE.get(fullyQualifiedName));
   }
 
   public MetaClass get(String fqcn) {
@@ -125,7 +139,7 @@ public class MetaClassCache implements CacheStore {
   public Set<String> getAllDeletedClasses() {
     return Collections.unmodifiableSet(removed);
   }
-  
+
   public Set<MetaClass> getAllNewClasses() {
     return Collections.unmodifiableSet(added);
   }
@@ -149,7 +163,7 @@ public class MetaClassCache implements CacheStore {
   public boolean isKnownType(String fqcn) {
     return PRIMARY_CLASS_CACHE.containsKey(fqcn);
   }
-  
+
   public boolean isNewOrUpdated(String fqcn) {
     return invalidated.contains(fqcn);
   }

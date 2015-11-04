@@ -92,19 +92,21 @@ public abstract class MetaClassBridgeUtil {
           final MetaClass clazz = JavaReflectionClass
               .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName()));
 
-          if (isReloadable(clazz, reloadable))
+          if (isReloadable(clazz, reloadable)) {
             classesToPush.put(clazz.getFullyQualifiedName(), clazz);
-          else
+          } else if (!cache.isKnownType(clazz.getFullyQualifiedName())) {
             cache.pushCache(clazz);
+          }
         }
         else {
           logger.log(TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
           final MetaClass clazz = GWTClass.newUncachedInstance(typeOracle, type);
 
-          if (isReloadable(clazz, reloadable))
+          if (isReloadable(clazz, reloadable)) {
             classesToPush.put(clazz.getFullyQualifiedName(), clazz);
-          else
+          } else if (!cache.isKnownType(clazz.getFullyQualifiedName())) {
             cache.pushCache(clazz);
+          }
         }
       }
 

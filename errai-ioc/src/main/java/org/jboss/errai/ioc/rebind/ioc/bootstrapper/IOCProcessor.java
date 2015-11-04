@@ -42,7 +42,6 @@ import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Provider;
@@ -118,6 +117,8 @@ public class IOCProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(IOCProcessor.class);
 
+  private final Set<Class<? extends Annotation>> nonSimpletonTypeAnnotations = new HashSet<Class<? extends Annotation>>();
+
   private final InjectionContext injectionContext;
   private final QualifierFactory qualFactory;
   private Collection<String> alternatives;
@@ -125,6 +126,15 @@ public class IOCProcessor {
   public IOCProcessor(final InjectionContext injectionContext) {
     this.injectionContext = injectionContext;
     this.qualFactory = injectionContext.getQualifierFactory();
+
+    nonSimpletonTypeAnnotations.add(IOCProvider.class);
+    nonSimpletonTypeAnnotations.add(JsType.class);
+    nonSimpletonTypeAnnotations.add(Specializes.class);
+    nonSimpletonTypeAnnotations.add(LoadAsync.class);
+    nonSimpletonTypeAnnotations.add(EnabledByProperty.class);
+    nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean));
+    nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.NormalScopedBean));
+    nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.AlternativeBean));
   }
 
   /**
@@ -141,8 +151,12 @@ public class IOCProcessor {
 
 
     addAllInjectableProviders(graphBuilder);
-    final DependencyGraph dependencyGraph = processDependencies(allMetaClasses, graphBuilder);
-    log.debug("Dependency graph with {} injectables built in {}ms", dependencyGraph.getNumberOfInjectables(), System.currentTimeMillis() - start);
+    processDependencies(allMetaClasses, graphBuilder);
+    log.debug("Added {} classes to dependency graph in {}ms", allMetaClasses.size(), System.currentTimeMillis() - start);
+
+    start = System.currentTimeMillis();
+    final DependencyGraph dependencyGraph = graphBuilder.createGraph(true);
+    log.debug("Resolved dependency graph with {} reachable injectables in {}ms", dependencyGraph.getNumberOfInjectables(), System.currentTimeMillis() - start);
 
     FactoryGenerator.resetTotalTime();
     FactoryGenerator.setDependencyGraph(dependencyGraph);
@@ -314,7 +328,7 @@ public class IOCProcessor {
                                          loadLiteral(false),
                                          loadLiteral(injectable.getBeanName()))));
     for (final MetaClass assignable : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
-      curMethod._(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable.asClass())));
+      curMethod._(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable)));
     }
 
     for (final Annotation qualifier : injectable.getQualifier()) {
@@ -477,15 +491,13 @@ public class IOCProcessor {
     return factory;
   }
 
-  private DependencyGraph processDependencies(final Collection<MetaClass> types, final DependencyGraphBuilder builder) {
+  private void processDependencies(final Collection<MetaClass> types, final DependencyGraphBuilder builder) {
     final List<String> problems = new ArrayList<String>();
     for (final MetaClass type : types) {
       processType(type, builder, problems);
     }
 
-    if (problems.isEmpty()) {
-      return builder.createGraph(true);
-    } else {
+    if (!problems.isEmpty()) {
       throw new RuntimeException(buildProblemsMessage(problems));
     }
   }
@@ -531,33 +543,39 @@ public class IOCProcessor {
     processProducerFields(typeInjectable, builder, disposesMethods);
   }
 
-  private boolean isTypeInjectableCandidate(MetaClass type) {
-    boolean isNotTopLevel;
+  private boolean isTypeInjectableCandidate(final MetaClass type) {
+    return type.isPublic() && type.isConcrete() && (type.isStatic() || isTopLevel(type));
+  }
+
+  private boolean isTopLevel(MetaClass type) {
+    boolean isTopLevel;
     // Workaround for http://bugs.java.com/view_bug.do?bug_id=2210448
     try {
-      isNotTopLevel = (type.asClass() != null && type.asClass().getDeclaringClass() != null);
+      isTopLevel = (type.asClass() == null || type.asClass().getDeclaringClass() == null);
     } catch (IncompatibleClassChangeError ex) {
-      isNotTopLevel = true;
+      isTopLevel = false;
     }
-
-    return type.isPublic() && type.isConcrete() && (!isNotTopLevel || type.isStatic());
+    return isTopLevel;
   }
 
   private boolean isSimpleton(final MetaClass type) {
-    if (type.isAnnotationPresent(Alternative.class) || type.isAnnotationPresent(IOCProvider.class)
-            || type.isAnnotationPresent(JsType.class) || type.isAnnotationPresent(Specializes.class)
-            || type.isAnnotationPresent(LoadAsync.class) || hasEnablingProperty(type)) {
-      return false;
+    for (final Annotation anno : type.getAnnotations()) {
+      if (nonSimpletonTypeAnnotations.contains(anno.annotationType()) || anno.annotationType().isAnnotationPresent(Stereotype.class)) {
+        return false;
+      }
     }
-    if (getDirectScope(type) != null) {
-      return false;
-    }
+
     if (!getInjectableConstructors(type).isEmpty()) {
       return false;
     }
-    if (!type.getMethodsAnnotatedWith(Produces.class).isEmpty()) {
-      return false;
+
+    final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
+    for (final Class<? extends Annotation> producerAnnoType : producerAnnos) {
+      if (!type.getMethodsAnnotatedWith(producerAnnoType).isEmpty()) {
+        return false;
+      }
     }
+
     final Collection<Class<? extends Annotation>> injectAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> anno : injectAnnos) {
       if (!type.getFieldsAnnotatedWith(anno).isEmpty()) {

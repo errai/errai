@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.lang.annotation.Annotation;
@@ -28,6 +29,7 @@ import javax.inject.Qualifier;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Stmt;
@@ -80,6 +82,20 @@ public class InjectUtil {
     // This cast is for the benefit of codegen, which is sometimes unable to
     // identify the value for the type parameter of Factory.getReferenceAs.
     return castTo(refType, loadVariable("thisInstance").invoke("getReferenceAs", loadVariable("instance"), name, refType));
+  }
+
+  /**
+   * Generates code to call
+   * {@link Factory#getReferenceAs(Object, String, Class)} for an instance in
+   * {@link Factory#createInstance(org.jboss.errai.ioc.client.container.ContextManager)}
+   * and
+   * {@link Factory#destroyInstance(Object, org.jboss.errai.ioc.client.container.ContextManager)}
+   * methods.
+   */
+  public static ContextualStatementBuilder constructGetReference(final String name, final MetaClass refType) {
+    // This cast is for the benefit of codegen, which is sometimes unable to
+    // identify the value for the type parameter of Factory.getReferenceAs.
+    return castTo(refType, loadVariable("thisInstance").invoke("getReferenceAs", loadVariable("instance"), name, loadLiteral(refType)));
   }
 
   /**

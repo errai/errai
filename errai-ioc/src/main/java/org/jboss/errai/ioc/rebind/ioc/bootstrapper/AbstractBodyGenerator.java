@@ -602,11 +602,11 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     final Statement newObject;
     if (injectable.getInjectedType().isAnnotationPresent(ActivatedBy.class)) {
       final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().getAnnotation(ActivatedBy.class).value();
-      newObject = newObject(FactoryHandleImpl.class, injectable.getInjectedType().asClass(),
+      newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
               injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
               injectable.getBeanName(), loadLiteral(activatorType));
     } else {
-      newObject = newObject(FactoryHandleImpl.class, injectable.getInjectedType().asClass(),
+      newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
               injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
               injectable.getBeanName());
     }
@@ -614,7 +614,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     final ConstructorBlockBuilder<?> con = bodyBlockBuilder.publicConstructor();
     for (final MetaClass assignableType : getAllAssignableTypes(injectable.getInjectedType())) {
       if (assignableType.isPublic()) {
-        con._(loadVariable("handle").invoke("addAssignableType", assignableType.asClass()));
+        con._(loadVariable("handle").invoke("addAssignableType", loadLiteral(assignableType)));
       }
     }
     for (final Annotation qual : injectable.getQualifier()) {

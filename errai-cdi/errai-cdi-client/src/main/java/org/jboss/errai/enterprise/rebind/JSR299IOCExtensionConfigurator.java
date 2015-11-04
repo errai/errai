@@ -35,7 +35,6 @@ import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -43,13 +42,13 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   @Override
-  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
-      final IOCProcessor procFactory) {
+  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext) {
 
     injectionContext.mapElementType(WiringElementType.SingletonBean, ApplicationScoped.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
   }
 
+  @SuppressWarnings("unchecked")
   private static void addTypeHierarchyFor(final IOCProcessingContext context, final Set<MetaClass> classes) {
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
 
@@ -94,8 +93,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
   }
 
   @Override
-  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext,
-      final IOCProcessor procFactory) {
+  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
 
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
     final Set<MetaClass> knownObserverTypes = new HashSet<MetaClass>();

@@ -39,15 +39,15 @@ import com.google.gwt.core.ext.TreeLogger;
 
 /**
  * Base class of all asynchronous code generators.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractAsyncGenerator extends Generator implements AsyncCodeGenerator {
 
   private static final Map<Class<? extends AbstractAsyncGenerator>, String> cacheMap = new ConcurrentHashMap<Class<? extends AbstractAsyncGenerator>, String>();
-  private static final Map<Class<? extends AbstractAsyncGenerator>, Set<String>> cacheRelevantClasses = 
+  private static final Map<Class<? extends AbstractAsyncGenerator>, Set<String>> cacheRelevantClasses =
           new ConcurrentHashMap<Class<? extends AbstractAsyncGenerator>, Set<String>>();
-  
+
   private static Logger log = LoggerFactory.getLogger(AbstractAsyncGenerator.class);
 
   @Override
@@ -95,37 +95,37 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
     boolean hasChanges = MetaClassFactory.hasAnyChanges() && hasRelevantChanges();
     return hasGenerationCache() && !hasChanges;
   }
-  
+
   private boolean hasRelevantChanges() {
     Set<String> relevantClasses = cacheRelevantClasses.get(this.getClass());
     if (relevantClasses == null) {
       // generator did not mark any classes. we have to assume that a rerun is required.
       return true;
     }
-    
+
     for (MetaClass newClazz : MetaClassFactory.getNewClasses()) {
       if (isRelevantNewClass(newClazz)) {
         return true;
       }
     }
-    
+
     for (String relevantClass : relevantClasses) {
       if (MetaClassFactory.isChangedOrDeleted(relevantClass)) {
         return true;
       }
     }
-    
+
     return false;
   }
-  
+
   /**
    * Checks if the provided class is relevant to this generator. This method is
    * invoked to determine whether or not the introduction of the provided class
    * should trigger a rerun of this generator.
-   * 
+   *
    * @param clazz
    *          a newly introduced clazz since the last refresh.
-   * 
+   *
    * @return true if newly introduced class is relevant to this generator,
    *         otherwise false.
    */
@@ -136,10 +136,10 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
   /**
    * Called by {@link #generateAsync(TreeLogger, GeneratorContext)} to carry out the actual code
    * generation.
-   * 
+   *
    * @param context
    *          the generator context to use.
-   * 
+   *
    * @return the generated code.
    */
   protected abstract String generate(final TreeLogger logger, final GeneratorContext context);
@@ -147,7 +147,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
   /**
    * Starts all asynchronous generators if they haven't been started yet and waits for the
    * completion of the generator responsible for the provided interface type.
-   * 
+   *
    * @param interfaceType
    *          the interface for which an implementation should be generated.
    * @param context
@@ -158,7 +158,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    *          the package name of the generated class.
    * @param className
    *          the name of the generated class.
-   * 
+   *
    * @return the fully qualified name of the generated class.
    */
   protected String startAsyncGeneratorsAndWaitFor(
@@ -178,7 +178,9 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
             .runIfStarting(new Runnable() {
               @Override
               public void run() {
+                final long start = System.currentTimeMillis();
                 MetaClassBridgeUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+                log.debug("MetaClassFactory populated in {}ms", System.currentTimeMillis() - start);
               }
             })
             .build()
@@ -201,14 +203,14 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
 
     return packageName + "." + className;
   }
-  
+
   /**
    * Marks the provided class as cache relevant. This means that the provided
    * class will be considered when checking for changes to determine whether or
    * not the generator needs to rerun after a refresh. If no cache relevant
    * classes are added any change to reloadable classes will cause the generator
    * to rerun.
-   * 
+   *
    * @param clazz
    *          the class to consider when checking for changes.
    */
@@ -227,7 +229,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * or not the generator needs to rerun after a refresh. If no cache relevant
    * classes are added any change to reloadable classes will cause the generator
    * to rerun.
-   * 
+   *
    * @param classes
    *          the classes to consider when checking for changes.
    */
@@ -236,7 +238,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
       addCacheRelevantClass(clazz);
     }
   }
-  
+
   private void clearCacheRelevantClasses() {
     cacheRelevantClasses.remove(this.getClass());
   }

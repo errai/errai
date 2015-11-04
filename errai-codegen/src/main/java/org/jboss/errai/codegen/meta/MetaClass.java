@@ -20,8 +20,6 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */

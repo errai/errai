@@ -158,7 +158,7 @@ public class DataBindingUtil {
                   Collections.<Statement>singletonList(
                           controller.setReferenceStmt(MODEL_VAR_NAME, DecorableType.PARAM.getAccessStatement(mp, decorable.getFactoryMetaClass()))));
           dataBinderRef = controller.getInstancePropertyStmt(
-                  controller.getReferenceStmt(MODEL_VAR_NAME, dataModelType.asClass()), BINDER_VAR_NAME,
+                  controller.getReferenceStmt(MODEL_VAR_NAME, dataModelType), BINDER_VAR_NAME,
                   DataBinder.class);
         }
         else {

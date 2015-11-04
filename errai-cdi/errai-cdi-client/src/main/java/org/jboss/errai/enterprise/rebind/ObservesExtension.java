@@ -128,7 +128,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       subscribeMethod = "subscribeJsType";
       callBackBlock = getJsTypeSubscriptionCallback(decorable, controller);
     }
-    else if (EnvUtil.isPortableType(parm.getType().asClass()) && !EnvUtil.isLocalEventType(parm.getType().asClass())) {
+    else if (EnvUtil.isPortableType(parm.getType()) && !EnvUtil.isLocalEventType(parm.getType())) {
       subscribeMethod = "subscribe";
       callBackBlock = getSubscriptionCallback(decorable, controller);
     }

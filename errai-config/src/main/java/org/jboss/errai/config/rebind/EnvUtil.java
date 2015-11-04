@@ -298,19 +298,31 @@ public abstract class EnvUtil {
 
   public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
-    if (cls.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(mc)
-        || getEnvironmentConfig().getPortableSuperTypes().contains(mc)) {
-      return true;
-    }
-    else {
-      if (String.class.equals(cls) || TypeHandlerFactory.getHandler(cls) != null) {
-        return true;
-      }
-    }
-    return false;
+    return isUserPortableType(mc) || isString(mc) || isBuiltinPortableType(cls);
+  }
+
+  public static boolean isPortableType(final MetaClass mc) {
+    return isUserPortableType(mc) || isString(mc) || isBuiltinPortableType(mc.asClass());
+  }
+
+  private static boolean isUserPortableType(final MetaClass mc) {
+    return mc.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(mc)
+        || getEnvironmentConfig().getPortableSuperTypes().contains(mc);
+  }
+
+  private static boolean isString(final MetaClass mc) {
+    return String.class.getName().equals(mc.getFullyQualifiedName());
+  }
+
+  private static boolean isBuiltinPortableType(final Class<?> cls) {
+    return TypeHandlerFactory.getHandler(cls) != null;
   }
 
   public static boolean isLocalEventType(final Class<?> cls) {
+    return cls.isAnnotationPresent(LocalEvent.class);
+  }
+
+  public static boolean isLocalEventType(final MetaClass cls) {
     return cls.isAnnotationPresent(LocalEvent.class);
   }
 
