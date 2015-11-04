@@ -76,9 +76,13 @@ public class JBossUtil {
   }
 
   public static String[] getCommandArguments(StackTreeLogger logger) {
-    final String rawArgs = System.getProperty(CMD_ARGS_PROPERTY, "");
+    final String rawArgs = System.getProperty(CMD_ARGS_PROPERTY);
 
-    return rawArgs.split("\\s+");
+    if (rawArgs == null) {
+      return new String[0];
+    } else {
+      return rawArgs.split("\\s+");
+    }
   }
 
 }
