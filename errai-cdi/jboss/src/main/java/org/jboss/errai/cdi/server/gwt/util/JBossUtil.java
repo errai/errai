@@ -8,12 +8,13 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 /**
  * Utility methods for bootstrapping various JBoss/WildFly containers in
  * DevMode.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JBossUtil {
   private static final String APP_CONTEXT_PROPERTY = "errai.dev.context";
   private static final String JBOSS_HOME_PROPERTY = "errai.jboss.home";
+  private static final String CMD_ARGS_PROPERTY = "errai.jboss.args";
   public static final String USERS_PROPERTY_FILE = "application-users.properties";
   public static final String ROLES_PROPERTY_FILE = "application-roles.properties";
   public static final String STANDALONE_CONFIGURATION = "standalone" + File.separator + "configuration";
@@ -72,6 +73,12 @@ public class JBossUtil {
 
   public static String getDeploymentContext() {
     return System.getProperty(APP_CONTEXT_PROPERTY, "ROOT");
+  }
+
+  public static String[] getCommandArguments(StackTreeLogger logger) {
+    final String rawArgs = System.getProperty(CMD_ARGS_PROPERTY, "");
+
+    return rawArgs.split("\\s+");
   }
 
 }
