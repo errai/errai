@@ -55,7 +55,7 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-weld-integration</artifactId>      
+      <artifactId>errai-cdi-server</artifactId>      
     </dependency>
 
     <dependency>

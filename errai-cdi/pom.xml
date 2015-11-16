@@ -59,7 +59,7 @@
   <modules>
     <module>jboss</module>
     <module>errai-cdi-client</module>
-    <module>weld-integration</module>
+    <module>errai-cdi-server</module>
   </modules>
 
   <build>
