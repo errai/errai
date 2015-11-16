@@ -16,17 +16,16 @@
 
 package org.jboss.errai.ioc.support.bus.client;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
-import org.jboss.errai.ioc.client.api.IOCProvider;
-
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-@IOCProvider
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
+
 @Singleton
-public class MessageBusProvider implements Provider<ClientMessageBus> {
-  @Override
+public class MessageBusProvider {
+
+  @IOCProducer
   public ClientMessageBus get() {
     return (ClientMessageBus) ErraiBus.get();
   }

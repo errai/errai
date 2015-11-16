@@ -19,13 +19,15 @@ package org.jboss.errai.ioc.rebind.ioc.extension.builtin;
 import static org.jboss.errai.codegen.util.Stmt.nestedCall;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.config.rebind.WidgetSubtypeCache;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
@@ -61,49 +63,28 @@ public class WidgetIOCExtension implements IOCExtensionConfigurator {
 
   @Override
   public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext) {
-    injectionContext.registerSubTypeMatchingInjectableProvider(
-            new InjectableHandle(MetaClassFactory.get(Widget.class), injectionContext.getQualifierFactory().forDefault()), new InjectableProvider() {
+    final Collection<MetaClass> widgetSubtypes = CacheUtil.getCache(WidgetSubtypeCache.class).get();
 
-              @Override
-              public FactoryBodyGenerator getGenerator(final InjectionSite injectionSite) {
-                final MetaClass type = injectionSite.getExactType();
-                if (type.isInterface() || type.isAbstract()) {
-                  throw new RuntimeException(buildAbstractTypeMessage(injectionSite));
-                }
-                if (!(type.isPublic() && type.isDefaultInstantiable())) {
-                  throw new RuntimeException("Cannot generate default instance for type " + type.getFullyQualifiedName()
-                          + " in " + injectionSite.getEnclosingType().getFullyQualifiedName());
-                }
-                return new AbstractBodyGenerator() {
+    for (final MetaClass widgetType : widgetSubtypes) {
+      if (widgetType.isPublic() && widgetType.isDefaultInstantiable()) {
+        injectionContext.registerExactTypeInjectableProvider(
+                new InjectableHandle(widgetType, injectionContext.getQualifierFactory().forDefault()),
+                new InjectableProvider() {
+
                   @Override
-                  protected List<Statement> generateCreateInstanceStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-                          Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
-                    return Collections
-                            .<Statement> singletonList(nestedCall(newObject(type, new Object[0])).returnValue());
+                  public FactoryBodyGenerator getGenerator(final InjectionSite injectionSite) {
+                    return new AbstractBodyGenerator() {
+                      @Override
+                      protected List<Statement> generateCreateInstanceStatements(
+                              ClassStructureBuilder<?> bodyBlockBuilder, Injectable injectable, DependencyGraph graph,
+                              InjectionContext injectionContext) {
+                        return Collections
+                                .<Statement> singletonList(nestedCall(newObject(widgetType, new Object[0])).returnValue());
+                      }
+                    };
                   }
-                };
-              }
-            });
-  }
-
-  private static String buildAbstractTypeMessage(final InjectionSite injectionSite) {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("The ")
-           .append(WidgetIOCExtension.class.getSimpleName())
-           .append(" was used to resolve the abstract type ")
-           .append(injectionSite.getExactType())
-           .append(".\n")
-           .append("Most likely one of the following injectables should have been matched instead:\n");
-
-    for (final Injectable injectable : injectionSite.getOtherResolvedInjectables()) {
-      builder.append('\t')
-             .append(injectable)
-             .append('\n');
+                });
+      }
     }
-
-    builder.append("To fix this problem, one of the above beans should be given an explicit scope.");
-
-    return builder.toString();
   }
-
 }

@@ -74,7 +74,7 @@ public class InjectionContext {
 
   private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings = HashMultimap.create();
   private final Multimap<InjectableHandle, InjectableProvider> injectableProviders = HashMultimap.create();
-  private final Multimap<InjectableHandle, InjectableProvider> subTypeMatchingInjectableProviders = HashMultimap.create();
+  private final Multimap<InjectableHandle, InjectableProvider> exactTypeInjectableProviders = HashMultimap.create();
 
   private final boolean async;
 
@@ -173,13 +173,13 @@ public class InjectionContext {
 
   /**
    * Like
-   * {@link #registerInjectableProvider(InjectableHandle, InjectableProvider)}
-   * except that the given {@link InjectableProvider} will be used to satisfy
-   * any injection point where the qualifier is satisfied and the type is a
-   * subtype of {@link InjectableHandle#getType()}.
+   * {@link #registerInjectableProvider(InjectableHandle, InjectableProvider)},
+   * but only injection sites with the exact type of the given
+   * {@link InjectableHandle} are satisfied.
    *
    * @param handle
-   *          Contains the type and qualifier that the given provider satisfies.
+   *          Contains the exact type and qualifier that the given provider
+   *          satisfies.
    * @param provider
    *          The
    *          {@link InjectableProvider#getGenerator(org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite)}
@@ -187,16 +187,16 @@ public class InjectionContext {
    *          handle. The returned {@link FactoryBodyGenerator} will be used to
    *          generate factories specific to the given injection sites.
    */
-  public void registerSubTypeMatchingInjectableProvider(final InjectableHandle handle, final InjectableProvider provider) {
-    subTypeMatchingInjectableProviders.put(handle, provider);
+  public void registerExactTypeInjectableProvider(final InjectableHandle handle, final InjectableProvider provider) {
+    exactTypeInjectableProviders.put(handle, provider);
   }
 
   public Multimap<InjectableHandle, InjectableProvider> getInjectableProviders() {
     return Multimaps.unmodifiableMultimap(injectableProviders);
   }
 
-  public Multimap<InjectableHandle, InjectableProvider> getSubTypeMatchingInjectableProviders() {
-    return Multimaps.unmodifiableMultimap(subTypeMatchingInjectableProviders);
+  public Multimap<InjectableHandle, InjectableProvider> getExactTypeInjectableProviders() {
+    return Multimaps.unmodifiableMultimap(exactTypeInjectableProviders);
   }
 
   public QualifierFactory getQualifierFactory() {

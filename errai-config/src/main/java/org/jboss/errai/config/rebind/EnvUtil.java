@@ -59,6 +59,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 public abstract class EnvUtil {
   public static class EnvironmentConfigCache implements CacheStore {
     private volatile EnvironmentConfig environmentConfig;
+    private final Map<String, String> permanentProperties = new ConcurrentHashMap<String, String>();
 
     public EnvironmentConfigCache() {
       clear();
@@ -67,10 +68,15 @@ public abstract class EnvUtil {
     @Override
     public synchronized void clear() {
       environmentConfig = newEnvironmentConfig();
+      environmentConfig.getFrameworkProperties().putAll(permanentProperties);
     }
 
     public synchronized EnvironmentConfig get() {
       return environmentConfig;
+    }
+
+    public void addPermanentFrameworkProperty(final String name, final String value) {
+      permanentProperties.put(name, value);
     }
   }
 

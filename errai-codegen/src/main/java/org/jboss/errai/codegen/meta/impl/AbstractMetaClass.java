@@ -498,6 +498,20 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
+  public boolean isDefaultInstantiableSubtypeOf(final String fqcn) {
+    if (!isPublic() || !isDefaultInstantiable()) {
+      return false;
+    }
+
+    MetaClass type = this;
+    while (type != null && !type.getFullyQualifiedName().equals(fqcn)) {
+      type = type.getSuperClass();
+    }
+
+    return type != null;
+  }
+
+  @Override
   public boolean isAssignableTo(final MetaClass clazz) {
     return clazz.isAssignableFrom(this);
   }

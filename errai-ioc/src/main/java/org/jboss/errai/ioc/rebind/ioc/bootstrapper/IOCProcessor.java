@@ -197,9 +197,9 @@ public class IOCProcessor {
     for (final InjectableHandle handle : injectionContext.getInjectableProviders().keySet()) {
       graphBuilder.addExtensionInjectable(handle.getType(), handle.getQualifier(), Dependent.class, WiringElementType.DependentBean);
     }
-    for (final InjectableHandle handle : injectionContext.getSubTypeMatchingInjectableProviders().keySet()) {
+    for (final InjectableHandle handle : injectionContext.getExactTypeInjectableProviders().keySet()) {
       graphBuilder.addExtensionInjectable(handle.getType(), handle.getQualifier(), Dependent.class,
-              WiringElementType.DependentBean, WiringElementType.SubTypeMatching);
+              WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
     }
   }
 
@@ -341,7 +341,7 @@ public class IOCProcessor {
   private void registerFactoryBodyGeneratorForInjectionSite(final Injectable injectable) {
     final Collection<InjectableProvider> providers = new ArrayList<InjectableProvider>();
     providers.addAll(injectionContext.getInjectableProviders().get(injectable.getHandle()));
-    providers.addAll(injectionContext.getSubTypeMatchingInjectableProviders().get(injectable.getHandle()));
+    providers.addAll(injectionContext.getExactTypeInjectableProviders().get(injectable.getHandle()));
     if (providers.size() > 1) {
       throw new RuntimeException("Multiple providers for " + injectable.getHandle() + ". An error should have been thrown in the graph builder.");
     } else if (providers.isEmpty()) {

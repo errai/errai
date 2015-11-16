@@ -174,6 +174,8 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
 
   public abstract boolean isAssignableTo(Class clazz);
 
+  public abstract boolean isDefaultInstantiableSubtypeOf(String fqcn);
+
   public abstract boolean isPrimitive();
 
   public abstract boolean isInterface();

@@ -64,7 +64,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   private final QualifierFactory qualFactory;
   private final Map<InjectableHandle, AbstractInjectable> abstractInjectables = new HashMap<InjectableHandle, AbstractInjectable>();
   private final Multimap<MetaClass, AbstractInjectable> directAbstractInjectablesByAssignableTypes = HashMultimap.create();
-  private final Collection<AbstractInjectable> subTypeMatchingInjectables = new ArrayList<AbstractInjectable>();
+  private final Multimap<MetaClass, ConcreteInjectable> exactTypeConcreteInjectablesByType = HashMultimap.create();
   private final Map<String, ConcreteInjectable> concretesByName = new HashMap<String, ConcreteInjectable>();
   private final List<ConcreteInjectable> specializations = new ArrayList<ConcreteInjectable>();
   private final FactoryNameGenerator nameGenerator = new FactoryNameGenerator();
@@ -93,7 +93,11 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     if (concrete.wiringTypes.contains(WiringElementType.Specialization)) {
       specializations.add(concrete);
     }
-    linkDirectAbstractInjectable(concrete);
+    if (concrete.wiringTypes.contains(WiringElementType.ExactTypeMatching)) {
+      exactTypeConcreteInjectablesByType.put(concrete.type.getErased(), concrete);
+    } else {
+      linkDirectAbstractInjectable(concrete);
+    }
 
     return concrete;
   }
@@ -117,18 +121,8 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   }
 
   private void linkDirectAbstractInjectable(final ConcreteInjectable concreteInjectable) {
-    if (concreteInjectable.wiringTypes.contains(WiringElementType.SubTypeMatching)) {
-      final AbstractInjectable subTypeMatchingInjectable = new AbstractInjectable(concreteInjectable.type, concreteInjectable.qualifier);
-      subTypeMatchingInjectables.add(subTypeMatchingInjectable);
-      subTypeMatchingInjectable.linked.add(concreteInjectable);
-    } else if (concreteInjectable.wiringTypes.contains(WiringElementType.ExactTypeMatching)) {
-      final AbstractInjectable exactTypeMatchingInjectable = new AbstractInjectable(concreteInjectable.type, concreteInjectable.qualifier);
-      exactTypeMatchingInjectable.linked.add(concreteInjectable);
-      directAbstractInjectablesByAssignableTypes.put(concreteInjectable.type.getErased(), exactTypeMatchingInjectable);
-    } else {
-      final AbstractInjectable abstractInjectable = lookupAsAbstractInjectable(concreteInjectable.type, concreteInjectable.qualifier);
-      abstractInjectable.linked.add(concreteInjectable);
-    }
+    final AbstractInjectable abstractInjectable = lookupAsAbstractInjectable(concreteInjectable.type, concreteInjectable.qualifier);
+    abstractInjectable.linked.add(concreteInjectable);
   }
 
   private void processAssignableTypes(final AbstractInjectable abstractInjectable) {
@@ -576,17 +570,9 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     final Multimap<ResolutionPriority, ConcreteInjectable> resolvedByPriority = HashMultimap.create();
     final Queue<AbstractInjectable> resolutionQueue = new LinkedList<AbstractInjectable>();
     resolutionQueue.add(dep.injectable);
+    resolutionQueue.add(addMatchingExactTypeInjectables(dep.injectable));
 
-    do {
-      final AbstractInjectable cur = resolutionQueue.poll();
-      for (final BaseInjectable link : cur.linked) {
-        if (link instanceof AbstractInjectable) {
-          resolutionQueue.add((AbstractInjectable) link);
-        } else if (link instanceof ConcreteInjectable) {
-          resolvedByPriority.put(getMatchingPriority(link), (ConcreteInjectable) link);
-        }
-      }
-    } while (resolutionQueue.size() > 0);
+    processResolutionQueue(resolutionQueue, resolvedByPriority);
 
     // Iterates through priorities from highest to lowest.
     for (final ResolutionPriority priority : ResolutionPriority.values()) {
@@ -599,16 +585,10 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
           ConcreteInjectable injectable = resolved.iterator().next();
           if (injectable.isExtension()) {
             final ExtensionInjectable providedInjectable = (ExtensionInjectable) injectable;
-            final MetaClass injectedType;
-            if (concrete.wiringTypes.contains(WiringElementType.SubTypeMatching)) {
-              injectedType = dep.injectable.type;
-            } else {
-              injectedType = concrete.type;
-            }
             final Collection<Injectable> otherResolvedInjectables = new ArrayList<Injectable>(resolvedByPriority.values());
             otherResolvedInjectables.remove(injectable);
 
-            final InjectionSite site = new InjectionSite(injectedType, getAnnotated(dep), otherResolvedInjectables);
+            final InjectionSite site = new InjectionSite(concrete.type, getAnnotated(dep), otherResolvedInjectables);
             injectable = new ProvidedInjectableImpl(providedInjectable, site);
             customProvideds.put(injectable.getFactoryName(), injectable);
             dep.injectable = copyAbstractInjectable(dep.injectable);
@@ -620,6 +600,31 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
 
     problems.add(unsatisfiedDependencyMessage(dep, concrete));
     return null;
+  }
+
+  private AbstractInjectable addMatchingExactTypeInjectables(final AbstractInjectable depInjectable) {
+    final AbstractInjectable exactTypeLinker = new AbstractInjectable(depInjectable.type, depInjectable.qualifier);
+    for (final ConcreteInjectable candidate : exactTypeConcreteInjectablesByType.get(depInjectable.type.getErased())) {
+      if (candidateSatisfiesInjectable(depInjectable, candidate)) {
+        exactTypeLinker.linked.add(candidate);
+      }
+    }
+
+    return exactTypeLinker;
+  }
+
+  private void processResolutionQueue(final Queue<AbstractInjectable> resolutionQueue,
+          final Multimap<ResolutionPriority, ConcreteInjectable> resolvedByPriority) {
+    do {
+      final AbstractInjectable cur = resolutionQueue.poll();
+      for (final BaseInjectable link : cur.linked) {
+        if (link instanceof AbstractInjectable) {
+          resolutionQueue.add((AbstractInjectable) link);
+        } else if (link instanceof ConcreteInjectable) {
+          resolvedByPriority.put(getMatchingPriority(link), (ConcreteInjectable) link);
+        }
+      }
+    } while (resolutionQueue.size() > 0);
   }
 
   private String unsatisfiedDependencyMessage(final BaseDependency dep, final ConcreteInjectable concrete) {
@@ -648,11 +653,6 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   }
 
   private void linkAbstractInjectables() {
-    linkAbstractInjectablsFromDependencies();
-    linkSubTypeMatchingAbstractInjectables();
-  }
-
-  private void linkAbstractInjectablsFromDependencies() {
     final Set<AbstractInjectable> linked = new HashSet<AbstractInjectable>(abstractInjectables.size());
     for (final ConcreteInjectable concrete : concretesByName.values()) {
       for (final BaseDependency dep : concrete.dependencies) {
@@ -664,27 +664,19 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     }
   }
 
-  private void linkSubTypeMatchingAbstractInjectables() {
-    for (final AbstractInjectable subTypeMatching : subTypeMatchingInjectables) {
-      final Collection<AbstractInjectable> candidates = directAbstractInjectablesByAssignableTypes.get(subTypeMatching.type.getErased());
-      for (final AbstractInjectable candidate : candidates) {
-        if (candidate.qualifier.isSatisfiedBy(subTypeMatching.qualifier)
-                && !subTypeMatching.equals(candidate)) {
-          candidate.linked.add(subTypeMatching);
-        }
+  private void linkAbstractInjectable(final AbstractInjectable abstractInjectable) {
+    final Collection<AbstractInjectable> candidates = directAbstractInjectablesByAssignableTypes.get(abstractInjectable.type.getErased());
+    for (final AbstractInjectable candidate : candidates) {
+      if (candidateSatisfiesInjectable(abstractInjectable, candidate)) {
+        abstractInjectable.linked.add(candidate);
       }
     }
   }
 
-  private void linkAbstractInjectable(final AbstractInjectable abstractInjectable) {
-    final Collection<AbstractInjectable> candidates = directAbstractInjectablesByAssignableTypes.get(abstractInjectable.type.getErased());
-    for (final AbstractInjectable candidate : candidates) {
-      if (abstractInjectable.qualifier.isSatisfiedBy(candidate.qualifier)
-              && hasAssignableTypeParameters(candidate.getInjectedType(), abstractInjectable.type)
-              && !candidate.equals(abstractInjectable)) {
-        abstractInjectable.linked.add(candidate);
-      }
-    }
+  private boolean candidateSatisfiesInjectable(final AbstractInjectable abstractInjectable, final Injectable candidate) {
+    return abstractInjectable.qualifier.isSatisfiedBy(candidate.getQualifier())
+            && hasAssignableTypeParameters(candidate.getInjectedType(), abstractInjectable.type)
+            && !candidate.equals(abstractInjectable);
   }
 
   private boolean hasAssignableTypeParameters(final MetaClass fromType, final MetaClass toType) {
