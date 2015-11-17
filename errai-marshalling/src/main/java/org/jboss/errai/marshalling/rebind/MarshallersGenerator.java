@@ -328,7 +328,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
       }
 
       return _clientMarshallerCache
-          = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT, EnvUtil.getAllReachableClasses(context))
+          = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT)
           .generate(packageName, className, new MarshallerGenerationCallback() {
 
             @Override

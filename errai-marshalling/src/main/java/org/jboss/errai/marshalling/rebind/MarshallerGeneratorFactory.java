@@ -27,7 +27,6 @@ import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarN
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,7 +52,6 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.rebind.NameUtil;
 import org.jboss.errai.common.rebind.UniqueNameGenerator;
 import org.jboss.errai.config.rebind.CommonConfigAttribs;
-import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
 import org.jboss.errai.marshalling.client.api.GeneratedMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -86,7 +84,6 @@ public class MarshallerGeneratorFactory {
   private static final boolean SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_SHORT_IMPL_NAMES, "true"));
 
   private final MarshallerOutputTarget target;
-  private final ReachableTypes reachableTypes;
 
   private GeneratorMappingContext mappingContext;
   private final GeneratorContext context;
@@ -108,47 +105,13 @@ public class MarshallerGeneratorFactory {
 
   long startTime;
 
-  private MarshallerGeneratorFactory(final GeneratorContext context, final MarshallerOutputTarget target, final ReachableTypes reachableTypes) {
+  private MarshallerGeneratorFactory(final GeneratorContext context, final MarshallerOutputTarget target) {
     this.context = context;
     this.target = target;
-
-    this.reachableTypes = reachableTypes;
-    if (reachableTypes.isBasedOnReachabilityAnalysis()) {
-      this.reachableTypes.add(Object.class.getName());
-      this.reachableTypes.add(Map.class.getName());
-      this.reachableTypes.add(Set.class.getName());
-      this.reachableTypes.add(String.class.getName());
-      this.reachableTypes.add(Double.class.getName());
-      this.reachableTypes.add(Long.class.getName());
-      this.reachableTypes.add(Float.class.getName());
-      this.reachableTypes.add(Integer.class.getName());
-      this.reachableTypes.add(Short.class.getName());
-      this.reachableTypes.add(List.class.getName());
-      this.reachableTypes.add(Character.class.getName());
-      this.reachableTypes.add(Float.class.getName());
-      this.reachableTypes.add(Byte.class.getName());
-      this.reachableTypes.add(Boolean.class.getName());
-      this.reachableTypes.add(StackTraceElement.class.getName());
-
-      this.reachableTypes.add("char");
-      this.reachableTypes.add("long");
-      this.reachableTypes.add("float");
-      this.reachableTypes.add("double");
-      this.reachableTypes.add("int");
-      this.reachableTypes.add("boolean");
-      this.reachableTypes.add("boolean");
-      this.reachableTypes.add("byte");
-      this.reachableTypes.add("short");
-    }
   }
 
   public static MarshallerGeneratorFactory getFor(final GeneratorContext context, final MarshallerOutputTarget target) {
-    return new MarshallerGeneratorFactory(context, target, ReachableTypes.EVERYTHING_REACHABLE_INSTANCE);
-  }
-
-  public static MarshallerGeneratorFactory getFor(final GeneratorContext context, final MarshallerOutputTarget target,
-      final ReachableTypes reachableTypes) {
-    return new MarshallerGeneratorFactory(context, target, reachableTypes);
+    return new MarshallerGeneratorFactory(context, target);
   }
 
   public String generate(final String packageName, final String clazzName) {
@@ -224,7 +187,7 @@ public class MarshallerGeneratorFactory {
     for (final MetaClass cls : mappingContext.getDefinitionsFactory().getExposedClasses()) {
       final String clsName = cls.getFullyQualifiedName();
 
-      if (!mappingContext.getDefinitionsFactory().hasDefinition(clsName) || !reachable(cls)) {
+      if (!mappingContext.getDefinitionsFactory().hasDefinition(clsName)) {
         continue;
       }
 
@@ -326,7 +289,7 @@ public class MarshallerGeneratorFactory {
       final MetaClass compType = cls.getOuterComponentType();
       final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(compType);
 
-      if (definition.getClientMarshallerClass() != null || definition.alreadyGenerated() || !reachable(compType)) {
+      if (definition.getClientMarshallerClass() != null || definition.alreadyGenerated()) {
         continue;
       }
 
@@ -610,17 +573,6 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  public boolean reachable(final MetaClass cls) {
-    if (reachableTypes.isEmpty())
-      return true;
-
-    String name = cls.getFullyQualifiedName();
-    if (name.contains("$")) {
-      name = name.substring(0, name.indexOf('$'));
-    }
-
-    return reachableTypes.contains(name);
-  }
 
   public static BuildMetaClass createArrayMarshallerClass(MetaClass type) {
     BuildMetaClass arrayMarshaller =
