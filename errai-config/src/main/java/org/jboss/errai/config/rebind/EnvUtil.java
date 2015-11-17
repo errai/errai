@@ -67,6 +67,7 @@ public abstract class EnvUtil {
 
     public void addPermanentFrameworkProperty(final String name, final String value) {
       permanentProperties.put(name, value);
+      environmentConfig.getFrameworkProperties().put(name, value);
     }
   }
 

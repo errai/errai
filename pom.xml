@@ -101,8 +101,6 @@
     <module>errai-javaee-all</module>
     <module>errai-config</module>
     <module>errai-codegen-gwt</module>
-    <module>errai-ioc-async-tests</module>
-    <module>errai-cdi-async-tests</module>
     <module>errai-cordova</module>
     <module>errai-cordova-maven-plugin</module>
     <module>errai-ioc-bus-support</module>
@@ -110,7 +108,6 @@
     <module>errai-jboss-as-support</module>
     <module>errai-otec</module>
     <module>errai-security</module>
-    <module>errai-cdi-async-databinding-tests</module>
     <module>errai-demos</module>
     <module>errai-client-local-class-hider</module>
     <module>errai-annotation-processors</module>

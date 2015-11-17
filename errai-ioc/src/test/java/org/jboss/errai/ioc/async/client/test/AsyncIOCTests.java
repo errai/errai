@@ -16,6 +16,8 @@
  */
 package org.jboss.errai.ioc.async.client.test;
 
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.config.rebind.EnvUtil.EnvironmentConfigCache;
 import org.jboss.errai.ioc.async.test.beanmanager.client.AsyncBeanManagerTests;
 import org.jboss.errai.ioc.async.test.constructor.client.AsyncConstructorInjectionTests;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.AsyncDependentScopeIntegrationTest;
@@ -31,6 +33,8 @@ import org.jboss.errai.ioc.tests.wiring.client.BlackListingBeansIntegrationTest;
 import org.jboss.errai.ioc.tests.wiring.client.DisposerTest;
 import org.jboss.errai.ioc.tests.wiring.client.JsTypeInjectionTest;
 import org.jboss.tests.errai.ioc.wiring.client.WhiteListingBeansIntegrationTest;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -45,7 +49,7 @@ import org.junit.runners.Suite.SuiteClasses;
   AsyncDependentScopeIntegrationTest.class,
   AsyncSpecializationIntegrationTest.class,
 
-  // Tests from errai-ioc
+  // Rerun as async
   BasicIOCTest.class,
   IOCLoggingInjectorTest.class,
   IOCLifecycleTest.class,
@@ -59,5 +63,15 @@ import org.junit.runners.Suite.SuiteClasses;
   DisposerTest.class
 })
 public class AsyncIOCTests {
+
+  @BeforeClass
+  public static void setup() {
+    CacheUtil.getCache(EnvironmentConfigCache.class).addPermanentFrameworkProperty("errai.ioc.async_bean_manager", "true");
+  }
+
+  @AfterClass
+  public static void tearDown() {
+    CacheUtil.getCache(EnvironmentConfigCache.class).addPermanentFrameworkProperty("errai.ioc.async_bean_manager", "false");
+  }
 
 }
