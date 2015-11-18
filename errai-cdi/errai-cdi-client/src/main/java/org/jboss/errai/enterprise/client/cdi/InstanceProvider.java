@@ -25,34 +25,37 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncBeanDef;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
 
+import com.google.gwt.core.client.GWT;
+
+@SuppressWarnings("rawtypes")
 @IOCProvider
 @Singleton
-@EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
 public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
   @Override
   public Instance provide(final Class[] typeargs, final Annotation[] qualifiers) {
 
     /*
-    * If you see a compile error here, ensure that you are using Errai's custom
-    * version of javax.enterprise.event.Event, which comes from the
-    * errai-javax-enterprise project. The errai-cdi-client POM is set up this
-    * way.
-    *
-    * Eclipse users: seeing an error here probably indicates that M2E has
-    * clobbered your errai-javax-enterprise source folder settings. To fix your
-    * setup, see the README in the root of errai-javax-enterprise.
-    */
+     * If you see a compile error here, ensure that you are using Errai's custom
+     * version of javax.enterprise.event.Event, which comes from the
+     * errai-javax-enterprise project. The errai-cdi-client POM is set up this
+     * way.
+     *
+     * Eclipse users: seeing an error here probably indicates that M2E has
+     * clobbered your errai-javax-enterprise source folder settings. To fix your
+     * setup, see the README in the root of errai-javax-enterprise.
+     */
 
     return new InstanceImpl(typeargs[0], qualifiers);
   }
 
   static class InstanceImpl implements Instance<Object> {
+    private static final IOCEnvironment IOC_ENVIRONMENT = GWT.<IOCEnvironment> create(IOCEnvironment.class);
     private final Class type;
     private final Annotation[] qualifiers;
 
@@ -72,14 +75,14 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked" })
     public boolean isUnsatisfied() {
       Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
-      return beanDefs.isEmpty(); 
+      return beanDefs.isEmpty();
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked" })
     public boolean isAmbiguous() {
       Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
       return beanDefs.size() > 1;
@@ -90,21 +93,35 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
       return Collections.emptyList().iterator();
     }
 
-    
     @Override
+    @SuppressWarnings("unchecked")
     public Object get() {
-      final SyncBeanDef bean = IOC.getBeanManager().lookupBean(type, qualifiers);
-      if (bean == null) {
-        return null;
-      }
-      else {
-        return bean.getInstance();
+      try {
+        return IOC.getBeanManager().<Object> lookupBean(type, qualifiers).getInstance();
+      } catch (IOCResolutionException ex) {
+        if (IOC_ENVIRONMENT.isAsync() && isUnsatisfied()) {
+          throw new RuntimeException("No bean satisfied " + prettyQualifiersAndType()
+                  + ". Hint: Types loaded via Instance should not be @LoadAsync.", ex);
+        }
+        else {
+          throw ex;
+        }
       }
     }
 
-	@Override
-	public void destroy(final Object instance) {
-	  IOC.getBeanManager().destroyBean(instance);
-	}
+    private String prettyQualifiersAndType() {
+      final StringBuilder builder = new StringBuilder();
+      for (final Annotation qual : qualifiers) {
+        builder.append('@').append(qual.annotationType().getSimpleName()).append(' ');
+      }
+      builder.append(type.getSimpleName());
+
+      return builder.toString();
+    }
+
+    @Override
+    public void destroy(final Object instance) {
+      IOC.getBeanManager().destroyBean(instance);
+    }
   }
 }

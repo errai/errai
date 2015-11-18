@@ -55,6 +55,7 @@ import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanOranges;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualV;
 import org.jboss.errai.cdi.async.test.bm.client.res.TestBeanActivator;
+import org.jboss.errai.cdi.async.test.bm.client.res.ViaInstanceModule;
 import org.jboss.errai.cdi.async.test.bm.client.res.Visa;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -549,13 +550,6 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
     });
   }
 
-  private static boolean containsInstanceOf(final Collection<AsyncBeanDef> defs, final Class<?> clazz) {
-    for (final AsyncBeanDef def : defs) {
-      if (def.getType().equals(clazz)) return true;
-    }
-    return false;
-  }
-
   public void testBeanActivator() {
     final RefHolder<TestBeanActivator> activatorRef = new RefHolder<TestBeanActivator>();
     // This will happen synchronously as BeanActivators can not be annotated @LoadAsync
@@ -586,5 +580,31 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   public void testBeanActiveByDefault() {
     AsyncBeanDef<DependentScopedBean> bean = IOC.getAsyncBeanManager().lookupBean(DependentScopedBean.class);
     assertTrue(bean.isActivated());
+  }
+
+  public void testInjectInstanceForSyncTypeWithAsyncEnabled() throws Exception {
+    final ViaInstanceModule module = IOC.getBeanManager().lookupBean(ViaInstanceModule.class).getInstance();
+    try {
+      module.syncViaInstance.get();
+    } catch (Throwable t) {
+      throw new AssertionError("Should be able to get sync instance via Instance.get()", t);
+    }
+  }
+
+  public void testErrorWhenUsingInstanceWithAsyncType() throws Exception {
+    final ViaInstanceModule module = IOC.getBeanManager().lookupBean(ViaInstanceModule.class).getInstance();
+    try {
+      module.asyncViaInstance.get();
+      fail("Should have failed from an unsatisfied dependency exception.");
+    } catch (Throwable t) {
+      assertTrue("The exception thrown did not have the @LoadAsync hint.", t.getMessage().contains("@LoadAsync"));
+    }
+  }
+
+  private static boolean containsInstanceOf(final Collection<AsyncBeanDef> defs, final Class<?> clazz) {
+    for (final AsyncBeanDef def : defs) {
+      if (def.getType().equals(clazz)) return true;
+    }
+    return false;
   }
 }
