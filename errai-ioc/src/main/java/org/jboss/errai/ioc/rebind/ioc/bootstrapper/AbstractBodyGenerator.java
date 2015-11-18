@@ -24,11 +24,13 @@ import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodNam
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.if_;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.nestedCall;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
 import static org.jboss.errai.codegen.util.Stmt.throw_;
+import static org.jboss.errai.codegen.util.Stmt.try_;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -78,6 +80,7 @@ import org.jboss.errai.ioc.client.container.ProxyHelperImpl;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.ParamDependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -131,13 +134,37 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
       createProxyBody._(loadLiteral(null).returnValue()).finish();
     }
     else {
+      final Object proxyInstanceStmt;
+      if (injectable.getInjectedType().isInterface() || getAccessibleNoArgConstructor(injectable.getInjectedType()) != null) {
+        proxyInstanceStmt = newObject(proxyImpl);
+      } else {
+        bodyBlockBuilder
+                .privateMethod(parameterizedAs(Proxy.class, typeParametersOf(injectable.getInjectedType())),
+                        "createProxyWithErrorMessage")
+                .body()
+                ._(try_()._(load(newObject(proxyImpl)).returnValue()).finish()
+                        .catch_(Throwable.class, "t")._(throw_(RuntimeException.class,
+                                loadLiteral(injectableConstructorErrorMessage(injectable)), loadVariable("t")))
+                        .finish())
+                .finish();
+        proxyInstanceStmt = loadVariable("this").invoke("createProxyWithErrorMessage");
+      }
+
       createProxyBody
               ._(declareFinalVariable("proxyImpl",
                       parameterizedAs(Proxy.class, typeParametersOf(injectable.getInjectedType())),
-                      newObject(proxyImpl)))
+                      proxyInstanceStmt))
               ._(loadVariable("proxyImpl").invoke("setContext", loadVariable("context")))
               ._(loadVariable("proxyImpl").returnValue()).finish();
     }
+  }
+
+  private String injectableConstructorErrorMessage(final Injectable injectable) {
+    final MetaConstructor constr = getAccessibleConstructor(injectable);
+
+    return "While creating a proxy for " + injectable.getInjectedType().getFullyQualifiedName()
+            + " an exception was thrown from this constructor: " + constr
+            + "\nTo fix this problem, add a no-argument public or protected constructor for use in proxying.";
   }
 
   /**
@@ -155,7 +182,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
               .implementsInterface(parameterizedAs(Proxy.class, typeParametersOf(injectedType)))
               .implementsInterface(injectedType).body();
       declareAndInitializeProxyHelper(injectable, proxyImpl);
-    } else if (requiresProxy && isProxiable(injectable)) {
+    } else if (requiresProxy && isProxiableClass(injectable)) {
       proxyImpl = ClassBuilder
               .define(injectable.getFactoryName() + "ProxyImpl", injectedType)
               .privateScope()
@@ -167,6 +194,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
       throw new RuntimeException(injectedType + " must be proxiable but is not.");
     }
 
+    maybeImplementConstructor(proxyImpl, injectable);
     implementProxyMethods(proxyImpl, injectable);
     implementAccessibleMethods(proxyImpl, injectable, bodyBlockBuilder.getClassDefinition());
 
@@ -179,15 +207,43 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return injectable.requiresProxy() || controller.requiresProxy();
   }
 
-  private boolean isProxiable(final Injectable injectable) {
+  private boolean isProxiableClass(final Injectable injectable) {
     final MetaClass type = injectable.getInjectedType();
 
-    return (type.isDefaultInstantiable() || (type.isAbstract() && hasDefaultConstructor(type))) && !type.isFinal();
+    return !type.isFinal() && hasAccessibleConstructor(injectable);
   }
 
-  private boolean hasDefaultConstructor(final MetaClass type) {
-    final MetaConstructor con = type.getConstructor(new Class[0]);
-    return con != null && (con.isPublic() || con.isProtected());
+  private boolean hasAccessibleConstructor(final Injectable injectable) {
+    return getAccessibleConstructor(injectable) != null;
+  }
+
+  private MetaConstructor getAccessibleConstructor(final Injectable injectable) {
+    final MetaClass type = injectable.getInjectedType();
+    final MetaConstructor noArgConstr = getAccessibleNoArgConstructor(type);
+
+    if (noArgConstr != null) {
+      return noArgConstr;
+    }
+
+    for (final Dependency dep : injectable.getDependencies()) {
+      if (dep.getDependencyType().equals(DependencyType.Constructor)) {
+        final MetaConstructor injectableConstr = (MetaConstructor) ((ParamDependency) dep).getParameter().getDeclaringMember();
+
+        return (injectableConstr.isPublic() || injectableConstr.isProtected()) ? injectableConstr : null;
+      }
+    }
+
+    return null;
+  }
+
+  private MetaConstructor getAccessibleNoArgConstructor(final MetaClass type) {
+    final MetaConstructor noArgConstr = type.getConstructor(new MetaClass[0]);
+
+    if (noArgConstr != null && (noArgConstr.isPublic() || noArgConstr.isProtected())) {
+      return noArgConstr;
+    } else {
+      return null;
+    }
   }
 
   private void declareAndInitializeProxyHelper(final Injectable injectable, final ClassStructureBuilder<?> bodyBlockBuilder) {
@@ -203,6 +259,26 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return newObject(
             parameterizedAs(ProxyHelperImpl.class, typeParametersOf(injectable.getInjectedType())),
             injectable.getFactoryName());
+  }
+
+  private void maybeImplementConstructor(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
+    if (injectable.getInjectedType().isInterface()) {
+      return;
+    }
+
+    final MetaConstructor accessibleConstructor = getAccessibleConstructor(injectable);
+    if (accessibleConstructor.getParameters().length > 0) {
+      implementConstructor(proxyImpl, accessibleConstructor);
+    }
+  }
+
+  private void implementConstructor(final ClassStructureBuilder<?> proxyImpl, final MetaConstructor accessibleConstructor) {
+    final Object[] args = new Object[accessibleConstructor.getParameters().length];
+    for (int i = 0; i < args.length; i++) {
+      args[i] = loadLiteral(null);
+    }
+
+    proxyImpl.publicConstructor().callSuper(args).finish();
   }
 
   private void implementAccessibleMethods(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable, final BuildMetaClass factoryClass) {
@@ -502,6 +578,9 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     }
     for (final MetaMethod method : controller.getExposedMethods()) {
       addPrivateAccessStubs("jsni", bodyBlockBuilder, method);
+    }
+    for (final MetaConstructor constructor : controller.getExposedConstructors()) {
+      addPrivateAccessStubs("jsni", bodyBlockBuilder, constructor);
     }
   }
 

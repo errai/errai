@@ -583,7 +583,7 @@ public class IOCProcessor {
       }
     }
 
-    return type.isDefaultInstantiable();
+    return (type.getConstructor(new MetaClass[0]) != null);
   }
 
   private WiringElementType[] getWiringTypes(final MetaClass type, final Class<? extends Annotation> directScope) {
@@ -879,16 +879,14 @@ public class IOCProcessor {
       problems.add(type.getFullyQualifiedName() + " has " + injectableConstructors.size() + " constructors annotated with @Inject.");
       return false;
     } else if (injectableConstructors.size() == 1) {
-      if (scopeDoesNotRequireProxy(type)) {
-        return true;
-      } else if (type.isDefaultInstantiable()) {
+      if (scopeDoesNotRequireProxy(type) || type.getConstructor(new MetaClass[0]) != null) {
         return true;
       } else {
-        problems.add(type.getFullyQualifiedName() + " must have a default, no args constructor.");
-        return false;
+        log.warn("The class {} must be proxiable but has no zero-argument constructors.", type.getFullyQualifiedName());
+        return true;
       }
     } else {
-      return type.isDefaultInstantiable();
+      return (type.getConstructor(new MetaClass[0]) != null);
     }
   }
 

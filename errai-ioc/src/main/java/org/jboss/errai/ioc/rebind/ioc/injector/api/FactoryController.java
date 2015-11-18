@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.InjectUtil.constructGetReference;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.InjectUtil.constructSetReference;
@@ -38,6 +40,7 @@ import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -70,6 +73,7 @@ public class FactoryController {
   private final Map<String, Object> attributes = new HashMap<String, Object>();
   private final Set<MetaField> exposedFields = new HashSet<MetaField>();
   private final Set<MetaMethod> exposedMethods = new HashSet<MetaMethod>();
+  private final Set<MetaConstructor> exposedConstructors = new HashSet<MetaConstructor>();
   private final List<Statement> factoryInitializationStatements = new ArrayList<Statement>();
   private final MetaClass producedType;
   private final String factoryName;
@@ -311,10 +315,10 @@ public class FactoryController {
   }
 
   /**
-   * For public methods, fields, and parameters of public methods, this method
-   * does nothing. Otherwise this method generates private accessors/mutators.
-   * In the case of a parameter this method acts as if called for the declaring
-   * method.
+   * For public methods, fields, constructors, and parameters of public methods,
+   * this method does nothing. Otherwise this method generates private
+   * accessors/mutators. In the case of a parameter this method acts as if
+   * called for the declaring method.
    *
    * This method is idempotent.
    *
@@ -333,6 +337,8 @@ public class FactoryController {
         addExposedField((MetaField) member);
       } else if (member instanceof MetaMethod) {
         addExposedMethod((MetaMethod) member);
+      } else if (member instanceof MetaConstructor) {
+        addExposedConstructor((MetaConstructor) member);
       }
     }
   }
@@ -354,7 +360,7 @@ public class FactoryController {
    *          A non-public method.
    * @param params
    *          Statements for the values to be passed in as parameters.
-   * @return A statement for accessing the value of a field.
+   * @return A statement for accessing invoking the given method.
    */
   public ContextualStatementBuilder exposedMethodStmt(final MetaMethod method, final Statement... params) {
     addExposedMethod(method);
@@ -369,6 +375,29 @@ public class FactoryController {
    */
   public void addExposedMethod(final MetaMethod method) {
     exposedMethods.add(method);
+  }
+
+  /**
+   * This should only be called for non-public constructors. This method forces a
+   * private accessor to be generated for the constructor.
+   *
+   * @param constructor
+   *          A non-public constructor.
+   * @return A statement for invoking the given constructor.
+   */
+  public ContextualStatementBuilder exposedConstructorStmt(final MetaConstructor constructor, final Statement... params) {
+    addExposedConstructor(constructor);
+
+    return invokeStatic(factory, getPrivateMethodName(constructor), (Object[]) params);
+  }
+
+  /**
+   * This method is idempotent.
+   *
+   * @param constructor A non-public constructor for which a private accessor method should be generated.
+   */
+  public void addExposedConstructor(final MetaConstructor constructor) {
+    exposedConstructors.add(constructor);
   }
 
   /**
@@ -396,6 +425,15 @@ public class FactoryController {
    */
   public Collection<MetaMethod> getExposedMethods() {
     return Collections.unmodifiableCollection(exposedMethods);
+  }
+
+  /**
+   * @return An unmodifiable collection of constructors added with
+   *         {@link #addExposedMethod(MetaMethod)} or
+   *         {@link #ensureMemberExposed(HasAnnotations)}.
+   */
+  public Collection<MetaConstructor> getExposedConstructors() {
+    return Collections.unmodifiableCollection(exposedConstructors);
   }
 
   /**

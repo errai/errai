@@ -22,8 +22,8 @@ import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBeanInterface;
@@ -31,8 +31,14 @@ import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentOnInnerType;
+import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithPackageConstr;
+import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithPrivateConstr;
+import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithProtectedConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
+import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstr;
+import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstrThrowsNPE;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableNonPublicPostconstruct;
+import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableProtectedConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
@@ -224,5 +230,57 @@ public class BasicIOCTest extends IOCClientTestCase {
   public void testLoadingBeanWithProxiableNonPublicPostConstruct() {
     final ProxiableNonPublicPostconstruct bean = IOC.getBeanManager().lookupBean(ProxiableNonPublicPostconstruct.class).getInstance();
     assertTrue(bean.getValue());
+  }
+
+  public void testProxyingWithProtectedConstructor() throws Exception {
+    try {
+      assertEquals("Package constructor should not have been invoked before instance lookup.", 0, ProxiableProtectedConstr.numPrivateConstrInvocations);
+      IOC.getBeanManager().lookupBean(ProxiableProtectedConstr.class).getInstance();
+      assertEquals("Private constructor was not used to create proxy.", 1, ProxiableProtectedConstr.numPrivateConstrInvocations);
+    } catch (Throwable t) {
+      throw new AssertionError("Could not construct instance of proxiable type with protected constructor.", t);
+    }
+  }
+
+  public void testProxyingWithOnlyInjectableConstructor() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(ProxiableInjectableConstr.class).getInstance();
+    } catch (Throwable t) {
+      throw new AssertionError("Could not construct instance of proxiable type with injectable constructor.", t);
+    }
+  }
+
+  public void testErrorMessageWhenProxyingFailsWithOnlyInjectableConstructor() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(ProxiableInjectableConstrThrowsNPE.class).getInstance();
+    } catch (Throwable t) {
+      assertTrue("The error message did not explain that the problem was with proxying.", t.getMessage().contains("proxy"));
+      return;
+    }
+    fail("Looking up an instance should have failed when creating proxy.");
+  }
+
+  public void testDependentScopeWithPrivateConstr() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(DependentWithPrivateConstr.class).getInstance();
+    } catch (Throwable t) {
+      throw new AssertionError("Could not create instance of bean with private constructor.", t);
+    }
+  }
+
+  public void testDependentScopeWithPackageConstr() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(DependentWithPackageConstr.class).getInstance();
+    } catch (Throwable t) {
+      throw new AssertionError("Could not create instance of bean with package constructor.", t);
+    }
+  }
+
+  public void testDependentScopeWithProtectedConstr() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(DependentWithProtectedConstr.class).getInstance();
+    } catch (Throwable t) {
+      throw new AssertionError("Could not create instance of bean with protected constructor.", t);
+    }
   }
 }

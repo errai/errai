@@ -47,6 +47,7 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -402,49 +403,87 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   private void constructInstance(final Injectable injectable, final Collection<Dependency> constructorDependencies,
           final List<Statement> createInstanceStatements) {
     if (constructorDependencies.size() > 0) {
-      final Object[] constructorParameterStatements = new Object[constructorDependencies.size()];
-      final List<Statement> dependentScopedRegistrationStatements = new ArrayList<Statement>(constructorDependencies.size());
-      for (final Dependency dep : constructorDependencies) {
-        final Injectable depInjectable = dep.getInjectable();
-        final ParamDependency paramDep = ParamDependency.class.cast(dep);
-
-        final ContextualStatementBuilder injectedValue;
-        if (depInjectable.isContextual()) {
-          final Injectable providerInjectable = getProviderInjectable(depInjectable);
-          final MetaClass providerType = providerInjectable.getInjectedType();
-          if (providerType.isAssignableTo(ContextualTypeProvider.class)) {
-            final MetaClass[] typeArgsClasses = getTypeArguments(paramDep.getParameter().getType());
-            final Annotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new Annotation[0]);
-            injectedValue = castTo(providerType,
-                    loadVariable("contextManager").invoke("getInstance", loadLiteral(providerInjectable.getFactoryName())))
-                            .invoke("provide", typeArgsClasses, qualifiers);
-          } else {
-            throw new RuntimeException("Unrecognized contextual provider type " + providerType.getFullyQualifiedName()
-                    + " for dependency in " + paramDep.getParameter().getDeclaringMember().getDeclaringClassName());
-          }
-        } else {
-          injectedValue = castTo(depInjectable.getInjectedType(),
-                  loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
-        }
-
-        final String paramLocalVarName = getLocalVariableName(paramDep.getParameter());
-        createInstanceStatements.add(declareFinalVariable(paramLocalVarName, paramDep.getParameter().getType(), injectedValue));
-        if (dep.getInjectable().getWiringElementTypes().contains(WiringElementType.DependentBean)) {
-          dependentScopedRegistrationStatements.add(loadVariable("this").invoke("registerDependentScopedReference",
-                  loadVariable("instance"), loadVariable(paramLocalVarName)));
-        }
-        constructorParameterStatements[paramDep.getParamIndex()] = loadVariable(paramLocalVarName);
-      }
-
-      createInstanceStatements.add(declareFinalVariable("instance", injectable.getInjectedType(),
-              newObject(injectable.getInjectedType(), constructorParameterStatements)));
-      createInstanceStatements.addAll(dependentScopedRegistrationStatements);
+      addConstructorInjectionStatements(injectable, constructorDependencies, createInstanceStatements);
     } else {
-      createInstanceStatements.add(declareFinalVariable("instance", injectable.getInjectedType(),
-              newObject(injectable.getInjectedType())));
+      assignNewObjectWithZeroArgConstructor(injectable, createInstanceStatements);
     }
 
     createInstanceStatements.add(loadVariable("this").invoke("setIncompleteInstance", loadVariable("instance")));
+  }
+
+  private void assignNewObjectWithZeroArgConstructor(final Injectable injectable, final List<Statement> createInstanceStatements) {
+    final MetaConstructor noArgConstr = injectable.getInjectedType().getConstructor(new MetaClass[0]);
+    final Object newObjectStmt;
+
+    if (noArgConstr.isPublic()) {
+      newObjectStmt = newObject(injectable.getInjectedType());
+    } else {
+      newObjectStmt = controller.exposedConstructorStmt(noArgConstr);
+    }
+
+    createInstanceStatements.add(declareFinalVariable("instance", injectable.getInjectedType(), newObjectStmt));
+  }
+
+  private void addConstructorInjectionStatements(final Injectable injectable, final Collection<Dependency> constructorDependencies,
+          final List<Statement> createInstanceStatements) {
+    final Object[] constructorParameterStatements = new Object[constructorDependencies.size()];
+    final List<Statement> dependentScopedRegistrationStatements = new ArrayList<Statement>(constructorDependencies.size());
+    for (final Dependency dep : constructorDependencies) {
+      processConstructorDependencyStatement(createInstanceStatements, constructorParameterStatements, dependentScopedRegistrationStatements, dep);
+    }
+
+    createInstanceStatements.add(declareFinalVariable("instance", injectable.getInjectedType(),
+            newObject(injectable.getInjectedType(), constructorParameterStatements)));
+    createInstanceStatements.addAll(dependentScopedRegistrationStatements);
+  }
+
+  private void processConstructorDependencyStatement(final List<Statement> createInstanceStatements, final Object[] constructorParameterStatements,
+          final List<Statement> dependentScopedRegistrationStatements, final Dependency dep) {
+    final Injectable depInjectable = dep.getInjectable();
+    final ParamDependency paramDep = ParamDependency.class.cast(dep);
+
+    final ContextualStatementBuilder injectedValue = getInjectedValue(depInjectable, paramDep);
+    final String paramLocalVarName = getLocalVariableName(paramDep.getParameter());
+
+    createInstanceStatements.add(declareFinalVariable(paramLocalVarName, paramDep.getParameter().getType(), injectedValue));
+    if (dep.getInjectable().getWiringElementTypes().contains(WiringElementType.DependentBean)) {
+      dependentScopedRegistrationStatements.add(loadVariable("this").invoke("registerDependentScopedReference",
+              loadVariable("instance"), loadVariable(paramLocalVarName)));
+    }
+    constructorParameterStatements[paramDep.getParamIndex()] = loadVariable(paramLocalVarName);
+  }
+
+  private ContextualStatementBuilder getInjectedValue(final Injectable depInjectable, final ParamDependency paramDep) {
+    final ContextualStatementBuilder injectedValue;
+    if (depInjectable.isContextual()) {
+      injectedValue = invokeContextualProvider(depInjectable, paramDep);
+    } else {
+      injectedValue = castTo(depInjectable.getInjectedType(),
+              loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
+    }
+    return injectedValue;
+  }
+
+  private ContextualStatementBuilder invokeContextualProvider(final Injectable depInjectable, final ParamDependency paramDep) {
+    final Injectable providerInjectable = getProviderInjectable(depInjectable);
+    final MetaClass providerType = providerInjectable.getInjectedType();
+    if (providerType.isAssignableTo(ContextualTypeProvider.class)) {
+      return invokeProviderStmt(paramDep, providerInjectable, providerType);
+    } else {
+      throw new RuntimeException("Unrecognized contextual provider type " + providerType.getFullyQualifiedName()
+              + " for dependency in " + paramDep.getParameter().getDeclaringMember().getDeclaringClassName());
+    }
+  }
+
+  private ContextualStatementBuilder invokeProviderStmt(final ParamDependency paramDep, final Injectable providerInjectable,
+          final MetaClass providerType) {
+    final ContextualStatementBuilder injectedValue;
+    final MetaClass[] typeArgsClasses = getTypeArguments(paramDep.getParameter().getType());
+    final Annotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new Annotation[0]);
+    injectedValue = castTo(providerType,
+            loadVariable("contextManager").invoke("getInstance", loadLiteral(providerInjectable.getFactoryName())))
+                    .invoke("provide", typeArgsClasses, qualifiers);
+    return injectedValue;
   }
 
   private Injectable getProviderInjectable(final Injectable depInjectable) {
