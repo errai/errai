@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.async.databinding.test.client.res;
+package org.jboss.errai.cdi.async.test.databinding.client.res;
 
 import org.jboss.errai.databinding.client.api.Bindable;
 

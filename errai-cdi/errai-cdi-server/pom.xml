@@ -235,8 +235,8 @@
                 <include>**/*Tests.java</include>
               </includes>
               <excludes>
-                <exclude>**/org/jboss/errai/cdi/async/test/**/Test.java</exclude>
-                <exclude>**/org/jboss/errai/cdi/async/test/**/Tests.java</exclude>
+                <exclude>**/org/jboss/errai/cdi/async/test/**/*Test.java</exclude>
+                <exclude>**/org/jboss/errai/cdi/async/test/**/*Tests.java</exclude>
               </excludes>
             </configuration>
           </plugin>

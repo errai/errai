@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.async.databinding.test.client.res;
+package org.jboss.errai.cdi.async.test.databinding.client.res;
 
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.ui.shared.api.annotations.Bound;

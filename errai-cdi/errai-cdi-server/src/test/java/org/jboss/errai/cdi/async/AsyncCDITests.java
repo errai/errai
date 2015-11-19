@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.async;
 
 import org.jboss.errai.cdi.async.test.bm.client.AsyncCDIBeanManagerTest;
 import org.jboss.errai.cdi.async.test.cyclic.client.AsyncCyclicDepsIntegrationTest;
+import org.jboss.errai.cdi.async.test.databinding.client.AsyncCDIBeanManagerDatabindingTest;
 import org.jboss.errai.cdi.async.test.postconstruct.client.AsyncPostConstructOrderTest;
 import org.jboss.errai.cdi.async.test.producers.client.AsyncProducerTest;
 import org.jboss.errai.cdi.stereotypes.client.test.StereotypesIntegrationTest;
@@ -38,6 +39,7 @@ import org.junit.runners.Suite.SuiteClasses;
   AsyncCyclicDepsIntegrationTest.class,
   AsyncPostConstructOrderTest.class,
   AsyncProducerTest.class,
+  AsyncCDIBeanManagerDatabindingTest.class,
   StereotypesIntegrationTest.class
 })
 public class AsyncCDITests {
