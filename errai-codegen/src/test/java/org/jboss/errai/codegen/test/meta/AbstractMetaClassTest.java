@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -57,6 +56,7 @@ import org.jboss.errai.codegen.util.GenUtil;
 import org.junit.Test;
 import org.mvel2.util.NullType;
 
+import com.google.common.collect.Lists;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 
 /**
@@ -550,7 +550,7 @@ public abstract class AbstractMetaClassTest {
             Arrays.asList(getMetaClass(Serializable.class)),
             Arrays.asList(returnType.getBounds()));
   }
-  
+
   @Test
   public void testFieldWithTwoUpperBoundedTypeVarParam() throws Exception {
     final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
@@ -663,14 +663,14 @@ public abstract class AbstractMetaClassTest {
     assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getLowerBounds());
     assertArrayEquals(new MetaType[] { getMetaClass(Object.class)}, typeParam.getUpperBounds());
   }
-  
+
   @Test
   public void testGetMethods() {
     final MetaClass c = getMetaClass(Child.class);
     MetaMethod[] methods = c.getMethods();
-    
+
     assertNotNull(methods);
-    
+
     List<String> methodSignatures = new ArrayList<String>();
     for(MetaMethod m : methods) {
       methodSignatures.add(GenUtil.getMethodString(m));
@@ -691,10 +691,10 @@ public abstract class AbstractMetaClassTest {
     expectedMethods.add("wait([long])");
     expectedMethods.add("hashCode([])");
     expectedMethods.add("wait([long, int])");
-    
+
     Collections.sort(expectedMethods);
     Collections.sort(methodSignatures);
-    
+
 
     assertEquals(expectedMethods.toString(), methodSignatures.toString());
   }

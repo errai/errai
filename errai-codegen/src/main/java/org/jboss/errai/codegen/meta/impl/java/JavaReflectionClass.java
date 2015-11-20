@@ -176,7 +176,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       for (final Method method : type.getDeclaredMethods()) {
         JavaReflectionMethod metaMethod = new JavaReflectionMethod(this, method);
         String readableMethodDecl = GenUtil.getMethodString(metaMethod);
-        if (!metaMethod.isPrivate() && !processedMethods.contains(readableMethodDecl)) {
+        if (!metaMethod.isPrivate() && !method.isBridge() && !processedMethods.contains(readableMethodDecl)) {
             meths.add(metaMethod);
             processedMethods.add(readableMethodDecl);
         }
