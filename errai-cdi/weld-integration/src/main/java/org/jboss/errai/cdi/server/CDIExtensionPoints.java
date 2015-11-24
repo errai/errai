@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Extension points to the CDI container. Makes Errai components available as CDI beans (i.e. the
  * message bus) and registers CDI components as services with Errai.
- * 
+ *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -148,7 +148,7 @@ public class CDIExtensionPoints implements Extension {
 
   /**
    * Register managed beans as Errai services
-   * 
+   *
    * @param event
    *          -
    * @param <T>
@@ -265,9 +265,9 @@ public class CDIExtensionPoints implements Extension {
     subscribeServices(bm, bus);
 
     // initialize the CDI event bridge to the client
-    final EventDispatcher eventDispatcher = 
+    final EventDispatcher eventDispatcher =
             new EventDispatcher(bm, eventRoutingTable, bus, observableEvents, eventQualifiers);
-    
+
     AnyEventObserver.init(eventDispatcher);
 
     // subscribe event dispatcher
@@ -293,21 +293,21 @@ public class CDIExtensionPoints implements Extension {
 
       this.expiryTime = System.currentTimeMillis() + (timeOutInSeconds * 1000);
     }
-    
+
     private Annotation[] getQualifiers(Class<?> delegateClass) {
       int length = 0;
       for (Annotation anno : delegateClass.getAnnotations()) {
         if (anno.annotationType().isAnnotationPresent(Qualifier.class))
           length += 1;
       }
-      
+
       Annotation[] ret = new Annotation[length];
       int i = 0;
       for (Annotation anno : delegateClass.getAnnotations()) {
         if (anno.annotationType().isAnnotationPresent(Qualifier.class))
           ret[i++] = anno;
       }
-      
+
       return ret;
     }
 
@@ -329,16 +329,16 @@ public class CDIExtensionPoints implements Extension {
           if (!toRegister.contains(delegateClass) || beanManager.getBeans(delegateClass, getQualifiers(delegateClass)).size() == 0) {
             continue;
           }
-        } 
+        }
         catch(Throwable t) {
           continue;
         }
-        
+
         for (final ServiceParser svcParser : managedTypes.getDelegateServices(delegateClass)) {
           final Object delegateInstance;
           try {
             delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
-          } 
+          }
           catch (IllegalStateException t) {
             // handle WELD-001332: BeanManager method getReference() is not available during application initialization
             // try again later...
