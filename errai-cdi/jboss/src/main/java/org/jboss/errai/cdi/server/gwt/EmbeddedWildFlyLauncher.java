@@ -1,9 +1,8 @@
 package org.jboss.errai.cdi.server.gwt;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.BindException;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -57,6 +56,8 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
 
   private static final String ERRAI_PROPERTIES_HINT_START = "#Errai-Start\n";
   private static final String ERRAI_PROPERTIES_HINT_END = "\n#Errai-End\n";
+  private static final String ERRAI_PROPERTIES_REALM_TOKEN = "\n#$REALM_NAME=ApplicationRealm$ This line is used by " +
+          "the add-user utility to identify the realm name already used in this file.\n";
 
   static {
     System.setProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager");
@@ -99,37 +100,71 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
             Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.USERS_PROPERTY_FILE);
 
     if (usersStream != null) {
-      writeConfigurationPropertyFile(JBossUtil.USERS_PROPERTY_FILE, jbossHome, usersStream);
+      processPropertiesFile(JBossUtil.USERS_PROPERTY_FILE, jbossHome, usersStream, true);
     }
 
     InputStream rolesStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.ROLES_PROPERTY_FILE);
 
     if (rolesStream != null) {
-      writeConfigurationPropertyFile(JBossUtil.ROLES_PROPERTY_FILE, jbossHome, rolesStream);
+      processPropertiesFile(JBossUtil.ROLES_PROPERTY_FILE, jbossHome, rolesStream, false);
     }
   }
 
-  private void writeConfigurationPropertyFile(final String propertyFileName, final String jbossHome, final InputStream in) {
+  private void processPropertiesFile(final String propertyFileName, final String jbossHome,
+                                           final InputStream newUsersStream, final boolean handleRealmToken) {
     final File propertyDir = new File(jbossHome, JBossUtil.STANDALONE_CONFIGURATION);
     final File propertyFile = new File(propertyDir, propertyFileName);
-    try {
-      String content = FileUtils.readFileToString(propertyFile);
-      String erraiContent = StringUtils.substringBetween(content, ERRAI_PROPERTIES_HINT_START, ERRAI_PROPERTIES_HINT_END);
 
-      content = content.replace(ERRAI_PROPERTIES_HINT_START, "");
-      if (erraiContent != null) {
-        content = content.replace(erraiContent, "");
+    try {
+
+      String realmToken = ERRAI_PROPERTIES_REALM_TOKEN;
+      boolean isErraiContent = false;
+      final StringBuilder result = new StringBuilder();
+      List<String> lines = FileUtils.readLines(propertyFile);
+      if (lines != null) {
+
+        for (final String currentLine : lines) {
+          String trimmed = currentLine.trim();
+          if(trimmed.startsWith(ERRAI_PROPERTIES_HINT_START.trim())) {
+            isErraiContent = true;
+          } else if(trimmed.startsWith(ERRAI_PROPERTIES_HINT_END.trim())) {
+            isErraiContent = false;
+          } else if(handleRealmToken && trimmed.startsWith("#") && trimmed.contains("$REALM_NAME=")) {
+            realmToken = currentLine;
+          } else if (!isErraiContent) {
+            result.append(currentLine).append("\n");
+          }
+        }
+
+        // Add the expected new users into the file.
+        final String newUsersStr = IOUtils.toString(newUsersStream, (String) null);
+        result.append(ERRAI_PROPERTIES_HINT_START);
+        result.append(newUsersStr).append("\n");
+        result.append(ERRAI_PROPERTIES_HINT_END);
+
+        // Add the realm expected token.
+        if (handleRealmToken) {
+          result.append(realmToken).append("\n");
+        }
+
+        // Write the users properties again with new errai stuff.
+        try {
+          FileUtils.write(propertyFile, result.toString());
+        } catch (IOException e) {
+          throw new RuntimeException("Failed to write content for " +
+                  propertyFileName + " in " + propertyFile.getAbsolutePath(), e);
+        }
       }
-      content = content.replace(ERRAI_PROPERTIES_HINT_END, "");
-      content += ERRAI_PROPERTIES_HINT_START + IOUtils.toString(in, (String) null) + ERRAI_PROPERTIES_HINT_END;
-      FileUtils.write(propertyFile, content);
+
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to parse content for " +
+              propertyFileName + " in " + propertyFile.getAbsolutePath(), e);
     }
-    catch (IOException e) {
-      throw new RuntimeException("Failed to write " +
-              JBossUtil.USERS_PROPERTY_FILE + " in " + propertyFile.getAbsolutePath());
-    }
+
   }
+
+
 
   /**
    * Writes a new or updates an existing beans.xml file to add exclusions for
