@@ -14,35 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ioc.tests.wiring.client;
+package org.jboss.errai.ui.test.basic.client.res;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import javax.inject.Inject;
+
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
+
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
- * Runs {@link org.jboss.errai.ioc.tests.wiring.client.prod.JsTypeInjectionTest}
- * in production mode.
- *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@RunWith(Suite.class)
-@SuiteClasses(org.jboss.errai.ioc.tests.wiring.client.prod.JsTypeInjectionTest.class)
-public class JsTypeInjectionTest {
+@Templated
+public class NonCompositeComponent {
 
-  private static String originalGwtArgs;
+  @Inject
+  @DataField
+  private TextBox text;
 
-  @BeforeClass
-  public static void enableProductionMode() {
-    originalGwtArgs = System.getProperty("gwt.args", "");
-    System.setProperty("gwt.args", originalGwtArgs + " -prod");
+  @Inject
+  @DataField
+  private Button button;
+
+  public TextBox getTextBox() {
+    return text;
   }
 
-  @AfterClass
-  public static void disableProductionMode() {
-    System.setProperty("gwt.args", originalGwtArgs);
+  public Button getButton() {
+    return button;
   }
 
 }

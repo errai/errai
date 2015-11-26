@@ -51,7 +51,7 @@
     <el.api.version>2.2</el.api.version>
     <exec.maven.plugin.version>1.2.1</exec.maven.plugin.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
-    <guava.version>17.0</guava.version>
+    <guava.version>19.0-SNAPSHOT</guava.version>
     <guice.version>3.0</guice.version>
     <gwt.ajaxloader.version>1.1.0</gwt.ajaxloader.version>
     <gwt.exporter.version>2.3.0</gwt.exporter.version>
@@ -435,6 +435,12 @@
       <dependency>
         <groupId>com.google.gwt</groupId>
         <artifactId>gwt-user</artifactId>
+        <version>${gwt.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-elemental</artifactId>
         <version>${gwt.version}</version>
       </dependency>
 

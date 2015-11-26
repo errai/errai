@@ -1,7 +1,13 @@
 package org.jboss.errai.ui.test.basic.client;
 
+import static org.jboss.errai.ui.shared.TemplateUtil.asElement;
+
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.TemplateWidget;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
+import org.jboss.errai.ui.test.basic.client.res.NonCompositeComponent;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
@@ -32,7 +38,10 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     String innerHtml = app.getComponent().getElement().getInnerHTML();
     assertTrue(RegExp.compile("<h1(.)*>This will be rendered</h1>").test(innerHtml));
     assertTrue(RegExp.compile("<div(.)*>This will be rendered</div>").test(innerHtml));
-    assertTrue(innerHtml.contains("This will be rendered inside button"));
+
+    RegExp buttonInnerHtmlRegExp = RegExp.compile("This will be rendered inside button", "g");
+    assertTrue("Did find single instance of button text.", buttonInnerHtmlRegExp.test(innerHtml));
+    assertTrue("Did find second instance of button text.", buttonInnerHtmlRegExp.test(innerHtml));
 
     Element c1 = Document.get().getElementById("c1");
     assertNotNull(c1);
@@ -41,6 +50,14 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     assertNotNull(Document.get().getElementById("c2"));
     assertNotNull(Document.get().getElementById("c3"));
     assertNull(Document.get().getElementById("content"));
+
+    Element nc1 = Document.get().getElementById("nc1");
+    assertNotNull(nc1);
+    assertEquals("Added by component", nc1.getInnerText());
+
+    assertNotNull(Document.get().getElementById("nc2"));
+    assertNotNull(Document.get().getElementById("nc3"));
+    assertNull(Document.get().getElementById("nativeContent"));
   }
 
   @Test
@@ -60,6 +77,13 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
 
     Element c3 = app.getComponent().getTextBox().getElement();
     assertEquals("address", c3.getAttribute("name"));
+
+    Element nc1 = asElement(app.getComponent().getNativeLabel());
+    assertEquals("nc1", nc1.getAttribute("class"));
+    assertEquals("left", nc1.getAttribute("align"));
+
+    Element nc3 = TemplateUtil.asElement(app.getComponent().getNativeTextBox());
+    assertEquals("address", nc3.getAttribute("name"));
   }
 
   @Test
@@ -75,13 +99,22 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
   private void testHasHTMLPreservesInnerHTML(BasicTemplateTestApp app) throws Exception {
     Anchor c4comp = app.getComponent().getC4();
     String c4compHtml = c4comp.getHTML();
-    assertTrue("Inner HTML should be preserved when component implements ", 
+    assertTrue("Inner HTML should be preserved when component implements ",
         RegExp.compile("<span(.)*>LinkHTML</span>").test(c4compHtml));
-    
+
     Element c4 = c4comp.getElement();
     assertEquals("blah", c4.getAttribute("href"));
     assertEquals("SPAN", c4.getFirstChildElement().getTagName());
     assertEquals("LinkHTML", c4.getFirstChildElement().getInnerHTML());
+
+    Element nc4 = TemplateUtil.asElement(app.getComponent().getNc4());
+    String nc4Html = nc4.getInnerHTML();
+    assertTrue("Inner HTML should be preserved when component implements ",
+        RegExp.compile("<span(.)*>LinkHTML</span>").test(nc4Html));
+
+    assertEquals("blah", nc4.getAttribute("href"));
+    assertEquals("SPAN", nc4.getFirstChildElement().getTagName());
+    assertEquals("LinkHTML", nc4.getFirstChildElement().getInnerHTML());
   }
 
   @Test
@@ -100,16 +133,34 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
 
     System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
     assertEquals(c6.getElement(), c5.getElement().getFirstChildElement());
+
+    org.jboss.errai.ui.test.common.client.dom.Element nc5 = app.getComponent().getNc5();
+    org.jboss.errai.ui.test.common.client.dom.Element nc6 = app.getComponent().getNc6();
+
+    System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
+    assertEquals(TemplateUtil.asElement(nc6), TemplateUtil.asElement(nc5).getFirstChildElement());
   }
-  
+
   @Test
   public void testPrecedenceRules() throws Exception {
     PrecedenceTemplateTestApp app = IOC.getBeanManager().lookupBean(PrecedenceTemplateTestApp.class).getInstance();
-   
+
     assertEquals(app.getComponent().getA().getText(), "This is a");
     assertEquals(app.getComponent().getB().getText(), "This is b");
     assertEquals(app.getComponent().getC().getText(), "This is c");
     assertEquals(app.getComponent().getE().getText(), "This is d, e, and f");
+  }
+
+  @Test
+  public void testLoadingNonCompositeTemplatedBean() throws Exception {
+    final NonCompositeComponent instance = IOC.getBeanManager().lookupBean(NonCompositeComponent.class).getInstance();
+    final TemplateWidget rootWidget = TemplateWidgetMapper.get(instance);
+
+    assertTrue(instance.getTextBox().getElement().hasParentElement());
+    assertTrue(instance.getButton().getElement().hasParentElement());
+
+    assertTrue(instance.getTextBox().getElement().getParentElement().equals(rootWidget.getElement()));
+    assertTrue(instance.getButton().getElement().getParentElement().equals(rootWidget.getElement()));
   }
 
 }

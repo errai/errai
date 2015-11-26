@@ -1,9 +1,13 @@
 package org.jboss.errai.ui.test.basic.client.res;
 
+import static org.jboss.errai.ui.test.common.client.dom.Document.getDocument;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.test.common.client.dom.Element;
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -38,10 +42,32 @@ public class BasicComponent extends Composite {
   @DataField
   private Anchor c5;
 
+  @DataField("nc1")
+  private Element nativeContent = getDocument().createElement("label");
+
+  @DataField
+  private Element nc2 = getDocument().createElement("button");
+
+  @DataField
+  private Element nc3 = getDocument().createElement("input");
+
+  @DataField
+  private Element nc4 = getDocument().createElement("a");
+
+  @DataField
+  private Element nc6 = getDocument().createElement("img");
+
+  @DataField
+  private Element nc5 = getDocument().createElement("a");
+
   @PostConstruct
   public void init() {
     content.getElement().setAttribute("id", "c1");
     content.setText("Added by component");
+
+    com.google.gwt.dom.client.Element nativeInputElement = TemplateUtil.asElement(nativeContent);
+    nativeInputElement.setAttribute("id", "nc1");
+    nativeInputElement.setInnerText("Added by component");
   }
 
   public Label getLabel() {
@@ -70,5 +96,25 @@ public class BasicComponent extends Composite {
 
   public Image getC6() {
     return c6;
+  }
+
+  public Element getNativeLabel() {
+    return nativeContent;
+  }
+
+  public Element getNativeTextBox() {
+    return nc3;
+  }
+
+  public Element getNc4() {
+    return nc4;
+  }
+
+  public Element getNc5() {
+    return nc5;
+  }
+
+  public Element getNc6() {
+    return nc6;
   }
 }

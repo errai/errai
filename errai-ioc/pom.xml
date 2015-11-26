@@ -163,7 +163,7 @@
               <forkMode>pertest</forkMode>
               <argLine>-Xmx1500m -XX:MaxPermSize=500m
                 -Dgwt.gen=/tmp/gwt_test_gen_out/
-                -Dgwt.args='-prod -testBeginTimeout 5 ${gwtArgs}' -Xdebug</argLine>
+                -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug</argLine>
 
               <systemProperties>
                 <property>
@@ -179,6 +179,7 @@
               <excludes>
                 <exclude>**/IOCTests.java</exclude>
                 <exclude>**/org/jboss/errai/ioc/async/test/**/*.java</exclude>
+                <exclude>**/prod/**/*.java</exclude>
               </excludes>
             </configuration>
           </plugin>

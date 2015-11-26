@@ -14,35 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ioc.tests.wiring.client;
+package org.jboss.errai.databinding.client;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import com.google.gwt.dom.client.Element;
 
 /**
- * Runs {@link org.jboss.errai.ioc.tests.wiring.client.prod.JsTypeInjectionTest}
- * in production mode.
- *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@RunWith(Suite.class)
-@SuiteClasses(org.jboss.errai.ioc.tests.wiring.client.prod.JsTypeInjectionTest.class)
-public class JsTypeInjectionTest {
+public class BoundUtil {
 
-  private static String originalGwtArgs;
+  private BoundUtil() {}
 
-  @BeforeClass
-  public static void enableProductionMode() {
-    originalGwtArgs = System.getProperty("gwt.args", "");
-    System.setProperty("gwt.args", originalGwtArgs + " -prod");
-  }
-
-  @AfterClass
-  public static void disableProductionMode() {
-    System.setProperty("gwt.args", originalGwtArgs);
-  }
+  public static native Element asElement(final Object element) /*-{
+    return element;
+  }-*/;
 
 }

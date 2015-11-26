@@ -2,6 +2,7 @@ package org.jboss.errai.ui.test.quickhandler.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.shared.TemplateUtil;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.AnchorElement;
@@ -26,11 +27,12 @@ public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
     assertFalse(app.getComponent().isThisEventFired());
     DomEvent.fireNativeEvent(generateClickEvent(), app.getComponent());
     assertTrue(app.getComponent().isThisEventFired());
-    
+
     DivElement c0 = DivElement.as(Document.get().getElementById("c0"));
     assertNotNull(c0);
     AnchorElement c1 = app.getComponent().getC1();
     ButtonElement c2 = ButtonElement.as(Document.get().getElementById("c2"));
+    ButtonElement c3 = ButtonElement.as(TemplateUtil.asElement(app.getComponent().getC3()));
     assertNotNull(c2);
 
     assertFalse(app.getComponent().isC0EventFired());
@@ -48,6 +50,10 @@ public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
     assertFalse(app.getComponent().isC2EventFired());
     c2.click();
     assertTrue(app.getComponent().isC2EventFired());
+
+    assertFalse(app.getComponent().isC3EventFired());
+    c3.dispatchEvent(generateClickEvent());
+    assertTrue(app.getComponent().isC3EventFired());
   }
 
   private NativeEvent generateClickEvent() {

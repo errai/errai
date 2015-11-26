@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * A widget that wraps an {@link Element} to support the registration of event listeners and data
  * binding.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -50,11 +50,11 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
     }
     return widget;
   }
-  
+
   public static ElementWrapperWidget removeWidget(Element element) {
     return widgetMap.remove(element);
   }
-  
+
   public static ElementWrapperWidget removeWidget(ElementWrapperWidget widget) {
     return widgetMap.remove(widget.getElement());
   }

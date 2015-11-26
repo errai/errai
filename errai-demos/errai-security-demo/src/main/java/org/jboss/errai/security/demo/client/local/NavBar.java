@@ -30,19 +30,21 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
+
+import elemental.client.Browser;
+import elemental.html.AnchorElement;
+import elemental.js.html.JsAnchorElement;
 
 /**
  * <p>
  * A navigation bar that lives outside the {@link Navigation#getContentPanel()
  * navigation content panel} so that it is always displayed on the page.
- * 
+ *
  * <p>
  * {@link RestrictedAccess} annotated on a field applies a
  * {@link RestrictedAccess#CSS_CLASS_NAME CSS class} to the element when a user
  * is not logged in or lacks the specified roles.
- * 
+ *
  * <p>
  * {@link #admin}, and {{@link #logout} become hidden when a user lacks roles.
  * {@link #login} uses additional CSS rules so that it is hidden when a user
@@ -50,18 +52,21 @@ import com.google.gwt.user.client.ui.Composite;
  */
 @Templated
 @Dependent
-public class NavBar extends Composite {
+public class NavBar {
 
-  @Inject @DataField Anchor messages;
-  @Inject @DataField @RestrictedAccess Anchor login;
-  @Inject @DataField @RestrictedAccess(roles = "admin") Anchor admin;
-  @Inject @DataField @RestrictedAccess Anchor logout;
+  /*
+   * Calling Browser.getDocument().createAnchorElement() makes an <anchor> tag instead of an <a> tag.
+   */
+  @DataField AnchorElement messages = (JsAnchorElement) Browser.getDocument().createElement("a");
+  @DataField @RestrictedAccess AnchorElement login = (JsAnchorElement) Browser.getDocument().createElement("a");
+  @DataField @RestrictedAccess(roles = "admin") AnchorElement admin = (JsAnchorElement) Browser.getDocument().createElement("a");
+  @DataField @RestrictedAccess AnchorElement logout = (JsAnchorElement) Browser.getDocument().createElement("a");
 
   @Inject TransitionTo<WelcomePage> welcomePage;
   @Inject TransitionTo<Messages> messagesTab;
   @Inject TransitionTo<LoginForm> loginTab;
   @Inject TransitionTo<AdminPage> adminTab;
-  
+
   @Inject Caller<AuthenticationService> authServiceCaller;
 
   @EventHandler("messages")
@@ -78,7 +83,7 @@ public class NavBar extends Composite {
   public void onAdminTabClicked(ClickEvent event) {
     adminTab.go();
   }
-  
+
   @EventHandler("logout")
   public void logoutClicked(final ClickEvent event) {
     authServiceCaller.call(new RemoteCallback<Void>() {

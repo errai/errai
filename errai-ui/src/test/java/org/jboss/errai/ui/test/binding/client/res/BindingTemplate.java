@@ -1,5 +1,7 @@
 package org.jboss.errai.ui.test.binding.client.res;
 
+import static org.jboss.errai.ui.test.common.client.dom.Document.getDocument;
+
 import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -8,6 +10,8 @@ import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.test.common.client.TestModel;
+import org.jboss.errai.ui.test.common.client.dom.Element;
+import org.jboss.errai.ui.test.common.client.dom.TextInputElement;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.user.client.DOM;
@@ -32,6 +36,14 @@ public class BindingTemplate extends Composite {
   @DataField
   private TextBox name;
 
+  @Bound(property = "title")
+  @DataField
+  private Element titleField = getDocument().createElement("div");
+
+  @Bound
+  @DataField
+  private TextInputElement age = getDocument().createTextInputElement();
+
   @Inject
   @Bound(property = "lastChanged", converter = BindingDateConverter.class)
   @DataField("dateField")
@@ -46,7 +58,7 @@ public class BindingTemplate extends Composite {
   @Bound
   @DataField
   private BindingListWidget children;
-  
+
   private final TestModel model;
 
   @Inject
@@ -73,7 +85,15 @@ public class BindingTemplate extends Composite {
   public TextBox getPhoneNumberBox() {
     return phoneNumber;
   }
-  
+
+  public Element getTitleField() {
+    return titleField;
+  }
+
+  public TextInputElement getAge() {
+    return age;
+  }
+
   public BindingListWidget getListWidget() {
     return children;
   }

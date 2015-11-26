@@ -30,10 +30,14 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ui.shared.Template;
+import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.common.base.Strings;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Widget;
 
 
 /**
@@ -62,7 +66,17 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
             + "] which does not support @Inject; this instance must be created manually.");
       }
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
+    } else if (RebindUtil.isNativeJsType(decorable.getType()) || RebindUtil.isElementalIface(decorable.getType())) {
+      instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
+    } else if (!decorable.getType().isAssignableTo(Widget.class)) {
+      if (decorable.getType().isAnnotationPresent(Templated.class)) {
+        instance = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", instance);
+      } else {
+        throw new GenerationException("Unable to use [" + name + "] in class [" + decorable.getDecorableDeclaringType()
+        + "] as a @DataField. The field must be a Widget or a DOM element as either a JavaScriptObject or native @JsType.");
+      }
     }
+
     saveDataField(decorable, decorable.getType(), name, decorable.getName(), instance);
   }
 

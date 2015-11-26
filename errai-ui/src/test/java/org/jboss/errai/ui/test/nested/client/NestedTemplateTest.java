@@ -2,8 +2,12 @@ package org.jboss.errai.ui.test.nested.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.shared.TemplateWidget;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.nested.client.res.A;
 import org.jboss.errai.ui.test.nested.client.res.NestedClassComponent;
+import org.jboss.errai.ui.test.nested.client.res.ParentCompositeComponent;
+import org.jboss.errai.ui.test.nested.client.res.ParentNonCompositeComponent;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
@@ -25,7 +29,7 @@ public class NestedTemplateTest extends AbstractErraiCDITest {
     assertTrue(RegExp.compile("<h1(.)*>This will be rendered</h1>").test(innerHtml));
     assertTrue(RegExp.compile("<div(.)*>This will be rendered</div>").test(innerHtml));
     assertTrue(innerHtml.contains("This will be rendered inside button"));
-    
+
     Element lbl = Document.get().getElementById("c1a");
     assertNotNull(lbl);
     assertEquals("Added by component", lbl.getInnerText());
@@ -48,7 +52,7 @@ public class NestedTemplateTest extends AbstractErraiCDITest {
     assertEquals("This is the address field in A.html", a.getAddress().getValue());
     assertEquals("This is the address field in B.html", a.getB().getAddress().getText());
   }
-  
+
   /**
    * Regression test for the failure case documented in ERRAI-790.
    */
@@ -56,6 +60,25 @@ public class NestedTemplateTest extends AbstractErraiCDITest {
   public void testComponentAsStaticInnerClass() {
     NestedClassComponent.Content c = IOC.getBeanManager().lookupBean(NestedClassComponent.Content.class).getInstance();
     assertNotNull(c);
+  }
+
+  @Test
+  public void testCompositeParentOfNonComposite() throws Exception {
+    final ParentCompositeComponent instance = IOC.getBeanManager().lookupBean(ParentCompositeComponent.class).getInstance();
+    final TemplateWidget childRootWidget = TemplateWidgetMapper.get(instance.getChild());
+
+    assertTrue(childRootWidget.getElement().hasParentElement());
+    assertTrue(childRootWidget.getElement().getParentElement().equals(instance.getElement()));
+  }
+
+  @Test
+  public void testNonCompositeParentOfNonComposite() throws Exception {
+    final ParentNonCompositeComponent instance = IOC.getBeanManager().lookupBean(ParentNonCompositeComponent.class).getInstance();
+    final TemplateWidget parentRootWidget = TemplateWidgetMapper.get(instance);
+    final TemplateWidget childRootWidget = TemplateWidgetMapper.get(instance.getChild());
+
+    assertTrue(childRootWidget.getElement().hasParentElement());
+    assertTrue(childRootWidget.getElement().getParentElement().equals(parentRootWidget.getElement()));
   }
 
 }

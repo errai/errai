@@ -20,4 +20,5 @@
     <inherits name='org.jboss.errai.ui.UI'/>
     <inherits name="org.jboss.errai.databinding.DataBinding"/>
     <inherits name="org.jboss.errai.ui.test.common.UITestCommon"/>
+    <inherits name="elemental.Elemental"/>
 </module>

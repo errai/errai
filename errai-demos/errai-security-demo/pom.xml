@@ -61,7 +61,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <maven.gwt.plugin.version>2.7.0</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.8.0-SNAPSHOT</maven.gwt.plugin.version>
   </properties>
 
   <repositories>
@@ -145,6 +145,11 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-elemental</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -300,7 +305,7 @@
           <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx512m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.home=${errai.jboss.home} -Derrai.jboss.javaopts="-XX:MaxPermSize=128M -Xmx512M" -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx2G -XX:CompileThreshold=7000 -XX:MaxPermSize=256M -Derrai.jboss.home=${errai.jboss.home} -Derrai.jboss.javaopts="-XX:MaxPermSize=128M -Xmx512M" -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>

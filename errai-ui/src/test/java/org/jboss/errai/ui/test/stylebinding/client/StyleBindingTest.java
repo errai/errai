@@ -19,10 +19,14 @@ package org.jboss.errai.ui.test.stylebinding.client;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
+import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.jboss.errai.ui.test.stylebinding.client.res.StyleBoundTemplate;
 import org.jboss.errai.ui.test.stylebinding.client.res.StyleControl;
 import org.jboss.errai.ui.test.stylebinding.client.res.TestModel;
+
+import com.google.gwt.dom.client.Element;
 
 /**
  * @author Mike Brock
@@ -52,6 +56,64 @@ public class StyleBindingTest extends AbstractErraiCDITest {
     StyleBindingsRegistry.get().updateStyles();
 
     assertEquals("visible", instance.getTestA().getElement().getStyle().getVisibility());
+  }
+
+  public void testStyleBindingWithElementalElement() {
+    final SyncBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    final StyleBoundTemplate instance = bean.getInstance();
+
+    assertEquals("hidden", instance.getElementalElement().getStyle().getVisibility());
+
+    final SyncBeanDef<StyleControl> styleControl = IOC.getBeanManager().lookupBean(StyleControl.class);
+    styleControl.getInstance().setAdmin(true);
+
+    StyleBindingsRegistry.get().updateStyles();
+
+    assertEquals("visible", instance.getElementalElement().getStyle().getVisibility());
+  }
+
+  public void testStyleBindingWithGwtUserElement() {
+    final SyncBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    final StyleBoundTemplate instance = bean.getInstance();
+
+    assertEquals("hidden", instance.getUserSpanElement().getStyle().getVisibility());
+
+    final SyncBeanDef<StyleControl> styleControl = IOC.getBeanManager().lookupBean(StyleControl.class);
+    styleControl.getInstance().setAdmin(true);
+
+    StyleBindingsRegistry.get().updateStyles();
+
+    assertEquals("visible", instance.getUserSpanElement().getStyle().getVisibility());
+  }
+
+  public void testStyleBindingWithJsTypeElement() throws Exception {
+    final SyncBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    final StyleBoundTemplate instance = bean.getInstance();
+    final Element element = TemplateUtil.asElement(instance.getJstype());
+
+    assertEquals("hidden", element.getStyle().getVisibility());
+
+    final SyncBeanDef<StyleControl> styleControl = IOC.getBeanManager().lookupBean(StyleControl.class);
+    styleControl.getInstance().setAdmin(true);
+
+    StyleBindingsRegistry.get().updateStyles();
+
+    assertEquals("visible", element.getStyle().getVisibility());
+  }
+
+  public void testStyleBindingWithNonCompositeComponent() throws Exception {
+    final SyncBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    final StyleBoundTemplate instance = bean.getInstance();
+    final Element element = TemplateWidgetMapper.get(instance.getTestD()).getElement().cast();
+
+    assertEquals("hidden", element.getStyle().getVisibility());
+
+    final SyncBeanDef<StyleControl> styleControl = IOC.getBeanManager().lookupBean(StyleControl.class);
+    styleControl.getInstance().setAdmin(true);
+
+    StyleBindingsRegistry.get().updateStyles();
+
+    assertEquals("visible", element.getStyle().getVisibility());
   }
 
   public void testDataBindingChangesUpdatesStyle() {

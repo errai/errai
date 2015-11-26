@@ -14,6 +14,7 @@
   <inherits name="org.jboss.errai.security.SecurityShared" />
 
   <inherits name="com.google.gwt.user.User" />
+  <inherits name="elemental.Elemental"/>
 
   <set-property name="user.agent" value="safari" />
 

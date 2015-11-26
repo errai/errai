@@ -59,6 +59,12 @@
 
     <dependency>
       <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-elemental</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gwt</groupId>
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -176,7 +182,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <forkMode>always</forkMode>
-              <argLine>-Xmx1500m ${argLine}</argLine>
+              <argLine>-Xmx1500m -XX:MaxPermSize=256m ${argLine} -Dgwt.args='-prod'</argLine>
 
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>

@@ -112,9 +112,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     Class<?> templateProvider = declaringClass.getAnnotation(Templated.class).provider();
     boolean customProvider = templateProvider != Templated.DEFAULT_PROVIDER.class;
 
-    if (!declaringClass.isAssignableTo(Composite.class)) {
-      throw new GenerationException("@Templated class [" + declaringClass.getFullyQualifiedName()
-          + "] must extend base class [" + Composite.class.getName() + "].");
+    if (declaringClass.isAssignableTo(Composite.class)) {
+      logger.warn("The @Templated class, {}, extends Composite. This will not be supported in future versions.", declaringClass.getFullyQualifiedName());
     }
 
     final List<Statement> initStmts = new ArrayList<Statement>();
@@ -142,19 +141,6 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     else {
       controller.addInitializationStatements(initStmts);
     }
-
-    // TODO AAAAAAAAAHHHHHHRRRRRRRGGGGGGG
-//    if (ctx.getInjectionContext().isAsync()) {
-//      final Statement runnable = Stmt.newObject(Runnable.class).extend()
-//        .publicOverridesMethod("run")
-//        .append(addInitCallback)
-//        .finish()
-//        .finish();
-//      stmts.add(Stmt.loadVariable("async").invoke("runOnFinish", runnable));
-//    }
-//    else {
-//      stmts.add(addInitCallback);
-//    }
 
     controller.addDestructionStatements(generateTemplateDestruction(decorable));
     controller.addInitializationStatementsToEnd(Collections.<Statement>singletonList(invokeStatic(StyleBindingsRegistry.class, "get")
@@ -433,7 +419,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           }
 
           if (dataFieldType.isAssignableTo(Element.class)) {
-            initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", instance,
+            initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler",
                 eventSource, listenerInstance,
                 Stmt.invokeStatic(eventType, "getType")));
           }
@@ -446,13 +432,16 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
             final Statement widget = Cast.to(Widget.class, eventSource);
             initStmts.add(Stmt.nestedCall(widget).invoke("addDomHandler",
                 listenerInstance, Stmt.invokeStatic(eventType, "getType")));
-          }
-          else {
+          } else if (RebindUtil.isNativeJsType(dataFieldType) || RebindUtil.isElementalIface(dataFieldType)) {
+            initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler",
+                eventSource, listenerInstance,
+                Stmt.invokeStatic(eventType, "getType")));
+          } else {
             throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
                 + "] in class [" + declaringClass.getFullyQualifiedName()
-                + "] does not implement required interface [" + hasHandlerType.getName()
+                + "] must either implement the interface [" + hasHandlerType.getName()
                 + "] specified by @EventHandler method " + method.getName() + "(" + eventType.getName()
-                + ")]");
+                + ")] or else be a DOM element (wrapped as either a JavaScriptObject or a native @JsType).");
           }
         }
       }
@@ -544,6 +533,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
                                              final Statement dataFieldElements,
                                              final Statement fieldsMap) {
 
+    final boolean composite = decorable.getEnclosingInjectable().getInjectedType().isAssignableTo(Composite.class);
+
     /*
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
@@ -563,12 +554,18 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       initStmts.add(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
     }
 
-    /*
-     * Attach the Template to the Component, and set up the GWT Widget hierarchy
-     * to preserve Handlers and DOM events.
-     */
-    initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement,
-        Stmt.nestedCall(fieldsMap).invoke("values")));
+    final String initMethodName;
+    if (composite) {
+      /*
+       * Attach the Template to the Component, and set up the GWT Widget hierarchy
+       * to preserve Handlers and DOM events.
+       */
+      initMethodName = "initWidget";
+    } else {
+      initMethodName = "initTemplated";
+    }
+    initStmts.add(Stmt.invokeStatic(TemplateUtil.class, initMethodName, component, rootTemplateElement,
+            Stmt.nestedCall(fieldsMap).invoke("values")));
 
   }
 

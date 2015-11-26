@@ -35,6 +35,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
@@ -94,7 +95,7 @@ public final class TemplateUtil {
 
     Element parentElement = element.getParentElement();
     try {
-      if (field instanceof HasText) {
+      if (field instanceof HasText && (!(field instanceof ElementWrapperWidget) || field.getElement().getChildCount() == 0)) {
         Node firstNode = element.getFirstChild();
         while (firstNode != null) {
           if (firstNode != element.getFirstChildElement())
@@ -138,6 +139,32 @@ public final class TemplateUtil {
             " - Did you already @Insert or @Replace a parent Element?" +
             " Is an element referenced by more than one @DataField?", e);
     }
+  }
+
+  public static Element asElement(Object element) {
+    try {
+      return nativeCast(element);
+    } catch (Throwable t) {
+      throw new RuntimeException("Error casting @DataField of type " + element.getClass().getName() + " to " + Element.class.getName(), t);
+    }
+  }
+
+  private static native <T extends JavaScriptObject> T nativeCast(Object element) /*-{
+    return element;
+  }-*/;
+
+  public static com.google.gwt.user.client.Element asDeprecatedElement(Object element) {
+    try {
+      return nativeCast(element);
+    } catch (Throwable t) {
+      throw new RuntimeException("Error casting @DataField of type " + element.getClass().getName() + " to "
+              + com.google.gwt.user.client.Element.class.getName(), t);
+    }
+  }
+
+  public static void initTemplated(Object templated, Element wrapped, Collection<Widget> dataFields) {
+    TemplateWidgetMapper.put(templated, new TemplateWidget(wrapped, dataFields));
+    StyleBindingsRegistry.get().updateStyles(templated);
   }
 
   public static void initWidget(Composite component, Element wrapped, Collection<Widget> dataFields) {
@@ -335,7 +362,7 @@ public final class TemplateUtil {
     return widget;
   }
 
-  public static <T extends EventHandler> void setupWrappedElementEventHandler(Composite component, Widget widget,
+  public static <T extends EventHandler> void setupWrappedElementEventHandler(Widget widget,
           T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
     widget.addDomHandler(handler, type);
   }

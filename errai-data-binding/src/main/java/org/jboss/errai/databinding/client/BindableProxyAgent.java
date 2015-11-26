@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -34,6 +35,9 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -214,14 +218,29 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     HashMap<Class<? extends GwtEvent>, HandlerRegistration> handlerMap =
                                                           new HashMap<Class<? extends GwtEvent>, HandlerRegistration>();
 
-    if (widget instanceof HasValue) {
-      HandlerRegistration valueHandlerReg = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
+    final boolean nativeInputElement = (widget instanceof ElementWrapperWidget) && InputElement.is(widget.getElement());
 
-        @Override
-        public void onValueChange(ValueChangeEvent event) {
-          updater.update(event.getValue());
-        }
-      });
+    if (widget instanceof HasValue || nativeInputElement) {
+      final HandlerRegistration valueHandlerReg;
+
+      if (nativeInputElement) {
+        valueHandlerReg = widget.addDomHandler(new ChangeHandler() {
+          @Override
+          public void onChange(ChangeEvent event) {
+            updater.update(widget.getElement().getPropertyString("value"));
+          }
+        }, ChangeEvent.getType());
+      }
+      else {
+        valueHandlerReg = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
+          @Override
+          public void onValueChange(ValueChangeEvent event) {
+            final Object value = ((HasValue) widget).getValue();
+            updater.update(value);
+          }
+        });
+      }
+
       handlerMap.put(ValueChangeEvent.class, valueHandlerReg);
     }
     else if (!(widget instanceof HasText) && !(widget instanceof TakesValue)) {
@@ -402,7 +421,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (widget == excluding)
         continue;
 
-      if (widget instanceof TakesValue) {
+      if (widget instanceof ElementWrapperWidget && InputElement.is(widget.getElement())) {
+        Object widgetValue = Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converter);
+        widget.getElement().setPropertyString("value", (String) widgetValue);
+      }
+      else if (widget instanceof TakesValue) {
         TakesValue hv = (TakesValue) widget;
         Object widgetValue = Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converter);
         hv.setValue(widgetValue);

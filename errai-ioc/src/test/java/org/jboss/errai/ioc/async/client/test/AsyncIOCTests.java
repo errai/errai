@@ -31,7 +31,6 @@ import org.jboss.errai.ioc.tests.wiring.client.AlternativeBeanIntegrationTest;
 import org.jboss.errai.ioc.tests.wiring.client.BasicIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.BlackListingBeansIntegrationTest;
 import org.jboss.errai.ioc.tests.wiring.client.DisposerTest;
-import org.jboss.errai.ioc.tests.wiring.client.JsTypeInjectionTest;
 import org.jboss.tests.errai.ioc.wiring.client.WhiteListingBeansIntegrationTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -59,7 +58,6 @@ import org.junit.runners.Suite.SuiteClasses;
   AlternativeBeanIntegrationTest.class,
   BlackListingBeansIntegrationTest.class,
   WhiteListingBeansIntegrationTest.class,
-  JsTypeInjectionTest.class,
   DisposerTest.class
 })
 public class AsyncIOCTests {

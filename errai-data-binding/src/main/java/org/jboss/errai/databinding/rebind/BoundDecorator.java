@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
@@ -50,6 +51,8 @@ import org.jboss.errai.ui.shared.api.annotations.Bound;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
+
+import jsinterop.annotations.JsType;
 
 /**
  * Generates an {@link InitializationCallback} that contains automatic binding logic.
@@ -94,37 +97,40 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
             + "property chain, all properties but the last in a chain must be of a @Bindable type!");
       }
 
-      Statement widget = decorable.getAccessStatement();
+      Statement component = decorable.getAccessStatement();
       controller.ensureMemberExposed(decorable.get());
 
       // Ensure the @Bound field or method provides a widget or DOM element
-      MetaClass widgetType = decorable.getType();
-      if (widgetType.isAssignableTo(Widget.class)) {
+      MetaClass componentType = decorable.getType();
+      if (componentType.isAssignableTo(Widget.class)) {
         // Ensure @Bound widget field is initialized
-        if (!decorable.get().isAnnotationPresent(Inject.class) && decorable.decorableType().equals(DecorableType.FIELD) && widgetType.isDefaultInstantiable()) {
+        if (!decorable.get().isAnnotationPresent(Inject.class) && decorable.decorableType().equals(DecorableType.FIELD) && componentType.isDefaultInstantiable()) {
           Statement widgetInit = Stmt.loadVariable("this").invoke(
               PrivateAccessUtil.getPrivateFieldAccessorName(decorable.getAsField()),
               Refs.get("instance"),
-              ObjectBuilder.newInstanceOf(widgetType));
+              ObjectBuilder.newInstanceOf(componentType));
 
-          statements.add(If.isNull(widget).append(widgetInit).finish());
+          statements.add(If.isNull(component).append(widgetInit).finish());
         }
       }
-      else if (widgetType.isAssignableTo(Element.class)) {
-        widget = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", widget);
+      else if (componentType.isAssignableTo(Element.class)) {
+        component = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", component);
+      }
+      else if (componentType.isAnnotationPresent(JsType.class)) {
+        component = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(BoundUtil.class, "asElement", component));
       }
       else {
         throw new GenerationException("@Bound field or method " + decorable.getName()
             + " in class " + targetClass
             + " must provide a widget or DOM element type but provides: "
-            + widgetType.getFullyQualifiedName());
+            + componentType.getFullyQualifiedName());
       }
 
 
       // Generate the binding
       Statement conv = bound.converter().equals(Bound.NO_CONVERTER.class) ? loadLiteral(null) : Stmt.newObject(bound.converter());
       Statement onKeyUp = Stmt.load(bound.onKeyUp());
-      statements.add(Stmt.loadVariable("binder").invoke("bind", widget, property, conv, onKeyUp));
+      statements.add(Stmt.loadVariable("binder").invoke("bind", component, property, conv, onKeyUp));
     }
     else {
       throw new GenerationException("No @Model or @AutoBound data binder found for @Bound field or method "

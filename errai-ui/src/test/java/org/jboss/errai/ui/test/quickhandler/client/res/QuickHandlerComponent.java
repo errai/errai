@@ -6,6 +6,8 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.test.common.client.dom.ButtonElement;
+import org.jboss.errai.ui.test.common.client.dom.Document;
 
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,10 +26,14 @@ public class QuickHandlerComponent extends Composite {
   @DataField
   private Button c2;
 
+  @DataField
+  private ButtonElement c3 = Document.getDocument().createButtonElement();
+
   private boolean c0EventFired = false;
   private boolean c1EventFired = false;
   private boolean c1_dupEventFired = false;
-  private boolean c2EventFired = false; 
+  private boolean c2EventFired = false;
+  private boolean c3EventFired = false;
   private boolean thisEventFired = false;
   private final boolean c0EventFired2 = false;
 
@@ -38,6 +44,10 @@ public class QuickHandlerComponent extends Composite {
 
   public Button getC2() {
     return c2;
+  }
+
+  public ButtonElement getC3() {
+    return c3;
   }
 
   @EventHandler("c0")
@@ -60,7 +70,12 @@ public class QuickHandlerComponent extends Composite {
   public void doSomethingC2(ClickEvent e) {
     c2EventFired = true;
   }
-  
+
+  @EventHandler("c3")
+  public void doSomethingC3(ClickEvent event) {
+    c3EventFired = true;
+  }
+
   @EventHandler
   public void doSomethingOnThis(ClickEvent e) {
     thisEventFired = true;
@@ -84,6 +99,10 @@ public class QuickHandlerComponent extends Composite {
 
   public boolean isC2EventFired() {
     return c2EventFired;
+  }
+
+  public boolean isC3EventFired() {
+    return c3EventFired;
   }
 
   public boolean isThisEventFired() {
