@@ -145,6 +145,20 @@
 
   </dependencyManagement>
 
+  <repositories>
+    <repository>
+      <id>google-snapshots</id>
+      <name>Google Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/google-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <build>
     <!-- include module descriptors from src/main/java in order not to break the Intellij GWT plugin -->
     <resources>

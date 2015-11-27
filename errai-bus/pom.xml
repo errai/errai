@@ -83,6 +83,19 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <!-- This should not be packaged with the Errai Distro. There are no runtime
+                dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-common</artifactId>
     </dependency>
@@ -100,20 +113,6 @@
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
       <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Must come after errai-common is inherited for patched JUnitShell -->
-    <dependency>
-      <groupId>com.google.gwt</groupId>
-      <artifactId>gwt-user</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.gwt</groupId>
-      <artifactId>gwt-dev</artifactId>
-      <!-- This should not be packaged with the Errai Distro. There are no runtime
-                dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
       <scope>provided</scope>
     </dependency>
 
