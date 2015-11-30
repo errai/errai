@@ -5,9 +5,9 @@ import javax.inject.Inject;
 public class JsTypeConsumer {
 
   @Inject
-  private JsTypeUnimplemented iface;
+  private NativeType iface;
 
-  public JsTypeUnimplemented getIface() {
+  public NativeType getIface() {
     return iface;
   }
 

@@ -530,7 +530,7 @@ public class IOCProcessor {
           maybeProcessAsProvider(typeInjectable, builder);
         }
       } else if (type.isAnnotationPresent(JsType.class)) {
-        builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType);
+        builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, WiringElementType.DependentBean);
       }
     } catch (Throwable t) {
       throw new RuntimeException("A fatal error occurred while processing " + type.getFullyQualifiedName(), t);

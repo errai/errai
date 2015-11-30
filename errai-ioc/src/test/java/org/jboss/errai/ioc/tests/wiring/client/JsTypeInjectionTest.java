@@ -1,9 +1,9 @@
 package org.jboss.errai.ioc.tests.wiring.client;
 
 import org.jboss.errai.ioc.client.WindowInjectionContext;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
-import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeConsumer;
@@ -11,7 +11,13 @@ import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonInterface;
-import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeUnimplemented;
+import org.jboss.errai.ioc.tests.wiring.client.res.NativeFactory;
+import org.jboss.errai.ioc.tests.wiring.client.res.NativeType;
+
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.ScriptInjector;
+import com.google.gwt.user.client.Timer;
 
 public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
@@ -45,20 +51,45 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
   }
 
   public void testConsumingOfUnimplementedJsType() throws Exception {
-    final JsTypeUnimplemented ref = new JsTypeUnimplemented() {
+    final String scriptUrl = GWT.getModuleBaseForStaticFiles() + "native.js";
+    final Timer timeoutFail = new Timer() {
+
+      @Override
+      public void run() {
+        fail("Timed out waiting to load " + scriptUrl);
+      }
     };
 
-    final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
-    wndContext.addBeanProvider("fake", new JsTypeProvider<JsTypeUnimplemented>() {
-      @Override
-      public JsTypeUnimplemented getInstance() {
-        return ref;
-      }
-    });
-    wndContext.addSuperTypeAlias(JsTypeUnimplemented.class.getName(), "fake");
+    timeoutFail.schedule(9000);
+    delayTestFinish(10000);
+    ScriptInjector.fromUrl(scriptUrl)
+                  .setWindow(ScriptInjector.TOP_WINDOW)
+                  .setCallback(new Callback<Void, Exception>() {
 
-    final SyncBeanDef<JsTypeConsumer> consumer = IOC.getBeanManager().lookupBean(JsTypeConsumer.class);
+                    @Override
+                    public void onSuccess(Void result) {
+                      final NativeType ref = NativeFactory.get();
 
-    assertSame(ref, ((Proxy<JsTypeUnimplemented>) consumer.getInstance().getIface()).unwrap());
+                      final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+                      wndContext.addBeanProvider("org.jboss.errai.ioc.tests.wiring.client.res.NativeType", new JsTypeProvider<NativeType>() {
+                        @Override
+                        public NativeType getInstance() {
+                          return ref;
+                        }
+                      });
+
+                      final SyncBeanDef<JsTypeConsumer> consumer = IOC.getBeanManager().lookupBean(JsTypeConsumer.class);
+
+                      assertSame(ref, Factory.maybeUnwrapProxy(consumer.getInstance().getIface()));
+                      timeoutFail.cancel();
+                      finishTest();
+                    }
+
+                    @Override
+                    public void onFailure(Exception reason) {
+                      timeoutFail.cancel();
+                      fail("Could not load " + scriptUrl);
+                    }
+                  }).inject();
   }
 }

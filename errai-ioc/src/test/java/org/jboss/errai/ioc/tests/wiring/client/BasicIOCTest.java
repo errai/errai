@@ -253,11 +253,10 @@ public class BasicIOCTest extends IOCClientTestCase {
   public void testErrorMessageWhenProxyingFailsWithOnlyInjectableConstructor() throws Exception {
     try {
       IOC.getBeanManager().lookupBean(ProxiableInjectableConstrThrowsNPE.class).getInstance();
+      fail("Looking up an instance should have failed when creating proxy.");
     } catch (Throwable t) {
       assertTrue("The error message did not explain that the problem was with proxying.", t.getMessage().contains("proxy"));
-      return;
     }
-    fail("Looking up an instance should have failed when creating proxy.");
   }
 
   public void testDependentScopeWithPrivateConstr() throws Exception {
