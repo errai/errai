@@ -103,7 +103,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.js.JsType;
+
+import jsinterop.annotations.JsType;
 
 /**
  * Creates {@link DependencyGraph} by adding all types and dependencies to the
