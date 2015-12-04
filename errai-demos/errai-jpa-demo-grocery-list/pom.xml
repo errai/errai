@@ -59,25 +59,23 @@
     <slf4j.version>1.7.10</slf4j.version>
     <cdiapi.version>1.2</cdiapi.version>
     <servletapi.version>1.0.2.Final</servletapi.version>
-    <gwt.version>2.8.0-SNAPSHOT</gwt.version>
+    <gwt.maven.version>2.8.0-SNAPSHOT</gwt.maven.version>
     <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <argLine></argLine>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>google-snapshots</id>
-      <name>Google Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.errai.bom</groupId>
+        <artifactId>errai-bom</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -242,15 +240,6 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
-      <version>${gwt.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Gets ClassNotFound exception for gwt-dev dependency while compiling if this is not here -->
-    <dependency>
-      <groupId>com.google.gwt</groupId>
-      <artifactId>gwt-dev</artifactId>
-      <version>${gwt.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -266,12 +255,6 @@
       <groupId>com.google.gwt.google-apis</groupId>
       <artifactId>gwt-ajaxloader</artifactId>
       <version>1.1.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-dev</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -381,7 +364,6 @@
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-codeserver</artifactId>
-          <version>${gwt.version}</version>
         </dependency>
 
         <dependency>
@@ -607,15 +589,13 @@
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-user</artifactId>
-          <version>${gwt.version}</version>
-          <scope>compile</scope>
+          <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-dev</artifactId>
-          <version>${gwt.version}</version>
-          <scope>compile</scope>
+          <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -658,8 +638,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
       <plugin>
@@ -689,7 +669,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
+        <version>${gwt.maven.version}</version>
         <configuration>
           <strict>false</strict>
           <logLevel>INFO</logLevel>

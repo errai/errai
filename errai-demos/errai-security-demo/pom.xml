@@ -63,21 +63,6 @@
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <maven.gwt.plugin.version>2.8.0-SNAPSHOT</maven.gwt.plugin.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>google-snapshots</id>
-      <name>Google Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -150,6 +135,12 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-elemental</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!-- With gwt-maven-plugin:2.8.0-SNAPSHOT compilation fails without this dependency. -->
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -254,8 +245,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
       <plugin>
@@ -305,7 +296,7 @@
           <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx2G -XX:CompileThreshold=7000 -XX:MaxPermSize=256M -Derrai.jboss.home=${errai.jboss.home} -Derrai.jboss.javaopts="-XX:MaxPermSize=128M -Xmx512M" -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx512m -XX:CompileThreshold=7000 -XX:MaxPermSize=128M -Derrai.jboss.home=${errai.jboss.home} -Derrai.jboss.javaopts="-XX:MaxPermSize=128M -Xmx512M" -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>

@@ -67,20 +67,6 @@
     <jetty.version>6.1.25</jetty.version>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>google-snapshots</id>
-      <name>Google Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -136,7 +122,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Without this GWT compilation fails from a ClassNotFoundException -->
+    <!-- With gwt-maven-plugin:2.8.0-SNAPSHOT compilation fails without this dependency. -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-dev</artifactId>

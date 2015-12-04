@@ -66,20 +66,6 @@
     <jetty.version>6.1.25</jetty.version>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>google-snapshots</id>
-      <name>Google Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -158,7 +144,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Gets ClassNotFound exception for gwt-dev dependency while compiling if this is not here -->
+    <!-- With gwt-maven-plugin:2.8.0-SNAPSHOT compilation fails without this dependency. -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-dev</artifactId>
@@ -169,6 +155,7 @@
     <dependency>
       <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
       <artifactId>ostermiller-syntax</artifactId>
+      <version>1.1.1</version>
       <scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -188,8 +175,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
       <plugin>
@@ -352,14 +339,17 @@
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-naming</artifactId>
+          <version>${jetty.version}</version>
         </dependency>
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty</artifactId>
+          <version>${jetty.version}</version>
         </dependency>
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-plus</artifactId>
+          <version>${jetty.version}</version>
         </dependency>
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>

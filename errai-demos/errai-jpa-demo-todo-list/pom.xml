@@ -53,7 +53,7 @@
     <jetty.version>6.1.25</jetty.version>    
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <wildfly.plugin.version>1.0.1.Final</wildfly.plugin.version>
-    <maven.compiler.target>1.7</maven.compiler.target>    
+    <maven.compiler.target>1.6</maven.compiler.target>    
     <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
@@ -65,19 +65,6 @@
     <!-- Set this property to the full path to your Wildfly installation to run DevMode -->
     <errai.jboss.home></errai.jboss.home>
   </properties>
-  <repositories>
-    <repository>
-      <id>google-snapshots</id>
-      <name>Google Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -105,9 +92,10 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
+      <scope>provided</scope>
     </dependency>
 
-    <!-- Gets ClassNotFound exception for gwt-dev dependency while compiling if this is not here -->
+    <!-- With gwt-maven-plugin:2.8.0-SNAPSHOT compilation fails without this dependency. -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-dev</artifactId>
