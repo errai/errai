@@ -35,7 +35,6 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -59,7 +58,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Utilities to avoid redundant code for proxy generation.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
@@ -72,7 +71,7 @@ public abstract class ProxyUtil {
   /**
    * Generates the {@link org.jboss.errai.common.client.api.interceptor.CallContext} for method
    * interception. Ignores annotations in non-translatable packages.
-   * 
+   *
    * @param callContextType
    *          the type of {@link org.jboss.errai.common.client.api.interceptor.RemoteCallContext} to
    *          use.
@@ -181,11 +180,11 @@ public abstract class ProxyUtil {
     final BlockStatement proceedLogic = new BlockStatement();
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
-    final BlockBuilder<ElseBlockBuilder> interceptorStack =
-              If.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor"));
+    ElseBlockBuilder interceptorStack =
+              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor"))._(proceed).finish();
 
     for (final Class<?> interceptor : interceptors) {
-      interceptorStack.append(If.cond(Bool.equals(
+      interceptorStack = interceptorStack.elseif_(Bool.equals(
               Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
               .append(Stmt.declareFinalVariable("ctx", callContextType, Stmt.loadVariable("this")))
               .append(
@@ -198,7 +197,9 @@ public abstract class ProxyUtil {
                                   Stmt.castTo(interceptor, Stmt.loadVariable("beanInstance")).invoke("aroundInvoke",
                                       Variable.get("ctx")))
                               .append(
-                                  If.not(Stmt.loadVariable("status").invoke("isProceeding"))
+                                  If.cond(Bool.and(
+                                            Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")),
+                                            Bool.equals(Stmt.loadLiteral(interceptor), Stmt.loadVariable("status").invoke("getNextInterceptor"))))
                                       .append(
                                           Stmt.loadVariable("remoteCallback").invoke("callback",
                                               Stmt.loadVariable("ctx").invoke("getResult")))
@@ -207,10 +208,9 @@ public abstract class ProxyUtil {
                               .finish() // finish the anonymous CreationalCallback class body
                       ))
               .append(generateAsyncInterceptorCreation(context, interceptor))
-              .finish()
-          );
+              .finish();
     }
-    proceedLogic.addStatement(interceptorStack.finish().else_().append(proceed).finish());
+    proceedLogic.addStatement(interceptorStack.else_().finish());
     return proceedLogic;
   }
 
@@ -218,7 +218,7 @@ public abstract class ProxyUtil {
    * Generates the code that will create the interceptor and then invoke the callback when done. If
    * IOC is available *and* the interceptor is a managed bean, then the IOC bean manager will be
    * used to load the interceptor.
-   * 
+   *
    * @param context
    * @param interceptor
    */
@@ -281,12 +281,12 @@ public abstract class ProxyUtil {
 
     /**
      * Returns the interceptors for the provided proxy type and method.
-     * 
+     *
      * @param type
      *          the remote interface
      * @param method
      *          the remote method
-     * 
+     *
      * @return the list of interceptors that should be triggered when invoking the provided proxy
      *         method on the provided type, never null.
      */
@@ -320,7 +320,7 @@ public abstract class ProxyUtil {
   /**
    * Returns true if the given bean is an explicitely managed bean (meaning it is annotated in some
    * way).
-   * 
+   *
    * @param interceptor
    */
   private static boolean isManagedBean(Class<?> interceptor) {
@@ -371,7 +371,7 @@ public abstract class ProxyUtil {
 
   /**
    * Generates a valid return statement for the provided method.
-   * 
+   *
    * @param method
    * @return return statement for the provided method
    */
