@@ -16,13 +16,14 @@
  */
 package org.jboss.errai.ui.test.common.client.dom;
 
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@JsType(isNative = true, name = "HTMLInputElement", namespace = "<global>")
+@JsType(isNative = true, name = "HTMLInputElement", namespace = JsPackage.GLOBAL)
 public interface TextInputElement extends Element {
 
   @JsProperty

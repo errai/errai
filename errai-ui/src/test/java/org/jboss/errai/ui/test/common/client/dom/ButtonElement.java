@@ -16,12 +16,13 @@
  */
 package org.jboss.errai.ui.test.common.client.dom;
 
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@JsType(isNative = true, name = "HTMLButtonElement", namespace = "<global>")
+@JsType(isNative = true, name = "HTMLButtonElement", namespace = JsPackage.GLOBAL)
 public interface ButtonElement extends Element {
 
 }

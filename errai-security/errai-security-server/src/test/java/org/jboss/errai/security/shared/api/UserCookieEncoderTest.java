@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -39,44 +40,22 @@ public class UserCookieEncoderTest {
   }
 
   @Test
-  public void testEncodeUserCookie() {
-
+  public void encodeThenDecodeUserCookie() throws Exception {
     Collection<Role> roles = new ArrayList<Role>();
     roles.add(new RoleImpl("user"));
     roles.add(new RoleImpl("staff"));
 
-    Map<String, String> properties = new TreeMap<String, String>();
+    Map<String, String> properties = new LinkedHashMap<String, String>();
     properties.put("p1", "v1");
     properties.put("p2", "v2");
 
-    String cookieValue = UserCookieEncoder.toCookieValue(new UserImpl("fred", roles, properties));
+    User originalUser = new UserImpl("fred", roles, properties);
+    User decodedUser = UserCookieEncoder.fromCookieValue(UserCookieEncoder.toCookieValue(originalUser));
 
-
-    String expected = "{\"^EncodedType\":\"org.jboss.errai.security.shared.api.identity.UserImpl\",\"^ObjectID\":\"1\",\"name\":\"fred\","
-            + "\"roles\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"2\",\"^Value\":"
-            + "[{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"3\",\"name\":\"staff\"},"
-            + "{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"4\",\"name\":\"user\"}]},"
-            + "\"groups\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"5\",\"^Value\":[]},"
-            + "\"properties\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableMap\",\"^ObjectID\":\"6\","
-            + "\"^Value\":{\"p2\":\"v2\",\"p1\":\"v1\"}}}";
-    assertEquals(expected, cookieValue);
-  }
-
-  @Test
-  public void testDecodePlainUserCookie() throws Exception {
-    String nonEncodedFred =
-            "{\"^EncodedType\":\"org.jboss.errai.security.shared.api.identity.UserImpl\",\"^ObjectID\":\"1\",\"name\":\"fred\","
-                    + "\"roles\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"2\",\"^Value\":"
-                    + "[{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"3\",\"name\":\"staff\"},"
-                    + "{\"^EncodedType\":\"org.jboss.errai.security.shared.api.RoleImpl\",\"^ObjectID\":\"4\",\"name\":\"user\"}]},"
-                    + "\"groups\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableSet\",\"^ObjectID\":\"5\",\"^Value\":[]},"
-                    + "\"properties\":{\"^EncodedType\":\"java.util.Collections$UnmodifiableMap\",\"^ObjectID\":\"6\","
-                    + "\"^Value\":{\"p2\":\"v2\",\"p1\":\"v1\"}}}";
-
-    User fred = UserCookieEncoder.fromCookieValue(nonEncodedFred);
-
-    String expected = "UserImpl [id=fred, roles=[staff, user], groups=[], properties={p2=v2, p1=v1}]";
-    assertEquals(expected, fred.toString());
+    assertEquals(originalUser.getIdentifier(), decodedUser.getIdentifier());
+    assertEquals(originalUser.getGroups(), decodedUser.getGroups());
+    assertEquals(originalUser.getProperties(), decodedUser.getProperties());
+    assertEquals(originalUser.getRoles(), decodedUser.getRoles());
   }
 
   /**

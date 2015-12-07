@@ -17,16 +17,17 @@
 package org.jboss.errai.ui.test.common.client.dom;
 
 import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@JsType(isNative = true, name = "HTMLDocument", namespace = "<global>")
+@JsType(isNative = true, name = "HTMLDocument", namespace = JsPackage.GLOBAL)
 public abstract class Document {
 
-  @JsProperty(namespace = "<global>")
+  @JsProperty(namespace = JsPackage.GLOBAL)
   public static native Document getDocument();
 
   private Document() {}
