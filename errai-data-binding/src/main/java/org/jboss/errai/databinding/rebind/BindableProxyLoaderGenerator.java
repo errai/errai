@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.rebind;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Set;
 
@@ -54,7 +55,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * Generates the proxy loader for {@link Bindable}s.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @GenerateAsync(BindableProxyLoader.class)
@@ -77,7 +78,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
 
     Set<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context);
     addCacheRelevantClasses(allBindableTypes);
-    
+
     for (MetaClass bindable : allBindableTypes) {
       if (bindable.isFinal()) {
         throw new RuntimeException("@Bindable type cannot be final: " + bindable.getFullyQualifiedName());
@@ -148,9 +149,15 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
       }
     }
   }
-  
+
   @Override
   protected boolean isRelevantClass(MetaClass clazz) {
-    return clazz.isAnnotationPresent(Bindable.class) || clazz.isAnnotationPresent(DefaultConverter.class);
+    for (final Annotation anno : clazz.getAnnotations()) {
+      if (anno.annotationType().equals(Bindable.class) || anno.annotationType().equals(DefaultConverter.class)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

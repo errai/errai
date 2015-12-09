@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.rebind;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
@@ -48,7 +49,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @GenerateAsync(RpcProxyLoader.class)
@@ -67,7 +68,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
     log.info("generating RPC proxy loader class...");
-    
+
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
     final long time = System.currentTimeMillis();
     final MethodBlockBuilder<?> loadProxies =
@@ -76,7 +77,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Collection<MetaClass> remotes = ClassScanner.getTypesAnnotatedWith(Remote.class,
         RebindUtils.findTranslatablePackages(context), context);
     addCacheRelevantClasses(remotes);
-    
+
     final InterceptorProvider interceptorProvider = getInterceptorProvider(context);
 
     for (final MetaClass remote : remotes) {
@@ -109,20 +110,26 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Collection<MetaClass> featureInterceptors = ClassScanner.getTypesAnnotatedWith(FeatureInterceptor.class,
         RebindUtils.findTranslatablePackages(context), context);
     addCacheRelevantClasses(featureInterceptors);
-    
+
     final Collection<MetaClass> standaloneInterceptors = ClassScanner.getTypesAnnotatedWith(InterceptsRemoteCall.class,
         RebindUtils.findTranslatablePackages(context), context);
     addCacheRelevantClasses(standaloneInterceptors);
-    
+
     return new InterceptorProvider(featureInterceptors, standaloneInterceptors);
   }
 
   @Override
   protected boolean isRelevantClass(MetaClass clazz) {
-    return clazz.isAnnotationPresent(Remote.class) || clazz.isAnnotationPresent(FeatureInterceptor.class)
-            || clazz.isAnnotationPresent(InterceptsRemoteCall.class); 
+    for (final Annotation anno : clazz.getAnnotations()) {
+      if (anno.annotationType().equals(Remote.class) || anno.annotationType().equals(FeatureInterceptor.class)
+              || anno.annotationType().equals(InterceptsRemoteCall.class)) {
+        return true;
+      }
+    }
+
+    return false;
   }
-  
-  
+
+
 
 }

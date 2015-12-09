@@ -73,7 +73,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
       // which doesn't get updated otherwise.
       needsToRun = true;
     }
-    
+
     constructor.finish();
     return classBuilder.toJavaString();
   }
@@ -133,9 +133,9 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
 
     return resource;
   }
-  
+
   @Override
   protected boolean isCacheValid() {
-    return super.isCacheValid() && !needsToRun;
+    return !needsToRun && super.isCacheValid();
   }
 }
