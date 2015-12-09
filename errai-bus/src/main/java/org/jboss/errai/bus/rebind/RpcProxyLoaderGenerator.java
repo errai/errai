@@ -118,7 +118,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
   }
 
   @Override
-  protected boolean isRelevantNewClass(MetaClass clazz) {
+  protected boolean isRelevantClass(MetaClass clazz) {
     return clazz.isAnnotationPresent(Remote.class) || clazz.isAnnotationPresent(FeatureInterceptor.class)
             || clazz.isAnnotationPresent(InterceptsRemoteCall.class); 
   }

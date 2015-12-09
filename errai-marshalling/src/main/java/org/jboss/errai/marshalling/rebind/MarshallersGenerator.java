@@ -338,6 +338,11 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
     }
   }
 
+  @Override
+  protected boolean isRelevantClass(final MetaClass clazz) {
+    return EnvUtil.isPortableType(clazz.asClass());
+  }
+
   interface DiscoveryContext {
     public void veto();
 
