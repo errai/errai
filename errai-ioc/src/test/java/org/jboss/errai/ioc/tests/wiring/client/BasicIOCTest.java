@@ -16,9 +16,11 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -39,6 +41,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstrThrowsNPE;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableNonPublicPostconstruct;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableProtectedConstr;
+import org.jboss.errai.ioc.tests.wiring.client.res.PublicInnerClassIface;
 import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
@@ -281,5 +284,10 @@ public class BasicIOCTest extends IOCClientTestCase {
     } catch (Throwable t) {
       throw new AssertionError("Could not create instance of bean with protected constructor.", t);
     }
+  }
+
+  public void testNoFactoryGeneratedForInnerClassOfNonPublicClass() throws Exception {
+    final Collection<SyncBeanDef<PublicInnerClassIface>> foundBeans = IOC.getBeanManager().lookupBeans(PublicInnerClassIface.class, QualifierUtil.ANY_ANNOTATION);
+    assertEquals(0, foundBeans.size());
   }
 }

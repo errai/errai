@@ -517,24 +517,30 @@ public class IOCProcessor {
 
   private void processType(final MetaClass type, final DependencyGraphBuilder builder, final List<String> problems) {
     try {
-      if (isTypeInjectableCandidate(type)) {
-        if (isSimpleton(type)) {
-          builder.addInjectable(type, qualFactory.forSource(type), Dependent.class, InjectableType.Type,
-                  WiringElementType.DependentBean, WiringElementType.Simpleton);
-        } else if (isTypeInjectable(type, problems)) {
-          final Class<? extends Annotation> directScope = getScope(type);
-          final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type),
-                  directScope, InjectableType.Type, getWiringTypes(type, directScope));
-          processInjectionPoints(typeInjectable, builder, problems);
-          maybeProcessAsProducer(builder, typeInjectable);
-          maybeProcessAsProvider(typeInjectable, builder);
+      if (isTypeAccessible(type)) {
+        if (type.isConcrete()) {
+          if (isSimpleton(type)) {
+            builder.addInjectable(type, qualFactory.forSource(type), Dependent.class, InjectableType.Type,
+                    WiringElementType.DependentBean, WiringElementType.Simpleton);
+          } else if (isTypeInjectable(type, problems)) {
+            final Class<? extends Annotation> directScope = getScope(type);
+            final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type),
+                    directScope, InjectableType.Type, getWiringTypes(type, directScope));
+            processInjectionPoints(typeInjectable, builder, problems);
+            maybeProcessAsProducer(builder, typeInjectable);
+            maybeProcessAsProvider(typeInjectable, builder);
+          }
+        } else if (type.isAnnotationPresent(JsType.class)) {
+          builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, WiringElementType.DependentBean);
         }
-      } else if (type.isAnnotationPresent(JsType.class)) {
-        builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, WiringElementType.DependentBean);
       }
     } catch (Throwable t) {
       throw new RuntimeException("A fatal error occurred while processing " + type.getFullyQualifiedName(), t);
     }
+  }
+
+  private boolean isTypeAccessible(final MetaClass type) {
+    return type.isPublic() && (isTopLevel(type) || (type.isStatic() && isEnclosingTypeAccessible(type)));
   }
 
   private void maybeProcessAsProducer(final DependencyGraphBuilder builder, final Injectable typeInjectable) {
@@ -542,10 +548,6 @@ public class IOCProcessor {
     final Collection<MetaMethod> disposesMethods = getAllDisposesMethods(typeInjectable.getInjectedType());
     processProducerMethods(typeInjectable, builder, disposesMethods);
     processProducerFields(typeInjectable, builder, disposesMethods);
-  }
-
-  private boolean isTypeInjectableCandidate(final MetaClass type) {
-    return type.isPublic() && type.isConcrete() && (type.isStatic() || isTopLevel(type));
   }
 
   private boolean isTopLevel(MetaClass type) {
@@ -557,6 +559,22 @@ public class IOCProcessor {
       isTopLevel = false;
     }
     return isTopLevel;
+  }
+
+  private boolean isEnclosingTypeAccessible(final MetaClass type) {
+    boolean hasEnclosingClass = false;
+    Class<?> enclosing;
+    // Workaround for http://bugs.java.com/view_bug.do?bug_id=2210448
+    try {
+      enclosing = (type.asClass() == null ? null : type.asClass().getDeclaringClass());
+      hasEnclosingClass = true;
+    } catch (IncompatibleClassChangeError ex) {
+      enclosing = null;
+      hasEnclosingClass = true;
+    }
+
+    // Assume that the enclosing class is inaccessible if we can't access it because of an IncomaptibleClassChangeError
+    return !hasEnclosingClass || (enclosing != null && isTypeAccessible(MetaClassFactory.get(enclosing)));
   }
 
   private boolean isSimpleton(final MetaClass type) {
