@@ -160,7 +160,7 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
   }
   
   @Override
-  protected boolean isRelevantNewClass(MetaClass clazz) {
+  protected boolean isRelevantClass(MetaClass clazz) {
     return clazz.isAnnotationPresent(Path.class) || clazz.isAnnotationPresent(FeatureInterceptor.class)
             || clazz.isAnnotationPresent(InterceptsRemoteCall.class) || clazz.isAnnotationPresent(Provider.class); 
   }

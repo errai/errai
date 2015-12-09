@@ -150,7 +150,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
   }
   
   @Override
-  protected boolean isRelevantNewClass(MetaClass clazz) {
+  protected boolean isRelevantClass(MetaClass clazz) {
     return clazz.isAnnotationPresent(Bindable.class) || clazz.isAnnotationPresent(DefaultConverter.class);
   }
 }

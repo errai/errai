@@ -77,7 +77,11 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * @return True iff there is a cached output for this generator. Useful for subclasses that must override {@link #isCacheValid()}.
    */
   protected final boolean hasGenerationCache() {
-    return cacheMap.containsKey(getClass());
+    final boolean hasCache = cacheMap.containsKey(getClass());
+    if (log.isDebugEnabled()) {
+      log.debug("{} {} a generated cache.", getClass().getSimpleName(), (hasCache ? "has" : "does not have"));
+    }
+    return hasCache;
   }
 
   protected final String getGeneratedCache() {
@@ -92,26 +96,34 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * @return True iff this generator does not need to be run again this refresh.
    */
   protected boolean isCacheValid() {
-    boolean hasChanges = MetaClassFactory.hasAnyChanges() && hasRelevantChanges();
-    return hasGenerationCache() && !hasChanges;
+    return hasGenerationCache() && !(MetaClassFactory.hasAnyChanges() && hasRelevantChanges());
   }
 
   private boolean hasRelevantChanges() {
-    Set<String> relevantClasses = cacheRelevantClasses.get(this.getClass());
+    final String generatorName = this.getClass().getSimpleName();
+    final Set<String> relevantClasses = cacheRelevantClasses.get(this.getClass());
     if (relevantClasses == null) {
-      // generator did not mark any classes. we have to assume that a rerun is required.
+      log.debug("No classes marked as relevant for {}. Assuming there are relevant changes.", generatorName);
       return true;
     }
 
-    for (MetaClass newClazz : MetaClassFactory.getNewClasses()) {
-      if (isRelevantNewClass(newClazz)) {
+    for (final MetaClass clazz : MetaClassFactory.getAllNewOrUpdatedClasses()) {
+      final boolean previouslyMarkedRelevant = relevantClasses.contains(clazz.getFullyQualifiedName());
+      if (previouslyMarkedRelevant || isRelevantClass(clazz)) {
+        log.debug("New or updated class {} is {} cache relevant for {}.", clazz.getFullyQualifiedName(),
+                (previouslyMarkedRelevant ? "previously marked as" : "now marked as"), generatorName);
         return true;
+      } else {
+        log.trace("New or updated class {} is not cache relevant for {}.", clazz.getFullyQualifiedName(), generatorName);
       }
     }
 
-    for (String relevantClass : relevantClasses) {
-      if (MetaClassFactory.isChangedOrDeleted(relevantClass)) {
+    for (final String deleted : MetaClassFactory.getAllDeletedClasses()) {
+      if (relevantClasses.contains(deleted)) {
+        log.debug("Deleted class {} was cache relevant for {}.", deleted, generatorName);
         return true;
+      } else {
+        log.trace("Deleted class {} is not cache relevant for {}.", deleted, generatorName);
       }
     }
 
@@ -129,7 +141,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * @return true if newly introduced class is relevant to this generator,
    *         otherwise false.
    */
-  protected boolean isRelevantNewClass(MetaClass clazz) {
+  protected boolean isRelevantClass(MetaClass clazz) {
     return true;
   }
 

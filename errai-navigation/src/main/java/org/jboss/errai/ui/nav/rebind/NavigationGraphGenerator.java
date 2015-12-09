@@ -718,7 +718,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   }
 
   @Override
-  protected boolean isRelevantNewClass(MetaClass clazz) {
+  protected boolean isRelevantClass(MetaClass clazz) {
     return clazz.isAnnotationPresent(Page.class);
   }
 }
