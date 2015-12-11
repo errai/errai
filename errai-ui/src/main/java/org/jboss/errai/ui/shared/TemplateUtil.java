@@ -183,10 +183,11 @@ public final class TemplateUtil {
   }-*/;
 
   private static Map<String, Element> templateRoots = new HashMap<String, Element>();
-  public static Element getRootTemplateElement(String templateContents, final String templateFileName, final String rootField) {
+
+  public static Element getRootTemplateParentElement(String templateContents, final String templateFileName, final String rootField) {
     String key = templateFileName + "#" + rootField;
     if (templateRoots.containsKey(key)) {
-      return cloneWithEmptyParent(templateRoots.get(key));
+      return cloneIntoNewParent(templateRoots.get(key));
     }
 
     Element parserDiv = DOM.createDiv();
@@ -226,8 +227,12 @@ public final class TemplateUtil {
     }
     else {
       templateRoots.put(key, templateRoot);
-      return cloneWithEmptyParent(templateRoot);
+      return cloneIntoNewParent(templateRoot);
     }
+  }
+
+  public static Element getRootTemplateElement(final Element rootParent) {
+    return firstNonMetaElement(rootParent);
   }
 
   /*
@@ -387,11 +392,11 @@ public final class TemplateUtil {
     return elem.attributes;
   }-*/;
 
-  private static Element cloneWithEmptyParent(Element element) {
+  private static Element cloneIntoNewParent(Element element) {
     Element parent = DOM.createDiv();
     Element clone = DOM.clone(element, true);
     parent.appendChild(clone);
-    return clone;
+    return parent;
   }
 
   private final static class TemplateRequest {

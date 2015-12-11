@@ -156,11 +156,15 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     final NonCompositeComponent instance = IOC.getBeanManager().lookupBean(NonCompositeComponent.class).getInstance();
     final TemplateWidget rootWidget = TemplateWidgetMapper.get(instance);
 
-    assertTrue(instance.getTextBox().getElement().hasParentElement());
-    assertTrue(instance.getButton().getElement().hasParentElement());
+    assertEquals("The root @DataField was not used.", rootWidget.getElement(), instance.getRoot());
 
-    assertTrue(instance.getTextBox().getElement().getParentElement().equals(rootWidget.getElement()));
-    assertTrue(instance.getButton().getElement().getParentElement().equals(rootWidget.getElement()));
+    assertTrue("The text @DataField was not used.", instance.getTextBox().getElement().hasParentElement());
+    assertTrue("The button @DataField was not used.", instance.getButton().getElement().hasParentElement());
+
+    assertTrue("The text @DataField is not a child of the root element.",
+            instance.getTextBox().getElement().getParentElement().equals(rootWidget.getElement()));
+    assertTrue("The button @DataField is not a child of the root element.",
+            instance.getButton().getElement().getParentElement().equals(rootWidget.getElement()));
   }
 
 }

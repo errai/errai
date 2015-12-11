@@ -204,18 +204,19 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       /*
        * Get root Template Element
        */
-      final String rootTemplateElementVarName = "elementForTemplateOf" + decorable.getDecorableDeclaringType().getName();
+      final String parentOfRootTemplateElementVarName = "parentElementForTemplateOf" + decorable.getDecorableDeclaringType().getName();
       initStmts.add(Stmt
           .declareVariable(Element.class)
-          .named(rootTemplateElementVarName)
+          .named(parentOfRootTemplateElementVarName)
           .initializeWith(
-              Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateElement",
+              Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateParentElement",
                   (customProvider) ? Variable.get("template") :
                     Stmt.loadVariable(templateVarName).invoke("getContents").invoke("getText"),
                   getTemplateFileName(declaringClass),
                   getTemplateFragmentName(declaringClass))));
 
-      final Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
+      final Statement rootTemplateElement = Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateElement",
+              Stmt.loadVariable(parentOfRootTemplateElementVarName));
 
       /*
        * If i18n is enabled for this module, translate the root template element here

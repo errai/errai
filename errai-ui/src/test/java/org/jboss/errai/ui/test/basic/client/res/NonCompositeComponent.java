@@ -21,6 +21,8 @@ import javax.inject.Inject;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -29,6 +31,9 @@ import com.google.gwt.user.client.ui.TextBox;
  */
 @Templated
 public class NonCompositeComponent {
+
+  @DataField
+  private DivElement root = Document.get().createDivElement();
 
   @Inject
   @DataField
@@ -44,6 +49,10 @@ public class NonCompositeComponent {
 
   public Button getButton() {
     return button;
+  }
+
+  public DivElement getRoot() {
+    return root;
   }
 
 }
