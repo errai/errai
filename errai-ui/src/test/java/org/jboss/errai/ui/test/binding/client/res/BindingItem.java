@@ -16,38 +16,21 @@
  */
 package org.jboss.errai.ui.test.binding.client.res;
 
+import org.jboss.errai.ui.client.widget.HasModel;
 import org.jboss.errai.ui.test.common.client.TestModel;
-import org.jboss.errai.ui.test.common.client.dom.Element;
-import org.jboss.errai.ui.test.common.client.dom.TextInputElement;
 
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface BindingTemplate<W extends BindingItem> {
+public interface BindingItem extends HasModel<TestModel> {
 
-  Element getRoot();
+  TextBox getTextBox();
 
-  DivElement getIdDiv();
+  void testDestroy();
 
-  Label getIdLabel();
-
-  TextBox getNameTextBox();
-
-  TextBox getDateTextBox();
-
-  TextBox getPhoneNumberBox();
-
-  Element getTitleField();
-
-  TextInputElement getAge();
-
-  BindingListWidget<W> getListWidget();
-
-  TestModel getModel();
+  int getNum();
 
 }

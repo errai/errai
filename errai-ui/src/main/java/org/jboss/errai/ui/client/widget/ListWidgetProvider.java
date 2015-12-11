@@ -36,7 +36,7 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
     }
 
     @Override
-    protected Class<W> getItemWidgetType() {
+    protected Class<W> getItemComponentType() {
       return itemWidgetType;
     }
   }

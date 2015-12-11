@@ -56,7 +56,7 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
     private DepartmentWidget draggingDepartmentWidget;
 
     @Override
-    protected Class<DepartmentWidget> getItemWidgetType() {
+    protected Class<DepartmentWidget> getItemComponentType() {
         return DepartmentWidget.class;
     }
 
@@ -85,7 +85,7 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
         // make all the widgets draggable
         for (int i = 0; i < getPanel().getWidgetCount(); i++) {
             final int widgetIndex = i;
-            final DepartmentWidget dw = getWidget(widgetIndex);
+            final DepartmentWidget dw = getComponent(widgetIndex);
             dw.getElement().getStyle().setPaddingRight(20, Unit.PX);
             final ItemMoveAnimation growAnimation = new ItemMoveAnimation(dw);
             dw.getElement().setDraggable(Element.DRAGGABLE_TRUE);

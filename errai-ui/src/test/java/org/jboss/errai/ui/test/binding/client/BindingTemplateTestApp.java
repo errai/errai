@@ -7,9 +7,12 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.client.widget.Table;
 import org.jboss.errai.ui.client.widget.UnOrderedList;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
-import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
+import org.jboss.errai.ui.test.binding.client.res.CompositeBindingTemplate;
+import org.jboss.errai.ui.test.binding.client.res.NonCompositeBindingItem;
+import org.jboss.errai.ui.test.binding.client.res.NonCompositeBindingTemplate;
 import org.jboss.errai.ui.test.common.client.TestModel;
 
 import com.google.gwt.user.client.ui.RootPanel;
@@ -21,8 +24,11 @@ public class BindingTemplateTestApp {
   private RootPanel root;
 
   @Inject
-  private BindingTemplate template;
-   
+  private CompositeBindingTemplate compositeTemplate;
+
+  @Inject
+  private NonCompositeBindingTemplate nonCompositeTemplate;
+
   @Inject
   @UnOrderedList
   private ListWidget<TestModel, BindingItemWidget> ulListWidget;
@@ -33,15 +39,16 @@ public class BindingTemplateTestApp {
 
   @PostConstruct
   public void setup() {
-    root.add(template);
+    root.add(compositeTemplate);
+    root.add(TemplateWidgetMapper.get(nonCompositeTemplate));
   }
 
-  public BindingTemplate getTemplate() {
-    return template;
+  public BindingTemplate<BindingItemWidget> getCompositeTemplate() {
+    return compositeTemplate;
   }
-  
-  public BindingListWidget getListWidget() {
-    return template.getListWidget();
+
+  public BindingTemplate<NonCompositeBindingItem> getNonCompositeTemplate() {
+    return nonCompositeTemplate;
   }
 
   public ListWidget<TestModel, BindingItemWidget> getUlListWidget() {

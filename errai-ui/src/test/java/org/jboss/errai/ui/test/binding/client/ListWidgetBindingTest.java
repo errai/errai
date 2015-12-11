@@ -30,9 +30,10 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.client.local.spi.InvalidBeanScopeException;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.test.binding.client.res.AppScopedBindingListWidget;
-import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
+import org.jboss.errai.ui.test.binding.client.res.BindingItem;
 import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
+import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
 import org.jboss.errai.ui.test.binding.client.res.SingletonBindingListWidget;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
@@ -42,7 +43,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Tests data binding with {@link ListWidget}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ListWidgetBindingTest extends AbstractErraiCDITest {
@@ -55,48 +56,55 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
   @Test
   public void testAutomaticListBinding() {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingTemplate template = app.getTemplate();
+    automaticListBindingAssertions(app.getCompositeTemplate());
+    automaticListBindingAssertions(app.getNonCompositeTemplate());
+  }
+
+  private void automaticListBindingAssertions(BindingTemplate<?> template) {
     assertNotNull("Template instance was not injected!", template);
-    assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
+    assertEquals("Expected zero widgets", 0, template.getListWidget().getComponentCount());
 
     TestModel model = template.getModel();
-    assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
+    assertEquals("Expected zero widgets", 0, template.getListWidget().getComponentCount());
     model.getChildren().add(new TestModel(3, "c3"));
-    assertEquals("Expected one widget", 1, template.getListWidget().getWidgetCount());
+    assertEquals("Expected one widget", 1, template.getListWidget().getComponentCount());
     model.getChildren().remove(0);
-    assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
+    assertEquals("Expected zero widgets", 0, template.getListWidget().getComponentCount());
 
     List<TestModel> children = new ArrayList<TestModel>();
     children.add(new TestModel(1, "c1"));
     children.add(new TestModel(2, "c2"));
     model.setChildren(children);
-    assertEquals("Expected two widgets", 2, template.getListWidget().getWidgetCount());
+    assertEquals("Expected two widgets", 2, template.getListWidget().getComponentCount());
     model.getChildren().add(new TestModel(3, "c3"));
-    assertEquals("Expected three widgets", 3, template.getListWidget().getWidgetCount());
+    assertEquals("Expected three widgets", 3, template.getListWidget().getComponentCount());
   }
 
   @Test
   public void testManualListBinding() {
-    List<TestModel> modelList = new ArrayList<TestModel>();
-    TestModel model0 = new TestModel();
-    TestModel model1 = new TestModel();
-    modelList.add(model0);
-    modelList.add(model1);
-
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
+    manualListBindingAssertions(app.getCompositeTemplate().getListWidget());
+    manualListBindingAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void manualListBindingAssertions(BindingListWidget<?> listWidget) {
+    final List<TestModel> modelList = new ArrayList<TestModel>();
+    final TestModel model0, model1;
+
+    modelList.add(model0 = new TestModel());
+    modelList.add(model1 = new TestModel());
     // binding a list of model objects
     listWidget.setItems(modelList);
 
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
-    assertEquals("", listWidget.getWidget(0).getTextBox().getText());
-    assertEquals("", listWidget.getWidget(1).getTextBox().getText());
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
+    assertEquals("", listWidget.getComponent(0).getTextBox().getText());
+    assertEquals("", listWidget.getComponent(1).getTextBox().getText());
     assertEquals("onItemsRendered should be called exactly one time", 1, listWidget.getItemsRenderedCalled());
 
-    BindingItemWidget itemWidget0 = listWidget.getWidget(0);
-    assertEquals(itemWidget0, listWidget.getWidget(model0));
-    BindingItemWidget itemWidget1 = listWidget.getWidget(1);
-    assertEquals(itemWidget1, listWidget.getWidget(model1));
+    BindingItem itemWidget0 = listWidget.getComponent(0);
+    assertEquals(itemWidget0, listWidget.getComponent(model0));
+    BindingItem itemWidget1 = listWidget.getComponent(1);
+    assertEquals(itemWidget1, listWidget.getComponent(model1));
 
     itemWidget0.getModel().setName("0");
     itemWidget1.getModel().setName("1");
@@ -112,15 +120,19 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
   @Test
   public void testListBindingOfNullList() {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
+    bindingOfNullListAssertions(app.getCompositeTemplate().getListWidget());
+    bindingOfNullListAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingOfNullListAssertions(BindingListWidget<?> listWidget) {
     listWidget.setValue(null);
     List<TestModel> proxiedList = listWidget.getValue();
-    
+
     assertNotNull(proxiedList);
     assertTrue(proxiedList instanceof BindableListWrapper);
     assertTrue(proxiedList.isEmpty());
   }
-  
+
   @Test
   public void testUnorderedListWidget() {
     List<TestModel> modelList = new ArrayList<TestModel>();
@@ -131,14 +143,14 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertNotNull(listWidget);
     listWidget.setItems(modelList);
 
-    
-    Widget item = listWidget.getWidget(0);
+
+    Widget item = listWidget.getComponent(0);
     assertNotNull(item);
     Widget panel = item.getParent();
     assertTrue(panel instanceof HTMLPanel);
     assertEquals(panel.getElement().getNodeName(), "UL");
   }
-  
+
   @Test
   public void testTableListWidget() {
     List<TestModel> modelList = new ArrayList<TestModel>();
@@ -148,8 +160,8 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     ListWidget<TestModel, BindingItemWidget> listWidget = app.getTableListWidget();
     assertNotNull(listWidget);
     listWidget.setItems(modelList);
-    
-    Widget item = listWidget.getWidget(0);
+
+    Widget item = listWidget.getComponent(0);
     assertNotNull(item);
     Widget panel = item.getParent();
     assertTrue(panel instanceof HTMLPanel);
@@ -165,7 +177,7 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
       fail("Did not throw InvalidBeanScopeException");
     } catch (InvalidBeanScopeException e) {}
   }
-  
+
   @Test
   public void testSingletonWidgetInListCausesError() {
     List<TestModel> list = new ArrayList<TestModel>();
@@ -175,34 +187,42 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
       fail("Did not throw InvalidBeanScopeException");
     } catch (InvalidBeanScopeException e) {}
   }
-  
+
   @Test
   public void testListBindingAndAddItem() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected one widget", 1, listWidget.getWidgetCount());
+    assertEquals("Expected one widget", 1, listWidget.getComponentCount());
 
     // Add a widget to the UI by adding a model instance to the model list
     listWidget.getItems().add(new TestModel(1, "1"));
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
 
-    BindingItemWidget itemWidget1 = listWidget.getWidget(1);
+    BindingItem itemWidget1 = listWidget.getComponent(1);
     assertEquals("Second item widget was not rendered correctly!", "1", itemWidget1.getTextBox().getText());
   }
-  
+
   @Test
   public void testListBindingAndAddManyItems() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddManyItemsAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddManyItemsAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddManyItemsAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(1, "0"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected one widgets", 1, listWidget.getWidgetCount());
+    assertEquals("Expected one widgets", 1, listWidget.getComponentCount());
 
     List<TestModel> addModelList = new ArrayList<TestModel>();
     for (int i = 1; i < 500; i++) {
@@ -211,26 +231,30 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
     // Add widgets to the UI by adding model instances to the model list
     listWidget.getItems().addAll(addModelList);
-    assertEquals("Expected exactly 100 widgets", 500, listWidget.getWidgetCount());
+    assertEquals("Expected exactly 100 widgets", 500, listWidget.getComponentCount());
   }
 
   @Test
   public void testListBindingAndAddItemByIndex() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemByIndexAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemByIndexAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemByIndexAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected three widgets", 3, listWidget.getWidgetCount());
+    assertEquals("Expected three widgets", 3, listWidget.getComponentCount());
 
     // Add a widget to the UI by adding a model instance to the model list
     listWidget.getItems().add(1, new TestModel(1, "1"));
     assertItemsRendered(listWidget);
   }
-  
+
   @Test
   public void testListBindingAndAddItemByIndexUsingHtmlPanel() {
     List<TestModel> modelList = new ArrayList<TestModel>();
@@ -241,24 +265,28 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
     ListWidget<TestModel, BindingItemWidget> listWidget = app.getTableListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected three widgets", 3, listWidget.getWidgetCount());
+    assertEquals("Expected three widgets", 3, listWidget.getComponentCount());
 
     // Add a widget to the UI by adding a model instance to the model list
     listWidget.getValue().add(1, new TestModel(1, "1"));
     assertItemsRendered(listWidget);
   }
-  
+
   @Test
   public void testListBindingAndAddItemByIndexAtHead() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemByIndexAtHeadAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemByIndexAtHeadAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemByIndexAtHeadAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(1, "1"));
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected three widgets", 3, listWidget.getWidgetCount());
+    assertEquals("Expected three widgets", 3, listWidget.getComponentCount());
 
     // Add a widget to the UI by adding a model instance to the model list
     listWidget.getItems().add(0, new TestModel(0, "0"));
@@ -267,15 +295,19 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndAddItemByIndexAtTail() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemByIndexAtTailAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemByIndexAtTailAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemByIndexAtTailAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(1, "1"));
     modelList.add(new TestModel(2, "2"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected three widgets", 3, listWidget.getWidgetCount());
+    assertEquals("Expected three widgets", 3, listWidget.getComponentCount());
 
     // Add a widget to the UI by adding a model instance to the model list
     listWidget.getItems().add(3, new TestModel(3, "3"));
@@ -284,14 +316,18 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndAddItems() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemsAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemsAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemsAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(1, "1"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
 
     List<TestModel> addModelList = new ArrayList<TestModel>();
     addModelList.add(new TestModel(2, "2"));
@@ -301,17 +337,21 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     listWidget.getItems().addAll(addModelList);
     assertItemsRendered(listWidget);
   }
-  
+
   @Test
   public void testListBindingAndAddItemsByIndex() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemsByIndexAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemsByIndexAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemsByIndexAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
 
     List<TestModel> addModelList = new ArrayList<TestModel>();
     addModelList.add(new TestModel(1, "1"));
@@ -321,7 +361,7 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     listWidget.getItems().addAll(1, addModelList);
     assertItemsRendered(listWidget);
   }
-  
+
   @Test
   public void testListBindingAndAddItemsByIndexUsingHtmlPanel() {
     List<TestModel> modelList = new ArrayList<TestModel>();
@@ -331,7 +371,7 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
     ListWidget<TestModel, BindingItemWidget> listWidget = app.getUlListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
 
     List<TestModel> addModelList = new ArrayList<TestModel>();
     addModelList.add(new TestModel(1, "1"));
@@ -344,14 +384,18 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndAddItemsByIndexAtHead() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemsByIndexAtHeadAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemsByIndexAtHeadAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemsByIndexAtHeadAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
 
     List<TestModel> addModelList = new ArrayList<TestModel>();
     addModelList.add(new TestModel(0, "0"));
@@ -364,14 +408,18 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndAddItemsByIndexAtTail() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndAddItemsByIndexAtTailAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndAddItemsByIndexAtTailAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndAddItemsByIndexAtTailAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(1, "1"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
 
     List<TestModel> addModelList = new ArrayList<TestModel>();
     addModelList.add(new TestModel(2, "2"));
@@ -384,23 +432,27 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndClearItems() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndClearItemsAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndClearItemsAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndClearItemsAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(1, "1"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
-    
-    List <BindingItemWidget> testWidgetsCleared = new ArrayList<BindingItemWidget>();
-    for (int i = 0; i < listWidget.getWidgetCount(); i++) {
-      testWidgetsCleared.add(listWidget.getWidget(i));
+    assertEquals("Expected two widgets", 2, listWidget.getComponentCount());
+
+    List <BindingItem> testWidgetsCleared = new ArrayList<BindingItem>();
+    for (int i = 0; i < listWidget.getComponentCount(); i++) {
+      testWidgetsCleared.add(listWidget.getComponent(i));
     }
     listWidget.getItems().clear();
-    assertEquals("Expected zero widgets", 0, listWidget.getWidgetCount());
-    
-    Iterator<BindingItemWidget> itr = testWidgetsCleared.iterator();
+    assertEquals("Expected zero widgets", 0, listWidget.getComponentCount());
+
+    Iterator<BindingItem> itr = testWidgetsCleared.iterator();
     while(itr.hasNext()) {
       //BindingItemWidget.getNum() is incremented in a pre-destroy method
       assertEquals(1, itr.next().getNum());
@@ -409,16 +461,20 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndSetItems() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndSetItemsAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndSetItemsAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndSetItemsAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(1, "1"));
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected two widgets", 4, listWidget.getWidgetCount());
+    assertEquals("Expected two widgets", 4, listWidget.getComponentCount());
 
     listWidget.getItems().set(1, new TestModel(1, "1"));
     listWidget.getItems().set(2, new TestModel(2, "2"));
@@ -427,6 +483,12 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndRemoveItem() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndRemoveItemAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndRemoveItemAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndRemoveItemAssertions(BindingListWidget<?> listWidget) {
     TestModel itemToRemove = new TestModel(4, "4");
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
@@ -435,12 +497,10 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected five widgets", 5, listWidget.getWidgetCount());
+    assertEquals("Expected five widgets", 5, listWidget.getComponentCount());
 
-    BindingItemWidget widget = listWidget.getWidget(2);
+    BindingItem widget = listWidget.getComponent(2);
     listWidget.getItems().remove(itemToRemove);
     assertEquals(1, widget.getNum());
     assertItemsRendered(listWidget);
@@ -448,6 +508,12 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndRemoveItems() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    BindingListWidget<?> listWidget = app.getCompositeTemplate().getListWidget();
+    bindingAndRemoveItemsAssertions(listWidget);
+  }
+
+  private void bindingAndRemoveItemsAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> removeList = new ArrayList<TestModel>();
     TestModel removeModel1 = (new TestModel(4, "4"));
     TestModel removeModel2 = (new TestModel(5, "5"));
@@ -462,20 +528,18 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     modelList.add(removeModel2);
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected six widgets", 6, listWidget.getWidgetCount());
-    
-    List<BindingItemWidget> testWidgetsRemoved = new ArrayList<BindingItemWidget>();
-    
-    for(int i = 0; i < listWidget.getWidgetCount(); i++) {
-      testWidgetsRemoved.add(listWidget.getWidget(i));
+    assertEquals("Expected six widgets", 6, listWidget.getComponentCount());
+
+    List<BindingItem> testWidgetsRemoved = new ArrayList<BindingItem>();
+
+    for(int i = 0; i < listWidget.getComponentCount(); i++) {
+      testWidgetsRemoved.add(listWidget.getComponent(i));
     }
 
     listWidget.getItems().removeAll(removeList);
-    
-    for(int i = 0; i < listWidget.getWidgetCount(); i++) {
+
+    for(int i = 0; i < listWidget.getComponentCount(); i++) {
       if ((i == 1) || (i == 4))
         assertEquals("Widget " + i + " failed", 1, testWidgetsRemoved.get(i).getNum());
       else
@@ -486,6 +550,12 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
 
   @Test
   public void testListBindingAndRemoveItemByIndex() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndRemoveItemByIndexAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndRemoveItemByIndexAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndRemoveItemByIndexAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(1, "1"));
@@ -493,90 +563,100 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(3, "3"));
 
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
     listWidget.setItems(modelList);
-    assertEquals("Expected five widgets", 5, listWidget.getWidgetCount());
+    assertEquals("Expected five widgets", 5, listWidget.getComponentCount());
 
-    BindingItemWidget widget = listWidget.getWidget(2);
+    BindingItem widget = listWidget.getComponent(2);
     listWidget.getItems().remove(2);
     assertEquals(1, widget.getNum());
     assertItemsRendered(listWidget);
   }
-  
+
   @Test
   public void testListBindingAndCollectionsSort() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndCollectionSoryAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndCollectionSoryAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndCollectionSoryAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(3, "3"));
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(1, "1"));
     modelList.add(new TestModel(0, "0"));
-    
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
+
     listWidget.setItems(modelList);
-    assertEquals("Expected four widgets", 4, listWidget.getWidgetCount());
-    
+    assertEquals("Expected four widgets", 4, listWidget.getComponentCount());
+
     Collections.sort(listWidget.getItems(), new Comparator<TestModel>() {
       @Override
       public int compare(TestModel o1, TestModel o2) {
         return o1.getId() - o2.getId();
       }
     });
-    
+
     assertItemsRendered(listWidget);
   }
-  
+
   @Test
   public void testBindableListIteratorAdd() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingAndListIteratorAddAssertions(app.getCompositeTemplate().getListWidget());
+    bindingAndListIteratorAddAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingAndListIteratorAddAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(1, "1"));
     modelList.add(new TestModel(3, "3"));
-    
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
+
     listWidget.setItems(modelList);
-    assertEquals("Expected three widgets", 3, listWidget.getWidgetCount());
-    
+    assertEquals("Expected three widgets", 3, listWidget.getComponentCount());
+
     ListIterator<TestModel> iter = listWidget.getValue().listIterator();
     iter.next();
     iter.next();
     iter.add(new TestModel(2, "2"));
-    
+
     assertItemsRendered(listWidget);
   }
-  
+
   @Test
   public void testBindableListIteratorRemove() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    bindingListIteratorRemoveAssertions(app.getCompositeTemplate().getListWidget());
+    bindingListIteratorRemoveAssertions(app.getNonCompositeTemplate().getListWidget());
+  }
+
+  private void bindingListIteratorRemoveAssertions(BindingListWidget<?> listWidget) {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel(0, "0"));
     modelList.add(new TestModel(1, "1"));
     modelList.add(new TestModel(5, "5"));
     modelList.add(new TestModel(2, "2"));
     modelList.add(new TestModel(3, "3"));
-    
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingListWidget listWidget = app.getListWidget();
+
     listWidget.setItems(modelList);
-    assertEquals("Expected three widgets", 5, listWidget.getWidgetCount());
-    
+    assertEquals("Expected three widgets", 5, listWidget.getComponentCount());
+
     ListIterator<TestModel> iter = listWidget.getValue().listIterator();
     for (int i = 0; i < 3; i++) {
       iter.next();
     }
     iter.remove();
-    
+
     assertItemsRendered(listWidget);
   }
 
-  private void assertItemsRendered(ListWidget<TestModel, BindingItemWidget> listWidget) {
-    assertEquals("Expected exactly four widgets", 4, listWidget.getWidgetCount());
+  private void assertItemsRendered(ListWidget<TestModel, ? extends BindingItem> listWidget) {
+    assertEquals("Expected exactly four widgets", 4, listWidget.getComponentCount());
 
-    BindingItemWidget itemWidget0 = listWidget.getWidget(0);
-    BindingItemWidget itemWidget1 = listWidget.getWidget(1);
-    BindingItemWidget itemWidget2 = listWidget.getWidget(2);
-    BindingItemWidget itemWidget3 = listWidget.getWidget(3);
+    BindingItem itemWidget0 = listWidget.getComponent(0);
+    BindingItem itemWidget1 = listWidget.getComponent(1);
+    BindingItem itemWidget2 = listWidget.getComponent(2);
+    BindingItem itemWidget3 = listWidget.getComponent(3);
     assertEquals("First item widget was not rendered correctly!", "0", itemWidget0.getTextBox().getText());
     assertEquals("Second item widget was not rendered correctly!", "1", itemWidget1.getTextBox().getText());
     assertEquals("Third item widget was not rendered correctly!", "2", itemWidget2.getTextBox().getText());

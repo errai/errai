@@ -34,7 +34,19 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   @Test
   public void testAutomaticBinding() {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    BindingTemplate template = app.getTemplate();
+    try {
+      automaticBindingAssertions(app.getCompositeTemplate());
+    } catch (Throwable t) {
+      throw new AssertionError("Failure with templated composite: " + t.getMessage(), t);
+    }
+    try {
+      automaticBindingAssertions(app.getNonCompositeTemplate());
+    } catch (Throwable t) {
+      throw new AssertionError("Failure with templated non-composite: " + t.getMessage(), t);
+    }
+  }
+
+  private void automaticBindingAssertions(final BindingTemplate template) {
     assertNotNull("Template instance was not injected!", template);
 
     Label idLabel = template.getIdLabel();

@@ -32,7 +32,7 @@ public class AppScopedBindingListWidget extends ListWidget<TestModel, AppScopedB
   private int itemsRenderedCalled = 0;
   
   @Override
-  protected Class<AppScopedBindingItemWidget> getItemWidgetType() {
+  protected Class<AppScopedBindingItemWidget> getItemComponentType() {
     return AppScopedBindingItemWidget.class;
   }
 
@@ -50,7 +50,7 @@ public class AppScopedBindingListWidget extends ListWidget<TestModel, AppScopedB
     return items;
   }
   
-  public int getWidgetCount() {
+  public int getComponentCount() {
     return getPanel().getWidgetCount();
   }
   

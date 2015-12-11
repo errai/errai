@@ -27,11 +27,10 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.test.common.client.TestModel;
 
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Templated("BindingTemplate.html")
-public class BindingItemWidget extends Composite implements BindingItem {
+public class NonCompositeBindingItem implements BindingItem {
 
   @Inject @Bound @DataField
   private TextBox name;

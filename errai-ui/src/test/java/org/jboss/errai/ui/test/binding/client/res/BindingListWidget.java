@@ -23,18 +23,13 @@ import org.jboss.errai.ui.test.common.client.TestModel;
 
 /**
  * {@link ListWidget} to test the binding of a list of model objects to UI widgets.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BindingListWidget extends ListWidget<TestModel, BindingItemWidget> {
-  
+public abstract class BindingListWidget<W extends BindingItem> extends ListWidget<TestModel, W> {
+
   private List<TestModel> items;
   private int itemsRenderedCalled = 0;
-  
-  @Override
-  protected Class<BindingItemWidget> getItemWidgetType() {
-    return BindingItemWidget.class;
-  }
 
   @Override
   protected void onItemsRendered(List<TestModel> items) {
@@ -45,13 +40,14 @@ public class BindingListWidget extends ListWidget<TestModel, BindingItemWidget> 
   public int getItemsRenderedCalled() {
     return itemsRenderedCalled;
   }
-  
+
   public List<TestModel> getItems() {
     return items;
   }
-  
-  public int getWidgetCount() {
+
+  @Override
+  public int getComponentCount() {
     return getPanel().getWidgetCount();
   }
-  
+
 }

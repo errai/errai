@@ -30,7 +30,18 @@ import com.google.gwt.user.client.ui.Composite;
  */
 public class TemplateWidgetMapper {
 
-  private static final Map<Object, TemplateWidget> widgetsByTemplatedBean = new IdentityHashMap<Object, TemplateWidget>();
+  private static class Pair {
+    Object bean;
+    TemplateWidget widget;
+
+    Pair(Object bean, TemplateWidget widget) {
+      this.bean = bean;
+      this.widget = widget;
+    }
+  }
+
+  // There is no identity bimap so we do this.
+  private static final Map<Object, Pair> widgetsByTemplatedBean = new IdentityHashMap<Object, Pair>();
 
   private TemplateWidgetMapper() {}
 
@@ -41,17 +52,34 @@ public class TemplateWidgetMapper {
       throw new RuntimeException(
               "There is already a widget mapped for the " + bean.getClass().getName() + " bean: " + bean.toString());
     } else {
-      widgetsByTemplatedBean.put(bean, widget);
+      final Pair pair = new Pair(bean, widget);
+      widgetsByTemplatedBean.put(bean, pair);
+      widgetsByTemplatedBean.put(widget, pair);
     }
+  }
+
+  public static boolean containsKey(Object bean) {
+    bean = Factory.maybeUnwrapProxy(bean);
+
+    return widgetsByTemplatedBean.containsKey(bean);
   }
 
   public static TemplateWidget get(Object bean) {
     bean = Factory.maybeUnwrapProxy(bean);
-    final TemplateWidget widget = widgetsByTemplatedBean.get(bean);
-    if (widget == null) {
+    final Pair pair = widgetsByTemplatedBean.get(bean);
+    if (pair == null) {
       throw new RuntimeException("There is no widget mapped to the " + bean.getClass().getName() + " bean: " + bean.toString());
     } else {
-      return widget;
+      return pair.widget;
+    }
+  }
+
+  public static Object reverseGet(final TemplateWidget widget) {
+    final Pair pair = widgetsByTemplatedBean.get(widget);
+    if (pair == null) {
+      throw new RuntimeException("There is no bean mapped to the templated widget with contents:\n" + widget.getElement().getInnerHTML());
+    } else {
+      return pair.bean;
     }
   }
 

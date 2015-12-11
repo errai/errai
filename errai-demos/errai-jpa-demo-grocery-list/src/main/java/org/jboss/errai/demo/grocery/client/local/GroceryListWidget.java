@@ -138,7 +138,7 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
   }
 
   @Override
-  public Class<GroceryItemWidget> getItemWidgetType() {
+  public Class<GroceryItemWidget> getItemComponentType() {
     return GroceryItemWidget.class;
   }
 

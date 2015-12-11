@@ -32,7 +32,7 @@ public class SingletonBindingListWidget extends ListWidget<TestModel, SingletonB
   private int itemsRenderedCalled = 0;
   
   @Override
-  protected Class<SingletonBindingItemWidget> getItemWidgetType() {
+  protected Class<SingletonBindingItemWidget> getItemComponentType() {
     return SingletonBindingItemWidget.class;
   }
 
@@ -50,7 +50,7 @@ public class SingletonBindingListWidget extends ListWidget<TestModel, SingletonB
     return items;
   }
   
-  public int getWidgetCount() {
+  public int getComponentCount() {
     return getPanel().getWidgetCount();
   }
   
