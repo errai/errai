@@ -16,14 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import static org.jboss.errai.codegen.util.Bool.instanceOf;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.addPrivateAccessStubs;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldAccessorName;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.if_;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.util.ArrayList;
@@ -40,8 +36,8 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.util.PrivateAccessType;
-import org.jboss.errai.ioc.client.container.Proxy;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
@@ -62,6 +58,8 @@ import com.google.common.collect.Multimap;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
+
+  private static final String PRODUCER_INSTANCE = "producerInstance";
 
   @Override
   protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
@@ -88,29 +86,22 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
   private List<Statement> methodCreateInstanceStatements(final MetaMethod producingMember, final Injectable producerInjectable,
           final Injectable producedInjectable, final Collection<Dependency> paramDeps, final ClassStructureBuilder<?> bodyBlockBuilder) {
     final List<Statement> stmts = new ArrayList<Statement>();
-    addPrivateAccessStubs("jsni", bodyBlockBuilder, producingMember);
+    controller.ensureMemberExposed(producingMember);
 
     if (!producingMember.isStatic()) {
       final Statement producerInstanceValue = loadVariable("contextManager").invoke("getInstance", producerInjectable.getFactoryName());
-      stmts.add(declareVariable("producerInstance", producerInjectable.getInjectedType(), producerInstanceValue));
-
-      // TODO figure out if proxied at compile time to simplify this code
-      stmts.add(
-              if_(instanceOf(
-                      loadVariable(
-                              "producerInstance"),
-                      Proxy.class))._(loadVariable("producerInstance").assignValue(
-                              castTo(producerInjectable.getInjectedType(), castTo(Proxy.class,
-                                      loadVariable("producerInstance")).invoke("unwrap"))))
-              .finish());
+      stmts.add(declareVariable(PRODUCER_INSTANCE, producerInjectable.getInjectedType(), producerInstanceValue));
+      stmts.add(loadVariable(PRODUCER_INSTANCE).assignValue(castTo(producerInjectable.getInjectedType(),
+              invokeStatic(Factory.class, "maybeUnwrapProxy", loadVariable(PRODUCER_INSTANCE)))));
     }
 
-    stmts.add(declareFinalVariable("instance", producedInjectable.getInjectedType(), loadVariable("this")
-            .invoke(getPrivateMethodName(producingMember), getProducerInvocationParams(producingMember, paramDeps))));
+    final Statement invocation = controller.exposedMethodStmt(loadVariable(PRODUCER_INSTANCE), producingMember,
+            getProducerInvocationParams(producingMember, paramDeps));
+    stmts.add(declareFinalVariable("instance", producedInjectable.getInjectedType(), invocation));
     if (!producingMember.isStatic()) {
       stmts.add(setProducerInstanceReference());
       if (producerInjectable.getWiringElementTypes().contains(WiringElementType.DependentBean)) {
-        stmts.add(loadVariable("this").invoke("registerDependentScopedReference", loadVariable("instance"), loadVariable("producerInstance")));
+        stmts.add(loadVariable("this").invoke("registerDependentScopedReference", loadVariable("instance"), loadVariable(PRODUCER_INSTANCE)));
       }
     }
 
@@ -119,22 +110,13 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
     return stmts;
   }
 
-  private Object[] getProducerInvocationParams(final MetaMethod producingMember, final Collection<Dependency> paramDeps) {
+  private Statement[] getProducerInvocationParams(final MetaMethod producingMember, final Collection<Dependency> paramDeps) {
     // TODO validate params
-    final int offset;
-    final Object[] params;
-    if (producingMember.isStatic()) {
-      offset = 0;
-      params = new Object[producingMember.getParameters().length];
-    } else {
-      offset = 1;
-      params = new Object[producingMember.getParameters().length+1];
-      params[0] = loadVariable("producerInstance");
-    }
+    final Statement[] params = new Statement[producingMember.getParameters().length];
 
     for (final Dependency dep : paramDeps) {
       final ParamDependency paramDep = (ParamDependency) dep;
-      params[paramDep.getParamIndex() + offset] = castTo(paramDep.getInjectable().getInjectedType(),
+      params[paramDep.getParamIndex()] = castTo(paramDep.getInjectable().getInjectedType(),
               loadVariable("contextManager").invoke("getInstance", paramDep.getInjectable().getFactoryName()));
     }
 
@@ -144,29 +126,21 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
   private List<Statement> fieldCreateInstanceStatements(final MetaField producingMember, final Injectable producerInjectable,
           final Injectable producedInjectable, final ClassStructureBuilder<?> bodyBlockBuilder) {
     final List<Statement> stmts = new ArrayList<Statement>();
-    addPrivateAccessStubs(PrivateAccessType.Read, "jsni", bodyBlockBuilder, producingMember);
+    controller.ensureMemberExposed(producingMember);
 
     if (!producingMember.isStatic()) {
       final Statement producerInstanceValue = loadVariable("contextManager").invoke("getInstance", producerInjectable.getFactoryName());
-      stmts.add(declareVariable("producerInstance", producerInjectable.getInjectedType(), producerInstanceValue));
+      stmts.add(declareVariable(PRODUCER_INSTANCE, producerInjectable.getInjectedType(), producerInstanceValue));
       if (producerInjectable.getWiringElementTypes().contains(WiringElementType.DependentBean)) {
-        stmts.add(loadVariable("this").invoke("registerDependentScopedReference", loadVariable("producerInstance")));
+        stmts.add(loadVariable("this").invoke("registerDependentScopedReference", loadVariable(PRODUCER_INSTANCE)));
       }
 
-      // TODO figure out if proxied at compile time to simplify this code
-      stmts.add(
-              if_(instanceOf(
-                      loadVariable(
-                              "producerInstance"),
-                      Proxy.class))._(loadVariable("producerInstance").assignValue(
-                              castTo(producerInjectable.getInjectedType(), castTo(Proxy.class,
-                                      loadVariable("producerInstance")).invoke("unwrap"))))
-              .finish());
+      stmts.add(loadVariable(PRODUCER_INSTANCE).assignValue(Stmt.castTo(producerInjectable.getInjectedType(),
+              invokeStatic(Factory.class, "maybeUnwrapProxy", loadVariable(PRODUCER_INSTANCE)))));
     }
 
-    final Object[] params = (producingMember.isStatic()) ? new Object[0] : new Object[] { loadVariable("producerInstance") };
-    stmts.add(declareFinalVariable("instance", producedInjectable.getInjectedType(),
-            loadVariable("this").invoke(getPrivateFieldAccessorName(producingMember), params)));
+    final Statement invocation = controller.exposedFieldStmt(loadVariable(PRODUCER_INSTANCE), producingMember);
+    stmts.add(declareFinalVariable("instance", producedInjectable.getInjectedType(), invocation));
 
     if (!producingMember.isStatic()) {
       stmts.add(setProducerInstanceReference());
@@ -178,7 +152,7 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
   }
 
   private Statement setProducerInstanceReference() {
-    return InjectUtil.constructSetReference("producerInstance", loadVariable("producerInstance"));
+    return controller.setReferenceStmt(PRODUCER_INSTANCE, loadVariable(PRODUCER_INSTANCE));
   }
 
   @Override
@@ -201,25 +175,19 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
       final DisposerMethodDependency disposerDep = (DisposerMethodDependency) disposerMethodDeps.iterator().next();
       final MetaMethod disposer = disposerDep.getDisposerMethod();
 
-      addPrivateAccessStubs("jsni", bodyBlockBuilder, disposer);
-      destroyInstanceStmts.add(loadVariable("this").invoke(getPrivateMethodName(disposer),
-              getDisposerParams(disposer, depsByType.get(DependencyType.DisposerParameter), bodyBlockBuilder.getClassDefinition())));
+      controller.ensureMemberExposed(disposer);
+      final Statement invocation = controller.exposedMethodStmt(
+              controller.getReferenceStmt(PRODUCER_INSTANCE, disposer.getDeclaringClass()), disposer,
+              getDisposerParams(disposer, depsByType.get(DependencyType.DisposerParameter),
+                      bodyBlockBuilder.getClassDefinition()));
+      destroyInstanceStmts.add(invocation);
     }
 
     return destroyInstanceStmts;
   }
 
-  private Object[] getDisposerParams(final MetaMethod disposer, final Collection<Dependency> disposerParams, final BuildMetaClass factory) {
-    final int offset;
-    final Object[] params;
-    if (disposer.isStatic()) {
-      offset = 0;
-      params = new Object[disposer.getParameters().length];
-    } else {
-      offset = 1;
-      params = new Object[disposer.getParameters().length+1];
-      params[0] = castTo(disposer.getDeclaringClass(), InjectUtil.constructGetReference("producerInstance", disposer.getDeclaringClass()));
-    }
+  private Statement[] getDisposerParams(final MetaMethod disposer, final Collection<Dependency> disposerParams, final BuildMetaClass factory) {
+    final Statement[] params = new Statement[disposer.getParameters().length];
 
     for (final Dependency dep : disposerParams) {
       final ParamDependency paramDep = (ParamDependency) dep;
@@ -232,11 +200,11 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
         paramExpression = paramInstance;
       }
 
-      params[paramDep.getParamIndex()+offset] = paramExpression;
+      params[paramDep.getParamIndex()] = paramExpression;
     }
 
     final MetaParameter disposesParam = disposer.getParametersAnnotatedWith(Disposes.class).get(0);
-    params[disposesParam.getIndex()+offset] = loadVariable("instance");
+    params[disposesParam.getIndex()] = loadVariable("instance");
 
     return params;
   }

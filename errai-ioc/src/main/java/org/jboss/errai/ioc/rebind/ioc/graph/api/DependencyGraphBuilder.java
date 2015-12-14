@@ -136,6 +136,15 @@ public interface DependencyGraphBuilder {
   void addProducerMemberDependency(Injectable injectable, MetaClass type, Qualifier qualifier, MetaClassMember producingMember);
 
   /**
+   * Create a dependency for a static producer member (field or method) injection point in a bean class.
+   *
+   * @param injectable The {@link Injectable} that has the dependency.
+   * @param type The class of the dependency.
+   * @param dependentField The producer member (field or method) that must be invoked to satisfy the dependency.
+   */
+  void addProducerMemberDependency(Injectable producedInjectable, MetaClass producerType, MetaClassMember method);
+
+  /**
    * Create a dependency for a setter method injection point in a bean class.
    *
    * @param injectable The {@link Injectable} that has the dependency.
@@ -199,7 +208,7 @@ public interface DependencyGraphBuilder {
    * @author Max Barkley <mbarkley@redhat.com>
    */
   public static enum InjectableType {
-    Type, JsType, Producer, Provider, ContextualProvider, Abstract, Extension, ExtensionProvided
+    Type, JsType, Producer, Provider, ContextualProvider, Abstract, Extension, ExtensionProvided, Static
   }
 
   /**

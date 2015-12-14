@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
 import org.apache.commons.lang3.Validate;
@@ -709,6 +710,14 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     }
   }
 
+  private AbstractInjectable createStaticMemberInjectable(final MetaClass producerType, final MetaClassMember member) {
+    final AbstractInjectable retVal = new AbstractInjectable(producerType, qualFactory.forUniversallyQualified());
+    retVal.resolution = new ConcreteInjectable(producerType, qualFactory.forUniversallyQualified(), "",
+            ApplicationScoped.class, InjectableType.Static, Collections.<WiringElementType>emptyList());
+
+    return retVal;
+  }
+
   @Override
   public void addFieldDependency(final Injectable concreteInjectable, final MetaClass type, final Qualifier qualifier,
           final MetaField dependentField) {
@@ -745,6 +754,14 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     final ProducerInstanceDependency dep = new ProducerInstanceDependencyImpl(
             AbstractInjectable.class.cast(abstractInjectable), DependencyType.ProducerMember, member);
     addDependency(concreteInjectable, dep);
+  }
+
+  @Override
+  public void addProducerMemberDependency(Injectable producedInjectable, MetaClass producerType, MetaClassMember member) {
+    final AbstractInjectable abstractInjectable = createStaticMemberInjectable(producerType, member);
+    final ProducerInstanceDependency dep = new ProducerInstanceDependencyImpl(
+            abstractInjectable, DependencyType.ProducerMember, member);
+    addDependency(producedInjectable, dep);
   }
 
   @Override

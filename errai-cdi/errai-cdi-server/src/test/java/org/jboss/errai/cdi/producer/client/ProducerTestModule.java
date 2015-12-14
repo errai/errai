@@ -20,9 +20,6 @@ import org.jboss.errai.cdi.client.qualifier.E;
  */
 @ApplicationScoped
 public class ProducerTestModule {
-  @Produces
-  private static StaticallyProducedBeanB staticallyProducedBeanB = new StaticallyProducedBeanB();
-
   @Produces @A
   private Integer numberA = new Random().nextInt();
 
@@ -49,11 +46,6 @@ public class ProducerTestModule {
 
   @Produces @D @E @Default
   private Float floatDE = 1.1f;
-
-  @Produces
-  private static StaticallyProducedBean produceStaticallyProducedBean() {
-    return new StaticallyProducedBean();
-  }
 
   public Integer getNumberA() {
     return numberA;

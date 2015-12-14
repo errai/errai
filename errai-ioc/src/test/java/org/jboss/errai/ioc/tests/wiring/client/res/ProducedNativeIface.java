@@ -16,8 +16,6 @@
  */
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
-
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
@@ -25,9 +23,8 @@ import jsinterop.annotations.JsType;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
-public abstract class NativeFactory {
+public interface ProducedNativeIface {
 
-  @IOCProducer
-  public static native ProducedNativeIface create();
+  String getMagicWord();
 
 }

@@ -527,11 +527,15 @@ public class IOCProcessor {
             final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type),
                     directScope, InjectableType.Type, getWiringTypes(type, directScope));
             processInjectionPoints(typeInjectable, builder, problems);
-            maybeProcessAsProducer(builder, typeInjectable);
+            maybeProcessAsProducer(builder, type, typeInjectable);
             maybeProcessAsProvider(typeInjectable, builder);
           }
-        } else if (type.isAnnotationPresent(JsType.class)) {
-          builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, WiringElementType.DependentBean);
+        }
+        else {
+          maybeProcessAsStaticOnlyProducer(builder, type);
+          if (isPublishableJsType(type)) {
+            builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, WiringElementType.DependentBean);
+          }
         }
       }
     } catch (Throwable t) {
@@ -539,15 +543,28 @@ public class IOCProcessor {
     }
   }
 
+  private void maybeProcessAsStaticOnlyProducer(final DependencyGraphBuilder builder, final MetaClass type) {
+    maybeProcessAsProducer(builder, type, null);
+  }
+
+  private boolean isPublishableJsType(final MetaClass type) {
+    final JsType jsType = type.getAnnotation(JsType.class);
+
+    return jsType != null && !jsType.isNative();
+  }
+
   private boolean isTypeAccessible(final MetaClass type) {
     return type.isPublic() && (isTopLevel(type) || (type.isStatic() && isEnclosingTypeAccessible(type)));
   }
 
-  private void maybeProcessAsProducer(final DependencyGraphBuilder builder, final Injectable typeInjectable) {
+  /**
+   * @param typeInjectable If null, only static members will be processed.
+   */
+  private void maybeProcessAsProducer(final DependencyGraphBuilder builder, final MetaClass producerType, final Injectable typeInjectable) {
     // TODO log error/warning for unused @Disposes methods?
-    final Collection<MetaMethod> disposesMethods = getAllDisposesMethods(typeInjectable.getInjectedType());
-    processProducerMethods(typeInjectable, builder, disposesMethods);
-    processProducerFields(typeInjectable, builder, disposesMethods);
+    final Collection<MetaMethod> disposesMethods = getAllDisposesMethods(producerType, (typeInjectable == null));
+    processProducerMethods(typeInjectable, producerType, builder, disposesMethods);
+    processProducerFields(typeInjectable, producerType, builder, disposesMethods);
   }
 
   private boolean isTopLevel(MetaClass type) {
@@ -617,7 +634,7 @@ public class IOCProcessor {
       wiringTypes.add(WiringElementType.AlternativeBean);
     }
 
-    if (type.isAnnotationPresent(JsType.class)) {
+    if (isPublishableJsType(type)) {
       wiringTypes.add(WiringElementType.JsType);
     }
 
@@ -694,31 +711,48 @@ public class IOCProcessor {
     return null;
   }
 
-  private void processProducerMethods(final Injectable typeInjectable, final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods) {
-    final MetaClass type = typeInjectable.getInjectedType();
+  /**
+   * @param producerTypeInjectable If this parameter is null, only static methods will be processed.
+   */
+  private void processProducerMethods(final Injectable producerTypeInjectable, final MetaClass producerType,
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods) {
+    final boolean staticOnly = (producerTypeInjectable == null);
     final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
     for (final Class<? extends Annotation> anno : producerAnnos) {
-      final List<MetaMethod> methods = type.getDeclaredMethodsAnnotatedWith(anno);
+      final List<MetaMethod> methods = producerType.getDeclaredMethodsAnnotatedWith(anno);
       for (final MetaMethod method : methods) {
-        final Class<? extends Annotation> directScope = getScope(method);
-        final WiringElementType[] wiringTypes = getWiringTypeForProducer(type, method, directScope);
-        final Injectable producedInjectable = builder.addInjectable(method.getReturnType(),
-                qualFactory.forSource(method), directScope, InjectableType.Producer, wiringTypes);
-        builder.addProducerMemberDependency(producedInjectable, typeInjectable.getInjectedType(), typeInjectable.getQualifier(), method);
-        final MetaParameter[] params = method.getParameters();
-        for (int i = 0; i < params.length; i++) {
-          final MetaParameter param = params[i];
-          builder.addProducerParamDependency(producedInjectable, param.getType(), qualFactory.forSink(param), i, param);
-        }
-
-        final Collection<MetaMethod> matchingDisposes = getMatchingMethods(method, disposesMethods);
-        if (matchingDisposes.size() > 1) {
-          // TODO descriptive message with names of disposers found.
-          throw new RuntimeException();
-        } else if (!matchingDisposes.isEmpty()) {
-          addDisposerDependencies(producedInjectable, matchingDisposes.iterator().next(), builder);
+        if (!staticOnly || method.isStatic()) {
+          processProducerMethod(producerTypeInjectable, producerType, builder, disposesMethods, method);
         }
       }
+    }
+  }
+
+  private void processProducerMethod(final Injectable producerTypeInjectable, final MetaClass producerType,
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final MetaMethod method) {
+    final Class<? extends Annotation> directScope = getScope(method);
+    final WiringElementType[] wiringTypes = getWiringTypeForProducer(producerType, method, directScope);
+    final Injectable producedInjectable = builder.addInjectable(method.getReturnType(),
+            qualFactory.forSource(method), directScope, InjectableType.Producer, wiringTypes);
+    if (method.isStatic()) {
+      builder.addProducerMemberDependency(producedInjectable, producerType, method);
+    }
+    else {
+      builder.addProducerMemberDependency(producedInjectable, producerType, producerTypeInjectable.getQualifier(), method);
+    }
+
+    final MetaParameter[] params = method.getParameters();
+    for (int i = 0; i < params.length; i++) {
+      final MetaParameter param = params[i];
+      builder.addProducerParamDependency(producedInjectable, param.getType(), qualFactory.forSink(param), i, param);
+    }
+
+    final Collection<MetaMethod> matchingDisposes = getMatchingMethods(method, disposesMethods);
+    if (matchingDisposes.size() > 1) {
+      // TODO descriptive message with names of disposers found.
+      throw new RuntimeException();
+    } else if (!matchingDisposes.isEmpty()) {
+      addDisposerDependencies(producedInjectable, matchingDisposes.iterator().next(), builder);
     }
   }
 
@@ -737,9 +771,13 @@ public class IOCProcessor {
     return wiringTypes.toArray(new WiringElementType[wiringTypes.size()]);
   }
 
-  private Collection<MetaMethod> getAllDisposesMethods(final MetaClass type) {
+  private Collection<MetaMethod> getAllDisposesMethods(final MetaClass type, final boolean staticOnly) {
     final Collection<MetaMethod> disposers = new ArrayList<MetaMethod>();
     for (final MetaMethod method : type.getMethods()) {
+      if (staticOnly && !method.isStatic()) {
+        continue;
+      }
+
       final List<MetaParameter> disposerParams = method.getParametersAnnotatedWith(Disposes.class);
       if (disposerParams.size() > 1) {
         throw new RuntimeException("Found method " + method + " in " + method.getDeclaringClassName()
@@ -798,26 +836,43 @@ public class IOCProcessor {
     }
   }
 
-  private void processProducerFields(final Injectable concreteInjectable, final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods) {
-    final MetaClass type = concreteInjectable.getInjectedType();
+  /**
+   * @param producerInjectable If null then only static fields will be processed.
+   */
+  private void processProducerFields(final Injectable producerInjectable, final MetaClass producerType,
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods) {
+    final boolean staticOnly = (producerInjectable == null);
     final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
     for (final Class<? extends Annotation> producerAnno : producerAnnos) {
-      final List<MetaField> fields = type.getFieldsAnnotatedWith(producerAnno);
+      final List<MetaField> fields = producerType.getFieldsAnnotatedWith(producerAnno);
       for (final MetaField field : fields) {
-        final Class<? extends Annotation> scopeAnno = getScope(field);
-        final Injectable producedInjectable = builder.addInjectable(field.getType(),
-                qualFactory.forSource(field), scopeAnno, InjectableType.Producer,
-                getWiringTypeForProducer(type, field, scopeAnno));
-        builder.addProducerMemberDependency(producedInjectable, concreteInjectable.getInjectedType(), concreteInjectable.getQualifier(), field);
-
-        final Collection<MetaMethod> matchingDisposers = getMatchingMethods(field, disposesMethods);
-        if (matchingDisposers.size() > 1) {
-          // TODO add descriptive error message.
-          throw new RuntimeException();
-        } else if (!matchingDisposers.isEmpty()) {
-          addDisposerDependencies(producedInjectable, matchingDisposers.iterator().next(), builder);
+        if (!staticOnly || field.isStatic()) {
+          processProducerField(producerInjectable, producerType, builder, disposesMethods, field);
         }
       }
+    }
+  }
+
+  private void processProducerField(final Injectable producerInjectable, final MetaClass producerType,
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final MetaField field) {
+    final Class<? extends Annotation> scopeAnno = getScope(field);
+    final Injectable producedInjectable = builder.addInjectable(field.getType(),
+            qualFactory.forSource(field), scopeAnno, InjectableType.Producer,
+            getWiringTypeForProducer(producerType, field, scopeAnno));
+
+    if (field.isStatic()) {
+      builder.addProducerMemberDependency(producedInjectable, producerType, field);
+    }
+    else {
+      builder.addProducerMemberDependency(producedInjectable, producerInjectable.getInjectedType(), producerInjectable.getQualifier(), field);
+    }
+
+    final Collection<MetaMethod> matchingDisposers = getMatchingMethods(field, disposesMethods);
+    if (matchingDisposers.size() > 1) {
+      // TODO add descriptive error message.
+      throw new RuntimeException();
+    } else if (!matchingDisposers.isEmpty()) {
+      addDisposerDependencies(producedInjectable, matchingDisposers.iterator().next(), builder);
     }
   }
 

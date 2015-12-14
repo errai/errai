@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ioc.tests.wiring.client.res;
+package org.jboss.errai.cdi.producer.client;
 
-import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
-
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsType;
+import javax.enterprise.inject.Produces;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@JsType(isNative = true, namespace = JsPackage.GLOBAL)
-public abstract class NativeFactory {
+public abstract class StaticNonInstantiableProducer {
+  @Produces
+  private static StaticallyProducedBeanB staticallyProducedBeanB = new StaticallyProducedBeanB();
 
-  @IOCProducer
-  public static native ProducedNativeIface create();
+  @Produces
+  private static StaticallyProducedBean produceStaticallyProducedBean() {
+    return new StaticallyProducedBean();
+  }
 
 }

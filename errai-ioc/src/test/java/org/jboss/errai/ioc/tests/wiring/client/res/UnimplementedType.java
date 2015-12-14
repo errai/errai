@@ -9,10 +9,10 @@ import jsinterop.annotations.JsType;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@JsType(isNative = true)
-public abstract class NativeType {
+@JsType
+public abstract class UnimplementedType {
 
-  public abstract void overloaded();
+  protected abstract void overloaded();
 
   public abstract void overloaded(Object obj);
 

@@ -16,18 +16,20 @@
  */
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
-
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsType;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 /**
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@JsType(isNative = true, namespace = JsPackage.GLOBAL)
-public abstract class NativeFactory {
+@Dependent
+public class NativeTypeTestModule {
 
-  @IOCProducer
-  public static native ProducedNativeIface create();
+  @Inject
+  public ProducedNativeIface producedNativeIface;
+
+  @Inject
+  public NativeConcreteJsType nativeConcreteJsType;
 
 }

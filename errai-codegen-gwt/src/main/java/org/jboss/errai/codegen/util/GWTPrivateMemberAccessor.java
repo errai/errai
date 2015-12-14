@@ -56,6 +56,9 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
       methodBuilder
               .parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass().getErased(), "instance"),
                       Parameter.of(type, "value")));
+    } else {
+      methodBuilder
+              .parameters(DefParameters.fromParameters(Parameter.of(type, "value")));
     }
 
     methodBuilder.modifiers(appendJsni(modifiers))

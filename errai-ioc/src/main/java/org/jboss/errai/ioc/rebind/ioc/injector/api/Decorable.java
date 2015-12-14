@@ -20,7 +20,9 @@ import static org.apache.commons.lang3.Validate.notNull;
 import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldAccessorName;
 import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.nestedCall;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator.getLocalVariableName;
 
 import java.lang.annotation.Annotation;
@@ -76,11 +78,22 @@ public class Decorable {
 
       @Override
       public ContextualStatementBuilder getAccessStatement(final HasAnnotations annotated, final BuildMetaClass factory) {
+        return call(loadVariable("instance"), annotated, factory);
+      }
+
+      @Override
+      public ContextualStatementBuilder call(final Statement instance, final HasAnnotations annotated,
+              final BuildMetaClass factory, final Statement... params) {
         final MetaField field = (MetaField) annotated;
         if (field.isPublic()) {
-          return loadVariable("instance").loadField(field);
+          if (field.isStatic()) {
+            return loadStatic(field.getDeclaringClass(), field.getName());
+          } else {
+            return nestedCall(instance).loadField(field);
+          }
         } else {
-          return invokeStatic(notNull(factory), getPrivateFieldAccessorName(field), loadVariable("instance"));
+          final Object[] accessorParams = (field.isStatic() ? new Object[0] : new Object[] { instance });
+          return invokeStatic(notNull(factory), getPrivateFieldAccessorName(field), accessorParams);
         }
       }
     },
@@ -97,22 +110,42 @@ public class Decorable {
 
       @Override
       public ContextualStatementBuilder getAccessStatement(final HasAnnotations annotated, final BuildMetaClass factory, final Statement[] statement) {
-        final MetaMethod method = (MetaMethod) annotated;
-        if (method.isPublic()) {
-          return loadVariable("instance").invoke(method, (Object[]) statement);
-        } else {
-          final Object[] params = new Object[statement.length+1];
-          for (int i = 0; i < statement.length; i++) {
-            params[i+1] = statement[i];
-          }
-          params[0] = loadVariable("instance");
-          return invokeStatic(notNull(factory), getPrivateMethodName(method), params);
-        }
+        return call(loadVariable("instance"), annotated, factory, statement);
       }
 
       @Override
       public ContextualStatementBuilder getAccessStatement(final HasAnnotations annotated, final BuildMetaClass factory) {
         return getAccessStatement(annotated, factory, new Statement[0]);
+      }
+
+      @Override
+      public ContextualStatementBuilder call(final Statement instance, final HasAnnotations annotated, final BuildMetaClass factory,
+              final Statement... statement) {
+        final MetaMethod method = (MetaMethod) annotated;
+        if (method.isPublic()) {
+          if (method.isStatic()) {
+            return invokeStatic(method.getDeclaringClass(), method.getName(), (Object[]) statement);
+          } else {
+            return nestedCall(instance).invoke(method, (Object[]) statement);
+          }
+        } else {
+          final Object[] params = getParams(method.isStatic(), instance, statement);
+          return invokeStatic(notNull(factory), getPrivateMethodName(method), params);
+        }
+      }
+
+      private Object[] getParams(final boolean isStatic, final Statement instance, final Statement... statement) {
+        final int offset = (isStatic ? 0 : 1);
+        final Object[] params = new Object[statement.length+offset];
+        if (!isStatic) {
+          params[0] = instance;
+        }
+
+        for (int i = 0; i < statement.length; i++) {
+          params[i+offset] = statement[i];
+        }
+
+        return params;
       }
     },
     PARAM {
@@ -133,8 +166,14 @@ public class Decorable {
       }
 
       @Override
-      public Statement call(final HasAnnotations annotated, final BuildMetaClass factory, final Statement... params) {
-        return METHOD.getAccessStatement(((MetaParameter) annotated).getDeclaringMember(), factory, params);
+      public ContextualStatementBuilder call(final Statement instance, final HasAnnotations annotated,
+              final BuildMetaClass factory, final Statement... params) {
+        return METHOD.call(instance, ((MetaParameter) annotated).getDeclaringMember(), factory, params);
+      }
+
+      @Override
+      public ContextualStatementBuilder call(final HasAnnotations annotated, final BuildMetaClass factory, final Statement... params) {
+        return call(loadVariable("instance"), annotated, factory, params);
       }
 
       @Override
@@ -162,6 +201,12 @@ public class Decorable {
       public String getName(final HasAnnotations annotated) {
         return ((MetaClass) annotated).getName();
       }
+
+      @Override
+      public ContextualStatementBuilder call(final Statement instance, final HasAnnotations annotated, final BuildMetaClass factory,
+              final Statement... params) {
+        return nestedCall(instance);
+      }
     };
 
     public abstract MetaClass getType(HasAnnotations annotated);
@@ -170,7 +215,8 @@ public class Decorable {
       return getAccessStatement(annotated, factory);
     }
     public abstract ContextualStatementBuilder getAccessStatement(final HasAnnotations annotated, final BuildMetaClass factory);
-    public Statement call(final HasAnnotations annotated, final BuildMetaClass factory, Statement... params) {
+    public abstract ContextualStatementBuilder call(final Statement instance, final HasAnnotations annotated, final BuildMetaClass factory, Statement... params);
+    public ContextualStatementBuilder call(final HasAnnotations annotated, final BuildMetaClass factory, Statement... params) {
       return getAccessStatement(annotated, factory, params);
     }
     public String getName(HasAnnotations annotated) {

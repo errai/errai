@@ -1,25 +1,18 @@
-org = {
-  'jboss' : {
-    'errai' : {
-      'ioc' : {
-        'tests' : {
-          'wiring' : {
-            'client' : {
-              'res' : {
-                'NativeType' : function() {
-                  this.overloaded = function() {}
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+NativeConcreteJsType = function() {
+  this.message = function() {
+    return "I am a native type!";
+  };
 };
 
-errai = {
-  'get' : function() {
-    return new org.jboss.errai.ioc.tests.wiring.client.res.NativeType();
+ProducedNativeIface = function() {
+  this.getMagicWord = function() {
+    return "please";
   }
+};
+  
+NativeFactory = function() {
+};
+
+NativeFactory.create = function() {
+  return new ProducedNativeIface();
 };

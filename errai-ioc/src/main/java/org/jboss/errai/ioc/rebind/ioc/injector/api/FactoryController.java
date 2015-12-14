@@ -305,13 +305,31 @@ public class FactoryController {
    * private accessor to be generated for the field.
    *
    * @param field
-   *          A non-public field.
+   *          A field, static or non-static.
    * @return A statement for accessing the value of a field.
    */
   public ContextualStatementBuilder exposedFieldStmt(final MetaField field) {
-    addExposedField(field);
+    if (!field.isPublic()) {
+      addExposedField(field);
+    }
 
     return DecorableType.FIELD.getAccessStatement(field, factory);
+  }
+
+  /**
+   * This should only be called for non-public fields. This method forces a
+   * private accessor to be generated for the field.
+   *
+   * @param field
+   *          A non-static field.
+   * @return A statement for accessing the value of a field.
+   */
+  public ContextualStatementBuilder exposedFieldStmt(final Statement instance, final MetaField field) {
+    if (!field.isPublic()) {
+      addExposedField(field);
+    }
+
+    return DecorableType.FIELD.call(instance, field, factory);
   }
 
   /**
@@ -354,18 +372,41 @@ public class FactoryController {
 
   /**
    * This should only be called for non-public methods. This method forces a
-   * private accessor to be generated for the method.
+   * private accessor to be generated for the method. Dispatches to variable
+   * {@code instance}.
    *
    * @param method
-   *          A non-public method.
+   *          A method, static or non-static.
    * @param params
    *          Statements for the values to be passed in as parameters.
    * @return A statement for accessing invoking the given method.
    */
   public ContextualStatementBuilder exposedMethodStmt(final MetaMethod method, final Statement... params) {
-    addExposedMethod(method);
+    if (!method.isPublic()) {
+      addExposedMethod(method);
+    }
 
     return DecorableType.METHOD.getAccessStatement(method, factory, params);
+  }
+
+  /**
+   * This should only be called for non-public methods. This method forces a
+   * private accessor to be generated for the method.
+   *
+   * @param instance
+   *          A statement for the instance on which this method will be called.
+   * @param method
+   *          A non-static method.
+   * @param params
+   *          Statements for the values to be passed in as parameters.
+   * @return A statement for accessing invoking the given method.
+   */
+  public ContextualStatementBuilder exposedMethodStmt(final Statement instance, final MetaMethod method, final Statement... params) {
+    if (!method.isPublic()) {
+      addExposedMethod(method);
+    }
+
+    return DecorableType.METHOD.call(instance, method, factory, params);
   }
 
   /**
