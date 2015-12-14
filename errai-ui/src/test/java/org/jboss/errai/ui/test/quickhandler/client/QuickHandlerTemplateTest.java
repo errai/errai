@@ -20,8 +20,20 @@ public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testInsertAndReplace() {
-    QuickHandlerTemplateTestApp app = IOC.getBeanManager().lookupBean(QuickHandlerTemplateTestApp.class).getInstance();
+  public void testInsertAndReplaceWithCompositeTemplate() {
+    final QuickHandlerTemplateTestApp app = IOC.getBeanManager().lookupBean(CompositeQuickHandlerTemplateTestApp.class).getInstance();
+    runAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
+
+  @Test
+  public void testInsertAndReplaceWithNonCompositeTemplate() {
+    final QuickHandlerTemplateTestApp app = IOC.getBeanManager().lookupBean(NonCompositeQuickHandlerTemplateTestApp.class).getInstance();
+    runAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
+
+  private void runAssertions(QuickHandlerTemplateTestApp app) {
     assertNotNull(app.getComponent());
 
     assertFalse(app.getComponent().isThisEventFired());

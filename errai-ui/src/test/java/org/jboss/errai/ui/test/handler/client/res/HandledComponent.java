@@ -1,55 +1,31 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2015, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.ui.test.handler.client.res;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.jboss.errai.ui.test.common.client.TestModel;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 
-@Templated
-public class HandledComponent extends Composite {
+/**
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+public interface HandledComponent {
 
-  private final Button b1;
+  Button getB1();
 
-  @DataField
-  private final Button b2 = new Button("Will be rendered inside button from GWT");
-
-  private final VocalWidget b3;
-
-  @Inject
-  public HandledComponent(@DataField Button b1, @DataField VocalWidget b3, DataBinder<TestModel> binder) {
-    this.b1 = b1;
-    this.b3 = b3;
-  }
-
-  @PostConstruct
-  public void init() {
-    b1.getElement().setAttribute("id", "b1");
-    b2.getElement().setAttribute("id", "b2");
-    b3.getElement().setAttribute("id", "b3");
-
-    b1.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        System.out.println("Handled click event on b1.");
-        b1.removeFromParent();
-      }
-    });
-  }
-
-  public Button getB1() {
-    return b1;
-  }
-
-  public Button getB2() {
-    return b2;
-  }
+  Button getB2();
 
 }

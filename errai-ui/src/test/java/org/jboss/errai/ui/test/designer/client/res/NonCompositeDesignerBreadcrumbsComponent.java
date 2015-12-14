@@ -3,12 +3,15 @@ package org.jboss.errai.ui.test.designer.client.res;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 
-public abstract class DesignerBreadcrumbsComponent extends Composite implements DesignerComponent {
+@Templated("DesignerTemplate.html#breadcrumbs")
+public class NonCompositeDesignerBreadcrumbsComponent implements DesignerComponent {
 
   @Inject
   @DataField
@@ -27,6 +30,10 @@ public abstract class DesignerBreadcrumbsComponent extends Composite implements 
     c1.getElement().setAttribute("id", "basic");
     something.getElement().setAttribute("id", "somethingNew");
     c2.getElement().setAttribute("id", "btn");
+  }
+
+  public Widget getRoot() {
+    return TemplateWidgetMapper.get(this);
   }
 
   @Override

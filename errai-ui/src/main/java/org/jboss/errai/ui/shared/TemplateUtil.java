@@ -347,7 +347,7 @@ public final class TemplateUtil {
     return dataFields;
   }
 
-  public static void setupNativeEventListener(Composite component, Element element, EventListener listener,
+  public static void setupNativeEventListener(Object component, Element element, EventListener listener,
           int eventsToSink) {
 
     if (element == null) {

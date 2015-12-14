@@ -42,6 +42,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -65,6 +66,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ui.client.local.spi.TemplateRenderingCallback;
 import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -437,12 +439,17 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
             initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler",
                 eventSource, listenerInstance,
                 Stmt.invokeStatic(eventType, "getType")));
+          } else if (dataFieldType.isAnnotationPresent(Templated.class)) {
+            final ContextualStatementBuilder widget = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", eventSource);
+            initStmts.add(widget.invoke("addDomHandler",
+                listenerInstance, Stmt.invokeStatic(eventType, "getType")));
           } else {
             throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
                 + "] in class [" + declaringClass.getFullyQualifiedName()
-                + "] must either implement the interface [" + hasHandlerType.getName()
+                + "] must implement the interface [" + hasHandlerType.getName()
                 + "] specified by @EventHandler method " + method.getName() + "(" + eventType.getName()
-                + ")] or else be a DOM element (wrapped as either a JavaScriptObject or a native @JsType).");
+                + ")], be a DOM element (wrapped as either a JavaScriptObject or a native @JsType), "
+                + "or be a @Templated bean.");
           }
         }
       }

@@ -15,28 +15,38 @@ public class DesignerTemplateTest extends AbstractErraiCDITest {
 
   @Test
   public void testInsertAndReplaceNested() {
-    DesignerTemplateTestApp app = IOC.getBeanManager().lookupBean(DesignerTemplateTestApp.class).getInstance();
-    assertNotNull(app.getComponent());
-    System.out.println(app.getRoot().getElement().getInnerHTML());
-
-    assertNotNull(Document.get().getElementById("btn"));
-    assertEquals("Will be rendered inside button", app.getComponent().getButton().getElement().getInnerHTML());
-    assertNotNull(Document.get().getElementById("somethingNew"));
-    assertNotNull(Document.get().getElementById("basic"));
-    assertNotNull(Document.get().getElementById("h2"));
+    DesignerTemplateTestApp app = IOC.getBeanManager().lookupBean(DesignerTemplateTestAppUsingDataFields.class).getInstance();
+    insertAndReplaceNestedAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
   }
-  
+
   @Test
   public void testInsertAndReplaceNestedUsingIdsAndClasses() {
-    DesignerTemplateTestAppUsingIdsAndClasses app = IOC.getBeanManager().lookupBean(DesignerTemplateTestAppUsingIdsAndClasses.class).getInstance();
-    assertNotNull(app.getComponent());
-    System.out.println(app.getRoot().getElement().getInnerHTML());
+    DesignerTemplateTestApp app = IOC.getBeanManager().lookupBean(DesignerTemplateTestAppUsingIdsAndClasses.class).getInstance();
+    insertAndReplaceNestedAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
 
-    assertNotNull(Document.get().getElementById("btn"));
+  @Test
+  public void testInsertAndReplaceNestedUsingNonCompositeComponent() {
+    DesignerTemplateTestApp app = IOC.getBeanManager().lookupBean(DesignerTemplateTestAppUsingNonCompositeComponent.class).getInstance();
+    insertAndReplaceNestedAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
+
+  private void insertAndReplaceNestedAssertions(DesignerTemplateTestApp app) {
+    assertNotNull("Component was not injected.", app.getComponent());
+    final String html = app.getRoot().getElement().getInnerHTML();
+
+    assertNotNull(messageHelper("btn was not found.", html), Document.get().getElementById("btn"));
     assertEquals("Will be rendered inside button", app.getComponent().getButton().getElement().getInnerHTML());
-    assertNotNull(Document.get().getElementById("somethingNew"));
-    assertNotNull(Document.get().getElementById("basic"));
-    assertNotNull(Document.get().getElementById("h2"));
+    assertNotNull(messageHelper("somethingNew was not found.", html), Document.get().getElementById("somethingNew"));
+    assertNotNull(messageHelper("basic was not found.", html), Document.get().getElementById("basic"));
+    assertNotNull(messageHelper("h2 was not found.", html), Document.get().getElementById("h2"));
+  }
+
+  private static String messageHelper(final String message, final String html) {
+    return message + "\n" + html + "\n";
   }
 
 }

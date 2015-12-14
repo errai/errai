@@ -8,10 +8,9 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 
-@Templated
-public class BaseComponent extends Composite {
+@Templated("BaseComponent.html")
+public class NonCompositeBaseComponent implements Base {
 
   @Inject
   @DataField
@@ -27,6 +26,7 @@ public class BaseComponent extends Composite {
     c2.getElement().setAttribute("id", "c2");
   }
 
+  @Override
   public Button getC2Base() {
     return c2;
   }

@@ -10,8 +10,6 @@ import org.junit.Test;
 
 public class I18nTemplateTest extends AbstractErraiCDITest {
 
-  private I18nTemplateTestApp app;
-
   /**
    * @see com.google.gwt.junit.client.GWTTestCase#getModuleName()
    */
@@ -24,14 +22,29 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     TranslationService.setCurrentLocale("en");
-    app = IOC.getBeanManager().lookupBean(I18nTemplateTestApp.class).getInstance();
   }
 
   /**
    * Tests that the bundle is created and is accessible.
    */
   @Test
-  public void testBundleAccess() {
+  public void testBundleAccessWithCompositeComponent() {
+    final I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(CompositeI18nTemplateTestApp.class).getInstance();
+    bundleAccessAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
+
+  /**
+   * Tests that the bundle is created and is accessible.
+   */
+  @Test
+  public void testBundleAccessWithNonCompositeComponent() {
+    final I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(NonCompositeI18nTemplateTestApp.class).getInstance();
+    bundleAccessAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
+
+  private void bundleAccessAssertions(final I18nTemplateTestApp app) {
     assertNotNull(app.getComponent());
     assertEquals("Welcome to the errai-ui i18n demo.", app.getComponent().getWelcome_p().getInnerText());
     assertEquals("Label 1:", app.getComponent().getLabel1().getText());
@@ -49,11 +62,23 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
     assertEquals("Enter your email address...", app.getComponent().getEmail().getElement().getAttribute("placeholder"));
     assertEquals("Password:", app.getComponent().getPasswordLabel().getText());
     assertEquals("Your password goes here.", app.getComponent().getPassword().getElement().getAttribute("title"));
-
   }
 
   @Test
-  public void testShouldCreateLocaleListBoxContainingAllLanguageOptions() {
+  public void testShouldCreateLocaleListBoxContainingAllLanguageOptionsWithCompositeTemplate() {
+    final I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(CompositeI18nTemplateTestApp.class).getInstance();
+    localeListBoxAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
+
+  @Test
+  public void testShouldCreateLocaleListBoxContainingAllLanguageOptionsWithNonCompositeTemplate() {
+    final I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(NonCompositeI18nTemplateTestApp.class).getInstance();
+    localeListBoxAssertions(app);
+    IOC.getBeanManager().destroyBean(app);
+  }
+
+  private void localeListBoxAssertions(final I18nTemplateTestApp app) {
     // given
     LocaleSelector selector = IOC.getBeanManager().lookupBean(LocaleSelector.class).getInstance();
     LocaleListBox localeListBox = app.getComponent().getListBox();

@@ -29,7 +29,7 @@ public class I18nTemplateTest_fr_FR extends AbstractErraiCDITest {
    */
   @Test
   public void testBundleAccess() {
-    I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(org.jboss.errai.ui.test.i18n.client.I18nTemplateTestApp.class).getInstance();
+    I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(org.jboss.errai.ui.test.i18n.client.CompositeI18nTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
     assertEquals("Bienvenue sur la démo Errai-ui i18n.", app.getComponent().getWelcome_p().getInnerText());
     assertEquals("Etiquette 1:", app.getComponent().getLabel1().getText());

@@ -1,84 +1,48 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2015, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.ui.test.element.client.res;
 
-import javax.inject.Inject;
-
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.jboss.errai.ui.test.common.client.dom.Document;
-
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 
-import elemental.client.Browser;
 import elemental.html.ButtonElement;
 
-@Templated
-public class ElementFormComponent extends Composite {
+/**
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+public interface ElementFormComponent {
 
-  private int numberOfTimesPressed = 0;
+  Element getForm();
 
-  @DataField
-  private Element form = DOM.createForm();
+  org.jboss.errai.ui.test.common.client.dom.Element getUsername();
 
-  @DataField
-  private org.jboss.errai.ui.test.common.client.dom.Element username = Document.getDocument().createElement("input");
+  PasswordTextBox getPassword();
 
-  @Inject
-  @DataField
-  private PasswordTextBox password;
+  CheckBox getRememberMe();
 
-  @Inject
-  @DataField("remember")
-  private CheckBox rememberMe;
+  Button getSubmit();
 
-  @Inject
-  @DataField
-  private Button submit;
+  ButtonElement getCancel();
 
-  @DataField
-  private ButtonElement cancel = Browser.getDocument().createButtonElement();
+  int getNumberOfTimesPressed();
 
-  public Element getForm() {
-    return form;
-  }
+  Element getElement();
 
-  public org.jboss.errai.ui.test.common.client.dom.Element getUsername() {
-    return username;
-  }
-
-  public PasswordTextBox getPassword() {
-    return password;
-  }
-
-  public CheckBox getRememberMe() {
-    return rememberMe;
-  }
-
-  public Button getSubmit() {
-    return submit;
-  }
-
-  public ButtonElement getCancel() {
-    return cancel;
-  }
-
-  @EventHandler("cancel")
-  private void onClick(ClickEvent event) {
-    numberOfTimesPressed++;
-    /*
-     * DO NOT REMOVE
-     * HTMLUnit crashes when firing a click event without this.
-     */
-    event.preventDefault();
-  }
-
-  public int getNumberOfTimesPressed() {
-    return numberOfTimesPressed;
-  }
 }

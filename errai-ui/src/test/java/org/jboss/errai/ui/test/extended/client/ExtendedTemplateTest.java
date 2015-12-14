@@ -14,8 +14,18 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testInsertAndReplaceNested() {
-    ExtendedTemplateTestApp app = IOC.getBeanManager().lookupBean(ExtendedTemplateTestApp.class).getInstance();
+  public void testInsertAndReplaceNestedWithCompositeTemplate() {
+    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(CompositeExtendedTemplateTestApp.class).getInstance();
+    runAssertions(app);
+  }
+
+  @Test
+  public void testInsertAndReplaceNestedNonCompositeTemplate() {
+    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(NonCompositeExtendedTemplateTestApp.class).getInstance();
+    runAssertions(app);
+  }
+
+  private void runAssertions(ElementTemplateTestApp app) {
     assertNotNull(app.getExtComponent());
 
     System.out.println("DUMPING: " + Document.get().getBody().getInnerHTML());
@@ -40,7 +50,6 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
     assertNotNull(app.getSecondExtComponent());
     assertNotNull(app.getSecondExtComponent().getC2());
     assertNotNull(app.getSecondExtComponent().getContent3());
-
   }
 
 }

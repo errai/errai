@@ -14,20 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ui.test.designer.client;
+package org.jboss.errai.ui.test.designer.client.res;
 
-import org.jboss.errai.ui.test.designer.client.res.DesignerComponent;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.user.client.ui.RootPanel;
-
-/**
- *
- * @author Max Barkley <mbarkley@redhat.com>
- */
-public interface DesignerTemplateTestApp {
-
-  RootPanel getRoot();
-
-  DesignerComponent getComponent();
+@Templated("DesignerTemplate.html#breadcrumbs")
+public class DesignerBreadcrumbsComponentUsingDataFields extends DesignerBreadcrumbsComponent {
 
 }

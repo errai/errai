@@ -21,9 +21,18 @@ public class ElementTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testUseElementDirectly() {
-    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(ElementTemplateTestApp.class).getInstance();
+  public void testUseElementInCompositeComponent() {
+    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(CompositeElementTemplateTestApp.class).getInstance();
+    runAssertions(app);
+  }
 
+  @Test
+  public void testUseElementInNonCompositeComponent() {
+    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(NonCompositeElementTemplateTestApp.class).getInstance();
+    runAssertions(app);
+  }
+
+  private void runAssertions(ElementTemplateTestApp app) {
     Element form = app.getForm().getElement();
     assertTrue(form.getInnerHTML().contains("Keep me logged in on this computer"));
     assertTrue(app.getForm().getForm().getInnerHTML().contains("Keep me logged in on this computer"));

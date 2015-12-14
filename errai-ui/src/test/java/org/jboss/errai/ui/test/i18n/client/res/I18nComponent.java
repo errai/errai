@@ -1,129 +1,85 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2015, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.ui.test.i18n.client.res;
 
-import javax.inject.Inject;
-
 import org.jboss.errai.ui.client.widget.LocaleListBox;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ParagraphElement;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
-@Templated
-public class I18nComponent extends Composite {
-
-  @DataField("welcome-p")
-  private final ParagraphElement welcome_p = Document.get().createPElement();
-  @Inject @DataField
-  private InlineLabel label1;
-  @Inject @DataField
-  private InlineLabel val1;
-  @Inject @DataField
-  private InlineLabel nestedLabel;
-  @Inject @DataField
-  private InlineLabel val1_1;
-  @Inject @DataField
-  private InlineLabel label2;
-  @Inject @DataField
-  private InlineLabel val2;
-
-  @Inject @DataField
-  private Label longTextLabel;
-
-  @Inject @DataField
-  private InlineLabel emailLabel;
-  @Inject @DataField
-  private TextBox email;
-  @Inject @DataField
-  private InlineLabel passwordLabel;
-  @Inject @DataField
-  private TextBox password;
-
-  @Inject
-  private LocaleListBox listBox;
+/**
+ * 
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+public interface I18nComponent {
 
   /**
    * @return the welcome_p
    */
-  public ParagraphElement getWelcome_p() {
-    return welcome_p;
-  }
+  ParagraphElement getWelcome_p();
 
   /**
    * @return the label1
    */
-  public InlineLabel getLabel1() {
-    return label1;
-  }
+  InlineLabel getLabel1();
 
   /**
    * @return the val1
    */
-  public InlineLabel getVal1() {
-    return val1;
-  }
+  InlineLabel getVal1();
 
   /**
    * @return the label2
    */
-  public InlineLabel getLabel2() {
-    return label2;
-  }
+  InlineLabel getLabel2();
 
   /**
    * @return the val2
    */
-  public InlineLabel getVal2() {
-    return val2;
-  }
+  InlineLabel getVal2();
 
-  public Label getLongTextLabel() {
-    return longTextLabel;
-  }
+  Label getLongTextLabel();
 
   /**
    * @return the emailLabel
    */
-  public InlineLabel getEmailLabel() {
-    return emailLabel;
-  }
+  InlineLabel getEmailLabel();
 
   /**
    * @return the email
    */
-  public TextBox getEmail() {
-    return email;
-  }
+  TextBox getEmail();
 
   /**
    * @return the passwordLabel
    */
-  public InlineLabel getPasswordLabel() {
-    return passwordLabel;
-  }
+  InlineLabel getPasswordLabel();
 
   /**
    * @return the password
    */
-  public TextBox getPassword() {
-    return password;
-  }
+  TextBox getPassword();
 
-  public LocaleListBox getListBox() {
-    return listBox;
-  }
+  LocaleListBox getListBox();
 
-  public InlineLabel getNestedLabel() {
-    return nestedLabel;
-  }
+  InlineLabel getNestedLabel();
 
-  public InlineLabel getVal1_1() {
-    return val1_1;
-  }
-
+  InlineLabel getVal1_1();
 
 }

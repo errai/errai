@@ -14,20 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ui.test.designer.client;
+package org.jboss.errai.ui.test.extended.client.res;
 
-import org.jboss.errai.ui.test.designer.client.res.DesignerComponent;
-
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Button;
 
 /**
- *
+ * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface DesignerTemplateTestApp {
+public interface Base {
 
-  RootPanel getRoot();
-
-  DesignerComponent getComponent();
+  Button getC2Base();
 
 }

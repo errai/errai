@@ -26,7 +26,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.rebind.TranslationServiceGenerator;
-import org.jboss.errai.ui.test.i18n.client.res.I18nComponent;
+import org.jboss.errai.ui.test.i18n.client.res.CompositeI18nComponent;
 import org.jboss.errai.ui.test.i18n.client.res.I18nNestedComponent;
 import org.jboss.errai.ui.test.i18n.client.res.I18nNotRootTemplatedWidget;
 import org.junit.Test;
@@ -42,9 +42,9 @@ public class I18nBundleTest {
   @Test
   public void testAllBundleFileContainsAllKeys() throws Exception {
 
-    MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(I18nComponent.class));
+    MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(CompositeI18nComponent.class));
     MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(I18nNestedComponent.class));
-    MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(I18nTemplateTestApp.class));
+    MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(CompositeI18nTemplateTestApp.class));
     MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(TranslationService.class));
 
     new TranslationServiceGenerator().generate(null, null);
@@ -80,7 +80,7 @@ public class I18nBundleTest {
   public void testAllBundleFileOnlyContainsNestedTemplateKeys() throws Exception {
 
     MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(I18nNotRootTemplatedWidget.class));
-    MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(I18nTemplateTestApp.class));
+    MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(CompositeI18nTemplateTestApp.class));
     MetaClassFactory.getMetaClassCache().pushCache(MetaClassFactory.get(TranslationService.class));
 
     new TranslationServiceGenerator().generate(null, null);
