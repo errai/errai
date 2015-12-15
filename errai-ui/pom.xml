@@ -103,7 +103,16 @@
           <groupId>org.apache.felix</groupId>
           <artifactId>org.apache.felix.scr.annotations</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging-api</artifactId>
+        </exclusion>
       </exclusions>
+    </dependency>
+    <!-- Replacement for commons-logging-api excluded from the above org.apache.stanbol.enhancer.engines.htmlextractor -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
 
     <dependency>

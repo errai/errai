@@ -285,12 +285,29 @@
         <groupId>org.lesscss</groupId>
         <artifactId>lesscss</artifactId>
         <version>${lesscss.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.enhancer.engines.htmlextractor</artifactId>
-        <version>${apache.stanbol.htmlextractor.version}</version>      
+        <version>${apache.stanbol.htmlextractor.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${version.org.apache.httpcomponents.httpclient}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
