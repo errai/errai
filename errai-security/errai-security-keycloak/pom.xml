@@ -40,6 +40,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
+    <!-- Replacement for commons-logging which was excluded (in paren't depMgmt) from the org.apache.httpcomponents:httpclient. -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.deltaspike.core</groupId>
