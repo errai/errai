@@ -5,7 +5,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.handler.client.res.HandledComponent;
 import org.jboss.errai.ui.test.handler.client.res.NonCompositeHandledComponent;
 
@@ -22,7 +21,7 @@ public class NonCompositeHandlerTemplateTestApp implements HandlerTemplateTestAp
 
   @PostConstruct
   public void setup() {
-    root.add(TemplateWidgetMapper.get(component));
+    root.getElement().appendChild(component.getRoot());
   }
 
   @PreDestroy

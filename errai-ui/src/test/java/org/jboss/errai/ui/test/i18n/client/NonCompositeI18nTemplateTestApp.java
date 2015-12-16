@@ -5,7 +5,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.test.i18n.client.res.I18nComponent;
 import org.jboss.errai.ui.test.i18n.client.res.NonCompositeI18nComponent;
@@ -24,7 +23,7 @@ public class NonCompositeI18nTemplateTestApp implements I18nTemplateTestApp {
 
   @PostConstruct
   public void setup() {
-    root.add(TemplateWidgetMapper.get(component));
+    root.getElement().appendChild(component.getRoot());
   }
 
   @PreDestroy

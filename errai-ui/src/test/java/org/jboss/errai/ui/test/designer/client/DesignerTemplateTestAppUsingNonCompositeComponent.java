@@ -21,12 +21,12 @@ public class DesignerTemplateTestAppUsingNonCompositeComponent implements Design
 
   @PostConstruct
   public void setup() {
-    root.add(component.getRoot());
+    root.getElement().appendChild(component.getRoot());
   }
 
   @PreDestroy
   public void tearDown() {
-    root.clear();
+    root.getElement().removeAllChildren();
   }
 
   @Override

@@ -4,7 +4,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.extended.client.res.Extension;
 import org.jboss.errai.ui.test.extended.client.res.NonCompositeSecondLevelExtensionComponent;
 
@@ -24,8 +23,7 @@ public class NonCompositeExtendedTemplateTestApp implements ElementTemplateTestA
 
   @PostConstruct
   public void setup() {
-    System.out.println("Adding component to RootPanel");
-    root.add(TemplateWidgetMapper.get(extComponent));
+    root.getElement().appendChild(extComponent.getElement());
   }
 
   @Override

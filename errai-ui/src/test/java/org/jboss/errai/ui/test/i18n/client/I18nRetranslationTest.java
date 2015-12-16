@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  * Test that templated beans of different scopes are re-translated when the locale is manually
  * changed (ERRAI-610). Templated widgets attached to the DOM and detached application scoped Templated widgets
  * should be translated.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class I18nRetranslationTest extends AbstractErraiCDITest {
@@ -137,7 +137,15 @@ public class I18nRetranslationTest extends AbstractErraiCDITest {
 
     AppScopedWidget appWidget = IOC.getBeanManager().lookupBean(AppScopedWidget.class).getInstance();
 
-    assertTrue("This widget should not be attached to the DOM!", !appWidget.isAttached());
+    /*
+     * Have to do both these because there is no method that both physically
+     * detaches and makes isAttached == false.
+     */
+    appWidget.removeFromParent();
+    appWidget.getElement().removeFromParent();
+
+    assertFalse("This widget should not be attached", appWidget.isAttached());
+    assertFalse("This widget's element should not be attached to the DOM!", appWidget.getElement().hasParentElement());
 
     TranslationService.setCurrentLocale("fr_fr");
 
@@ -162,7 +170,6 @@ public class I18nRetranslationTest extends AbstractErraiCDITest {
     // Check values through DOM
     Element element = parent.getElement();
     Element firstChild = element.getFirstChildElement();
-    String foo = firstChild.getInnerText();
     assertEquals("Parent template leaf element was not properly translated", "bonjour", firstChild.getInnerText());
     assertEquals("Non-keyed child template was not translated", "bonjour", firstChild.getNextSiblingElement().getInnerText());
     assertEquals("Keyed child template was not translated", "bonjour", firstChild

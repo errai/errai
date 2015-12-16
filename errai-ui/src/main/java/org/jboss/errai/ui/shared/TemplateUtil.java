@@ -40,12 +40,12 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -163,20 +163,29 @@ public final class TemplateUtil {
   }
 
   public static void initTemplated(Object templated, Element wrapped, Collection<Widget> dataFields) {
-    TemplateWidgetMapper.put(templated, new TemplateWidget(wrapped, dataFields));
+    final TemplateWidget widget = new TemplateWidget(wrapped, dataFields);
+    TemplateWidgetMapper.put(templated, widget);
     StyleBindingsRegistry.get().updateStyles(templated);
+    widget.onAttach();
+    RootPanel.detachOnWindowClose(widget);
+    TemplateInitializedEvent.fire(widget);
   }
 
   public static void initWidget(Composite component, Element wrapped, Collection<Widget> dataFields) {
     if (!(component instanceof ListWidget)) {
       initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
     }
-
-    DOM.setEventListener(component.getElement(), component);
+    if (!component.isAttached()) {
+      onAttachNative(component);
+      RootPanel.detachOnWindowClose(component);
+    }
     StyleBindingsRegistry.get().updateStyles(component);
-    AttachEvent.fire(component, true);
     TemplateInitializedEvent.fire(component);
   }
+
+  private static native void onAttachNative(Widget w) /*-{
+    w.@com.google.gwt.user.client.ui.Widget::onAttach()();
+  }-*/;
 
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
     component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);

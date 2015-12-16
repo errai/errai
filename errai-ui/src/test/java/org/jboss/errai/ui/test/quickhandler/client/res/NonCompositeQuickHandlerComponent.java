@@ -11,6 +11,7 @@ import org.jboss.errai.ui.test.common.client.dom.ButtonElement;
 import org.jboss.errai.ui.test.common.client.dom.Document;
 
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.DOM;
@@ -19,6 +20,9 @@ import com.google.gwt.user.client.ui.Button;
 
 @Templated("QuickHandlerComponent.html")
 public class NonCompositeQuickHandlerComponent implements QuickHandlerComponent {
+
+  @DataField
+  private Element root = DOM.createDiv();
 
   @DataField
   private final AnchorElement c1 = DOM.createAnchor().cast();
@@ -127,5 +131,9 @@ public class NonCompositeQuickHandlerComponent implements QuickHandlerComponent 
   @Override
   public void fireEvent(GwtEvent<?> event) {
     TemplateWidgetMapper.get(this).fireEvent(event);
+  }
+
+  public Element getRoot() {
+    return root;
   }
 }

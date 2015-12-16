@@ -8,12 +8,17 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.test.common.client.TestModel;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
 
 @Templated("HandledComponent.html")
 public class NonCompositeHandledComponent implements HandledComponent {
+
+  @DataField
+  private Element root = DOM.createDiv();
 
   private final Button b1;
 
@@ -40,6 +45,10 @@ public class NonCompositeHandledComponent implements HandledComponent {
         b1.removeFromParent();
       }
     });
+  }
+
+  public Element getRoot() {
+    return root;
   }
 
   @Override

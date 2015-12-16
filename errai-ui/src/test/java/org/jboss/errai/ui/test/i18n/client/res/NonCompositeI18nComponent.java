@@ -7,13 +7,18 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Templated("I18nComponent.html")
 public class NonCompositeI18nComponent implements I18nComponent {
+
+  @DataField
+  private Element root = DOM.createDiv();
 
   @DataField("welcome-p")
   private final ParagraphElement welcome_p = Document.get().createPElement();
@@ -44,6 +49,10 @@ public class NonCompositeI18nComponent implements I18nComponent {
 
   @Inject
   private LocaleListBox listBox;
+
+  public Element getRoot() {
+    return root;
+  }
 
   /**
    * @return the welcome_p

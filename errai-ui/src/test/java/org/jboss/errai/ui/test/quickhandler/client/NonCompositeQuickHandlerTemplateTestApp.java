@@ -5,7 +5,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.quickhandler.client.res.NonCompositeQuickHandlerComponent;
 import org.jboss.errai.ui.test.quickhandler.client.res.QuickHandlerComponent;
 
@@ -22,7 +21,7 @@ public class NonCompositeQuickHandlerTemplateTestApp implements QuickHandlerTemp
 
   @PostConstruct
   public void setup() {
-    root.add(TemplateWidgetMapper.get(component));
+    root.getElement().appendChild(component.getRoot());
   }
 
   @PreDestroy

@@ -18,8 +18,6 @@ package org.jboss.errai.ui.shared;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.jboss.errai.ioc.client.container.Factory;
-
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Panel;
@@ -38,13 +36,15 @@ public class TemplateWidget extends Panel {
     this.children = children;
 
     for (Widget child : children) {
-      setParentNative(this, Factory.maybeUnwrapProxy(child));
+      child.removeFromParent();
+      adopt(child);
     }
   }
 
-  private static native void setParentNative(Widget parent, Widget field) /*-{
-		field.@com.google.gwt.user.client.ui.Widget::setParent(Lcom/google/gwt/user/client/ui/Widget;)(parent);
-  }-*/;
+  @Override
+  public void onAttach() {
+    super.onAttach();
+  }
 
   @Override
   public Iterator<Widget> iterator() {

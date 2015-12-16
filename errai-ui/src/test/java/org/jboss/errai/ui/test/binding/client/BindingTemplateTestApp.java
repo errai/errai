@@ -7,7 +7,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.client.widget.Table;
 import org.jboss.errai.ui.client.widget.UnOrderedList;
-import org.jboss.errai.ui.shared.TemplateWidgetMapper;
+import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
 import org.jboss.errai.ui.test.binding.client.res.CompositeBindingTemplate;
@@ -40,7 +40,7 @@ public class BindingTemplateTestApp {
   @PostConstruct
   public void setup() {
     root.add(compositeTemplate);
-    root.add(TemplateWidgetMapper.get(nonCompositeTemplate));
+    root.getElement().appendChild(TemplateUtil.asElement(nonCompositeTemplate.getRoot()));
   }
 
   public BindingTemplate<BindingItemWidget> getCompositeTemplate() {
