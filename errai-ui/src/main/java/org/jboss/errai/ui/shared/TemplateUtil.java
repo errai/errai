@@ -171,6 +171,14 @@ public final class TemplateUtil {
     TemplateInitializedEvent.fire(widget);
   }
 
+  public static void cleanupTemplated(Object templated) {
+    final TemplateWidget templateWidget = TemplateWidgetMapper.get(templated);
+    TemplateWidgetMapper.remove(templated);
+    if (RootPanel.isInDetachList(templateWidget)) {
+      RootPanel.detachNow(templateWidget);
+    }
+  }
+
   public static void initWidget(Composite component, Element wrapped, Collection<Widget> dataFields) {
     if (!(component instanceof ListWidget)) {
       initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
@@ -181,6 +189,12 @@ public final class TemplateUtil {
     }
     StyleBindingsRegistry.get().updateStyles(component);
     TemplateInitializedEvent.fire(component);
+  }
+
+  public static void cleanupWidget(Composite component) {
+    if (RootPanel.isInDetachList(component)) {
+      RootPanel.detachNow(component);
+    }
   }
 
   private static native void onAttachNative(Widget w) /*-{

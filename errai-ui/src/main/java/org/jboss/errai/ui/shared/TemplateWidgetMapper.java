@@ -41,32 +41,32 @@ public class TemplateWidgetMapper {
   }
 
   // There is no identity bimap so we do this.
-  private static final Map<Object, Pair> widgetsByTemplatedBean = new IdentityHashMap<Object, Pair>();
+  private static final Map<Object, Pair> widgetBeanMap = new IdentityHashMap<Object, Pair>();
 
   private TemplateWidgetMapper() {}
 
   public static void put(Object bean, final TemplateWidget widget) {
     bean = Factory.maybeUnwrapProxy(bean);
 
-    if (widgetsByTemplatedBean.containsKey(bean)) {
+    if (widgetBeanMap.containsKey(bean)) {
       throw new RuntimeException(
               "There is already a widget mapped for the " + bean.getClass().getName() + " bean: " + bean.toString());
     } else {
       final Pair pair = new Pair(bean, widget);
-      widgetsByTemplatedBean.put(bean, pair);
-      widgetsByTemplatedBean.put(widget, pair);
+      widgetBeanMap.put(bean, pair);
+      widgetBeanMap.put(widget, pair);
     }
   }
 
   public static boolean containsKey(Object bean) {
     bean = Factory.maybeUnwrapProxy(bean);
 
-    return widgetsByTemplatedBean.containsKey(bean);
+    return widgetBeanMap.containsKey(bean);
   }
 
   public static TemplateWidget get(Object bean) {
     bean = Factory.maybeUnwrapProxy(bean);
-    final Pair pair = widgetsByTemplatedBean.get(bean);
+    final Pair pair = widgetBeanMap.get(bean);
     if (pair == null) {
       throw new RuntimeException("There is no widget mapped to the " + bean.getClass().getName() + " bean: " + bean.toString());
     } else {
@@ -75,11 +75,20 @@ public class TemplateWidgetMapper {
   }
 
   public static Object reverseGet(final TemplateWidget widget) {
-    final Pair pair = widgetsByTemplatedBean.get(widget);
+    final Pair pair = widgetBeanMap.get(widget);
     if (pair == null) {
       throw new RuntimeException("There is no bean mapped to the templated widget with contents:\n" + widget.getElement().getInnerHTML());
     } else {
       return pair.bean;
+    }
+  }
+
+  public static void remove(Object obj) {
+    obj = Factory.maybeUnwrapProxy(obj);
+    final Pair pair = widgetBeanMap.get(obj);
+    if (pair != null) {
+      widgetBeanMap.remove(pair.bean);
+      widgetBeanMap.remove(pair.widget);
     }
   }
 

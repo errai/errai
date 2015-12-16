@@ -7,6 +7,8 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateWidget;
 import org.jboss.errai.ui.shared.TemplateWidgetMapper;
+import org.jboss.errai.ui.test.basic.client.res.BasicComponent;
+import org.jboss.errai.ui.test.basic.client.res.BasicComponentUsingDataFields;
 import org.jboss.errai.ui.test.basic.client.res.NonCompositeComponent;
 import org.junit.Test;
 
@@ -15,6 +17,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.RootPanel;
 
 public class BasicTemplateTest extends AbstractErraiCDITest {
 
@@ -165,6 +168,37 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
             instance.getTextBox().getElement().getParentElement().equals(rootWidget.getElement()));
     assertTrue("The button @DataField is not a child of the root element.",
             instance.getButton().getElement().getParentElement().equals(rootWidget.getElement()));
+  }
+
+  @Test
+  public void testNonCompositeTemplateCleanup() throws Exception {
+    final NonCompositeComponent instance = IOC.getBeanManager().lookupBean(NonCompositeComponent.class).getInstance();
+
+    assertTrue("Non-composite templated bean should have a TemplateWidget mapping after initialization.", TemplateWidgetMapper.containsKey(instance));
+    final TemplateWidget templateWidget = TemplateWidgetMapper.get(instance);
+    assertTrue("TemplateWidget should be attached after initialization.", templateWidget.isAttached());
+    assertTrue("TemplateWidget should be in detach list after initialization.", RootPanel.isInDetachList(templateWidget));
+
+    IOC.getBeanManager().destroyBean(instance);
+
+    assertFalse("Non-composite templated bean should not have a TemplateWidget mapping after destruction.", TemplateWidgetMapper.containsKey(instance));
+    assertFalse("TemplateWidget should not be attached after destruction.", templateWidget.isAttached());
+    assertFalse("TemplateWidget should not be in detach list after destruction.", RootPanel.isInDetachList(templateWidget));
+  }
+
+  @Test
+  public void testCompositeTemplateCleanup() throws Exception {
+    final BasicComponent instance = IOC.getBeanManager().lookupBean(BasicComponentUsingDataFields.class).getInstance();
+
+    assertFalse("Composite templated beans should not have TemplateWidget mappings after initialization.", TemplateWidgetMapper.containsKey(instance));
+    assertTrue("Composite templated bean should be attached after initialization.", instance.isAttached());
+    assertTrue("Composite templated bean should be in the detach list after initialization.", RootPanel.isInDetachList(instance));
+
+    IOC.getBeanManager().destroyBean(instance);
+
+    assertFalse("Composite templated beans should not have TemplateWidget mappings after destructions.", TemplateWidgetMapper.containsKey(instance));
+    assertFalse("Composite templated bean should not be attached after destruction.", instance.isAttached());
+    assertFalse("Composite templated bean should not be in the detach list after destruction.", RootPanel.isInDetachList(instance));
   }
 
 }

@@ -1,15 +1,15 @@
 package org.jboss.errai.ui.test.element.client;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.test.element.client.res.ElementFormComponent;
 import org.jboss.errai.ui.test.element.client.res.NonCompositeElementFormComponent;
 
 import com.google.gwt.user.client.ui.RootPanel;
 
-@EntryPoint
+@Dependent
 public class NonCompositeElementTemplateTestApp implements ElementTemplateTestApp {
 
   @Inject

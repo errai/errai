@@ -169,6 +169,12 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       }
     }
 
+    if (decorable.getDecorableDeclaringType().isAssignableTo(Composite.class)) {
+      destructionStatements.add(Stmt.invokeStatic(TemplateUtil.class, "cleanupWidget", decorable.getAccessStatement()));
+    } else {
+      destructionStatements.add(Stmt.invokeStatic(TemplateUtil.class, "cleanupTemplated", decorable.getAccessStatement()));
+    }
+
     return destructionStatements;
   }
 
