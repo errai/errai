@@ -106,7 +106,6 @@
     <module>errai-ioc-bus-support</module>
     <module>errai-bus-websocket</module>    
     <module>errai-jboss-as-support</module>
-    <module>errai-otec</module>
     <module>errai-security</module>
     <module>errai-demos</module>
     <module>errai-client-local-class-hider</module>

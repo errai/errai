@@ -209,12 +209,6 @@
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-otec</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
         <artifactId>errai-tools</artifactId>
         <version>${project.version}</version>
       </dependency>
