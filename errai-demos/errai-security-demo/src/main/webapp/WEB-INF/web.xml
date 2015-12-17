@@ -42,7 +42,7 @@
   </servlet-mapping>
 
   <filter-mapping>
-    <filter-name>ErraiUserCookieFilter</filter-name>
+    <filter-name>ErraiUserHostPageFilter</filter-name>
     <url-pattern>/index.jsp</url-pattern>
   </filter-mapping>
   
