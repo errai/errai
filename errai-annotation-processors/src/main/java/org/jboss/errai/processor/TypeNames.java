@@ -34,6 +34,7 @@ public class TypeNames {
   static final String GWT_COMPOSITE = "com.google.gwt.user.client.ui.Composite";
   static final String GWT_OPAQUE_DOM_EVENT = "com.google.gwt.user.client.Event";
   static final String GWT_EVENT = "com.google.gwt.event.shared.GwtEvent";
+  static final String JS_TYPE = "jsinterop.annotations.JsType";
 
   static final String JAVAX_INJECT = "javax.inject.Inject";
 

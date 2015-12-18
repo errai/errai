@@ -41,7 +41,7 @@ public class TemplatedAnnotationCheckerTest extends AbstractProcessorTest {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/TemplatedNotExtendingComposite.java");
 
-    assertCompilationMessage(diagnostics, Kind.ERROR, 6, 8, "subtype of Composite");
+    assertSuccessfulCompilation(diagnostics);
   }
 
   @Test
@@ -52,8 +52,8 @@ public class TemplatedAnnotationCheckerTest extends AbstractProcessorTest {
     assertCompilationMessage(diagnostics, Kind.ERROR, Diagnostic.NOPOS, Diagnostic.NOPOS,
             "Could not access associated template TemplatedMissingTemplate.html");
   }
-  
-  
+
+
   @Test
   public void shouldCompileCleanlyWhenAllRulesAreFollowedInSubTemplate() throws FileNotFoundException {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(

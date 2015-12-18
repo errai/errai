@@ -28,7 +28,7 @@ public class BoundNoWarnings {
     private Element property3 = DOM.createDiv();
     
     @Inject @Bound(property="property4")
-    private TextBox thisNameIsOverriddenByAttribute;
+    private JsTypeInputElement thisNameIsOverriddenByAttribute;
 
     @Inject @Bound(property="property6.property1")
     private TextBox propertyChainOneLevel;

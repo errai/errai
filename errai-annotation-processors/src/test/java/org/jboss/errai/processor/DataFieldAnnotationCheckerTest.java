@@ -37,11 +37,11 @@ public class DataFieldAnnotationCheckerTest extends AbstractProcessorTest {
   }
 
   @Test
-  public void shouldPrintErrorOnFieldNotExtendingWidget() throws FileNotFoundException {
+  public void shouldPrintErrorOnFieldNotExtendingWidgetOrElement() throws FileNotFoundException {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/DataFieldNotWidget.java");
 
-    assertCompilationMessage(diagnostics, Kind.ERROR, 10, 21, "must be assignable to Widget");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 10, 21, "must be assignable to Widget or Element, or be a native JsType element wrapper.");
   }
 
   @Test
@@ -51,7 +51,7 @@ public class DataFieldAnnotationCheckerTest extends AbstractProcessorTest {
 
     assertSuccessfulCompilation(diagnostics);
   }
-  
+
   @Test
   public void shouldCompileCleanlyWhenAllRulesAreFollowedInSubTemplate() throws FileNotFoundException {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
@@ -67,6 +67,5 @@ public class DataFieldAnnotationCheckerTest extends AbstractProcessorTest {
 
     assertCompilationMessage(diagnostics, Kind.WARNING, 9, 3, "no effect");
   }
-  
 
 }

@@ -13,4 +13,6 @@ public class DataFieldNoWarnings extends Composite {
   @DataField TextBox myTextBox;
 
   @DataField Element validType;
+  
+  @DataField JsTypeInputElement element;
 }
