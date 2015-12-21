@@ -37,6 +37,12 @@ public class PageWithTransitionAnchor extends FlowPanel {
   @Inject
   public TransitionAnchorFactory<PageBWithState> linkFactory;
 
+  @Inject
+  public TransitionAnchor<NonCompositePage> linkToNonComp;
+
+  @Inject
+  public TransitionAnchorFactory<NonCompositePage> nonCompLinkFactory;
+
   /**
    * Constructor.
    */
@@ -51,6 +57,7 @@ public class PageWithTransitionAnchor extends FlowPanel {
     HashMultimap<String, String> state = HashMultimap.create();
     state.put("uuid", "54321");
     add(linkFactory.get(state));
+    add(linkToNonComp);
   }
 
 }

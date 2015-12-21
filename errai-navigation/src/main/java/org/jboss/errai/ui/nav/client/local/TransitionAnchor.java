@@ -26,7 +26,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Represents an anchor widget that, when clicked, will navigate the user
@@ -39,7 +38,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @param <P> The type of the target page ("to page")
  * @author eric.wittmann@redhat.com
  */
-public final class TransitionAnchor<P extends IsWidget> extends Anchor implements ClickHandler {
+public final class TransitionAnchor<P> extends Anchor implements ClickHandler {
 
   private final Navigation navigation;
   private final Class<P> toPageWidgetType;
@@ -116,7 +115,7 @@ public final class TransitionAnchor<P extends IsWidget> extends Anchor implement
   public void onClick(ClickEvent event) {
     if (isEnabled())
       navigation.goTo(toPageWidgetType, this.state);
-    
+
     event.stopPropagation();
     event.preventDefault();
   }

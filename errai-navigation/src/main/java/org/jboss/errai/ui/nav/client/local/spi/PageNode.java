@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public interface PageNode<W extends IsWidget> {
+public interface PageNode<C> {
 
   /**
    * Returns the name of this page.
@@ -45,7 +45,7 @@ public interface PageNode<W extends IsWidget> {
 
   /**
    * Returns the URL template specified for this page by {@link Page#path()}. If no template is specified, it returns the page name.
-   * 
+   *
    * @return This page's URL. Never null.
    */
   public String getURL();
@@ -57,14 +57,14 @@ public interface PageNode<W extends IsWidget> {
    *          The callback that will receive the widget to display for this page. The Widget will have the same runtime
    *          type as returned by {@link #contentType()}, and will never be null.
    */
-  public void produceContent(CreationalCallback<W> callback);
+  public void produceContent(CreationalCallback<C> callback);
 
   /**
    * Returns the type of widget that this page node's {@link #produceContent(CreationalCallback)} method will produce.
    *
    * @return The type of widget that supplies this page's content. Never null.
    */
-  public Class<W> contentType();
+  public Class<C> contentType();
 
   /**
    * Called by the framework when this page node is about to be displayed in the navigation content panel.
@@ -77,7 +77,7 @@ public interface PageNode<W extends IsWidget> {
    * @param state
    *          the state of the page, parsed from the history token on the URL. Never null.
    */
-  public void pageShowing(W widget, HistoryToken state);
+  public void pageShowing(C widget, HistoryToken state);
 
   /**
    * Called by the framework when this page node was displayed in the navigation content panel.
@@ -90,7 +90,7 @@ public interface PageNode<W extends IsWidget> {
    * @param state
    *          the state of the page, parsed from the history token on the URL. Never null.
    */
-  public void pageShown(W widget, HistoryToken state);
+  public void pageShown(C widget, HistoryToken state);
 
   /**
    * Called by the framework when this page node is about to be removed from the navigation content panel.
@@ -101,7 +101,7 @@ public interface PageNode<W extends IsWidget> {
    *          the widget instance (which is currently in the navigation content panel) that was previously used in the
    *          call to {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
    */
-  public void pageHiding(W widget, NavigationControl control);
+  public void pageHiding(C widget, NavigationControl control);
 
   /**
    * Called by the framework after this page has been removed from the navigation content panel.
@@ -112,7 +112,7 @@ public interface PageNode<W extends IsWidget> {
    *          the widget instance (which was in the navigation content panel) that was previously used in the call to
    *          {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
    */
-  public void pageHidden(W widget);
+  public void pageHidden(C widget);
 
   /**
    * Used by the framework to destroy {@link Dependent} scoped beans after a page is no longer needed. For
@@ -121,6 +121,6 @@ public interface PageNode<W extends IsWidget> {
    * @param widget
    *          The widget instance that will be destroyed if it is a dependent-scoped bean. Never null.
    */
-  public void destroy(W widget);
+  public void destroy(C widget);
 
 }

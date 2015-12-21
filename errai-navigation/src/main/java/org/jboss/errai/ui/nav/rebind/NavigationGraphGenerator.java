@@ -85,6 +85,7 @@ import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
@@ -142,9 +143,9 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     if (hasNonBlacklistedPages) {
       for (MetaClass pageClass : pages) {
-        if (!pageClass.isAssignableTo(IsWidget.class)) {
+        if (!(pageClass.isAssignableTo(IsWidget.class) || pageClass.isAnnotationPresent(Templated.class))) {
           throw new GenerationException(
-              "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must implement IsWidget");
+              "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must implement IsWidget or be @Templated");
         }
         Page annotation = pageClass.getAnnotation(Page.class);
         String pageName = getPageName(pageClass);
@@ -327,14 +328,14 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   private String getPageURL(MetaClass pageClass, String pageName) {
     Page pageAnnotation = pageClass.getAnnotation(Page.class);
     String path = pageAnnotation.path();
-    
+
     if (path.equals("")) {
       return pageName;
     }
-    
+
     if (path.startsWith("/"))
       path = path.substring(1);
-    
+
     return path;
   }
 

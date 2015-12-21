@@ -44,7 +44,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * <p>
  * The concrete implementation of this class is usually generated at compile-time by scanning for page classes. It is
  * expected to fill in the {@link #pagesByName} map in its constructor.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public abstract class NavigationGraph {
@@ -55,21 +55,21 @@ public abstract class NavigationGraph {
    * Maps page names to the classes that implement them. The subclass's constructor is responsible for populating this
    * map.
    */
-  protected final Map<String, PageNode<? extends IsWidget>> pagesByName = new HashMap<String, PageNode<? extends IsWidget>>();
-  protected final Multimap<Class<? extends PageRole>, PageNode<? extends IsWidget>> pagesByRole = ArrayListMultimap
+  protected final Map<String, PageNode<?>> pagesByName = new HashMap<String, PageNode<?>>();
+  protected final Multimap<Class<? extends PageRole>, PageNode<?>> pagesByRole = ArrayListMultimap
           .create();
 
   /**
    * Returns an instance of the given page type. If the page is an ApplicationScoped bean, the singleton instance of the
    * page will be returned; otherwise (for Dependent-scoped beans) a new instance will be returned.
-   * 
+   *
    * @param name
    *          The page name, as defined by the implementation of page.
    * @return The appropriate instance of the page.
    */
-  public <W extends IsWidget> PageNode<W> getPage(String name) {
+  public <C> PageNode<C> getPage(String name) {
     @SuppressWarnings("unchecked")
-    PageNode<W> page = (PageNode<W>) pagesByName.get(name);
+    PageNode<C> page = (PageNode<C>) pagesByName.get(name);
     if (page == null) {
       throw new PageNotFoundException("Page not found: \"" + name + "\"");
     }
@@ -79,17 +79,17 @@ public abstract class NavigationGraph {
   /**
    * Returns an instance of the given page type. If the page is an ApplicationScoped bean, the singleton instance of the
    * page will be returned; otherwise (for Dependent-scoped beans) a new instance will be returned.
-   * 
+   *
    * @param type
    *          The Class object for the bean that implements the page.
    * @return The appropriate instance of the page.
    */
-  public <W extends IsWidget> PageNode<W> getPage(Class<W> type) {
+  public <C> PageNode<C> getPage(Class<C> type) {
     // TODO this could be made more efficient if we had a pagesByWidgetType map
-    for (Entry<String, PageNode<? extends IsWidget>> e : pagesByName.entrySet()) {
+    for (Entry<String, PageNode<?>> e : pagesByName.entrySet()) {
       if (e.getValue().contentType().equals(type)) {
         @SuppressWarnings({ "unchecked" })
-        PageNode<W> page = (PageNode<W>) e.getValue();
+        PageNode<C> page = (PageNode<C>) e.getValue();
         return page;
       }
     }
@@ -99,17 +99,17 @@ public abstract class NavigationGraph {
   /**
    * Returns all pages that have the specified role. In the add page annotation one can specify multiple roles for a
    * page. {@link #getPage(Class)} {@link PageRole}
-   * 
+   *
    * @param role
    *          the role used to lookup the pages
    * @return all pages that have the role set.
    */
-  public Collection<PageNode<? extends IsWidget>> getPagesByRole(Class<? extends PageRole> role) {
+  public Collection<PageNode<?>> getPagesByRole(Class<? extends PageRole> role) {
     return pagesByRole.get(role);
   }
 
   public PageNode getPageByRole(Class<? extends UniquePageRole> role) {
-    final Collection<PageNode<? extends IsWidget>> pageNodes = pagesByRole.get(role);
+    final Collection<PageNode<?>> pageNodes = pagesByRole.get(role);
     if (pageNodes.size() == 1) {
       return pageNodes.iterator().next();
     }
@@ -137,13 +137,13 @@ public abstract class NavigationGraph {
     }
 
   }
-  
+
   /**
    * @return Returns a collection of all {@link PageNode PageNodes} in the navigation graph.
    */
-  public Collection<PageNode<? extends IsWidget>> getAllPages() {
-    Collection<PageNode<? extends IsWidget>> values = pagesByName.values();
-    return Collections.unmodifiableCollection(new HashSet<PageNode<? extends IsWidget>>(values));
+  public Collection<PageNode<?>> getAllPages() {
+    Collection<PageNode<?>> values = pagesByName.values();
+    return Collections.unmodifiableCollection(new HashSet<PageNode<?>>(values));
   }
-  
+
 }

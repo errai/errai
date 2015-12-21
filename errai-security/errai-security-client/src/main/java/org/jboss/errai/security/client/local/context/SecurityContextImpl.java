@@ -48,7 +48,6 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
@@ -89,7 +88,7 @@ public class SecurityContextImpl implements SecurityContext {
   @Inject
   private Caller<NonCachingUserService> userServiceCaller;
 
-  private Class<? extends IsWidget> lastPageCache;
+  private Class<?> lastPageCache;
 
   @PostConstruct
   private void setup() {
@@ -135,7 +134,7 @@ public class SecurityContextImpl implements SecurityContext {
     redirectToLoginPage(getCurrentPage());
   }
 
-  private Class<? extends IsWidget> getCurrentPage() {
+  private Class<?> getCurrentPage() {
     if (navigation.getCurrentPage() != null) {
       return navigation.getCurrentPage().contentType();
     }
@@ -146,7 +145,7 @@ public class SecurityContextImpl implements SecurityContext {
   }
 
   @Override
-  public void redirectToLoginPage(final Class<? extends IsWidget> fromPage) {
+  public void redirectToLoginPage(final Class<?> fromPage) {
     lastPageCache = fromPage;
     navigation.goToWithRole(LoginPage.class);
   }
@@ -157,7 +156,7 @@ public class SecurityContextImpl implements SecurityContext {
   }
 
   @Override
-  public void redirectToSecurityErrorPage(final Class<? extends IsWidget> fromPage) {
+  public void redirectToSecurityErrorPage(final Class<?> fromPage) {
     lastPageCache = fromPage;
     navigation.goToWithRole(SecurityError.class);
   }
@@ -184,7 +183,7 @@ public class SecurityContextImpl implements SecurityContext {
   }
 
   @Override
-  public void navigateBackOrToPage(final Class<? extends IsWidget> pageType) {
+  public void navigateBackOrToPage(final Class<?> pageType) {
     if (lastPageCache != null) {
       navigation.goTo(lastPageCache, ImmutableMultimap.<String, String>of());
       lastPageCache = null;
@@ -197,7 +196,7 @@ public class SecurityContextImpl implements SecurityContext {
   @Override
   public void navigateBackOrHome() {
     // Guaranteed to exist at compile-time.
-    final PageNode<? extends IsWidget> defaultPageNode = navigation.getPagesByRole(DefaultPage.class).iterator().next();
+    final PageNode<?> defaultPageNode = navigation.getPagesByRole(DefaultPage.class).iterator().next();
     navigateBackOrToPage(defaultPageNode.contentType());
   }
 

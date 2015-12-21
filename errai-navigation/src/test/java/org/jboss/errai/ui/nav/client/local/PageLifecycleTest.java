@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.nav.client.local;
 
-import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.*;
+import static org.jboss.errai.ui.nav.client.local.testpages.BasePageForLifecycleTracing.lifecycleTracer;
 
 import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -34,6 +34,8 @@ import org.jboss.errai.ui.nav.client.local.testpages.DependentLifecycleCountingP
 import org.jboss.errai.ui.nav.client.local.testpages.EntryPointPage;
 import org.jboss.errai.ui.nav.client.local.testpages.ExplicitlyDependentScopedPage;
 import org.jboss.errai.ui.nav.client.local.testpages.ImplicitlyDependentScopedPage;
+import org.jboss.errai.ui.nav.client.local.testpages.NonCompositePage;
+import org.jboss.errai.ui.nav.client.local.testpages.NonCompositePageWithLifecycleMethods;
 import org.jboss.errai.ui.nav.client.local.testpages.PageA;
 import org.jboss.errai.ui.nav.client.local.testpages.PageAWithRedirect;
 import org.jboss.errai.ui.nav.client.local.testpages.PageBWithRedirect;
@@ -141,6 +143,16 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals("foo", page.stateWhenBeforeShowWasCalled);
   }
 
+  public void testPageShowingMethodCalledForNonCompositeTemplated() throws Exception {
+    NonCompositePageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(NonCompositePageWithLifecycleMethods.class).getInstance());
+    assertEquals(0, page.getShowing());
+
+    navigation.goTo(NonCompositePageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
+
+    assertEquals(1, page.getShowing());
+    assertEquals("foo", page.getState());
+  }
+
   public void testPageShownMethodCalled() throws Exception {
     PageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(PageWithLifecycleMethods.class).getInstance());
     page.afterShowCallCount = 0;
@@ -148,6 +160,16 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     navigation.goTo(PageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
 
     assertEquals(1, page.afterShowCallCount);
+  }
+
+  public void testPageShownMethodCalledForNonCompositeTemplated() throws Exception {
+    NonCompositePageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(NonCompositePageWithLifecycleMethods.class).getInstance());
+    assertEquals(0, page.getShown());
+
+    navigation.goTo(NonCompositePageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
+
+    assertEquals(1, page.getShown());
+    assertEquals("foo", page.getState());
   }
 
   public void testPageHidingMethodCalled() throws Exception {
@@ -164,6 +186,20 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals(1, page.beforeHideCallCount);
   }
 
+  public void testPageHidingMethodCalledForNonCompositeTemplated() throws Exception {
+    NonCompositePageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(NonCompositePageWithLifecycleMethods.class).getInstance());
+
+    // set up by ensuring we're at some other page to start with
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, page.getHiding());
+
+    navigation.goTo(NonCompositePageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
+    assertEquals(0, page.getHiding());
+
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(1, page.getHiding());
+  }
+
   public void testPageHiddenMethodCalled() throws Exception {
     PageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(PageWithLifecycleMethods.class).getInstance());
 
@@ -176,6 +212,33 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
     assertEquals(1, page.afterHideCallCount);
+  }
+
+  public void testPageHiddenMethodCalledForNonCompositeTemplated() throws Exception {
+    NonCompositePageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(NonCompositePageWithLifecycleMethods.class).getInstance());
+
+    // set up by ensuring we're at some other page to start with
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, page.getHidden());
+
+    navigation.goTo(NonCompositePageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
+    assertEquals(0, page.getHidden());
+
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(1, page.getHidden());
+  }
+
+  public void testNonCompositeTemplatedDependentScopedPageIsDestroyedAfterHiding() throws Exception {
+    NonCompositePage.resetDestroyed();
+    assertEquals(0, NonCompositePage.getDestroyed().size());
+    navigation.goTo(NonCompositePage.class, ImmutableMultimap.<String, String>of());
+    assertEquals(0, NonCompositePage.getDestroyed().size());
+    Object nonCompositePage = navigation.currentComponent;
+
+    // go somewhere else; doesn't matter where
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(1, NonCompositePage.getDestroyed().size());
+    assertEquals(nonCompositePage, NonCompositePage.getDestroyed().iterator().next());
   }
 
   public void testExplicitlyDependentScopedPageIsDestroyedAfterHiding() throws Exception {

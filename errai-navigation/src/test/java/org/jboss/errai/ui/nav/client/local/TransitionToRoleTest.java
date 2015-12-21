@@ -18,11 +18,12 @@ package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.nav.client.local.testpages.NonCompositePage;
 import org.jboss.errai.ui.nav.client.local.testpages.PageA;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithUniqueRole;
 
 public class TransitionToRoleTest extends AbstractErraiCDITest {
-  
+
   private TransitionToRoleTestApp testApp;
   private Navigation navigation;
 
@@ -46,6 +47,15 @@ public class TransitionToRoleTest extends AbstractErraiCDITest {
     testApp.testPage.transition.go();
 
     assertEquals(PageWithUniqueRole.class, navigation.currentPage.contentType());
+  }
+
+  public void testNavigationToNonCompositePageByRole() throws Exception {
+    navigation.goTo("");
+    assertEquals(PageA.class, navigation.currentPage.contentType());
+
+    testApp.testPage.nonCompositeTransition.go();
+
+    assertEquals(NonCompositePage.class, navigation.currentPage.contentType());
   }
 
 }

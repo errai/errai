@@ -24,8 +24,6 @@ import javax.inject.Singleton;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-import com.google.gwt.user.client.ui.IsWidget;
-
 /**
  * Provides new instances of the {@link TransitionAnchor} widget class, which
  * allows them to be injected.
@@ -35,14 +33,14 @@ import com.google.gwt.user.client.ui.IsWidget;
 public class TransitionAnchorProvider implements ContextualTypeProvider<TransitionAnchor<?>> {
 
   @Inject Navigation navigation;
-  
+
   @Inject HistoryTokenFactory htFactory;
 
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public TransitionAnchor provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    Class<IsWidget> toPageType = (Class<IsWidget>) typeargs[0];
-    return new TransitionAnchor<IsWidget>(navigation, toPageType, htFactory);
+    Class<?> toPageType = typeargs[0];
+    return new TransitionAnchor(navigation, toPageType, htFactory);
   }
 
 }

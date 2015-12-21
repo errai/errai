@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.nav.client.local.testpages;
+package org.jboss.errai.ui.nav.client.local.res;
 
-import javax.inject.Inject;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.TransitionToRole;
-import org.jboss.errai.ui.nav.client.local.res.NonCompositePageRole;
-
-import com.google.gwt.user.client.ui.SimplePanel;
-
-@Page
-public class PageWithTransitionToSomeUniquePageRole extends SimplePanel {
-
-  @Inject
-  public TransitionToRole<SomeUniquePageRole> transition;
-
-  @Inject
-  public TransitionToRole<NonCompositePageRole> nonCompositeTransition;
+/**
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+public interface NonCompositePageRole extends UniquePageRole {
 
 }

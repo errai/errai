@@ -19,6 +19,7 @@ package org.jboss.errai.ui.nav.client.local;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ui.nav.client.local.testpages.NonCompositePage;
 import org.jboss.errai.ui.nav.client.local.testpages.OtherPageWithTransitionAnchor;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithTransitionAnchor;
 
@@ -26,6 +27,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.RootPanel;
 
 public class TransitionAnchorTest extends AbstractErraiCDITest {
 
@@ -54,7 +56,7 @@ public class TransitionAnchorTest extends AbstractErraiCDITest {
     assertTrue(page.linkToB.getHref().endsWith("#page_b"));
 
     // Now ensure that an injected TransitionAnchorFactory works
-    assertEquals(4, page.getWidgetCount());
+    assertEquals(5, page.getWidgetCount());
     // TransitionAnchor from factory #1
     TransitionAnchor<?> factoryAnchor = (TransitionAnchor<?>) page.getWidget(1);
     assertNotNull(factoryAnchor);
@@ -67,6 +69,23 @@ public class TransitionAnchorTest extends AbstractErraiCDITest {
     factoryAnchor = (TransitionAnchor<?>) page.getWidget(3);
     assertNotNull(factoryAnchor);
     assertTrue(factoryAnchor.getHref().endsWith("#page_b_with_state;uuid=54321"));
+  }
+
+  public void testTransitionAnchorWithNonCompositePage() throws Exception {
+    TransitionAnchorTestApp app = beanManager.lookupBean(TransitionAnchorTestApp.class).getInstance();
+    assertNotNull(app);
+    PageWithTransitionAnchor page = app.getPage();
+    assertNotNull(page);
+
+    // Ensure that an injected TransitionAnchor works
+    assertNotNull(page.linkToNonComp.getHref());
+    assertTrue(page.linkToNonComp.getHref().endsWith("#" + NonCompositePage.class.getSimpleName()));
+
+    // TransitionAnchor from factory #1
+    TransitionAnchor<?> factoryAnchor = page.nonCompLinkFactory.get();
+    RootPanel.get().add(factoryAnchor);
+    assertNotNull(factoryAnchor);
+    assertTrue(factoryAnchor.getHref().endsWith("#" + NonCompositePage.class.getSimpleName()));
   }
 
   public void testTransitionAnchorSetDisabled() throws Exception {

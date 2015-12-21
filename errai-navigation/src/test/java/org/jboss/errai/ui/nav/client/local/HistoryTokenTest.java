@@ -19,7 +19,6 @@ package org.jboss.errai.ui.nav.client.local;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.junit.client.GWTTestCase;
 
 public class HistoryTokenTest extends GWTTestCase {
@@ -94,5 +93,5 @@ public class HistoryTokenTest extends GWTTestCase {
             .toString();
     assertEquals("PageName;p1=v1&p2=v2", encodedToken);
   }
-  
+
 }

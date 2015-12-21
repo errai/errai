@@ -42,6 +42,7 @@ import org.jboss.errai.ui.nav.client.local.api.RedirectLoopException;
 import org.jboss.errai.ui.nav.client.local.pushstate.PushStateUtil;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableListMultimap;
@@ -55,6 +56,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
@@ -82,9 +84,9 @@ public class Navigation {
   /**
    * Encapsulates a navigation request to another page.
    */
-  private static class Request<W extends IsWidget> {
+  private static class Request<C> {
 
-    PageNode<W> pageNode;
+    PageNode<C> pageNode;
 
     HistoryToken state;
 
@@ -99,7 +101,7 @@ public class Navigation {
      * @param state
      *          The state information to pass to the page node before showing it.
      */
-    private Request(PageNode<W> pageNode, HistoryToken state) {
+    private Request(PageNode<C> pageNode, HistoryToken state) {
       this.pageNode = pageNode;
       this.state = state;
     }
@@ -108,7 +110,9 @@ public class Navigation {
 
   private final NavigatingContainer navigatingContainer = GWT.create(NavigatingContainer.class);
 
-  protected PageNode<IsWidget> currentPage;
+  protected PageNode<Object> currentPage;
+
+  protected Object currentComponent;
 
   protected IsWidget currentWidget;
 
@@ -241,8 +245,8 @@ public class Navigation {
    *          The state information to set on the page node before showing it. Normally the map keys correspond with the
    *          names of fields annotated with {@code @PageState} in the widget class, but this is not required.
    */
-  public <W extends IsWidget> void goTo(Class<W> toPage, Multimap<String, String> state) {
-    PageNode<W> toPageInstance = null;
+  public <C> void goTo(Class<C> toPage, Multimap<String, String> state) {
+    PageNode<C> toPageInstance = null;
 
     try {
       toPageInstance = navGraph.getPage(toPage);
@@ -266,7 +270,7 @@ public class Navigation {
    *          the name of the page node to lookup and display.
    */
   public void goTo(String toPage) {
-    PageNode<? extends IsWidget> toPageInstance = null;
+    PageNode<?> toPageInstance = null;
     try {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance);
@@ -303,25 +307,25 @@ public class Navigation {
    *          the role to find PageNodes by
    * @return All the pageNodes of the pages that have the specific pageRole.
    */
-  public Collection<PageNode<? extends IsWidget>> getPagesByRole(Class<? extends PageRole> pageRole) {
+  public Collection<PageNode<?>> getPagesByRole(Class<? extends PageRole> pageRole) {
     return navGraph.getPagesByRole(pageRole);
   }
 
-  private <W extends IsWidget> void navigate(PageNode<W> toPageInstance) {
+  private <C> void navigate(PageNode<C> toPageInstance) {
     navigate(toPageInstance, ImmutableListMultimap.<String, String> of());
   }
 
-  private <W extends IsWidget> void navigate(PageNode<W> toPageInstance, Multimap<String, String> state) {
+  private <C> void navigate(PageNode<C> toPageInstance, Multimap<String, String> state) {
     HistoryToken token = historyTokenFactory.createHistoryToken(toPageInstance.name(), state);
     logger.debug("Navigating to " + toPageInstance.name() + " at url: " + token.toString());
-    navigate(new Request<W>(toPageInstance, token), true);
+    navigate(new Request<C>(toPageInstance, token), true);
   }
 
   /**
    * Captures a backup of the current page state in history, sets the state on the given PageNode from the given state
    * token, then makes its widget visible in the content area.
    */
-  private <W extends IsWidget> void navigate(Request<W> request, boolean fireEvent) {
+  private <C> void navigate(Request<C> request, boolean fireEvent) {
     if (locked) {
       queuedRequests.add(request);
       return;
@@ -336,7 +340,7 @@ public class Navigation {
     maybeShowPage(request, fireEvent);
   }
 
-  private <W extends IsWidget> void handleQueuedRequests(Request<W> request, boolean fireEvent) {
+  private <C> void handleQueuedRequests(Request<C> request, boolean fireEvent) {
     if (queuedRequests.isEmpty()) {
       // No new navigation requests were recorded in the lifecycle methods.
       // This is the page which has to be displayed and the browser's history
@@ -378,51 +382,53 @@ public class Navigation {
     // Ensure clean contentPanel regardless of currentPage being null
     navigatingContainer.clear();
 
-    if (currentPage != null && currentWidget != null) {
-      currentPage.pageHidden(currentWidget);
-      currentPage.destroy(currentWidget);
+    if (currentPage != null && currentComponent != null) {
+      currentPage.pageHidden(currentComponent);
+      currentPage.destroy(currentComponent);
     }
   }
 
   /**
    * Call navigation and page related lifecycle methods. If the {@link Access} is fired successfully, load the new page.
    */
-  private <W extends IsWidget> void maybeShowPage(final Request<W> request, final boolean fireEvent) {
-    request.pageNode.produceContent(new CreationalCallback<W>() {
+  private <C> void maybeShowPage(final Request<C> request, final boolean fireEvent) {
+    request.pageNode.produceContent(new CreationalCallback<C>() {
       @Override
-      public void callback(final W widget) {
-        if (widget == null) {
+      public void callback(final C component) {
+        if (component == null) {
           throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
         }
 
-        final W unwrappedWidget = Factory.maybeUnwrapProxy(widget);
+        final C unwrappedComponent = Factory.maybeUnwrapProxy(component);
+        final Widget widget = (unwrappedComponent instanceof IsWidget ? ((IsWidget) unwrappedComponent).asWidget()
+                : TemplateWidgetMapper.get(unwrappedComponent));
         maybeAttachContentPanel();
         currentPageToken = request.state;
 
-        if ((unwrappedWidget instanceof Composite) && (getCompositeWidget((Composite) unwrappedWidget) == null)) {
-          final HandlerRegistration reg = unwrappedWidget.asWidget().addAttachHandler(new Handler() {
+        if ((unwrappedComponent instanceof Composite) && (getCompositeWidget((Composite) unwrappedComponent) == null)) {
+          final HandlerRegistration reg = widget.addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
-              if (event.isAttached() && currentWidget != unwrappedWidget) {
-                pageHiding(unwrappedWidget, request, fireEvent);
+              if (event.isAttached() && currentWidget != unwrappedComponent) {
+                pageHiding(unwrappedComponent, widget, request, fireEvent);
               }
             }
           });
-          attachHandlerRegistrations.put(unwrappedWidget, reg);
+          attachHandlerRegistrations.put(widget, reg);
         }
         else {
-          pageHiding(unwrappedWidget, request, fireEvent);
+          pageHiding(unwrappedComponent, widget, request, fireEvent);
         }
       }
     });
   }
 
-  private <W extends IsWidget> void pageHiding(final W widget, final Request<W> request, final boolean fireEvent) {
-    if (widget instanceof Proxy) {
+  private <C, W extends IsWidget> void pageHiding(final C component, final W componentWidget, final Request<C> request, final boolean fireEvent) {
+    if (component instanceof Proxy) {
       throw new RuntimeException("Was passed in a proxy, but should always receive an unwrapped widget.");
     }
 
-    HandlerRegistration reg = attachHandlerRegistrations.remove(widget);
+    HandlerRegistration reg = attachHandlerRegistrations.remove(component);
     if (reg != null) {
       reg.removeHandler();
     }
@@ -430,8 +436,8 @@ public class Navigation {
     final NavigationControl control = new NavigationControl(new Runnable() {
       @Override
       public void run() {
-        final Access<W> accessEvent = new AccessImpl<W>();
-        accessEvent.fireAsync(widget, new LifecycleCallback() {
+        final Access<C> accessEvent = new AccessImpl<C>();
+        accessEvent.fireAsync(component, new LifecycleCallback() {
 
           @Override
           public void callback(final boolean success) {
@@ -439,18 +445,19 @@ public class Navigation {
               locked = true;
               try {
                 hideCurrentPage();
-                request.pageNode.pageShowing(widget, request.state);
+                request.pageNode.pageShowing(component, request.state);
 
                 // Fire IOC lifecycle event to indicate that the state of the
                 // bean has changed.
                 // TODO make this smarter and only fire state change event when
                 // fields actually changed.
-                stateChangeEvent.fireAsync(widget);
+                stateChangeEvent.fireAsync(component);
 
                 setCurrentPage(request.pageNode);
-                currentWidget = widget;
-                navigatingContainer.setWidget(widget);
-                request.pageNode.pageShown(widget, request.state);
+                currentWidget = componentWidget;
+                currentComponent = component;
+                navigatingContainer.setWidget(componentWidget);
+                request.pageNode.pageShown(component, request.state);
               } finally {
                 locked = false;
               }
@@ -458,15 +465,15 @@ public class Navigation {
               handleQueuedRequests(request, fireEvent);
             }
             else {
-              request.pageNode.destroy(widget);
+              request.pageNode.destroy(component);
             }
           }
         });
       }
     });
 
-    if (currentPage != null && currentWidget != null && currentWidget.asWidget() == navigatingContainer.getWidget()) {
-      currentPage.pageHiding(Factory.maybeUnwrapProxy(currentWidget), control);
+    if (currentPage != null && currentWidget != null && currentComponent != null && currentWidget.asWidget() == navigatingContainer.getWidget()) {
+      currentPage.pageHiding(Factory.maybeUnwrapProxy(currentComponent), control);
     }
     else {
       control.proceed();
@@ -478,7 +485,7 @@ public class Navigation {
    *
    * @return the current page
    */
-  public PageNode<IsWidget> getCurrentPage() {
+  public PageNode<?> getCurrentPage() {
     return currentPage;
   }
 
