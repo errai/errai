@@ -45,13 +45,20 @@ public class CompositeQuickHandlerComponent extends Composite implements QuickHa
   @DataField
   private ButtonElement c3 = Document.getDocument().createButtonElement();
 
+  @DataField
+  private ButtonElement c4 = Document.getDocument().createButtonElement();
+
+  @DataField
+  private AnchorElement c5 = DOM.createAnchor().cast();
+
   private boolean c0EventFired = false;
   private boolean c1EventFired = false;
   private boolean c1_dupEventFired = false;
   private boolean c2EventFired = false;
   private boolean c3EventFired = false;
   private boolean thisEventFired = false;
-  private final boolean c0EventFired2 = false;
+  private boolean c4EventFired = false;
+  private boolean c5EVentFired = false;
 
 
   @Override
@@ -69,6 +76,16 @@ public class CompositeQuickHandlerComponent extends Composite implements QuickHa
     return c3;
   }
 
+  @Override
+  public ButtonElement getC4() {
+    return c4;
+  }
+
+  @Override
+  public AnchorElement getC5() {
+    return c5;
+  }
+
   @EventHandler("c0")
   @SinkNative(Event.ONCLICK | Event.ONFOCUS)
   private void doSomethingC0(Event e) {
@@ -80,38 +97,41 @@ public class CompositeQuickHandlerComponent extends Composite implements QuickHa
     c1EventFired = true;
   }
 
-  @Override
   @EventHandler("c1")
-  public void doSomethingC1_dup(ClickEvent e) {
+  private void doSomethingC1_dup(ClickEvent e) {
     c1_dupEventFired = true;
   }
 
-  @Override
   @EventHandler("c2")
-  public void doSomethingC2(ClickEvent e) {
+  private void doSomethingC2(ClickEvent e) {
     c2EventFired = true;
   }
 
-  @Override
   @EventHandler("c3")
-  public void doSomethingC3(ClickEvent event) {
+  private void doSomethingC3(ClickEvent event) {
     c3EventFired = true;
   }
 
-  @Override
+  @EventHandler("c4")
+  @SinkNative(Event.ONCLICK)
+  private void doSomethingC4(Event e) {
+    c4EventFired = true;
+  }
+
+  @EventHandler("c5")
+  @SinkNative(Event.ONCLICK)
+  private void doSomethingC5(Event e) {
+    c5EVentFired = true;
+  }
+
   @EventHandler
-  public void doSomethingOnThis(ClickEvent e) {
+  private void doSomethingOnThis(ClickEvent e) {
     thisEventFired = true;
   }
 
   @Override
   public boolean isC0EventFired() {
     return c0EventFired;
-  }
-
-  @Override
-  public boolean isC0EventFired2() {
-    return c0EventFired2;
   }
 
   @Override
@@ -132,6 +152,16 @@ public class CompositeQuickHandlerComponent extends Composite implements QuickHa
   @Override
   public boolean isC3EventFired() {
     return c3EventFired;
+  }
+
+  @Override
+  public boolean isC4EventFired() {
+    return c4EventFired;
+  }
+
+  @Override
+  public boolean isC5EventFired() {
+    return c5EVentFired;
   }
 
   @Override

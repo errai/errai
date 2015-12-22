@@ -331,9 +331,12 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
             processedNativeHandlers.add(name);
           }
 
+          final ContextualStatementBuilder elementStmt;
           if (dataFieldTypes.containsKey(name)) {
             final MetaClass dataFieldType = dataFieldTypes.get(name);
-            if (!dataFieldType.isAssignableTo(Element.class)) {
+            if (dataFieldType.isAssignableTo(Element.class) || RebindUtil.isNativeJsType(dataFieldType)) {
+              elementStmt = Stmt.castTo(ElementWrapperWidget.class, Stmt.nestedCall(fieldsMap).invoke("get", name));
+            } else {
               /*
                * We have a GWT or other Widget type.
                */
@@ -341,28 +344,14 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
                   + "] in class [" + declaringClass.getFullyQualifiedName() + "] is not assignable to ["
                   + Element.class.getName() + "] specified by @EventHandler method " + method.getName()
                   + "("
-                  + eventType.getName() + ")]");
+                  + eventType.getName() + ")]\n");
             }
-            else {
-              /*
-               * We have a wrapped native Element reference
-               */
-              throw new GenerationException("Cannot attach native DOM events to @DataField [" + name
-                  + "] of type ["
-                  + dataFieldType.getName() + "] in class [" + declaringClass.getFullyQualifiedName()
-                  + "] specified by @EventHandler method " + method.getName() + "(" + eventType.getName()
-                  + ")] - Use the corresponding GWT 'EventHandler' types instead.");
-            }
+          } else {
+            elementStmt = Stmt.loadVariable(dataFieldElementsVarName).invoke("get", name);
           }
-          else {
-            /*
-             * We are completely native and have no reference to this data-field
-             * Element in Java
-             */
-            initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupNativeEventListener", instance,
-                Stmt.loadVariable(dataFieldElementsVarName).invoke("get", name), listenerInstance,
-                eventsToSink));
-          }
+          initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupNativeEventListener", instance,
+              elementStmt, listenerInstance,
+              eventsToSink));
         }
       }
       else {

@@ -371,6 +371,19 @@ public final class TemplateUtil {
     return dataFields;
   }
 
+  public static void setupNativeEventListener(Object component, ElementWrapperWidget wrapper, EventListener listener,
+          int eventsToSink) {
+
+    if (wrapper == null) {
+      throw new RuntimeException("A native event source was specified in " + component.getClass().getName()
+              + " but the corresponding data-field does not exist!");
+    }
+    wrapper.setEventListener(eventsToSink, listener);
+  }
+
+  /**
+   * Use this for elements that are not wrapped by any widgets (including the ElementWrapperWidget).
+   */
   public static void setupNativeEventListener(Object component, Element element, EventListener listener,
           int eventsToSink) {
 
@@ -378,7 +391,6 @@ public final class TemplateUtil {
       throw new RuntimeException("A native event source was specified in " + component.getClass().getName()
               + " but the corresponding data-field does not exist!");
     }
-    // These casts must stay to maintain compatibility with GWT 2.5.1
     DOM.setEventListener(element, listener);
     DOM.sinkEvents(element, eventsToSink);
   }

@@ -50,38 +50,47 @@ public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
   }
 
   private void runAssertions(QuickHandlerTemplateTestApp app) {
-    assertNotNull(app.getComponent());
+    assertNotNull("Component was not injected.", app.getComponent());
 
-    assertFalse(app.getComponent().isThisEventFired());
+    assertFalse("This event fired prematurely.", app.getComponent().isThisEventFired());
     DomEvent.fireNativeEvent(generateClickEvent(), app.getComponent());
-    assertTrue(app.getComponent().isThisEventFired());
+    assertTrue("This event handler was not called.", app.getComponent().isThisEventFired());
 
     DivElement c0 = DivElement.as(Document.get().getElementById("c0"));
-    assertNotNull(c0);
+    assertNotNull("Could not find c0 element in DOM.", c0);
     AnchorElement c1 = app.getComponent().getC1();
     ButtonElement c2 = ButtonElement.as(Document.get().getElementById("c2"));
     ButtonElement c3 = ButtonElement.as(TemplateUtil.asElement(app.getComponent().getC3()));
-    assertNotNull(c2);
+    ButtonElement c4 = ButtonElement.as(TemplateUtil.asElement(app.getComponent().getC4()));
+    AnchorElement c5 = app.getComponent().getC5();
+    assertNotNull("Could not find c2 element in DOM.", c2);
 
-    assertFalse(app.getComponent().isC0EventFired());
-    assertFalse(app.getComponent().isC0EventFired2());
+    assertFalse("c0 event fired prematurely.", app.getComponent().isC0EventFired());
     c0.dispatchEvent(generateClickEvent());
-    assertTrue(app.getComponent().isC0EventFired());
-    assertFalse(app.getComponent().isC0EventFired2());
+    assertTrue("c0 event handler was not called.", app.getComponent().isC0EventFired());
+    assertFalse("c4 event fired after click event on c0.", app.getComponent().isC4EventFired());
 
-    assertFalse(app.getComponent().isC1_dupEventFired());
-    assertFalse(app.getComponent().isC1EventFired());
+    assertFalse("c1 dup event fired prematurely.", app.getComponent().isC1_dupEventFired());
+    assertFalse("c1 event fired prematurely.", app.getComponent().isC1EventFired());
     c1.dispatchEvent(generateClickEvent());
-    assertTrue(app.getComponent().isC1EventFired());
-    assertTrue(app.getComponent().isC1_dupEventFired());
+    assertTrue("c1 event handler was not called.", app.getComponent().isC1EventFired());
+    assertTrue("c1 dup event handler was not called.", app.getComponent().isC1_dupEventFired());
 
-    assertFalse(app.getComponent().isC2EventFired());
+    assertFalse("c2 event fired prematurely.", app.getComponent().isC2EventFired());
     c2.click();
-    assertTrue(app.getComponent().isC2EventFired());
+    assertTrue("c2 event handler was not called.", app.getComponent().isC2EventFired());
 
-    assertFalse(app.getComponent().isC3EventFired());
+    assertFalse("c3 event fired prematurely.", app.getComponent().isC3EventFired());
     c3.dispatchEvent(generateClickEvent());
-    assertTrue(app.getComponent().isC3EventFired());
+    assertTrue("c3 event handler was not called.", app.getComponent().isC3EventFired());
+
+    assertFalse("c4 event fired prematurely.", app.getComponent().isC4EventFired());
+    c4.dispatchEvent(generateClickEvent());
+    assertTrue("c4 event handler was not called.", app.getComponent().isC4EventFired());
+
+    assertFalse("c5 event fired prematurely.", app.getComponent().isC5EventFired());
+    c5.dispatchEvent(generateClickEvent());
+    assertTrue("c5 event handler was not called.", app.getComponent().isC5EventFired());
   }
 
   private NativeEvent generateClickEvent() {

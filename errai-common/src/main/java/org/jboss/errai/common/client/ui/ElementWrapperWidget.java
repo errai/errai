@@ -21,6 +21,8 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -34,6 +36,30 @@ import com.google.gwt.user.client.ui.Widget;
 public class ElementWrapperWidget extends Widget implements HasHTML {
   private static Map<Element, ElementWrapperWidget> widgetMap = new HashMap<Element, ElementWrapperWidget>();
 
+  public static ElementWrapperWidget getWidget(final Element element) {
+    ElementWrapperWidget widget = widgetMap.get(element);
+    if (widget == null) {
+      widget = new ElementWrapperWidget(element);
+      widgetMap.put(element, widget);
+    }
+    return widget;
+  }
+
+  public static ElementWrapperWidget removeWidget(final Element element) {
+    return widgetMap.remove(element);
+  }
+
+  public static ElementWrapperWidget removeWidget(final ElementWrapperWidget widget) {
+    return widgetMap.remove(widget.getElement());
+  }
+
+  private EventListener listener = new EventListener() {
+    @Override
+    public void onBrowserEvent(final Event event) {
+      ElementWrapperWidget.super.onBrowserEvent(event);
+    }
+  };
+
   private ElementWrapperWidget(Element wrapped) {
     if (wrapped == null) {
       throw new IllegalArgumentException(
@@ -43,30 +69,13 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
     DOM.setEventListener(this.getElement(), this);
   }
 
-  public static ElementWrapperWidget getWidget(Element element) {
-    ElementWrapperWidget widget = widgetMap.get(element);
-    if (widget == null) {
-      widget = new ElementWrapperWidget(element);
-      widgetMap.put(element, widget);
-    }
-    return widget;
-  }
-
-  public static ElementWrapperWidget removeWidget(Element element) {
-    return widgetMap.remove(element);
-  }
-
-  public static ElementWrapperWidget removeWidget(ElementWrapperWidget widget) {
-    return widgetMap.remove(widget.getElement());
-  }
-
   @Override
   public String getText() {
     return getElement().getInnerText();
   }
 
   @Override
-  public void setText(String text) {
+  public void setText(final String text) {
     getElement().setInnerText(text);
   }
 
@@ -76,8 +85,22 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
   }
 
   @Override
-  public void setHTML(String html) {
+  public void setHTML(final String html) {
     getElement().setInnerHTML(html);
+  }
+
+  public void setEventListener(final int eventsToSink, final EventListener listener) {
+    if (listener == null) {
+      throw new IllegalArgumentException("EventListener cannot be null.");
+    }
+
+    sinkEvents(eventsToSink);
+    this.listener = listener;
+  }
+
+  @Override
+  public void onBrowserEvent(Event event) {
+    listener.onBrowserEvent(event);
   }
 
 }

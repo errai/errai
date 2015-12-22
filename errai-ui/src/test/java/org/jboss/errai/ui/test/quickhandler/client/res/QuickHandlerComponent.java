@@ -19,7 +19,6 @@ package org.jboss.errai.ui.test.quickhandler.client.res;
 import org.jboss.errai.ui.test.common.client.dom.ButtonElement;
 
 import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.ui.Button;
 
@@ -35,17 +34,11 @@ public interface QuickHandlerComponent extends HasHandlers {
 
   ButtonElement getC3();
 
-  void doSomethingC1_dup(ClickEvent e);
+  ButtonElement getC4();
 
-  void doSomethingC2(ClickEvent e);
-
-  void doSomethingC3(ClickEvent event);
-
-  void doSomethingOnThis(ClickEvent e);
+  AnchorElement getC5();
 
   boolean isC0EventFired();
-
-  boolean isC0EventFired2();
 
   boolean isC1EventFired();
 
@@ -54,6 +47,10 @@ public interface QuickHandlerComponent extends HasHandlers {
   boolean isC2EventFired();
 
   boolean isC3EventFired();
+
+  boolean isC4EventFired();
+
+  boolean isC5EventFired();
 
   boolean isThisEventFired();
 
