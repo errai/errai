@@ -26,7 +26,7 @@ import com.google.common.collect.Multimap;
 
 /**
  * Represents navigability from one page to another in the application's flow.
- * Thinking of the application flow as a directed graph, {@link PageNode}s are the
+ * Thinking of the application flow as a directed graph, {@link PageNode PageNodes} are the
  * nodes and PageTransitions are the edges.
  * <p>
  * Instances of this class are normally obtained via dependency injection.

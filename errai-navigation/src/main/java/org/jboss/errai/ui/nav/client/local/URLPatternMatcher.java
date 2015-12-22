@@ -27,13 +27,12 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 
 /**
  * Used to match URLs typed in by the user to the correct {@link Page#path()}
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @author Divya Dadlani <ddadlani@redhat.com>
  *
@@ -80,14 +79,14 @@ public class URLPatternMatcher {
     while ((mr = regex.exec(urlTemplate)) != null) {
       addParamName(paramList, mr);
       startOfNextPattern = mr.getIndex();
-      
-      // Append any string literal that may occur in the URL path 
+
+      // Append any string literal that may occur in the URL path
       // before the next parameter.
       sb.append(urlTemplate, endOfPreviousPattern, startOfNextPattern);
-      
+
       // Append regex for matching the parameter value
       sb.append(URLPattern.urlSafe);
-      
+
       endOfPreviousPattern = regex.getLastIndex();
     }
 
@@ -125,7 +124,7 @@ public class URLPatternMatcher {
     String pageName = parseValues(pageInfo, mapBuilder);
     if (pageName == null)
       throw new PageNotFoundException("Invalid URL \"" + URLPattern.decodeParsingCharacters(url) + "\" could not be mapped to any page.");
-    
+
     if (keyValuePairs != null) {
       parseKeyValuePairs(keyValuePairs, mapBuilder);
     }
@@ -151,12 +150,12 @@ public class URLPatternMatcher {
     }
     return pageName;
   }
-  
+
   private void parseKeyValuePairs(String rawKeyValueString, Builder<String, String> builder) {
     StringBuilder key = new StringBuilder();
     StringBuilder value = new StringBuilder();
 
-    // sb is a state cursor in this little parser: it always points to one of the 
+    // sb is a state cursor in this little parser: it always points to one of the
     // StringBuilders above; this is the one we're currently accumulating characters into.
     // you can also check the state of the parser by seeing which StringBuilder sb points at.
     StringBuilder sb = key;

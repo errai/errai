@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 
 /**
- * Indicates that the target method should be called when the {@code @Page} widget it belongs to is
+ * Indicates that the target method should be called when the {@link Page} it belongs to is
  * about to be removed from the navigation content panel.
  * <p>
  * The target method is permitted an optional parameter of type {@link NavigationControl}. If the

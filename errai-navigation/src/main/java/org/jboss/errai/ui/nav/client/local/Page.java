@@ -22,12 +22,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jboss.errai.ui.shared.api.annotations.Templated;
+
+import com.google.gwt.user.client.ui.IsWidget;
+
 /**
- * Declares that the target type,
- * <em>which must be a subtype of Widget or an implementation of IsWidget,</em>
- * is a named page with optional state information within the Errai Navigation
- * system.
- * 
+ * Declares that the target type &#8212;
+ * <em>which must be a subtype of Widget, implement {@link IsWidget}, or be a {@link Templated} component &#8212;</em>
+ * is a named page with optional state information within the Errai Navigation system.
+ *
  * @see TransitionTo
  * @see PageState
  * @see PageRole

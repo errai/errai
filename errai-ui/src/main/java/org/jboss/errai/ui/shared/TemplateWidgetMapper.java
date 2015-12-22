@@ -51,6 +51,8 @@ public class TemplateWidgetMapper {
     if (widgetBeanMap.containsKey(bean)) {
       throw new RuntimeException(
               "There is already a widget mapped for the " + bean.getClass().getName() + " bean: " + bean.toString());
+    } else if (widgetBeanMap.containsKey(widget)) {
+      throw new RuntimeException("There is already a bean mapped for the given " + TemplateWidget.class.getSimpleName() + ".");
     } else {
       final Pair pair = new Pair(bean, widget);
       widgetBeanMap.put(bean, pair);

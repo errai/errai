@@ -23,53 +23,56 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
+
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.Widget;
+
+import jsinterop.annotations.JsType;
 
 /**
- * Indicates that an annotated widget should automatically be bound to a
- * property of a data model associated with a {@link DataBinder} (see
+ * Indicates that an annotated component (a {@link Widget}, {@link Element}, or native {@link JsType} wrapping a DOM
+ * element) should automatically be bound to a property of a data model associated with a {@link DataBinder} (see
  * {@link AutoBound} and {@link Model}).
  * <p>
- * The annotated widget can either be a field, method or constructor parameter
- * or a method return value and must implement either {@link HasText},
- * {@link HasValue} or {@link TakesValue}. Note that a {@link Bound} field can
- * but does not have to be injected. The following example shows all valid use
- * cases for the {@link Bound} annotation.
- * 
+ * The annotated component can either be a field, method or constructor parameter or a method return value. If it is a
+ * {@link Widget} or a templated Errai UI bean then it must implement either {@link HasText}, {@link HasValue} or
+ * {@link TakesValue}. Note that a {@link Bound} field can but does not have to be injected. The following example shows
+ * all valid use cases for the {@link Bound} annotation.
+ *
  * <pre>
  *      public class MyBean {
- *        {@code @Inject} {@code @Model} 
+ *        {@code @Inject} {@code @Model}
  *        private MyModel model;
- *      
+ *
  *        {@code @Bound}
  *        private Label boundLabel = new Label();
- *        
+ *
  *        {@code @Inject} {@code @Bound}
  *        private TextBox injectedBoundTextBox;
- *  
+ *
  *        {@code @Inject}
  *        public MyBean({@code @Bound} SomeWidget boundWidget) {
  *          this.boundWidget = boundWidget;
  *        }
- *        
+ *
  *        {@code @Inject}
  *        public void setWidget({@code @Bound} SomeWidget boundWidget) {
  *          this.boundWidget = boundWidget;
  *        }
- *  
+ *
  *        {@code @Bound}
  *        public SomeWidget getWidget() {
  *          ...
  *        }
  *      }
  * </pre>
- * 
- * If no property is specified, the widget is bound to the data model property
- * with the same name as the field, parameter or method which is the target of
- * this annotation.
+ *
+ * If no property is specified, the component is bound to the data model property with the same name as the field,
+ * parameter, or method which is the target of this annotation.
  * <p>
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented
@@ -80,14 +83,14 @@ public @interface Bound {
 
   /**
    * The name of the data model property (or a property chain) to bind the
-   * widget to, following Java bean conventions. If omitted, the widget will be
+   * component to, following Java bean conventions. If omitted, the widget will be
    * bound to the data model property with the same name as the field, parameter
    * or method which is the target of this annotation.
    */
   String property() default "";
 
   /**
-   * The {@link Converter} to use when setting values on the model or widget.
+   * The {@link Converter} to use when setting values on the model or component.
    */
   // The NO_CONVERTER class needs to be fully qualified here to work around a
   // JDK bug: http://bugs.sun.com/view_bug.do?bug_id=6512707

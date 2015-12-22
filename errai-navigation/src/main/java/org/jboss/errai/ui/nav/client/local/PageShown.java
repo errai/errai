@@ -24,15 +24,15 @@ import java.lang.annotation.Target;
 
 
 /**
- * Indicates that the target method should be called when the {@code @Page}
- * widget it is a member of was displayed in the navigation content panel:
- * after the widget's {@code @PageState} fields have been updated and
+ * Indicates that the target method should be called when the {@link Page}
+ * it is a member of was displayed in the navigation content panel:
+ * after the widget's {@link PageState} fields have been updated and
  * before it is displayed in the navigation content panel.
  * <p>
  * When the client-side application is bootstrapping (the page is loading in the
  * browser), the Navigation system waits until all Errai modules are fully
  * initialized before displaying the initial page. Hence, it is safe to make RPC
- * requests and to fire portable CDI events from within a {@code @PageShown}
+ * requests and to fire portable CDI events from within a {@link PageShown}
  * method.
  * <p>
  * The target method is permitted an optional parameter of type

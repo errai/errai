@@ -21,16 +21,14 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.user.client.Window;
 
 /**
  * Used to extract page state values from the URL path.
  * This class generates a URL where the page state values are appropriately encoded for parsing. Thus the URL must be
  * appropriately decoded. See @see URLPattern#decodeParsingCharacters() below.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @author Divya Dadlani <ddadlani@redhat.com>
  *
@@ -46,7 +44,7 @@ public class URLPattern {
    * For example, in the URL {@code}/pageName/{id}/info{@code}, paramRegex would match 'id'.
    */
   static final String paramRegex = "\\{([^}]+)\\}";
-  
+
   /**
    * A regular expression that we use to match a path parameter value. Since the value can contain any characters,
    * this regex matches everything. Any characters that we use for parsing will later be encoded.
@@ -87,7 +85,7 @@ public class URLPattern {
    * path parameters (see {@link #getParamList()}) will be appended as key-value pairs.
    * Note that this method only encodes the URL in a format that can be parsed by {@see URLPatternMatcher#parseURL()
    * parseURL()}.
-   * 
+   *
    * @param state
    * @throws IllegalStateException
    *           If a path parameter is missing from the given state map.
@@ -128,11 +126,11 @@ public class URLPattern {
         urlBuilder.append(URLPattern.encodeParsingCharacters(pageStateField.getKey()));
         urlBuilder.append('=');
         urlBuilder.append(URLPattern.encodeParsingCharacters(pageStateField.getValue()));
-        
+
         if (itr.hasNext())
           urlBuilder.append('&');
       }
-      
+
     }
     return urlBuilder.toString();
   }

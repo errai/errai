@@ -16,16 +16,15 @@
 
 package org.jboss.errai.ui.rebind;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 
 import com.google.gwt.core.client.JavaScriptObject;
+
+import jsinterop.annotations.JsType;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -39,23 +38,13 @@ public class RebindUtil {
   }
 
   private static boolean hasNativeJsTypeAnnotation(final MetaClass type) {
-    // TODO Only support jsiterop.annotations.JsType and use actual class
-    // (without reflection) once we switch to GWT 2.8
-    final Collection<String> jsTypeAnnotationNames = Arrays.asList("com.google.gwt.core.client.js.JsType", "jsinterop.annotations.JsType");
-    for (final Annotation anno : type.getAnnotations()) {
-      if (jsTypeAnnotationNames.contains(anno.annotationType().getName())) {
-        try {
-          final Method method = anno.annotationType().getMethod("isNative");
-          return (Boolean) method.invoke(anno);
-        } catch (Exception e) {
-          throw new RuntimeException("Encountered an error while checking if " + type.getFullyQualifiedName() + " is a native @JsType.", e);
-        }
-      }
-    }
-
-    return false;
+    final JsType anno = type.getAnnotation(JsType.class);
+    return anno != null && anno.isNative();
   }
 
+  /**
+   * @return True iff the given type is an interface extending {@code elemental.html.Element}.
+   */
   public static boolean isElementalIface(final MetaClass type) {
     if (!(type.isInterface() && type.getPackageName().startsWith("elemental."))) {
       return false;

@@ -24,27 +24,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
+import jsinterop.annotations.JsType;
+
 /**
- * This annotation may only be used in subclasses of {@link Composite} that has been annotated with {@link Templated},
- * or in a super-class of said {@link Composite} types.
+ * This annotation may only be used in classes that has been annotated with {@link Templated}, or in a super-class of
+ * said types.
  * <p>
- * Declares a method in a {@link Templated} {@link Composite} widget as a handler for standard {@link Event} and
- * {@link DomEvent} types fired by {@link DataField} widgets and <code>data-field</code> elements within the
- * {@link Composite} component HTML template. Method handlers must accept a single argument of the type of event to be
- * handled.
+ * Declares a method in a {@link Templated} component as a handler for standard {@link Event} and {@link DomEvent} types
+ * fired by {@link DataField} widgets and <code>data-field</code> elements within the component HTML template. Method
+ * handlers must accept a single argument of the type of event to be handled.
  * <p>
  * The following scenarios are supported by this annotation:
  * <ol>
- * 
+ *
  * <li>GWT events on Widgets</li>
- * <li>GWT events on DOM Elements</li>
- * <li>Native DOM events on Elements</li>
- * 
+ * <li>GWT events on {@link Element Elements}</li>
+ * <li>GWT events on native {@link JsType JsTypes} wrapping DOM elements</li>
+ * <li>Native DOM events on DOM elements</li>
+ * <li>Native DOM events on native {@link JsType JsTypes} wrapping DOM elements</li>
+ *
  * </ol>
  * <p>
  * <b>WARNING:</b> Native GWT events cannot be used in conjunction with GWT standard events, since upon addition to the
@@ -54,20 +57,18 @@ import com.google.gwt.user.client.ui.Widget;
  * <p>
  * Example:
  * <p>
- * 
+ *
  * <pre>
  * &#064;Templated
- * public class WidgetHandlerComponent extends Composite
- * {
- *    &#064;Inject
- *    &#064;DataField
- *    private Button button;
- * 
- *    &#064;EventHandler(&quot;button&quot;)
- *    public void doSomethingC1(ClickEvent e)
- *    {
- *       // do something
- *    }
+ * public class WidgetHandlerComponent extends Composite {
+ *   &#064;Inject
+ *   &#064;DataField
+ *   private Button button;
+ *
+ *   &#064;EventHandler(&quot;button&quot;)
+ *   public void doSomethingC1(ClickEvent e) {
+ *     // do something
+ *   }
  * }
  * </pre>
  * <p>
@@ -75,20 +76,43 @@ import com.google.gwt.user.client.ui.Widget;
  * <p>
  * Example:
  * <p>
- * 
+ *
  * <pre>
  * &#064;Templated
- * public class WidgetHandlerComponent extends Composite
- * {
- *    &#064;Inject
- *    &#064;DataField
- *    private DivElement button;
- * 
- *    &#064;EventHandler(&quot;button&quot;)
- *    public void doSomethingC1(ClickEvent e)
- *    {
- *       // do something
- *    }
+ * public class WidgetHandlerComponent extends Composite {
+ *   &#064;Inject
+ *   &#064;DataField
+ *   private DivElement button;
+ *
+ *   &#064;EventHandler(&quot;button&quot;)
+ *   public void doSomethingC1(ClickEvent e) {
+ *     // do something
+ *   }
+ * }
+ * </pre>
+ * <p>
+ * <b>GWT events on JsTypes</b>
+ * <p>
+ * Example:
+ * <p>
+ *
+ * <pre>
+ * &#064;JsType(isNative=true)
+ * public interface ButtonElementWrapper {
+ *   // ...
+ * }
+ * </pre>
+ * <pre>
+ * &#064;Templated
+ * public class WidgetHandlerComponent extends Composite {
+ *   &#064;Inject
+ *   &#064;DataField
+ *   private ButtonElementWrapper button;
+ *
+ *   &#064;EventHandler(&quot;button&quot;)
+ *   public void doSomethingC1(ClickEvent e) {
+ *     // do something
+ *   }
  * }
  * </pre>
  * <p>
@@ -100,35 +124,68 @@ import com.google.gwt.user.client.ui.Widget;
  * <p>
  * Example:
  * <p>
- * 
+ *
  * <pre>
  * &#064;Templated
- * public class QuickHandlerComponent extends Composite
- * {
- *    &#064;DataField
- *    private AnchorElement link = DOM.createAnchor().cast();
- * 
- *    &#064;EventHandler(&quot;link&quot;)
- *    &#064;SinkNative(Event.ONCLICK | Event.ONMOUSEOVER)
- *    public void doSomething(Event e)
- *    {
- *       // do something
- *    }
- * 
- *    &#064;EventHandler(&quot;div&quot;)
- *    &#064;SinkNative(Event.ONMOUSEOVER)
- *    public void doSomethingElse(Event e)
- *    {
- *       // do something with an element not otherwise referenced in our component
- *    }
+ * public class QuickHandlerComponent extends Composite {
+ *   &#064;DataField
+ *   private AnchorElement link = DOM.createAnchor().cast();
+ *
+ *   &#064;EventHandler(&quot;link&quot;)
+ *   &#064;SinkNative(Event.ONCLICK | Event.ONMOUSEOVER)
+ *   public void doSomething(Event e) {
+ *     // do something
+ *   }
+ *
+ *   &#064;EventHandler(&quot;div&quot;)
+ *   &#064;SinkNative(Event.ONMOUSEOVER)
+ *   public void doSomethingElse(Event e) {
+ *     // do something with an element not otherwise referenced in our component
+ *   }
  * }
  * </pre>
- * 
+ * <p>
+ * <b>Native events on JsTypes</b>
+ * <p>
+ * This approach requires use of the {@link SinkNative} annotation, but does not require that target {@link Element}
+ * instances be referenced via {@link DataField} in the {@link Templated} component; they may also
+ * target un-referenced <code>data-field</code> elements from the corresponding HTML template.
+ * <p>
+ * Example:
+ * <p>
+ *
+ * <pre>
+ * &#064;JsType(isNative=true)
+ * public interface AnchorElementWrapper {
+ *   // ...
+ * }
+ * </pre>
+ * <pre>
+ * &#064;Templated
+ * public class QuickHandlerComponent extends Composite {
+ *   &#064;Inject
+ *   &#064;DataField
+ *   private AnchorElementWrapper link;
+ *
+ *   &#064;EventHandler(&quot;link&quot;)
+ *   &#064;SinkNative(Event.ONCLICK | Event.ONMOUSEOVER)
+ *   public void doSomething(Event e) {
+ *     // do something
+ *   }
+ *
+ *   &#064;EventHandler(&quot;div&quot;)
+ *   &#064;SinkNative(Event.ONMOUSEOVER)
+ *   public void doSomethingElse(Event e) {
+ *     // do something with an element not otherwise referenced in our component
+ *   }
+ * }
+ * </pre>
+ *
  * <p>
  * <b>See also:</b> {@link SinkNative}, {@link Templated}, {@link DataField}
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
- * 
+ *
  */
 @Inherited
 @Documented

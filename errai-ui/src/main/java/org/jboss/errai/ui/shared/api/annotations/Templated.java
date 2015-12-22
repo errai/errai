@@ -31,74 +31,74 @@ import org.jboss.errai.ui.shared.ServerTemplateProvider;
 import com.google.gwt.user.client.ui.Composite;
 
 /**
- * Must be used only on classes extending from {@link Composite}.
+ * Since Errai 4.0.0 this annotation may be used on classes that do not extends {@link Composite}.
  * <p>
  * Indicates that the annotated class will participate in the Errai UI templating framework. Instances of the annotated
- * {@link Composite} widget must be retrieved via {@link Inject} or {@link Instance} references in bean classes.
- * 
+ * component must be retrieved via {@link Inject} or {@link Instance} references in bean classes.
+ *
  * <p>
- * Unless otherwise specified in the {@link #value()} and {@link #provider()} attributes, a corresponding 
+ * Unless otherwise specified in the {@link #value()} and {@link #provider()} attributes, a corresponding
  * ComponentName.html file must be placed in the same directory on the class-path as the custom ComponentName type.
  * <p>
  * <b>Example:</b>
  * <p>
- * 
+ *
  * <pre>
  * package org.example;
- * 
+ *
  * &#064;Templated
- * public class CustomComponent extends Composite
+ * public class CustomComponent
  * {
  * }
  * </pre>
- * 
+ *
  * <b>And the corresponding HTML template:</b>
- * 
+ *
  * <pre>
  * &lt;form&gt;
  *   &lt;legend&gt;Log in to your account&lt;/legend&gt;
- *  
+ *
  *   &lt;label for="username"&gt;Username&lt;/label&gt;
  *   &lt;input data-field="username" id="username" type="text" placeholder="Username"&gt;
- *  
+ *
  *   &lt;label for="password"&gt;Password&lt;/label&gt;
  *   &lt;input data-field="password" id="password" type="password" placeholder="Password"&gt;
- *  
+ *
  *   &lt;button data-field="login" &gt;Log in&lt;/button&gt;
  *   &lt;button data-field="cancel" &gt;Cancel&lt;/button&gt;
  * &lt;/form&gt;
  * </pre>
  * <p>
- * 
+ *
  * <p>
- * Each element with a <code>id</code>, <code>data-field</code> or <code>class</code> attribute may be bound to a 
- * field, method, or constructor parameter in the annotated class, using the {@link DataField} annotation. Events 
- * triggered by elements or widgets in the template may be handled using the {@link EventHandler} annotation to 
+ * Each element with a <code>id</code>, <code>data-field</code>, or <code>class</code> attribute may be bound to a
+ * field, method, or constructor parameter in the annotated class, using the {@link DataField} annotation. Events
+ * triggered by elements or widgets in the template may be handled using the {@link EventHandler} annotation to
  * specify handler methods.
  * <p>
- * 
+ *
  * <pre>
  * package org.example;
- * 
+ *
  * &#064;Templated
- * public class CustomComponent extends Composite
+ * public class CustomComponent
  * {
  *    &#064;Inject
  *    &#064;DataField
  *    private TextBox username;
- * 
+ *
  *    &#064;Inject
  *    &#064;DataField
  *    private TextBox password;
- * 
+ *
  *    &#064;Inject
  *    &#064;DataField
  *    private Button login;
- * 
+ *
  *    &#064;Inject
  *    &#064;DataField
  *    private Button cancel;
- * 
+ *
  *    &#064;EventHandler(&quot;login&quot;)
  *    private void doLogin(ClickEvent event)
  *    {
@@ -108,7 +108,7 @@ import com.google.gwt.user.client.ui.Composite;
  * </pre>
  * <p>
  * <b>Obtaining a widget reference via {@link Inject}:</b>
- * 
+ *
  * <pre>
  * &#064;ApplicationScoped
  * public class ExampleBean
@@ -120,24 +120,24 @@ import com.google.gwt.user.client.ui.Composite;
  * <p>
  * <b>Obtaining widget references on demand, via {@link Instance}.</b> One may also create multiple instances of a
  * {@link Templated} widget using this approach:
- * 
+ *
  * <pre>
  * &#064;ApplicationScoped
  * public class ExampleBean
  * {
  *    &#064;Inject
  *    Instance&lt;CustomComponent&gt; instance;
- * 
+ *
  *    public CustomComponent getNewComponent()
  *    {
  *       return instance.get();
  *    }
  * }
  * </pre>
- * 
+ *
  * <p>
  * <b>See also:</b> {@link DataField}, {@link Bound}, {@link AutoBound}, {@link EventHandler}, {@link SinkNative}
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -154,19 +154,19 @@ public @interface Templated
     * qualified class name of the annotated type, plus `.html`. If the fragment is omitted, composition will be
     * performed using the first single element found (and all inner HTML) in the specified template.
     * <p>
-    * The fragment corresponds to an element with matching <code>id</code>, <code>data-field</code> or 
-    * <code>class</code> attribute. If specified, this singleelement (and all inner HTML) will be used as the root 
+    * The fragment corresponds to an element with matching <code>id</code>, <code>data-field</code> or
+    * <code>class</code> attribute. If specified, this singleelement (and all inner HTML) will be used as the root
     * of the widget.
     */
    String value() default "";
 
    /**
-   * Specifies a {@link TemplateProvider} that is used to supply a template at run-time i.e. 
-   * {@link ServerTemplateProvider}. By default, and if omitted, templates must be present at compile-time at the 
-   * class-path location specified by {@link #value()}. 
+   * Specifies a {@link TemplateProvider} that is used to supply a template at run-time i.e.
+   * {@link ServerTemplateProvider}. By default, and if omitted, templates must be present at compile-time at the
+   * class-path location specified by {@link #value()}.
    */
-   Class<? extends TemplateProvider> provider() default 
+   Class<? extends TemplateProvider> provider() default
      org.jboss.errai.ui.shared.api.annotations.Templated.DEFAULT_PROVIDER.class;
-   
+
    static abstract class DEFAULT_PROVIDER implements TemplateProvider {}
 }
