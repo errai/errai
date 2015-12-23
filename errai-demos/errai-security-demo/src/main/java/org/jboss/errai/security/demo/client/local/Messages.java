@@ -16,7 +16,7 @@
 
 package org.jboss.errai.security.demo.client.local;
 
-import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
@@ -42,19 +42,18 @@ import org.slf4j.Logger;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 
 /**
  * <p>
  * This {@link Page} demonstrates RPC service secured with
  * {@link RestrictedAccess}.
- * 
+ *
  * <p>
  * {@link MessageService} is an Errai Bus RPC service. If the service is called
  * without an authenticated user, a {@link DefaultBusSecurityErrorCallback}
  * navigates to the {@link LoginPage}.
- * 
+ *
  * <p>
  * {@link AdminService} is a JAX-RS endpoint. There is no global error-handling
  * for JAX-RS RPCs so {@link DefaultRestSecurityErrorCallback} is passed in
@@ -64,14 +63,14 @@ import com.google.gwt.user.client.ui.Label;
 @Dependent
 @Templated("#main")
 @Page
-public class Messages extends Composite {
-  
+public class Messages {
+
   @Inject
   private Caller<AuthenticationService> authCaller;
 
   @Inject
   private Caller<MessageService> messageServiceCaller;
-  
+
   @Inject
   private Caller<AdminService> adminServiceCaller;
 
@@ -86,7 +85,7 @@ public class Messages extends Composite {
   @Inject
   @DataField
   private Button ping;
-  
+
   @Inject
   private Instance<DefaultRestSecurityErrorCallback> defaultCallbackInstance;
 

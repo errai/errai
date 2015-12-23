@@ -69,9 +69,6 @@ public class LoginForm extends AbstractForm {
   private SecurityContext securityContext;
 
   @Inject
-  private KeycloakActivator keycloakActivator;
-
-  @Inject
   @DataField
   private TextBox username;
 

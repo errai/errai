@@ -16,7 +16,7 @@
 
 package org.jboss.errai.security.demo.client.local;
 
-import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -40,7 +40,6 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 
 /**
@@ -51,7 +50,7 @@ import com.google.gwt.user.client.ui.Label;
 @Page(role = DefaultPage.class)
 @Templated("#root")
 @ApplicationScoped
-public class WelcomePage extends Composite {
+public class WelcomePage {
 
   private static final String ANONYMOUS = "anonymous";
 
@@ -62,7 +61,7 @@ public class WelcomePage extends Composite {
   @Inject
   @DataField
   private Label userLabel;
-  
+
   @Inject
   private Caller<AuthenticationService> authCaller;
 

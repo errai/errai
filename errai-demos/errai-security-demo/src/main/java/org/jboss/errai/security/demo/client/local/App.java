@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.dom.client.Document;
 
 /**
  * This is the entry point to the client portion of the web application. At
@@ -34,13 +34,13 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 @EntryPoint
 public class App {
-  
+
   @Inject
   private NavigationWrapper navWrapper;
-  
+
   @PostConstruct
   public void init() {
-    RootPanel.get().add(navWrapper);
+    Document.get().getBody().appendChild(navWrapper.getBody());
     RestClient.setApplicationRoot("/errai-security-demo/rest/");
   }
 

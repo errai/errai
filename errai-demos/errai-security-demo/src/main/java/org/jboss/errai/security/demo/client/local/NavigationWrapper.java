@@ -25,7 +25,8 @@ import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
@@ -35,7 +36,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
  */
 @Templated("#body")
 @Dependent
-public class NavigationWrapper extends Composite {
+public class NavigationWrapper {
+
+  @DataField
+  private final Element body = DOM.createDiv();
 
   @Inject
   private Navigation navigation;
@@ -51,5 +55,9 @@ public class NavigationWrapper extends Composite {
   @PostConstruct
   public void clientMain() {
     content.add(navigation.getContentPanel());
+  }
+
+  public Element getBody() {
+    return body;
   }
 }
