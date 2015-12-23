@@ -47,6 +47,7 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultQualifierFactory;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
@@ -162,7 +163,7 @@ public class InjectionContext {
    *          Contains the type and qualifier that the given provider satisfies.
    * @param provider
    *          The
-   *          {@link InjectableProvider#getGenerator(org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite)}
+   *          {@link InjectableProvider#getInjectable(org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite, FactoryNameGenerator)}
    *          will be called for every injection site satisified by the given
    *          handle. The returned {@link FactoryBodyGenerator} will be used to
    *          generate factories specific to the given injection sites.
@@ -182,7 +183,7 @@ public class InjectionContext {
    *          satisfies.
    * @param provider
    *          The
-   *          {@link InjectableProvider#getGenerator(org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite)}
+   *          {@link InjectableProvider#getInjectable(org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite, FactoryNameGenerator)}
    *          will be called for every injection site satisified by the given
    *          handle. The returned {@link FactoryBodyGenerator} will be used to
    *          generate factories specific to the given injection sites.

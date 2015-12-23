@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.enterprise.context.Dependent;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -33,22 +35,26 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultCustomFactoryInjectable;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Creates injectables for all {@link Widget} subtypes. Without this extension,
- * injecting some widget types (such as {@link TextBox}) would result in an
- * ambigous resolution because of subtypes (such as {@link PasswordTextBox})
- * that are also type injectable.
+ * Creates injectables for all {@link Widget} subtypes. Without this extension, injecting some widget types (such as
+ * {@link TextBox}) would result in an ambigous resolution because of subtypes (such as {@link PasswordTextBox}) that
+ * are also type injectable.
  *
  * This extension creates a new instance of the exact {@link Widget} subtype for every injection point.
  *
@@ -67,23 +73,32 @@ public class WidgetIOCExtension implements IOCExtensionConfigurator {
 
     for (final MetaClass widgetType : widgetSubtypes) {
       if (widgetType.isPublic() && widgetType.isDefaultInstantiable()) {
-        injectionContext.registerExactTypeInjectableProvider(
-                new InjectableHandle(widgetType, injectionContext.getQualifierFactory().forDefault()),
-                new InjectableProvider() {
+        final InjectableHandle handle = new InjectableHandle(widgetType,
+                injectionContext.getQualifierFactory().forDefault());
+        injectionContext.registerExactTypeInjectableProvider(handle, new InjectableProvider() {
 
-                  @Override
-                  public FactoryBodyGenerator getGenerator(final InjectionSite injectionSite) {
-                    return new AbstractBodyGenerator() {
-                      @Override
-                      protected List<Statement> generateCreateInstanceStatements(
-                              ClassStructureBuilder<?> bodyBlockBuilder, Injectable injectable, DependencyGraph graph,
-                              InjectionContext injectionContext) {
-                        return Collections
-                                .<Statement> singletonList(nestedCall(newObject(widgetType, new Object[0])).returnValue());
-                      }
-                    };
-                  }
-                });
+          private CustomFactoryInjectable provided;
+
+          @Override
+          public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite, final FactoryNameGenerator nameGenerator) {
+            if (provided == null) {
+              final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
+                @Override
+                protected List<Statement> generateCreateInstanceStatements(ClassStructureBuilder<?> bodyBlockBuilder,
+                        Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
+                  return Collections
+                          .<Statement> singletonList(nestedCall(newObject(widgetType, new Object[0])).returnValue());
+                }
+              };
+              provided = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(),
+                      nameGenerator.generateFor(handle.getType(), handle.getQualifier(),
+                              InjectableType.ExtensionProvided),
+                      Dependent.class, Collections.singletonList(WiringElementType.DependentBean), generator);
+            }
+
+            return provided;
+          }
+        });
       }
     }
   }

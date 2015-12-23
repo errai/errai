@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.extension.builtin.LoggerFactoryIOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.ResolutionPriority;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 /**
@@ -93,7 +94,7 @@ public interface DependencyGraphBuilder {
    *
    * @return The newly added extension {@link Injectable}.
    */
-  Injectable addExtensionInjectable(MetaClass injectedType, Qualifier qualifier, Class<? extends Annotation> literalScope, WiringElementType... wiringTypes);
+  Injectable addExtensionInjectable(MetaClass injectedType, Qualifier qualifier, InjectableProvider provider, WiringElementType... wiringTypes);
 
   /**
    * Create a dependency for a field injection point in a bean class.

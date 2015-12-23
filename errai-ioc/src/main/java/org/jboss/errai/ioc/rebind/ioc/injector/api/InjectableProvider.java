@@ -17,9 +17,11 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import org.jboss.errai.ioc.client.container.Factory;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 
 /**
  * This allows {@link IOCExtensionConfigurator IOC extensions} to generate
@@ -35,8 +37,9 @@ public interface InjectableProvider {
 
   /**
    * @param injectionSite Metadata for an injection site.
-   * @return A {@link FactoryBodyGenerator} for the given injeciton site.
+   * @param nameGenerator TODO
+   * @return A {@link Injectable} for the given injeciton site.
    */
-  FactoryBodyGenerator getGenerator(InjectionSite injectionSite);
+  CustomFactoryInjectable getInjectable(InjectionSite injectionSite, FactoryNameGenerator nameGenerator);
 
 }

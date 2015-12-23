@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 /**
@@ -37,7 +38,7 @@ class AbstractInjectable extends BaseInjectable {
   // TODO needs to be renamed and not be an Injectable
 
   final Collection<BaseInjectable> linked = new HashSet<BaseInjectable>();
-  ConcreteInjectable resolution;
+  Injectable resolution;
 
   AbstractInjectable(final MetaClass type, final Qualifier qualifier) {
     super(type, qualifier, null);

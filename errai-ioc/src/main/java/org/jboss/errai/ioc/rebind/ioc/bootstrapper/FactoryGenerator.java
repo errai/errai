@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.container.Factory;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
@@ -57,7 +58,6 @@ public class FactoryGenerator extends IncrementalGenerator {
   private static final Logger log = LoggerFactory.getLogger(FactoryGenerator.class);
 
   private static final String GENERATED_PACKAGE = "org.jboss.errai.ioc.client";
-  private static final Map<String, FactoryBodyGenerator> customBodyGenerators = new HashMap<String, FactoryBodyGenerator>();
   private static DependencyGraph graph;
   private static InjectionContext injectionContext;
   private static Map<String, String> generatedSourceByFactoryTypeName = new HashMap<String, String>();
@@ -77,11 +77,6 @@ public class FactoryGenerator extends IncrementalGenerator {
   public static void setInjectionContext(final InjectionContext injectionContext) {
     log.debug("Injection context set.");
     FactoryGenerator.injectionContext = injectionContext;
-  }
-
-  public static void registerCustomBodyGenerator(final String typeName, final FactoryBodyGenerator generator) {
-    log.debug("Custom body generator registered for " + typeName);
-    customBodyGenerators.put(typeName, generator);
   }
 
   public static String getLocalVariableName(final MetaParameter param) {
@@ -116,7 +111,7 @@ public class FactoryGenerator extends IncrementalGenerator {
 
     final ClassStructureBuilder<?> factoryBuilder = define(getFactorySubTypeName(typeName),
             parameterizedAs(Factory.class, typeParametersOf(injectable.getInjectedType()))).publicScope().body();
-    final FactoryBodyGenerator generator = selectBodyGenerator(factoryType, typeName);
+    final FactoryBodyGenerator generator = selectBodyGenerator(factoryType, typeName, injectable);
 
     final String factorySimpleClassName = getFactorySubTypeSimpleName(typeName);
     final PrintWriter pw = generatorContext.tryCreate(logger, GENERATED_PACKAGE, factorySimpleClassName);
@@ -187,7 +182,7 @@ public class FactoryGenerator extends IncrementalGenerator {
     log.trace("End trace of hashContent for {}", name);
   }
 
-  private FactoryBodyGenerator selectBodyGenerator(final InjectableType factoryType, final String typeName) {
+  private FactoryBodyGenerator selectBodyGenerator(final InjectableType factoryType, final String typeName, final Injectable injectable) {
     final FactoryBodyGenerator generator;
     switch (factoryType) {
     case Type:
@@ -203,12 +198,12 @@ public class FactoryGenerator extends IncrementalGenerator {
       generator = new ProducerFactoryBodyGenerator();
       break;
     case ExtensionProvided:
-      final String simpleName = getSimpleName(typeName);
-      if (!customBodyGenerators.containsKey(simpleName)) {
-        throw new RuntimeException(simpleName + " has " + InjectableType.class.getSimpleName() + " " + InjectableType.ExtensionProvided
-                + " but no custom " + FactoryBodyGenerator.class.getSimpleName() + " has been registered.");
+      if (!(injectable instanceof CustomFactoryInjectable)) {
+        throw new RuntimeException(String.format("The injectable, %s, for %s is extension provided but is not a %s",
+                injectable.toString(), typeName, CustomFactoryInjectable.class.getSimpleName()));
       }
-      generator = customBodyGenerators.get(simpleName);
+
+      generator = ((CustomFactoryInjectable) injectable).getGenerator();
       break;
     case ContextualProvider:
       throw new RuntimeException("Types provided by a " + ContextualTypeProvider.class.getSimpleName() + " should not have factories generated.");
@@ -217,10 +212,6 @@ public class FactoryGenerator extends IncrementalGenerator {
     }
 
     return generator;
-  }
-
-  private static String getSimpleName(final String typeName) {
-    return typeName.substring(typeName.lastIndexOf('.')+1);
   }
 
   public static String getFactorySubTypeName(final String typeName) {

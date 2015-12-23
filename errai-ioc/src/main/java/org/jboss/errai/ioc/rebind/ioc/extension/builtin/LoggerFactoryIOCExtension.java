@@ -17,13 +17,17 @@
 package org.jboss.errai.ioc.rebind.ioc.extension.builtin;
 
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.annotations.NamedLogger;
@@ -32,12 +36,18 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultCustomFactoryInjectable;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,26 +62,38 @@ public class LoggerFactoryIOCExtension implements IOCExtensionConfigurator {
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
     final InjectableHandle handle = new InjectableHandle(MetaClassFactory.get(Logger.class),
             injectionContext.getQualifierFactory().forUniversallyQualified());
+    final Map<String, CustomFactoryInjectable> injectablesByLoggerName = new HashMap<String, CustomFactoryInjectable>();
+
     injectionContext.registerInjectableProvider(handle, new InjectableProvider() {
       @Override
-      public FactoryBodyGenerator getGenerator(final InjectionSite injectionSite) {
-        final Statement loggerValue;
+      public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite, final FactoryNameGenerator nameGenerator) {
+        final String loggerName;
         if (injectionSite.isAnnotationPresent(NamedLogger.class)) {
-          final String loggerName = injectionSite.getAnnotation(NamedLogger.class).value();
-          loggerValue = invokeStatic(LoggerFactory.class, "getLogger", loggerName);
+          loggerName = injectionSite.getAnnotation(NamedLogger.class).value();
         }
         else {
-          loggerValue = Stmt.invokeStatic(LoggerFactory.class, "getLogger",
-                  loadLiteral(injectionSite.getEnclosingType()));
+          loggerName = injectionSite.getEnclosingType().getFullyQualifiedName();
         }
 
-        return new AbstractBodyGenerator() {
-          @Override
-          protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-                  final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-            return Collections.singletonList(Stmt.nestedCall(loggerValue).returnValue());
-          }
-        };
+        if (!injectablesByLoggerName.containsKey(loggerName)) {
+          final Statement loggerValue = invokeStatic(LoggerFactory.class, "getLogger", loggerName);
+          final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
+            @Override
+            protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+                    final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+              return Collections.singletonList(Stmt.nestedCall(loggerValue).returnValue());
+            }
+          };
+
+          final MetaClass type = MetaClassFactory.get(Logger.class);
+          final Qualifier qualifier = injectionContext.getQualifierFactory().forUniversallyQualified();
+
+          injectablesByLoggerName.put(loggerName, new DefaultCustomFactoryInjectable(type, qualifier,
+                  nameGenerator.generateFor(type, qualifier, InjectableType.ExtensionProvided), Dependent.class,
+                  Collections.singletonList(WiringElementType.DependentBean), generator));
+        }
+
+        return injectablesByLoggerName.get(loggerName);
       }
     });
   }

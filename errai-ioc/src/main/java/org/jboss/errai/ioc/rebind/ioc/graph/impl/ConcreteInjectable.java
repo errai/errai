@@ -134,7 +134,7 @@ class ConcreteInjectable extends BaseInjectable {
   private int computeHashContent() {
     int hashContent = type.hashContent();
     for (final BaseDependency dep: dependencies) {
-      hashContent ^= dep.injectable.resolution.type.hashContent();
+      hashContent ^= dep.injectable.resolution.getInjectedType().hashContent();
     }
 
     return hashContent;

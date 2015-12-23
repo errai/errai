@@ -24,7 +24,10 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+
+import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -36,19 +39,22 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultCustomFactoryInjectable;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ui.shared.api.annotations.Model;
 
 /**
- * The purpose of this IOC extension is to provide bean instances of bindable
- * types that are qualified with {@link Model} and to expose the
- * {@link DataBinder}s that manage these model instances using {@link RefHolder}
- * s.
+ * The purpose of this IOC extension is to provide bean instances of bindable types that are qualified with
+ * {@link Model} and to expose the {@link DataBinder}s that manage these model instances using {@link RefHolder} s.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
@@ -66,38 +72,52 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
     final Collection<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.getGeneratorContext());
 
     for (final MetaClass modelBean : allBindableTypes) {
-      injectionContext.registerInjectableProvider(
-              new InjectableHandle(modelBean, injectionContext.getQualifierFactory().forDefault()),
-              new InjectableProvider() {
+      final InjectableHandle handle = new InjectableHandle(modelBean,
+              injectionContext.getQualifierFactory().forDefault());
+      injectionContext.registerInjectableProvider(handle, new InjectableProvider() {
+
+        private CustomFactoryInjectable provided;
+
+        @Override
+        public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite, final FactoryNameGenerator nameGenerator) {
+          if (injectionSite.isAnnotationPresent(Model.class)) {
+            if (provided == null) {
+              final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
 
                 @Override
-                public FactoryBodyGenerator getGenerator(InjectionSite injectionSite) {
-                  if (injectionSite.isAnnotationPresent(Model.class)) {
-                    return new AbstractBodyGenerator() {
+                protected List<Statement> generateCreateInstanceStatements(
+                        final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
+                        final DependencyGraph graph, final InjectionContext injectionContext) {
+                  final List<Statement> createInstanceStmts = new ArrayList<Statement>();
+                  final MetaClass binderClass = parameterizedAs(DataBinder.class, typeParametersOf(modelBean));
+                  final String dataBinderVar = "dataBinder";
+                  final String modelVar = "model";
 
-                      @Override
-                      protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-                              final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-                        final List<Statement> createInstanceStmts = new ArrayList<Statement>();
-                        final MetaClass binderClass = parameterizedAs(DataBinder.class, typeParametersOf(modelBean));
-                        final String dataBinderVar = "dataBinder";
-                        final String modelVar = "model";
+                  createInstanceStmts.add(declareFinalVariable(dataBinderVar, binderClass,
+                          invokeStatic(DataBinder.class, "forType", modelBean)));
+                  createInstanceStmts
+                  .add(declareFinalVariable(modelVar, modelBean, loadVariable(dataBinderVar).invoke("getModel")));
+                  createInstanceStmts.add(loadVariable("this").invoke("setReference", loadVariable(modelVar),
+                          DataBindingUtil.BINDER_VAR_NAME, loadVariable(dataBinderVar)));
+                  createInstanceStmts.add(loadVariable(modelVar).returnValue());
 
-                        createInstanceStmts.add(declareFinalVariable(dataBinderVar, binderClass, invokeStatic(DataBinder.class, "forType", modelBean)));
-                        createInstanceStmts.add(declareFinalVariable(modelVar, modelBean, loadVariable(dataBinderVar).invoke("getModel")));
-                        createInstanceStmts.add(loadVariable("this").invoke("setReference", loadVariable(modelVar),
-                                DataBindingUtil.BINDER_VAR_NAME, loadVariable(dataBinderVar)));
-                        createInstanceStmts.add(loadVariable(modelVar).returnValue());
-
-                        return createInstanceStmts;
-                      }
-                    };
-                  }
-                  else {
-                    throw new RuntimeException("Not yet implemented!");
-                  }
+                  return createInstanceStmts;
                 }
-              });
+              };
+
+              provided = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(),
+                      nameGenerator.generateFor(handle.getType(), handle.getQualifier(),
+                              InjectableType.ExtensionProvided),
+                      Dependent.class, Collections.singletonList(WiringElementType.DependentBean), generator);
+            }
+
+            return provided;
+          }
+          else {
+            throw new RuntimeException("Not yet implemented!");
+          }
+        }
+      });
     }
   }
 }

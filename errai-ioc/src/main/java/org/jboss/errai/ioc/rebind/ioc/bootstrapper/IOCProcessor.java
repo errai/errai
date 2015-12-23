@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
@@ -91,7 +92,6 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DependencyGraphBuilderImpl;
@@ -195,12 +195,12 @@ public class IOCProcessor {
   }
 
   private void addAllInjectableProviders(final DependencyGraphBuilder graphBuilder) {
-    for (final InjectableHandle handle : injectionContext.getInjectableProviders().keySet()) {
-      graphBuilder.addExtensionInjectable(handle.getType(), handle.getQualifier(), Dependent.class, WiringElementType.DependentBean);
+    for (final Entry<InjectableHandle, InjectableProvider> entry : injectionContext.getInjectableProviders().entries()) {
+      graphBuilder.addExtensionInjectable(entry.getKey().getType(), entry.getKey().getQualifier(), entry.getValue());
     }
-    for (final InjectableHandle handle : injectionContext.getExactTypeInjectableProviders().keySet()) {
-      graphBuilder.addExtensionInjectable(handle.getType(), handle.getQualifier(), Dependent.class,
-              WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
+    for (final Entry<InjectableHandle, InjectableProvider> entry : injectionContext.getExactTypeInjectableProviders().entries()) {
+      graphBuilder.addExtensionInjectable(entry.getKey().getType(), entry.getKey().getQualifier(), entry.getValue(),
+              WiringElementType.ExactTypeMatching);
     }
   }
 
@@ -273,12 +273,7 @@ public class IOCProcessor {
         final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
         registerAsyncFactory(injectable, processingContext, curMethod, factoryClass);
       } else {
-        if (injectable.getInjectableType().equals(InjectableType.ExtensionProvided)) {
-          declareAndRegisterConcreteInjectable(injectable, processingContext, scopeContexts, curMethod);
-          registerFactoryBodyGeneratorForInjectionSite(injectable);
-        } else {
-          declareAndRegisterConcreteInjectable(injectable, processingContext, scopeContexts, curMethod);
-        }
+        declareAndRegisterConcreteInjectable(injectable, processingContext, scopeContexts, curMethod);
       }
     }
   }
@@ -337,20 +332,6 @@ public class IOCProcessor {
     }
 
     return loadVariable(handleVarName);
-  }
-
-  private void registerFactoryBodyGeneratorForInjectionSite(final Injectable injectable) {
-    final Collection<InjectableProvider> providers = new ArrayList<InjectableProvider>();
-    providers.addAll(injectionContext.getInjectableProviders().get(injectable.getHandle()));
-    providers.addAll(injectionContext.getExactTypeInjectableProviders().get(injectable.getHandle()));
-    if (providers.size() > 1) {
-      throw new RuntimeException("Multiple providers for " + injectable.getHandle() + ". An error should have been thrown in the graph builder.");
-    } else if (providers.isEmpty()) {
-      throw new RuntimeException("No providers for " + injectable.getHandle() + ". An error should have been thrown in the graph builder.");
-    }
-
-    final InjectableProvider provider = providers.iterator().next();
-    FactoryGenerator.registerCustomBodyGenerator(injectable.getFactoryName(), provider.getGenerator(((ProvidedInjectable) injectable).getInjectionSite()));
   }
 
   private void declareAndRegisterConcreteInjectable(final Injectable injectable,
