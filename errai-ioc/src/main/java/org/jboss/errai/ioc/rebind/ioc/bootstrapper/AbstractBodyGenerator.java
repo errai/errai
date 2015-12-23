@@ -26,6 +26,7 @@ import static org.jboss.errai.codegen.util.Stmt.if_;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.nestedCall;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
@@ -40,6 +41,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.codegen.BooleanOperator;
@@ -66,6 +69,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.api.ActivatedBy;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.BeanActivator;
@@ -720,8 +724,14 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return false;
   }
 
-  private Object annotationLiteral(final Annotation qual) {
-    return LiteralFactory.getLiteral(qual);
+  private Statement annotationLiteral(final Annotation qual) {
+    if (qual.annotationType().equals(Any.class)) {
+      return loadStatic(QualifierUtil.class, "ANY_ANNOTATION");
+    } else if (qual.annotationType().equals(Default.class)) {
+      return loadStatic(QualifierUtil.class, "DEFAULT_ANNOTATION");
+    } else {
+      return LiteralFactory.getLiteral(qual);
+    }
   }
 
   protected Collection<Annotation> getQualifiers(final HasAnnotations injectedType) {
