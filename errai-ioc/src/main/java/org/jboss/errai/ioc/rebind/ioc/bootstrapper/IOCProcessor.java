@@ -104,6 +104,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 
 import jsinterop.annotations.JsType;
 
@@ -611,7 +612,8 @@ public class IOCProcessor {
       }
     }
 
-    return (type.getConstructor(new MetaClass[0]) != null);
+    final MetaConstructor noArgConstructor = type.getConstructor(new MetaClass[0]);
+    return noArgConstructor != null && (noArgConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class));
   }
 
   private WiringElementType[] getWiringTypes(final MetaClass type, final Class<? extends Annotation> directScope) {
@@ -939,20 +941,55 @@ public class IOCProcessor {
   }
 
   private boolean isConstructable(final MetaClass type, final List<String> problems) {
+    final boolean explicitlyScoped = getDirectScope(type) != null;
     final List<MetaConstructor> injectableConstructors = getInjectableConstructors(type);
+    final MetaConstructor noArgConstructor = type.getConstructor(new MetaClass[0]);
 
     if (injectableConstructors.size() > 1) {
       problems.add(type.getFullyQualifiedName() + " has " + injectableConstructors.size() + " constructors annotated with @Inject.");
       return false;
-    } else if (injectableConstructors.size() == 1) {
-      if (scopeDoesNotRequireProxy(type) || type.getConstructor(new MetaClass[0]) != null) {
-        return true;
+    }
+    else {
+      if (injectableConstructors.size() == 1) {
+        final MetaConstructor injectConstructor = injectableConstructors.get(0);
+        final boolean instantiable = injectConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class);
+        if (!instantiable) {
+          problems.add(String.format("Cannot access constructor for %s.", type.getFullyQualifiedName()));
+        }
+
+        if (scopeDoesNotRequireProxy(type)) {
+          return instantiable;
+        } else if (noArgConstructor == null || !(noArgConstructor.isPublic() || noArgConstructor.isProtected())) {
+          log.warn("The class {} must be proxiable but does not have an accessible no-argument constructor", type.getFullyQualifiedName());
+          final boolean injectConstructorProxiable = injectConstructor.isPublic() || injectConstructor.isProtected();
+          if (!injectConstructorProxiable) {
+            problems.add(String.format(
+                    "The class %s must be proxiable but has no injectable constructor or no-argument constructor accessible to subclasses.",
+                    type.getFullyQualifiedName()));
+          }
+
+          return instantiable && injectConstructorProxiable;
+        } else {
+          return instantiable;
+        }
       } else {
-        log.warn("The class {} must be proxiable but has no zero-argument constructors.", type.getFullyQualifiedName());
-        return true;
+        final boolean instantiable = noArgConstructor != null && (noArgConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class));
+        final boolean proxiable = noArgConstructor != null && (noArgConstructor.isPublic() || noArgConstructor.isProtected());
+        boolean passesProxiability = scopeDoesNotRequireProxy(type) || proxiable;
+
+        if (explicitlyScoped) {
+          if (!instantiable) {
+            problems.add(String.format("Cannot access constructor for %s.", type.getFullyQualifiedName()));
+          }
+          if (!passesProxiability) {
+            problems.add(String.format(
+                    "%s must be proxiable but does not have a no-argument constructor accessible to subclasses.",
+                    type.getFullyQualifiedName()));
+          }
+        }
+
+        return instantiable && passesProxiability;
       }
-    } else {
-      return (type.getConstructor(new MetaClass[0]) != null);
     }
   }
 
