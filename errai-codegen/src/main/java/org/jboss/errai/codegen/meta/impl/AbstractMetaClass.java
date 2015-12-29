@@ -468,13 +468,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     final MetaClass sup;
 
-    if (MetaClassFactory.get(Object.class).equals(this)) {
+    if (getFullyQualifiedName().equals(Object.class.getName())) {
       assignable = true;
     }
     else if (this.getFullyQualifiedName().equals(clazz.getFullyQualifiedName())) {
       assignable = true;
     }
-    else if (_hasInterface(clazz.getInterfaces(), this.getErased())) {
+    else if (isInterface() && _hasInterface(clazz.getInterfaces(), this.getErased())) {
       assignable = true;
     }
     else
