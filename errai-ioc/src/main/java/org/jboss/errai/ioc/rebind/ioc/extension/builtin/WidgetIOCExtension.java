@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.extension.builtin;
 import static org.jboss.errai.codegen.util.Stmt.nestedCall;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,8 +27,7 @@ import javax.enterprise.context.Dependent;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.rebind.WidgetSubtypeCache;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
@@ -43,6 +41,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultCustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.ExtensionTypeCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -64,42 +63,51 @@ import com.google.gwt.user.client.ui.Widget;
 public class WidgetIOCExtension implements IOCExtensionConfigurator {
 
   @Override
-  public void configure(IOCProcessingContext context, InjectionContext injectionContext) {
+  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext) {
   }
 
   @Override
-  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext) {
-    final Collection<MetaClass> widgetSubtypes = CacheUtil.getCache(WidgetSubtypeCache.class).get();
+  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
+    final MetaClass widgetClazz = MetaClassFactory.get(Widget.class);
+    injectionContext.registerExtensionTypeCallback(new ExtensionTypeCallback() {
 
-    for (final MetaClass widgetType : widgetSubtypes) {
-      if (widgetType.isPublic() && widgetType.isDefaultInstantiable()) {
-        final InjectableHandle handle = new InjectableHandle(widgetType,
-                injectionContext.getQualifierFactory().forDefault());
-        injectionContext.registerExactTypeInjectableProvider(handle, new InjectableProvider() {
-
-          private CustomFactoryInjectable provided;
-
-          @Override
-          public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite, final FactoryNameGenerator nameGenerator) {
-            if (provided == null) {
-              final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
-                @Override
-                protected List<Statement> generateCreateInstanceStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-                        Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
-                  return Collections
-                          .<Statement> singletonList(nestedCall(newObject(widgetType, new Object[0])).returnValue());
-                }
-              };
-              provided = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(),
-                      nameGenerator.generateFor(handle.getType(), handle.getQualifier(),
-                              InjectableType.ExtensionProvided),
-                      Dependent.class, Collections.singletonList(WiringElementType.DependentBean), generator);
-            }
-
-            return provided;
-          }
-        });
+      @Override
+      public void callback(final MetaClass type) {
+        if (type.isDefaultInstantiable() && type.isAssignableTo(widgetClazz)) {
+          addProviderForWidgetType(injectionContext, type);
+        }
       }
+    });
+  }
+
+  private void addProviderForWidgetType(final InjectionContext injectionContext, final MetaClass widgetType) {
+    if (widgetType.isPublic() && widgetType.isDefaultInstantiable()) {
+      final InjectableHandle handle = new InjectableHandle(widgetType,
+              injectionContext.getQualifierFactory().forDefault());
+      injectionContext.registerExactTypeInjectableProvider(handle, new InjectableProvider() {
+
+        private CustomFactoryInjectable provided;
+
+        @Override
+        public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite, final FactoryNameGenerator nameGenerator) {
+          if (provided == null) {
+            final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
+              @Override
+              protected List<Statement> generateCreateInstanceStatements(ClassStructureBuilder<?> bodyBlockBuilder,
+                      Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
+                return Collections
+                        .<Statement> singletonList(nestedCall(newObject(widgetType, new Object[0])).returnValue());
+              }
+            };
+            provided = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(),
+                    nameGenerator.generateFor(handle.getType(), handle.getQualifier(),
+                            InjectableType.ExtensionProvided),
+                    Dependent.class, Collections.singletonList(WiringElementType.DependentBean), generator);
+          }
+
+          return provided;
+        }
+      });
     }
   }
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,32 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config.rebind;
-
-import java.util.HashSet;
-import java.util.Set;
+package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 
 /**
+ * A callback registered by an {@link IOCExtensionConfigurator} to the {@link InjectionContext} via
+ * {@link InjectionContext#registerMetaClassCallback(ExtensionTypeCallback).
+ *
+ * @see InjectionContext#registerExactTypeInjectableProvider(org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle, InjectableProvider)
+ * @see InjectionContext#registerInjectableProvider(org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle, InjectableProvider)
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class WidgetSubtypeCache implements CacheStore {
-  private final Set<MetaClass> concreteWidgetSubtypes = new HashSet<MetaClass>();
+public interface ExtensionTypeCallback {
 
-  public void addConcreteWidgetSubtype(final MetaClass type) {
-    concreteWidgetSubtypes.add(type);
-  }
-
-  public Set<MetaClass> get() {
-    return concreteWidgetSubtypes;
-  }
-
-  @Override
-  public void clear() {
-    concreteWidgetSubtypes.clear();
-  }
+  void callback(MetaClass type);
 
 }

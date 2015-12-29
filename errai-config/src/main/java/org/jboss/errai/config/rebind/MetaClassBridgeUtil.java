@@ -67,7 +67,6 @@ public abstract class MetaClassBridgeUtil {
 
     final TypeOracle typeOracle = context.getTypeOracle();
     final MetaClassCache cache = MetaClassFactory.getMetaClassCache();
-    final WidgetSubtypeCache widgetSubtypeCache = CacheUtil.getCache(WidgetSubtypeCache.class);
 
     if (typeOracle != null) {
       final Map<String, MetaClass> classesToPush = new HashMap<String, MetaClass>(typeOracle.getTypes().length);
@@ -102,9 +101,6 @@ public abstract class MetaClassBridgeUtil {
         else {
           logger.log(TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
           final MetaClass clazz = GWTClass.newUncachedInstance(typeOracle, type);
-          if (clazz.isDefaultInstantiableSubtypeOf("com.google.gwt.user.client.ui.Widget")) {
-            widgetSubtypeCache.addConcreteWidgetSubtype(clazz);
-          }
 
           if (isReloadable(clazz, reloadable)) {
             classesToPush.put(clazz.getFullyQualifiedName(), clazz);

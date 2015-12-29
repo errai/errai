@@ -96,6 +96,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DependencyGraphBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.ExtensionTypeCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -150,6 +151,8 @@ public class IOCProcessor {
     log.debug("Found {} classes", allMetaClasses.size());
     final DependencyGraphBuilder graphBuilder = new DependencyGraphBuilderImpl(qualFactory, injectionContext.isAsync());
 
+    runExtensionCallbacks(allMetaClasses);
+    log.debug("Ran {} extension callbacks on all types {} types.", injectionContext.getExtensionTypeCallbacks().size(), allMetaClasses.size());
 
     addAllInjectableProviders(graphBuilder);
     processDependencies(allMetaClasses, graphBuilder);
@@ -188,6 +191,14 @@ public class IOCProcessor {
     callFinishInitOnContextManager(contextManagerFieldName, processingContext.getBlockBuilder());
 
     log.debug("Processed factory GWT.create calls in {}ms", System.currentTimeMillis() - start);
+  }
+
+  private void runExtensionCallbacks(final Collection<MetaClass> allMetaClasses) {
+    for (final MetaClass clazz : allMetaClasses) {
+      for (final ExtensionTypeCallback callback : injectionContext.getExtensionTypeCallbacks()) {
+        callback.callback(clazz);
+      }
+    }
   }
 
   private void callFinishInitOnContextManager(final String contextManagerFieldName, final BlockBuilder<?> methodBody) {
