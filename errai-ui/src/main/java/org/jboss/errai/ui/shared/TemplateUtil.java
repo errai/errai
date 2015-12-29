@@ -50,6 +50,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
+import jsinterop.annotations.JsType;
+
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
  *
@@ -150,7 +152,10 @@ public final class TemplateUtil {
     }
   }
 
-  private static native <T extends JavaScriptObject> T nativeCast(Object element) /*-{
+  /**
+   * Only works for native {@link JsType JsTypes} and {@link JavaScriptObject JavaScriptObjects}.
+   */
+  public static native <T> T nativeCast(Object element) /*-{
     return element;
   }-*/;
 

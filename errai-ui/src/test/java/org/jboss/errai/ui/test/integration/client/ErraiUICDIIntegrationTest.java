@@ -20,6 +20,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.test.integration.client.res.AppScopedTemplatedBean;
 import org.jboss.errai.ui.test.integration.client.res.BeanWithElementInjectionSites;
+import org.jboss.errai.ui.test.integration.client.res.InjectsJsTypeDiv;
 import org.jboss.errai.ui.test.integration.client.res.LazyTestHelper;
 import org.jboss.errai.ui.test.integration.client.res.NestedAppScopedTemplatedBean;
 import org.jboss.errai.ui.test.integration.client.res.TestAppBean;
@@ -52,7 +53,7 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
     assertEquals("The nested templated bean should have been loaded after being added to the RootPanel.", 1, NestedAppScopedTemplatedBean.postConstructCount);
   }
 
-  public void testElementInjection() throws Exception {
+  public void testGWTUserElementInjection() throws Exception {
     final BeanWithElementInjectionSites bean = IOC.getBeanManager().lookupBean(BeanWithElementInjectionSites.class).getInstance();
 
     assertNotNull(bean.anchor);
@@ -63,5 +64,12 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull(bean.button);
     assertEquals("BUTTON", bean.button.getTagName());
+  }
+
+  public void testJsTypeInjection() throws Exception {
+    final InjectsJsTypeDiv bean = IOC.getBeanManager().lookupBean(InjectsJsTypeDiv.class).getInstance();
+
+    assertNotNull(bean.div);
+    assertEquals("DIV", bean.div.getTagName());
   }
 }
