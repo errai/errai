@@ -19,8 +19,6 @@ package org.jboss.errai.ui.rebind;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -60,12 +58,6 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     Statement instance = decorable.getAccessStatement();
     String name = getTemplateDataFieldName((DataField) decorable.getAnnotation(), decorable.getName());
     if (decorable.getType().isAssignableTo(Element.class)) {
-      if (decorable.get().isAnnotationPresent(Inject.class)) {
-        throw new GenerationException("@DataField [" + name + "] in class ["
-            + decorable.getDecorableDeclaringType().getFullyQualifiedName() + "] is of type ["
-            + decorable.getType().getFullyQualifiedName()
-            + "] which does not support @Inject; this instance must be created manually.");
-      }
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
     } else if (RebindUtil.isNativeJsType(decorable.getType()) || RebindUtil.isElementalIface(decorable.getType())) {
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
