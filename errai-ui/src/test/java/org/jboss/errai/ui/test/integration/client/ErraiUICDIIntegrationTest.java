@@ -17,12 +17,15 @@
 package org.jboss.errai.ui.test.integration.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.integration.client.res.AppScopedTemplatedBean;
 import org.jboss.errai.ui.test.integration.client.res.BeanWithElementInjectionSites;
 import org.jboss.errai.ui.test.integration.client.res.InjectsJsTypeDiv;
 import org.jboss.errai.ui.test.integration.client.res.LazyTestHelper;
 import org.jboss.errai.ui.test.integration.client.res.NestedAppScopedTemplatedBean;
+import org.jboss.errai.ui.test.integration.client.res.QualifiedTemplatedBean;
 import org.jboss.errai.ui.test.integration.client.res.TestAppBean;
 
 import com.google.gwt.user.client.ui.RootPanel;
@@ -77,5 +80,14 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull(bean.th);
     assertEquals("TH", bean.th.getTagName());
+  }
+
+  public void testQualifiedDataField() throws Exception {
+    final QualifiedTemplatedBean bean = IOC.getBeanManager().lookupBean(QualifiedTemplatedBean.class, QualifierUtil.ANY_ANNOTATION).getInstance();
+
+    assertNotNull("FlowPanel was not injected.", bean.content);
+    assertTrue("FlowPanel element was not attached.", bean.content.getElement().hasParentElement());
+    assertEquals("FlowPanel element was not attached to the right element.",
+            TemplateWidgetMapper.get(bean).getElement(), bean.content.getElement().getParentElement());
   }
 }
