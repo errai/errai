@@ -56,14 +56,17 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
   public void testGWTUserElementInjection() throws Exception {
     final BeanWithElementInjectionSites bean = IOC.getBeanManager().lookupBean(BeanWithElementInjectionSites.class).getInstance();
 
-    assertNotNull(bean.anchor);
-    assertEquals("A", bean.anchor.getTagName());
+    assertNotNull("AnchorElement was not injected.", bean.anchor);
+    assertEquals("AnchorElement has wrong tag name.", "A", bean.anchor.getTagName());
 
-    assertNotNull(bean.div);
-    assertEquals("DIV", bean.div.getTagName());
+    assertNotNull("Div was not injected.", bean.div);
+    assertEquals("DivElement has wrong tag name.", "DIV", bean.div.getTagName());
 
-    assertNotNull(bean.button);
-    assertEquals("BUTTON", bean.button.getTagName());
+    assertNotNull("ButtonElement was not injected.", bean.button);
+    assertEquals("ButtonElement has wrong tag name.", "BUTTON", bean.button.getTagName());
+
+    assertNotNull("TableCellElement was not injected.", bean.td);
+    assertEquals("TableCellElement has the wrong tag name.", "TD", bean.td.getTagName());
   }
 
   public void testJsTypeInjection() throws Exception {
@@ -71,5 +74,8 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull(bean.div);
     assertEquals("DIV", bean.div.getTagName());
+
+    assertNotNull(bean.th);
+    assertEquals("TH", bean.th.getTagName());
   }
 }

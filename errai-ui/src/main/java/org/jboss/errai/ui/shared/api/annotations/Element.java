@@ -16,17 +16,20 @@
 
 package org.jboss.errai.ui.shared.api.annotations;
 
+import javax.inject.Named;
+
 import jsinterop.annotations.JsType;
 
 /**
- * Marks a native {@link JsType} as a wrapper for a DOM element. {@link Element#value()} is the tag name of the element.
- * Errai IoC will generate code calling {@code document.createElement} for injecting instances of types annotated with
- * {@linkplain Element}.
+ * Marks a native {@link JsType} as a wrapper for a DOM element. {@link Element#value()} are the tag names of the
+ * element. Errai IoC will generate code calling {@code document.createElement} for injecting instances of types
+ * annotated with {@linkplain Element}. When multiple tag names are specified, injection sites must use {@link Named} to
+ * remove ambiguity at injection sites.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public @interface Element {
 
-  String value();
+  String[] value();
 
 }

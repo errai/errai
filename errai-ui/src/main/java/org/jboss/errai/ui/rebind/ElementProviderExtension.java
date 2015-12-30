@@ -19,13 +19,16 @@ package org.jboss.errai.ui.rebind;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Named;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.client.api.IOCExtension;
@@ -38,6 +41,8 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultCustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
@@ -77,7 +82,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
         if (type.isAssignableTo(gwtElement)) {
           final TagName gwtTagNameAnno;
-          if ((gwtTagNameAnno = type.getAnnotation(TagName.class)) != null && gwtTagNameAnno.value().length == 1) {
+          if ((gwtTagNameAnno = type.getAnnotation(TagName.class)) != null) {
             processGwtUserElement(injectionContext, type, gwtTagNameAnno);
           }
         }
@@ -99,36 +104,77 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
   private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type,
           final TagName anno) {
-    final String tagName = anno.value()[0];
-    registerInjectableProvider(injectionContext, type, tagName);
+    registerInjectableProvider(injectionContext, type, anno.value());
   }
 
-  private static void registerInjectableProvider(final InjectionContext injectionContext, final MetaClass type, final String tagName) {
-    final InjectableHandle handle = new InjectableHandle(type, injectionContext.getQualifierFactory().forDefault());
-    injectionContext.registerExactTypeInjectableProvider(handle, new InjectableProvider() {
+  private static void registerInjectableProvider(final InjectionContext injectionContext, final MetaClass type, final String... tagNames) {
+    for (final String tagName : tagNames) {
+      final Qualifier qualifier = getNamedQualifier(injectionContext.getQualifierFactory(), tagName);
+      final InjectableHandle handle = new InjectableHandle(type, qualifier);
+      injectionContext.registerExactTypeInjectableProvider(handle, new InjectableProvider() {
 
-      CustomFactoryInjectable injectable;
+        CustomFactoryInjectable injectable;
 
-      @Override
-      public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite,
-              final FactoryNameGenerator nameGenerator) {
-        if (injectable == null) {
-          final String factoryName = nameGenerator.generateFor(handle.getType(), handle.getQualifier(),
-                  InjectableType.ExtensionProvided);
-          final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
+        @Override
+        public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite,
+                final FactoryNameGenerator nameGenerator) {
+          if (injectable == null) {
+            final String factoryName = nameGenerator.generateFor(handle.getType(), handle.getQualifier(),
+                    InjectableType.ExtensionProvided);
+            final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
 
-            @Override
-            protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-                    final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-              return Collections.singletonList(invokeStatic(TemplateUtil.class, "nativeCast",
-                      invokeStatic(Document.class, "get").invoke("createElement", loadLiteral(tagName))).returnValue());
-            }
-          };
-          injectable = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(), factoryName,
-                  Dependent.class, Collections.singletonList(WiringElementType.DependentBean), generator);
+              @Override
+              protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+                      final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+                return Collections.singletonList(invokeStatic(TemplateUtil.class, "nativeCast",
+                        invokeStatic(Document.class, "get").invoke("createElement", loadLiteral(tagName))).returnValue());
+              }
+            };
+            injectable = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(), factoryName,
+                    Dependent.class, Collections.singletonList(WiringElementType.DependentBean), generator);
+          }
+
+          return injectable;
+        }
+      });
+    }
+  }
+
+  private static Qualifier getNamedQualifier(final QualifierFactory factory, final String tagName) {
+    return factory.forSource(new HasAnnotations() {
+
+      private final Named named = new Named() {
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Named.class;
         }
 
-        return injectable;
+        @Override
+        public String value() {
+          return tagName;
+        }
+      };
+
+      @Override
+      public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
+        return Named.class.equals(annotation);
+      }
+
+      @Override
+      public Annotation[] getAnnotations() {
+        return new Annotation[] { named };
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+        if (isAnnotationPresent(annotation)) {
+          return (A) named;
+        }
+        else {
+          return null;
+        }
       }
     });
   }

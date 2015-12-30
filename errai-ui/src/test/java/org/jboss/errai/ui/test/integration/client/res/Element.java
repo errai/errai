@@ -16,17 +16,17 @@
 
 package org.jboss.errai.ui.test.integration.client.res;
 
-import org.jboss.errai.ui.shared.api.annotations.Element;
-
 import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
- *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
-@Element("div")
-public interface DivElement extends org.jboss.errai.ui.test.integration.client.res.Element {
+public interface Element {
+
+  @JsProperty
+  String getTagName();
 
 }

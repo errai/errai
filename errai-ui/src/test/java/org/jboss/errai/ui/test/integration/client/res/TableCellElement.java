@@ -22,11 +22,10 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
 /**
- *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
-@Element("div")
-public interface DivElement extends org.jboss.errai.ui.test.integration.client.res.Element {
+@Element({ "td", "th" })
+public interface TableCellElement extends org.jboss.errai.ui.test.integration.client.res.Element {
 
 }

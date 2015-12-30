@@ -18,10 +18,12 @@ package org.jboss.errai.ui.test.integration.client.res;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.ButtonElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.TableCellElement;
 
 /**
  *
@@ -38,5 +40,9 @@ public class BeanWithElementInjectionSites {
 
   @Inject
   public ButtonElement button;
+
+  @Inject
+  @Named(TableCellElement.TAG_TD)
+  public TableCellElement td;
 
 }
