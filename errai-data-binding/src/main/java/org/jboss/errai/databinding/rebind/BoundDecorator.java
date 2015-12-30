@@ -143,7 +143,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
     controller.addInitializationStatements(statements);
     if (!hasRunForType) {
       controller.addDestructionStatements(Collections.<Statement> singletonList(
-              nestedCall(Stmt.castTo(DataBinder.class, binderLookup.getValueAccessor())).invoke("unbind")));
+              nestedCall(controller.getReferenceStmt(DataBindingUtil.BINDER_VAR_NAME, DataBinder.class)).invoke("unbind")));
     }
   }
 

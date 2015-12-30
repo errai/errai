@@ -301,9 +301,7 @@ public class DataBindingUtil {
         }
         final ParamDependency paramDep = (ParamDependency) dep;
         if (paramDep.getParameter().isAnnotationPresent(AutoBound.class)) {
-          final Statement creationAccessStatement = DecorableType.PARAM.getAccessStatement(paramDep.getParameter(), decorable.getFactoryMetaClass());
-          controller.addInitializationStatements(Collections.<Statement>singletonList(controller.setReferenceStmt(BINDER_VAR_NAME, creationAccessStatement)));
-          return controller.getReferenceStmt(BINDER_VAR_NAME, DataBinder.class);
+          return DecorableType.PARAM.getAccessStatement(paramDep.getParameter(), decorable.getFactoryMetaClass());
         } else {
           break;
         }
