@@ -200,7 +200,6 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
     properties.add(new KeycloakProperty(StandardUserProperties.FIRST_NAME, accessToken.getGivenName()));
     properties.add(new KeycloakProperty(StandardUserProperties.LAST_NAME, accessToken.getFamilyName()));
     properties.add(new KeycloakProperty(StandardUserProperties.EMAIL, accessToken.getEmail()));
-    //properties.add(new KeycloakProperty(AUDIENCE, accessToken.getAudience()));
     properties.add(new KeycloakProperty(BIRTHDATE, accessToken.getBirthdate()));
     properties.add(new KeycloakProperty(GENDER, accessToken.getGender()));
     properties.add(new KeycloakProperty(LOCALE, accessToken.getLocale()));
