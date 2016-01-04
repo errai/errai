@@ -52,7 +52,7 @@ public abstract class ForgeTest {
   public static final String DEPENDENCY = "org.jboss.errai.forge:errai-forge-addon";
   public static final String ADDON_GROUP = "org.jboss.forge.addon";
   // TODO Programmatically lookup the Errai version this test is running in.
-  public static final String ERRAI_TEST_VERSION = "3.2.0-SNAPSHOT";
+  public static final String ERRAI_TEST_VERSION = "3.2.2-SNAPSHOT";
 
   @Inject
   protected ProjectFactory projectFactory;
@@ -101,7 +101,7 @@ public abstract class ForgeTest {
 
     return project;
   }
-  
+
   protected void assertResourceAndFileContentsSame(final String resourcePath, final File file)
           throws IOException {
     assertTrue(file.getAbsolutePath() + " was not created.", file.exists());
@@ -123,7 +123,7 @@ public abstract class ForgeTest {
         builders[i].append(chars, 0, read);
       }
     }
-    
+
     try {
       assertEquals(builders[0].toString(), builders[1].toString());
     }
@@ -133,7 +133,7 @@ public abstract class ForgeTest {
 
       System.out.println("OBSERVED");
       System.out.println(builders[1].toString());
-      
+
       throw e;
     }
   }
@@ -141,14 +141,14 @@ public abstract class ForgeTest {
   protected Project createErraiTestProject() {
     final Project project = initializeJavaProject();
     final ProjectConfig projectConfig = facetFactory.install(project, ProjectConfig.class);
-  
+
     projectConfig.setProjectProperty(ProjectProperty.ERRAI_VERSION, ERRAI_TEST_VERSION);
     projectConfig.setProjectProperty(ProjectProperty.MODULE_LOGICAL, "org.jboss.errai.ForgeTest");
     projectConfig.setProjectProperty(ProjectProperty.MODULE_FILE, new File(project.getRootDirectory()
             .getUnderlyingResourceObject(), "src/main/java/org/jboss/errai/ForgeTest.gwt.xml"));
     projectConfig.setProjectProperty(ProjectProperty.MODULE_NAME, "test");
     projectConfig.setProjectProperty(ProjectProperty.INSTALLED_FEATURES, new SerializableSet());
-  
+
     return project;
   }
 
