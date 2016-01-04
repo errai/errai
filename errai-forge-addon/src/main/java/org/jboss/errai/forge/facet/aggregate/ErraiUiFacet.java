@@ -18,7 +18,7 @@ package org.jboss.errai.forge.facet.aggregate;
 
 import org.jboss.errai.forge.facet.dependency.ErraiDataBindingDependencyFacet;
 import org.jboss.errai.forge.facet.dependency.ErraiUiDependencyFacet;
-import org.jboss.errai.forge.facet.dependency.ErraiWeldIntegrationDependencyFacet;
+import org.jboss.errai.forge.facet.dependency.ErraiCdiServerDependencyFacet;
 import org.jboss.errai.forge.facet.module.ErraiUiModuleFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
@@ -29,7 +29,7 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
  */
 
 @FacetConstraint({ CoreFacet.class, ErraiIocFacet.class, ErraiCdiClientFacet.class, ErraiUiDependencyFacet.class,
-    ErraiDataBindingDependencyFacet.class, ErraiUiModuleFacet.class, ErraiWeldIntegrationDependencyFacet.class })
+    ErraiDataBindingDependencyFacet.class, ErraiUiModuleFacet.class, ErraiCdiServerDependencyFacet.class })
 public class ErraiUiFacet extends BaseAggregatorFacet {
 
   @Override

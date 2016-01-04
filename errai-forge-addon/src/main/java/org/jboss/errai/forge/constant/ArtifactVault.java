@@ -95,7 +95,7 @@ public final class ArtifactVault {
     ErraiBus("errai-bus"),
     ErraiCdiClient("errai-cdi-client"),
     ErraiCdiClientTest("errai-cdi-client", "org.jboss.errai", null, "test-jar"),
-    ErraiWeldIntegration("errai-weld-integration"),
+    ErraiCdiServer("errai-cdi-server"),
     ErraiCdiJetty("errai-cdi-jetty"),
     ErraiCodegenGwt("errai-codegen-gwt"),
     ErraiIoc("errai-ioc"),

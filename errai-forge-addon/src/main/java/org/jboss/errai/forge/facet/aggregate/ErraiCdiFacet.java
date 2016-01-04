@@ -16,7 +16,7 @@
 
 package org.jboss.errai.forge.facet.aggregate;
 
-import org.jboss.errai.forge.facet.dependency.ErraiWeldIntegrationDependencyFacet;
+import org.jboss.errai.forge.facet.dependency.ErraiCdiServerDependencyFacet;
 import org.jboss.errai.forge.facet.resource.BeansXmlFacet;
 import org.jboss.errai.forge.facet.resource.CdiWebXmlFacet;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
@@ -27,7 +27,7 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@FacetConstraint({ CoreFacet.class, ErraiCdiClientFacet.class, ErraiWeldIntegrationDependencyFacet.class,
+@FacetConstraint({ CoreFacet.class, ErraiCdiClientFacet.class, ErraiCdiServerDependencyFacet.class,
     CdiWebXmlFacet.class, BeansXmlFacet.class })
 public class ErraiCdiFacet extends BaseAggregatorFacet {
 

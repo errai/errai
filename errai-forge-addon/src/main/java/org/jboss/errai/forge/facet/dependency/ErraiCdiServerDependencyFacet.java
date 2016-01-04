@@ -22,15 +22,15 @@ import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
 /**
- * This facet sets the Maven dependencies needed to use the errai-weld-integration project.
+ * This facet sets the Maven dependencies needed to use the errai-cdi-server project.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @FacetConstraint(VersionFacet.class)
-public class ErraiWeldIntegrationDependencyFacet extends AbstractDependencyFacet {
+public class ErraiCdiServerDependencyFacet extends AbstractDependencyFacet {
 
-  public ErraiWeldIntegrationDependencyFacet() {
-    setCoreDependencies(DependencyBuilder.create(DependencyArtifact.ErraiWeldIntegration.toString()));
+  public ErraiCdiServerDependencyFacet() {
+    setCoreDependencies(DependencyBuilder.create(DependencyArtifact.ErraiCdiServer.toString()));
   }
 
 }
