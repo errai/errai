@@ -2,10 +2,15 @@ package org.jboss.errai.ui.test.basic.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.test.basic.client.res.StyledComponent;
+import org.jboss.errai.ui.test.basic.client.res.StyledComponentWithAbsoluteSheetPath;
+import org.jboss.errai.ui.test.basic.client.res.StyledComponentWithRelativeSheetPath;
+import org.jboss.errai.ui.test.basic.client.res.StyledTemplatedBean;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Image;
@@ -75,9 +80,9 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
   private void testHasHTMLPreservesInnerHTML(BasicTemplateTestApp app) throws Exception {
     Anchor c4comp = app.getComponent().getC4();
     String c4compHtml = c4comp.getHTML();
-    assertTrue("Inner HTML should be preserved when component implements ", 
+    assertTrue("Inner HTML should be preserved when component implements ",
         RegExp.compile("<span(.)*>LinkHTML</span>").test(c4compHtml));
-    
+
     Element c4 = c4comp.getElement();
     assertEquals("blah", c4.getAttribute("href"));
     assertEquals("SPAN", c4.getFirstChildElement().getTagName());
@@ -101,15 +106,41 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
     assertEquals(c6.getElement(), c5.getElement().getFirstChildElement());
   }
-  
+
   @Test
   public void testPrecedenceRules() throws Exception {
     PrecedenceTemplateTestApp app = IOC.getBeanManager().lookupBean(PrecedenceTemplateTestApp.class).getInstance();
-   
+
     assertEquals(app.getComponent().getA().getText(), "This is a");
     assertEquals(app.getComponent().getB().getText(), "This is b");
     assertEquals(app.getComponent().getC().getText(), "This is c");
     assertEquals(app.getComponent().getE().getText(), "This is d, e, and f");
   }
+
+  public void testStyleSheetWithDefaultPath() throws Exception {
+    final StyledTemplatedBean bean = IOC.getBeanManager().lookupBean(StyledComponent.class).getInstance();
+    styledBeanAssertions(bean, "font-size", "100px");
+  }
+
+  public void testStyleSheetWithRelativePath() throws Exception {
+    final StyledTemplatedBean bean = IOC.getBeanManager().lookupBean(StyledComponentWithRelativeSheetPath.class).getInstance();
+    styledBeanAssertions(bean, "font-color", "red");
+  }
+
+  public void testStyleSheetWithAbsolutePath() throws Exception {
+    final StyledTemplatedBean bean = IOC.getBeanManager().lookupBean(StyledComponentWithAbsoluteSheetPath.class).getInstance();
+    styledBeanAssertions(bean, "margin", "10px");
+  }
+
+  private void styledBeanAssertions(final StyledTemplatedBean bean, final String propertyName, final String propertyValue) {
+    // Need to flush so that styles are computed immediately.
+    StyleInjector.flush();
+    assertTrue("The span element did not receive the class attribute from the template.", bean.getStyled().hasClassName("styled"));
+    assertEquals("Style from StyledComponent.css was not applied.", propertyValue, getPropertyValue(bean.getStyled(), propertyName));
+  }
+
+  private static native String getPropertyValue(Element elem, String prop) /*-{
+    return $wnd.getComputedStyle(elem,null).getPropertyValue(prop);
+  }-*/;
 
 }
