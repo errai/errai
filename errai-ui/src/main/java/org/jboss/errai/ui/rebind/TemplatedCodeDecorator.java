@@ -42,8 +42,10 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassDefinitionBuilderInterfaces;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilderAbstractMethodOption;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -66,6 +68,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ui.client.local.spi.TemplateRenderingCallback;
 import org.jboss.errai.ui.shared.Template;
+import org.jboss.errai.ui.shared.TemplateStyleSheet;
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -82,6 +85,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Event;
@@ -112,16 +116,24 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
     final MetaClass declaringClass = decorable.getDecorableDeclaringType();
 
-    Class<?> templateProvider = declaringClass.getAnnotation(Templated.class).provider();
-    boolean customProvider = templateProvider != Templated.DEFAULT_PROVIDER.class;
+    final Templated anno = (Templated) decorable.getAnnotation();
+    Class<?> templateProvider = anno.provider();
+    final boolean customProvider = templateProvider != Templated.DEFAULT_PROVIDER.class;
+    final boolean defaultStyleSheetPath = "".equals(anno.stylesheet());
+    final String styleSheetPath = getTemplateStyleSheetPath(declaringClass);
+    final boolean styleSheet = (Thread.currentThread().getContextClassLoader().getResource(styleSheetPath) != null);
 
     if (declaringClass.isAssignableTo(Composite.class)) {
       logger.warn("The @Templated class, {}, extends Composite. This will not be supported in future versions.", declaringClass.getFullyQualifiedName());
     }
+    if (!defaultStyleSheetPath && !styleSheet) {
+      throw new GenerationException("@Tempalted class [" + declaringClass.getFullyQualifiedName()
+              + "] declared a stylesheet [" + styleSheetPath + "] that could not be found.");
+    }
 
     final List<Statement> initStmts = new ArrayList<Statement>();
 
-    generateTemplatedInitialization(decorable, controller, initStmts, customProvider);
+    generateTemplatedInitialization(decorable, controller, initStmts, customProvider, styleSheet);
 
     if (declaringClass.isAnnotationPresent(EntryPoint.class)) {
       initStmts.add(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("instance")));
@@ -181,12 +193,14 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
   /**
    * Generate the actual construction logic for our {@link Templated} component
+   * @param styleSheet
    */
   @SuppressWarnings("serial")
   private void generateTemplatedInitialization(final Decorable decorable,
                                                final FactoryController controller,
                                                final List<Statement> initStmts,
-                                               boolean customProvider) {
+                                               final boolean customProvider,
+                                               final boolean styleSheet) {
 
     final Map<MetaClass, BuildMetaClass> constructed = getConstructedTemplateTypes(decorable);
     final MetaClass declaringClass = decorable.getDecorableDeclaringType();
@@ -197,8 +211,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       /*
        * Generate this component's ClientBundle resource if necessary
        */
-      if (!customProvider) {
-        generateTemplateResourceInterface(decorable, declaringClass);
+      if (!customProvider || styleSheet) {
+        generateTemplateResourceInterface(decorable, declaringClass, customProvider, styleSheet);
 
       /*
        * Instantiate the ClientBundle Template resource
@@ -208,6 +222,9 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           .named(templateVarName)
           .initializeWith(
               Stmt.invokeStatic(GWT.class, "create", constructed.get(declaringClass))));
+
+        if (styleSheet)
+          initStmts.add(Stmt.loadVariable(templateVarName).invoke("getStyle").invoke("ensureInjected"));
       }
 
       /*
@@ -574,29 +591,78 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   }
 
   /**
-   * Create an inner interface for the given {@link Template} class and its HTML corresponding resource
+   * Possibly create an inner interface {@link ClientBundle} for the template's HTML or CSS resources.
+   * @param customProvider
+   * @param styleSheet
    */
-  private void generateTemplateResourceInterface(final Decorable decorable, final MetaClass type) {
-    final ClassStructureBuilder<?> componentTemplateResource = ClassBuilder.define(getTemplateTypeName(type)).publicScope()
-        .interfaceDefinition().implementsInterface(Template.class).implementsInterface(ClientBundle.class)
-        .body()
-        .publicMethod(TextResource.class, "getContents").annotatedWith(new Source() {
+  private void generateTemplateResourceInterface(final Decorable decorable, final MetaClass type, final boolean customProvider, final boolean styleSheet) {
+    final ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> ifaceDef = ClassBuilder
+            .define(getTemplateTypeName(type)).publicScope().interfaceDefinition();
+    if (!customProvider) {
+      ifaceDef.implementsInterface(Template.class);
+    }
+    if (styleSheet) {
+      ifaceDef.implementsInterface(TemplateStyleSheet.class);
+    }
 
-          @Override
-          public Class<? extends Annotation> annotationType() {
-            return Source.class;
-          }
+    final ClassStructureBuilder<ClassStructureBuilderAbstractMethodOption> componentTemplateResource = ifaceDef
+            .implementsInterface(ClientBundle.class).body();
 
-          @Override
-          public String[] value() {
-            return new String[]{getTemplateFileName(type)};
-          }
+    if (!customProvider) {
+      componentTemplateResource.publicMethod(TextResource.class, "getContents").annotatedWith(new Source() {
 
-        }).finish();
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Source.class;
+        }
+
+        @Override
+        public String[] value() {
+          return new String[] { getTemplateFileName(type) };
+        }
+
+      }).finish();
+    }
+
+    if (styleSheet) {
+      componentTemplateResource.publicMethod(CssResource.class, "getStyle").annotatedWith(new Source() {
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Source.class;
+        }
+
+        @Override
+        public String[] value() {
+          return new String[] { getTemplateStyleSheetPath(type) };
+        }
+
+      }, new CssResource.NotStrict() {
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return CssResource.NotStrict.class;
+        }
+
+      }).finish();
+    }
 
     decorable.getFactoryMetaClass().addInnerClass(new InnerClass(componentTemplateResource.getClassDefinition()));
 
     getConstructedTemplateTypes(decorable).put(type, componentTemplateResource.getClassDefinition());
+  }
+
+  public static String getTemplateStyleSheetPath(final MetaClass type) {
+    final Templated anno = type.getAnnotation(Templated.class);
+    final boolean defaultPath = "".equals(anno.stylesheet());
+    final String rawPath = (defaultPath ? type.getName() + ".css" : anno.stylesheet());
+    final boolean absolute = rawPath.startsWith("/");
+
+    if (absolute) {
+      return rawPath.substring(1);
+    } else {
+      return type.getPackageName().replace('.', '/') + "/" + rawPath;
+    }
   }
 
   /**

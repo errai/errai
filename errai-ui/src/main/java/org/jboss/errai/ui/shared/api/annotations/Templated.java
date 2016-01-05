@@ -35,7 +35,6 @@ import com.google.gwt.user.client.ui.Composite;
  * <p>
  * Indicates that the annotated class will participate in the Errai UI templating framework. Instances of the annotated
  * component must be retrieved via {@link Inject} or {@link Instance} references in bean classes.
- *
  * <p>
  * Unless otherwise specified in the {@link #value()} and {@link #provider()} attributes, a corresponding
  * ComponentName.html file must be placed in the same directory on the class-path as the custom ComponentName type.
@@ -159,6 +158,16 @@ public @interface Templated
     * of the widget.
     */
    String value() default "";
+
+   /**
+   * Specifies the resource path (<code>com/example/foo/CompositeComponent.css</code>) of a CSS stylesheet to be added
+   * to the DOM when this component is created.
+   * <p>
+   * The resource path is the location of the CSS file on the classpath. If omitted, this defaults to the fully
+   * qualified class name of the annotated type, plus `.css`, in which case it is not an error if the CSS file is not
+   * found. For non-default values, missing stylesheets will cause rebind errors.
+   */
+   String stylesheet() default "";
 
    /**
    * Specifies a {@link TemplateProvider} that is used to supply a template at run-time i.e.

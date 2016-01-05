@@ -26,10 +26,15 @@ import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.basic.client.res.BasicComponent;
 import org.jboss.errai.ui.test.basic.client.res.BasicComponentUsingDataFields;
 import org.jboss.errai.ui.test.basic.client.res.NonCompositeComponent;
+import org.jboss.errai.ui.test.basic.client.res.StyledComponent;
+import org.jboss.errai.ui.test.basic.client.res.StyledComponentWithAbsoluteSheetPath;
+import org.jboss.errai.ui.test.basic.client.res.StyledComponentWithRelativeSheetPath;
+import org.jboss.errai.ui.test.basic.client.res.StyledTemplatedBean;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Image;
@@ -216,5 +221,34 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     assertFalse("Composite templated bean should not be attached after destruction.", instance.isAttached());
     assertFalse("Composite templated bean should not be in the detach list after destruction.", RootPanel.isInDetachList(instance));
   }
+
+  @Test
+  public void testStyleSheetWithDefaultPath() throws Exception {
+    final StyledTemplatedBean bean = IOC.getBeanManager().lookupBean(StyledComponent.class).getInstance();
+    styledBeanAssertions(bean, "font-size", "100px");
+  }
+
+  @Test
+  public void testStyleSheetWithRelativePath() throws Exception {
+    final StyledTemplatedBean bean = IOC.getBeanManager().lookupBean(StyledComponentWithRelativeSheetPath.class).getInstance();
+    styledBeanAssertions(bean, "font-color", "red");
+  }
+
+  @Test
+  public void testStyleSheetWithAbsolutePath() throws Exception {
+    final StyledTemplatedBean bean = IOC.getBeanManager().lookupBean(StyledComponentWithAbsoluteSheetPath.class).getInstance();
+    styledBeanAssertions(bean, "margin", "10px");
+  }
+
+  private void styledBeanAssertions(final StyledTemplatedBean bean, final String propertyName, final String propertyValue) {
+    // Need to flush so that styles are computed immediately.
+    StyleInjector.flush();
+    assertTrue("The span element did not receive the class attribute from the template.", bean.getStyled().hasClassName("styled"));
+    assertEquals("Style from StyledComponent.css was not applied.", propertyValue, getPropertyValue(bean.getStyled(), propertyName));
+  }
+
+  private static native String getPropertyValue(Element elem, String prop) /*-{
+    return $wnd.getComputedStyle(elem,null).getPropertyValue(prop);
+  }-*/;
 
 }
