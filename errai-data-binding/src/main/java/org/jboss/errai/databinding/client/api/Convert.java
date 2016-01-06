@@ -24,8 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.ConverterRegistrationKey;
 
+import com.google.gwt.core.client.JsDate;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.TakesValue;
@@ -42,7 +46,7 @@ import com.google.gwt.user.datepicker.client.DatePicker;
 
 /**
  * Type conversion utility used by the generated {@link Bindable} proxies.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Convert {
@@ -56,7 +60,7 @@ public class Convert {
    * This method is used in case no {@link Converter} has been specified for the binding (see
    * {@link DataBinder#bind(Widget, String, Converter)}) and no default converter has been registered for the
    * corresponding types (see {@link Convert#registerDefaultConverter(Class, Class, Converter)}).
-   * 
+   *
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
@@ -81,7 +85,7 @@ public class Convert {
     }
     else if (toType.equals(String.class)) {
       if (o.getClass().equals(Date.class)) {
-        return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).format((Date) o);
+        return DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format((Date) o);
       }
       return o.toString();
     }
@@ -106,7 +110,8 @@ public class Convert {
         return Double.parseDouble(val);
       }
       else if (toType.equals(Date.class)) {
-        return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).parse(val);
+        final Double epochTime = JsDate.create(val).getTime();
+        return new Date(epochTime.longValue());
       }
       else if (toType.equals(BigDecimal.class)) {
         return new BigDecimal(val);
@@ -120,7 +125,7 @@ public class Convert {
 
   /**
    * Converts the provided object to a widget value.
-   * 
+   *
    * @param <M>
    *          The type of the model value (field type of the model)
    * @param <W>
@@ -147,7 +152,7 @@ public class Convert {
 
   /**
    * Converts the provided object to a widget value.
-   * 
+   *
    * @param <M>
    *          The type of the model value (field type of the model)
    * @param <W>
@@ -183,7 +188,7 @@ public class Convert {
 
   /**
    * Converts the provided object to a model value.
-   * 
+   *
    * @param <M>
    *          The type of the model value (field type of the model)
    * @param <W>
@@ -210,7 +215,7 @@ public class Convert {
 
   /**
    * Converts the provided object to a model value.
-   * 
+   *
    * @param <M>
    *          The type of the model value (field type of the model)
    * @param <W>
@@ -247,7 +252,7 @@ public class Convert {
   /**
    * Registers a {@link Converter} as a default for the provided model and widget types. The default converter will be
    * used in case no custom converter is provided when binding a model to a widget.
-   * 
+   *
    * @param <M>
    *          The type of the model value (field type of the model)
    * @param <W>
@@ -277,8 +282,11 @@ public class Convert {
   @SuppressWarnings("rawtypes")
   private static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
     Class widgetValueType = null;
-    
-    if (widget instanceof TakesValue) {
+
+    if (widget instanceof ElementWrapperWidget && InputElement.is(widget.getElement())) {
+      widgetValueType = BoundUtil.getValueClassForInputType(widget.getElement().getAttribute("type"));
+    }
+    else if (widget instanceof TakesValue) {
       Object value = ((TakesValue) widget).getValue();
       if (value != null) {
         widgetValueType = value.getClass();
@@ -304,11 +312,11 @@ public class Convert {
       else {
         widgetValueType = defaultWidgetValueType;
       }
-    } 
+    }
     else {
       widgetValueType = String.class;
     }
-    
+
     return widgetValueType;
   }
 }
