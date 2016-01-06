@@ -18,12 +18,15 @@ package org.jboss.errai.ui.test.binding.client;
 
 import java.util.Date;
 
+import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.test.binding.client.res.BindingDateConverter;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
+import org.jboss.errai.ui.test.binding.client.res.InputElementsModel;
 import org.jboss.errai.ui.test.binding.client.res.TemplateFragmentWithoutFragmentId;
+import org.jboss.errai.ui.test.binding.client.res.TemplateWithInputElements;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.jboss.errai.ui.test.common.client.dom.Element;
 import org.jboss.errai.ui.test.common.client.dom.TextInputElement;
@@ -31,6 +34,7 @@ import org.junit.Test;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -42,27 +46,278 @@ import com.google.gwt.user.client.ui.TextBox;
  */
 public class BindingTemplateTest extends AbstractErraiCDITest {
 
+  private static interface PropertyHandler<V> {
+    void setProperty(V value);
+    V getProperty();
+  }
+
+  private static class DefaultInputElementHandler implements PropertyHandler<String> {
+
+    private final InputElement element;
+
+    private DefaultInputElementHandler(final InputElement element) {
+      this.element = element;
+    }
+
+    @Override
+    public void setProperty(String value) {
+      element.setValue(value);
+    }
+
+    @Override
+    public String getProperty() {
+      return element.getValue();
+    }
+
+  }
+
+  private static class CheckboxHandler implements PropertyHandler<Boolean> {
+
+    private final InputElement element;
+
+    private CheckboxHandler(final InputElement element) {
+      this.element = element;
+    }
+
+    @Override
+    public void setProperty(Boolean value) {
+      element.setChecked(value);
+    }
+
+    @Override
+    public Boolean getProperty() {
+      return element.isChecked();
+    }
+
+  }
+
+  private static class IdentityConverter<T> implements Converter<T, T> {
+
+    @Override
+    public T toModelValue(T widgetValue) {
+      return widgetValue;
+    }
+
+    @Override
+    public T toWidgetValue(T modelValue) {
+      return modelValue;
+    }
+
+  }
+
+  private static class DoubleConverter implements Converter<Double, String> {
+
+    @Override
+    public Double toModelValue(String widgetValue) {
+      return Double.valueOf(widgetValue);
+    }
+
+    @Override
+    public String toWidgetValue(Double modelValue) {
+      return String.valueOf(modelValue);
+    }
+
+  }
+
+  private static class IntegerConverter implements Converter<Integer, String> {
+
+    @Override
+    public Integer toModelValue(String widgetValue) {
+      return Integer.valueOf(widgetValue);
+    }
+
+    @Override
+    public String toWidgetValue(Integer modelValue) {
+      return String.valueOf(modelValue);
+    }
+
+  }
+
   @Override
   public String getModuleName() {
     return getClass().getName().replaceAll("client.*$", "Test");
   }
 
   @Test
-  public void testAutomaticBinding() {
-    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    try {
-      automaticBindingAssertions(app.getCompositeTemplate());
-    } catch (Throwable t) {
-      throw new AssertionError("Failure with templated composite: " + t.getMessage(), t);
-    }
-    try {
-      automaticBindingAssertions(app.getNonCompositeTemplate());
-    } catch (Throwable t) {
-      throw new AssertionError("Failure with templated non-composite: " + t.getMessage(), t);
-    }
+  public void testAutomaticBindingWithCompositeTemplated() {
+    final BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    automaticBindingAssertions(app.getCompositeTemplate());
   }
 
-  private void automaticBindingAssertions(final BindingTemplate template) {
+  @Test
+  public void testAutomaticBindingWithNonCompositeTemplated() {
+    final BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    automaticBindingAssertions(app.getNonCompositeTemplate());
+  }
+
+  @Test
+  public void testInputElementBindings() throws Exception {
+    final TemplateWithInputElements bean = IOC.getBeanManager().lookupBean(TemplateWithInputElements.class).getInstance();
+    final InputElementsModel model = bean.binder.getModel();
+
+    inputElementAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(String value) {
+        model.setText(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getText();
+      }
+    }, new DefaultInputElementHandler(bean.text), new IdentityConverter<String>(), "text", "test value", "other test value", bean.text);
+
+    inputElementAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(String value) {
+        model.setPassword(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getPassword();
+      }
+    }, new DefaultInputElementHandler(bean.password), new IdentityConverter<String>(), "password", "password123", "letmein123", bean.password);
+
+    inputElementAssertions(new PropertyHandler<Double>() {
+
+      @Override
+      public void setProperty(Double value) {
+        model.setNumber(value);
+      }
+
+      @Override
+      public Double getProperty() {
+        return model.getNumber();
+      }
+    }, new DefaultInputElementHandler(bean.number), new DoubleConverter(), "number", 1.0, "2.0", bean.number);
+
+    inputElementAssertions(new PropertyHandler<Integer>() {
+
+      @Override
+      public void setProperty(Integer value) {
+        model.setRange(value);
+      }
+
+      @Override
+      public Integer getProperty() {
+        return model.getRange();
+      }
+    }, new DefaultInputElementHandler(bean.range), new IntegerConverter(), "range", 10, "20", bean.range);
+
+    inputElementAssertions(new PropertyHandler<Boolean>() {
+
+      @Override
+      public void setProperty(Boolean value) {
+        model.setCheckbox(value);
+      }
+
+      @Override
+      public Boolean getProperty() {
+        return model.isCheckbox();
+      }
+    }, new CheckboxHandler(bean.checkbox), new IdentityConverter<Boolean>(), "checkbox", true, false, bean.checkbox);
+
+    inputElementAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(String value) {
+        model.setFile(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getFile();
+      }
+    }, new DefaultInputElementHandler(bean.file), new IdentityConverter<String>(), "file", "file:///tmp/foo", "file:///tmp/bar", bean.file);
+
+    inputElementAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(String value) {
+        model.setEmail(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getEmail();
+      }
+    }, new DefaultInputElementHandler(bean.email), new IdentityConverter<String>(), "email", "a@b.c", "y@z", bean.email);
+
+    inputElementAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(String value) {
+        model.setColor(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getColor();
+      }
+    }, new DefaultInputElementHandler(bean.color), new IdentityConverter<String>(), "color", "#000000", "#FFFFFF", bean.color);
+
+    inputElementAssertions(new PropertyHandler<Boolean>() {
+
+      @Override
+      public void setProperty(Boolean value) {
+        model.setRadio(value);
+      }
+
+      @Override
+      public Boolean getProperty() {
+        return model.getRadio();
+      }
+    }, new CheckboxHandler(bean.radio), new IdentityConverter<Boolean>(), "radio", true, false, bean.radio);
+
+    inputElementAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(String value) {
+        model.setTel(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getTel();
+      }
+    }, new DefaultInputElementHandler(bean.tel), new IdentityConverter<String>(), "tel", "4161234567", "6473217654", bean.tel);
+
+    inputElementAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(String value) {
+        model.setUrl(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getUrl();
+      }
+    }, new DefaultInputElementHandler(bean.url), new IdentityConverter<String>(), "url", "http://jboss.org", "https://redhat.com", bean.url);
+  }
+
+  private <M, U> void inputElementAssertions(final PropertyHandler<M> model, final PropertyHandler<U> ui,
+          final Converter<M, U> converter, final String type, final M value1, final U value2, final InputElement element) {
+    assertNotNull("The element for input[type='" + type + "'] was not injected.", element);
+    assertEquals("The element for input[type='" + type + "'] has the wrong tag name.", "INPUT", element.getTagName());
+    assertEquals("The element for input[type='" + type + "'] has the wrong type.", type, element.getType());
+
+    assertFalse("Precondition failed: ui property already set to [" + value1 + "].", converter.toWidgetValue(value1).equals(ui.getProperty()));
+
+    model.setProperty(value1);
+    assertEquals("The UI value for input[type='" + type + "'] was not updated after a model change.",
+            converter.toWidgetValue(value1), ui.getProperty());
+
+    ui.setProperty(value2);
+    fireChangeEvent(element);
+    assertEquals("The model value for input[type='" + type + "'] was not updated after a UI change.",
+            converter.toModelValue(value2), model.getProperty());
+  }
+
+  private void automaticBindingAssertions(final BindingTemplate<?> template) {
     assertNotNull("Template instance was not injected!", template);
 
     Label idLabel = template.getIdLabel();

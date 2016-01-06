@@ -16,6 +16,10 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.dom.client.Element;
 
 /**
@@ -25,8 +29,36 @@ public class BoundUtil {
 
   private BoundUtil() {}
 
+  private static final Map<String, Class<?>> valueClassesByInputTypes = new HashMap<String, Class<?>>();
+
+  static {
+    valueClassesByInputTypes.put(null, String.class);
+    valueClassesByInputTypes.put("text", String.class);
+    valueClassesByInputTypes.put("password", String.class);
+    valueClassesByInputTypes.put("file", String.class);
+    valueClassesByInputTypes.put("email", String.class);
+    valueClassesByInputTypes.put("color", String.class);
+    valueClassesByInputTypes.put("tel", String.class);
+    valueClassesByInputTypes.put("url", String.class);
+
+    valueClassesByInputTypes.put("checkbox", Boolean.class);
+    valueClassesByInputTypes.put("radio", Boolean.class);
+
+    valueClassesByInputTypes.put("number", Double.class);
+
+    valueClassesByInputTypes.put("range", Integer.class);
+
+    valueClassesByInputTypes.put("date", Date.class);
+    valueClassesByInputTypes.put("time", Date.class);
+    valueClassesByInputTypes.put("datetime-local", Date.class);
+  }
+
   public static native Element asElement(final Object element) /*-{
     return element;
   }-*/;
+
+  public static Class<?> getValueClassForInputType(final String inputType) {
+    return valueClassesByInputTypes.get(inputType.toLowerCase());
+  }
 
 }

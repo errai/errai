@@ -147,9 +147,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          should be used.
    * @param bindOnKeyUp
    *          a flag indicating that the property should be updated when the
-   *          widget fires a {@link com.google.gwt .event.dom.client.KeyUpEvent}
+   *          widget fires a {@link com.google.gwt.event.dom.client.KeyUpEvent}
    *          along with the default
-   *          {@link com.google.gwt.event.logical.shared .ValueChangeEvent}.
+   *          {@link com.google.gwt.event.logical.shared.ValueChangeEvent}.
    * @return binding the created binding.
    */
   public Binding bind(final Widget widget, final String property, final Converter converter, final boolean bindOnKeyUp) {
@@ -224,10 +224,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       final HandlerRegistration valueHandlerReg;
 
       if (nativeInputElement) {
+        final String inputType = widget.getElement().getAttribute("type");
+        final Class<?> valueType = BoundUtil.getValueClassForInputType(inputType);
+        final String propertyName = (Boolean.class.equals(valueType) ? "checked" : "value");
         valueHandlerReg = widget.addDomHandler(new ChangeHandler() {
           @Override
           public void onChange(ChangeEvent event) {
-            updater.update(widget.getElement().getPropertyString("value"));
+            updater.update(widget.getElement().getPropertyString(propertyName));
           }
         }, ChangeEvent.getType());
       }
@@ -422,8 +425,17 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         continue;
 
       if (widget instanceof ElementWrapperWidget && InputElement.is(widget.getElement())) {
-        Object widgetValue = Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converter);
-        widget.getElement().setPropertyString("value", (String) widgetValue);
+        final String inputType = widget.getElement().getAttribute("type");
+        final Class<?> valueType = BoundUtil.getValueClassForInputType(inputType);
+        final Object widgetValue = Convert.toWidgetValue(valueType, propertyTypes.get(property).getType(), newValue, converter);
+
+        if (Boolean.class.equals(valueType)) {
+          widget.getElement().setPropertyBoolean("checked", (Boolean) widgetValue);
+        } else if (valueType != null) {
+          widget.getElement().setPropertyObject("value", widgetValue);
+        } else {
+          throw new UnsupportedOperationException("Cannot bind to element input[type=\"" + inputType + "\"].");
+        }
       }
       else if (widget instanceof TakesValue) {
         TakesValue hv = (TakesValue) widget;
