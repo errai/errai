@@ -190,7 +190,7 @@
       <dependency>
         <groupId>org.jboss.integration-platform</groupId>
         <artifactId>jboss-integration-platform-bom</artifactId>
-        <version>6.0.0.CR27</version>
+        <version>6.0.0.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
