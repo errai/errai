@@ -16,7 +16,6 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +39,9 @@ public class BoundUtil {
     valueClassesByInputTypes.put("color", String.class);
     valueClassesByInputTypes.put("tel", String.class);
     valueClassesByInputTypes.put("url", String.class);
+    valueClassesByInputTypes.put("date", String.class);
+    valueClassesByInputTypes.put("time", String.class);
+    valueClassesByInputTypes.put("datetime-local", String.class);
 
     valueClassesByInputTypes.put("checkbox", Boolean.class);
     valueClassesByInputTypes.put("radio", Boolean.class);
@@ -47,10 +49,6 @@ public class BoundUtil {
     valueClassesByInputTypes.put("number", Double.class);
 
     valueClassesByInputTypes.put("range", Integer.class);
-
-    valueClassesByInputTypes.put("date", Date.class);
-    valueClassesByInputTypes.put("time", Date.class);
-    valueClassesByInputTypes.put("datetime-local", Date.class);
   }
 
   public static native Element asElement(final Object element) /*-{

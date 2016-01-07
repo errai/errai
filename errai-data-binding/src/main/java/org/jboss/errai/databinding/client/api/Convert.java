@@ -28,10 +28,7 @@ import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.ConverterRegistrationKey;
 
-import com.google.gwt.core.client.JsDate;
 import com.google.gwt.dom.client.InputElement;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
@@ -84,9 +81,6 @@ public class Convert {
       return o;
     }
     else if (toType.equals(String.class)) {
-      if (o.getClass().equals(Date.class)) {
-        return DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format((Date) o);
-      }
       return o.toString();
     }
     else if (o.getClass().equals(String.class)) {
@@ -109,10 +103,6 @@ public class Convert {
       else if (toType.equals(Double.class)) {
         return Double.parseDouble(val);
       }
-      else if (toType.equals(Date.class)) {
-        final Double epochTime = JsDate.create(val).getTime();
-        return new Date(epochTime.longValue());
-      }
       else if (toType.equals(BigDecimal.class)) {
         return new BigDecimal(val);
       }
@@ -120,7 +110,8 @@ public class Convert {
         return new BigInteger(val);
       }
     }
-    return o;
+
+    throw new IllegalArgumentException("There is no default conversion from " + toType.getName() + " to " + o.getClass().getName());
   }
 
   /**
