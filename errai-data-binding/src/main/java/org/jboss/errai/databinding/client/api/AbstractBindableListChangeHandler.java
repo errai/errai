@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,69 +14,50 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
+package org.jboss.errai.databinding.client.api;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
-
 /**
- * A {@link BindableListChangeHandler} that can be used in case details of the underlying list
- * mutation are irrelevant (when the sole information that the list has changed is sufficient).
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
- * 
- * @param <M>
+ * A convenience class for implementing {@link BindableListChangeHandler BindableListChangeHandlers} that only wish to
+ * implement a subset of the methods from the interface. All implementations in
+ * {@link AbstractBindableListChangeHandler} are noops.
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-public abstract class UnspecificListChangeHandler<M> implements BindableListChangeHandler<M> {
+public abstract class AbstractBindableListChangeHandler<M> implements BindableListChangeHandler<M> {
 
   @Override
   public void onItemAdded(List<M> source, M item) {
-    onListChanged(source);
   }
 
   @Override
   public void onItemAddedAt(List<M> source, int index, M item) {
-    onListChanged(source);
   }
 
   @Override
   public void onItemsAdded(List<M> source, Collection<? extends M> items) {
-    onListChanged(source);
   }
 
   @Override
   public void onItemsAddedAt(List<M> source, int index, Collection<? extends M> items) {
-    onListChanged(source);
   }
 
   @Override
   public void onItemsCleared(List<M> source) {
-    onListChanged(source);
   }
 
   @Override
   public void onItemRemovedAt(List<M> source, int index) {
-    onListChanged(source);
   }
 
   @Override
   public void onItemsRemovedAt(List<M> source, List<Integer> indexes) {
-    onListChanged(source);
   }
 
   @Override
   public void onItemChanged(List<M> source, int index, M item) {
-    onListChanged(source);
   }
-
-  /**
-   * Called when the monitored list has been mutated.
-   * 
-   * @param source
-   *          a list representing the state before the change. Never null.
-   */
-  abstract void onListChanged(List<M> source);
 
 }

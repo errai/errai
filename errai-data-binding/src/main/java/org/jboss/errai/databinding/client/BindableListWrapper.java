@@ -26,6 +26,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;

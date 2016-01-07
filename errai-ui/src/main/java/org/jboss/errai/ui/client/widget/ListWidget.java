@@ -26,8 +26,8 @@ import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.util.CreationalCallback;
-import org.jboss.errai.databinding.client.BindableListChangeHandler;
 import org.jboss.errai.databinding.client.BindableListWrapper;
+import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdapter;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
@@ -72,6 +72,7 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
 
   private final ComplexPanel panel;
   private BindableListWrapper<M> items;
+  private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
 
   private final List<ComponentCreationalCallback> callbacks = new LinkedList<ComponentCreationalCallback>();
   private int pendingCallbacks;
@@ -84,6 +85,7 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
 
   protected ListWidget(ComplexPanel panel) {
     this.panel = Assert.notNull(panel);
+    handlers.add(this);
     initWidget(panel);
   }
 
@@ -151,7 +153,9 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
     }
 
     if (changed) {
-      this.items.addChangeHandler(this);
+      for (final BindableListChangeHandler<M> handler : handlers) {
+        this.items.addChangeHandler(handler);
+      }
       init();
     }
   }
@@ -242,6 +246,21 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
     }
   }
 
+  public HandlerRegistration addBindableListChangeHandler(final BindableListChangeHandler<M> handler) {
+    ensureItemsInitialized();
+    handlers.add(handler);
+    items.addChangeHandler(handler);
+
+    return new HandlerRegistration() {
+      @Override
+      public void removeHandler() {
+        ensureItemsInitialized();
+        handlers.remove(handler);
+        items.removeChangeHandler(handler);
+      }
+    };
+  }
+
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<M>> handler) {
     if (!valueChangeHandlerInitialized) {
@@ -258,11 +277,17 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
 
   @Override
   public List<M> getValue() {
+    ensureItemsInitialized();
+    return items;
+  }
+
+  private void ensureItemsInitialized() {
     if (items == null) {
       items = new BindableListWrapper<M>(new ArrayList<M>());
-      items.addChangeHandler(this);
+      for (final BindableListChangeHandler<M> handler : handlers) {
+        items.addChangeHandler(handler);
+      }
     }
-    return items;
   }
 
   @Override

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
+package org.jboss.errai.databinding.client.api;
 
 import java.util.Collection;
 import java.util.List;
+
+import org.jboss.errai.databinding.client.BindableListWrapper;
 
 /**
  * A change handler for monitoring mutations of bindable lists (see {@link BindableListWrapper}).
