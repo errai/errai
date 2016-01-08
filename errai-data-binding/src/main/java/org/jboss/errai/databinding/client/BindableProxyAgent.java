@@ -492,7 +492,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (initialState != null) {
       Object value = proxy.get(property);
-      if (widget instanceof TakesValue) {
+      if (widget instanceof ElementWrapperWidget && (InputElement.is(widget.getElement()) || TextAreaElement.is(widget.getElement()))) {
+        final Class<?> valueType = BoundUtil.getValueClassForInputType(widget.getElement().getPropertyString("type"));
+        final String valuePropName = (Boolean.class.equals(valueType) ? "checked" : "value");
+        value = initialState.getInitialValue(value, widget.getElement().getPropertyString(valuePropName));
+      }
+      else if (widget instanceof TakesValue) {
         value = initialState.getInitialValue(value, ((TakesValue) widget).getValue());
       }
       else if (widget instanceof HasText) {
@@ -506,6 +511,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, value, converter);
         proxy.set(property, newValue);
         firePropertyChangeEvent(property, knownValues.get(property), newValue);
+        updateWidgetsAndFireEvent(property, knownValues.get(property), newValue, widget);
       }
     }
   }
@@ -685,8 +691,14 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   public void fireChangeEvents(BindableProxyAgent other) {
     for (String property : propertyTypes.keySet()) {
-      Object curValue = knownValues.get(property);
-      Object oldValue = other.knownValues.get(property);
+      final Object curValue,
+                   oldValue,
+                   thisValue = knownValues.get(property),
+                   otherValue = other.knownValues.get(property);
+
+      final InitialState initalState = (getInitialState() != null ? getInitialState() : InitialState.FROM_MODEL);
+      curValue = initalState.getInitialValue(thisValue, otherValue);
+      oldValue = initalState.getInitialValue(otherValue, thisValue);
 
       if ((curValue == null && oldValue != null) || (curValue != null && !curValue.equals(oldValue))) {
 
