@@ -33,6 +33,7 @@ public class BoundUtil {
   static {
     valueClassesByInputTypes.put(null, String.class);
     valueClassesByInputTypes.put("text", String.class);
+    valueClassesByInputTypes.put("textarea", String.class);
     valueClassesByInputTypes.put("password", String.class);
     valueClassesByInputTypes.put("file", String.class);
     valueClassesByInputTypes.put("email", String.class);

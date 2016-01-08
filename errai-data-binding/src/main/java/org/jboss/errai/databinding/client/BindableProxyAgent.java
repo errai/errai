@@ -36,6 +36,7 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.TextAreaElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -218,13 +219,14 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     HashMap<Class<? extends GwtEvent>, HandlerRegistration> handlerMap =
                                                           new HashMap<Class<? extends GwtEvent>, HandlerRegistration>();
 
-    final boolean nativeInputElement = (widget instanceof ElementWrapperWidget) && InputElement.is(widget.getElement());
+    final boolean nativeElementWithValue = widget instanceof ElementWrapperWidget
+            && (InputElement.is(widget.getElement()) || TextAreaElement.is(widget.getElement()));
 
-    if (widget instanceof HasValue || nativeInputElement) {
+    if (widget instanceof HasValue || nativeElementWithValue) {
       final HandlerRegistration valueHandlerReg;
 
-      if (nativeInputElement) {
-        final String inputType = widget.getElement().getAttribute("type");
+      if (nativeElementWithValue) {
+        final String inputType = widget.getElement().getPropertyString("type");
         final Class<?> valueType = BoundUtil.getValueClassForInputType(inputType);
         final String propertyName = (Boolean.class.equals(valueType) ? "checked" : "value");
         valueHandlerReg = widget.addDomHandler(new ChangeHandler() {
@@ -424,8 +426,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (widget == excluding)
         continue;
 
-      if (widget instanceof ElementWrapperWidget && InputElement.is(widget.getElement())) {
-        final String inputType = widget.getElement().getAttribute("type");
+      if (widget instanceof ElementWrapperWidget && (InputElement.is(widget.getElement()) || TextAreaElement.is(widget.getElement()))) {
+        final String inputType = widget.getElement().getPropertyString("type");
         final Class<?> valueType = BoundUtil.getValueClassForInputType(inputType);
         final Object widgetValue = Convert.toWidgetValue(valueType, propertyTypes.get(property).getType(), newValue, converter);
 
