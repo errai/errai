@@ -27,6 +27,8 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.ConverterRegistrationKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.user.client.TakesValue;
@@ -47,6 +49,9 @@ import com.google.gwt.user.datepicker.client.DatePicker;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Convert {
+
+  private static final Logger logger = LoggerFactory.getLogger(Convert.class);
+
   @SuppressWarnings("rawtypes")
   private static final Map<ConverterRegistrationKey, Converter> defaultConverters =
       new HashMap<ConverterRegistrationKey, Converter>();
@@ -84,7 +89,7 @@ public class Convert {
       return o.toString();
     }
     else if (o.getClass().equals(String.class)) {
-      String val = (String) o;
+      final String val = (String) o;
       if (toType.equals(Boolean.class)) {
         return Boolean.parseBoolean(val);
       }
@@ -109,9 +114,15 @@ public class Convert {
       else if (toType.equals(BigInteger.class)) {
         return new BigInteger(val);
       }
+      else {
+        throw new UnsupportedOperationException(
+                "Cannot convert from " + String.class.getName() + " to " + toType.getName());
+      }
     }
 
-    throw new IllegalArgumentException("There is no default conversion from " + toType.getName() + " to " + o.getClass().getName());
+    logger.debug("No explicit conversion was performed. Assuming " + o.getClass().getName()
+            + " is already assignable to " + toType.getName());
+    return o;
   }
 
   /**

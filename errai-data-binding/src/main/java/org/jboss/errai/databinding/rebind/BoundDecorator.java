@@ -126,7 +126,6 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
             + componentType.getFullyQualifiedName());
       }
 
-
       // Generate the binding
       Statement conv = bound.converter().equals(Bound.NO_CONVERTER.class) ? loadLiteral(null) : Stmt.newObject(bound.converter());
       Statement onKeyUp = Stmt.load(bound.onKeyUp());
