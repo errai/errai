@@ -140,6 +140,16 @@ public class ErraiBus implements EntryPoint {
         @Override
         public void clearProperties() {
         }
+
+        @Override
+        public String getSessionId() {
+          return null;
+        }
+
+        @Override
+        public String getClientId() {
+          return null;
+        }
       };
     }
 
@@ -178,5 +188,13 @@ public class ErraiBus implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
+  }
+
+  String getSessionId() {
+    return null;
+  }
+
+  String getClientId() {
+    return null;
   }
 }

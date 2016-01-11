@@ -136,4 +136,8 @@ public interface ClientMessageBus extends MessageBus {
    *          The message to deliver to local subscribers.
    */
   public void sendLocal(Message message);
+
+  String getSessionId();
+
+  String getClientId();
 }

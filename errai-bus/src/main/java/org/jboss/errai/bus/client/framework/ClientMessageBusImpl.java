@@ -547,10 +547,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return subjects;
   }
 
+  @Override
   public String getClientId() {
     return clientId;
   }
 
+  @Override
   public String getSessionId() {
     return sessionId;
   }
