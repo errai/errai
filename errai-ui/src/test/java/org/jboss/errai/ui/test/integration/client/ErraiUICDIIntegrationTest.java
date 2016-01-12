@@ -90,4 +90,16 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
     assertEquals("FlowPanel element was not attached to the right element.",
             TemplateWidgetMapper.get(bean).getElement(), bean.content.getElement().getParentElement());
   }
+
+  public void testJsTypeElementQualifiedPropertyInjection() throws Exception {
+    final BeanWithElementInjectionSites bean = IOC.getBeanManager().lookupBean(BeanWithElementInjectionSites.class).getInstance();
+
+    assertNotNull("Text input was not injected.", bean.textInput);
+    assertEquals("Text input does not have proper type.", "text", bean.textInput.getType());
+    assertEquals("Text input does not have proper placeholder.", "fooblie", bean.textInput.getPlaceholder());
+
+    assertNotNull("Number input was not injected.", bean.numberInput);
+    assertEquals("Number input does not have proper type.", "number", bean.numberInput.getType());
+    assertEquals("Number input does not have proper placeholder.", "1337", bean.numberInput.getPlaceholder());
+  }
 }

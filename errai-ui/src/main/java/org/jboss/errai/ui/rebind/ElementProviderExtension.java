@@ -16,12 +16,18 @@
 
 package org.jboss.errai.ui.rebind;
 
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Named;
@@ -52,6 +58,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.api.annotations.Element;
+import org.jboss.errai.ui.shared.api.annotations.Properties;
+import org.jboss.errai.ui.shared.api.annotations.Property;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TagName;
@@ -108,6 +116,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   }
 
   private static void registerInjectableProvider(final InjectionContext injectionContext, final MetaClass type, final String... tagNames) {
+    final Set<Property> properties = getProperties(type);
     for (final String tagName : tagNames) {
       final Qualifier qualifier = getNamedQualifier(injectionContext.getQualifierFactory(), tagName);
       final InjectableHandle handle = new InjectableHandle(type, qualifier);
@@ -126,8 +135,20 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
               @Override
               protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
                       final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-                return Collections.singletonList(invokeStatic(TemplateUtil.class, "nativeCast",
-                        invokeStatic(Document.class, "get").invoke("createElement", loadLiteral(tagName))).returnValue());
+                final List<Statement> stmts = new ArrayList<Statement>();
+                final String elementVar = "element";
+
+                stmts.add(declareFinalVariable(elementVar, com.google.gwt.dom.client.Element.class,
+                        invokeStatic(Document.class, "get").invoke("createElement", loadLiteral(tagName))));
+
+                for (final Property property : properties) {
+                  stmts.add(loadVariable(elementVar).invoke("setPropertyString", loadLiteral(property.name()),
+                          loadLiteral(property.value())));
+                }
+
+                stmts.add(invokeStatic(TemplateUtil.class, "nativeCast", loadVariable(elementVar)).returnValue());
+
+                return stmts;
               }
             };
             injectable = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(), factoryName,
@@ -138,6 +159,23 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
         }
       });
     }
+  }
+
+  private static Set<Property> getProperties(final MetaClass type) {
+    final Set<Property> properties = new HashSet<Property>();
+
+    final Property declaredProperty = type.getAnnotation(Property.class);
+    final Properties declaredProperties = type.getAnnotation(Properties.class);
+
+    if (declaredProperty != null) {
+      properties.add(declaredProperty);
+    }
+
+    if (declaredProperties != null) {
+      properties.addAll(Arrays.asList(declaredProperties.value()));
+    }
+
+    return properties;
   }
 
   private static Qualifier getNamedQualifier(final QualifierFactory factory, final String tagName) {

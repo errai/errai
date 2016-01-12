@@ -45,4 +45,10 @@ public class BeanWithElementInjectionSites {
   @Named(TableCellElement.TAG_TD)
   public TableCellElement td;
 
+  @Inject
+  public TextInputElement textInput;
+
+  @Inject
+  public NumberInputElement numberInput;
+
 }
