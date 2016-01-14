@@ -16,14 +16,13 @@
 
 package org.jboss.errai.databinding.client.test;
 
+import static org.jboss.errai.databinding.client.api.Convert.getConverter;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
 
 import org.jboss.errai.databinding.client.api.Convert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -31,130 +30,120 @@ import org.junit.Test;
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @autor Max Barkley <mbarkley@redhat.com>
  */
 public class DefaultConversionTest {
 
   @Test
   public void testStringToString() throws Exception {
-    Object result = Convert.to(String.class, "test");
+    Object result = getConverter(String.class, String.class).toWidgetValue("test");
     assertEquals("test", result);
   }
 
   @Test
   public void testNullStringBecomesEmpty() throws Exception {
-    Object result = Convert.to(String.class, null);
+    Object result = getConverter(Integer.class, String.class).toWidgetValue(null);
     assertEquals("", result);
   }
 
   @Test
   public void testStringToInt() throws Exception {
-    Object result = Convert.to(Integer.class, "1234");
+    Object result = getConverter(String.class, Integer.class).toWidgetValue("1234");
     assertEquals(Integer.valueOf(1234), result);
   }
 
   @Test
   public void testIntToString() throws Exception {
-    Object result = Convert.to(String.class, 1234);
+    Object result = getConverter(Integer.class, String.class).toWidgetValue(1234);
     assertEquals("1234", result);
   }
 
   @Test
   public void testStringToLong() throws Exception {
-    Object result = Convert.to(Long.class, "1234");
+    Object result = getConverter(String.class, Long.class).toWidgetValue("1234");
     assertEquals(Long.valueOf(1234), result);
   }
 
   @Test
   public void testLongToString() throws Exception {
-    Object result = Convert.to(String.class, 1234L);
+    Object result = getConverter(Long.class, String.class).toWidgetValue(1234L);
     assertEquals("1234", result);
   }
 
   @Test
   public void testStringToFloat() throws Exception {
-    Object result = Convert.to(Float.class, "1234");
+    Object result = getConverter(String.class, Float.class).toWidgetValue("1234");
     assertEquals(Float.valueOf(1234), result);
   }
 
   @Test
   public void testFloatToString() throws Exception {
-    Object result = Convert.to(String.class, 1234.5f);
+    Object result = getConverter(Float.class, String.class).toWidgetValue(1234.5f);
     assertEquals("1234.5", result);
   }
 
   @Test
   public void testStringToDouble() throws Exception {
-    Object result = Convert.to(Double.class, "1234");
+    Object result = getConverter(String.class, Double.class).toWidgetValue("1234");
     assertEquals(Double.valueOf(1234), result);
   }
 
   @Test
   public void testDoubleToString() throws Exception {
-    Object result = Convert.to(String.class, 1234.5d);
+    Object result = getConverter(Double.class, String.class).toWidgetValue(1234.5);
     assertEquals("1234.5", result);
   }
 
   @Test
   public void testStringToBooleanTrue() throws Exception {
-    Object result = Convert.to(Boolean.class, "true");
+    Object result = getConverter(String.class, Boolean.class).toWidgetValue("true");
     assertEquals(Boolean.TRUE, result);
   }
 
   @Test
   public void testBooleanTrueToString() throws Exception {
-    Object result = Convert.to(String.class, true);
+    Object result = getConverter(Boolean.class, String.class).toWidgetValue(true);
     assertEquals("true", result);
   }
 
   @Test
   public void testStringToBooleanFalse() throws Exception {
-    Object result = Convert.to(Boolean.class, "false");
+    Object result = getConverter(String.class, Boolean.class).toWidgetValue("false");
     assertEquals(Boolean.FALSE, result);
   }
 
   @Test
   public void testBooleanFalseToString() throws Exception {
-    Object result = Convert.to(String.class, false);
+    Object result = getConverter(Boolean.class, String.class).toWidgetValue(false);
     assertEquals("false", result);
   }
 
   @Test
   public void testBigDecimalToString() throws Exception {
     BigDecimal bd = new BigDecimal(System.currentTimeMillis());
-    Object result = Convert.to(String.class, bd);
+    Object result = getConverter(BigDecimal.class, String.class).toWidgetValue(bd);
     assertEquals(bd.toString(), result);
   }
-  
+
   @Test
   public void testStringToBigDecimal() throws Exception {
     BigDecimal bd = new BigDecimal(System.currentTimeMillis());
-    Object result = Convert.to(BigDecimal.class, bd.toString());
+    Object result = getConverter(String.class, BigDecimal.class).toWidgetValue(bd.toString());
     assertEquals(bd, result);
   }
-  
+
   @Test
   public void testBigIntegerToString() throws Exception {
     BigInteger bn = new BigInteger(String.valueOf(System.currentTimeMillis()));
-    Object result = Convert.to(String.class, bn);
+    Object result = getConverter(BigInteger.class, String.class).toWidgetValue(bn);
     assertEquals(bn.toString(), result);
   }
-  
+
   @Test
   public void testStringToBigInteger() throws Exception {
     BigInteger bn = new BigInteger(String.valueOf(System.currentTimeMillis()));
-    Object result = Convert.to(BigInteger.class, bn.toString());
+    Object result = getConverter(String.class, BigInteger.class).toWidgetValue(bn.toString());
     assertEquals(bn, result);
-  }
-  
-  // ignoring this test because converting dates leads to a GWT.create() call and this is not a GWTTestCase.
-  @Ignore @Test
-  public void testDateRoundTrip() throws Exception {
-    @SuppressWarnings("deprecation")
-    Date d = new Date(123, 5, 6);
-
-    Object result = Convert.to(Date.class, Convert.to(String.class, d));
-
-    assertEquals(d, result);
   }
 
 }

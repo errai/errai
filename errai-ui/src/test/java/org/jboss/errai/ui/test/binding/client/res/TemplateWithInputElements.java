@@ -19,6 +19,9 @@ package org.jboss.errai.ui.test.binding.client.res;
 import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.converter.DateInputConverter;
+import org.jboss.errai.databinding.client.api.converter.DateTimeInputConverter;
+import org.jboss.errai.databinding.client.api.converter.TimeInputConverter;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -66,15 +69,15 @@ public class TemplateWithInputElements {
   public InputElement file;
 
   @Inject
-  @Bound @DataField
+  @Bound(converter = DateInputConverter.class) @DataField
   public InputElement date;
 
   @Inject
-  @Bound @DataField
+  @Bound(converter = DateTimeInputConverter.class) @DataField
   public InputElement datetime;
 
   @Inject
-  @Bound @DataField
+  @Bound(converter = TimeInputConverter.class) @DataField
   public InputElement time;
 
   @Inject

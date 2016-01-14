@@ -24,17 +24,17 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 
 /**
  * Converter for testing purposes.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindingDateConverter implements Converter<Date, String> {
 
   public static final Date TEST_DATE;
-  
+
   static {
     TEST_DATE = DateTimeFormat.getFormat("yyyy/MM/dd").parse("1980/22/06");
   }
-  
+
   @Override
   public Date toModelValue(String widgetValue) {
     return TEST_DATE;
@@ -43,6 +43,16 @@ public class BindingDateConverter implements Converter<Date, String> {
   @Override
   public String toWidgetValue(Date modelValue) {
     return "testdate";
+  }
+
+  @Override
+  public Class<Date> getModelType() {
+    return Date.class;
+  }
+
+  @Override
+  public Class<String> getWidgetType() {
+    return String.class;
   }
 
 }

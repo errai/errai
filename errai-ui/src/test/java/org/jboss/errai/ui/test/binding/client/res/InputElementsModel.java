@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ui.test.binding.client.res;
 
-import java.sql.Time;
 import java.util.Date;
 
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -31,7 +30,7 @@ public class InputElementsModel {
 
   private String password;
 
-  private double number;
+  private Double number;
 
   private int range;
 
@@ -43,7 +42,7 @@ public class InputElementsModel {
 
   private Date datetime;
 
-  private Time time;
+  private Date time;
 
   private String email;
 
@@ -71,11 +70,11 @@ public class InputElementsModel {
     this.password = password;
   }
 
-  public double getNumber() {
+  public Double getNumber() {
     return number;
   }
 
-  public void setNumber(double number) {
+  public void setNumber(Double number) {
     this.number = number;
   }
 
@@ -119,11 +118,11 @@ public class InputElementsModel {
     this.datetime = datetime;
   }
 
-  public Time getTime() {
+  public Date getTime() {
     return time;
   }
 
-  public void setTime(Time time) {
+  public void setTime(Date time) {
     this.time = time;
   }
 

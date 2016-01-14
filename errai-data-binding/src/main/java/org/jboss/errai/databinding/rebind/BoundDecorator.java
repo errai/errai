@@ -59,7 +59,8 @@ import jsinterop.annotations.JsType;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@CodeDecorator
+// Must run after TemplatedCodeDecorator
+@CodeDecorator(order=2)
 public class BoundDecorator extends IOCDecoratorExtension<Bound> {
 
   final Set<MetaClass> processedTypes = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());

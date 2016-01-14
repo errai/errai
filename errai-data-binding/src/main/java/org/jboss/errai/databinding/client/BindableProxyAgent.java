@@ -16,8 +16,6 @@
 
 package org.jboss.errai.databinding.client;
 
-import static org.jboss.errai.databinding.client.api.Convert.toModelValue;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -143,7 +141,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          the widget to bind to, must not be null.
    * @param property
    *          the property of the model to bind the widget to, must not be null.
-   * @param converter
+   * @param userProvidedConverter
    *          the converter to use for this binding, null if default conversion
    *          should be used.
    * @param bindOnKeyUp
@@ -153,19 +151,24 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          {@link com.google.gwt.event.logical.shared.ValueChangeEvent}.
    * @return binding the created binding.
    */
-  public Binding bind(final Widget widget, final String property, final Converter converter, final boolean bindOnKeyUp) {
+  public Binding bind(final Widget widget, final String property, Converter userProvidedConverter, final boolean bindOnKeyUp) {
     validatePropertyExpr(property);
+
+    final Converter converter;
 
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       DataBinder nested = createNestedBinder(property);
+      converter = findConverter(property, getNestedPropertyType(property), widget, userProvidedConverter);
       nested.bind(widget, property.substring(dotPos + 1), converter, bindOnKeyUp);
       Binding binding = new Binding(property, widget, converter, null);
       bindings.put(property, binding);
       return binding;
     }
-
-    if (!propertyTypes.containsKey(property)) {
+    else if (propertyTypes.containsKey(property)) {
+      converter = findConverter(property, propertyTypes.get(property).getType(), widget, userProvidedConverter);
+    }
+    else {
       throw new NonExistingPropertyException(property);
     }
 
@@ -179,8 +182,14 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       @Override
       public void update(final Object value) {
         final Object oldValue = proxy.get(property);
-        final Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, value, converter);
-        proxy.set(property, newValue);
+        final Object newValue = converter.toModelValue(value);
+        try {
+          proxy.set(property, newValue);
+        } catch (Throwable t) {
+                  throw new RuntimeException("Error while setting property [" + property + "] to [" + newValue
+                          + "] converted from [" + value + "] with converter [" + converter.getModelType().getName()
+                          + " -> " + converter.getWidgetType().getName() + "].", t);
+                }
         updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
       }
     });
@@ -194,6 +203,54 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     syncState(widget, property, converter);
 
     return binding;
+  }
+
+  private Class<?> getNestedPropertyType(final String property) {
+    final String[] subProperties = property.split("\\.");
+    BindableProxyAgent<?> agent = this;
+    for (int i = 0; i < subProperties.length - 1; i++) {
+      final String subProperty = subProperties[i];
+      final DataBinder binder = Assert.notNull(
+              "Could not find subproperty " + i + ", " + subProperty + ", in " + property,
+              agent.binders.get(subProperty));
+      agent = ((BindableProxy<?>) binder.getModel()).getBindableProxyAgent();
+    }
+    final String lastSubProperty = subProperties[subProperties.length-1];
+
+    return Assert.notNull("Could not find last subproperty, " + lastSubProperty + ", in " + property,
+            agent.propertyTypes.get(lastSubProperty)).getType();
+  }
+
+  private Converter findConverter(final String property, final Class<?> propertyType, final Widget widget, final Converter userProvidedConverter) {
+    final Class<?> widgetValueType = Convert.inferWidgetValueType(widget, propertyType);
+    if (userProvidedConverter != null) {
+      validateTypes(property, propertyType, userProvidedConverter.getModelType(), "model");
+      validateTypes(property, widgetValueType, userProvidedConverter.getWidgetType(), "widget");
+
+      return userProvidedConverter;
+    }
+    else {
+      final Converter<?, ?> converter = Convert.getConverter(propertyType, widgetValueType);
+
+      if (converter == null) {
+        throw new RuntimeException(
+                "Cannot convert between " + propertyType.getName() + " and " + widgetValueType.getName()
+                        + " for property [" + property + "] in " + proxy.unwrap().getClass().getName());
+      }
+
+      return converter;
+    }
+  }
+
+  private void validateTypes(final String property, final Class<?> actualType, final Class<?> converterType, final String modelOrWidget) {
+    if (!actualType.equals(converterType) && !oneTypeIsInterface(actualType, converterType)) {
+      throw new RuntimeException("Converter " + modelOrWidget + " type, " + converterType.getName()
+              + ", does not match the required type, " + actualType.getName());
+    }
+  }
+
+  private boolean oneTypeIsInterface(Class<?> propertyType, Class<?> converterModelType) {
+    return propertyType.isInterface() ^ converterModelType.isInterface();
   }
 
   /**
@@ -228,21 +285,28 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (nativeElementWithValue) {
         final String inputType = widget.getElement().getPropertyString("type");
         final Class<?> valueType = BoundUtil.getValueClassForInputType(inputType);
-        final String propertyName = (Boolean.class.equals(valueType) ? "checked" : "value");
-        valueHandlerReg = widget.addDomHandler(new ChangeHandler() {
-          @Override
-          public void onChange(ChangeEvent event) {
-            updater.update(widget.getElement().getPropertyString(propertyName));
-          }
-        }, ChangeEvent.getType());
+        final ChangeHandler handler;
+        if (Boolean.class.equals(valueType)) {
+          handler = event -> {
+            updater.update(widget.getElement().getPropertyBoolean("checked"));
+          };
+        }
+        else if (String.class.equals(valueType)) {
+          handler = event -> {
+            final Object rawValue = widget.getElement().getPropertyObject("value");
+            updater.update(rawValue != null ? rawValue : "");
+          };
+        }
+        else {
+          throw new RuntimeException("Unrecognized input element type [" + inputType + "]");
+        }
+
+        valueHandlerReg = widget.addDomHandler(handler, ChangeEvent.getType());
       }
       else {
-        valueHandlerReg = ((HasValue) widget).addValueChangeHandler(new ValueChangeHandler() {
-          @Override
-          public void onValueChange(ValueChangeEvent event) {
-            final Object value = ((HasValue) widget).getValue();
-            updater.update(value);
-          }
+        valueHandlerReg = ((HasValue) widget).addValueChangeHandler(event -> {
+          final Object value = ((HasValue) widget).getValue();
+          updater.update(value);
         });
       }
 
@@ -255,13 +319,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (bindOnKeyUp) {
       if (widget instanceof ValueBoxBase) {
-        HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) widget).addKeyUpHandler(new KeyUpHandler() {
-
-          @Override
-          public void onKeyUp(KeyUpEvent event) {
-            updater.update(((ValueBoxBase) widget).getText());
-          }
-        });
+        HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) widget)
+                .addKeyUpHandler(event -> updater.update(((ValueBoxBase) widget).getText()));
         handlerMap.put(KeyUpEvent.class, keyUpHandlerReg);
       }
       else {
@@ -314,6 +373,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     }
     proxy.set(bindableProperty, binder.getModel());
     knownValues.put(bindableProperty, binder.getModel());
+
+    if (property.indexOf('.') != property.lastIndexOf('.')) {
+      ((BindableProxy<?>) binder.getModel()).getBindableProxyAgent().createNestedBinder(property.substring(property.indexOf('.')+1));
+    }
 
     return binder;
   }
@@ -420,8 +483,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           final Widget excluding) {
 
     for (Binding binding : bindings.get(property)) {
-      Widget widget = binding.getWidget();
-      Converter converter = binding.getConverter();
+      final Widget widget = binding.getWidget();
+      final Converter converter = binding.getConverter();
 
       if (widget == excluding)
         continue;
@@ -429,25 +492,32 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (widget instanceof ElementWrapperWidget && (InputElement.is(widget.getElement()) || TextAreaElement.is(widget.getElement()))) {
         final String inputType = widget.getElement().getPropertyString("type");
         final Class<?> valueType = BoundUtil.getValueClassForInputType(inputType);
-        final Object widgetValue = Convert.toWidgetValue(valueType, propertyTypes.get(property).getType(), newValue, converter);
+        final Object widgetValue = converter.toWidgetValue(newValue);
 
         if (Boolean.class.equals(valueType)) {
-          widget.getElement().setPropertyBoolean("checked", (Boolean) widgetValue);
-        } else if (valueType != null) {
-          widget.getElement().setPropertyObject("value", widgetValue);
+          try {
+            widget.getElement().setPropertyBoolean("checked", (Boolean) widgetValue);
+          } catch (ClassCastException e) {
+            throw new RuntimeException("Failed to cast converted value [" + widgetValue + "] of type "
+                    + (widgetValue != null ? widgetValue.getClass().getName() : "null")
+                    + " to Boolean.\nConverter has model type " + converter.getModelType().getName()
+                    + " and widget type " + converter.getWidgetType().getName() + ".");
+          }
+        } else if (String.class.equals(valueType)) {
+          widget.getElement().setPropertyObject("value", widgetValue != null ? widgetValue : "");
         } else {
           throw new UnsupportedOperationException("Cannot bind to element input[type=\"" + inputType + "\"].");
         }
       }
       else if (widget instanceof TakesValue) {
         TakesValue hv = (TakesValue) widget;
-        Object widgetValue = Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converter);
+        Object widgetValue = converter.toWidgetValue(newValue);
         hv.setValue(widgetValue);
       }
       else if (widget instanceof HasText) {
         HasText ht = (HasText) widget;
-        Object widgetValue = Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue,
-                converter);
+        assert String.class.equals(converter.getWidgetType());
+        Object widgetValue = converter.toWidgetValue(newValue);
         ht.setText((String) widgetValue);
       }
     }
@@ -508,7 +578,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         updateWidgetsAndFireEvent(property, knownValues.get(property), value);
       }
       else if (initialState == InitialState.FROM_UI) {
-        Object newValue = toModelValue(propertyTypes.get(property).getType(), widget, value, converter);
+        Object newValue = converter.toModelValue(value);
         proxy.set(property, newValue);
         firePropertyChangeEvent(property, knownValues.get(property), newValue);
         updateWidgetsAndFireEvent(property, knownValues.get(property), newValue, widget);

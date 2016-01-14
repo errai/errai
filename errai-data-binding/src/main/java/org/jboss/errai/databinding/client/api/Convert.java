@@ -25,10 +25,11 @@ import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.databinding.client.AbstractOneWayConverter;
 import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.ConverterRegistrationKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.errai.databinding.client.OneWayConverter;
+import org.jboss.errai.databinding.client.TwoWayConverter;
 
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.user.client.TakesValue;
@@ -50,205 +51,222 @@ import com.google.gwt.user.datepicker.client.DatePicker;
  */
 public class Convert {
 
-  private static final Logger logger = LoggerFactory.getLogger(Convert.class);
+  private static class AnyToStringConverter<D> extends AbstractOneWayConverter<D, String> {
+    public AnyToStringConverter(final Class<D> domainType) {
+      super(domainType, String.class);
+    }
+
+    @Override
+    public String convert(D value) {
+      if (value == null) {
+        return "";
+      }
+      else {
+        return value.toString();
+      }
+    }
+  }
+
+  private static class IdentityConverter<T> extends AbstractOneWayConverter<T, T> {
+    public IdentityConverter(final Class<T> type) {
+      super(type, type);
+    }
+
+    @Override
+    public T convert(T value) {
+      return value;
+    }
+  }
+
+  private static class StringToIntegerConverter extends AbstractOneWayConverter<String, Integer> {
+    public StringToIntegerConverter() {
+      super(String.class, Integer.class);
+    }
+
+    @Override
+    public Integer convert(String value) {
+      if (isEmpty(value)) {
+        return null;
+      }
+      else {
+        return Integer.parseInt(value);
+      }
+    }
+  }
+
+  private static class StringToLongConverter extends AbstractOneWayConverter<String, Long> {
+    public StringToLongConverter() {
+      super(String.class, Long.class);
+    }
+
+    @Override
+    public Long convert(String value) {
+      if (isEmpty(value)) {
+        return null;
+      }
+      else {
+        return Long.parseLong(value);
+      }
+    }
+  }
+
+  private static class StringToFloatConverter extends AbstractOneWayConverter<String, Float> {
+    public StringToFloatConverter() {
+      super(String.class, Float.class);
+    }
+
+    @Override
+    public Float convert(String value) {
+      if (isEmpty(value)) {
+        return null;
+      }
+      else {
+        return Float.parseFloat(value);
+      }
+    }
+  }
+
+  private static class StringToDoubleConverter extends AbstractOneWayConverter<String, Double> {
+    public StringToDoubleConverter() {
+      super(String.class, Double.class);
+    }
+
+    @Override
+    public Double convert(String value) {
+      if (isEmpty(value)) {
+        return null;
+      }
+      else {
+        return Double.parseDouble(value);
+      }
+    }
+  }
+
+  private static class StringToBigIntegerConverter extends AbstractOneWayConverter<String, BigInteger> {
+    public StringToBigIntegerConverter() {
+      super(String.class, BigInteger.class);
+    }
+
+    @Override
+    public BigInteger convert(String value) {
+      if (isEmpty(value)) {
+        return null;
+      }
+      else {
+        return new BigInteger(value);
+      }
+    }
+  }
+
+  private static class StringToBigDecimalConverter extends AbstractOneWayConverter<String, BigDecimal> {
+    public StringToBigDecimalConverter() {
+      super(String.class, BigDecimal.class);
+    }
+
+    @Override
+    public BigDecimal convert(String value) {
+      if (isEmpty(value)) {
+        return null;
+      }
+      else {
+        return new BigDecimal(value);
+      }
+    }
+  }
+
+  private static class StringToBooleanConverter extends AbstractOneWayConverter<String, Boolean> {
+    public StringToBooleanConverter() {
+      super(String.class, Boolean.class);
+    }
+
+    @Override
+    public Boolean convert(String value) {
+      if (isEmpty(value)) {
+        return null;
+      }
+      else {
+        return Boolean.parseBoolean(value);
+      }
+    }
+  }
+
+  private static final OneWayConverter<String, Integer> STRING_TO_INT = new StringToIntegerConverter();
+  private static final OneWayConverter<String, Long> STRING_TO_LONG = new StringToLongConverter();
+  private static final OneWayConverter<String, Float> STRING_TO_FLOAT = new StringToFloatConverter();
+  private static final OneWayConverter<String, Double> STRING_TO_DOUBLE = new StringToDoubleConverter();
+  private static final OneWayConverter<String, BigInteger> STRING_TO_BIG_INTEGER = new StringToBigIntegerConverter();
+  private static final OneWayConverter<String, BigDecimal> STRING_TO_BIG_DECIMAL = new StringToBigDecimalConverter();
+  private static final OneWayConverter<String, Boolean> STRING_TO_BOOLEAN = new StringToBooleanConverter();
 
   @SuppressWarnings("rawtypes")
   private static final Map<ConverterRegistrationKey, Converter> defaultConverters =
       new HashMap<ConverterRegistrationKey, Converter>();
 
-  /**
-   * Converts the provided object to the provided type.
-   * <p>
-   * This method is used in case no {@link Converter} has been specified for the binding (see
-   * {@link DataBinder#bind(Widget, String, Converter)}) and no default converter has been registered for the
-   * corresponding types (see {@link Convert#registerDefaultConverter(Class, Class, Converter)}).
-   *
-   * @param toType
-   *          The type to convert to, must not be null.
-   * @param o
-   *          The object to convert. Null allowed. If toType is String.class, null values will be represented as empty
-   *          Strings.
-   * @return the converted object
-   */
-  public static Object to(Class<?> toType, Object o) {
-    Assert.notNull(toType);
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  public static <M, W> Converter<M, W> getConverter(final Class<M> modelValueType, final Class<W> widgetValueType) {
+    Converter converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, widgetValueType));
+    if (converter == null) {
+      converter = maybeCreateBuiltinConverter(modelValueType, widgetValueType);
+    }
 
-    if (o == null) {
-      if (toType == String.class) {
-        o = "";
+    return converter;
+  }
+
+  private static boolean isEmpty(final String value) {
+    return value == null || value.equals("");
+  }
+
+  private static <M, W> Converter<M, W> maybeCreateBuiltinConverter(final Class<M> modelValueType, final Class<W> widgetValueType) {
+    Assert.notNull(modelValueType);
+    Assert.notNull(widgetValueType);
+
+    final OneWayConverter<M, W> modelToWidget = getOneWayConverter(modelValueType, widgetValueType);
+    final OneWayConverter<W, M> widgetToModel = getOneWayConverter(widgetValueType, modelValueType);
+
+    if (modelToWidget == null || widgetToModel == null) {
+      return null;
+    }
+    else {
+      return TwoWayConverter.createConverter(modelToWidget, widgetToModel);
+    }
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private static <D, T> OneWayConverter<D, T> getOneWayConverter(final Class<D> domainType, final Class<T> targetType) {
+    if (domainType.equals(targetType)) {
+      return new IdentityConverter(domainType);
+    }
+    else if (targetType.equals(String.class)) {
+      return new AnyToStringConverter(domainType);
+    }
+    else if (domainType.equals(String.class)) {
+      if (targetType.equals(Integer.class)) {
+        return (OneWayConverter<D, T>) STRING_TO_INT;
+      }
+      else if (targetType.equals(Long.class)) {
+        return (OneWayConverter<D, T>) STRING_TO_LONG;
+      }
+      else if (targetType.equals(Float.class)) {
+        return (OneWayConverter<D, T>) STRING_TO_FLOAT;
+      }
+      else if (targetType.equals(Double.class)) {
+        return (OneWayConverter<D, T>) STRING_TO_DOUBLE;
+      }
+      else if (targetType.equals(BigInteger.class)) {
+        return (OneWayConverter<D, T>) STRING_TO_BIG_INTEGER;
+      }
+      else if (targetType.equals(BigDecimal.class)) {
+        return (OneWayConverter<D, T>) STRING_TO_BIG_DECIMAL;
+      }
+      else if (targetType.equals(Boolean.class)) {
+        return (OneWayConverter<D, T>) STRING_TO_BOOLEAN;
       }
       else {
         return null;
       }
     }
 
-    if (toType.equals(o.getClass())) {
-      return o;
-    }
-    else if (toType.equals(String.class)) {
-      return o.toString();
-    }
-    else if (o.getClass().equals(String.class)) {
-      final String val = (String) o;
-      if (toType.equals(Boolean.class)) {
-        return Boolean.parseBoolean(val);
-      }
-      if (val.isEmpty()) {
-        return null;
-      }
-      else if (toType.equals(Integer.class)) {
-        return Integer.parseInt(val);
-      }
-      else if (toType.equals(Long.class)) {
-        return Long.parseLong(val);
-      }
-      else if (toType.equals(Float.class)) {
-        return Float.parseFloat(val);
-      }
-      else if (toType.equals(Double.class)) {
-        return Double.parseDouble(val);
-      }
-      else if (toType.equals(BigDecimal.class)) {
-        return new BigDecimal(val);
-      }
-      else if (toType.equals(BigInteger.class)) {
-        return new BigInteger(val);
-      }
-      else {
-        throw new UnsupportedOperationException(
-                "Cannot convert from " + String.class.getName() + " to " + toType.getName());
-      }
-    }
-
-    logger.debug("No explicit conversion was performed. Assuming " + o.getClass().getName()
-            + " is already assignable to " + toType.getName());
-    return o;
-  }
-
-  /**
-   * Converts the provided object to a widget value.
-   *
-   * @param <M>
-   *          The type of the model value (field type of the model)
-   * @param <W>
-   *          The type of the widget value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
-   *          {@link Checkbox} (=HasValue&lt;Boolean&gt;)))
-   * @param widget
-   *          The widget holding the value, used to determine the value type. Must not be null.
-   * @param modelValueType
-   *          The model type, used to lookup global default converters. Must not be null.
-   * @param modelValue
-   *          The value to convert.
-   * @param converter
-   *          The converter to use, null if default conversion should be used.
-   * @return the converted object
-   */
-  @SuppressWarnings({ "unchecked" })
-  public static <M, W> W toWidgetValue(Widget widget, Class<M> modelValueType, M modelValue, Converter<M, W> converter) {
-    return (W) toWidgetValue(
-        inferWidgetValueType(Assert.notNull(widget), Assert.notNull(modelValueType)),
-        modelValueType,
-        modelValue,
-        converter);
-  }
-
-  /**
-   * Converts the provided object to a widget value.
-   *
-   * @param <M>
-   *          The type of the model value (field type of the model)
-   * @param <W>
-   *          The type of the widget value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
-   *          {@link Checkbox} (=HasValue&lt;Boolean&gt;)))
-   * @param widgetValueType
-   *          The type to convert to. Must not be null.
-   * @param modelValueType
-   *          The model type, used to lookup global default converters. Must not be null.
-   * @param modelValue
-   *          The value to convert.
-   * @param converter
-   *          The converter to use, null if default conversion should be used.
-   * @return the converted object
-   */
-  @SuppressWarnings({ "unchecked" })
-  public static <M, W> W toWidgetValue(Class<W> widgetValueType, Class<M> modelValueType, M modelValue,
-      Converter<M, W> converter) {
-
-    Assert.notNull(widgetValueType);
-    Assert.notNull(modelValueType);
-
-    if (converter == null) {
-      converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, widgetValueType));
-    }
-
-    if (converter != null) {
-      return converter.toWidgetValue(modelValue);
-    }
-
-    return (W) to(widgetValueType, modelValue);
-  }
-
-  /**
-   * Converts the provided object to a model value.
-   *
-   * @param <M>
-   *          The type of the model value (field type of the model)
-   * @param <W>
-   *          The type of the widget value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
-   *          {@link Checkbox} (=HasValue&lt;Boolean&gt;)))
-   * @param modelValueType
-   *          The type to convert to. Must not be null.
-   * @param widget
-   *          The widget holding the value, used to determine the value type. Must not be null.
-   * @param widgetValue
-   *          The value to convert.
-   * @param converter
-   *          The converter to use, null if default conversion should be used.
-   * @return the converted object
-   */
-  @SuppressWarnings({ "unchecked" })
-  public static <M, W> M toModelValue(Class<M> modelValueType, Widget widget, W widgetValue, Converter<M, W> converter) {
-    return (M) toModelValue(
-        Assert.notNull(modelValueType),
-        inferWidgetValueType(Assert.notNull(widget), modelValueType),
-        widgetValue,
-        converter);
-  }
-
-  /**
-   * Converts the provided object to a model value.
-   *
-   * @param <M>
-   *          The type of the model value (field type of the model)
-   * @param <W>
-   *          The type of the widget value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
-   *          {@link Checkbox} (=HasValue&lt;Boolean&gt;)))
-   * @param modelValueType
-   *          The type to convert to. Must not be null.
-   * @param widgetValueType
-   *          The widget type, use to lookup global default converters. Must not be null.
-   * @param widgetValue
-   *          The value to convert.
-   * @param converter
-   *          The converter to use, null if default conversion should be used.
-   * @return the converted object
-   */
-  @SuppressWarnings({ "unchecked" })
-  public static <M, W> M toModelValue(Class<M> modelValueType, Class<W> widgetValueType, W widgetValue,
-      Converter<M, W> converter) {
-
-    Assert.notNull(modelValueType);
-    Assert.notNull(widgetValueType);
-
-    if (converter == null) {
-      converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, widgetValueType));
-    }
-
-    if (converter != null) {
-      return converter.toModelValue(widgetValue);
-    }
-
-    return (M) to(modelValueType, widgetValue);
+    return new IdentityConverter(targetType);
   }
 
   /**
@@ -282,11 +300,11 @@ public class Convert {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
+  public static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
     Class widgetValueType = null;
 
     if (widget instanceof ElementWrapperWidget && InputElement.is(widget.getElement())) {
-      widgetValueType = BoundUtil.getValueClassForInputType(widget.getElement().getAttribute("type"));
+      widgetValueType = BoundUtil.getValueClassForInputType(widget.getElement().getPropertyString("type"));
     }
     else if (widget instanceof TakesValue) {
       Object value = ((TakesValue) widget).getValue();

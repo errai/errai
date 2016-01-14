@@ -39,4 +39,14 @@ public class RelativeTimeConverter implements Converter<Date, String> {
         return $wnd.toRelativeTime(new Date(millisSinceEpoch));
     }-*/;
 
+    @Override
+    public Class<Date> getModelType() {
+      return Date.class;
+    }
+
+    @Override
+    public Class<String> getWidgetType() {
+      return String.class;
+    }
+
 }

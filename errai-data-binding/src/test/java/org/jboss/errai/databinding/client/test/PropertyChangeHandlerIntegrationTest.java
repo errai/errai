@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import org.jboss.errai.databinding.client.TestModelWithBindableTypeList;
 import org.jboss.errai.databinding.client.TestModelWithList;
 import org.jboss.errai.databinding.client.TestModelWithListWidget;
 import org.jboss.errai.databinding.client.api.Convert;
+import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
@@ -254,7 +256,30 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     MockHandler handler = new MockHandler();
 
     DataBinder<TestModelWithBindableTypeList> binder =
-            DataBinder.forType(TestModelWithBindableTypeList.class).bind(new TextBox(), "list");
+            DataBinder.forType(TestModelWithBindableTypeList.class).bind(new TextBox(), "list", new Converter<List<TestModelWithBindableTypeList>, String>() {
+
+              @SuppressWarnings("rawtypes")
+              @Override
+              public Class<List<TestModelWithBindableTypeList>> getModelType() {
+                return (Class) List.class;
+              }
+
+              @Override
+              public Class<String> getWidgetType() {
+                return String.class;
+              }
+
+              @Override
+              public List<TestModelWithBindableTypeList> toModelValue(String widgetValue) {
+                return Collections.emptyList();
+              }
+
+              @Override
+              public String toWidgetValue(List<TestModelWithBindableTypeList> modelValue) {
+                return "";
+              }
+            });
+
     binder.getModel().getList().add(new TestModelWithBindableTypeList("id"));
     binder.addPropertyChangeHandler(handler);
 

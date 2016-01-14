@@ -34,6 +34,10 @@ import com.google.gwt.user.client.ui.TextBox;
  */
 public interface Converter<M, W> {
 
+  public Class<M> getModelType();
+
+  public Class<W> getWidgetType();
+
   /**
    * Converts the provided widget value to a model value of type &lt;M&gt;.
    *

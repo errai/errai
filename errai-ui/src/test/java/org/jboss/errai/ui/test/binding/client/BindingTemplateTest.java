@@ -93,6 +93,12 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
 
   private static class IdentityConverter<T> implements Converter<T, T> {
 
+    private final Class<T> type;
+
+    private IdentityConverter(final Class<T> type) {
+      this.type = type;
+    }
+
     @Override
     public T toModelValue(T widgetValue) {
       return widgetValue;
@@ -101,6 +107,16 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     @Override
     public T toWidgetValue(T modelValue) {
       return modelValue;
+    }
+
+    @Override
+    public Class<T> getModelType() {
+      return type;
+    }
+
+    @Override
+    public Class<T> getWidgetType() {
+      return type;
     }
 
   }
@@ -117,6 +133,16 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       return String.valueOf(modelValue);
     }
 
+    @Override
+    public Class<Double> getModelType() {
+      return Double.class;
+    }
+
+    @Override
+    public Class<String> getWidgetType() {
+      return String.class;
+    }
+
   }
 
   private static class IntegerConverter implements Converter<Integer, String> {
@@ -129,6 +155,16 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     @Override
     public String toWidgetValue(Integer modelValue) {
       return String.valueOf(modelValue);
+    }
+
+    @Override
+    public Class<Integer> getModelType() {
+      return Integer.class;
+    }
+
+    @Override
+    public Class<String> getWidgetType() {
+      return String.class;
     }
 
   }
@@ -166,7 +202,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getText();
       }
-    }, new DefaultInputElementHandler(bean.text), new IdentityConverter<String>(), "text", "test value", "other test value", bean.text);
+    }, new DefaultInputElementHandler(bean.text), new IdentityConverter<String>(String.class), "text", "test value", "other test value", bean.text);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -179,7 +215,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getPassword();
       }
-    }, new DefaultInputElementHandler(bean.password), new IdentityConverter<String>(), "password", "password123", "letmein123", bean.password);
+    }, new DefaultInputElementHandler(bean.password), new IdentityConverter<String>(String.class), "password", "password123", "letmein123", bean.password);
 
     inputElementAssertions(new PropertyHandler<Double>() {
 
@@ -218,7 +254,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public Boolean getProperty() {
         return model.isCheckbox();
       }
-    }, new CheckboxHandler(bean.checkbox), new IdentityConverter<Boolean>(), "checkbox", true, false, bean.checkbox);
+    }, new CheckboxHandler(bean.checkbox), new IdentityConverter<Boolean>(Boolean.class), "checkbox", true, false, bean.checkbox);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -231,7 +267,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getFile();
       }
-    }, new DefaultInputElementHandler(bean.file), new IdentityConverter<String>(), "file", "file:///tmp/foo", "file:///tmp/bar", bean.file);
+    }, new DefaultInputElementHandler(bean.file), new IdentityConverter<String>(String.class), "file", "file:///tmp/foo", "file:///tmp/bar", bean.file);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -244,7 +280,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getEmail();
       }
-    }, new DefaultInputElementHandler(bean.email), new IdentityConverter<String>(), "email", "a@b.c", "y@z", bean.email);
+    }, new DefaultInputElementHandler(bean.email), new IdentityConverter<String>(String.class), "email", "a@b.c", "y@z", bean.email);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -257,7 +293,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getColor();
       }
-    }, new DefaultInputElementHandler(bean.color), new IdentityConverter<String>(), "color", "#000000", "#FFFFFF", bean.color);
+    }, new DefaultInputElementHandler(bean.color), new IdentityConverter<String>(String.class), "color", "#000000", "#FFFFFF", bean.color);
 
     inputElementAssertions(new PropertyHandler<Boolean>() {
 
@@ -270,7 +306,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public Boolean getProperty() {
         return model.getRadio();
       }
-    }, new CheckboxHandler(bean.radio), new IdentityConverter<Boolean>(), "radio", true, false, bean.radio);
+    }, new CheckboxHandler(bean.radio), new IdentityConverter<Boolean>(Boolean.class), "radio", true, false, bean.radio);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -283,7 +319,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getTel();
       }
-    }, new DefaultInputElementHandler(bean.tel), new IdentityConverter<String>(), "tel", "4161234567", "6473217654", bean.tel);
+    }, new DefaultInputElementHandler(bean.tel), new IdentityConverter<String>(String.class), "tel", "4161234567", "6473217654", bean.tel);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -296,7 +332,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getUrl();
       }
-    }, new DefaultInputElementHandler(bean.url), new IdentityConverter<String>(), "url", "http://jboss.org", "https://redhat.com", bean.url);
+    }, new DefaultInputElementHandler(bean.url), new IdentityConverter<String>(String.class), "url", "http://jboss.org", "https://redhat.com", bean.url);
   }
 
   private <M, U> void inputElementAssertions(final PropertyHandler<M> model, final PropertyHandler<U> ui,
@@ -307,12 +343,20 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
 
     assertFalse("Precondition failed: ui property already set to [" + value1 + "].", converter.toWidgetValue(value1).equals(ui.getProperty()));
 
-    model.setProperty(value1);
+    try {
+      model.setProperty(value1);
+    } catch (Throwable t) {
+      throw new RuntimeException("An error occurred setting [" + value1.toString() + "] for the model property.", t);
+    }
     assertEquals("The UI value for input[type='" + type + "'] was not updated after a model change.",
             converter.toWidgetValue(value1), ui.getProperty());
 
-    ui.setProperty(value2);
-    fireChangeEvent(element);
+    try {
+      ui.setProperty(value2);
+      fireChangeEvent(element);
+    } catch (Throwable t) {
+      throw new RuntimeException("An error occurred setting [" + value2.toString() + "] for the ui value.", t);
+    }
     assertEquals("The model value for input[type='" + type + "'] was not updated after a UI change.",
             converter.toModelValue(value2), model.getProperty());
   }

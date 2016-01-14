@@ -43,13 +43,12 @@ public class BoundUtil {
     valueClassesByInputTypes.put("date", String.class);
     valueClassesByInputTypes.put("time", String.class);
     valueClassesByInputTypes.put("datetime-local", String.class);
+    valueClassesByInputTypes.put("number", String.class);
+    valueClassesByInputTypes.put("range", String.class);
 
     valueClassesByInputTypes.put("checkbox", Boolean.class);
     valueClassesByInputTypes.put("radio", Boolean.class);
 
-    valueClassesByInputTypes.put("number", Double.class);
-
-    valueClassesByInputTypes.put("range", Integer.class);
   }
 
   public static native Element asElement(final Object element) /*-{

@@ -31,13 +31,13 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Used for testing declarative binding using {@link Model}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
 public class DeclarativeBindingModuleUsingParams extends DeclarativeBindingSuperType implements
     DeclarativeBindingModule {
-  
+
   public static final Date TEST_DATE = DateTimeFormat.getFormat("yyyy/MM/dd").parse("1980/22/06");
 
   private Label id;
@@ -89,6 +89,16 @@ public class DeclarativeBindingModuleUsingParams extends DeclarativeBindingSuper
     @Override
     public String toWidgetValue(Date modelValue) {
       return "testdate";
+    }
+
+    @Override
+    public Class<Date> getModelType() {
+      return Date.class;
+    }
+
+    @Override
+    public Class<String> getWidgetType() {
+      return String.class;
     }
   }
 }

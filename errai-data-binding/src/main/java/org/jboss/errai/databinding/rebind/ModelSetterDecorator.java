@@ -41,7 +41,7 @@ import org.jboss.errai.ui.shared.api.annotations.ModelSetter;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@CodeDecorator
+@CodeDecorator(order = 2)
 public class ModelSetterDecorator extends IOCDecoratorExtension<ModelSetter> {
 
   public ModelSetterDecorator(Class<ModelSetter> decoratesWith) {

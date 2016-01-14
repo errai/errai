@@ -22,7 +22,7 @@ import org.jboss.errai.databinding.client.api.DefaultConverter;
 /**
  * Global default converter for testing purposes. Converters annotated with {@link DefaultConverter} should be auto
  * discovered and registered as part of the bootstrap process.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @DefaultConverter
@@ -36,6 +36,16 @@ public class AutoRegisteredDefaultConverter implements Converter<Boolean, String
   @Override
   public String toWidgetValue(Boolean modelValue) {
     return "AutoRegisteredDefaultConverter";
+  }
+
+  @Override
+  public Class<Boolean> getModelType() {
+    return Boolean.class;
+  }
+
+  @Override
+  public Class<String> getWidgetType() {
+    return String.class;
   }
 
 }

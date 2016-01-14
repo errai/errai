@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Used for testing declarative binding using {@link Model}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
@@ -77,7 +77,7 @@ public class DeclarativeBindingModuleUsingModel extends DeclarativeBindingSuperT
   public void setModel(TestModel model) {
     this.model = model;
   }
-  
+
   public static class BindingDateConverter implements Converter<Date, String> {
 
     @Override
@@ -88,6 +88,16 @@ public class DeclarativeBindingModuleUsingModel extends DeclarativeBindingSuperT
     @Override
     public String toWidgetValue(Date modelValue) {
       return "testdate";
+    }
+
+    @Override
+    public Class<Date> getModelType() {
+      return Date.class;
+    }
+
+    @Override
+    public Class<String> getWidgetType() {
+      return String.class;
     }
   }
 }

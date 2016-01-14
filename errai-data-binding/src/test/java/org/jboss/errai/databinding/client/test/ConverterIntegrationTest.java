@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client.test;
 
+import org.jboss.errai.databinding.client.IdentityConverter;
 import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
@@ -29,7 +30,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Tests functionality related to the use of {@link Converter}s for data binding.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ConverterIntegrationTest extends AbstractErraiIOCTest {
@@ -44,7 +45,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     Convert.deregisterDefaultConverters();
     super.gwtSetUp();
   }
-  
+
   @Test
   public void testBindingSpecificConverter() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
@@ -56,6 +57,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       @Override
       public String toWidgetValue(Integer modelValue) {
         return "testCustomConverter";
+      }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
       }
     };
 
@@ -80,6 +91,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       @Override
       public String toWidgetValue(Integer modelValue) {
         return (modelValue == null) ? "null-widget" : modelValue.toString();
+      }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
       }
     };
 
@@ -107,6 +128,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       @Override
       public String toWidgetValue(Integer modelValue) {
         return "testCustomConverter";
+      }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
       }
     };
 
@@ -137,6 +168,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       public String toWidgetValue(Integer modelValue) {
         return "test";
       }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
+      }
     };
 
     Label label = new Label();
@@ -158,6 +199,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       @Override
       public String toWidgetValue(Integer modelValue) {
         return "testGlobalDefaultConverter";
+      }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
       }
     };
     Convert.registerDefaultConverter(Integer.class, String.class, converter);
@@ -184,6 +235,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       @Override
       public String toWidgetValue(Integer modelValue) {
         return (modelValue == null) ? "null-widget" : modelValue.toString();
+      }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
       }
     };
 
@@ -227,6 +288,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       public String toWidgetValue(Integer modelValue) {
         return "globalDefaultConverter";
       }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
+      }
     };
     Convert.registerDefaultConverter(Integer.class, String.class, converter);
 
@@ -240,6 +311,16 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       public String toWidgetValue(Integer modelValue) {
         return "bindingSpecificConverter";
       }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
+      }
     };
 
     TextBox textBox = new TextBox();
@@ -251,7 +332,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "bindingSpecificConverter", textBox.getText());
   }
-  
+
   @Test
   public void testInitialStateSyncWithConverter() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
@@ -264,8 +345,18 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       public String toWidgetValue(Integer modelValue) {
         return "customConverter";
       }
+
+      @Override
+      public Class<Integer> getModelType() {
+        return Integer.class;
+      }
+
+      @Override
+      public Class<String> getWidgetType() {
+        return String.class;
+      }
     };
-    
+
     TextBox textBox = new TextBox();
     textBox.setValue("123");
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_UI).bind(textBox, "age", converter);
@@ -273,10 +364,15 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
 
     TestModel model = new TestModel();
     model.setAge(123);
-    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name", converter);
+    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name", new IdentityConverter<String>(String.class) {
+      @Override
+      public String toWidgetValue(String modelValue) {
+        return "customConverter";
+      }
+    });
     assertEquals("Model not initialized based on widget's state", "customConverter", textBox.getValue());
   }
-  
+
   @Test
   public void testEmptyStringConversionToBigInteger() {
     TextBox textBox = new TextBox();
@@ -286,7 +382,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     textBox.setValue("", true);
     assertEquals("Failed to convert empty String to BigInteger", null, model.getAmountInt());
   }
-  
+
   @Test
   public void testEmptyStringConversionToBigDecimal() {
     TextBox textBox = new TextBox();
@@ -296,7 +392,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     textBox.setValue("", true);
     assertEquals("Failed to convert empty String to BigDecimal", null, model.getAmountDec());
   }
-  
+
   @Test
   public void testEmptyStringConversionToPrimitiveWrapper() {
     TextBox textBox = new TextBox();
@@ -304,6 +400,6 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "age").getModel();
 
     textBox.setValue("", true);
-    assertEquals("Failed to convert empty String to primitive wrapper type", null, model.getAmountDec());
+    assertEquals("Failed to convert empty String to primitive wrapper type", null, model.getAge());
   }
 }

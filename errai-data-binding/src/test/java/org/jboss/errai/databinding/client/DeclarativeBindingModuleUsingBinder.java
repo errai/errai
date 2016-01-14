@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Used for testing declarative binding using an {@link AutoBound} {@link DataBinder}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
@@ -46,11 +46,11 @@ public class DeclarativeBindingModuleUsingBinder extends DeclarativeBindingSuper
   private final TextBox name = new TextBox();
 
   //tests automatic initialization
-  @Bound  
+  @Bound
   private TextBox age;
-  
+
   private final TestModel model;
-  
+
   @Inject
   public DeclarativeBindingModuleUsingBinder(@AutoBound DataBinder<TestModel> binder) {
     model = binder.getModel();
@@ -65,17 +65,17 @@ public class DeclarativeBindingModuleUsingBinder extends DeclarativeBindingSuper
   public TextBox getNameTextBox() {
     return name;
   }
-  
+
   @Override
   public TextBox getAge() {
     return age;
   }
-  
+
   @Override
   public TestModel getModel() {
     return model;
   }
-  
+
   public static class BindingDateConverter implements Converter<Date, String> {
 
     @Override
@@ -86,6 +86,16 @@ public class DeclarativeBindingModuleUsingBinder extends DeclarativeBindingSuper
     @Override
     public String toWidgetValue(Date modelValue) {
       return "testdate";
+    }
+
+    @Override
+    public Class<Date> getModelType() {
+      return Date.class;
+    }
+
+    @Override
+    public Class<String> getWidgetType() {
+      return String.class;
     }
   }
 }

@@ -31,4 +31,14 @@ public class UsernameConverter implements Converter<User, String> {
         return modelValue == null ? "" : modelValue.getName();
     }
 
+    @Override
+    public Class<User> getModelType() {
+      return User.class;
+    }
+
+    @Override
+    public Class<String> getWidgetType() {
+      return String.class;
+    }
+
 }
