@@ -53,6 +53,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
@@ -148,10 +149,20 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
           final ClassStructureBuilder<?> bodyBlockBuilder) {
     final MetaClass type = injectable.getInjectedType();
     final Set<HasAnnotations> privateAccessors = new HashSet<HasAnnotations>();
-    runDecoratorsForElementType(injectionContext, type, ElementType.FIELD, bodyBlockBuilder, privateAccessors, injectable);
-    runDecoratorsForElementType(injectionContext, type, ElementType.PARAMETER, bodyBlockBuilder, privateAccessors, injectable);
-    runDecoratorsForElementType(injectionContext, type, ElementType.METHOD, bodyBlockBuilder, privateAccessors, injectable);
-    runDecoratorsForElementType(injectionContext, type, ElementType.TYPE, bodyBlockBuilder, privateAccessors, injectable);
+    final List<DecoratorRunnable> decoratorRunnables = new ArrayList<>();
+    decoratorRunnables.addAll(generateDecoratorRunnablesForType(injectionContext, type, ElementType.FIELD,
+            bodyBlockBuilder, privateAccessors, injectable));
+    decoratorRunnables.addAll(generateDecoratorRunnablesForType(injectionContext, type, ElementType.PARAMETER,
+            bodyBlockBuilder, privateAccessors, injectable));
+    decoratorRunnables.addAll(generateDecoratorRunnablesForType(injectionContext, type, ElementType.METHOD,
+            bodyBlockBuilder, privateAccessors, injectable));
+    decoratorRunnables.addAll(generateDecoratorRunnablesForType(injectionContext, type, ElementType.TYPE,
+            bodyBlockBuilder, privateAccessors, injectable));
+
+    decoratorRunnables.sort(null);
+    for (final DecoratorRunnable runnable : decoratorRunnables) {
+      runnable.run();
+    }
 
     for (final HasAnnotations annotated : privateAccessors) {
       if (annotated instanceof MetaField) {
@@ -163,9 +174,11 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   }
 
   @SuppressWarnings({ "rawtypes" })
-  private void runDecoratorsForElementType(final InjectionContext injectionContext,
+  private List<DecoratorRunnable> generateDecoratorRunnablesForType(final InjectionContext injectionContext,
           final MetaClass type, final ElementType elemType,
           final ClassStructureBuilder<?> builder, final Set<HasAnnotations> createdAccessors, final Injectable injectable) {
+    final List<DecoratorRunnable> decoratorRunnables = new ArrayList<>();
+
     final Collection<Class<? extends Annotation>> decoratorAnnos = injectionContext
             .getDecoratorAnnotationsBy(elemType);
     for (final Class<? extends Annotation> annoType : decoratorAnnos) {
@@ -174,21 +187,31 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       final IOCDecoratorExtension[] decorators = injectionContext.getDecorators(annoType);
       for (final IOCDecoratorExtension decorator : decorators) {
         for (final HasAnnotations annotated : annotatedItems) {
-          final Decorable decorable = new Decorable(annotated, annotated.getAnnotation(annoType), Decorable.DecorableType.fromElementType(elemType),
-                  injectionContext, builder.getClassDefinition().getContext(), builder.getClassDefinition(), injectable);
-          if (isNonPublicField(annotated) && !createdAccessors.contains(annotated)) {
-            createdAccessors.add(type);
-          }
-          else if (isNonPublicMethod(annotated) && !createdAccessors.contains(annotated)) {
-            createdAccessors.add(annotated);
-          } else if (isParamOfNonPublicMethod(annotated) && !createdAccessors.contains(((MetaParameter) annotated).getDeclaringMember())) {
-            final MetaMethod declaringMethod = (MetaMethod) ((MetaParameter) annotated).getDeclaringMember();
-            createdAccessors.add(declaringMethod);
-          }
-          decorator.generateDecorator(decorable, controller);
+          final DecoratorRunnable decoratorRunnable = new DecoratorRunnable(
+                  decorator.getClass().getAnnotation(CodeDecorator.class).order(), elemType,
+                  () -> {
+                    final Decorable decorable = new Decorable(annotated, annotated.getAnnotation(annoType),
+                            Decorable.DecorableType.fromElementType(elemType), injectionContext,
+                            builder.getClassDefinition().getContext(), builder.getClassDefinition(), injectable);
+                    if (isNonPublicField(annotated) && !createdAccessors.contains(annotated)) {
+                      createdAccessors.add(type);
+                    }
+                    else if (isNonPublicMethod(annotated) && !createdAccessors.contains(annotated)) {
+                      createdAccessors.add(annotated);
+                    }
+                    else if (isParamOfNonPublicMethod(annotated)
+                            && !createdAccessors.contains(((MetaParameter) annotated).getDeclaringMember())) {
+                      final MetaMethod declaringMethod = (MetaMethod) ((MetaParameter) annotated).getDeclaringMember();
+                      createdAccessors.add(declaringMethod);
+                    }
+                    decorator.generateDecorator(decorable, controller);
+                  });
+          decoratorRunnables.add(decoratorRunnable);
         }
       }
     }
+
+    return decoratorRunnables;
   }
 
   private boolean isParamOfNonPublicMethod(final HasAnnotations annotated) {
