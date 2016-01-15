@@ -25,8 +25,10 @@ import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.test.binding.client.res.BindingDateConverter;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
 import org.jboss.errai.ui.test.binding.client.res.InputElementsModel;
+import org.jboss.errai.ui.test.binding.client.res.NativeNumberInputElement;
 import org.jboss.errai.ui.test.binding.client.res.TemplateFragmentWithoutFragmentId;
 import org.jboss.errai.ui.test.binding.client.res.TemplateWithInputElements;
+import org.jboss.errai.ui.test.binding.client.res.TemplateWithNativeHasValue;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.jboss.errai.ui.test.common.client.dom.Element;
 import org.jboss.errai.ui.test.common.client.dom.TextInputElement;
@@ -333,6 +335,33 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
         return model.getUrl();
       }
     }, new DefaultInputElementHandler(bean.url), new IdentityConverter<String>(String.class), "url", "http://jboss.org", "https://redhat.com", bean.url);
+  }
+
+  @Test
+  public void testBindingToJsTypeWithNativeHasValue() throws Exception {
+    final TemplateWithNativeHasValue bean = IOC.getBeanManager().lookupBean(TemplateWithNativeHasValue.class).getInstance();
+    final InputElementsModel model = bean.binder.getModel();
+    final NativeNumberInputElement presenter = bean.number;
+
+    assertNull("Model value should be null.", model.getNumber());
+    assertNull("UI value should be null.", presenter.getValue());
+
+    try {
+      model.setNumber(1.0);
+    } catch (Throwable t) {
+      throw new RuntimeException("An error occurred while setting model property: " + t.getMessage(), t);
+    }
+
+    assertEquals("UI value was not updated.", model.getNumber(), presenter.getValue());
+
+    try {
+      presenter.setValue(2.0);
+      fireChangeEvent(presenter);
+    } catch (Throwable t) {
+      throw new RuntimeException("An error occurred while setting the UI value: " + t.getMessage(), t);
+    }
+
+    assertEquals("Model value was not updated.", presenter.getValue(), model.getNumber());
   }
 
   private <M, U> void inputElementAssertions(final PropertyHandler<M> model, final PropertyHandler<U> ui,

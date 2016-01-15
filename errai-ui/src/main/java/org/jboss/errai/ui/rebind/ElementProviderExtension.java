@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ui.rebind;
 
+import static org.jboss.errai.codegen.Parameter.finalOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
@@ -34,9 +36,14 @@ import javax.inject.Named;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.common.client.ui.HasValue;
+import org.jboss.errai.common.client.ui.NativeHasValueAccessors;
+import org.jboss.errai.common.client.ui.NativeHasValueAccessors.Accessor;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
@@ -64,6 +71,7 @@ import org.jboss.errai.ui.shared.api.annotations.Property;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TagName;
 
+import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsType;
 
 /**
@@ -146,10 +154,16 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
                           loadLiteral(property.value())));
                 }
 
-                stmts.add(invokeStatic(TemplateUtil.class, "nativeCast", loadVariable(elementVar)).returnValue());
+                final String retValVar = "retVal";
+                stmts.add(declareFinalVariable(retValVar, type, invokeStatic(TemplateUtil.class, "nativeCast", loadVariable(elementVar))));
+                if (typeHasValueWithOverlayMethods(type)) {
+                  stmts.add(invokeStatic(NativeHasValueAccessors.class, "registerAccessor", loadVariable(retValVar), createAccessorImpl(type, retValVar)));
+                }
+                stmts.add(loadVariable(retValVar).returnValue());
 
                 return stmts;
               }
+
             };
             injectable = new DefaultCustomFactoryInjectable(handle.getType(), handle.getQualifier(), factoryName,
                     Dependent.class, Collections.singletonList(WiringElementType.DependentBean), generator);
@@ -159,6 +173,27 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
         }
       });
     }
+  }
+
+  private static boolean typeHasValueWithOverlayMethods(final MetaClass type) {
+    final MetaMethod getValue;
+    return type.isAssignableTo(HasValue.class)
+            && ((getValue = type.getMethod("getValue", new Class[0])).isAnnotationPresent(JsOverlay.class)
+                    || type.getMethod("setValue", getValue.getReturnType()).isAnnotationPresent(JsOverlay.class));
+  }
+
+  private static Object createAccessorImpl(final MetaClass type, final String varName) {
+    final MetaClass propertyType = type.getMethod("getValue", new Class[0]).getReturnType();
+
+    return ObjectBuilder.newInstanceOf(Accessor.class)
+      .extend()
+      .publicMethod(Object.class, "get")
+      .append(loadVariable(varName).invoke("getValue").returnValue())
+      .finish()
+      .publicMethod(void.class, "set", finalOf(Object.class, "value"))
+      .append(loadVariable(varName).invoke("setValue", castTo(propertyType, loadVariable("value"))))
+      .finish()
+      .finish();
   }
 
   private static Set<Property> getProperties(final MetaClass type) {

@@ -41,6 +41,9 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.HasValue;
+import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
@@ -116,6 +119,16 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
               ObjectBuilder.newInstanceOf(componentType));
 
           statements.add(If.isNull(component).append(widgetInit).finish());
+        }
+      }
+      else if (componentType.isAnnotationPresent(JsType.class)) {
+        if (componentType.isAssignableTo(HasValue.class)) {
+          final MetaClass valueType = componentType.getMethod("getValue", new Class[0]).getReturnType();
+          component = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget",
+                  Stmt.invokeStatic(BoundUtil.class, "asElement", component), Stmt.loadLiteral(valueType));
+        }
+        else {
+          component = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(BoundUtil.class, "asElement", component));
         }
       }
       else if (!(componentType.isAssignableTo(TakesValue.class)

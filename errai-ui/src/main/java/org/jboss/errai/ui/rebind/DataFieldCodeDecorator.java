@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ui.rebind;
 
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
@@ -60,7 +63,14 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     if (decorable.getType().isAssignableTo(Element.class)) {
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
     } else if (RebindUtil.isNativeJsType(decorable.getType()) || RebindUtil.isElementalIface(decorable.getType())) {
-      instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
+      if (decorable.getType().isAssignableTo(HasValue.class)) {
+        final MetaClass valueType = decorable.getType().getMethod("getValue", new Class[0]).getReturnType();
+        instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget",
+                Stmt.invokeStatic(TemplateUtil.class, "asElement", instance), loadLiteral(valueType));
+      }
+      else {
+        instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
+      }
     } else if (!decorable.getType().isAssignableTo(Widget.class)) {
       if (decorable.getType().isAnnotationPresent(Templated.class)) {
         instance = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", instance);

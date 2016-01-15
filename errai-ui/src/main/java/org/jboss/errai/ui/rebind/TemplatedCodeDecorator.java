@@ -18,6 +18,7 @@ package org.jboss.errai.ui.rebind;
 
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
 
@@ -44,8 +45,8 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassDefinitionBuilderInterfaces;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilderAbstractMethodOption;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -59,6 +60,7 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
@@ -85,8 +87,8 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -351,8 +353,16 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           final ContextualStatementBuilder elementStmt;
           if (dataFieldTypes.containsKey(name)) {
             final MetaClass dataFieldType = dataFieldTypes.get(name);
-            if (dataFieldType.isAssignableTo(Element.class) || RebindUtil.isNativeJsType(dataFieldType)) {
-              elementStmt = Stmt.castTo(ElementWrapperWidget.class, Stmt.nestedCall(fieldsMap).invoke("get", name));
+            final boolean gwtUserElement = dataFieldType.isAssignableTo(Element.class);
+            final boolean nativeJsType = RebindUtil.isNativeJsType(dataFieldType);
+            if (gwtUserElement || nativeJsType) {
+              if (dataFieldType.isAssignableTo(HasValue.class)) {
+                final MetaClass valueType = dataFieldType.getMethod("getValue", new Class[0]).getReturnType();
+                elementStmt = Stmt.castTo(ElementWrapperWidget.class, Stmt.nestedCall(fieldsMap).invoke("get", name, loadLiteral(valueType)));
+              }
+              else {
+                elementStmt = Stmt.castTo(ElementWrapperWidget.class, Stmt.nestedCall(fieldsMap).invoke("get", name));
+              }
             } else {
               /*
                * We have a GWT or other Widget type.
