@@ -26,15 +26,14 @@ import java.util.Map;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.AbstractOneWayConverter;
-import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.ConverterRegistrationKey;
 import org.jboss.errai.databinding.client.OneWayConverter;
 import org.jboss.errai.databinding.client.TwoWayConverter;
 
-import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -303,8 +302,11 @@ public class Convert {
   public static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
     Class widgetValueType = null;
 
-    if (widget instanceof ElementWrapperWidget && InputElement.is(widget.getElement())) {
-      widgetValueType = BoundUtil.getValueClassForInputType(widget.getElement().getPropertyString("type"));
+    if (widget instanceof HasText) {
+      widgetValueType = String.class;
+    }
+    else if (widget instanceof ElementWrapperWidget) {
+      widgetValueType = ((ElementWrapperWidget<?>) widget).getValueType();
     }
     else if (widget instanceof TakesValue) {
       Object value = ((TakesValue) widget).getValue();

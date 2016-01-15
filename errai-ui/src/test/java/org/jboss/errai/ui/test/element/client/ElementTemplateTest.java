@@ -63,7 +63,7 @@ public class ElementTemplateTest extends AbstractErraiCDITest {
 
   private void assertWrapperWidgetIsRemovedOnDestruction(final ElementTemplateTestApp app) {
     final Element formElement = app.getForm().getForm();
-    final ElementWrapperWidget wrapper = ElementWrapperWidget.getWidget(formElement);
+    final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(formElement);
     assertSame("Control failed: This method should return the same instance until it is removed.", wrapper, ElementWrapperWidget.getWidget(formElement));
     IOC.getBeanManager().destroyBean(app);
     assertNotSame("Wrapper widget was not removed.", wrapper, ElementWrapperWidget.getWidget(formElement));
@@ -71,17 +71,21 @@ public class ElementTemplateTest extends AbstractErraiCDITest {
 
   private void assertContentIsCorrect(final ElementTemplateTestApp app) {
     final Element form = app.getForm().getElement();
-    assertTrue(form.getInnerHTML().contains("Keep me logged in on this computer"));
-    assertTrue(app.getForm().getForm().getInnerHTML().contains("Keep me logged in on this computer"));
-    assertEquals("Cancel", app.getForm().getCancel().getTextContent());
+    assertTrue("Form component element is missing text.",
+            form.getInnerHTML().contains("Keep me logged in on this computer"));
+    assertTrue("[form] element in component is missing text.",
+            app.getForm().getForm().getInnerHTML().contains("Keep me logged in on this computer"));
+    assertEquals("Cancel button is missing text.", "Cancel", app.getForm().getCancel().getTextContent());
 
-    assertEquals("Username", TemplateUtil.asElement(app.getForm().getUsername()).getAttribute("placeholder"));
+    assertEquals("Username field is missing placeholder attribute.", "Username",
+            TemplateUtil.asElement(app.getForm().getUsername()).getAttribute("placeholder"));
     // This assertion on it's own could fail if there is a problem with how we use JsInterop
-    assertEquals("Username", app.getForm().getUsername().getAttribute("placeholder"));
+    assertEquals("Username field is missing placeholder attribute.", "Username",
+            app.getForm().getUsername().getAttribute("placeholder"));
 
-    assertEquals(0, app.getForm().getNumberOfTimesPressed());
+    assertEquals("Button pressed incorrect number of times.", 0, app.getForm().getNumberOfTimesPressed());
     click(app.getForm().getCancel());
-    assertEquals(1, app.getForm().getNumberOfTimesPressed());
+    assertEquals("Button pressed incorrect number of times.", 1, app.getForm().getNumberOfTimesPressed());
   }
 
   /**

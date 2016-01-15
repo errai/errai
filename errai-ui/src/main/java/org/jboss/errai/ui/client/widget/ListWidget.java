@@ -25,6 +25,7 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.ui.ValueChangeManager;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
@@ -37,8 +38,6 @@ import org.jboss.errai.ui.shared.TemplateWidget;
 import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -77,7 +76,7 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
   private final List<ComponentCreationalCallback> callbacks = new LinkedList<ComponentCreationalCallback>();
   private int pendingCallbacks;
 
-  private boolean valueChangeHandlerInitialized;
+  private final ValueChangeManager<List<M>, ListWidget<M, C>> valueChangeManager = new ValueChangeManager<>(this);
 
   protected ListWidget() {
     this(new FlowPanel());
@@ -263,16 +262,7 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
 
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<M>> handler) {
-    if (!valueChangeHandlerInitialized) {
-      valueChangeHandlerInitialized = true;
-      addDomHandler(new ChangeHandler() {
-        @Override
-        public void onChange(ChangeEvent event) {
-          ValueChangeEvent.fire(ListWidget.this, getValue());
-        }
-      }, ChangeEvent.getType());
-    }
-    return addHandler(handler, ValueChangeEvent.getType());
+    return valueChangeManager.addValueChangeHandler(handler);
   }
 
   @Override

@@ -20,10 +20,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.TextAreaElement;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.HasHTML;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -33,24 +39,139 @@ import com.google.gwt.user.client.ui.Widget;
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ElementWrapperWidget extends Widget implements HasHTML {
-  private static Map<Element, ElementWrapperWidget> widgetMap = new HashMap<Element, ElementWrapperWidget>();
+public abstract class ElementWrapperWidget<T> extends Widget {
+  private static Map<Element, ElementWrapperWidget<?>> widgetMap = new HashMap<>();
 
-  public static ElementWrapperWidget getWidget(final Element element) {
-    ElementWrapperWidget widget = widgetMap.get(element);
+  public static ElementWrapperWidget<?> getWidget(final Element element) {
+    ElementWrapperWidget<?> widget = widgetMap.get(element);
     if (widget == null) {
-      widget = new ElementWrapperWidget(element);
+      widget = createElementWrapperWidget(element);
       widgetMap.put(element, widget);
     }
     return widget;
   }
 
-  public static ElementWrapperWidget removeWidget(final Element element) {
+  private static ElementWrapperWidget<?> createElementWrapperWidget(final Element element) {
+    if (InputElement.is(element) || TextAreaElement.is(element)) {
+      return new InputElementWrapperWidget<>(element);
+    }
+    else {
+      return new DefaultElementWrapperWidget<>(element);
+    }
+  }
+
+  private static Class<?> getValueClassForInputType(final String inputType) {
+    if ("checkbox".equalsIgnoreCase(inputType) || "radio".equalsIgnoreCase(inputType)) {
+      return Boolean.class;
+    }
+    else {
+      return String.class;
+    }
+  }
+
+  private static boolean different(final Object oldValue, final Object newValue) {
+    return (oldValue == null ^ newValue == null) || (oldValue != null && !oldValue.equals(newValue));
+  }
+
+  public static ElementWrapperWidget<?> removeWidget(final Element element) {
     return widgetMap.remove(element);
   }
 
-  public static ElementWrapperWidget removeWidget(final ElementWrapperWidget widget) {
+  public static ElementWrapperWidget<?> removeWidget(final ElementWrapperWidget<?> widget) {
     return widgetMap.remove(widget.getElement());
+  }
+
+  private static class InputElementWrapperWidget<T> extends ElementWrapperWidget<T> implements HasValue<T> {
+
+    private final ValueChangeManager<T, InputElementWrapperWidget<T>> valueChangeManager = new ValueChangeManager<>(this);
+
+    private InputElementWrapperWidget(final Element element) {
+      super(element);
+    }
+
+    @Override
+    public void setValue(final T value, final boolean fireEvents) {
+      final T oldValue = getValue();
+      setValue(value);
+      if (fireEvents && different(oldValue, value)) {
+        ValueChangeEvent.fire(this, value);
+      }
+    }
+
+    @Override
+    public void setValue(final T value) {
+      final String inputType = getElement().getPropertyString("type");
+      final Class<?> valueType = getValueClassForInputType(inputType);
+
+      if (Boolean.class.equals(valueType)) {
+        getElement().setPropertyBoolean("checked", (Boolean) value);
+      } else if (String.class.equals(valueType)) {
+        getElement().setPropertyObject("value", value != null ? value : "");
+      } else {
+        throw new IllegalArgumentException("Cannot set value " + value + " to element input[type=\"" + inputType + "\"].");
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T getValue() {
+      final String inputType = getElement().getPropertyString("type");
+      final Class<?> valueType = getValueClassForInputType(inputType);
+      if (Boolean.class.equals(valueType)) {
+        return (T) (Boolean) getElement().getPropertyBoolean("checked");
+      }
+      else if (String.class.equals(valueType)) {
+        final Object rawValue = getElement().getPropertyObject("value");
+        return (T) (rawValue != null ? rawValue : "");
+      }
+      else {
+        throw new RuntimeException("Unrecognized input element type [" + inputType + "]");
+      }
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(final ValueChangeHandler<T> handler) {
+      return valueChangeManager.addValueChangeHandler(handler);
+    }
+
+    @Override
+    public Class<?> getValueType() {
+      return getValueClassForInputType(getElement().getPropertyString("type"));
+    }
+
+  }
+
+  private static class DefaultElementWrapperWidget<T> extends ElementWrapperWidget<T> implements HasHTML {
+
+    private DefaultElementWrapperWidget(final Element element) {
+      super(element);
+    }
+
+    @Override
+    public String getText() {
+      return getElement().getInnerText();
+    }
+
+    @Override
+    public void setText(final String text) {
+      getElement().setInnerText(text);
+    }
+
+    @Override
+    public String getHTML() {
+      return getElement().getInnerHTML();
+    }
+
+    @Override
+    public void setHTML(final String html) {
+      getElement().setInnerHTML(html);
+    }
+
+    @Override
+    public Class<?> getValueType() {
+      return String.class;
+    }
+
   }
 
   private EventListener listener = new EventListener() {
@@ -69,26 +190,6 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
     DOM.setEventListener(this.getElement(), this);
   }
 
-  @Override
-  public String getText() {
-    return getElement().getInnerText();
-  }
-
-  @Override
-  public void setText(final String text) {
-    getElement().setInnerText(text);
-  }
-
-  @Override
-  public String getHTML() {
-    return getElement().getInnerHTML();
-  }
-
-  @Override
-  public void setHTML(final String html) {
-    getElement().setInnerHTML(html);
-  }
-
   public void setEventListener(final int eventsToSink, final EventListener listener) {
     if (listener == null) {
       throw new IllegalArgumentException("EventListener cannot be null.");
@@ -102,5 +203,7 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
   public void onBrowserEvent(Event event) {
     listener.onBrowserEvent(event);
   }
+
+  public abstract Class<?> getValueType();
 
 }
