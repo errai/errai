@@ -26,12 +26,22 @@ public interface SyncBeanManager extends ClientBeanManager {
 
   /**
    * Register a bean with the bean manager. The registered bean will be
-   * available for lookup, but will not affect wiring of other beans.
+   * available for lookup, by type and by name if applicable.
    *
    * @param beanDef
    *          The bean def to register.
    */
   <T> void registerBean(SyncBeanDef<T> beanDef);
+
+  /**
+   * Register a bean with the bean manager as being assignable to another type.
+   *
+   * @param beanDef
+   *          The bean def to be registered.
+   * @param type
+   *          The type by which this beanDef will be available for lookup.
+   */
+  <T> void registerBeanTypeAlias(SyncBeanDef<T> beanDef, final Class<?> type);
 
   /**
    * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.

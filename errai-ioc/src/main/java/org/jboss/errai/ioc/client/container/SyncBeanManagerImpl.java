@@ -173,9 +173,17 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   @Override
   public <T> void registerBean(final SyncBeanDef<T> beanDef) {
     runtimeBeanDefsByName.put(beanDef.getType().getName(), beanDef);
+    if (!beanDef.getType().getName().equals(beanDef.getBeanClass().getName())) {
+      runtimeBeanDefsByName.put(beanDef.getBeanClass().getName(), beanDef);
+    }
     if (beanDef.getName() != null) {
       runtimeBeanDefsByName.put(beanDef.getName(), beanDef);
     }
+  }
+
+  @Override
+  public <T> void registerBeanTypeAlias(final SyncBeanDef<T> beanDef, final Class<?> type) {
+    runtimeBeanDefsByName.put(type.getName(), beanDef);
   }
 
   /**
