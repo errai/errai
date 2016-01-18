@@ -29,7 +29,6 @@ import javax.enterprise.inject.Alternative;
 import org.jboss.errai.ioc.client.QualifierUtil;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 /**
@@ -43,9 +42,8 @@ import com.google.common.collect.Multimap;
 public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
   private ContextManager contextManager;
-  private final Multimap<String, FactoryHandle> handlesByTypeName = ArrayListMultimap.create();
-  private final Multimap<String, String> typeNamesByName = HashMultimap.create();
-  private final Multimap<String, SyncBeanDef<?>> runtimeBeanDefsByTypeName = ArrayListMultimap.create();
+  private final Multimap<String, FactoryHandle> handlesByName = ArrayListMultimap.create();
+  private final Multimap<String, SyncBeanDef<?>> runtimeBeanDefsByName = ArrayListMultimap.create();
 
   @Override
   public void destroyBean(Object ref) {
@@ -102,55 +100,43 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
   private void addFactory(final FactoryHandle handle) {
     for (final Class<?> assignableType : handle.getAssignableTypes()) {
-      handlesByTypeName.put(assignableType.getName(), handle);
-      typeNamesByName.put(assignableType.getName(), assignableType.getName());
+      handlesByName.put(assignableType.getName(), handle);
     }
     if (handle.getBeanName() != null) {
-      typeNamesByName.put(handle.getBeanName(), handle.getActualType().getName());
+      handlesByName.put(handle.getBeanName(), handle);
     }
   }
 
-  @SuppressWarnings({ "rawtypes" })
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Collection<SyncBeanDef> lookupBeans(final String name) {
-    final Collection<SyncBeanDef> beanDefs = new ArrayList<SyncBeanDef>();
-    for (final String typeName : typeNamesByName.get(name)) {
-      beanDefs.addAll(lookupBeansByTypeName(typeName));
-    }
+    final Collection<FactoryHandle> handles = handlesByName.get(name);
+    final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByName.get(name);
 
-    return beanDefs;
-  }
-
-  @Override
-  public <T> Collection<SyncBeanDef<T>> lookupBeans(final Class<T> type) {
-    return lookupBeansByTypeName(type.getName());
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> Collection<SyncBeanDef<T>> lookupBeansByTypeName(final String typeName) {
-    final Collection<FactoryHandle> handles = handlesByTypeName.get(typeName);
-    final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByTypeName.get(typeName);
-
-    @SuppressWarnings("rawtypes")
-    final Collection beanDefs = new ArrayList<SyncBeanDef<T>>(handles.size()+runtimeBeanDefs.size());
+    final Collection beanDefs = new ArrayList<SyncBeanDef<Object>>(handles.size()+runtimeBeanDefs.size());
     beanDefs.addAll(runtimeBeanDefs);
     for (final FactoryHandle handle : handles) {
-      beanDefs.add(new IOCBeanDefImplementation<T>(handle, this.<T>getType(typeName, handle)));
+      beanDefs.add(new IOCBeanDefImplementation<Object>(handle, this.<Object>getType(name, handle, handle.getActualType())));
     }
 
     return beanDefs;
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Override
+  public <T> Collection<SyncBeanDef<T>> lookupBeans(final Class<T> type) {
+    return (Collection) lookupBeans(type.getName());
+  }
+
   @SuppressWarnings("unchecked")
-  private <T> Class<T> getType(final String typeName, final FactoryHandle handle) {
+  private <T> Class<T> getType(final String typeName, final FactoryHandle handle, final Class<?> defaultType) {
     for (final Class<?> type : handle.getAssignableTypes()) {
       if (type.getName().equals(typeName)) {
         return (Class<T>) type;
       }
     }
 
-    throw new RuntimeException("The type " + handle.getActualType().getName() + " was matched for " + typeName
-            + ", but " + typeName + " is not one of it's assingable types.");
+    return (Class<T>) defaultType;
   }
 
   @Override
@@ -186,9 +172,9 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
   @Override
   public <T> void registerBean(final SyncBeanDef<T> beanDef) {
-    runtimeBeanDefsByTypeName.put(beanDef.getType().getName(), beanDef);
+    runtimeBeanDefsByName.put(beanDef.getType().getName(), beanDef);
     if (beanDef.getName() != null) {
-      typeNamesByName.put(beanDef.getName(), beanDef.getType().getName());
+      runtimeBeanDefsByName.put(beanDef.getName(), beanDef);
     }
   }
 
@@ -197,9 +183,8 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
    */
   public void reset() {
     contextManager = null;
-    typeNamesByName.clear();
-    handlesByTypeName.clear();
-    runtimeBeanDefsByTypeName.clear();
+    handlesByName.clear();
+    runtimeBeanDefsByName.clear();
   }
 
   private final class IOCBeanDefImplementation<T> implements SyncBeanDef<T> {

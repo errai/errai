@@ -43,6 +43,7 @@ import org.jboss.errai.cdi.injection.client.InterfaceB;
 import org.jboss.errai.cdi.injection.client.InterfaceC;
 import org.jboss.errai.cdi.injection.client.InterfaceD;
 import org.jboss.errai.cdi.injection.client.InterfaceRoot;
+import org.jboss.errai.cdi.injection.client.InterfaceWithNamedImpls;
 import org.jboss.errai.cdi.injection.client.OuterBeanInterface;
 import org.jboss.errai.cdi.injection.client.Pig;
 import org.jboss.errai.cdi.injection.client.Visa;
@@ -480,6 +481,65 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertEquals("Failed to lookup programmatically added bean by name.", 1, bm.lookupBeans("Name of DisabledAlternative").size());
   }
 
+  public void testLookupByNameDoesNotFindOtherBeansOfSameType() throws Exception {
+    final SyncBeanManager beanManager = IOC.getBeanManager();
+    beanManager.registerBean(new SyncBeanDef<InterfaceWithNamedImpls>() {
+
+      @Override
+      public Class<InterfaceWithNamedImpls> getType() {
+        return InterfaceWithNamedImpls.class;
+      }
+
+      @Override
+      public Class<?> getBeanClass() {
+        return InterfaceWithNamedImpls.class;
+      }
+
+      @Override
+      public Class<? extends Annotation> getScope() {
+        return Dependent.class;
+      }
+
+      @Override
+      public Set<Annotation> getQualifiers() {
+        return Collections.emptySet();
+      }
+
+      @Override
+      public boolean matches(Set<Annotation> annotations) {
+        return true;
+      }
+
+      @Override
+      public String getName() {
+        return "Programmatic";
+      }
+
+      @Override
+      public boolean isConcrete() {
+        return true;
+      }
+
+      @Override
+      public boolean isActivated() {
+        return true;
+      }
+
+      @Override
+      public InterfaceWithNamedImpls getInstance() {
+        return null;
+      }
+
+      @Override
+      public InterfaceWithNamedImpls newInstance() {
+        return null;
+      }
+    });
+
+    assertEquals("Found multiple beans looking up @Named bean.", 1, beanManager.lookupBeans("Named").size());
+    assertEquals("Found multiple beans looking up programmatically registered bean by name.", 1,
+            beanManager.lookupBeans("Programmatic").size());
+  }
 
   private static boolean containsInstanceOf(final Collection<SyncBeanDef> defs, final Class<?> clazz) {
     for (final SyncBeanDef def : defs) {
