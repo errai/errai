@@ -16,7 +16,6 @@
  */
 package org.jboss.errai.security.keycloak;
 
-import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.AUDIENCE;
 import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.BIRTHDATE;
 import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.COUNTRY;
 import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames.EMAIL_VERIFIED;
@@ -182,9 +181,7 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
 
   protected User createKeycloakUser(final AccessToken accessToken) {
     final User user = new UserImpl(accessToken.getPreferredUsername(), createRoles(accessToken));
-
     final Collection<KeycloakProperty> properties = getKeycloakUserProperties(accessToken);
-
     for (KeycloakProperty property : properties) {
       if (property.hasValue()) {
         user.setProperty(property.name, property.value);
@@ -230,7 +227,7 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   }
 
   private Collection<? extends Role> createRoles(final AccessToken accessToken) {
-    Set<String> roleNames = accessToken.getResourceAccess(accessToken.getIssuedFor()).getRoles();
+    Set<String> roleNames = accessToken.getRealmAccess().getRoles();
     final List<Role> roles = new ArrayList<Role>(roleNames.size());
     for (final String roleName : roleNames) {
       roles.add(new RoleImpl(roleName));
