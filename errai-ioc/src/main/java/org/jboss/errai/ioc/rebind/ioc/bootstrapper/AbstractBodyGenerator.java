@@ -88,6 +88,8 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.ParamDepe
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -103,6 +105,8 @@ import com.google.gwt.core.ext.TreeLogger;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
+
+  private static final Logger logger = LoggerFactory.getLogger(AbstractBodyGenerator.class);
 
   protected static Multimap<DependencyType, Dependency> separateByType(final Collection<Dependency> dependencies) {
     final Multimap<DependencyType, Dependency> separated = HashMultimap.create();
@@ -328,6 +332,11 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
         body.finish();
       }
+      else if (!(method.isPublic() || method.isPrivate() || method.isProtected()) && injectable.requiresProxy()) {
+        logger.warn("The normal scoped type, " + injectable.getInjectedType().getFullyQualifiedName()
+                + ", has a package-private method, " + method.getName()
+                + ", that cannot be proxied. Invoking this method on an injected instance may cause errors.");
+      }
     }
   }
 
@@ -338,9 +347,6 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
               getParametersForDeclaration(method));
     } else if (method.isProtected()) {
       methodBuilder = proxyImpl.protectedMethod(method.getReturnType().getErased(), method.getName(),
-              getParametersForDeclaration(method));
-    } else if (!method.isPrivate()) {
-      methodBuilder = proxyImpl.packageMethod(method.getReturnType().getErased(), method.getName(),
               getParametersForDeclaration(method));
     } else {
       final String methodType = (method.isProtected()) ? "private" : "package private";
@@ -371,7 +377,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
   private boolean shouldProxyMethod(final MetaMethod method, final Multimap<String, MetaMethod> proxiedMethodsByName) {
     return (method.getDeclaringClass() != null && method.getDeclaringClass().isInterface())
-            || !method.isStatic() && !method.isPrivate() && !method.isFinal()
+            || !method.isStatic() && (method.isPublic() || method.isProtected()) && !method.isFinal()
                     && methodIsNotFromObjectUnlessHashCode(method)
             && typesInSignatureAreVisible(method)
             && isNotAlreadyProxied(method, proxiedMethodsByName);
