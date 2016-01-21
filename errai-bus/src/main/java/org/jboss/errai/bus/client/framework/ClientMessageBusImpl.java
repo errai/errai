@@ -118,7 +118,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     @Override
     public void callback(final Message message) {
       final String errorTo = message.get(String.class, MessageParts.ErrorTo);
-      
+
       if (errorTo == null) {
         Throwable t = message.get(Throwable.class, MessageParts.Throwable);
         GWT.getUncaughtExceptionHandler().onUncaughtException(t);
@@ -139,7 +139,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         message.sendNowWith(ClientMessageBusImpl.this);
       }
     }
-    
+
   }
   private final ErrorProcessor clientBusErrorsCallback = new ErrorProcessor();
 
@@ -280,7 +280,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final Map<String, String> properties = new HashMap<String, String>();
 
   private Timer initialConnectTimer;
-  
+
   private static final Logger logger = LoggerFactory.getLogger(ClientMessageBusImpl.class);
 
   public ClientMessageBusImpl() {
@@ -350,7 +350,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
        * This is an optimization to improve unit testing speed. If a test case
        * does not tear down the bus after each test, calling this will ensure
        * that any services dependent on the bus will still be loaded.
-       * 
+       *
        * It's very important that we call waitFor first because InitVotes is
        * reset between most tests. Calling voteFor has not effect without a
        * prior waitFor.
@@ -673,7 +673,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
         catch (Exception e) {
           managementConsole
-              .displayError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
+              .displayError("receiver '" + subject + "' threw an exception:\n\t" + e.getMessage(), decodeCommandMessage(message), e);
         }
       }
     };
@@ -897,10 +897,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   /**
    * Checks if subject is already listed in the subscriptions map
-   * 
+   *
    * @param subject
    *          subject to look for
-   * 
+   *
    * @return true if the subject is already subscribed
    */
   @Override
@@ -991,7 +991,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Adds a subscription listener, so it is possible to add subscriptions to the
    * client.
-   * 
+   *
    * @param listener
    *          subscription listener
    */
@@ -1229,12 +1229,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     Assert.notNull(handler);
     uncaughtExceptionHandlers.add(handler);
   }
-  
+
   public void removeUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
     Assert.notNull(handler);
     uncaughtExceptionHandlers.remove(handler);
   }
-  
+
   public void removeAllUncaughtExceptionHandlers() {
     uncaughtExceptionHandlers.clear();
   }
