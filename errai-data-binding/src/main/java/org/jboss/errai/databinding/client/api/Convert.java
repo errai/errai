@@ -302,10 +302,7 @@ public class Convert {
   public static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
     Class widgetValueType = null;
 
-    if (widget instanceof HasText) {
-      widgetValueType = String.class;
-    }
-    else if (widget instanceof ElementWrapperWidget) {
+    if (widget instanceof ElementWrapperWidget) {
       widgetValueType = ((ElementWrapperWidget<?>) widget).getValueType();
     }
     else if (widget instanceof TakesValue) {
@@ -334,6 +331,9 @@ public class Convert {
       else {
         widgetValueType = defaultWidgetValueType;
       }
+    }
+    else if (widget instanceof HasText) {
+        widgetValueType = String.class;
     }
     else {
       widgetValueType = String.class;
