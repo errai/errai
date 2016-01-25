@@ -59,6 +59,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -91,6 +92,25 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     model.setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+  
+  @Test
+  public void testBindingWithHasTextAndHasValue() {
+    IntegerBox integerBox = new IntegerBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(integerBox, "age").getModel();
+
+    integerBox.setValue(5, true);
+    assertEquals("Model not properly updated", (Integer) 5, model.getAge());
+
+    model.setAge(3);
+    assertEquals("Widget not properly updated", "3", integerBox.getText());
+
+    integerBox.setValue(null, true);
+    assertEquals("Model not properly updated", (Integer) null, model.getAge());
+    
+    model.setAge(null);
+    assertEquals("Widget not properly updated", "", integerBox.getText());
+
   }
 
   @Test
