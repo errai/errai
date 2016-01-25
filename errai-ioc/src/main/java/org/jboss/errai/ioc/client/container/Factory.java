@@ -46,7 +46,7 @@ public abstract class Factory<T> {
    */
   protected final Factory<T> thisInstance = this;
 
-  private final Map<T, Map<String, Object>> referenceMaps = new HashMap<T, Map<String, Object>>();
+  private final Map<T, Map<String, Object>> referenceMaps = new IdentityHashMap<T, Map<String, Object>>();
   private final SetMultimap<T, Object> dependentScopedDependencies = Multimaps
           .newSetMultimap(new IdentityHashMap<T, Collection<Object>>(), new Supplier<Set<Object>>() {
             @Override

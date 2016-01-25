@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Disposes;
@@ -603,6 +604,10 @@ public class IOCProcessor {
       if (!type.getMethodsAnnotatedWith(producerAnnoType).isEmpty()) {
         return false;
       }
+    }
+
+    if (!type.getMethodsAnnotatedWith(PostConstruct.class).isEmpty()) {
+      return false;
     }
 
     final Collection<Class<? extends Annotation>> injectAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
