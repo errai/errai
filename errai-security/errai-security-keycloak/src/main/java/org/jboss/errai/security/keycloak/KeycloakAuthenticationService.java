@@ -239,7 +239,7 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
     //Add realm roles next, if any
     AccessToken.Access realmAccess = accessToken.getRealmAccess();
     if(realmAccess!=null && realmAccess.getRoles()!=null){
-        roleNames.addAll(access.getRoles());
+        roleNames.addAll(realmAccess.getRoles());
     }
     final List<Role> roles = new ArrayList<Role>(roleNames.size());
     for (final String roleName : roleNames) {
