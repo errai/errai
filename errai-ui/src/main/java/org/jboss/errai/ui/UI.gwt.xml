@@ -31,10 +31,6 @@
     <when-type-is class="org.jboss.errai.ui.client.local.spi.TranslationService"/>
   </generate-with>
 
-  <generate-with class="org.jboss.errai.ui.rebind.less.LessStyleGenerator">
-    <when-type-is class="org.jboss.errai.ui.client.local.spi.LessStyleMapping"/>
-  </generate-with>
-
   <source path="client" />
   <source path="shared" />
 </module>

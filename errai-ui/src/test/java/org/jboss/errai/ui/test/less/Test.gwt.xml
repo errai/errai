@@ -1,4 +1,0 @@
-<module>
-  <inherits name='org.jboss.errai.ui.UI'/>
-  <inherits name="org.jboss.errai.ui.test.common.UITestCommon"/>
-</module>
