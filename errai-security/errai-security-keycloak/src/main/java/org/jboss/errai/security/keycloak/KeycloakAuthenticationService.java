@@ -230,7 +230,17 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   }
 
   private Collection<? extends Role> createRoles(final AccessToken accessToken) {
-    Set<String> roleNames = accessToken.getResourceAccess(accessToken.getIssuedFor()).getRoles();
+    Set<String roleNames = new HashSet<>();
+    //Add app roles first, if any
+    AccessToken.Access access = accessToken.getResourceAccess(accessToken.getIssuedFor());
+    if(access!=null && access.getRoles()!=null){
+        roleNames.addAll(access.getRoles());
+    }
+    //Add realm roles next, if any
+    AccessToken.Access realmAccess = accessToken.getRealmAccess();
+    if(realmAccess!=null && realmAccess.getRoles()!=null){
+        roleNames.addAll(access.getRoles());
+    }
     final List<Role> roles = new ArrayList<Role>(roleNames.size());
     for (final String roleName : roleNames) {
       roles.add(new RoleImpl(roleName));
