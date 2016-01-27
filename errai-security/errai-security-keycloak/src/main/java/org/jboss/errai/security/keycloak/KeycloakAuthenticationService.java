@@ -42,6 +42,7 @@ import static org.jboss.errai.security.keycloak.properties.KeycloakPropertyNames
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -230,7 +231,20 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
   }
 
   private Collection<? extends Role> createRoles(final AccessToken accessToken) {
-    Set<String> roleNames = accessToken.getResourceAccess(accessToken.getIssuedFor()).getRoles();
+    Set<String> roleNames = new HashSet<String>();
+    
+    //Add app roles first, if any
+    AccessToken.Access access = accessToken.getResourceAccess(accessToken.getIssuedFor());
+    if(access != null && access.getRoles() != null){
+      roleNames.addAll(access.getRoles());
+    }
+    
+    //Add realm roles next, if any
+    AccessToken.Access realmAccess = accessToken.getRealmAccess();
+    if(realmAccess != null && realmAccess.getRoles() !=null ){
+      roleNames.addAll(realmAccess.getRoles());
+    }
+    
     final List<Role> roles = new ArrayList<Role>(roleNames.size());
     for (final String roleName : roleNames) {
       roles.add(new RoleImpl(roleName));
