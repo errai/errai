@@ -219,7 +219,6 @@
             <version>2.5</version>
             <configuration>
               <skipTests>false</skipTests>
-              <argLine>-XX:MaxPermSize=256m</argLine>
             </configuration>
           </plugin>
         </plugins>

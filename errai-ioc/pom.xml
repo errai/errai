@@ -161,9 +161,7 @@
               <!-- This is required because the BasicIOCTest is run in "simulated 
                 client" mode, which prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
-              <argLine>-Xmx1500m -XX:MaxPermSize=500m
-                -Dgwt.gen=/tmp/gwt_test_gen_out/
-                -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug</argLine>
+              <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug</argLine>
 
               <systemProperties>
                 <property>

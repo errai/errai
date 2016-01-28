@@ -127,7 +127,7 @@
             <configuration>
               <skipTests>false</skipTests>
               <forkMode>always</forkMode>
-              <argLine>-Xms1g -Xmx1500m -XX:MaxPermSize=250m ${argLine} ${jacocoArgs}</argLine>
+              <argLine>-Xms1g -Xmx1500m ${argLine} ${jacocoArgs}</argLine>
 
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>

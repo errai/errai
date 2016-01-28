@@ -229,7 +229,7 @@
               <forkMode>pertest</forkMode>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
                 flag or the testsuite WILL fail. -->
-              <argLine>-Xmx1500m -XX:MaxPermSize=128m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true -Dorg.jboss.errai.bus.do_long_poll=false</argLine>
+              <argLine>-Xmx1500m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true -Dorg.jboss.errai.bus.do_long_poll=false</argLine>
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>

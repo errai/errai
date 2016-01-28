@@ -258,7 +258,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <forkMode>always</forkMode>
-              <argLine>-Xmx1500m -XX:MaxPermSize=256m ${argLine}</argLine>
+              <argLine>-Xmx1500m ${argLine}</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
 
               <systemProperties>
