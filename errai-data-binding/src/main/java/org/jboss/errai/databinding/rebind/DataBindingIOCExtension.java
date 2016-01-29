@@ -22,6 +22,7 @@ import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.IOCExtension;
@@ -41,9 +43,9 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultCustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
@@ -70,10 +72,41 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
 
     final Collection<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.getGeneratorContext());
+    final Model anno = new Model() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Model.class;
+      }
+    };
 
     for (final MetaClass modelBean : allBindableTypes) {
       final InjectableHandle handle = new InjectableHandle(modelBean,
-              injectionContext.getQualifierFactory().forDefault());
+              injectionContext.getQualifierFactory().forSource(new HasAnnotations() {
+
+                @Override
+                public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+                  return Model.class.equals(annotation);
+                }
+
+                @Override
+                public Annotation[] getAnnotations() {
+                  return new Annotation[] {
+                      anno
+                  };
+                }
+
+                @SuppressWarnings("unchecked")
+                @Override
+                public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+                  if (isAnnotationPresent(annotation)) {
+                    return (A) anno;
+                  }
+                  else {
+                    return null;
+                  }
+                }
+              }));
+
       injectionContext.registerInjectableProvider(handle, new InjectableProvider() {
 
         private CustomFactoryInjectable provided;
@@ -114,7 +147,8 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
             return provided;
           }
           else {
-            throw new RuntimeException("Not yet implemented!");
+            throw new IllegalStateException("The " + DataBindingIOCExtension.class.getSimpleName()
+                    + " was used to satisfy an injection site without the @" + Model.class.getName() + " annotation.");
           }
         }
       });

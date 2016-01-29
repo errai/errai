@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 import org.jboss.errai.databinding.client.api.DataBinder;
 
 /**
@@ -33,30 +35,31 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * <p>
  * The annotated model can be a field and a method or constructor parameter. The following
  * example shows all use cases for the {@link Model} annotation.
- * 
+ *
  * <pre>
  *      public class MyBean {
- *        {@code @Inject} {@code @Model} 
+ *        {@code @Inject} {@code @Model}
  *        private MyModel model;
- *      
+ *
  *        {@code @Inject}
  *        public MyBean({@code @Model} MyModel model) {
  *          this.model = model;
  *        }
- *        
+ *
  *        {@code @Inject}
  *        public void setModel({@code @Model} MyModel model) {
  *          this.model = model;
  *        }
  *      }
  * </pre>
- * 
+ *
  * There can only be one {@link Model} per class.
  * <p>
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
+@Qualifier
 @Documented
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
