@@ -16,6 +16,10 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -23,6 +27,8 @@ import org.jboss.errai.common.client.api.tasks.ClientTaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
+import org.jboss.errai.common.client.logging.LoggingHandlerConfigurator;
+import org.jboss.errai.common.client.logging.handlers.ErraiSystemLogHandler;
 
 import com.google.gwt.junit.client.GWTTestCase;
 
@@ -42,6 +48,17 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtSetUp() throws Exception {
+    // Only setup handlers for first test.
+    if (LoggingHandlerConfigurator.get() == null) {
+      // Cannot use console logger in non-production compiled tests.
+      new LoggingHandlerConfigurator().onModuleLoad();
+      final Handler[] handlers = Logger.getLogger("").getHandlers();
+      for (final Handler handler : handlers) {
+        handler.setLevel(Level.OFF);
+      }
+      LoggingHandlerConfigurator.get().getHandler(ErraiSystemLogHandler.class).setLevel(Level.ALL);
+    }
+
     bus = (ClientMessageBus) ErraiBus.get();
 
     InitVotes.setTimeoutMillis(60000);
