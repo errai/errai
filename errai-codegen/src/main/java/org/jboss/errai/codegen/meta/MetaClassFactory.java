@@ -111,9 +111,9 @@ public final class MetaClassFactory {
   }
 
   private static MetaClassCache cache;
-  
+
   public static MetaClassCache getMetaClassCache() {
-    if (cache == null) { 
+    if (cache == null) {
       cache = CacheUtil.getCache(MetaClassCache.class);
     }
     return cache;
@@ -277,7 +277,7 @@ public final class MetaClassFactory {
   private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz,
                                                       final MetaParameterizedType parameterizedType,
                                                       final boolean reifyRecursively) {
-    final BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create(), clazz.getFullyQualifiedName());
+    final BuildMetaClass buildMetaClass = new BuildMetaClass(null, clazz.getFullyQualifiedName());
 
     buildMetaClass.setReifiedFormOf(clazz);
     buildMetaClass.setAbstract(clazz.isAbstract());
@@ -549,15 +549,15 @@ public final class MetaClassFactory {
   public static Collection<MetaClass> getAllNewOrUpdatedClasses() {
     return getMetaClassCache().getAllNewOrUpdated();
   }
-  
+
   public static Collection<MetaClass> getNewClasses() {
     return getMetaClassCache().getAllNewClasses();
   }
-  
+
   public static boolean isChangedOrDeleted(String fqcn) {
     return getMetaClassCache().getAllDeletedClasses().contains(fqcn) || getMetaClassCache().isNewOrUpdated(fqcn);
   }
-  
+
   public static Set<String> getAllDeletedClasses() {
     return getMetaClassCache().getAllDeletedClasses();
   }

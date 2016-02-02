@@ -130,7 +130,11 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
 
   private void processAssignableTypes(final AbstractInjectable abstractInjectable) {
     for (final MetaClass assignable : abstractInjectable.type.getAllSuperTypesAndInterfaces()) {
-      directAbstractInjectablesByAssignableTypes.put(assignable.getErased(), abstractInjectable);
+      try {
+        directAbstractInjectablesByAssignableTypes.put(assignable.getErased(), abstractInjectable);
+      } catch (Throwable t) {
+        throw new RuntimeException("Error occurred adding the assignable type " + assignable.getFullyQualifiedName(), t);
+      }
     }
   }
 

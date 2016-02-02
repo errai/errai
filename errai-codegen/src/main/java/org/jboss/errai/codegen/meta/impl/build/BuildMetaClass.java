@@ -85,9 +85,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public BuildMetaClass(final Context context, final String name) {
     super(null);
     this.className = name;
-    this.context = Context.create(context);
-    this.context.addVariable(Variable.create("this", this));
-    context.attachClass(this);
+    if (context != null) {
+      this.context = Context.create(context);
+      this.context.addVariable(Variable.create("this", this));
+      context.attachClass(this);
+    }
   }
 
   private BuildMetaClass shallowCopy() {
@@ -583,6 +585,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   public String toJavaString(final Context context) {
+    if (context == null) {
+      throw new IllegalArgumentException("Cannot generate Java String with null Context.");
+    }
+
     if (generatedCache != null) return generatedCache;
 
     final StringBuilder buf = new StringBuilder(512);
@@ -719,6 +725,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   public String membersToString() {
+    if (context == null) {
+      throw new IllegalStateException("Cannot call membersToString when no context is set.");
+    }
+
     final StringBuilder buf = new StringBuilder(512);
 
     final Iterator<InnerClass> innerClassIterator = innerClasses.iterator();
