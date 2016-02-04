@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.jboss.errai.databinding.client.MockHandler;
 import org.jboss.errai.databinding.client.PropertyChangeHandlerSupport;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -16,28 +16,17 @@
 
 package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.databinding.client.api.Bindable;
-
 /**
- * Provides instances of {@link BindableProxy}s (proxy objects for types annotated with {@link Bindable}).
+ * Thrown to indicate that a UI component could not be bound to a model property because it is already bound to a property of
+ * the same model instance.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BindableProxyProvider {
+@SuppressWarnings("serial")
+public class ComponentAlreadyBoundException extends RuntimeException {
 
-  /**
-   * Returns a proxy for a newly created model instance, bound to the provided component.
-   *
-   * @return proxy instance
-   */
-  public BindableProxy<?> getBindableProxy();
+  public ComponentAlreadyBoundException(String message) {
+    super(message);
+  }
 
-  /**
-   * Returns a proxy for the provided model instance, bound to the provided component.
-   *
-   * @param model
-   *          The model to proxy.
-   * @return proxy instance
-   */
-  public BindableProxy<?> getBindableProxy(Object model);
 }

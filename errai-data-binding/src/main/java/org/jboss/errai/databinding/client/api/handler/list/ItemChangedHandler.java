@@ -14,40 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
+package org.jboss.errai.databinding.client.api.handler.list;
 
-import org.jboss.errai.databinding.client.api.Converter;
+import java.util.List;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class IdentityConverter<T> implements Converter<T, T> {
+@FunctionalInterface
+public interface ItemChangedHandler<M> {
 
-  private final Class<T> type;
-
-  public IdentityConverter(final Class<T> type) {
-    this.type = type;
-  }
-
-  @Override
-  public Class<T> getModelType() {
-    return type;
-  }
-
-  @Override
-  public Class<T> getComponentType() {
-    return type;
-  }
-
-  @Override
-  public T toModelValue(T widgetValue) {
-    return widgetValue;
-  }
-
-  @Override
-  public T toWidgetValue(T modelValue) {
-    return modelValue;
-  }
+  /**
+   * Called when a single item has been changed.
+   *
+   * @param source
+   *          a list representing the state before the item was changed (equal to the old value of
+   *          the list). Never null.
+   * @param index
+   *          the index of the item that has changed.
+   * @param item
+   *          the new value of the item at the provided index.
+   */
+  public void onItemChanged(List<M> source, int index, M item);
 
 }

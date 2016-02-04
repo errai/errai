@@ -62,7 +62,7 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
       // expected
     }
   }
-  
+
   @Test
   public void testGetProperties() {
     final HasProperties model = (HasProperties) DataBinder.forType(TestModel.class).getModel();
@@ -70,23 +70,23 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
     final Set<String> actualProperties = properties.keySet();
     final Set<String> expectedProperties = new HashSet<String>(Arrays.asList("agent", "amountDec", "id", "amountInt",
             "lastChanged", "value", "name", "age", "active", "child", "oldValue"));
-    
+
     assertEquals(expectedProperties, actualProperties);
   }
-  
+
   @Test
   public void testChangePropertyValue() {
     final TestModel model = DataBinder.forType(TestModel.class).getModel();
     final HasProperties properties = (HasProperties) model;
-    
+
     assertNull(properties.get("value"));
     assertNull(model.getValue());
-    
+
     properties.set("value", "value");
     assertEquals("value", model.getValue());
     assertSame(model.getValue(), properties.get("value"));
   }
-  
+
   @Test
   public void testGetThrowsNonExistingPropertyException() {
     final HasProperties model = (HasProperties) DataBinder.forType(TestModel.class).getModel();
@@ -98,7 +98,7 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
       // expected
     }
   }
-  
+
   @Test
   public void testSetThrowsNonExistingPropertyException() {
     final HasProperties model = (HasProperties) DataBinder.forType(TestModel.class).getModel();
@@ -110,5 +110,5 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
       // expected
     }
   }
-  
+
 }

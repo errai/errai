@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2012 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client.api;
+package org.jboss.errai.databinding.client.api.handler.list;
+
+import java.util.List;
 
 /**
- * A {@link PropertyChangeEvent} gets dispatched when any property of a bound bean is changed.
  *
- * @author David Cracauer <dcracauer@gmail.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface PropertyChangeHandler<T> {
+@FunctionalInterface
+public interface ItemsClearedHandler<M> {
 
   /**
-   * Called when {@link PropertyChangeEvent} is dispatched.
+   * Called when all items have been removed from the list.
    *
-   * @param event
-   *          the {@link PropertyChangeEvent} that was dispatched.
+   * @param source
+   *          a list representing the state before all items were removed (equal to the old value of
+   *          the list). Never null.
    */
-  public void onPropertyChange(PropertyChangeEvent<T> event);
+  public void onItemsCleared(List<M> source);
 
 }

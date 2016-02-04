@@ -16,8 +16,8 @@
 
 package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 
 /**
  * Implementations are a source of {@link PropertyChangeEvent}s.

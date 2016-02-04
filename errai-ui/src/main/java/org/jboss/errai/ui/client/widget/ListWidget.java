@@ -28,7 +28,7 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.ui.ValueChangeManager;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.databinding.client.BindableListWrapper;
-import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdapter;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
@@ -71,9 +71,10 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
 
   private final ComplexPanel panel;
   private BindableListWrapper<M> items;
-  private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
+  private final List<BindableListChangeHandler<M>> handlers = new ArrayList<>();
+  private final Collection<HandlerRegistration> registrations = new ArrayList<>();
 
-  private final List<ComponentCreationalCallback> callbacks = new LinkedList<ComponentCreationalCallback>();
+  private final List<ComponentCreationalCallback> callbacks = new LinkedList<>();
   private int pendingCallbacks;
 
   private final ValueChangeManager<List<M>, ListWidget<M, C>> valueChangeManager = new ValueChangeManager<>(this);
@@ -136,8 +137,8 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
    *          The list of model objects. If null or empty all existing child
    *          components will be removed.
    */
-  public void setItems(List<M> items) {
-    boolean changed = this.items != items;
+  public void setItems(final List<M> items) {
+    final boolean changed = this.items != items;
 
     if (items instanceof BindableListWrapper) {
       this.items = (BindableListWrapper<M>) items;
@@ -152,10 +153,18 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
     }
 
     if (changed) {
-      for (final BindableListChangeHandler<M> handler : handlers) {
-        this.items.addChangeHandler(handler);
-      }
+      initializeHandlers();
       init();
+    }
+  }
+
+  private void initializeHandlers() {
+    for (final HandlerRegistration reg : registrations) {
+      reg.removeHandler();
+    }
+    registrations.clear();
+    for (final BindableListChangeHandler<M> handler : handlers) {
+      registrations.add(this.items.addChangeHandler(handler));
     }
   }
 
@@ -248,14 +257,14 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
   public HandlerRegistration addBindableListChangeHandler(final BindableListChangeHandler<M> handler) {
     ensureItemsInitialized();
     handlers.add(handler);
-    items.addChangeHandler(handler);
+    final HandlerRegistration wrapperHandlerRegistration = items.addChangeHandler(handler);
 
     return new HandlerRegistration() {
       @Override
       public void removeHandler() {
         ensureItemsInitialized();
         handlers.remove(handler);
-        items.removeChangeHandler(handler);
+        wrapperHandlerRegistration.removeHandler();
       }
     };
   }
@@ -274,9 +283,7 @@ public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
   private void ensureItemsInitialized() {
     if (items == null) {
       items = new BindableListWrapper<M>(new ArrayList<M>());
-      for (final BindableListChangeHandler<M> handler : handlers) {
-        items.addChangeHandler(handler);
-      }
+      initializeHandlers();
     }
   }
 

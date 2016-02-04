@@ -38,8 +38,8 @@ import javax.persistence.PreUpdate;
 
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;

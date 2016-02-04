@@ -115,7 +115,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     }
 
     @Override
-    public Class<T> getWidgetType() {
+    public Class<T> getComponentType() {
       return type;
     }
 
@@ -139,7 +139,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     }
 
     @Override
-    public Class<String> getWidgetType() {
+    public Class<String> getComponentType() {
       return String.class;
     }
 
@@ -163,7 +163,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     }
 
     @Override
-    public Class<String> getWidgetType() {
+    public Class<String> getComponentType() {
       return String.class;
     }
 

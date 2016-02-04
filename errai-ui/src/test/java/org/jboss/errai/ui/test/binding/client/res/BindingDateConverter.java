@@ -51,7 +51,7 @@ public class BindingDateConverter implements Converter<Date, String> {
   }
 
   @Override
-  public Class<String> getWidgetType() {
+  public Class<String> getComponentType() {
     return String.class;
   }
 

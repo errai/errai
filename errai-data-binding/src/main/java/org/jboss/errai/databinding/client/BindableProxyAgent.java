@@ -18,20 +18,32 @@ package org.jboss.errai.databinding.client;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.function.Consumer;
+import org.jboss.errai.common.client.function.Function;
+import org.jboss.errai.common.client.function.Optional;
+import org.jboss.errai.common.client.function.Supplier;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.TextAreaElement;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -39,35 +51,35 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.TakesValue;
+import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the
- * target model and bound widgets in sync.
+ * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the target model and bound widgets in sync.
  * <p>
  * An agent will:
  * <ul>
- * <li>Carry out an initial state sync between the bound widgets and the target
- * model, if specified (see {@link DataBinder#DataBinder(Object, StateSync)})
- * </li>
+ * <li>Carry out an initial state sync between the bound widgets and the target model, if specified (see
+ * {@link DataBinder#setModel(Object, StateSync)})</li>
  *
  * <li>Update the bound widget when a setter method is invoked on the model (see
- * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for
- * widgets that either implement {@link TakesValue} or {@link HasText})</li>
+ * {@link #updateWidgetsAndFireEvent(boolean, String, Object, Object)}). Works for components that either implement
+ * {@link TakesValue} or {@link HasText}). Also works for native wrappers of input elements. Components displaying lists
+ * can implement {@link BindableListChangeHandler} to receive incremental updates of the model state.</li>
  *
- * <li>Update the bound widgets when a non-accessor method is invoked on the
- * model (by comparing all bound properties to detect changes). See
- * {@link #updateWidgetsAndFireEvents()}. Works for widgets that either
- * implement {@link TakesValue} or {@link HasText})</li>
+ * <li>Update the bound components when a non-accessor method is invoked on the model (by comparing all bound properties
+ * to detect changes). See {@link #updateWidgetsAndFireEvents()}. Works for components that either implement
+ * {@link TakesValue} or {@link HasText})</li>
  *
- * <li>Update the target model in response to value change events (only works
- * for bound widgets that implement {@link HasValue})</li>
+ * <li>Update the target model in response to value change events (only works for bound components that implement
+ * {@link HasValue})</li>
  * <ul>
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  *
  * @param <T>
  *          The type of the target model being proxied.
@@ -79,24 +91,16 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final Map<String, PropertyType> propertyTypes = new HashMap<String, PropertyType>();
   final Map<String, DataBinder> binders = new HashMap<String, DataBinder>();
   final Map<String, Object> knownValues = new HashMap<String, Object>();
+  final Collection<HandlerRegistration> modelChangeHandlers = new ArrayList<>();
 
   PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
 
   final BindableProxy<T> proxy;
-  final T target;
-  StateSync initialState;
+  T target;
 
-  /**
-   * Updates a bound property of a model in response to UI changes.
-   */
-  private interface ModelUpdater {
-    public void update(Object value);
-  }
-
-  BindableProxyAgent(BindableProxy<T> proxy, T target, StateSync initialState) {
+  BindableProxyAgent(BindableProxy<T> proxy, T target) {
     this.proxy = proxy;
     this.target = target;
-    this.initialState = initialState;
   }
 
   /**
@@ -105,131 +109,233 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   void copyValues() {
     for (String property : propertyTypes.keySet()) {
-      knownValues.put(property, proxy.get(property));
+      if (!"this".equals(property)) {
+        knownValues.put(property, proxy.get(property));
+      }
     }
   }
 
   /**
-   * Binds the provided widget to the specified property (or property chain) of
-   * the model instance associated with this proxy (see
-   * {@link DataBinder#setModel(Object, StateSync)}).
+   * Binds the provided component to the specified property (or property chain) of the model instance associated with
+   * this proxy (see {@link DataBinder#setModel(Object, StateSync)}).
    *
-   * @param widget
-   *          the widget to bind to, must not be null.
+   * @param component
+   *          the UI component to bind to, must not be null.
    * @param property
    *          the property of the model to bind the widget to, must not be null.
    * @param converter
-   *          the converter to use for this binding, null if default conversion
-   *          should be used.
+   *          the converter to use for this binding, null if default conversion should be used. See
+   *          {@link Convert#getConverter(Class, Class)} and {@link Convert#identityConverter(Class)} for possible
+   *          arguments.
    * @return binding the created binding.
    */
-  public Binding bind(final Widget widget, final String property, final Converter converter) {
-    return bind(widget, property, converter, false);
+  public Binding bind(final Object component, final String property, final Converter converter) {
+    return bind(component, property, converter, false, StateSync.FROM_MODEL);
   }
 
   /**
-   * Binds the provided widget to the specified property (or property chain) of
-   * the model instance associated with this proxy (see
-   * {@link DataBinder#setModel(Object, StateSync)}).
+   * Binds the provided component to the specified property (or property chain) of the model instance associated with
+   * this proxy (see {@link DataBinder#setModel(Object, StateSync)}).
    *
-   * @param widget
-   *          the widget to bind to, must not be null.
+   * @param component
+   *          the UI component to bind to, must not be null.
    * @param property
    *          the property of the model to bind the widget to, must not be null.
-   * @param userProvidedConverter
-   *          the converter to use for this binding, null if default conversion
-   *          should be used.
+   * @param providedConverter
+   *          the converter to use for this binding, null if default conversion should be used. See
+   *          {@link Convert#getConverter(Class, Class)} and {@link Convert#identityConverter(Class)} for possible
+   *          arguments.
    * @param bindOnKeyUp
-   *          a flag indicating that the property should be updated when the
-   *          widget fires a {@link com.google.gwt.event.dom.client.KeyUpEvent}
-   *          along with the default
+   *          a flag indicating that the property should be updated when the widget fires a
+   *          {@link com.google.gwt.event.dom.client.KeyUpEvent} along with the default
    *          {@link com.google.gwt.event.logical.shared.ValueChangeEvent}.
+   * @param initialState
+   *          specifies whether to use the model or component state when initially synchronizing this binding. If null,
+   *          the values will not be synchronized until a change is made to the model or component.
    * @return binding the created binding.
    */
-  public Binding bind(final Widget widget, final String property, Converter userProvidedConverter, final boolean bindOnKeyUp) {
+  public Binding bind(final Object component, final String property, final Converter providedConverter,
+          final boolean bindOnKeyUp, final StateSync initialState) {
+    final Converter converter = findConverter(property, getPropertyType(property), component, providedConverter);
+    final String lastSubProperty = property.substring(property.lastIndexOf('.')+1);
+
+    final Optional<Function<Object, Object>> uiGetter = maybeCreateUIGetter(component);
+    final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar =
+          agent -> addHandlers(component, bindOnKeyUp, uiGetter, modelUpdater(component, converter, lastSubProperty, agent));
+
+    return bindHelper(component, property, converter, registrar, uiGetter, initialState);
+  }
+
+  private Optional<Function<Object, Object>> maybeCreateUIGetter(final Object component) {
+    if (component instanceof TakesValue) {
+      return createTakesValueGetter();
+    }
+    else if (component instanceof HasText) {
+      return createHasTextGetter();
+    }
+    else if (isElement(component)) {
+      return maybeCreateElementValueGetter(component);
+    }
+    else {
+      return Optional.empty();
+    }
+  }
+
+  private Consumer<Object> modelUpdater(final Object component, final Converter converter, final String lastSubProperty,
+          BindableProxyAgent<?> agent) {
+    return uiValue -> {
+      final Object oldValue = agent.proxy.get(lastSubProperty);
+      final Object newValue = converter.toModelValue(uiValue);
+      agent.trySettingModelProperty(lastSubProperty, converter, uiValue, newValue);
+      agent.updateWidgetsAndFireEvent(false, lastSubProperty, oldValue, newValue, component);
+    };
+  }
+
+  private Optional<Function<Object, Object>> createTakesValueGetter() {
+    return Optional.ofNullable(o -> ((TakesValue) o).getValue());
+  }
+
+  private Optional<Function<Object, Object>> createHasTextGetter() {
+    return Optional.ofNullable(o -> ((HasText) o).getText());
+  }
+
+  private Optional<Function<Object, Object>> maybeCreateElementValueGetter(final Object component) {
+    final Optional<Function<Object, Object>> uiGetter;
+    final Function<Object, ElementWrapperWidget> toWidget = o -> ElementWrapperWidget.getWidget(BoundUtil.asElement(o));
+    final ElementWrapperWidget wrapper = toWidget.apply(component);
+    if (wrapper instanceof HasValue) {
+      uiGetter = Optional.ofNullable(o -> ((HasValue) toWidget.apply(o)).getValue());
+    }
+    else if (wrapper instanceof HasHTML) {
+      uiGetter = Optional.ofNullable(o -> ((HasHTML) toWidget.apply(o)).getText());
+    }
+    else {
+      uiGetter = Optional.empty();
+    }
+    return uiGetter;
+  }
+
+  private Binding bindHelper(final Object component, final String property, final Converter converter,
+          final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
+          final Optional<Function<Object, Object>> uiGetter, final StateSync initialState) {
     validatePropertyExpr(property);
 
-    final Converter converter;
+    if (property.contains(".")) {
+      return bindNestedProperty(component, property, converter, registrar, uiGetter, initialState);
+    }
+    else {
+      return bindDirectProperty(component, property, converter, registrar.apply(this), uiGetter, initialState);
+    }
+  }
 
-    int dotPos = property.indexOf(".");
-    if (dotPos > 0) {
-      DataBinder nested = createNestedBinder(property);
-      converter = findConverter(property, getNestedPropertyType(property), widget, userProvidedConverter);
-      nested.bind(widget, property.substring(dotPos + 1), converter, bindOnKeyUp);
-      Binding binding = new Binding(property, widget, converter, null);
+  private Binding bindNestedProperty(final Object component, final String property, final Converter<?, ?> converter,
+          final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
+          final Optional<Function<Object,Object>> uiGetter, final StateSync initialState) {
+      final DataBinder nestedBinder = createNestedBinder(property);
+      final String subProperty = property.substring(property.indexOf('.') + 1);
+      final BindableProxyAgent<?> nestedAgent = ((BindableProxy<?>) nestedBinder.getModel()).getBindableProxyAgent();
+      nestedBinder.addBinding(subProperty, nestedAgent.bindHelper(component, subProperty, converter, registrar, uiGetter, initialState));
+      final Binding binding = new Binding(property, component, converter, null);
       bindings.put(property, binding);
+
       return binding;
+  }
+
+  private void trySettingModelProperty(final String property, final Converter converter, final Object uiValue,
+          final Object newValue) {
+    try {
+      proxy.set(property, newValue);
+    } catch (Throwable t) {
+      throw new RuntimeException("Error while setting property [" + property + "] to [" + newValue
+              + "] converted from [" + uiValue + "] with converter [" + converter.getModelType().getName() + " -> "
+              + converter.getComponentType().getName() + "].", t);
+    }
+  }
+
+  private Class<?> getPropertyType(final String property) {
+    if (property.contains(".")) {
+      return getNestedPropertyType(property);
     }
     else if (propertyTypes.containsKey(property)) {
-      converter = findConverter(property, propertyTypes.get(property).getType(), widget, userProvidedConverter);
+      return propertyTypes.get(property).getType();
     }
     else {
       throw new NonExistingPropertyException(property);
     }
+  }
 
-    for (Binding binding : bindings.values()) {
-      if (binding.getWidget().equals(widget) && !property.equals(binding.getProperty())) {
-        throw new WidgetAlreadyBoundException("Widget already bound to property: " + binding.getProperty());
-      }
-    }
+  private Binding bindDirectProperty(final Object component, final String property, final Converter converter,
+          final Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> handlerRegistrar,
+          final Optional<Function<Object, Object>> uiGetter, final StateSync initialState) {
+    checkComponentNotAlreadyBound(component, property);
+    final Binding binding = createBinding(component, property, converter, handlerRegistrar);
+    syncState(component, property, converter, uiGetter, initialState);
 
-    Map<Class <? extends GwtEvent>, HandlerRegistration> handlerMap = addWidgetHandlers(widget, bindOnKeyUp, new ModelUpdater() {
-      @Override
-      public void update(final Object value) {
-        final Object oldValue = proxy.get(property);
-        final Object newValue = converter.toModelValue(value);
-        try {
-          proxy.set(property, newValue);
-        } catch (Throwable t) {
-                  throw new RuntimeException("Error while setting property [" + property + "] to [" + newValue
-                          + "] converted from [" + value + "] with converter [" + converter.getModelType().getName()
-                          + " -> " + converter.getWidgetType().getName() + "].", t);
-                }
-        updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
-      }
-    });
+    return binding;
+  }
 
-    Binding binding = new Binding(property, widget, converter, handlerMap);
+  private Binding createBinding(final Object component, final String property, final Converter converter,
+          final Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> handlerRegistrar) {
+    final Binding binding = new Binding(property, component, converter, handlerRegistrar.get());
     bindings.put(property, binding);
 
     if (propertyTypes.get(property).isList()) {
       proxy.set(property, ensureBoundListIsProxied(property));
     }
-    syncState(widget, property, converter);
 
     return binding;
   }
 
-  private Class<?> getNestedPropertyType(final String property) {
-    final String[] subProperties = property.split("\\.");
-    BindableProxyAgent<?> agent = this;
-    for (int i = 0; i < subProperties.length - 1; i++) {
-      final String subProperty = subProperties[i];
-      final DataBinder binder = Assert.notNull(
-              "Could not find subproperty " + i + ", " + subProperty + ", in " + property,
-              agent.binders.get(subProperty));
-      agent = ((BindableProxy<?>) binder.getModel()).getBindableProxyAgent();
+  private void checkComponentNotAlreadyBound(final Object component, final String property) {
+    for (Binding binding : bindings.values()) {
+      if (binding.getComponent().equals(component) && !property.equals(binding.getProperty())) {
+        throw new ComponentAlreadyBoundException("Widget already bound to property: " + binding.getProperty());
+      }
     }
-    final String lastSubProperty = subProperties[subProperties.length-1];
-
-    return Assert.notNull("Could not find last subproperty, " + lastSubProperty + ", in " + property,
-            agent.propertyTypes.get(lastSubProperty)).getType();
   }
 
-  private Converter findConverter(final String property, final Class<?> propertyType, final Widget widget, final Converter userProvidedConverter) {
-    final Class<?> widgetValueType = Convert.inferWidgetValueType(widget, propertyType);
+  private Class<?> getNestedPropertyType(final String property) {
+    final Map<String, PropertyType> propertyType = ((BindableProxy) createNestedBinder(property).getModel())
+            .getBindableProxyAgent().propertyTypes;
+
+    return Assert.notNull(propertyType.get(property.substring(property.lastIndexOf('.') + 1))).getType();
+  }
+
+  private Converter findConverter(final String property, final Class<?> propertyType, final Object component, final Converter userProvidedConverter) {
+    final Optional<Class<?>> componentValueType;
+
+    if (component instanceof Widget) {
+      componentValueType = Optional.ofNullable(Convert.inferWidgetValueType((Widget) component, propertyType));
+    }
+    else if (isElement(component)) {
+      final Element element = BoundUtil.asElement(component);
+      if (InputElement.is(element)) {
+        componentValueType = Optional.ofNullable(ElementWrapperWidget.getValueClassForInputType(element.getPropertyString("type")));
+      }
+      else if (TextAreaElement.is(element)) {
+        componentValueType = Optional.ofNullable(String.class);
+      }
+      else {
+        componentValueType = Optional.empty();
+      }
+    }
+    else {
+      componentValueType = Optional.empty();
+    }
+
     if (userProvidedConverter != null) {
       validateTypes(property, propertyType, userProvidedConverter.getModelType(), "model");
-      validateTypes(property, widgetValueType, userProvidedConverter.getWidgetType(), "widget");
+      componentValueType.ifPresent(t -> validateTypes(property, t, userProvidedConverter.getComponentType(), "widget"));
 
       return userProvidedConverter;
     }
     else {
-      final Converter<?, ?> converter = Convert.getConverter(propertyType, widgetValueType);
+      final Class<?> effectiveComponentType = componentValueType.orElse(String.class);
+      final Converter<?, ?> converter = Convert.getConverter(propertyType, effectiveComponentType);
 
       if (converter == null) {
         throw new RuntimeException(
-                "Cannot convert between " + propertyType.getName() + " and " + widgetValueType.getName()
+                "Cannot convert between " + propertyType.getName() + " and " + effectiveComponentType.getName()
                         + " for property [" + property + "] in " + proxy.unwrap().getClass().getName());
       }
 
@@ -249,53 +355,123 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Adds the required event handlers to the provided widget. A
-   * {@link ValueChangeHandler} is added by default, a {@link KeyUpHandler} is
-   * added if bindOnKeyUp is true.
+   * Makes a supplier for adding the required event handlers to the provided component. A {@link ValueChangeHandler} is
+   * added by default, a {@link KeyUpHandler} is added if bindOnKeyUp is true.
    *
-   * @param widget
-   *          the bound widget, must not be null.
+   * @param component
+   *          the bound UI component, must not be null.
    * @param bindOnKeyUp
-   *          a flag indicating that the property should be updated when the
-   *          widget fires a {@link com.google.gwt.event.dom.client.KeyUpEvent}
-   *          , in addition to the default
+   *          a flag indicating that the property should be updated when the widget fires a
+   *          {@link com.google.gwt.event.dom.client.KeyUpEvent} , in addition to the default
    *          {@link com.google.gwt.event.logical.shared.ValueChangeEvent}.
-   * @param updater
-   *          A {@link ModelUpdater} that updates the bound property of the
-   *          model in response to UI changes.
-   * @return collection of event handler registrations.
+   * @param uiGetter
+   *          an optional function for extracting the UI component value.
+   * @param modelUpdater
+   *          A {@link Consumer<?>} that updates the bound property of the model in response to UI changes.
+   * @return a supplier that registers handlers and returns a collection of event handler registrations.
    */
-  private Map<Class<? extends GwtEvent>, HandlerRegistration> addWidgetHandlers(final Widget widget,
-                                                              final boolean bindOnKeyUp, final ModelUpdater updater) {
+  private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> addHandlers(
+          final Object component, final boolean bindOnKeyUp, final Optional<Function<Object, Object>> uiGetter,
+          final Consumer<Object> modelUpdater) {
+    checkWidgetHasTextOrValue(component);
 
-    HashMap<Class<? extends GwtEvent>, HandlerRegistration> handlerMap =
-                                                          new HashMap<Class<? extends GwtEvent>, HandlerRegistration>();
+    Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar = () -> new HashMap<>();
 
-    if (widget instanceof HasValue) {
-      final HandlerRegistration valueHandlerReg = ((HasValue) widget).addValueChangeHandler(event -> {
-        final Object value = ((HasValue) widget).getValue();
-        updater.update(value);
-      });
-      handlerMap.put(ValueChangeEvent.class, valueHandlerReg);
+    if (component instanceof HasValue) {
+      registrar = mergeHasValueChangeHandler(component, modelUpdater, registrar);
     }
-    else if (!(widget instanceof HasText) && !(widget instanceof TakesValue)) {
-      throw new RuntimeException("Widget must implement either " + TakesValue.class.getName() + " or "
-              + HasText.class.getName() + "!");
+    else if (isElement(component)) {
+      registrar = mergeNativeChangeEventListener(component, uiGetter, modelUpdater, registrar);
     }
 
     if (bindOnKeyUp) {
-      if (widget instanceof ValueBoxBase) {
-        HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) widget)
-                .addKeyUpHandler(event -> updater.update(((ValueBoxBase) widget).getText()));
-        handlerMap.put(KeyUpEvent.class, keyUpHandlerReg);
+      if (component instanceof ValueBoxBase) {
+        registrar = mergeValueBoxKeyUpHandler(component, modelUpdater, registrar);
       }
       else {
-        throw new RuntimeException("Cannot bind widget " + widget.toString() + " on KeyUpEvents, " + widget.toString()
+        throw new RuntimeException("Cannot bind widget " + component.toString() + " on KeyUpEvents, " + component.toString()
                 + " is not an instance of ValueBoxBase");
       }
     }
 
-    return handlerMap;
+    return registrar;
+  }
+
+  private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeNativeChangeEventListener(
+          final Object component, final Optional<Function<Object, Object>> uiGetter,
+          final Consumer<Object> modelUpdater,
+          Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
+    registrar = mergeToLeft(registrar, () -> {
+      final JavaScriptObject listener = wrap(() ->
+        uiGetter.ifPresent(getter ->
+          modelUpdater.accept(getter.apply(component))));
+      addChangeEventListener(component, listener);
+
+      return Collections.singletonMap(ValueChangeEvent.class, () -> removeChangeEventListener(component, listener));
+    });
+
+    return registrar;
+  }
+
+  private static boolean isElement(Object obj) {
+    return obj instanceof JavaScriptObject && Node.is((JavaScriptObject) obj) && Element.is((Node) obj);
+  }
+
+  private static native JavaScriptObject wrap(Runnable runnable) /*-{
+    return function() {
+      runnable.@java.lang.Runnable::run()();
+    };
+  }-*/;
+
+  private static native void addChangeEventListener(Object element, JavaScriptObject listener) /*-{
+    element.addEventListener("change", listener);
+  }-*/;
+
+  private static native void removeChangeEventListener(Object element, JavaScriptObject listener) /*-{
+    element.removeEventListener("change", listener);
+  }-*/;
+
+  private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeValueBoxKeyUpHandler(
+          final Object component, final Consumer<Object> modelUpdater,
+          Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
+    registrar = mergeToLeft(registrar, () -> {
+      final HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) component)
+              .addKeyUpHandler(event -> modelUpdater.accept(((ValueBoxBase) component).getText()));
+
+      return Collections.singletonMap(KeyUpEvent.class, keyUpHandlerReg);
+    });
+
+    return registrar;
+  }
+
+  private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeHasValueChangeHandler(
+          final Object component, final Consumer<Object> modelUpdater,
+          Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
+    registrar = mergeToLeft(registrar, () -> {
+      final HandlerRegistration valueHandlerReg = ((HasValue) component).addValueChangeHandler(event -> {
+        final Object value = ((HasValue) component).getValue();
+        modelUpdater.accept(value);
+      });
+
+      return Collections.singletonMap(ValueChangeEvent.class, valueHandlerReg);
+    });
+    return registrar;
+  }
+
+  private static void checkWidgetHasTextOrValue(final Object component) {
+    if (component instanceof Widget && !(component instanceof HasText || component instanceof TakesValue)) {
+      throw new RuntimeException(
+              "Widget must implement either " + TakesValue.class.getName() + " or " + HasText.class.getName() + "!");
+    }
+  }
+
+  private static <K, V> Supplier<Map<K, V>> mergeToLeft(final Supplier<Map<K, V>> f, final Supplier<Map<K, V>> g) {
+    return () -> {
+      final Map<K, V> retVal = f.get();
+      retVal.putAll(g.get());
+
+      return retVal;
+    };
   }
 
   /**
@@ -324,10 +500,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (binder == null) {
       if (proxy.get(bindableProperty) == null) {
-        binder = DataBinder.forType(propertyTypes.get(bindableProperty).getType(), initialState);
+        binder = DataBinder.forType(propertyTypes.get(bindableProperty).getType());
       }
       else {
-        binder = DataBinder.forModel(proxy.get(bindableProperty), initialState);
+        binder = DataBinder.forModel(proxy.get(bindableProperty));
       }
       binders.put(bindableProperty, binder);
       for (PropertyChangeHandler<?> handler : propertyChangeHandlerSupport.specificPropertyHandlers.get("**")) {
@@ -335,7 +511,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
     }
     else {
-      binder.setModel(proxy.get(bindableProperty), initialState, true);
+      binder.setModel(proxy.get(bindableProperty), StateSync.FROM_MODEL, true);
     }
     proxy.set(bindableProperty, binder.getModel());
     knownValues.put(bindableProperty, binder.getModel());
@@ -376,7 +552,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         final BindableProxyAgent<T> nestedAgent = ((BindableProxy<T>) binder.getModel()).getBindableProxyAgent();
         final Collection<Binding> nestedBindings = nestedAgent.bindings.get(property.substring(dotPos + 1));
         for (Binding nestedBinding : nestedBindings.toArray(new Binding[nestedBindings.size()])) {
-          if (binding.getWidget() == nestedBinding.getWidget()) {
+          if (binding.getComponent() == nestedBinding.getComponent()) {
             nestedAgent.unbind(nestedBinding);
           }
         }
@@ -407,17 +583,20 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           nestedBinder.setModel(actualValue, StateSync.FROM_MODEL, true);
           proxy.set(property, nestedBinder.getModel());
         }
-        updateWidgetsAndFireEvent(property, knownValue, actualValue);
+        updateWidgetsAndFireEvent(true, property, knownValue, actualValue);
       }
     }
   }
 
   /**
-   * Updates all bound widgets and fires the corresponding
-   * {@link PropertyChangeEvent}.
+   * Updates all bound widgets and fires the corresponding {@link PropertyChangeEvent}.
    *
-   * @param <P>
+   * @param
+   *          <P>
    *          The property type of the changed property.
+   * @param sync
+   *          True if a {@link BindableListChangeHandler} component bound to a list should have it's value set via
+   *          {@link TakesValue#setValue(Object)}.
    * @param property
    *          The name of the property that changed. Must not be null.
    * @param oldValue
@@ -425,8 +604,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param newValue
    *          The new value of the property.
    */
-  <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue) {
-    updateWidgetsAndFireEvent(property, oldValue, newValue, null);
+  <P> void updateWidgetsAndFireEvent(final boolean sync, final String property, final P oldValue, final P newValue) {
+    updateWidgetsAndFireEvent(sync, property, oldValue, newValue, null);
   }
 
   /**
@@ -435,6 +614,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *
    * @param <P>
    *          The property type of the changed property.
+   * @param sync
+   *          True if a {@link BindableListChangeHandler} component bound to a list should have it's value set via
+   *          {@link TakesValue#setValue(Object)}.
    * @param property
    *          The name of the property that changed.
    * @param oldValue
@@ -445,36 +627,56 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          A widget reference that does not need to be updated (the origin of
    *          the value change event).
    */
-  private <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue,
-          final Widget excluding) {
+  private <P> void updateWidgetsAndFireEvent(final boolean sync, final String property, final P oldValue, final P newValue,
+          final Object excluding) {
 
     for (Binding binding : bindings.get(property)) {
-      final Widget widget = binding.getWidget();
+      final Object component = binding.getComponent();
       final Converter converter = binding.getConverter();
 
-      if (widget == excluding)
+      if (component == excluding)
         continue;
 
-      if (widget instanceof TakesValue) {
-        TakesValue hv = (TakesValue) widget;
-        Object widgetValue = converter.toWidgetValue(newValue);
-        hv.setValue(widgetValue);
+      if (!sync && binding.propertyIsList() && component instanceof BindableListChangeHandler)
+        continue;
+
+      if (component instanceof TakesValue) {
+        updateComponentValue(newValue, (TakesValue) component, converter);
       }
-      else if (widget instanceof HasText) {
-        HasText ht = (HasText) widget;
-        assert String.class.equals(converter.getWidgetType());
-        Object widgetValue = converter.toWidgetValue(newValue);
-        ht.setText((String) widgetValue);
+      else if (component instanceof HasText) {
+        updateComponentValue(newValue, (HasText) component, converter);
+      }
+      else if (isElement(component)) {
+        final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(BoundUtil.asElement(component));
+        if (wrapper instanceof TakesValue) {
+          updateComponentValue(newValue, (TakesValue) wrapper, converter);
+        }
+        else if (wrapper instanceof HasText) {
+          updateComponentValue(newValue, (HasText) wrapper, converter);
+        }
       }
     }
 
-    firePropertyChangeEvent(property, oldValue, newValue);
+    maybeFirePropertyChangeEvent(property, oldValue, newValue);
+  }
+
+  private <P> void updateComponentValue(final P newValue, final HasText component, final Converter converter) {
+    assert String.class.equals(converter.getComponentType());
+    Object widgetValue = converter.toWidgetValue(newValue);
+    component.setText((String) widgetValue);
+  }
+
+  private <P> void updateComponentValue(final P newValue, final TakesValue component, final Converter converter) {
+    Object widgetValue = converter.toWidgetValue(newValue);
+    component.setValue(widgetValue);
   }
 
   /**
-   * Fires a property change event.
+   * Fires a property change event unless the property is {@code "this"}. The {@code "this"} property is only fired for
+   * types with no other properties.
    *
-   * @param <P>
+   * @param
+   *          <P>
    *          The property type of the changed property.
    * @param property
    *          The name of the property that changed. Must not be null.
@@ -482,47 +684,57 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          The old value of the property.
    * @param newValue
    *          The new value of the property.
+   * @return true Iff property change handlers were notified for this type.
    */
-  private <P> void firePropertyChangeEvent(final String property, final P oldValue, final P newValue) {
+  private <P> boolean maybeFirePropertyChangeEvent(final String property, final P oldValue, final P newValue) {
     knownValues.put(property, newValue);
 
     PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, Assert.notNull(property), oldValue, newValue);
-    propertyChangeHandlerSupport.notifyHandlers(event);
+
+    if (!"this".equals(property) || propertyTypes.size() == 1) {
+      propertyChangeHandlerSupport.notifyHandlers(event);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   /**
-   * Synchronizes the state of the provided widgets and model property based on
-   * the value of the provided {@link StateSync}.
+   * Synchronizes the state of the provided widgets and model property based on the value of the provided
+   * {@link StateSync}.
    *
-   * @param widget
+   * @param component
    *          The widget to synchronize. Must not be null.
    * @param property
-   *          The name of the model property that should be synchronized. Must
-   *          not be null.
+   *          The name of the model property that should be synchronized. Must not be null.
    * @param converter
-   *          The converter specified for the property binding. Null allowed.
+   *          The converter specified for the property binding. Must not be null.
+   * @param uiGetter
+   *          An optional function for getting the value from the UI component. Must not be null.
+   * @param initialState
+   *          If {@link StateSync#FROM_MODEL} the UI value will be updated from the model. If {@link StateSync#FROM_UI}
+   *          the model value will be updated from the UI. If null no synchronization is performed.
    */
-  private void syncState(final Widget widget, final String property, final Converter converter) {
-    Assert.notNull(widget);
+  private void syncState(final Object component, final String property, final Converter converter,
+          final Optional<Function<Object, Object>> uiGetter, final StateSync initialState) {
+    Assert.notNull(component);
     Assert.notNull(property);
 
     if (initialState != null) {
-      Object value = proxy.get(property);
-      if (widget instanceof TakesValue) {
-        value = initialState.getInitialValue(value, ((TakesValue) widget).getValue());
-      }
-      else if (widget instanceof HasText) {
-        value = initialState.getInitialValue(value, ((HasText) widget).getText());
-      }
+      final Object modelValue = proxy.get(property);
+      final Optional<Object> uiValue = uiGetter.map(f -> f.apply(component));
+
+      final Object value = uiValue.map(v -> initialState.getInitialValue(modelValue, v)).orElse(modelValue);
 
       if (initialState == StateSync.FROM_MODEL) {
-        updateWidgetsAndFireEvent(property, knownValues.get(property), value);
+        updateWidgetsAndFireEvent(true, property, knownValues.get(property), value);
       }
       else if (initialState == StateSync.FROM_UI) {
         Object newValue = converter.toModelValue(value);
         proxy.set(property, newValue);
-        firePropertyChangeEvent(property, knownValues.get(property), newValue);
-        updateWidgetsAndFireEvent(property, knownValues.get(property), newValue, widget);
+        maybeFirePropertyChangeEvent(property, knownValues.get(property), newValue);
+        updateWidgetsAndFireEvent(true, property, knownValues.get(property), newValue, component);
       }
     }
   }
@@ -538,8 +750,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *         proxied
    */
   private List ensureBoundListIsProxied(String property) {
-    List newList = ensureBoundListIsProxied(property, (List) proxy.get(property));
-    updateWidgetsAndFireEvent(property, proxy.get(property), newList);
+    final List oldList = (List) proxy.get(property);
+    final List newList = ensureBoundListIsProxied(property, oldList);
+    if (oldList != newList)
+      updateWidgetsAndFireEvent(true, property, proxy.get(property), newList);
+
     return newList;
   }
 
@@ -558,33 +773,23 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   List ensureBoundListIsProxied(final String property, final List list) {
     if (!(list instanceof BindableListWrapper) && bindings.containsKey(property) && list != null) {
       final BindableListWrapper newList = new BindableListWrapper(list);
-      newList.addChangeHandler(new UnspecificListChangeHandler() {
+      modelChangeHandlers.add(newList.addChangeHandler(new UnspecificListChangeHandler() {
         @Override
         void onListChanged(List oldList) {
-          updateWidgetsAndFireEvent(property, oldList, newList);
+          updateWidgetsAndFireEvent(false, property, oldList, newList);
         }
-      });
+      }));
+
+      for (final Binding binding : bindings.get(property)) {
+        if (binding.getComponent() instanceof BindableListChangeHandler) {
+          modelChangeHandlers.add(newList.addChangeHandler((BindableListChangeHandler) binding.getComponent()));
+        }
+      }
 
       return newList;
     }
 
     return list;
-  }
-
-  /**
-   * Returns the {@link StateSync} configured when the proxy was created.
-   *
-   * @return initial state, can be null.
-   */
-  public StateSync getInitialState() {
-    return initialState;
-  }
-
-  /**
-   * Configures the {@link StateSync}.
-   */
-  public void setInitialState(StateSync initialState) {
-    this.initialState = initialState;
   }
 
   /**
@@ -694,22 +899,26 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Compares property values between this agent and the provided agent
-   * recursively and fires {@link PropertyChangeEvent}s for all differences.
+   * Compares property values between this agent and the provided agent recursively and fires
+   * {@link PropertyChangeEvent}s for all differences.
    *
    * @param other
    *          the agent to compare against.
+   * @param initialState
+   *          If {@link StateSync#FROM_MODEL} the state from this agent's model overrides the other. If
+   *          {@link StateSync#FROM_UI} the state from the other agent's model overrides this one. If null, default to
+   *          {@link StateSync#FROM_MODEL}.
    */
-  public void fireChangeEvents(BindableProxyAgent other) {
+  public void fireChangeEvents(BindableProxyAgent other, final StateSync initialState) {
     for (String property : propertyTypes.keySet()) {
       final Object curValue,
                    oldValue,
                    thisValue = knownValues.get(property),
                    otherValue = other.knownValues.get(property);
 
-      final StateSync initalState = (getInitialState() != null ? getInitialState() : StateSync.FROM_MODEL);
-      curValue = initalState.getInitialValue(thisValue, otherValue);
-      oldValue = initalState.getInitialValue(otherValue, thisValue);
+      final StateSync state = (initialState != null ? initialState : StateSync.FROM_MODEL);
+      curValue = state.getInitialValue(thisValue, otherValue);
+      oldValue = state.getInitialValue(otherValue, thisValue);
 
       if ((curValue == null && oldValue != null) || (curValue != null && !curValue.equals(oldValue))) {
 
@@ -718,11 +927,26 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         if (nestedBinder != null && otherNestedBinder != null) {
           BindableProxyAgent nestedAgent = ((BindableProxy<T>) nestedBinder.getModel()).getBindableProxyAgent();
           BindableProxyAgent otherNestedAgent = ((BindableProxy<T>) otherNestedBinder.getModel()).getBindableProxyAgent();
-          nestedAgent.fireChangeEvents(otherNestedAgent);
+          nestedAgent.fireChangeEvents(otherNestedAgent, state);
         }
 
-        firePropertyChangeEvent(property, oldValue, curValue);
+        maybeFirePropertyChangeEvent(property, oldValue, curValue);
       }
     }
+  }
+
+  public void clearModelHandlers() {
+    for (final HandlerRegistration reg : modelChangeHandlers) {
+      reg.removeHandler();
+    }
+    modelChangeHandlers.clear();
+
+    for (final DataBinder<?> binder : binders.values()) {
+      getAgent(binder).clearModelHandlers();
+    }
+  }
+
+  private static BindableProxyAgent<?> getAgent(final DataBinder<?> binder) {
+    return ((BindableProxy<?>) binder.getModel()).getBindableProxyAgent();
   }
 }

@@ -14,40 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
-
-import org.jboss.errai.databinding.client.api.Converter;
+package org.jboss.errai.common.client.function;
 
 /**
+ * A temporary replacement for java.util.function.BiConsumer until it is implemented for GWT.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class IdentityConverter<T> implements Converter<T, T> {
+@FunctionalInterface
+public interface BiConsumer<T, U> {
 
-  private final Class<T> type;
+  void accept(T t, U u);
 
-  public IdentityConverter(final Class<T> type) {
-    this.type = type;
-  }
-
-  @Override
-  public Class<T> getModelType() {
-    return type;
-  }
-
-  @Override
-  public Class<T> getComponentType() {
-    return type;
-  }
-
-  @Override
-  public T toModelValue(T widgetValue) {
-    return widgetValue;
-  }
-
-  @Override
-  public T toWidgetValue(T modelValue) {
-    return modelValue;
+  default BiConsumer<T, U> andThen(final BiConsumer<? super T, ? super U> other) {
+    return (t, u) -> {
+      accept(t, u);
+      other.accept(t, u);
+    };
   }
 
 }

@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2011 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
+package org.jboss.errai.common.client.function;
 
 /**
- * Thrown to indicate that a widget could not be bound to a model property because it is already bound to a property of
- * the same model instance.
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
+ * A temporary replacement for java.util.function.BiFunction until it is implemented for GWT.
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-@SuppressWarnings("serial")
-public class WidgetAlreadyBoundException extends RuntimeException {
+@FunctionalInterface
+public interface BiFunction<T, U, R> {
 
-  public WidgetAlreadyBoundException(String message) {
-    super(message);
+  R apply(T t, U u);
+
+  default <S> BiFunction<T, U, S> andThen(final Function<R, S> f) {
+    return (t, u) -> f.apply(apply(t, u));
   }
 
 }

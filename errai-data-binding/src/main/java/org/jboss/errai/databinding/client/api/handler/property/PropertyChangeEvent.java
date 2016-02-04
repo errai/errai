@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client.api;
+package org.jboss.errai.databinding.client.api.handler.property;
 
 /**
  * Dispatched when a bound property has changed.
@@ -64,10 +64,16 @@ public class PropertyChangeEvent<T> {
 
   /**
    * Gets the object on which the Event initially occurred.
-   * 
+   *
    * @return the source object.
    */
   public Object getSource() {
     return source;
+  }
+
+  @Override
+  public String toString() {
+    return "[property=" + propertyName + ", source=" + source.toString() + ", oldValue=" + oldValue + ", newValue="
+            + newValue + "]";
   }
 }

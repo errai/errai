@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
+package org.jboss.errai.databinding.client.api.handler.property;
 
 /**
- * {@link PropertyChangeHandler} for testing purposes.
+ * A {@link PropertyChangeEvent} gets dispatched when any property of a bound bean is changed.
  *
  * @author David Cracauer <dcracauer@gmail.com>
  */
-@SuppressWarnings("rawtypes")
-public class MockHandler implements PropertyChangeHandler {
-  List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
+public interface PropertyChangeHandler<T> {
 
-  @Override
-  public void onPropertyChange(PropertyChangeEvent event) {
-    events.add(event);
-  }
+  /**
+   * Called when {@link PropertyChangeEvent} is dispatched.
+   *
+   * @param event
+   *          the {@link PropertyChangeEvent} that was dispatched.
+   */
+  public void onPropertyChange(PropertyChangeEvent<T> event);
 
-  public List<PropertyChangeEvent> getEvents() {
-    return events;
-  }
 }

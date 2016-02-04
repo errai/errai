@@ -20,16 +20,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
-import org.jboss.errai.databinding.client.api.StateSync;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
+
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Wraps a List<M> to notify change handlers of all operations that mutate the underlying list.
@@ -40,16 +42,22 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
  * @param <M>
  */
 @SuppressWarnings("unchecked")
-public class BindableListWrapper<M> implements List<M> {
+public class BindableListWrapper<M> implements List<M>, BindableProxy<List<M>> {
 
-  private final List<M> list;
-  private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
+  private List<M> list;
+
+  /*
+   * Must be identity set so that ListWidget is not added as a handler twice when using declarative binding.
+   */
+  private final Collection<BindableListChangeHandler<M>> handlers = Collections.newSetFromMap(new IdentityHashMap<>());
 
   private final Map<BindableProxyAgent<?>, PropertyChangeHandler<?>> elementChangeHandlers =
           new HashMap<BindableProxyAgent<?>, PropertyChangeHandler<?>>();
 
   private final Map<PropertyChangeHandler<?>, PropertyChangeUnsubscribeHandle> unsubscribeHandlesByHandler =
           new HashMap<PropertyChangeHandler<?>, PropertyChangeUnsubscribeHandle>();
+
+  private final BindableProxyAgent<List<M>> agent;
 
   public BindableListWrapper(List<M> list) {
     Assert.notNull(list);
@@ -58,6 +66,9 @@ public class BindableListWrapper<M> implements List<M> {
     for (int i = 0; i < this.list.size(); i++) {
       this.list.set(i, (M) convertToProxy(this.list.get(i)));
     }
+
+    agent = new BindableProxyAgent<List<M>>(this, list);
+    agent.propertyTypes.put("this", new PropertyType(List.class, true, true));
   }
 
   @Override
@@ -213,7 +224,7 @@ public class BindableListWrapper<M> implements List<M> {
   public boolean removeAll(Collection<?> c) {
     final List<M> oldValue = new ArrayList<M>(list);
 
-    List<Integer> indexes = new ArrayList<Integer>();
+    final List<Integer> indexes = new ArrayList<Integer>();
     for (Object m : c) {
       m = convertToProxy(m);
       Integer index = list.indexOf(m);
@@ -223,12 +234,14 @@ public class BindableListWrapper<M> implements List<M> {
     }
     Collections.sort(indexes, Collections.reverseOrder());
 
-    boolean b = list.removeAll(c);
+    final boolean b = list.removeAll(c);
     if (b) {
       for (BindableListChangeHandler<M> handler : handlers) {
         handler.onItemsRemovedAt(oldValue, indexes);
       }
-      removeElementChangeHandlers();
+      for (final Object m : c) {
+        removeElementChangeHandler(convertToProxy(m));
+      }
     }
     return b;
   }
@@ -275,18 +288,20 @@ public class BindableListWrapper<M> implements List<M> {
     return list.toArray(a);
   }
 
-  public void addChangeHandler(BindableListChangeHandler<M> handler) {
+  /**
+   * @param handler
+   *          If this handler has already been added, it will not be added again.
+   */
+  public HandlerRegistration addChangeHandler(final BindableListChangeHandler<M> handler) {
     Assert.notNull(handler);
     handlers.add(handler);
-  }
 
-  public void removeChangeHandler(BindableListChangeHandler<M> handler) {
-    handlers.remove(handler);
+    return () -> handlers.remove(handler);
   }
 
   private Object convertToProxy(Object element) {
     if (BindableProxyFactory.isBindableType(element)) {
-      element = BindableProxyFactory.getBindableProxy(element, StateSync.FROM_MODEL);
+      element = BindableProxyFactory.getBindableProxy(element);
       final BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getBindableProxyAgent();
 
       if (!elementChangeHandlers.containsKey(agent)) {
@@ -352,6 +367,11 @@ public class BindableListWrapper<M> implements List<M> {
   @Override
   public boolean equals(Object obj) {
    return list.equals(obj);
+  }
+
+  @Override
+  public String toString() {
+    return list.toString();
   }
 
   /**
@@ -433,5 +453,60 @@ public class BindableListWrapper<M> implements List<M> {
         handler.onItemAddedAt(oldValue, index, e);
       }
     }
+  }
+
+  @Override
+  public Object unwrap() {
+    return list;
+  }
+
+  @Override
+  public Object get(String propertyName) {
+    if ("this".equals(propertyName)) {
+      return list;
+    }
+    else {
+      throw new NonExistingPropertyException(propertyName);
+    }
+  }
+
+  @Override
+  public void set(String propertyName, Object value) {
+    if ("this".equals(propertyName)) {
+      list = (List<M>) value;
+    }
+    else {
+      throw new NonExistingPropertyException(propertyName);
+    }
+  }
+
+  @Override
+  public Map<String, PropertyType> getBeanProperties() {
+    return Collections.emptyMap();
+  }
+
+  @Override
+  public BindableProxyAgent<List<M>> getBindableProxyAgent() {
+    return agent;
+  }
+
+  @Override
+  public void updateWidgets() {
+    agent.updateWidgetsAndFireEvents();
+  }
+
+  @Override
+  public List<M> deepUnwrap() {
+    final List<M> unwrapped = new ArrayList<>(list.size());
+
+    for (M m : list) {
+      if (m instanceof BindableProxy) {
+        m = ((BindableProxy<M>) m).deepUnwrap();
+      }
+
+      unwrapped.add(m);
+    }
+
+    return unwrapped;
   }
 }

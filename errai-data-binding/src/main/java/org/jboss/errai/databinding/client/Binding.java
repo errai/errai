@@ -16,12 +16,14 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.List;
 import java.util.Map;
+
 import org.jboss.errai.databinding.client.api.Converter;
+
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Represents the binding of a bean property to a widget and holds all relevant binding-specific
@@ -32,15 +34,15 @@ import com.google.gwt.user.client.ui.Widget;
 public final class Binding {
 
   private final String property;
-  private final Widget widget;
+  private final Object component;
   private final Converter<?, ?> converter;
   private final Map<Class<? extends GwtEvent>, HandlerRegistration> handlerMap;
   private final boolean needsKeyUpBinding;
 
-  public Binding(String property, Widget widget, Converter<?, ?> converter,
+  public Binding(String property, Object component, Converter<?, ?> converter,
                   Map<Class<? extends GwtEvent>, HandlerRegistration> handlerMap) {
     this.property = property;
-    this.widget = widget;
+    this.component = component;
     this.converter = converter;
     this.handlerMap = handlerMap;
     needsKeyUpBinding = (handlerMap != null && handlerMap.containsKey(KeyUpEvent.class));
@@ -54,8 +56,8 @@ public final class Binding {
     return converter;
   }
 
-  public Widget getWidget() {
-    return widget;
+  public Object getComponent() {
+    return component;
   }
 
   public Map<Class<? extends GwtEvent>, HandlerRegistration> getHandlerMap() {
@@ -74,11 +76,15 @@ public final class Binding {
 
   @Override
   public String toString() {
-    return "Binding [property=" + property + ", widget=" + widget + "]";
+    return "Binding [property=" + property + ", widget=" + component + "]";
   }
 
   public boolean needsKeyUpBinding() {
     return needsKeyUpBinding;
+  }
+
+  public boolean propertyIsList() {
+    return List.class.equals(converter.getModelType());
   }
 
 }

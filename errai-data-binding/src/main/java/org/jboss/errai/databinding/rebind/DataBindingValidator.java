@@ -16,12 +16,14 @@
 
 package org.jboss.errai.databinding.rebind;
 
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
  * Validation utilities for data binding.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
@@ -32,17 +34,22 @@ public class DataBindingValidator {
   /**
    * Returns true if and only if the given property chain is a valid property expression rooted in the given bindable
    * type.
-   * 
+   *
    * @param bindableType
    *          The root type the given property chain is resolved against. Not null.
    * @param propertyChain
    *          The data binding property chain to validate. Not null.
    * @return True if the given property chain is resolvable from the given bindable type.
    */
-  public static boolean isValidPropertyChain(MetaClass bindableType, String propertyChain) {
-    if (!bindableType.isAnnotationPresent(Bindable.class) && 
-        !DataBindingUtil.getConfiguredBindableTypes().contains(bindableType)) {
+  public static boolean isValidPropertyChain(final MetaClass bindableType, final String propertyChain) {
+    if (!bindableType.isAnnotationPresent(Bindable.class) &&
+        !DataBindingUtil.getConfiguredBindableTypes().contains(bindableType) &&
+        !bindableType.getFullyQualifiedName().equals(List.class.getName())) {
       return false;
+    }
+
+    if ("this".equals(propertyChain)) {
+      return true;
     }
 
     int dotPos = propertyChain.indexOf(".");
@@ -57,6 +64,30 @@ public class DataBindingValidator {
       }
       MetaClass propertyType = bindableType.getBeanDescriptor().getPropertyType(thisProperty);
       return  isValidPropertyChain(propertyType, moreProperties);
+    }
+  }
+
+  /**
+   * @param bindableType
+   *          The root type the given property chain is resolved against. Not null.
+   * @param propertyChain
+   *          The data binding property chain to validate. Not null.
+   * @return The type of the given property within the given bindable type.
+   */
+  public static MetaClass getPropertyType(final MetaClass bindableType, final String propertyChain) {
+    if ("this".equals(propertyChain)) {
+      return bindableType;
+    }
+
+    final int dotPos = propertyChain.indexOf('.');
+    if (dotPos >= 0) {
+      final String firstProp = propertyChain.substring(0, dotPos);
+      final String subChain = propertyChain.substring(dotPos+1);
+
+      return getPropertyType(bindableType.getBeanDescriptor().getPropertyType(firstProp), subChain);
+    }
+    else {
+      return bindableType.getBeanDescriptor().getPropertyType(propertyChain);
     }
   }
 }

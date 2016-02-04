@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;

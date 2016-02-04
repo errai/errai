@@ -22,30 +22,37 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
- * Contract for converters that perform model value to widget value transformations and vice versa.
+ * Contract for converters that perform model value to component value transformations and vice versa.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  *
  * @param <M>
  *          The type of the model value (field type of the model)
- * @param <W>
- *          The type of the widget value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
+ * @param <C>
+ *          The type of the component value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
  *          {@link Checkbox} (=HasValue&lt;Boolean&gt;)))
  */
-public interface Converter<M, W> {
+public interface Converter<M, C> {
 
+  /**
+   * @return The type of the model value.
+   */
   public Class<M> getModelType();
 
-  public Class<W> getWidgetType();
+  /**
+   * @return The type of the component value.
+   */
+  public Class<C> getComponentType();
 
   /**
    * Converts the provided widget value to a model value of type &lt;M&gt;.
    *
-   * @param widgetValue
-   *          the widget value to convert, may be null.
+   * @param componentValue
+   *          the component value to convert, may be null.
    * @return converted value for the model.
    */
-  public M toModelValue(W widgetValue);
+  public M toModelValue(C componentValue);
 
   /**
    * Converts the provided model value to a value usable by widgets of type {@link HasValue HasValue&lt;W&gt;} or
@@ -53,7 +60,7 @@ public interface Converter<M, W> {
    *
    * @param modelValue
    *          the model value to convert, may be null.
-   * @return converted value for the widget.
+   * @return converted value for the component.
    */
-  public W toWidgetValue(M modelValue);
+  public C toWidgetValue(M modelValue);
 }

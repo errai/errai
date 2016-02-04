@@ -16,7 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 
 /**
  * A handle for unsubscribing {@link PropertyChangeHandler

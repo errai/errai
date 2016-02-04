@@ -19,6 +19,7 @@ package org.jboss.errai.databinding.client;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -34,7 +35,7 @@ public class InjectedDataBinderModuleBoundOnKeyUp {
 
   @PostConstruct
   public void init() {
-    dataBinder.bind(nameTextBox, "name", null, true);
+    dataBinder.bind(nameTextBox, "name", null, StateSync.FROM_MODEL, true);
   }
 
   public TextBox getNameTextBox() {

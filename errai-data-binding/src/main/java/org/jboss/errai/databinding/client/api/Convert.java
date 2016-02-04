@@ -47,6 +47,7 @@ import com.google.gwt.user.datepicker.client.DatePicker;
  * Type conversion utility used by the generated {@link Bindable} proxies.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 public class Convert {
 
@@ -201,11 +202,16 @@ public class Convert {
   private static final Map<ConverterRegistrationKey, Converter> defaultConverters =
       new HashMap<ConverterRegistrationKey, Converter>();
 
+  /**
+   * Lookup a default converter.
+   *
+   * @return A {@link Converter} between the given types, or else {@code null} if no such default converter exists.
+   */
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public static <M, W> Converter<M, W> getConverter(final Class<M> modelValueType, final Class<W> widgetValueType) {
-    Converter converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, widgetValueType));
+  public static <M, W> Converter<M, W> getConverter(final Class<M> modelValueType, final Class<W> componentValueType) {
+    Converter converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, componentValueType));
     if (converter == null) {
-      converter = maybeCreateBuiltinConverter(modelValueType, widgetValueType);
+      converter = maybeCreateBuiltinConverter(modelValueType, componentValueType);
     }
 
     return converter;
@@ -266,6 +272,15 @@ public class Convert {
     }
 
     return new IdentityConverter(targetType);
+  }
+
+  /**
+   * Return an converter that does not modify model or component values.
+   */
+  public static <T> Converter<T, T> identityConverter(final Class<T> type) {
+    IdentityConverter<T> idOneWay = new IdentityConverter<>(type);
+
+    return TwoWayConverter.createConverter(idOneWay, idOneWay);
   }
 
   /**

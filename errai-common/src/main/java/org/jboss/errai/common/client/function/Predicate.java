@@ -14,40 +14,36 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
-
-import org.jboss.errai.databinding.client.api.Converter;
+package org.jboss.errai.common.client.function;
 
 /**
+ * A temporary replacement for java.util.function.Predicate until it is implemented for GWT.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class IdentityConverter<T> implements Converter<T, T> {
+public interface Predicate<T> {
 
-  private final Class<T> type;
+  boolean test(T value);
 
-  public IdentityConverter(final Class<T> type) {
-    this.type = type;
+  default Predicate<T> negate() {
+    return t -> !test(t);
   }
 
-  @Override
-  public Class<T> getModelType() {
-    return type;
+  default Predicate<T> and(final Predicate<T> pred) {
+    return t -> test(t) && pred.test(t);
   }
 
-  @Override
-  public Class<T> getComponentType() {
-    return type;
+  default Predicate<T> or(final Predicate<T> pred) {
+    return t -> test(t) || pred.test(t);
   }
 
-  @Override
-  public T toModelValue(T widgetValue) {
-    return widgetValue;
-  }
-
-  @Override
-  public T toWidgetValue(T modelValue) {
-    return modelValue;
+  static <T> Predicate<T> isEqualTo(Object value) {
+    if (value == null) {
+      return t -> t == null;
+    }
+    else {
+      return t -> value.equals(t);
+    }
   }
 
 }

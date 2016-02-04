@@ -65,7 +65,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
@@ -99,7 +99,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
@@ -136,7 +136,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
@@ -175,13 +175,13 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
 
     Label label = new Label();
-    TestModel model = DataBinder.forModel(new TestModel(), StateSync.FROM_MODEL)
+    TestModel model = DataBinder.forModel(new TestModel())
       .bind(label, "age", converter).getModel();
 
     model.setAge(123);
@@ -207,7 +207,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
@@ -243,7 +243,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
@@ -295,7 +295,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
@@ -318,7 +318,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
@@ -352,24 +352,24 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
       }
 
       @Override
-      public Class<String> getWidgetType() {
+      public Class<String> getComponentType() {
         return String.class;
       }
     };
 
     TextBox textBox = new TextBox();
     textBox.setValue("123");
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, StateSync.FROM_UI).bind(textBox, "age", converter);
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "age", converter, StateSync.FROM_UI);
     assertEquals("Model not initialized based on widget's state", Integer.valueOf(1701), binder.getModel().getAge());
 
     TestModel model = new TestModel();
     model.setAge(123);
-    DataBinder.forModel(model, StateSync.FROM_MODEL).bind(textBox, "name", new IdentityConverter<String>(String.class) {
+    DataBinder.forModel(model).bind(textBox, "name", new IdentityConverter<String>(String.class) {
       @Override
       public String toWidgetValue(String modelValue) {
         return "customConverter";
       }
-    });
+    }, StateSync.FROM_MODEL);
     assertEquals("Model not initialized based on widget's state", "customConverter", textBox.getValue());
   }
 

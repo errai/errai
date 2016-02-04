@@ -16,49 +16,65 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.databinding.client.api.StateSync;
 
 /**
  * Provides access to the generated proxies for {@link Bindable} types.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 public class BindableProxyFactory {
   private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders = new HashMap<Class<?>, BindableProxyProvider>();
   private static Map<String, Class<?>> bindableTypes = new HashMap<String, Class<?>>();
+  private static Map<Class<?>, BindableProxyProvider> builtinProxyProviders = new HashMap<Class<?>, BindableProxyProvider>();
   private static Map<Object, BindableProxy<?>> proxies = new IdentityHashMap<Object, BindableProxy<?>>();
+
+  static {
+    builtinProxyProviders.put(List.class, new BindableProxyProvider() {
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public BindableProxy<?> getBindableProxy(final Object model) {
+        return new BindableListWrapper<Object>((List<Object>) model);
+      }
+
+      @Override
+      public BindableProxy<?> getBindableProxy() {
+        return new BindableListWrapper<>(new ArrayList<>());
+      }
+    });
+  }
 
   /**
    * Returns a new proxy for the provided model instance. Changes to the proxy's state will result
-   * in updates on the widget given the corresponding property was bound (see
-   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
-   * 
+   * in updates on the widget given the corresponding property was bound.
+   *
    * @param <T>
    *          the bindable type
    * @param model
    *          The model instance to proxy.
-   * @param state
-   *          Specifies the origin of the initial state of both model and UI widget.
-   * 
    * @return proxy that can be used in place of the model instance.
    */
   @SuppressWarnings("unchecked")
-  public static <T> T getBindableProxy(T model, StateSync state) {
+  public static <T> T getBindableProxy(T model) {
     if (model instanceof BindableProxy)
       return model;
 
     BindableProxy<?> proxy = proxies.get(model);
     if (proxy == null) {
-      final BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
-      proxy = proxyProvider.getBindableProxy(model, state);
+      final Class<? extends Object> modelClass = (model instanceof List ? List.class : model.getClass());
+      final BindableProxyProvider proxyProvider = getBindableProxyProvider(modelClass);
+      proxy = proxyProvider.getBindableProxy(model);
       if (proxy == null) {
-        throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
+        throw new RuntimeException("No proxy instance provided for bindable type: " + modelClass.getName());
       }
       proxies.put(model, proxy);
     }
@@ -67,54 +83,35 @@ public class BindableProxyFactory {
 
   /**
    * Returns a proxy for a newly created model instance of the provided type. Changes to the proxy's
-   * state will result in updates on the widget given the corresponding property was bound (see
-   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
-   * 
+   * state will result in updates on the component given the corresponding property was bound.
+   *
    * @param bindableType
    *          the bindable type
-   * @param state
-   *          Specifies the origin of the initial state of both model and UI widget.
    * @return proxy that can be used in place of the model instance.
    */
   @SuppressWarnings("unchecked")
-  public static <T> T getBindableProxy(Class<T> bindableType, StateSync state) {
+  public static <T> T getBindableProxy(Class<T> bindableType) {
     final BindableProxyProvider proxyProvider = getBindableProxyProvider(bindableType);
 
-    final BindableProxy<?> proxy = proxyProvider.getBindableProxy(state);
+    final BindableProxy<?> proxy = proxyProvider.getBindableProxy();
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + bindableType.getName());
     }
 
     return (T) proxy;
   }
-  
+
   /**
    * Returns a proxy for a newly created model instance of the provided type. Changes to the proxy's
-   * state will result in updates on the widget given the corresponding property was bound (see
-   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
-   * 
+   * state will result in updates on the widget given the corresponding property was bound.
+   *
    * @param bindableType
    *          The fully qualified name of the bindable type
    * @return proxy that can be used in place of the model instance.
    */
   public static BindableProxy<?> getBindableProxy(String bindableType) {
-    return getBindableProxy(bindableType, StateSync.FROM_MODEL);
-  }
-  
-  /**
-   * Returns a proxy for a newly created model instance of the provided type. Changes to the proxy's
-   * state will result in updates on the widget given the corresponding property was bound (see
-   * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
-   * 
-   * @param bindableType
-   *          The fully qualified name of the bindable type
-   * @param state
-   *          Specifies the origin of the initial state of both model and UI widget.
-   * @return proxy that can be used in place of the model instance.
-   */
-  public static BindableProxy<?> getBindableProxy(String bindableType, StateSync state) {
     final Class<?> bindableClass = bindableTypes.get(bindableType);
-    return (BindableProxy<?>) getBindableProxy(bindableClass, state);
+    return (BindableProxy<?>) getBindableProxy(bindableClass);
   }
 
   private static BindableProxyProvider getBindableProxyProvider(Class<?> bindableType) {
@@ -122,7 +119,10 @@ public class BindableProxyFactory {
       throw new RuntimeException("There are no proxy providers for bindable types registered yet.");
     }
 
-    final BindableProxyProvider proxyProvider = bindableProxyProviders.get(bindableType);
+    BindableProxyProvider proxyProvider = bindableProxyProviders.get(bindableType);
+    if (proxyProvider == null) {
+      proxyProvider = builtinProxyProviders.get(bindableType);
+    }
     if (proxyProvider == null) {
       throw new RuntimeException("No proxy provider found for bindable type: " + bindableType.getName());
     }
@@ -133,7 +133,7 @@ public class BindableProxyFactory {
   /**
    * Registers a generated bindable proxy. This method is called by the generated
    * BindableProxyLoader.
-   * 
+   *
    * @param proxyType
    *          The bindable type, must not be null.
    * @param proxyProvider
@@ -150,7 +150,7 @@ public class BindableProxyFactory {
   /**
    * Remove the cached proxy for the provided model instance. A future lookup will cause the
    * creation of a new proxy instance.
-   * 
+   *
    * @param <T>
    *          the bindable type
    * @param model
@@ -163,7 +163,7 @@ public class BindableProxyFactory {
   /**
    * Checks if the type of the provided model is bindable. That's the case when a proxy provider has
    * been generated for that type (the type has been annotated or configured to be bindable).
-   * 
+   *
    * @param model
    *          the object to be checked.
    * @return true if the object is bindable, otherwise false.

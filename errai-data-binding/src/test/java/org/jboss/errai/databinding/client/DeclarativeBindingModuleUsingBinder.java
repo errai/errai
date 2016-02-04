@@ -94,7 +94,7 @@ public class DeclarativeBindingModuleUsingBinder extends DeclarativeBindingSuper
     }
 
     @Override
-    public Class<String> getWidgetType() {
+    public Class<String> getComponentType() {
       return String.class;
     }
   }

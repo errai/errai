@@ -19,14 +19,14 @@ package org.jboss.errai.databinding.client;
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
 
 /**
  * A {@link BindableListChangeHandler} that can be used in case details of the underlying list
  * mutation are irrelevant (when the sole information that the list has changed is sufficient).
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
+ *
  * @param <M>
  */
 public abstract class UnspecificListChangeHandler<M> implements BindableListChangeHandler<M> {
@@ -73,7 +73,7 @@ public abstract class UnspecificListChangeHandler<M> implements BindableListChan
 
   /**
    * Called when the monitored list has been mutated.
-   * 
+   *
    * @param source
    *          a list representing the state before the change. Never null.
    */

@@ -60,7 +60,7 @@ public abstract class ElementWrapperWidget<T> extends Widget {
     }
   }
 
-  private static Class<?> getValueClassForInputType(final String inputType) {
+  public static Class<?> getValueClassForInputType(final String inputType) {
     if ("checkbox".equalsIgnoreCase(inputType) || "radio".equalsIgnoreCase(inputType)) {
       return Boolean.class;
     }

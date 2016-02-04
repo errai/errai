@@ -96,7 +96,7 @@ public class DeclarativeBindingModuleUsingModel extends DeclarativeBindingSuperT
     }
 
     @Override
-    public Class<String> getWidgetType() {
+    public Class<String> getComponentType() {
       return String.class;
     }
   }

@@ -34,8 +34,8 @@ import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -265,7 +265,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
               }
 
               @Override
-              public Class<String> getWidgetType() {
+              public Class<String> getComponentType() {
                 return String.class;
               }
 
@@ -457,9 +457,9 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     textBox.setValue("UI change");
 
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, StateSync.FROM_UI);
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     binder.addPropertyChangeHandler(handler);
-    binder.bind(textBox, "value");
+    binder.bind(textBox, "value", null, StateSync.FROM_UI);
 
     assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
     assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());

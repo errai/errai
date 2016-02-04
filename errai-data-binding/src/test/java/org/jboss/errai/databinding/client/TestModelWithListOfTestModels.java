@@ -16,38 +16,24 @@
 
 package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.databinding.client.api.Converter;
+import java.util.List;
+
+import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
- *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class IdentityConverter<T> implements Converter<T, T> {
+@Bindable
+public class TestModelWithListOfTestModels {
 
-  private final Class<T> type;
+  private List<TestModel> list;
 
-  public IdentityConverter(final Class<T> type) {
-    this.type = type;
+  public List<TestModel> getList() {
+    return list;
   }
 
-  @Override
-  public Class<T> getModelType() {
-    return type;
-  }
-
-  @Override
-  public Class<T> getComponentType() {
-    return type;
-  }
-
-  @Override
-  public T toModelValue(T widgetValue) {
-    return widgetValue;
-  }
-
-  @Override
-  public T toWidgetValue(T modelValue) {
-    return modelValue;
+  public void setList(List<TestModel> list) {
+    this.list = list;
   }
 
 }

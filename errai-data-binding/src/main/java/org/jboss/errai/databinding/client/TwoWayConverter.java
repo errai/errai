@@ -51,7 +51,7 @@ public class TwoWayConverter<M, W> implements Converter<M, W> {
   }
 
   @Override
-  public Class<W> getWidgetType() {
+  public Class<W> getComponentType() {
     return modelToWidget.getTargetType();
   }
 

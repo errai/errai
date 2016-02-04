@@ -14,40 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
-
-import org.jboss.errai.databinding.client.api.Converter;
+package org.jboss.errai.common.client.function;
 
 /**
+ * A temporary replacement for java.util.function.Function until it is implemented for GWT.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class IdentityConverter<T> implements Converter<T, T> {
+@FunctionalInterface
+public interface Function<T,R> {
 
-  private final Class<T> type;
+  R apply(T arg);
 
-  public IdentityConverter(final Class<T> type) {
-    this.type = type;
+  default <S> Function<T,S> andThen(final Function<R,S> f) {
+    return t -> f.apply(apply(t));
   }
 
-  @Override
-  public Class<T> getModelType() {
-    return type;
+  default <S> Function<S,R> compose(final Function<S,T> f) {
+    return s -> apply(f.apply(s));
   }
 
-  @Override
-  public Class<T> getComponentType() {
-    return type;
-  }
-
-  @Override
-  public T toModelValue(T widgetValue) {
-    return widgetValue;
-  }
-
-  @Override
-  public T toWidgetValue(T modelValue) {
-    return modelValue;
+  static <T> Function<T,T> indentity() {
+    return t -> t;
   }
 
 }

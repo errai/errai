@@ -24,7 +24,6 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -45,7 +44,6 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DefaultConverter;
-import org.jboss.errai.databinding.client.api.StateSync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,15 +92,14 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
       Statement proxyProvider =
           ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
               .extend()
-              .publicOverridesMethod("getBindableProxy", Parameter.of(Object.class, "model"),
-                  Parameter.of(StateSync.class, "state"))
+              .publicOverridesMethod("getBindableProxy", Parameter.of(Object.class, "model"))
               .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
-                  .withParameters(Cast.to(bindable, Stmt.loadVariable("model")), Variable.get("state"))).returnValue())
+                  .withParameters(Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
               .finish()
-              .publicOverridesMethod("getBindableProxy", Parameter.of(StateSync.class, "state"))
+              .publicOverridesMethod("getBindableProxy")
               .append(
                   Stmt.nestedCall(
-                      Stmt.newObject(bindableProxy.getClassDefinition()).withParameters(Variable.get("state")))
+                      Stmt.newObject(bindableProxy.getClassDefinition()))
                       .returnValue())
               .finish()
               .finish();
