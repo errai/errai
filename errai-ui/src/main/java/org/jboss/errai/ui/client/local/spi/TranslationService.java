@@ -19,12 +19,14 @@ package org.jboss.errai.ui.client.local.spi;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.common.client.util.Properties;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ui.shared.DomVisit;
@@ -39,7 +41,7 @@ import com.google.gwt.user.client.ui.Composite;
 /**
  * A base class for a generated translation service that includes all of the translation visible at
  * compile time.
- * 
+ *
  * @author eric.wittmann@redhat.com
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -68,17 +70,29 @@ public abstract class TranslationService {
 
   /**
    * Registers the bundle with the translation service.
-   * 
+   *
    * @param jsonData
    */
-  protected void registerBundle(String jsonData, String locale) {
-    JSONMap data = JSONMap.create(jsonData);
-    registerJSON(data, locale);
+  protected void registerJsonBundle(String data, String locale) {
+    registerJSON(JSONMap.create(data), locale);
+  }
+
+  /**
+   * Registers the bundle with the translation service.
+   *
+   * @param jsonData
+   */
+  protected void registerPropertiesBundle(String data, String locale) {
+    final Map<String, String> translation = Properties.load(data);
+
+    for (final Entry<String, String> entry : translation.entrySet()) {
+      registerTranslation(entry.getKey(), entry.getValue(), locale);
+    }
   }
 
   /**
    * Registers a single translation.
-   * 
+   *
    * @param key
    * @param value
    * @param locale
@@ -93,7 +107,7 @@ public abstract class TranslationService {
   /**
    * Registers some i18n data with the translation service. This is called for each discovered
    * bundle file.
-   * 
+   *
    * @param data
    * @param locale
    */
@@ -109,7 +123,7 @@ public abstract class TranslationService {
 
   /**
    * Gets the translation for the given i18n translation key.
-   * 
+   *
    * @param translationKey
    */
   public String getTranslation(String translationKey) {
@@ -128,7 +142,7 @@ public abstract class TranslationService {
   /**
    * Look up a message in the i18n resource message bundle by key, then format the message with the
    * given arguments and return the result.
-   * 
+   *
    * @param key
    * @param args
    */
@@ -190,24 +204,24 @@ public abstract class TranslationService {
    * Gets the browser's configured locale.
    */
   public final static native String getBrowserLocale() /*-{
-                                                       if ($wnd.navigator.language) {
-                                                       return $wnd.navigator.language;
-                                                       }
-                                                       if ($wnd.navigator.userLanguage) {
-                                                       return $wnd.navigator.userLanguage;
-                                                       }
-                                                       if ($wnd.navigator.browserLanguage) {
-                                                       return $wnd.navigator.browserLanguage;
-                                                       }
-                                                       if ($wnd.navigator.systemLanguage) {
-                                                       return $wnd.navigator.systemLanguage;
-                                                       }
-                                                       return null;
-                                                       }-*/;
+    if ($wnd.navigator.language) {
+      return $wnd.navigator.language;
+    }
+    if ($wnd.navigator.userLanguage) {
+      return $wnd.navigator.userLanguage;
+    }
+    if ($wnd.navigator.browserLanguage) {
+      return $wnd.navigator.browserLanguage;
+    }
+    if ($wnd.navigator.systemLanguage) {
+      return $wnd.navigator.systemLanguage;
+    }
+    return null;
+   }-*/;
 
   /**
    * Forcibly set the current locale and re-translate all instantiated {@link Templated} beans.
-   * 
+   *
    * @param locale
    */
   public final static void setCurrentLocale(String locale) {
@@ -218,7 +232,7 @@ public abstract class TranslationService {
   /**
    * Forcibly set the current locale but do not re-translate existing templated instances. Mostly
    * useful for testing.
-   * 
+   *
    * @param locale
    */
   public final static void setCurrentLocaleWithoutUpdate(String locale) {
@@ -244,7 +258,7 @@ public abstract class TranslationService {
              * Only translate parent-less widgets to avoid re-translating a single widget multiple
              * times (the call to revisit will traverse the whole subtree rooted at this widget).
              */
-            if (beanInstance.getParent() == null && !beanInstance.isAttached())
+            if (beanInstance.getParent() == null)
               DomVisit.revisit(new ElementWrapper(beanInstance.getElement()), new TranslationDomRevisitor());
           }
         });

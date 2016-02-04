@@ -102,7 +102,7 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
 
     // when - then
     assertNull(localeListBox.getValue());
-    assertEquals(4, selector.getSupportedLocales().size());
+    assertEquals(5, selector.getSupportedLocales().size());
 
     localeListBox.setValue(new Locale("da", "Danish"), true);
 
