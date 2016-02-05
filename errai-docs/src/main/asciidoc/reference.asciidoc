@@ -6449,19 +6449,27 @@ User interfaces often need to be available in different languages. Errai's i18n 
 
 ==== HTML Template Translation
 
-To get started with Errai's internationalization support, simply put the [code]+@Bundle("bundle.json")+ annotation on your entry point and add an empty [code]+bundle.json+ file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.
+To get started with Errai's internationalization support, simply put [code]+@Bundle("bundle.json")+ or [code]+@Bundle("bundle.properties")+ annotation on your entry point and add an empty [code]+bundle.json+ or [code]+bundle.properties+ file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently provided the file extension is `.json` or `.properties`.
 
-Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called [code]+errai-bundle-all.json+ and put it in your [code]+.errai+ directory. You can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.
+Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called [code]+errai-bundle-all.json+ and put it in your [code]+.errai+ directory. If you used a JSON file in you [code]+@Bundle+ annotation, you can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.
 
-The translation bundle files use the same naming scheme as Java (e.g. [code]+bundle_nl_BE.json+ for Belgian Dutch and [code]+bundle_nl.json+ for plain Dutch). Errai will also generate a file called [code]+errai-bundle-missing.json+ in the [code]+.errai+ folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations:
+The translation bundle files use the same naming scheme as Java (e.g. [code]+bundle_nl_BE.json+ or [code]+bundel_nl_BE.properties+ for Belgian Dutch, and [code]+bundle_nl.json+ or [code]+bundle_nl.properties+ for plain Dutch). Errai will also generate a file called [code]+errai-bundle-missing.json+ in the [code]+.errai+ folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations when you use a JSON file:
 
 
-[source, java]
+[source, javascript]
 ----
 {
 "StoresPage.Stores!" : "Stores!",
 "WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front._-734987445" : "As you move toward a more and more declarative style, you allow the compiler and the framework to catch more mistakes up front. Broken links? A thing of the past!"
 }
+----
+
+Here are the same translations as specified by a properties file:
+
+[source]
+----
+StoresPage.Stores! = Stores!
+WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front._-734987445 = As you move toward a more and more declarative style, you allow the compiler and the framework to catch more mistakes up front. Broken links? A thing of the past!
 ----
 
 If you want to use your own keys instead of these generated ones you can specify them in your templates using the [code]+data-i18n-key+ attribute:
@@ -6480,12 +6488,20 @@ If you want to use your own keys instead of these generated ones you can specify
 By adding this attribute in the template you can translate it with the following:
 
 
-[source, java]
+[source, javascript]
 ----
 {
     "Widget.welcome": "Willkommen bei Errai-ui i18n."
 }
 ----
+
+or
+
+[source]
+----
+Widget.welcome=Willkommen bei Errai-ui i18n.
+----
+
 
 Because your templates are designer templates and can contain some mock data that doesn't need to be translated, Errai has the ability to indicate that with an attribute [code]+data-role=dummy+:
 
