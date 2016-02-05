@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.BindableListChangeHandler;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
@@ -286,7 +286,7 @@ public class BindableListWrapper<M> implements List<M> {
 
   private Object convertToProxy(Object element) {
     if (BindableProxyFactory.isBindableType(element)) {
-      element = BindableProxyFactory.getBindableProxy(element, InitialState.FROM_MODEL);
+      element = BindableProxyFactory.getBindableProxy(element, StateSync.FROM_MODEL);
       final BindableProxyAgent<?> agent = ((BindableProxy<?>) element).getBindableProxyAgent();
 
       if (!elementChangeHandlers.containsKey(agent)) {

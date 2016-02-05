@@ -17,7 +17,7 @@
 package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 
 /**
  * Provides instances of {@link BindableProxy}s (proxy objects for types annotated with {@link Bindable}).
@@ -33,7 +33,7 @@ public interface BindableProxyProvider {
    *          Specifies the origin of the initial state of both model and UI widget.
    * @return proxy instance
    */
-  public BindableProxy<?> getBindableProxy(InitialState state);
+  public BindableProxy<?> getBindableProxy(StateSync state);
 
   /**
    * Returns a proxy for the provided model instance, bound to the provided widget.
@@ -44,5 +44,5 @@ public interface BindableProxyProvider {
    *          Specifies the origin of the initial state of both model and UI widget.
    * @return proxy instance
    */
-  public BindableProxy<?> getBindableProxy(Object model, InitialState state);
+  public BindableProxy<?> getBindableProxy(Object model, StateSync state);
 }

@@ -25,7 +25,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.demo.grocery.client.local.convert.RelativeTimeConverter;
 import org.jboss.errai.demo.grocery.client.local.convert.UsernameConverter;
 import org.jboss.errai.demo.grocery.client.shared.Item;
@@ -132,7 +132,7 @@ public class GroceryItemWidget extends Composite implements HasModel<Item> {
   @Override
   public void setModel(Item item) {
     System.out.println("ItemWidget: adopting model object " + System.identityHashCode(item));
-    itemBinder.setModel(item, InitialState.FROM_MODEL);
+    itemBinder.setModel(item, StateSync.FROM_MODEL);
   }
 
   @Override

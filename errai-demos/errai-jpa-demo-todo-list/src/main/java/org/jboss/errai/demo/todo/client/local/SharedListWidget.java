@@ -19,7 +19,7 @@ package org.jboss.errai.demo.todo.client.local;
 import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.demo.todo.shared.SharedList;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.ui.client.widget.HasModel;
@@ -50,6 +50,6 @@ public class SharedListWidget extends Composite implements HasModel<SharedList> 
 
   @Override
   public void setModel(SharedList model) {
-    sharedListDataBinder.setModel(model, InitialState.FROM_MODEL);
+    sharedListDataBinder.setModel(model, StateSync.FROM_MODEL);
   }
 }

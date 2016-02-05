@@ -26,7 +26,7 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
@@ -51,7 +51,7 @@ import com.google.gwt.user.client.ui.Widget;
  * An agent will:
  * <ul>
  * <li>Carry out an initial state sync between the bound widgets and the target
- * model, if specified (see {@link DataBinder#DataBinder(Object, InitialState)})
+ * model, if specified (see {@link DataBinder#DataBinder(Object, StateSync)})
  * </li>
  *
  * <li>Update the bound widget when a setter method is invoked on the model (see
@@ -84,7 +84,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   final BindableProxy<T> proxy;
   final T target;
-  InitialState initialState;
+  StateSync initialState;
 
   /**
    * Updates a bound property of a model in response to UI changes.
@@ -93,7 +93,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     public void update(Object value);
   }
 
-  BindableProxyAgent(BindableProxy<T> proxy, T target, InitialState initialState) {
+  BindableProxyAgent(BindableProxy<T> proxy, T target, StateSync initialState) {
     this.proxy = proxy;
     this.target = target;
     this.initialState = initialState;
@@ -112,7 +112,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Binds the provided widget to the specified property (or property chain) of
    * the model instance associated with this proxy (see
-   * {@link DataBinder#setModel(Object, InitialState)}).
+   * {@link DataBinder#setModel(Object, StateSync)}).
    *
    * @param widget
    *          the widget to bind to, must not be null.
@@ -130,7 +130,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Binds the provided widget to the specified property (or property chain) of
    * the model instance associated with this proxy (see
-   * {@link DataBinder#setModel(Object, InitialState)}).
+   * {@link DataBinder#setModel(Object, StateSync)}).
    *
    * @param widget
    *          the widget to bind to, must not be null.
@@ -404,7 +404,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
         DataBinder nestedBinder = binders.get(property);
         if (nestedBinder != null) {
-          nestedBinder.setModel(actualValue, InitialState.FROM_MODEL, true);
+          nestedBinder.setModel(actualValue, StateSync.FROM_MODEL, true);
           proxy.set(property, nestedBinder.getModel());
         }
         updateWidgetsAndFireEvent(property, knownValue, actualValue);
@@ -492,7 +492,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Synchronizes the state of the provided widgets and model property based on
-   * the value of the provided {@link InitialState}.
+   * the value of the provided {@link StateSync}.
    *
    * @param widget
    *          The widget to synchronize. Must not be null.
@@ -515,10 +515,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         value = initialState.getInitialValue(value, ((HasText) widget).getText());
       }
 
-      if (initialState == InitialState.FROM_MODEL) {
+      if (initialState == StateSync.FROM_MODEL) {
         updateWidgetsAndFireEvent(property, knownValues.get(property), value);
       }
-      else if (initialState == InitialState.FROM_UI) {
+      else if (initialState == StateSync.FROM_UI) {
         Object newValue = converter.toModelValue(value);
         proxy.set(property, newValue);
         firePropertyChangeEvent(property, knownValues.get(property), newValue);
@@ -572,18 +572,18 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the {@link InitialState} configured when the proxy was created.
+   * Returns the {@link StateSync} configured when the proxy was created.
    *
    * @return initial state, can be null.
    */
-  public InitialState getInitialState() {
+  public StateSync getInitialState() {
     return initialState;
   }
 
   /**
-   * Configures the {@link InitialState}.
+   * Configures the {@link StateSync}.
    */
-  public void setInitialState(InitialState initialState) {
+  public void setInitialState(StateSync initialState) {
     this.initialState = initialState;
   }
 
@@ -707,7 +707,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
                    thisValue = knownValues.get(property),
                    otherValue = other.knownValues.get(property);
 
-      final InitialState initalState = (getInitialState() != null ? getInitialState() : InitialState.FROM_MODEL);
+      final StateSync initalState = (getInitialState() != null ? getInitialState() : StateSync.FROM_MODEL);
       curValue = initalState.getInitialValue(thisValue, otherValue);
       oldValue = initalState.getInitialValue(otherValue, thisValue);
 

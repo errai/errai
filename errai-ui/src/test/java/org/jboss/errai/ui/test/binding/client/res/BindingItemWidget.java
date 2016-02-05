@@ -20,7 +20,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -53,7 +53,7 @@ public class BindingItemWidget extends Composite implements BindingItem {
 
   @Override
   public void setModel(TestModel model) {
-    binder.setModel(model, InitialState.FROM_MODEL);
+    binder.setModel(model, StateSync.FROM_MODEL);
   }
 
   @Override

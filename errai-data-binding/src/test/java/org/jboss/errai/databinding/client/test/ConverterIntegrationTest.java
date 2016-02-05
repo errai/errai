@@ -21,7 +21,7 @@ import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.junit.Test;
 
@@ -181,7 +181,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     };
 
     Label label = new Label();
-    TestModel model = DataBinder.forModel(new TestModel(), InitialState.FROM_MODEL)
+    TestModel model = DataBinder.forModel(new TestModel(), StateSync.FROM_MODEL)
       .bind(label, "age", converter).getModel();
 
     model.setAge(123);
@@ -359,12 +359,12 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
 
     TextBox textBox = new TextBox();
     textBox.setValue("123");
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_UI).bind(textBox, "age", converter);
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, StateSync.FROM_UI).bind(textBox, "age", converter);
     assertEquals("Model not initialized based on widget's state", Integer.valueOf(1701), binder.getModel().getAge());
 
     TestModel model = new TestModel();
     model.setAge(123);
-    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name", new IdentityConverter<String>(String.class) {
+    DataBinder.forModel(model, StateSync.FROM_MODEL).bind(textBox, "name", new IdentityConverter<String>(String.class) {
       @Override
       public String toWidgetValue(String modelValue) {
         return "customConverter";

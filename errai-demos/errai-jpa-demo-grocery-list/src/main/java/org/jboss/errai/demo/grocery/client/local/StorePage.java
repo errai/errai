@@ -44,7 +44,7 @@ import org.gwtopenmaps.openlayers.client.layer.OSM;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
@@ -155,7 +155,7 @@ public class StorePage extends Composite {
         Window.alert("No such store: " + requestedStoreId);
         backToStoresPage.go();
       }
-      storeBinder.setModel(found, InitialState.FROM_MODEL);
+      storeBinder.setModel(found, StateSync.FROM_MODEL);
       radius.setValue(Integer.valueOf(DEFAULT_RADIUS));
     }
 

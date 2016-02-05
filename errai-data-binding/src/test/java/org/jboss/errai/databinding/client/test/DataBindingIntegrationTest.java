@@ -45,7 +45,7 @@ import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
 import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.container.Factory;
@@ -158,7 +158,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testNestedBindingWithModelChange() {
     TextBox textBox = new TextBox();
     TestModel model = new TestModel();
-    DataBinder<TestModel> binder = DataBinder.forModel(model, InitialState.FROM_MODEL);
+    DataBinder<TestModel> binder = DataBinder.forModel(model, StateSync.FROM_MODEL);
     model = binder.bind(textBox, "child.value").getModel();
 
     textBox.setValue("old string", true);
@@ -318,12 +318,12 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     TestModel model = new TestModel();
     model.setName("initial name");
-    binder.setModel(model, InitialState.FROM_MODEL);
+    binder.setModel(model, StateSync.FROM_MODEL);
     assertEquals("Widget not updated after model change", "initial name", textBox.getText());
 
     model = new TestModel();
     textBox.setText("changed name");
-    binder.setModel(model, InitialState.FROM_UI);
+    binder.setModel(model, StateSync.FROM_UI);
     assertEquals("Model not updated after model change", "changed name", model.getName());
   }
 
@@ -332,12 +332,12 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     textBox.setValue("initial ui value");
 
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_UI).bind(textBox, "name");
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, StateSync.FROM_UI).bind(textBox, "name");
     assertEquals("Model not initialized based on widget's state", "initial ui value", binder.getModel().getName());
 
     TestModel model = new TestModel();
     model.setName("initial model value");
-    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name");
+    DataBinder.forModel(model, StateSync.FROM_MODEL).bind(textBox, "name");
     assertEquals("Model not initialized based on widget's state", "initial model value", textBox.getValue());
   }
 
@@ -351,7 +351,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TestModel model = new TestModel();
     model.setChild(childModel);
 
-    DataBinder<TestModel> binder = DataBinder.forModel(model, InitialState.FROM_MODEL).bind(widget, "child");
+    DataBinder<TestModel> binder = DataBinder.forModel(model, StateSync.FROM_MODEL).bind(widget, "child");
     assertEquals("Widget not updated based on model's state", childModel, binder.getModel().getChild());
   }
 
@@ -365,7 +365,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TestModel model = new TestModel();
     model.setChild(childModel);
 
-    DataBinder<TestModel> binder = DataBinder.forModel(model, InitialState.FROM_MODEL).bind(widget, "child");
+    DataBinder<TestModel> binder = DataBinder.forModel(model, StateSync.FROM_MODEL).bind(widget, "child");
     assertEquals("Widget not updated based on model's state", childModel, binder.getModel().getChild());
   }
 
@@ -477,7 +477,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     textBox.setValue("initial ui value");
 
     DataBinder<TestModel> binder =
-        DataBinder.forType(TestModel.class, InitialState.FROM_UI).bind(textBox, "child.name");
+        DataBinder.forType(TestModel.class, StateSync.FROM_UI).bind(textBox, "child.name");
     assertEquals("Model not initialized based on widget's state", "initial ui value",
         binder.getModel().getChild().getName());
 
@@ -486,7 +486,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TestModel model = new TestModel();
     model.setChild(childModel);
 
-    binder = DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "child.name");
+    binder = DataBinder.forModel(model, StateSync.FROM_MODEL).bind(textBox, "child.name");
     assertEquals("Model not initialized based on widget's state", "initial model value", textBox.getValue());
 
     childModel = new TestModel();
@@ -494,7 +494,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model = new TestModel();
     model.setChild(childModel);
 
-    binder.setModel(model, InitialState.FROM_MODEL);
+    binder.setModel(model, StateSync.FROM_MODEL);
     assertEquals("Model not initialized based on widget's state", "updated model value", textBox.getValue());
   }
 
@@ -1140,5 +1140,95 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     DomEvent.fireNativeEvent(Document.get().createKeyUpEvent(false, false, false, false, KeyCodes.KEY_NUM_TWO), tb2);
 
     assertEquals("First widget not updated", tb2.getValue(), tb1.getValue());
+  }
+  
+  @Test
+  public void testPauseResumeFromUI() {
+    TextBox textBox = new TextBox();
+
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    TestModel model = binder.getModel();
+    
+    binder.pause();
+    assertSame("Pause should not change model instance", model, binder.getModel());
+    
+    textBox.setValue("UI change paused", true);
+    assertEquals("Model should not have been updated while paused", null, model.getValue());
+    model.setValue("model change while paused");
+    assertEquals("Widget should not have been updated while paused", "UI change paused", textBox.getText());
+    
+    binder.resume(StateSync.FROM_UI);
+    assertEquals("Model not properly updated", "UI change paused", model.getValue());
+    assertEquals("Widget should not have been updated", "UI change paused", textBox.getText());
+    
+    textBox.setValue("UI change resumed", true);
+    assertEquals("Model not properly updated", "UI change resumed", model.getValue());
+    model.setValue("model change resumed");
+    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+  }
+  
+  @Test
+  public void testPauseResumeFromModel() {
+    TextBox textBox = new TextBox();
+
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    TestModel model = binder.getModel();
+    
+    binder.pause();
+    assertSame("Pause should not change model instance", model, binder.getModel());
+    
+    textBox.setValue("UI change paused", true);
+    assertEquals("Model should not have been updated", null, model.getValue());
+    model.setValue("model change paused");
+    assertEquals("Widget should not have been updated", "UI change paused", textBox.getText());
+    
+    binder.resume(StateSync.FROM_MODEL);
+    assertEquals("Widget not properly updated", "model change paused", textBox.getText());
+    assertEquals("Model should not have been updated", "model change paused", model.getValue());
+    
+    textBox.setValue("UI change resumed", true);
+    assertEquals("Model not properly updated", "UI change resumed", model.getValue());
+    model.setValue("model change resumed");
+    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+  }
+  
+  @Test
+  public void testPauseResumeWithSetModel() {
+    TextBox textBox = new TextBox();
+
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    TestModel model = binder.getModel();
+    
+    binder.pause();
+    assertSame("Pause should not change model instance", model, binder.getModel());
+    
+    textBox.setValue("UI change paused", true);
+    assertEquals("Model should not have been updated", null, model.getValue());
+    model.setValue("model change paused");
+    assertEquals("Widget should not have been updated", "UI change paused", textBox.getText());
+    
+    // Resume using setModel
+    TestModel model2 = binder.setModel(new TestModel("model update"));
+    assertEquals("Widget not properly updated", "model update", textBox.getText());
+    assertEquals("Model should not have been updated", "model update", model2.getValue());
+    
+    textBox.setValue("UI change resumed", true);
+    assertEquals("Model not properly updated", "UI change resumed", model2.getValue());
+    model2.setValue("model change resumed");
+    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+    
+    // Explicit resume should have no effect after resuming with setModel
+    binder.resume(StateSync.FROM_MODEL);
+    
+    textBox.setValue("UI change resumed", true);
+    assertEquals("Model not properly updated", "UI change resumed", model2.getValue());
+    model2.setValue("model change resumed");
+    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+  }
+  
+  @Test
+  public void testResumeWithoutPauseDoesntThrowException() {
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(new TextBox(), "value");
+    binder.resume(StateSync.FROM_MODEL);
   }
 }

@@ -48,9 +48,11 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class DataBinder<T> implements HasPropertyChangeHandlers {
   private final PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
-  private final InitialState initialState;
+  private final StateSync initialState;
   private Multimap<String, Binding> bindings = LinkedHashMultimap.create();
+  
   private T proxy;
+  private T paused;
 
   /**
    * Creates a {@link DataBinder} for a new model instance of the provided type
@@ -66,8 +68,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Creates a {@link DataBinder} for a new model instance of the provided type
    * (see {@link #forType(Class)}), initializing either model or UI widgets from
-   * the values defined by {@link InitialState} (see
-   * {@link #forModel(Object, InitialState)}).
+   * the values defined by {@link StateSync} (see
+   * {@link #forModel(Object, StateSync)}).
    *
    * @param modelType
    *          The bindable type, must not be null.
@@ -76,7 +78,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          widget. Null if no initial state synchronization should be carried
    *          out.
    */
-  private DataBinder(Class<T> modelType, InitialState initialState) {
+  private DataBinder(Class<T> modelType, StateSync initialState) {
     this.initialState = initialState;
     this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), initialState);
   }
@@ -94,8 +96,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Creates a {@link DataBinder} for the provided model instance, initializing
-   * either model or UI widgets from the values defined by {@link InitialState}
-   * (see {@link #forModel(Object, InitialState)}).
+   * either model or UI widgets from the values defined by {@link StateSync}
+   * (see {@link #forModel(Object, StateSync)}).
    *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
@@ -104,7 +106,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          widget. Null if no initial state synchronization should be carried
    *          out.
    */
-  private DataBinder(T model, InitialState initialState) {
+  private DataBinder(T model, StateSync initialState) {
     this.initialState = initialState;
     this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(model), initialState);
   }
@@ -122,7 +124,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Creates a {@link DataBinder} for a new model instance of the provided type,
    * initializing either model or UI widgets from the values defined by
-   * {@link InitialState}.
+   * {@link StateSync}.
    *
    * @param modelType
    *          The bindable type, must not be null.
@@ -131,7 +133,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          widget. Null if no initial state synchronization should be carried
    *          out.
    */
-  public static <T> DataBinder<T> forType(Class<T> modelType, InitialState initialState) {
+  public static <T> DataBinder<T> forType(Class<T> modelType, StateSync initialState) {
     return new DataBinder<T>(modelType, initialState);
   }
 
@@ -147,7 +149,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Creates a {@link DataBinder} for the provided model instance, initializing
-   * either model or UI widgets from the values defined by {@link InitialState}.
+   * either model or UI widgets from the values defined by {@link StateSync}.
    *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
@@ -156,7 +158,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          widget. Null if no initial state synchronization should be carried
    *          out.
    */
-  public static <T> DataBinder<T> forModel(T model, InitialState initialState) {
+  public static <T> DataBinder<T> forModel(T model, StateSync initialState) {
     return new DataBinder<T>(model, initialState);
   }
 
@@ -341,14 +343,15 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    */
   public T getModel() {
     ensureProxied();
-    return this.proxy;
+    return (paused == null) ? proxy : paused;
   }
 
   /**
    * Changes the underlying model instance. The existing bindings stay intact
    * but only affect the new model instance. The previously associated model
    * instance will no longer be kept in sync with the UI. The bound UI widgets
-   * will be updated based on the new model state.
+   * will be updated based on the new model state. Bindings will be resumed if
+   * they are currently paused.
    *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
@@ -358,13 +361,14 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         accessible using {@link #getModel()}).
    */
   public T setModel(T model) {
-    return setModel(model, InitialState.FROM_MODEL);
+    return setModel(model, StateSync.FROM_MODEL);
   }
 
   /**
    * Changes the underlying model instance. The existing bindings stay intact
    * but only affect the new model instance. The previously associated model
-   * instance will no longer be kept in sync with the UI.
+   * instance will no longer be kept in sync with the UI. Bindings will be
+   * resumed if they are currently paused.
    *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
@@ -377,14 +381,15 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         if changes should be automatically synchronized with the UI (also
    *         accessible using {@link #getModel()}).
    */
-  public T setModel(T model, InitialState initialState) {
+  public T setModel(T model, StateSync initialState) {
     return setModel(model, initialState, false);
   }
 
   /**
    * Changes the underlying model instance. The existing bindings stay intact
    * but only affect the new model instance. The previously associated model
-   * instance will no longer be kept in sync with the UI.
+   * instance will no longer be kept in sync with the UI. Bindings will be
+   * resumed if they are currently paused.
    *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
@@ -401,11 +406,11 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         accessible using {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
-  public T setModel(T model, InitialState initialState, boolean fireChangeEvents) {
+  public T setModel(T model, StateSync initialState, boolean fireChangeEvents) {
     Assert.notNull(model);
 
     BindableProxy<T> newProxy;
-    InitialState newInitState = (initialState != null) ? initialState : getAgent().getInitialState();
+    StateSync newInitState = (initialState != null) ? initialState : getAgent().getInitialState();
     if (model instanceof BindableProxy) {
       newProxy = (BindableProxy<T>) model;
       newProxy.getBindableProxyAgent().setInitialState(newInitState);
@@ -434,6 +439,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       bindings.put(b.getProperty(), newProxy.getBindableProxyAgent()
                                       .bind(b.getWidget(), b.getProperty(), b.getConverter(), bindOnKeyUp));
     }
+    this.paused = null;
     this.bindings = bindings;
     this.proxy = (T) newProxy;
     return this.proxy;
@@ -467,6 +473,34 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     return bindings.keySet();
   }
 
+  /**
+   * Pauses all bindings. The model and UI fields are no longer kept in sync
+   * until {@link #resume(StateSync)} or
+   * {@link #setModel(Object, StateSync, boolean)} is called.
+   */
+  @SuppressWarnings("unchecked")
+  public void pause() {
+    T paused = proxy;
+    T clone = (T) ((BindableProxy<?>) proxy).deepUnwrap();
+    setModel(clone);
+    this.paused = paused;
+  }  
+  
+  /**
+   * Resumes the previously paused bindings (see {@link #pause()}) and carries
+   * out state synchronization to catch up on changes that happened in the
+   * meantime. This method has no effect if {@link #pause()} was never called.
+   * 
+   * @param resumeState
+   *          the state to resume from. Must not be null.
+   */
+  public void resume(final StateSync resumeState) {
+    Assert.notNull(resumeState);
+    if (paused != null) {
+      setModel(paused, resumeState);
+    }
+  }
+  
   @Override
   public PropertyChangeUnsubscribeHandle addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
     propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
@@ -493,7 +527,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       }
     };
   }
-
+  
   @SuppressWarnings("unchecked")
   private BindableProxyAgent<T> getAgent() {
     ensureProxied();

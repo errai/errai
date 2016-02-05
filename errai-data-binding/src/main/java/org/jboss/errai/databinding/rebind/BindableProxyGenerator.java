@@ -56,7 +56,7 @@ import org.jboss.errai.databinding.client.HasProperties;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 
 import com.google.gwt.core.ext.TreeLogger;
 
@@ -90,10 +90,10 @@ public class BindableProxyGenerator {
     classBuilder
         .privateField(agentField, parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
         .finish()
-        .publicConstructor(Parameter.of(InitialState.class, "initialState"))
+        .publicConstructor(Parameter.of(StateSync.class, "initialState"))
         .callThis(Stmt.newObject(bindable), Variable.get("initialState"))
         .finish()
-        .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(InitialState.class, "initialState"))
+        .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(StateSync.class, "initialState"))
         .append(Stmt.loadVariable(agentField).assignValue(
             Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
                 Variable.get("this"), Variable.get("target"), Variable.get("initialState"))))
@@ -225,7 +225,7 @@ public class BindableProxyGenerator {
             Stmt.if_(Bool.expr(agent("binders").invoke("containsKey", property)))
                 .append(Stmt.loadVariable(property).assignValue(Cast.to(paramType,
                     agent("binders").invoke("get", property).invoke("setModel", Variable.get(property),
-                        Stmt.loadStatic(InitialState.class, "FROM_MODEL"),
+                        Stmt.loadStatic(StateSync.class, "FROM_MODEL"),
                         Stmt.loadLiteral(true)))))
                 .finish();
       }

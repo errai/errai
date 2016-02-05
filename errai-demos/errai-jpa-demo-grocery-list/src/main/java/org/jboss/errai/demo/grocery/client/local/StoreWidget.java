@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ui.client.widget.HasModel;
@@ -131,7 +131,7 @@ public class StoreWidget extends Composite implements HasModel<Store> {
 
     @Override
     public void setModel(Store store) {
-        storeBinder.setModel(store, InitialState.FROM_MODEL);
+        storeBinder.setModel(store, StateSync.FROM_MODEL);
         departments.setText(String.valueOf(store.getDepartments().size()));
     }
 

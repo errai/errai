@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 
 /**
  * Provides access to the generated proxies for {@link Bindable} types.
@@ -48,7 +48,7 @@ public class BindableProxyFactory {
    * @return proxy that can be used in place of the model instance.
    */
   @SuppressWarnings("unchecked")
-  public static <T> T getBindableProxy(T model, InitialState state) {
+  public static <T> T getBindableProxy(T model, StateSync state) {
     if (model instanceof BindableProxy)
       return model;
 
@@ -76,7 +76,7 @@ public class BindableProxyFactory {
    * @return proxy that can be used in place of the model instance.
    */
   @SuppressWarnings("unchecked")
-  public static <T> T getBindableProxy(Class<T> bindableType, InitialState state) {
+  public static <T> T getBindableProxy(Class<T> bindableType, StateSync state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(bindableType);
 
     BindableProxy<?> proxy = proxyProvider.getBindableProxy(state);

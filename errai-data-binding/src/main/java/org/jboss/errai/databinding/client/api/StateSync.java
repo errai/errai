@@ -19,11 +19,10 @@ package org.jboss.errai.databinding.client.api;
 /**
  * Specifies the state from which a {@link DataBinder}'s properties should be initialized.
  * 
- * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
- * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-public enum InitialState {
+public enum StateSync {
   
   /**
    * Specifies that the bound value should be initialized to the pre-existing

@@ -26,7 +26,7 @@ import javax.persistence.EntityManager;
 import javax.validation.Validator;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.GroceryList;
 import org.jboss.errai.demo.grocery.client.shared.Item;
@@ -180,7 +180,7 @@ public abstract class Form extends Composite {
     if (item.getDepartment() == null) {
       item.setDepartment(new Department());
     }
-    itemBinder.setModel(item, InitialState.FROM_MODEL);
+    itemBinder.setModel(item, StateSync.FROM_MODEL);
   }
   
   /**

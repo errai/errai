@@ -33,7 +33,7 @@ import org.jboss.errai.databinding.client.TestModelWithListWidget;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.container.RefHolder;
@@ -80,7 +80,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
 
     // This should not cause additional events to be fired
-    binder.setModel(new TestModel(), InitialState.FROM_MODEL);
+    binder.setModel(new TestModel(), StateSync.FROM_MODEL);
 
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
@@ -197,7 +197,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
         handler.getEvents().get(0).getSource());
 
     // This should not cause additional events to be fired
-    binder.setModel(new TestModel(), InitialState.FROM_MODEL);
+    binder.setModel(new TestModel(), StateSync.FROM_MODEL);
 
     binder.getModel().getChild().getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
@@ -325,7 +325,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
         handler.getEvents().get(0).getSource());
 
     // This should not cause additional events to be fired
-    binder.setModel(new TestModel(), InitialState.FROM_MODEL);
+    binder.setModel(new TestModel(), StateSync.FROM_MODEL);
 
     binder.getModel().getChild().getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
@@ -355,7 +355,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
         handler.getEvents().get(0).getSource());
 
     // This should not cause additional events to be fired
-    binder.setModel(new TestModel(), InitialState.FROM_MODEL);
+    binder.setModel(new TestModel(), StateSync.FROM_MODEL);
 
     binder.getModel().getChild().getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
@@ -384,7 +384,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
         handler.getEvents().get(0).getSource());
 
     // This should not cause additional events to be fired
-    binder.setModel(new TestModel(), InitialState.FROM_MODEL);
+    binder.setModel(new TestModel(), StateSync.FROM_MODEL);
 
     binder.getModel().getChild().getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
@@ -457,7 +457,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     textBox.setValue("UI change");
 
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_UI);
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, StateSync.FROM_UI);
     binder.addPropertyChangeHandler(handler);
     binder.bind(textBox, "value");
 

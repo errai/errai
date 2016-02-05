@@ -21,7 +21,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.demo.todo.shared.TodoItem;
@@ -48,7 +48,7 @@ public class TodoItemWidget extends Composite implements HasModel<TodoItem> {
 
   @Override
   public void setModel(TodoItem item) {
-    itemBinder.setModel(item, InitialState.FROM_MODEL);
+    itemBinder.setModel(item, StateSync.FROM_MODEL);
     updateDoneStyle();
   }
 
