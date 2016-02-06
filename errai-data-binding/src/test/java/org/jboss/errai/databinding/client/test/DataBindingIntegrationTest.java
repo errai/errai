@@ -1231,4 +1231,16 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(new TextBox(), "value");
     binder.resume(StateSync.FROM_MODEL);
   }
+  
+  @Test
+  public void testPausingMultipeTimes() {
+    TextBox textBox = new TextBox();
+
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    TestModel model = binder.getModel();
+    
+    binder.pause();
+    binder.pause();
+    assertSame("Pause should not change model instance", model, binder.getModel());
+  }
 }

@@ -475,11 +475,13 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Pauses all bindings. The model and UI fields are no longer kept in sync
-   * until {@link #resume(StateSync)} or
-   * {@link #setModel(Object, StateSync, boolean)} is called.
+   * until either {@link #resume(StateSync)} or {@link #setModel(Object)} is
+   * called. This method has no effect if the bindings are already paused.
    */
   @SuppressWarnings("unchecked")
   public void pause() {
+    if (paused != null) return;
+    
     T paused = proxy;
     T clone = (T) ((BindableProxy<?>) proxy).deepUnwrap();
     setModel(clone);
@@ -495,10 +497,10 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          the state to resume from. Must not be null.
    */
   public void resume(final StateSync resumeState) {
+    if (paused == null) return;
+    
     Assert.notNull(resumeState);
-    if (paused != null) {
-      setModel(paused, resumeState);
-    }
+    setModel(paused, resumeState);
   }
   
   @Override
