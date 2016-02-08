@@ -22,8 +22,10 @@ import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.codegen.BlockStatement;
@@ -153,6 +155,10 @@ public class BindableProxyGenerator {
     Statement nonExistingPropertyException = Stmt.throw_(NonExistingPropertyException.class, Variable.get("property"));
     getMethod.append(nonExistingPropertyException).finish();
     setMethod.append(nonExistingPropertyException).finish();
+    
+    classBuilder.publicMethod(Map.class, "getProperties")
+      .append(Stmt.invokeStatic(Collections.class, "unmodifiableMap", agent().loadField("propertyTypes")).returnValue())
+    .finish();
   }
 
   /**

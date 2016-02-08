@@ -16,9 +16,12 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.Map;
+
 /**
- * Implementations of this interface allow for dynamic access of their JavaBean properties by name. Since this is a GWT
- * client-side interface, all implementations must be code generated in the absence of Java reflection.
+ * Implementations of this interface allow for dynamic access of their JavaBean
+ * properties by name. Since this is a GWT client-side interface, all
+ * implementations must be code generated in the absence of Java reflection.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -31,7 +34,8 @@ public interface HasProperties {
    *          the name of the JavaBean property, must not be null.
    * @return the current value of the corresponding property.
    * @throws NonExistingPropertyException
-   *           if the implementing bean does not have a property with the given name.
+   *           if the implementing bean does not have a property with the given
+   *           name.
    */
   public Object get(String propertyName);
 
@@ -43,8 +47,16 @@ public interface HasProperties {
    * @param value
    *          the value to set.
    * @throws NonExistingPropertyException
-   *           if the implementing bean does not have a property with the given name.
+   *           if the implementing bean does not have a property with the given
+   *           name.
    */
   public void set(String propertyName, Object value);
+
+  /**
+   * Returns a map of JavaBean property names to their {@link PropertyType}.
+   * 
+   * @return an immutable map of property names to their types. Never null.
+   */
+  public Map<String, PropertyType> getProperties();
 
 }

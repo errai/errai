@@ -21,7 +21,8 @@ import java.util.List;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
- * Represent the type of a bound property.
+ * Represents the type of a JavaBean property with additional metadata for Errai
+ * data binding.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -32,6 +33,10 @@ public class PropertyType {
   private final boolean bindable;
   private final boolean list;
 
+  public PropertyType(Class type) {
+    this (type, false, false);
+  }
+  
   public PropertyType(Class type, boolean bindable, boolean list) {
     this.type = type;
     this.bindable = bindable;
@@ -55,7 +60,7 @@ public class PropertyType {
   public boolean isBindable() {
     return bindable;
   }
-  
+
   /**
    * Indicates whether or not the property type is a {@link List}.
    * 
