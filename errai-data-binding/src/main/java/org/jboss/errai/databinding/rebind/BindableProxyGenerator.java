@@ -156,7 +156,7 @@ public class BindableProxyGenerator {
     getMethod.append(nonExistingPropertyException).finish();
     setMethod.append(nonExistingPropertyException).finish();
     
-    classBuilder.publicMethod(Map.class, "getProperties")
+    classBuilder.publicMethod(Map.class, "getBeanProperties")
       .append(Stmt.invokeStatic(Collections.class, "unmodifiableMap", agent().loadField("propertyTypes")).returnValue())
     .finish();
   }

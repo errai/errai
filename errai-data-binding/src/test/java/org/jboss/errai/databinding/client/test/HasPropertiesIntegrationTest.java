@@ -53,7 +53,7 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testPropertyMapIsReadOny() {
     final HasProperties model = (HasProperties) DataBinder.forType(TestModel.class).getModel();
-    final Map<String, PropertyType> properties = model.getProperties();
+    final Map<String, PropertyType> properties = model.getBeanProperties();
     try {
       properties.put("prop1", new PropertyType(String.class));
       fail("Expected UnsupportedOperationException");
@@ -66,7 +66,7 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testGetProperties() {
     final HasProperties model = (HasProperties) DataBinder.forType(TestModel.class).getModel();
-    final Map<String, PropertyType> properties = model.getProperties();
+    final Map<String, PropertyType> properties = model.getBeanProperties();
     final Set<String> actualProperties = properties.keySet();
     final Set<String> expectedProperties = new HashSet<String>(Arrays.asList("agent", "amountDec", "id", "amountInt",
             "lastChanged", "value", "name", "age", "active", "child", "oldValue"));

@@ -57,6 +57,6 @@ public interface HasProperties {
    * 
    * @return an immutable map of property names to their types. Never null.
    */
-  public Map<String, PropertyType> getProperties();
+  public Map<String, PropertyType> getBeanProperties();
 
 }
