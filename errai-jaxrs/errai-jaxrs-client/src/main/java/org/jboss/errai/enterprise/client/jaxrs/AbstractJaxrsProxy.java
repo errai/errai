@@ -34,7 +34,7 @@ import java.util.List;
  * JAX-RS proxies are {@link RpcStub}s managed by the shared {@see
  * RemoteServiceProxyFactory}. The implementations of this class are generated
  * at compile time.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractJaxrsProxy implements RpcStub {
@@ -45,14 +45,14 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
 
   /**
    * Returns the remote callback used by this proxy.
-   * 
+   *
    * @return the remote callback, never null.
    */
   public abstract RemoteCallback<?> getRemoteCallback();
 
   /**
    * Returns the error callback used by this proxy.
-   * 
+   *
    * @return the error callback, null if no error callback was provided.
    */
   public abstract ErrorCallback<?> getErrorCallback();
@@ -60,7 +60,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   /**
    * If not set explicitly, the base URL is the configured default application
    * root path {@see RestClient}.
-   * 
+   *
    * @return the base URL used to contact the remote service
    */
   public String getBaseUrl() {
@@ -75,7 +75,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   /**
    * Sets the base URL of the remote service and overrides the configured
    * default application root path.
-   * 
+   *
    * @param baseUrl
    *          the base URL used to contact the remote service
    */
@@ -85,7 +85,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
 
   /**
    * Returns the list of success codes used by this proxy.
-   * 
+   *
    * @return list of success codes, null if no custom success codes were
    *         provided.
    */
@@ -96,7 +96,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   /**
    * Sets a list of HTTP status codes that will be used to determine whether a
    * request was successful or not.
-   * 
+   *
    * @param successCodes
    *          list of HTTP status codes
    */
@@ -127,10 +127,25 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
               ((ResponseCallback) getRemoteCallback()).callback(response);
             }
             else if (response.getStatusCode() == 204) {
-              remoteCallback.callback(null);
+              try {
+                remoteCallback.callback(null);
+              } catch (NullPointerException npe) {
+                throw new RuntimeException(
+                        "A NullPointerException occurred while invoking a remote callback. "
+                        + "If the callback is expecting a non-null value for all response, make sure it is an instance of "
+                        + ResponseCallback.class.getName(), npe);
+              }
             }
             else {
-              remoteCallback.callback(demarshallingCallback.demarshallResponse(response.getText()));
+              final Object demarshalledValue;
+              try {
+                demarshalledValue = demarshallingCallback.demarshallResponse(response.getText());
+              } catch (Throwable t) {
+                throw new RuntimeException("An error occurred while demarshalling the body of the response. "
+                        + "If your callback is expecting a Reponse object and not a marshalled value, make sure it is a "
+                        + ResponseCallback.class.getName(), t);
+              }
+              remoteCallback.callback(demarshalledValue);
             }
           }
           else {
@@ -160,7 +175,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   /**
    * Uses the configured {@link ClientExceptionMapper} to unmarshal the
    * {@link Response} into a {@link Throwable}.
-   * 
+   *
    * @param response
    */
   protected Throwable unmarshallException(Response response) {
