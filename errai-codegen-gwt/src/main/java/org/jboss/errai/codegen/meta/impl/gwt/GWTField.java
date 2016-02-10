@@ -54,15 +54,6 @@ public class GWTField extends MetaField {
     return annotations == null ? new Annotation[0] : annotations;
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <A extends Annotation> A getAnnotation(final Class<A> annotation) {
-    for (final Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation)) return (A) a;
-    }
-    return null;
-  }
-
   @Override
   public MetaType getGenericType() {
     return GWTUtil.fromType(oracle, field.getType());

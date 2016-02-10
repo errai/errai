@@ -48,7 +48,7 @@ public class WhileLoop extends AbstractConditionalBlock {
   @Override
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
-    StringBuilder builder = new StringBuilder("while (")
+    final StringBuilder builder = new StringBuilder("while (")
         .append(getCondition().generate(context)).append(") {\n");
 
     if (getBlock() != null) {

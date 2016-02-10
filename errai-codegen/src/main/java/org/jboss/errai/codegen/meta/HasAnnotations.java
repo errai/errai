@@ -17,14 +17,23 @@
 package org.jboss.errai.codegen.meta;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface HasAnnotations {
   public Annotation[] getAnnotations();
 
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation);
 
-  public <A extends Annotation> A getAnnotation(Class<A> annotation);
+  @SuppressWarnings("unchecked")
+  public default <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    // Please no hate or else null.
+    return (A) Arrays.stream(getAnnotations())
+            .filter(a -> a.annotationType().equals(annotation))
+            .findFirst()
+            .orElse(null);
+  }
 }

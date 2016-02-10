@@ -72,13 +72,11 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     super(context);
 
     if (context != null) {
-      for (final Variable v : context.getDeclaredVariables()) {
-    	  Matcher m = THIS_OR_SUPPER_PATTERN.matcher(v.getName());
-    	  if(m.matches()) continue;
-        appendCallElement(new DeclareVariable(v));
-      }
-      appendCallElement(new ResetCallElement());
+      context.getDeclaredVariables().stream()
+        .filter(v -> !THIS_OR_SUPPER_PATTERN.matcher(v.getName()).matches())
+        .forEach(v -> appendCallElement(new DeclareVariable(v)));
     }
+    appendCallElement(new ResetCallElement());
   }
 
   public static StatementBegin create() {
@@ -169,7 +167,6 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return declareVariable(Variable.create(name, type, initialization));
   }
 
-
   @Override
   public StatementBuilder declareFinalVariable(final String name, final Class<?> type) {
     return declareVariable(Variable.createFinal(name, type));
@@ -202,7 +199,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   @Override
   public VariableReferenceContextualStatementBuilder loadVariable(final String name, final Object... indexes) {
-    Matcher m = THIS_PATTERN.matcher(name);
+    final Matcher m = THIS_PATTERN.matcher(name);
     if (m.matches()) {
       return loadClassMember(name.replaceFirst("(this\\.)", ""), indexes);
     }

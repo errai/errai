@@ -39,13 +39,12 @@ public class ForLoop extends AbstractConditionalBlock {
     this.initializer = initializer;
     this.afterBlock = afterBlock;
   }
-
   
   String generatedCache;
   @Override
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
-    StringBuilder builder = new StringBuilder("for (");
+    final StringBuilder builder = new StringBuilder("for (");
 
     if (initializer != null) {
       builder.append(initializer.generate(context));

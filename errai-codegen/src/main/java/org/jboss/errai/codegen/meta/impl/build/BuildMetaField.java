@@ -51,7 +51,7 @@ public class BuildMetaField extends MetaField implements Builder {
 
   private String fieldComment;
 
-  private List<Annotation> annotations = new ArrayList<Annotation>();
+  private final List<Annotation> annotations = new ArrayList<Annotation>();
 
 
   public BuildMetaField(BuildMetaClass declaringClass, Statement statement, Scope scope, MetaClass type, String name) {
@@ -142,16 +142,6 @@ public class BuildMetaField extends MetaField implements Builder {
     return false;
   }
 
-  @Override
-  public <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation)) {
-        return (A) a;
-      }
-    }
-    return null;
-  }
-
   public void setDeclaringClass(BuildMetaClass declaringClass) {
     this.declaringClass = declaringClass;
   }
@@ -202,13 +192,13 @@ public class BuildMetaField extends MetaField implements Builder {
 
   @Override
   public String toJavaString() {
-    StringBuilder builder = new StringBuilder(25);
+    final StringBuilder builder = new StringBuilder(25);
     if (fieldComment != null) {
       builder.append(new Comment(fieldComment).generate(null)).append('\n');
     }
 
     if (!annotations.isEmpty()) {
-      for (Annotation a : getAnnotations()) {
+      for (final Annotation a : getAnnotations()) {
         builder.append(new AnnotationLiteral(a).getCanonicalString(Context.create())).append(" ");
       }
     }

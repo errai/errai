@@ -40,7 +40,7 @@ public class StringStatement extends AbstractStatement {
     return new StringStatement(statement, returnType);
   }
 
-  public static StringStatement of(final String statement, final Class returnType) {
+  public static StringStatement of(final String statement, final Class<?> returnType) {
     return of(statement, MetaClassFactory.get(returnType));
   }
 

@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.builder.impl;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.enterprise.util.TypeLiteral;
@@ -61,9 +62,7 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
 
   @Override
   public MethodBlockBuilder<T> annotatedWith(final Annotation... annotations) {
-    for (final Annotation a : annotations) {
-      this.annotations.add(a);
-    }
+    Arrays.stream(annotations).forEach(a -> this.annotations.add(a));
     return this;
   }
 

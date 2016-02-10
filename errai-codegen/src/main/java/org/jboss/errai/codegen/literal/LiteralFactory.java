@@ -19,11 +19,9 @@ package org.jboss.errai.codegen.literal;
 import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
@@ -32,9 +30,6 @@ import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.exception.NotLiteralizableException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
 
 /**
  * The literal factory provides a LiteralValue for the specified object (if possible).
@@ -79,13 +74,8 @@ public class LiteralFactory {
     return getLiteral(context, o, true);
   }
 
-  private static final RenderCacheStore<Object, LiteralValue<?>> CLASS_LITERAL_RENDER_CACHE
-      = new RenderCacheStore<Object, LiteralValue<?>>() {
-    @Override
-    public String getName() {
-      return "LITERAL_CACHE_STORE";
-    }
-  };
+  private static final RenderCacheStore<Object, LiteralValue<?>> CLASS_LITERAL_RENDER_CACHE = 
+          () -> "LITERAL_CACHE_STORE";
 
   /**
    * Implementation for the public getLiteral() methods.

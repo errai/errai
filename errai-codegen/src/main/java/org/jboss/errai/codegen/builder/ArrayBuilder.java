@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ArrayBuilder extends Statement, Builder {
-//  public ArrayInitializationBuilder newArray(Class<?> componentType);
 
   public ArrayInitializationBuilder newArray(MetaClass componentType, Object... dimensions);
 

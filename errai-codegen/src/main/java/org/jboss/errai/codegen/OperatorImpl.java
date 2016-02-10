@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen;
 
+import java.util.Arrays;
+
 import org.jboss.errai.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -67,11 +69,6 @@ public class OperatorImpl implements Operator {
   @Override
   public boolean canBeApplied(MetaClass clazz) {
     if (constraints.length == 0) return true;
-
-    for (final MetaClass mc : constraints) {
-      if (mc.asBoxed().isAssignableFrom(clazz.asBoxed())) return true;
-    }
-
-    return false;
+    return Arrays.stream(constraints).anyMatch(mc -> mc.asBoxed().isAssignableFrom(clazz.asBoxed()));
   }
 }

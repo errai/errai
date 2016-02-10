@@ -31,7 +31,7 @@ public class DoWhileLoop extends AbstractConditionalBlock {
 
   @Override
   public String generate(Context context) {
-    StringBuilder builder = new StringBuilder("do {\n");
+    final StringBuilder builder = new StringBuilder("do {\n");
 
     if (getBlock() != null) {
       builder.append(getBlock().generate(context));

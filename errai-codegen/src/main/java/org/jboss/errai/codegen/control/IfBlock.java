@@ -26,7 +26,7 @@ import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IfBlock extends AbstractConditionalBlock {
-  private BlockStatement elseBlock = new BlockStatement();
+  private final BlockStatement elseBlock = new BlockStatement();
   private IfBlock elseIfBlock;
 
   public IfBlock(BooleanExpression condition) {
@@ -56,7 +56,7 @@ public class IfBlock extends AbstractConditionalBlock {
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
     
-    StringBuilder builder = new StringBuilder("if ");
+    final StringBuilder builder = new StringBuilder("if ");
     builder.append("(").append(getCondition().generate(context)).append(") ");
 
     builder.append("{\n");

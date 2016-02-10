@@ -16,12 +16,14 @@
 
 package org.jboss.errai.codegen.meta.impl;
 
+import static java.util.stream.Collectors.collectingAndThen;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jboss.errai.codegen.meta.BeanDescriptor;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -277,23 +280,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return meth;
   }
 
-
   private MetaMethod[] getStaticMethods() {
     if (staticMethodCache != null) {
       return staticMethodCache;
     }
 
-    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
-
-    for (final MetaMethod method : getMethods()) {
-      if (method.isStatic()) {
-        methods.add(method);
-      }
-    }
-
-    return staticMethodCache = methods.toArray(new MetaMethod[methods.size()]);
+    return staticMethodCache = Arrays.stream(getMethods()).filter(m -> m.isStatic()).toArray(s -> new MetaMethod[s]);
   }
-
 
   @Override
   public MetaConstructor getBestMatchingConstructor(final Class... parameters) {
@@ -337,16 +330,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
-    for (final Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation))
-        return (A) a;
-    }
-    return null;
-  }
-
-  // docs inherited from superclass
-  @Override
   public final List<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
     final List<MetaMethod> methods = new ArrayList<MetaMethod>();
     MetaClass scanTarget = this;
@@ -358,19 +341,14 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       }
       scanTarget = scanTarget.getSuperClass();
     }
-    return Collections.unmodifiableList(methods); // in case we want to cache this in the future
+    return Collections.unmodifiableList(methods);
   }
 
   @Override
   public List<MetaMethod> getDeclaredMethodsAnnotatedWith(Class<? extends Annotation> annotation) {
-    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
-    for (final MetaMethod m : getDeclaredMethods()) {
-      if (m.isAnnotationPresent(annotation)) {
-        methods.add(m);
-      }
-    }
-
-    return Collections.unmodifiableList(methods); // in case we want to cache
+    return Arrays.stream(getDeclaredMethods())
+      .filter(m -> m.isAnnotationPresent(annotation))
+      .collect(collectingAndThen(Collectors.toList(), l -> Collections.unmodifiableList(l)));
   }
 
   @Override
@@ -397,16 +375,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return true;
     }
     else {
-      for (final Annotation a : root.getAnnotations()) {
-        if (_findMetaAnnotation(a.annotationType(), annotation)) {
-          return true;
-        }
-      }
+      return Arrays.stream(root.getAnnotations()).anyMatch(a -> _findMetaAnnotation(a.annotationType(), annotation));
     }
-    return false;
   }
 
-  // docs inherited from superclass
   @Override
   public final List<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
     final List<MetaField> fields = new ArrayList<MetaField>();
@@ -419,7 +391,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       }
       scanTarget = scanTarget.getSuperClass();
     }
-    return Collections.unmodifiableList(fields); // in case we want to cache this in the future
+    return Collections.unmodifiableList(fields);
   }
 
   @Override
@@ -600,7 +572,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         cls = Class.forName(getInternalName().replace('/', '.'), false,
             Thread.currentThread().getContextClassLoader());
       }
-      catch (ClassNotFoundException e) {
+      catch (final ClassNotFoundException e) {
         e.printStackTrace();
         cls = null;
       }
@@ -609,7 +581,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       try {
         cls = Thread.currentThread().getContextClassLoader().loadClass(getFullyQualifiedName());
       }
-      catch (ClassNotFoundException e) {
+      catch (final ClassNotFoundException e) {
         // ignore.
       }
     }
@@ -782,25 +754,25 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public int hashContent() {
     if (contentString == null) {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       if (getAnnotations() != null) {
-        for (Annotation a : getAnnotations()) {
+        for (final Annotation a : getAnnotations()) {
           sb.append(a.toString());
         }
       }
-      for (MetaMethod c : getDeclaredConstructors()) {
+      for (final MetaMethod c : getDeclaredConstructors()) {
         sb.append(c.toString());
       }
-      for (MetaField f : getDeclaredFields()) {
+      for (final MetaField f : getDeclaredFields()) {
         sb.append(f.toString());
       }
-      for (MetaMethod m : getDeclaredMethods()) {
+      for (final MetaMethod m : getDeclaredMethods()) {
         sb.append(m.toString());
       }
-      for (MetaClass i : getInterfaces()) {
+      for (final MetaClass i : getInterfaces()) {
         sb.append(i.getFullyQualifiedNameWithTypeParms());
       }
-      for (MetaClass dc : getDeclaredClasses()) {
+      for (final MetaClass dc : getDeclaredClasses()) {
         sb.append(dc.getFullyQualifiedNameWithTypeParms());
       }
       if (getSuperClass() != null) {

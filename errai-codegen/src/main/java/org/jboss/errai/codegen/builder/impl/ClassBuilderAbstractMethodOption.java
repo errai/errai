@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
@@ -28,15 +31,13 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaMethod;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructureBuilderAbstractMethodOption> 
     implements ClassStructureBuilderAbstractMethodOption {
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   ClassBuilderAbstractMethodOption(ClassBuilder that, Context context) {
     super(that, context);
   }

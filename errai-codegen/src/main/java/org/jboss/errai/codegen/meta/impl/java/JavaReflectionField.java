@@ -52,15 +52,6 @@ public class JavaReflectionField extends MetaField {
     return _annotationsCache = field.getAnnotations();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
-    for (final Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation)) return (A) a;
-    }
-    return null;
-  }
-
   @Override
   public MetaType getGenericType() {
     return JavaReflectionUtil.fromType(field.getGenericType());

@@ -16,11 +16,11 @@
 
 package org.jboss.errai.codegen.builder;
 
-import org.jboss.errai.codegen.InnerClass;
-import org.jboss.errai.codegen.Statement;
-
 import java.util.Collection;
 import java.util.List;
+
+import org.jboss.errai.codegen.InnerClass;
+import org.jboss.errai.codegen.Statement;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

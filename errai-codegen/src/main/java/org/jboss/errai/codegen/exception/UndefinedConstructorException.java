@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.exception;
 
+import java.util.Arrays;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 
 /**
@@ -52,12 +54,10 @@ public class UndefinedConstructorException extends GenerationException {
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder(128);
+    final StringBuilder buf = new StringBuilder(128);
 
     buf.append(super.toString()).append(": class:").append(type.getFullyQualifiedName()).append(" parameterTypes:");
-    for (MetaClass type : parameterTypes) {
-      buf.append(type.getFullyQualifiedName()).append(" ");
-    }
+    Arrays.stream(parameterTypes).forEach(type -> buf.append(type.getFullyQualifiedName()).append(" "));
     return buf.toString();
   }
 }

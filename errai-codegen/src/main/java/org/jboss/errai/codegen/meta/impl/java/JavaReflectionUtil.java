@@ -21,9 +21,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,31 +45,14 @@ public class JavaReflectionUtil {
     }
   }
 
-
   public static MetaTypeVariable[] fromTypeVariable(final TypeVariable<?>[] typeVariables) {
-    final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>(typeVariables.length);
-
-    for (final TypeVariable<?> typeVariable : typeVariables) {
-      typeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
-    }
-
-    return typeVariableList.toArray(new MetaTypeVariable[typeVariableList.size()]);
+    return Arrays.stream(typeVariables)
+            .map(t -> new JavaReflectionTypeVariable(t)).toArray(s -> new MetaTypeVariable[s]);
   }
 
   public static MetaType[] fromTypeArray(final Type[] types) {
-    final List<MetaType> typeList = new ArrayList<MetaType>();
-
-    for (final Type t : types) {
-      typeList.add(fromType(t));
-    }
-
-    return typeList.toArray(new MetaType[types.length]);
+    return Arrays.stream(types).map(t -> fromType(t)).toArray(s -> new MetaType[s]);
   }
-
-
-
-
-
 
   /**
    * Returns an instance of the appropriate MetaType that wraps the given Java

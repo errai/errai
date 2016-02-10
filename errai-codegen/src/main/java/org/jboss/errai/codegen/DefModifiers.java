@@ -16,11 +16,11 @@
 
 package org.jboss.errai.codegen;
 
-import org.jboss.errai.codegen.builder.Builder;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.jboss.errai.codegen.builder.Builder;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -57,11 +57,7 @@ public class DefModifiers implements Builder {
   @Override
   public String toJavaString() {
     final StringBuilder stringBuilder = new StringBuilder(128);
-
-    for (final Modifier m : modifiers) {
-      stringBuilder.append(m.getCanonicalString()).append(" ");
-    }
-
+    modifiers.stream().forEach(m -> stringBuilder.append(m.getCanonicalString()).append(" "));
     return stringBuilder.toString().trim();
   }
 }

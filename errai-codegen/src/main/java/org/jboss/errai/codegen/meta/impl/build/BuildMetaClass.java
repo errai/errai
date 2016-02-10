@@ -44,7 +44,6 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrettyPrinter;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
 
 /**
@@ -219,18 +218,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   @Override
   public MetaField[] getFields() {
     if (_fieldsCache == null) {
-      final List<MetaField> publicFields = Lists.newArrayList();
-      for (BuildMetaField field : fields) {
-        if (field.isPublic()) {
-          publicFields.add(field);
-        }
-      }
-      _fieldsCache = publicFields.toArray(new MetaField[publicFields.size()]);
+      _fieldsCache = fields.stream().filter(field -> field.isPublic()).toArray(size -> new MetaField[size]);
       if (superClass != null) {
         _fieldsCache = ObjectArrays.concat(_fieldsCache, superClass.getFields(), MetaField.class);
       }
     }
-
     return _fieldsCache;
   }
 
@@ -247,13 +239,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public MetaField getField(final String name) {
-    for (final MetaField field : fields) {
-      if (field.getName().equals(name)) {
-        return field;
-      }
-    }
-
-    return null;
+    return fields.stream().filter(f -> f.getName().equals(name)).findFirst().orElse(null);
   }
 
   @Override
@@ -538,25 +524,6 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return super.getBestMatchingConstructor(parameters);
   }
 
-  private MetaMethod findReifiedVersion(final MetaMethod formOf) {
-    for (final BuildMetaMethod method : methods) {
-      if (method.getReifiedFormOf().equals(formOf)) {
-        return method;
-      }
-    }
-    return null;
-  }
-
-  private MetaConstructor findReifiedVersion(final MetaConstructor formOf) {
-    for (final BuildMetaConstructor method : constructors) {
-      if (method.getReifiedFormOf().equals(formOf)) {
-        return method;
-      }
-    }
-    return null;
-  }
-
-
   @Override
   public MetaClass asArrayOf(final int dimensions) {
     final BuildMetaClass copy = shallowCopy();
@@ -810,10 +777,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     GenUtil.setPermissiveMode(_permissiveMode);
 
     if (!_permissiveMode) {
-      // verification pass.
-      for (final Builder builder : toBuild) {
-        builder.toJavaString();
-      }
+      toBuild.stream().forEach(builder -> builder.toJavaString());
     }
     return fieldRenderBuffer;
   }

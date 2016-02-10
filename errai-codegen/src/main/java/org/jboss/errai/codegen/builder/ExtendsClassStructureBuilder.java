@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
+@SuppressWarnings("rawtypes")
 public interface ExtendsClassStructureBuilder extends ClassStructureBuilder, ClosedBlock {
   public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesConstructor(MetaClass... parms);
 
@@ -41,8 +42,6 @@ public interface ExtendsClassStructureBuilder extends ClassStructureBuilder, Clo
 
   public BlockBuilder<ExtendsClassStructureBuilder> packageOverridesConstructor(Class<?>... parms);
 
-
-  // -- //
 
   public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesMethod(MetaClass returnType, String name,
                                                                           MetaClass... parms);
@@ -70,8 +69,5 @@ public interface ExtendsClassStructureBuilder extends ClassStructureBuilder, Clo
 
   public BlockBuilder<ExtendsClassStructureBuilder> packageOverridesMethod(Class<?> returnType, String name,
                                                                            Class<?>... parms);
-
-  // -- //
-
 
 }

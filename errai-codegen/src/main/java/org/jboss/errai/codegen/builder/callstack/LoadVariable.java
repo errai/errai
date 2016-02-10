@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.builder.callstack;
 
+import java.util.Arrays;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.VariableReference;
@@ -32,8 +34,8 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoadVariable extends AbstractCallElement {
-  private String variableName;
-  private Object[] indexes;
+  private final String variableName;
+  private final Object[] indexes;
   private boolean classMember;
 
   public LoadVariable(final String variableName, final Object... indexes) {
@@ -88,10 +90,7 @@ public class LoadVariable extends AbstractCallElement {
           final StringBuilder buf = new StringBuilder((classMember
                   && context.isAmbiguous(ref.getName()) ? "this." : "").concat(getName()));
   
-          for (final Statement s : idx) {
-            buf.append('[').append(s.generate(context)).append(']');
-          }
-  
+          Arrays.stream(idx).forEach(s -> buf.append('[').append(s.generate(context)).append(']'));
           return generatedCache = buf.toString();
         }
   
@@ -121,7 +120,7 @@ public class LoadVariable extends AbstractCallElement {
       ref.setIndexes(idx);
       nextOrReturn(writer, context, stmt);
     } 
-    catch (GenerationException e) {
+    catch (final GenerationException e) {
       blameAndRethrow(e);
     }
   }

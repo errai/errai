@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.builder.impl.Scope;
@@ -25,8 +27,6 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock
@@ -135,7 +135,6 @@ public class GWTSpecialMethod extends MetaMethod {
   @Override
   public boolean isStatic() {
     return modifiers.hasModifier(Modifier.Static);
-
   }
 
   @Override

@@ -29,10 +29,8 @@ import org.jboss.errai.codegen.builder.LoopBuilder;
 import org.jboss.errai.codegen.builder.StatementEnd;
 import org.jboss.errai.codegen.builder.WhileBuilder;
 import org.jboss.errai.codegen.builder.callstack.CallElement;
-import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.builder.callstack.ConditionalBlockCallElement;
 import org.jboss.errai.codegen.builder.callstack.DeferredCallElement;
-import org.jboss.errai.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.codegen.control.DoWhileLoop;
 import org.jboss.errai.codegen.control.ForLoop;
 import org.jboss.errai.codegen.control.ForeachLoop;
@@ -73,15 +71,12 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
   }
   
   private CallElement foreachCallElement(final BlockStatement body, final String loopVarName, final MetaClass loopVarType, final boolean nullSafe) {
-    return new DeferredCallElement(new DeferredCallback() {
-      @Override
-      public void doDeferred(CallWriter writer, Context context, Statement statement) {
-          GenUtil.assertIsIterable(statement);
-          final Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType, context);
-          final String collection = writer.getCallString();
-          writer.reset();
-          writer.append(new ForeachLoop(loopVar, collection, body, nullSafe).generate(Context.create(context)));
-      }
+    return new DeferredCallElement((writer, context, statement) -> {
+        GenUtil.assertIsIterable(statement);
+        final Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType, context);
+        final String collection = writer.getCallString();
+        writer.reset();
+        writer.append(new ForeachLoop(loopVar, collection, body, nullSafe).generate(Context.create(context)));
     });
   }
   
@@ -206,7 +201,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
   private Variable createForEachLoopVar(Statement collection, String loopVarName, MetaClass providedLoopVarType, Context context) {
     // infer the loop variable type
     MetaClass loopVarType = MetaClassFactory.get(Object.class);
-    MetaParameterizedType parameterizedType = collection.getType().getParameterizedType();
+    final MetaParameterizedType parameterizedType = collection.getType().getParameterizedType();
     if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0 && 
             parameterizedType.getTypeParameters()[0] instanceof MetaClass) {
       loopVarType = (MetaClass) parameterizedType.getTypeParameters()[0];
@@ -221,7 +216,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
       loopVarType = providedLoopVarType;
     }
 
-    Variable loopVar = Variable.create(loopVarName, loopVarType);
+    final Variable loopVar = Variable.create(loopVarName, loopVarType);
     context.addVariable(loopVar);
     return loopVar;
   }

@@ -16,6 +16,12 @@
 
 package org.jboss.errai.codegen.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Modifier;
@@ -41,12 +47,6 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.DataConversion;
 import org.mvel2.util.NullType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -69,13 +69,7 @@ public class GenUtil {
   }
 
   public static Statement[] generateCallParameters(final Context context, final Object... parameters) {
-    final Statement[] statements = new Statement[parameters.length];
-
-    int i = 0;
-    for (final Object parameter : parameters) {
-      statements[i++] = generate(context, parameter);
-    }
-    return statements;
+    return Arrays.stream(parameters).map(p -> generate(context, p)).toArray(s -> new Statement[s]);
   }
 
   public static Statement[] generateCallParameters(final MetaMethod method,
@@ -98,7 +92,7 @@ public class GenUtil {
       try {
         statements[i] = convert(context, parameter, methParms[i++].getType());
       }
-      catch (GenerationException t) {
+      catch (final GenerationException t) {
         t.appendFailureInfo("in method call: "
             + method.getDeclaringClass().getFullyQualifiedName()
             + "." + method.getName() + "(" + Arrays.toString(methParms) + ")");
@@ -216,7 +210,7 @@ public class GenUtil {
         return generate(context, input);
       }
     }
-    catch (NumberFormatException nfe) {
+    catch (final NumberFormatException nfe) {
       throw new InvalidTypeException(nfe);
     }
   }
@@ -233,19 +227,11 @@ public class GenUtil {
   }
 
   public static MetaClass[] fromParameters(final MetaParameter... parms) {
-    final List<MetaClass> parameters = new ArrayList<MetaClass>();
-    for (final MetaParameter metaParameter : parms) {
-      parameters.add(metaParameter.getType());
-    }
-    return parameters.toArray(new MetaClass[parameters.size()]);
+    return Arrays.stream(parms).map(p -> p.getType()).toArray(s -> new MetaClass[s]);
   }
 
   public static MetaClass[] classToMeta(final Class<?>[] types) {
-    final MetaClass[] metaClasses = new MetaClass[types.length];
-    for (int i = 0; i < types.length; i++) {
-      metaClasses[i] = MetaClassFactory.get(types[i]);
-    }
-    return metaClasses;
+    return Arrays.stream(types).map(t -> MetaClassFactory.get(t)).toArray(s -> new MetaClass[s]);
   }
 
   public static Scope scopeOf(final MetaClass clazz) {
@@ -455,10 +441,10 @@ public class GenUtil {
     try {
       throw t;
     }
-    catch (RuntimeException e) {
+    catch (final RuntimeException e) {
       throw e;
     }
-    catch (Throwable e) {
+    catch (final Throwable e) {
       throw new RuntimeException("generation failure at: " + error, e);
     }
   }
@@ -651,7 +637,7 @@ public class GenUtil {
 
       return DataConversion.canConvert(toClass, fromClazz);
     }
-    catch (Throwable t) {
+    catch (final Throwable t) {
       return false;
     }
   }

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import java.util.Arrays;
+
 import org.jboss.errai.codegen.AssignmentOperator;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
@@ -68,9 +70,7 @@ public class AssignmentBuilder implements Statement {
     if (indexes==null || indexes.length == 0) return "";
    
     final StringBuilder buf = new StringBuilder(128);
-    for (final Statement index : indexes) {
-      buf.append("[").append(index.generate(context)).append("]");
-    }
+    Arrays.stream(indexes).forEach(index -> buf.append("[").append(index.generate(context)).append("]"));
     return buf.toString();
   }
 

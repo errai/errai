@@ -17,14 +17,16 @@
 package org.jboss.errai.codegen.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-import org.jboss.errai.codegen.meta.*;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
@@ -55,13 +57,9 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaParameter[] getParameters() {
-    final List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
-
-    for (final JParameter jParameter : method.getParameters()) {
-      parameterList.add(new GWTParameter(oracle, jParameter, this));
-    }
-
-    return parameterList.toArray(new MetaParameter[parameterList.size()]);
+    return Arrays.stream(method.getParameters())
+            .map(p -> new GWTParameter(oracle, p, this))
+            .toArray(s -> new GWTParameter[s]);
   }
 
   @Override
@@ -82,10 +80,10 @@ public class GWTMethod extends MetaMethod {
   @Override
   public MetaType getGenericReturnType() {
     try {
-      JType returnType = method.getReturnType();
+      final JType returnType = method.getReturnType();
       return GWTUtil.fromType(oracle, returnType);
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException(
               "Failed to produce a generic MetaType for return type of method " +
               method.getReadableDeclaration() + " in class " +
@@ -97,12 +95,9 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaType[] getGenericParameterTypes() {
-    final List<MetaType> typeList = new ArrayList<MetaType>();
-    for (final JParameter parm : method.getParameters()) {
-      typeList.add(GWTUtil.fromType(oracle, parm.getType()));
-    }
-
-    return typeList.toArray(new MetaType[typeList.size()]);
+    return Arrays.stream(method.getParameters())
+            .map(p -> GWTUtil.fromType(oracle, p.getType()))
+            .toArray(s -> new MetaType[s]);
   }
 
   @Override

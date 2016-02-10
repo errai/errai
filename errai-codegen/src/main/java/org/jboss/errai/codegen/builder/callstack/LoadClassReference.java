@@ -47,7 +47,7 @@ public class LoadClassReference extends AbstractCallElement {
     try {
       nextOrReturn(writer, context, new ClassReference(metaClass));
     }
-    catch (GenerationException e) {
+    catch (final GenerationException e) {
       blameAndRethrow(e);
     }
   }
@@ -74,13 +74,8 @@ public class LoadClassReference extends AbstractCallElement {
     return getClassReference(metaClass, context, true);
   }
 
-  private static final RenderCacheStore<MetaType, String> CLASS_LITERAL_RENDER_CACHE =
-      new RenderCacheStore<MetaType, String>() {
-        @Override
-        public String getName() {
-          return "CLASS_LITERAL_RENDER_CACHE";
-        }
-      };
+  private static final RenderCacheStore<MetaType, String> CLASS_LITERAL_RENDER_CACHE = 
+          () -> "CLASS_LITERAL_RENDER_CACHE";
 
   public static String getClassReference(final MetaType metaClass, final Context context, final boolean typeParms) {
     final Map<MetaType, String> cacheStore = context.getRenderingCache(CLASS_LITERAL_RENDER_CACHE);
@@ -125,13 +120,8 @@ public class LoadClassReference extends AbstractCallElement {
     return buf.toString();
   }
 
-  private static final RenderCacheStore<MetaParameterizedType, String> PARMTYPE_LITERAL_RENDER_CACHE =
-          new RenderCacheStore<MetaParameterizedType, String>() {
-            @Override
-            public String getName() {
-              return "PARMTYPE_LITERAL_RENDER_CACHE";
-            }
-          };
+  private static final RenderCacheStore<MetaParameterizedType, String> PARMTYPE_LITERAL_RENDER_CACHE = 
+          () -> "PARMTYPE_LITERAL_RENDER_CACHE";
 
   private static String getClassReferencesForParameterizedTypes(final MetaParameterizedType parameterizedType,
                                                                 final Context context) {

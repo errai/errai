@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.control;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,19 +34,14 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class SwitchBlock extends AbstractStatement {
-  private List<Class<?>> supportedTypes = new ArrayList<Class<?>>() {
-    {
-      add(Integer.class);
-      add(Character.class);
-      add(Short.class);
-      add(Byte.class);
-      add(Enum.class);
-    }
-  };
+  private static final List<Class<?>> supportedTypes; 
+  static {
+    supportedTypes = new ArrayList<Class<?>>(Arrays.asList(Integer.class, Character.class, Short.class, Byte.class, Enum.class));
+  }
 
   private Statement switchExprStmt;
   private String switchExpr;
-  private Map<LiteralValue<?>, BlockStatement> caseBlocks = new LinkedHashMap<LiteralValue<?>, BlockStatement>();
+  private final Map<LiteralValue<?>, BlockStatement> caseBlocks = new LinkedHashMap<LiteralValue<?>, BlockStatement>();
   private BlockStatement defaultBlock;
 
   public SwitchBlock() {}
@@ -79,7 +75,7 @@ public class SwitchBlock extends AbstractStatement {
 
   @Override
   public String generate(Context context) {
-    StringBuilder buf = new StringBuilder("switch (");
+    final StringBuilder buf = new StringBuilder("switch (");
     if (switchExpr == null) {
       buf.append(switchExprStmt.generate(context)).append(") {\n ");
     }
@@ -90,14 +86,14 @@ public class SwitchBlock extends AbstractStatement {
     checkSwitchExprType();
 
     if (!caseBlocks.isEmpty()) {
-      for (LiteralValue<?> value : caseBlocks.keySet()) {
+      for (final LiteralValue<?> value : caseBlocks.keySet()) {
         if (!switchExprStmt.getType().getErased().asBoxed().isAssignableFrom(value.getType().getErased())) {
           throw new InvalidTypeException(
               value.generate(context) + " is not a valid value for " + switchExprStmt.getType().getFullyQualifiedName());
         }
         // case labels must be unqualified
         String val = value.generate(context);
-        int idx = val.lastIndexOf('.');
+        final int idx = val.lastIndexOf('.');
         if (idx != -1) {
           val = val.substring(idx + 1);
         }
@@ -114,13 +110,9 @@ public class SwitchBlock extends AbstractStatement {
   }
 
   private void checkSwitchExprType() {
-    boolean validType = false;
-    for (Class<?> clazz : supportedTypes) {
-      if (MetaClassFactory.get(clazz).isAssignableFrom(switchExprStmt.getType().asBoxed())) {
-        validType = true;
-        break;
-      }
-    }
+    final boolean validType = supportedTypes.stream()
+            .anyMatch(cls -> MetaClassFactory.get(cls).isAssignableFrom(switchExprStmt.getType().asBoxed()));
+
     if (!validType)
       throw new InvalidTypeException("Type not permitted in switch statements:" + 
           switchExprStmt.getType().getFullyQualifiedName());

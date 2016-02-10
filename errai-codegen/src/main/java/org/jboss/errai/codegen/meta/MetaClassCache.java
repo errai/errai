@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.meta;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.jboss.errai.common.rebind.CacheStore;
 import org.slf4j.Logger;
@@ -127,22 +127,11 @@ public class MetaClassCache implements CacheStore {
   }
 
   public Collection<MetaClass> getAllCached() {
-    final Collection<MetaClass> allCached = new ArrayList<MetaClass>(PRIMARY_CLASS_CACHE.size());
-    for (final CacheEntry cacheEntry : PRIMARY_CLASS_CACHE.values()) {
-      if (cacheEntry != null) {
-        allCached.add(cacheEntry.cachedClass);
-      }
-    }
-
-    return allCached;
+    return PRIMARY_CLASS_CACHE.values().stream().filter(c -> c != null).map(c -> c.cachedClass).collect(Collectors.toList());
   }
 
   public Collection<MetaClass> getAllNewOrUpdated() {
-    final Collection<MetaClass> newOrUpdated = new ArrayList<MetaClass>(invalidated.size());
-    for (final String fqcn : invalidated) {
-      newOrUpdated.add(PRIMARY_CLASS_CACHE.get(fqcn).cachedClass);
-    }
-    return newOrUpdated;
+    return invalidated.stream().map(fcqn -> PRIMARY_CLASS_CACHE.get(fcqn).cachedClass).collect(Collectors.toList());
   }
 
   public Set<String> getAllDeletedClasses() {

@@ -24,9 +24,7 @@ import org.jboss.errai.codegen.builder.BuildCallback;
 import org.jboss.errai.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.builder.StatementEnd;
 import org.jboss.errai.codegen.builder.TryBlockBuilder;
-import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.builder.callstack.DeferredCallElement;
-import org.jboss.errai.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.codegen.control.TryBlock;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -47,12 +45,9 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
   public BlockBuilder<CatchBlockBuilder> try_() {
     tryBlock = new TryBlock();
 
-    appendCallElement(new DeferredCallElement(new DeferredCallback() {
-      @Override
-      public void doDeferred(CallWriter writer, Context context, Statement statement) {
-        writer.reset();
-        writer.append(tryBlock.generate(Context.create(context)));
-      }
+    appendCallElement(new DeferredCallElement((writer, context, statement) -> {
+      writer.reset();
+      writer.append(tryBlock.generate(Context.create(context)));
     }));
 
     return new BlockBuilderImpl<CatchBlockBuilder>(tryBlock.getBlock(), new BuildCallback<CatchBlockBuilder>() {
@@ -75,7 +70,7 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
 
   @Override
   public BlockBuilder<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName) {
-    Variable exceptionVar = Variable.create(variableName, exceptionType);
+    final Variable exceptionVar = Variable.create(variableName, exceptionType);
     tryBlock.addCatchBlock(exceptionVar);
 
     return new BlockBuilderImpl<CatchBlockBuilder>(tryBlock.getCatchBlock(exceptionVar),

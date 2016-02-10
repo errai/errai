@@ -30,10 +30,10 @@ import org.jboss.errai.codegen.Variable;
  */
 public class ForeachLoop extends AbstractStatement {
 
-  private Variable loopVar;
-  private String collectionExpr;
-  private Statement body;
-  private boolean nullSafe;
+  private final Variable loopVar;
+  private final String collectionExpr;
+  private final Statement body;
+  private final boolean nullSafe;
 
   public ForeachLoop(Variable loopVar, String collectionExpr, Statement body, boolean nullSafe) {
     this.loopVar = loopVar;

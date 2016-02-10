@@ -62,14 +62,6 @@ public class JavaReflectionParameter extends MetaParameter {
   }
 
   @Override
-  public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
-    for (final Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation)) return (A) a;
-    }
-    return null;
-  }
-
-  @Override
   public MetaClassMember getDeclaringMember() {
     return declaredBy;
   }

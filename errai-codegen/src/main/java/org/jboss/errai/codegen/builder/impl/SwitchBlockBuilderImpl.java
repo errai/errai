@@ -24,9 +24,7 @@ import org.jboss.errai.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.codegen.builder.ContextualSwitchBlockBuilder;
 import org.jboss.errai.codegen.builder.StatementEnd;
 import org.jboss.errai.codegen.builder.SwitchBlockBuilder;
-import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.builder.callstack.DeferredCallElement;
-import org.jboss.errai.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.codegen.control.SwitchBlock;
 import org.jboss.errai.codegen.literal.ByteValue;
 import org.jboss.errai.codegen.literal.CharValue;
@@ -61,16 +59,13 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
 
   private CaseBlockBuilder switch_(final SwitchBlock switchBlock) {
     this.switchBlock = switchBlock;
-    appendCallElement(new DeferredCallElement(new DeferredCallback() {
-      @Override
-      public void doDeferred(CallWriter writer, Context context, Statement statement) {
-        if (statement != null) {
-          switchBlock.setSwitchExpr(statement);
-          switchBlock.setSwitchExpr(writer.getCallString());
-        }
-        writer.reset();
-        writer.append(switchBlock.generate(Context.create(context)));
+    appendCallElement(new DeferredCallElement((writer, context, statement) -> {
+      if (statement != null) {
+        switchBlock.setSwitchExpr(statement);
+        switchBlock.setSwitchExpr(writer.getCallString());
       }
+      writer.reset();
+      writer.append(switchBlock.generate(Context.create(context)));
     }));
 
     return this;
@@ -84,7 +79,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
 
   @Override
   public BlockBuilder<CaseBlockBuilder> case_(int value) {
-    IntValue val = (IntValue) LiteralFactory.getLiteral(value);
+    final IntValue val = (IntValue) LiteralFactory.getLiteral(value);
     return case_(val);
   }
 
@@ -96,7 +91,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   
   @Override
   public BlockBuilder<CaseBlockBuilder> case_(char value) {
-    CharValue val = (CharValue) LiteralFactory.getLiteral(value);
+    final CharValue val = (CharValue) LiteralFactory.getLiteral(value);
     return case_(val);
   }
 
@@ -108,7 +103,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   
   @Override
   public BlockBuilder<CaseBlockBuilder> case_(byte value) {
-    ByteValue val = (ByteValue) LiteralFactory.getLiteral(value);
+    final ByteValue val = (ByteValue) LiteralFactory.getLiteral(value);
     return case_(val);
   }
 
@@ -120,7 +115,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
 
   @Override
   public BlockBuilder<CaseBlockBuilder> case_(short value) {
-    ShortValue val = (ShortValue) LiteralFactory.getLiteral(value);
+    final ShortValue val = (ShortValue) LiteralFactory.getLiteral(value);
     return case_(val);
   }
 
@@ -132,7 +127,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
 
   @Override
   public BlockBuilder<CaseBlockBuilder> case_(Enum<?> value) {
-    LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(value);
+    final LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(value);
     return case_(val);
   }
   

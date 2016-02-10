@@ -32,7 +32,7 @@ import org.jboss.errai.codegen.builder.VariableDeclarationInitializer;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ContextBuilder implements Builder {
-  private Context context;
+  private final Context context;
 
   protected ContextBuilder(Context context) {
     this.context = context;
@@ -111,20 +111,16 @@ public class ContextBuilder implements Builder {
     return declareVariable(Variable.create(name, type));
   }
 
-
   @Override
   public String toJavaString() {
-    Collection<Variable> vars = context.getDeclaredVariables();
-    StringBuilder buf = new StringBuilder(128);
-
-    for (Variable var : vars) {
-      buf.append(var.generate(context)).append(";\n");
-    }
-
+    final Collection<Variable> vars = context.getDeclaredVariables();
+    final StringBuilder buf = new StringBuilder(128);
+    vars.forEach(var -> buf.append(var.generate(context)).append(";\n"));
     return buf.toString();
   }
 
   public Context getContext() {
     return context;
   }
+  
 }

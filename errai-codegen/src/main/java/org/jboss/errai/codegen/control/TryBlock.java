@@ -28,8 +28,8 @@ import org.jboss.errai.codegen.Variable;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class TryBlock extends AbstractStatement {
-  private BlockStatement block = new BlockStatement();
-  private Map<Variable, BlockStatement> catchBlocks = new LinkedHashMap<Variable, BlockStatement>();
+  private final BlockStatement block = new BlockStatement();
+  private final Map<Variable, BlockStatement> catchBlocks = new LinkedHashMap<Variable, BlockStatement>();
   private BlockStatement finallyBlock = null;
 
   public BlockStatement getBlock() {
@@ -55,12 +55,12 @@ public class TryBlock extends AbstractStatement {
   @Override
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
-    StringBuilder buf = new StringBuilder("try {\n");
+    final StringBuilder buf = new StringBuilder("try {\n");
     buf.append(block.generate(context)).append("\n} ");
 
     if (!catchBlocks.isEmpty()) {
-      for (Variable exception : catchBlocks.keySet()) {
-        Context ctx = Context.create(context).addVariable(exception);
+      for (final Variable exception : catchBlocks.keySet()) {
+        final Context ctx = Context.create(context).addVariable(exception);
         buf.append("catch (").append(exception.generate(ctx)).append(") ")
             .append("{\n")
             .append(catchBlocks.get(exception).generate(ctx))
@@ -72,7 +72,7 @@ public class TryBlock extends AbstractStatement {
     }
 
     if (finallyBlock != null) {
-      Context ctx = Context.create(context);
+      final Context ctx = Context.create(context);
       buf.append(" finally {\n").append(finallyBlock.generate(ctx)).append("\n}\n");
     }
 

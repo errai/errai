@@ -30,6 +30,7 @@ public class ThrowsDeclaration extends AbstractStatement {
     this.exceptionTypes = exceptionTypes;
   }
 
+  @SuppressWarnings("unchecked")
   public static ThrowsDeclaration of(final Class<? extends Throwable>... exceptionTypes) {
     return new ThrowsDeclaration(MetaClassFactory.fromClassArray(exceptionTypes));
   }

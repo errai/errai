@@ -16,8 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -34,26 +33,14 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  */
 public class GWTUtil {
 
-  public static MetaTypeVariable[] fromTypeVariable(final TypeOracle oracle,
-                                                    final JTypeParameter[] typeParameters) {
-    final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
-
-    for (final JTypeParameter typeVariable : typeParameters) {
-      typeVariableList.add(new GWTTypeVariable(oracle, typeVariable));
-    }
-
-    return typeVariableList.toArray(new MetaTypeVariable[typeVariableList.size()]);
+  public static MetaTypeVariable[] fromTypeVariable(final TypeOracle oracle, 
+          final JTypeParameter[] typeParameters) {
+    
+    return Arrays.stream(typeParameters).map(p -> new GWTTypeVariable(oracle, p)).toArray(s -> new MetaTypeVariable[s]);
   }
 
-
-  public static MetaType[] fromTypeArray(final TypeOracle oracle, final JType[] types) {
-    final List<MetaType> typeList = new ArrayList<MetaType>();
-
-    for (final JType t : types) {
-      typeList.add(fromType(oracle, t));
-    }
-
-    return typeList.toArray(new MetaType[types.length]);
+  public static MetaType[] fromTypeArray(final TypeOracle oracle, final JType[] types) {        
+    return Arrays.stream(types).map(t -> fromType(oracle, t)).toArray(s -> new MetaType[s]);
   }
 
   private static JType getRootComponentType(JArrayType type) {
@@ -80,7 +67,7 @@ public class GWTUtil {
       }
     }
     if (t.isTypeParameter() != null) {
-      JTypeParameter tp = t.isTypeParameter();
+      final JTypeParameter tp = t.isTypeParameter();
       return MetaClassFactory.get(tp.getErasedType().getQualifiedBinaryName());
     }
     return GWTClass.newInstance(oracle, t);

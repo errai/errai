@@ -16,6 +16,16 @@
 
 package org.jboss.errai.codegen;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.jboss.errai.codegen.control.branch.Label;
 import org.jboss.errai.codegen.control.branch.LabelReference;
 import org.jboss.errai.codegen.exception.OutOfScopeException;
@@ -26,16 +36,6 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.client.api.Assert;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * This class represents a context in which {@link Statement}s are generated.
@@ -70,7 +70,7 @@ public class Context {
   private Map<String, Map<Object, Object>> renderingCache;
 
   private boolean permissiveMode = GenUtil.isPermissiveMode();
-  private Set<String> missingSymbols = new HashSet<String>();
+  private final Set<String> missingSymbols = new HashSet<String>();
 
 
   private Context() {
@@ -276,12 +276,10 @@ public class Context {
       return Collections.emptySet();
 
     final Set<String> importedClasses = new TreeSet<String>();
-    for (final String className : imports.keySet()) {
-      final String packageName = imports.get(className);
-      if (!packageName.equals("java.lang")) {
-        importedClasses.add(packageName + "." + className);
-      }
-    }
+    
+    imports.keySet().stream()
+      .filter(clsName -> !imports.get(clsName).equals("java.lang"))
+      .forEach(clsName -> importedClasses.add(imports.get(clsName) + "." + clsName));
     return importedClasses;
   }
 
@@ -502,7 +500,7 @@ public class Context {
    * @param clazz
    *     the class, interface or superclass to be considered literalizable.
    */
-  public void addLiteralizableClass(final Class clazz) {
+  public void addLiteralizableClass(final Class<?> clazz) {
     checkThread();
     addLiteralizableClass(MetaClassFactory.get(clazz));
   }
@@ -529,7 +527,7 @@ public class Context {
    *
    * @see #addLiteralizableClass(Class)
    */
-  public boolean isLiteralizableClass(final Class clazz) {
+  public boolean isLiteralizableClass(final Class<?> clazz) {
     checkThread();
     return isLiteralizableClass(MetaClassFactory.get(clazz));
   }
@@ -561,7 +559,7 @@ public class Context {
    *
    * @return the literalizable target type that matches
    */
-  public Class getLiteralizableTargetType(final Class clazz) {
+  public Class<?> getLiteralizableTargetType(final Class<?> clazz) {
     checkThread();
     return getLiteralizableTargetType(MetaClassFactory.get(clazz));
   }
@@ -578,7 +576,7 @@ public class Context {
    *
    * @return the literalizable target type that matches
    */
-  public Class getLiteralizableTargetType(final MetaClass clazz) {
+  public Class<?> getLiteralizableTargetType(final MetaClass clazz) {
     checkThread();
     Context ctx = this;
     do {
@@ -654,6 +652,7 @@ public class Context {
   }
 
   // TODO factor this out. should not be part of Context.
+  @SuppressWarnings("unchecked")
   public <K, V> Map<K, V> getRenderingCache(final RenderCacheStore<K, V> store) {
     checkThread();
     Map<K, V> cacheStore = (Map<K, V>) renderingCache.get(store.getName());
@@ -742,4 +741,5 @@ public class Context {
     checkThread();
     return Collections.unmodifiableSet(missingSymbols);
   }
+  
 }

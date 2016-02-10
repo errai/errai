@@ -16,16 +16,18 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 
-import org.jboss.errai.codegen.meta.*;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -46,13 +48,9 @@ public class GWTConstructor extends MetaConstructor {
 
   @Override
   public MetaParameter[] getParameters() {
-    final List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
-
-    for (final JParameter jParameter : constructor.getParameters()) {
-      parameterList.add(new GWTParameter(oracle, jParameter, this));
-    }
-
-    return parameterList.toArray(new MetaParameter[parameterList.size()]);
+    return Arrays.stream(constructor.getParameters())
+            .map(p -> new GWTParameter(oracle, p, this))
+            .toArray(s -> new MetaParameter[s]);
   }
 
   @Override

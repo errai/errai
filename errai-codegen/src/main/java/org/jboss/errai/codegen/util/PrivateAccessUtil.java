@@ -208,7 +208,7 @@ public class PrivateAccessUtil {
     String name =  declaringClass.getName() + "_" + method.getName();
 
     if (method.getParameters() != null) {
-      for (MetaParameter p : method.getParameters()) {
+      for (final MetaParameter p : method.getParameters()) {
        name += "_" + getTypeName(p.getType());
       }
     }

@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.builder.impl;
 import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.codegen.AbstractStatement;
@@ -61,18 +62,15 @@ public class AnonymousClassStructureBuilderImpl
           @Override
           public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
 
-            addCallable(new DeferredGenerateCallback() {
-              @Override
-              public String doGenerate(final Context context) {
-                final StringBuilder buf = new StringBuilder(256);
-                buf.append("{\n");
-                if (statement != null) {
-                  buf.append(statement.generate(Context.create(context))).append("\n");
-                }
-                buf.append("}\n");
-
-                return buf.toString();
+            addCallable(context -> {
+              final StringBuilder buf = new StringBuilder(256);
+              buf.append("{\n");
+              if (statement != null) {
+                buf.append(statement.generate(Context.create(context))).append("\n");
               }
+              buf.append("}\n");
+
+              return buf.toString();
             });
 
             return AnonymousClassStructureBuilderImpl.this;
@@ -92,28 +90,24 @@ public class AnonymousClassStructureBuilderImpl
           @Override
           public AnonymousClassStructureBuilder callback(final Statement statement) {
 
-            addCallable(new DeferredGenerateCallback() {
-              @Override
-              public String doGenerate(final Context context) {
-                final Context subContext = Context.create(context);
-                for (final Parameter parm : parameters.getParameters()) {
-                  subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
-                }
+            addCallable(context -> {
+              final Context subContext = Context.create(context);
+              parameters.getParameters()
+                .forEach(p -> subContext.addVariable(Variable.create(p.getName(), p.getType())));
 
-                final StringBuilder buf = new StringBuilder(256);
-                final String returnType = getClassReference(method.getReturnType(), context);
+              final StringBuilder buf = new StringBuilder(256);
+              final String returnType = getClassReference(method.getReturnType(), context);
 
-                buf.append("public ").append(returnType)
-                    .append(" ")
-                    .append(method.getName())
-                    .append(parameters.generate(context)).append(" {\n");
-                if (statement != null) {
-                  buf.append(statement.generate(subContext)).append("\n");
-                }
-                buf.append("}\n");
-
-                return buf.toString();
+              buf.append("public ").append(returnType)
+                  .append(" ")
+                  .append(method.getName())
+                  .append(parameters.generate(context)).append(" {\n");
+              if (statement != null) {
+                buf.append(statement.generate(subContext)).append("\n");
               }
+              buf.append("}\n");
+
+              return buf.toString();
             });
 
             return AnonymousClassStructureBuilderImpl.this;
@@ -129,11 +123,10 @@ public class AnonymousClassStructureBuilderImpl
   @Override
   public BlockBuilder<AnonymousClassStructureBuilder> publicOverridesMethod(final String name, final Parameter... args) {
     final List<MetaClass> types = new ArrayList<MetaClass>();
-    for (final Parameter arg : args) {
-      types.add(arg.getType());
-    }
+    Arrays.stream(args).forEach(a -> types.add(a.getType()));
     final MetaMethod method = classDefinition.getSuperClass()
         .getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
+    
     if (method == null)
       throw new UndefinedMethodException("Can't override (inherited method not found):"
           + classDefinition.getFullyQualifiedNameWithTypeParms() + "." + name + "(" + types + ")");
@@ -171,24 +164,16 @@ public class AnonymousClassStructureBuilderImpl
 
       final Context subContext = Context.create(context);
 
-      for (final Variable v : classDefinition.getContext().getDeclaredVariables()) {
-        subContext.addVariable(v);
-      }
-
+      classDefinition.getContext().getDeclaredVariables().forEach((v) -> subContext.addVariable(v));
       subContext.addVariable(Variable.create("this", getClassDefinition()));
-
       classDefinition.setContext(subContext);
 
       final StringBuilder buf = new StringBuilder(256);
       buf.append(classDefinition.membersToString().trim()).append("\n");
-
-      for (final DeferredGenerateCallback c : deferredGenerateCallbacks) {
-        buf.append(c.doGenerate(subContext).trim()).append('\n');
-      }
-
+      deferredGenerateCallbacks.forEach(c -> buf.append(c.doGenerate(subContext).trim()).append('\n'));
       return generatedCache = buf.toString().trim();
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       GenUtil.throwIfUnhandled("while generating: " + classDefinition.getFullyQualifiedName(), e);
       return null;
     }
