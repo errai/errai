@@ -198,6 +198,19 @@ public class Convert {
   private static final OneWayConverter<String, BigDecimal> STRING_TO_BIG_DECIMAL = new StringToBigDecimalConverter();
   private static final OneWayConverter<String, Boolean> STRING_TO_BOOLEAN = new StringToBooleanConverter();
 
+  private static final Map<Class<?>, Class<?>> boxedTypesByPrimitive = new HashMap<>();
+
+  static {
+    boxedTypesByPrimitive.put(boolean.class, Boolean.class);
+    boxedTypesByPrimitive.put(short.class, Short.class);
+    boxedTypesByPrimitive.put(int.class, Integer.class);
+    boxedTypesByPrimitive.put(long.class, Long.class);
+    boxedTypesByPrimitive.put(float.class, Float.class);
+    boxedTypesByPrimitive.put(double.class, Double.class);
+    boxedTypesByPrimitive.put(byte.class, Byte.class);
+    boxedTypesByPrimitive.put(char.class, Character.class);
+  }
+
   @SuppressWarnings("rawtypes")
   private static final Map<ConverterRegistrationKey, Converter> defaultConverters =
       new HashMap<ConverterRegistrationKey, Converter>();
@@ -211,7 +224,7 @@ public class Convert {
   public static <M, W> Converter<M, W> getConverter(final Class<M> modelValueType, final Class<W> componentValueType) {
     Converter converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, componentValueType));
     if (converter == null) {
-      converter = maybeCreateBuiltinConverter(modelValueType, componentValueType);
+      converter = maybeCreateBuiltinConverter(maybeBoxPrimitive(modelValueType), maybeBoxPrimitive(componentValueType));
     }
 
     return converter;
@@ -221,12 +234,12 @@ public class Convert {
     return value == null || value.equals("");
   }
 
-  private static <M, W> Converter<M, W> maybeCreateBuiltinConverter(final Class<M> modelValueType, final Class<W> widgetValueType) {
+  private static <M, C> Converter<M, C> maybeCreateBuiltinConverter(final Class<M> modelValueType, final Class<C> widgetValueType) {
     Assert.notNull(modelValueType);
     Assert.notNull(widgetValueType);
 
-    final OneWayConverter<M, W> modelToWidget = getOneWayConverter(modelValueType, widgetValueType);
-    final OneWayConverter<W, M> widgetToModel = getOneWayConverter(widgetValueType, modelValueType);
+    final OneWayConverter<M, C> modelToWidget = getOneWayConverter(modelValueType, widgetValueType);
+    final OneWayConverter<C, M> widgetToModel = getOneWayConverter(widgetValueType, modelValueType);
 
     if (modelToWidget == null || widgetToModel == null) {
       return null;
@@ -272,6 +285,15 @@ public class Convert {
     }
 
     return new IdentityConverter(targetType);
+  }
+
+  private static Class<?> maybeBoxPrimitive(final Class<?> type) {
+    if (type.isPrimitive()) {
+      return Assert.notNull("Unrecognized primitive " + type.getName(), boxedTypesByPrimitive.get(type));
+    }
+    else {
+      return type;
+    }
   }
 
   /**

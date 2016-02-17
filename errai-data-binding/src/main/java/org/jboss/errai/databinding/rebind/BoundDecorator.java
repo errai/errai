@@ -41,6 +41,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.databinding.client.BoundUtil;
@@ -133,7 +134,9 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       }
       else if (!(componentType.isAssignableTo(TakesValue.class)
               || componentType.isAssignableTo(BindableListChangeHandler.class)
-              || componentType.isAssignableTo(Element.class) || componentType.isAnnotationPresent(JsType.class))) {
+              || componentType.isAssignableTo(Element.class)
+              || componentType.isAnnotationPresent(JsType.class)
+              || componentType.isAssignableTo(IsElement.class))) {
         throw new GenerationException("@Bound field or method " + decorable.getName()
             + " in class " + targetClass
             + " must be assignable to Widget, TakesValue, or a DOM element type but provides: "

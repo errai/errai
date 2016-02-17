@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.function.Consumer;
 import org.jboss.errai.common.client.function.Function;
 import org.jboss.errai.common.client.function.Optional;
@@ -159,22 +160,25 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     final Converter converter = findConverter(property, getPropertyType(property), component, providedConverter);
     final String lastSubProperty = property.substring(property.lastIndexOf('.')+1);
 
-    final Optional<Function<Object, Object>> uiGetter = maybeCreateUIGetter(component);
+    final Optional<Supplier<Object>> uiGetter = maybeCreateUIGetter(component);
     final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar =
           agent -> addHandlers(component, bindOnKeyUp, uiGetter, modelUpdater(component, converter, lastSubProperty, agent));
 
     return bindHelper(component, property, converter, registrar, uiGetter, initialState);
   }
 
-  private Optional<Function<Object, Object>> maybeCreateUIGetter(final Object component) {
+  private Optional<Supplier<Object>> maybeCreateUIGetter(final Object component) {
     if (component instanceof TakesValue) {
-      return createTakesValueGetter();
+      return createTakesValueGetter((TakesValue) component);
     }
     else if (component instanceof HasText) {
-      return createHasTextGetter();
+      return createHasTextGetter((HasText) component);
+    }
+    else if (component instanceof IsElement) {
+      return maybeCreateElementValueGetter(((IsElement) component).getElement());
     }
     else if (isElement(component)) {
-      return maybeCreateElementValueGetter(component);
+      return maybeCreateElementValueGetter(BoundUtil.asElement(component));
     }
     else {
       return Optional.empty();
@@ -191,23 +195,23 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     };
   }
 
-  private Optional<Function<Object, Object>> createTakesValueGetter() {
-    return Optional.ofNullable(o -> ((TakesValue) o).getValue());
+  private Optional<Supplier<Object>> createTakesValueGetter(final TakesValue component) {
+    return Optional.ofNullable(() -> component.getValue());
   }
 
-  private Optional<Function<Object, Object>> createHasTextGetter() {
-    return Optional.ofNullable(o -> ((HasText) o).getText());
+  private Optional<Supplier<Object>> createHasTextGetter(final HasText component) {
+    return Optional.ofNullable(() -> component.getText());
   }
 
-  private Optional<Function<Object, Object>> maybeCreateElementValueGetter(final Object component) {
-    final Optional<Function<Object, Object>> uiGetter;
-    final Function<Object, ElementWrapperWidget> toWidget = o -> ElementWrapperWidget.getWidget(BoundUtil.asElement(o));
-    final ElementWrapperWidget wrapper = toWidget.apply(component);
+  private Optional<Supplier<Object>> maybeCreateElementValueGetter(final Element element) {
+    final Optional<Supplier<Object>> uiGetter;
+    final Supplier<ElementWrapperWidget> toWidget = () -> ElementWrapperWidget.getWidget(element);
+    final ElementWrapperWidget wrapper = toWidget.get();
     if (wrapper instanceof HasValue) {
-      uiGetter = Optional.ofNullable(o -> ((HasValue) toWidget.apply(o)).getValue());
+      uiGetter = Optional.ofNullable(() -> ((HasValue) toWidget.get()).getValue());
     }
     else if (wrapper instanceof HasHTML) {
-      uiGetter = Optional.ofNullable(o -> ((HasHTML) toWidget.apply(o)).getText());
+      uiGetter = Optional.ofNullable(() -> ((HasHTML) toWidget.get()).getText());
     }
     else {
       uiGetter = Optional.empty();
@@ -217,7 +221,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   private Binding bindHelper(final Object component, final String property, final Converter converter,
           final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
-          final Optional<Function<Object, Object>> uiGetter, final StateSync initialState) {
+          final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
     validatePropertyExpr(property);
 
     if (property.contains(".")) {
@@ -230,7 +234,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   private Binding bindNestedProperty(final Object component, final String property, final Converter<?, ?> converter,
           final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
-          final Optional<Function<Object,Object>> uiGetter, final StateSync initialState) {
+          final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
       final DataBinder nestedBinder = createNestedBinder(property);
       final String subProperty = property.substring(property.indexOf('.') + 1);
       final BindableProxyAgent<?> nestedAgent = ((BindableProxy<?>) nestedBinder.getModel()).getBindableProxyAgent();
@@ -266,7 +270,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   private Binding bindDirectProperty(final Object component, final String property, final Converter converter,
           final Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> handlerRegistrar,
-          final Optional<Function<Object, Object>> uiGetter, final StateSync initialState) {
+          final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
     checkComponentNotAlreadyBound(component, property);
     final Binding binding = createBinding(component, property, converter, handlerRegistrar);
     syncState(component, property, converter, uiGetter, initialState);
@@ -371,7 +375,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @return a supplier that registers handlers and returns a collection of event handler registrations.
    */
   private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> addHandlers(
-          final Object component, final boolean bindOnKeyUp, final Optional<Function<Object, Object>> uiGetter,
+          final Object component, final boolean bindOnKeyUp, final Optional<Supplier<Object>> uiGetter,
           final Consumer<Object> modelUpdater) {
     checkWidgetHasTextOrValue(component);
 
@@ -379,6 +383,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     if (component instanceof HasValue) {
       registrar = mergeHasValueChangeHandler(component, modelUpdater, registrar);
+    }
+    else if (component instanceof IsElement) {
+      registrar = mergeNativeChangeEventListener(((IsElement) component).getElement(), uiGetter, modelUpdater, registrar);
     }
     else if (isElement(component)) {
       registrar = mergeNativeChangeEventListener(component, uiGetter, modelUpdater, registrar);
@@ -398,13 +405,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeNativeChangeEventListener(
-          final Object component, final Optional<Function<Object, Object>> uiGetter,
-          final Consumer<Object> modelUpdater,
+          final Object component, final Optional<Supplier<Object>> uiGetter, final Consumer<Object> modelUpdater,
           Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
     registrar = mergeToLeft(registrar, () -> {
       final JavaScriptObject listener = wrap(() ->
         uiGetter.ifPresent(getter ->
-          modelUpdater.accept(getter.apply(component))));
+          modelUpdater.accept(getter.get())));
       addChangeEventListener(component, listener);
 
       return Collections.singletonMap(ValueChangeEvent.class, () -> removeChangeEventListener(component, listener));
@@ -646,8 +652,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       else if (component instanceof HasText) {
         updateComponentValue(newValue, (HasText) component, converter);
       }
-      else if (isElement(component)) {
-        final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(BoundUtil.asElement(component));
+      else if (component instanceof IsElement || isElement(component)) {
+        final Element element = (component instanceof IsElement ? ((IsElement) component).getElement() : BoundUtil.asElement(component));
+        final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(element);
         if (wrapper instanceof TakesValue) {
           updateComponentValue(newValue, (TakesValue) wrapper, converter);
         }
@@ -717,13 +724,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          the model value will be updated from the UI. If null no synchronization is performed.
    */
   private void syncState(final Object component, final String property, final Converter converter,
-          final Optional<Function<Object, Object>> uiGetter, final StateSync initialState) {
+          final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
     Assert.notNull(component);
     Assert.notNull(property);
 
     if (initialState != null) {
       final Object modelValue = proxy.get(property);
-      final Optional<Object> uiValue = uiGetter.map(f -> f.apply(component));
+      final Optional<Object> uiValue = uiGetter.map(f -> f.get());
 
       final Object value = uiValue.map(v -> initialState.getInitialValue(modelValue, v)).orElse(modelValue);
 
