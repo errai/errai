@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,26 @@
 
 package org.jboss.errai.ui.test.element.client.res;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.PasswordTextBox;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-import elemental.html.ButtonElement;
+import org.jboss.errai.common.client.api.IsElement;
+
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 
 /**
- *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface ElementFormComponent {
+@Dependent
+public class ElementPresenter implements IsElement {
 
-  Element getForm();
+  @Inject
+  private DivElement element;
 
-  org.jboss.errai.ui.test.common.client.dom.Element getUsername();
-
-  PasswordTextBox getPassword();
-
-  CheckBox getRememberMe();
-
-  Button getSubmit();
-
-  ButtonElement getCancel();
-
-  int getNumberOfTimesPressed();
-
-  Element getElement();
-
-  ElementPresenter getElementPresenter();
+  @Override
+  public Element getElement() {
+    return element;
+  }
 
 }

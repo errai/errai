@@ -62,6 +62,10 @@ public class NonCompositeElementFormComponent implements ElementFormComponent {
   @DataField
   private ButtonElement cancel = Browser.getDocument().createButtonElement();
 
+  @Inject
+  @DataField
+  private ElementPresenter presenter;
+
   @Override
   public Element getForm() {
     return form;
@@ -90,6 +94,11 @@ public class NonCompositeElementFormComponent implements ElementFormComponent {
   @Override
   public ButtonElement getCancel() {
     return cancel;
+  }
+
+  @Override
+  public ElementPresenter getElementPresenter() {
+    return presenter;
   }
 
   @EventHandler("cancel")

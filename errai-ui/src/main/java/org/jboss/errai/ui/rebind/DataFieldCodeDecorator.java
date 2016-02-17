@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -62,6 +63,8 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     String name = getTemplateDataFieldName((DataField) decorable.getAnnotation(), decorable.getName());
     if (decorable.getType().isAssignableTo(Element.class)) {
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
+    } else if (decorable.getType().isAssignableTo(IsElement.class)) {
+      instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.nestedCall(instance).invoke("getElement"));
     } else if (RebindUtil.isNativeJsType(decorable.getType()) || RebindUtil.isElementalIface(decorable.getType())) {
       if (decorable.getType().isAssignableTo(HasValue.class)) {
         final MetaClass valueType = decorable.getType().getMethod("getValue", new Class[0]).getReturnType();
@@ -76,7 +79,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
         instance = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", instance);
       } else {
         throw new GenerationException("Unable to use [" + name + "] in class [" + decorable.getDecorableDeclaringType()
-        + "] as a @DataField. The field must be a Widget or a DOM element as either a JavaScriptObject or native @JsType.");
+                + "] as a @DataField. The field must be a Widget or a DOM element as either a JavaScriptObject, native @JsType, or IsElement.");
       }
     }
 

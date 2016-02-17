@@ -86,6 +86,9 @@ public class ElementTemplateTest extends AbstractErraiCDITest {
     assertEquals("Button pressed incorrect number of times.", 0, app.getForm().getNumberOfTimesPressed());
     click(app.getForm().getCancel());
     assertEquals("Button pressed incorrect number of times.", 1, app.getForm().getNumberOfTimesPressed());
+
+    assertEquals("Did not copy inner text from template for element presenter div", "Inner presenter text",
+            app.getForm().getElementPresenter().getElement().getInnerText());
   }
 
   /**
