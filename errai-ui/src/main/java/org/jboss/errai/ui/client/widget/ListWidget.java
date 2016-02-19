@@ -29,6 +29,7 @@ import org.jboss.errai.common.client.ui.ValueChangeManager;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.components.ListComponent;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdapter;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
@@ -63,9 +64,11 @@ import com.google.gwt.user.client.ui.Widget;
  *          associating the widget instance with the corresponding model
  *          instance. This component must be either a {@link Widget} or
  *          a {@link Templated} bean.
+ * @deprecated Replaced by {@link ListComponent}.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@Deprecated
 public abstract class ListWidget<M, C extends HasModel<M>> extends Composite
   implements HasValue<List<M>>, BindableListChangeHandler<M> {
 

@@ -155,13 +155,13 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
       }
 
       @Override
-      public boolean isConcrete() {
-        return beanDef.isConcrete();
+      public boolean isActivated() {
+        return beanDef.isActivated();
       }
 
       @Override
-      public boolean isActivated() {
-        return beanDef.isActivated();
+      public boolean isAssignableTo(Class type) {
+        return beanDef.isAssignableTo(type);
       }
     };
 

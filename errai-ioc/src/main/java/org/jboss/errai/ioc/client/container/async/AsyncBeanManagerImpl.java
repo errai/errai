@@ -434,11 +434,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
       }
 
       @Override
-      public boolean isConcrete() {
-        return true;
-      }
-
-      @Override
       public boolean isActivated() {
         return true;
       }
@@ -446,6 +441,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
       @Override
       public String toString() {
         return BeanManagerUtil.beanDeftoString(handle);
+      }
+
+      @Override
+      public boolean isAssignableTo(final Class<?> type) {
+        return handle.getAssignableTypes().contains(type);
       }
 
     }

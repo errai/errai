@@ -16,6 +16,11 @@
 
 package org.jboss.errai.databinding.client;
 
+import javax.enterprise.context.Dependent;
+
+import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
+
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -24,12 +29,28 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Used to test bindings to widgets of custom HasValue types.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@Dependent
 public class TestModelWidget extends Widget implements HasValue<TestModel> {
 
+  @IOCProducer
+  @Qual
+  public static TestModelWidget create() {
+    return new TestModelWidget() {
+      @Override
+      public boolean isQualified() {
+        return true;
+      }
+    };
+  }
+
   private TestModel value;
+
+  public TestModelWidget() {
+    setElement(Document.get().createDivElement());
+  }
 
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<TestModel> handler) {
@@ -54,6 +75,10 @@ public class TestModelWidget extends Widget implements HasValue<TestModel> {
   @Override
   public void setValue(TestModel value, boolean fireEvents) {
     this.value = value;
+  }
+
+  public boolean isQualified() {
+    return false;
   }
 
 }

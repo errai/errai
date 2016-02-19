@@ -28,6 +28,13 @@ import org.jboss.errai.ioc.client.api.ActivatedBy;
 public interface IOCBeanDef<T> {
 
   /**
+   * @param type
+   *          Must not be null.
+   * @return True if this bean is assginable to the given type.
+   */
+  public boolean isAssignableTo(Class<?> type);
+
+  /**
    * Returns the type of the bean.
    *
    * @see #getBeanClass()
@@ -71,13 +78,6 @@ public interface IOCBeanDef<T> {
    * @return the name of the bean. If the bean does not have a name, returns null.
    */
   public String getName();
-
-  /**
-   * Returns true if the bean is a concrete bean definition and not an interface or abstract type.
-   *
-   * @return true if concrete.
-   */
-  public boolean isConcrete();
 
   /**
    * Returns true if the bean is activated. All managed beans are activated by default unless a
