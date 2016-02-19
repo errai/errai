@@ -61,6 +61,9 @@ public class BindableListWrapper<M> implements List<M>, BindableProxy<List<M>> {
 
   public BindableListWrapper(List<M> list) {
     Assert.notNull(list);
+    if (list instanceof BindableListWrapper) {
+      throw new IllegalArgumentException("Wrap a BindableListWrapper in a BindableListWrapper.");
+    }
     this.list = list;
 
     for (int i = 0; i < this.list.size(); i++) {
@@ -473,6 +476,9 @@ public class BindableListWrapper<M> implements List<M>, BindableProxy<List<M>> {
   @Override
   public void set(String propertyName, Object value) {
     if ("this".equals(propertyName)) {
+      if (value instanceof BindableListWrapper) {
+        throw new IllegalArgumentException("Cannot nest BindableListWrapper.");
+      }
       list = (List<M>) value;
     }
     else {

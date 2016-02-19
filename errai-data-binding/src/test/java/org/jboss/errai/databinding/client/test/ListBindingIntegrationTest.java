@@ -16,19 +16,26 @@
 
 package org.jboss.errai.databinding.client.test;
 
+import static org.jboss.errai.databinding.client.components.ListComponent.forIsWidgetComponent;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.jboss.errai.databinding.client.BindableListChangeHandlerComponent;
+import org.jboss.errai.databinding.client.ListComponentContainerModule;
+import org.jboss.errai.databinding.client.ListComponentModule;
+import org.jboss.errai.databinding.client.QualifiedListComponentModule;
 import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelWidget;
 import org.jboss.errai.databinding.client.TestModelWithList;
 import org.jboss.errai.databinding.client.TestModelWithListOfTestModels;
 import org.jboss.errai.databinding.client.TestModelWithListWidget;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
+import org.jboss.errai.databinding.client.components.ListComponent;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
@@ -52,33 +59,69 @@ public class ListBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   public void testListHandlerBindingToListProperty() throws Exception {
-    final BindableListChangeHandlerComponent component = new BindableListChangeHandlerComponent();
+    final ListComponent<TestModel, TestModelWidget> component = forIsWidgetComponent(TestModelWidget::new, c -> {}).inDiv();
     final TestModelWithListOfTestModels model = DataBinder.forType(TestModelWithListOfTestModels.class)
             .bind(component, "list", Convert.identityConverter(List.class)).getModel();
     model.setList(new ArrayList<>());
     final List<TestModel> list = model.getList();
-    final List<TestModel> copy = component.getValue();
     final TestModel one = new TestModel("one");
     final TestModel two = new TestModel("two");
     final TestModel three = new TestModel("three");
 
-    runTestModelListAssertions(list, copy, one, two, three);
+    runTestModelListAssertions(list, component, one, two, three);
+  }
+
+  public void testDeclarativeListHandlerBindingWithInjectedListComponent() throws Exception {
+    final ListComponentModule module = IOC.getBeanManager().lookupBean(ListComponentModule.class).getInstance();
+    final ListComponent<TestModel, TestModelWidget> component = module.list;
+    final TestModelWithListOfTestModels model = module.binder.getModel();
+    model.setList(new ArrayList<>());
+    final List<TestModel> list = model.getList();
+    final TestModel one = new TestModel("one");
+    final TestModel two = new TestModel("two");
+    final TestModel three = new TestModel("three");
+
+    list.add(one);
+    assertFalse(component.getComponent(0).isQualified());
+    assertIndexOutOfBounds(component, 1);
+    list.remove(0);
+    assertIndexOutOfBounds(component, 0);
+
+    runTestModelListAssertions(list, component, one, two, three);
+  }
+
+  public void testListComponentElementTypesThroughIOC() throws Exception {
+    final ListComponentContainerModule module = IOC.getBeanManager().lookupBean(ListComponentContainerModule.class).getInstance();
+    assertEquals("div", module.defaultComponent.getElement().getTagName().toLowerCase());
+    assertEquals("tbody", module.tableComponent.getElement().getTagName().toLowerCase());
+  }
+
+  public void testDeclarativeQualifiedListHandlerBindingWithInjectedListComponent() throws Exception {
+    final QualifiedListComponentModule module = IOC.getBeanManager().lookupBean(QualifiedListComponentModule.class).getInstance();
+    final ListComponent<TestModel, TestModelWidget> component = module.list;
+    final TestModelWithListOfTestModels model = module.binder.getModel();
+    model.setList(new ArrayList<>());
+    final List<TestModel> list = model.getList();
+    final TestModel one = new TestModel("one");
+
+    list.add(one);
+    assertTrue(component.getComponent(0).isQualified());
+    assertIndexOutOfBounds(component, 1);
   }
 
   public void testListHandlerBindingToListDirectly() throws Exception {
-    final BindableListChangeHandlerComponent component = new BindableListChangeHandlerComponent();
+    final ListComponent<TestModel, TestModelWidget> component = forIsWidgetComponent(TestModelWidget::new, c -> {}).inDiv();
     final List<TestModel> list = DataBinder.forListOfType(TestModel.class)
             .bind(component, "this", Convert.identityConverter(List.class)).getModel();
-    final List<TestModel> copy = component.getValue();
     final TestModel one = new TestModel("one");
     final TestModel two = new TestModel("two");
     final TestModel three = new TestModel("three");
 
-    runTestModelListAssertions(list, copy, one, two, three);
+    runTestModelListAssertions(list, component, one, two, three);
   }
 
   public void testListHandlerPauseAndResume() throws Exception {
-    final BindableListChangeHandlerComponent component = new BindableListChangeHandlerComponent();
+    final ListComponent<TestModel, TestModelWidget> component = forIsWidgetComponent(TestModelWidget::new, c -> {}).inDiv();
     final DataBinder<List<TestModel>> binder = DataBinder.forListOfType(TestModel.class)
             .bind(component, "this", Convert.identityConverter(List.class));
     final TestModel one = new TestModel("one");
@@ -147,34 +190,62 @@ public class ListBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals(list, component.getValue());
   }
 
-  private void runTestModelListAssertions(final List<TestModel> boundList, final List<TestModel> copyList, final TestModel one,
+  private void runTestModelListAssertions(final List<TestModel> boundList, final ListComponent<TestModel, TestModelWidget> component, final TestModel one,
           final TestModel two, final TestModel three) {
+    assertIndexOutOfBounds(component, 0);
     boundList.add(one);
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertIndexOutOfBounds(component, 1);
 
     boundList.add(three);
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertEquals(three, component.getComponent(1).getValue());
+    assertIndexOutOfBounds(component, 2);
 
     boundList.add(1, two);
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertEquals(two, component.getComponent(1).getValue());
+    assertEquals(three, component.getComponent(2).getValue());
+    assertIndexOutOfBounds(component, 3);
 
     boundList.remove(2);
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertEquals(two, component.getComponent(1).getValue());
+    assertIndexOutOfBounds(component, 2);
 
     boundList.removeAll(Collections.singleton(two));
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertIndexOutOfBounds(component, 1);
 
     boundList.addAll(Collections.singleton(three));
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertEquals(three, component.getComponent(1).getValue());
+    assertIndexOutOfBounds(component, 2);
 
     boundList.addAll(1, Collections.singleton(two));
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertEquals(two, component.getComponent(1).getValue());
+    assertEquals(three, component.getComponent(2).getValue());
+    assertIndexOutOfBounds(component, 3);
 
     boundList.get(0).setValue("one!");
-    assertEquals(boundList, copyList);
+    assertEquals(one, component.getComponent(0).getValue());
+    assertEquals(two, component.getComponent(1).getValue());
+    assertEquals(three, component.getComponent(2).getValue());
+    assertIndexOutOfBounds(component, 3);
 
     boundList.clear();
-    assertEquals(boundList, copyList);
+    assertIndexOutOfBounds(component, 0);
+  }
+
+  private static void assertIndexOutOfBounds(final ListComponent<TestModel, TestModelWidget> component, final int index) {
+    try {
+      component.getComponent(index);
+    } catch (IndexOutOfBoundsException ex) {
+      return;
+    }
+
+    fail("Index " + index + " was not out of bounds.");
   }
 
 }

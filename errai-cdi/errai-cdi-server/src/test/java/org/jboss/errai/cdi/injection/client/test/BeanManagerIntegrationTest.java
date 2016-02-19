@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.injection.client.test;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -59,8 +60,8 @@ import org.jboss.errai.cdi.injection.client.qualifier.QualV;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 /**
@@ -467,13 +468,13 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
 
       @Override
-      public boolean isConcrete() {
+      public boolean isActivated() {
         return true;
       }
 
       @Override
-      public boolean isActivated() {
-        return true;
+      public boolean isAssignableTo(Class<?> type) {
+        return Arrays.asList(Object.class, DisabledAlternativeBean.class).contains(type);
       }
     });
 
@@ -516,11 +517,6 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
 
       @Override
-      public boolean isConcrete() {
-        return true;
-      }
-
-      @Override
       public boolean isActivated() {
         return true;
       }
@@ -533,6 +529,11 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       @Override
       public InterfaceWithNamedImpls newInstance() {
         return null;
+      }
+
+      @Override
+      public boolean isAssignableTo(Class<?> type) {
+        return Arrays.asList(Object.class, InterfaceWithNamedImpls.class).contains(type);
       }
     });
 

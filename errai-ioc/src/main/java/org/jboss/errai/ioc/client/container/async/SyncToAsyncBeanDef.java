@@ -65,11 +65,6 @@ public class SyncToAsyncBeanDef<T> implements AsyncBeanDef<T> {
   }
 
   @Override
-  public boolean isConcrete() {
-    return beanDef.isConcrete();
-  }
-
-  @Override
   public boolean isActivated() {
     return beanDef.isActivated();
   }
@@ -82,6 +77,11 @@ public class SyncToAsyncBeanDef<T> implements AsyncBeanDef<T> {
   @Override
   public void newInstance(final CreationalCallback<T> callback) {
     callback.callback(beanDef.newInstance());
+  }
+
+  @Override
+  public boolean isAssignableTo(final Class<?> type) {
+    return beanDef.isAssignableTo(type);
   }
 
 }

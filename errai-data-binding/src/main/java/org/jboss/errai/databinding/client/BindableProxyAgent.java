@@ -284,7 +284,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     bindings.put(property, binding);
 
     if (propertyTypes.get(property).isList()) {
-      proxy.set(property, ensureBoundListIsProxied(property));
+      if ("this".equals(property) && proxy instanceof BindableListWrapper) {
+        addHandlersForBindableListWrapper("this", (BindableListWrapper) proxy);
+      }
+      else {
+        proxy.set(property, ensureBoundListIsProxied(property));
+      }
     }
 
     return binding;
@@ -780,23 +785,27 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   List ensureBoundListIsProxied(final String property, final List list) {
     if (!(list instanceof BindableListWrapper) && bindings.containsKey(property) && list != null) {
       final BindableListWrapper newList = new BindableListWrapper(list);
-      modelChangeHandlers.add(newList.addChangeHandler(new UnspecificListChangeHandler() {
-        @Override
-        void onListChanged(List oldList) {
-          updateWidgetsAndFireEvent(false, property, oldList, newList);
-        }
-      }));
-
-      for (final Binding binding : bindings.get(property)) {
-        if (binding.getComponent() instanceof BindableListChangeHandler) {
-          modelChangeHandlers.add(newList.addChangeHandler((BindableListChangeHandler) binding.getComponent()));
-        }
-      }
+      addHandlersForBindableListWrapper(property, newList);
 
       return newList;
     }
 
     return list;
+  }
+
+  private void addHandlersForBindableListWrapper(final String property, final BindableListWrapper newList) {
+    modelChangeHandlers.add(newList.addChangeHandler(new UnspecificListChangeHandler() {
+      @Override
+      void onListChanged(List oldList) {
+        updateWidgetsAndFireEvent(false, property, oldList, newList);
+      }
+    }));
+
+    for (final Binding binding : bindings.get(property)) {
+      if (binding.getComponent() instanceof BindableListChangeHandler) {
+        modelChangeHandlers.add(newList.addChangeHandler((BindableListChangeHandler) binding.getComponent()));
+      }
+    }
   }
 
   /**

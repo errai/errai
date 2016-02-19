@@ -259,12 +259,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     }
 
     @Override
-    public boolean isConcrete() {
-      // TODO Auto-generated method stub
-      throw new RuntimeException("Not yet implemented.");
-    }
-
-    @Override
     public boolean isActivated() {
       final Class<? extends BeanActivator> activatorType = handle.getBeanActivatorType();
       if (activatorType == null) {
@@ -273,6 +267,11 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
         final BeanActivator activator = lookupBean(activatorType).getInstance();
         return activator.isActivated();
       }
+    }
+
+    @Override
+    public boolean isAssignableTo(final Class<?> type) {
+      return handle.getAssignableTypes().contains(type);
     }
   }
 
