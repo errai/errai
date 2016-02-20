@@ -50,8 +50,8 @@ public class JBossServletContainerAdaptor extends ServletContainer {
   @SuppressWarnings("unused")
   private final Process jbossProcess;
 
-  private static final String NATIVE_CONTROLLER_PATH = "remote://localhost:9999";
-  private static final String HTTP_CONTROLLER_PATH = "http-remoting://localhost:9990";
+  private String nativeControllerPath = "remote://localhost:9999";
+  private String httpControllerPath = "http-remoting://localhost:9990";
   private static final int MAX_RETRIES = 9;
 
   /**
@@ -67,16 +67,52 @@ public class JBossServletContainerAdaptor extends ServletContainer {
    *          For logging events from this container.
    * @throws UnableToCompleteException
    *           Thrown if this container cannot properly connect or deploy.
-   */
+   */ 
+  
   public JBossServletContainerAdaptor(int port, File appRootDir, String context, TreeLogger treeLogger,
           Process jbossProcess) throws UnableToCompleteException {
+	  this(port,appRootDir,context,treeLogger,jbossProcess,null, null);
+  }
+  
+  /**
+   * Initialize the command context for a remote JBoss AS instance.
+   *
+   * @param port
+   *          The port to which the JBoss instance binds.
+   * @param appRootDir
+   *          The exploded war directory to be deployed.
+   * @param context
+   *          The deployment context for the app.
+   * @param treeLogger
+   *          For logging events from this container.
+   * @param httpRemotingAddress
+   * 		  If not null, overrides HTTP_CONTROLLER_PATH property with the specified one.
+   * @param nativeRemotingAddress
+   * 		  If not null, overrides NATIVE_CONTROLLER_PATH property with the specified one.
+   * 
+   * @throws UnableToCompleteException
+   *           Thrown if this container cannot properly connect or deploy.
+   */
+  public JBossServletContainerAdaptor(int port, File appRootDir, String context, TreeLogger treeLogger,
+          Process jbossProcess,String httpRemotingAddress, String nativeRemotingAddress ) throws UnableToCompleteException {
     this.port = port;
     logger = new StackTreeLogger(treeLogger);
     this.jbossProcess = jbossProcess;
     this.context = context;
-
+    
     logger.branch(Type.INFO, "Starting container initialization...");
+    // Overrides remoting address if and only if an ovverride is passed.
+    if (httpRemotingAddress != null && !httpRemotingAddress.trim().equalsIgnoreCase(httpControllerPath)) {
+    	logger.branch(Type.INFO, "Changing default 'httpControllerPath' property from ["+httpControllerPath+"] to ["+httpRemotingAddress+"]");
+    	httpControllerPath = httpRemotingAddress;
+    }
 
+    if (nativeRemotingAddress != null && !nativeRemotingAddress.trim().equalsIgnoreCase(nativeControllerPath)) {
+    	logger.branch(Type.INFO, "Changing default 'nativeControllerPath' property from ["+nativeControllerPath+"] to ["+nativeRemotingAddress+"]");
+    	nativeControllerPath = nativeRemotingAddress;
+    }
+
+    
     CommandContext ctx = null;
     try {
       // Create command context
@@ -184,10 +220,8 @@ public class JBossServletContainerAdaptor extends ServletContainer {
   private void attemptCommandContextConnection(final int maxRetries)
           throws UnableToCompleteException {
 
-    final String[] controllers = new String[] {
-        HTTP_CONTROLLER_PATH,
-        NATIVE_CONTROLLER_PATH
-    };
+    String[] controllers = new String[] { httpControllerPath,  nativeControllerPath  };
+    
     final String[] protocols = new String[controllers.length];
     for (int i = 0; i < controllers.length; i++) {
       protocols[i] = controllers[i].split(":", 2)[0];
