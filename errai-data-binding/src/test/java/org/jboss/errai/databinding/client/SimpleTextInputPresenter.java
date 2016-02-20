@@ -17,10 +17,10 @@
 package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.dom.HTMLElement;
+import org.jboss.errai.common.client.dom.HTMLInputElement;
 
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.InputElement;
 
 /**
  * For testing binding with IsElement that does not implement TakesValue or HasText.
@@ -29,10 +29,10 @@ import com.google.gwt.dom.client.InputElement;
  */
 public class SimpleTextInputPresenter implements IsElement {
 
-  private InputElement element = Document.get().createTextInputElement();
+  private HTMLInputElement element = (HTMLInputElement) Document.get().createTextInputElement();
 
   @Override
-  public Element getElement() {
+  public HTMLElement getElement() {
     return element;
   }
 

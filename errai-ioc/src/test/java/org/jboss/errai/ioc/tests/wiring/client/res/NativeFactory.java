@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
+import org.jboss.errai.common.client.api.annotations.IOCProducer;
 
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;

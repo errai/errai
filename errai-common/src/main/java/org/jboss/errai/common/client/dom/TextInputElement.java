@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.shared.api.annotations;
+package org.jboss.errai.common.client.dom;
 
-import javax.inject.Named;
+import org.jboss.errai.common.client.api.annotations.Element;
+import org.jboss.errai.common.client.api.annotations.Property;
 
 import jsinterop.annotations.JsType;
 
 /**
- * Marks a native {@link JsType} as a wrapper for a DOM element. {@link Element#value()} are the tag names of the
- * element. Errai IoC will generate code calling {@code document.createElement} for injecting instances of types
- * annotated with {@linkplain Element}. When multiple tag names are specified, injection sites must use {@link Named} to
- * remove ambiguity at injection sites.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public @interface Element {
-
-  String[] value();
+@JsType(isNative = true)
+@Element("input")
+@Property(name = "type", value = "text")
+public interface TextInputElement extends HTMLInputElement {
 
 }

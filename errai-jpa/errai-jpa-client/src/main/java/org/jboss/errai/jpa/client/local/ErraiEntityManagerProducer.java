@@ -18,7 +18,7 @@ package org.jboss.errai.jpa.client.local;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
+import org.jboss.errai.common.client.api.annotations.IOCProducer;
 
 import com.google.gwt.core.client.GWT;
 

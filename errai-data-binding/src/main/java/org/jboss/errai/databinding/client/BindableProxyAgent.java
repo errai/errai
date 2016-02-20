@@ -175,7 +175,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       return createHasTextGetter((HasText) component);
     }
     else if (component instanceof IsElement) {
-      return maybeCreateElementValueGetter(((IsElement) component).getElement());
+      return maybeCreateElementValueGetter(BoundUtil.asElement(((IsElement) component).getElement()));
     }
     else if (isElement(component)) {
       return maybeCreateElementValueGetter(BoundUtil.asElement(component));
@@ -658,7 +658,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         updateComponentValue(newValue, (HasText) component, converter);
       }
       else if (component instanceof IsElement || isElement(component)) {
-        final Element element = (component instanceof IsElement ? ((IsElement) component).getElement() : BoundUtil.asElement(component));
+        final Element element = BoundUtil.asElement(component instanceof IsElement ? ((IsElement) component).getElement() : component);
         final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(element);
         if (wrapper instanceof TakesValue) {
           updateComponentValue(newValue, (TakesValue) wrapper, converter);

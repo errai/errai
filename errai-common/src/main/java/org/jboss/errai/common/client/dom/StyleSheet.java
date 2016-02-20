@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api.builtin;
+package org.jboss.errai.common.client.dom;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import javax.enterprise.inject.Produces;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
- * Indicates that the annotated field or method produces a managed bean.
  *
- * @see Produces
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Documented
-@Retention(RUNTIME)
-@Target({FIELD, METHOD})
-public @interface IOCProducer {
+@JsType(isNative = true)
+public interface StyleSheet {
+  @JsProperty String getType();
 
+  @JsProperty boolean getDisabled();
+  @JsProperty void setDisabled(boolean disabled);
+
+  @JsProperty Node getOwnerNode();
+  @JsProperty StyleSheet getParentStyleSheet();
+  @JsProperty String getHref();
+  @JsProperty String getTitle();
+  @JsProperty MediaList getMedia();
 }
