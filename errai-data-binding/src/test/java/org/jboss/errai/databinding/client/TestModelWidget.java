@@ -18,7 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import javax.enterprise.context.Dependent;
 
-import org.jboss.errai.ioc.client.api.builtin.IOCProducer;
+import org.jboss.errai.common.client.api.annotations.IOCProducer;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;

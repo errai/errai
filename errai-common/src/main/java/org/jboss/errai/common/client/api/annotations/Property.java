@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.shared.api.annotations;
+package org.jboss.errai.common.client.api.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import javax.inject.Qualifier;
 
 /**
  * Used when declaring a type with {@link Element}. Indicates that the declared {@link Element} will have the property,
@@ -31,7 +29,6 @@ import javax.inject.Qualifier;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Qualifier
 @Documented
 @Target(ElementType.TYPE)
 public @interface Property {

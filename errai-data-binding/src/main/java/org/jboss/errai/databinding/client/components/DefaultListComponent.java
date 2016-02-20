@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.function.Consumer;
 import org.jboss.errai.common.client.function.Function;
 import org.jboss.errai.common.client.function.Supplier;
 
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.TakesValue;
 
@@ -44,10 +44,10 @@ public class DefaultListComponent<M, C extends TakesValue<M>> implements ListCom
   private final Collection<Consumer<C>> creationHandlers = new ArrayList<>();
   private final Collection<Consumer<C>> destructionHandlers = new ArrayList<>();
 
-  private final Element root;
+  private final HTMLElement root;
   private final Supplier<C> supplier;
   private final Consumer<C> destroyer;
-  private final Function<C, Element> elementAccessor;
+  private final Function<C, HTMLElement> elementAccessor;
   private final List<C> components = new ArrayList<>();
   private List<M> value;
   private Consumer<C> selector = c -> {};
@@ -55,7 +55,7 @@ public class DefaultListComponent<M, C extends TakesValue<M>> implements ListCom
 
   private final Set<C> selected = Collections.newSetFromMap(new IdentityHashMap<>());
 
-  public DefaultListComponent(final Element root, final Supplier<C> supplier, final Consumer<C> destroyer, final Function<C, Element> elementAccessor) {
+  public DefaultListComponent(final HTMLElement root, final Supplier<C> supplier, final Consumer<C> destroyer, final Function<C, HTMLElement> elementAccessor) {
     this.root = root;
     this.supplier = supplier;
     this.destroyer = destroyer;
@@ -77,7 +77,7 @@ public class DefaultListComponent<M, C extends TakesValue<M>> implements ListCom
   }
 
   @Override
-  public Element getElement() {
+  public HTMLElement getElement() {
     return root;
   }
 
@@ -168,20 +168,21 @@ public class DefaultListComponent<M, C extends TakesValue<M>> implements ListCom
     for (final Consumer<C> handler : destructionHandlers) {
       handler.accept(component);
     }
-    elementAccessor.apply(component).removeFromParent();
+    final HTMLElement element = elementAccessor.apply(component);
+    element.getParentNode().removeChild(element);
     destroyer.accept(component);
   }
 
   private void addComponent(final int index, final M item) {
     final C component = createComponent(item);
-    components.add(index, component);
-    final Element element = elementAccessor.apply(component);
-    if (index == 0) {
-      root.insertFirst(element);
+    final HTMLElement element = Assert.notNull(elementAccessor.apply(component));
+    if (index < components.size()) {
+      root.insertBefore(element, Assert.notNull(elementAccessor.apply(components.get(index))));
     }
     else {
-      root.insertAfter(element, elementAccessor.apply(components.get(index-1)));
+      root.appendChild(element);
     }
+    components.add(index, component);
     for (final Consumer<C> handler : creationHandlers) {
       handler.accept(component);
     }

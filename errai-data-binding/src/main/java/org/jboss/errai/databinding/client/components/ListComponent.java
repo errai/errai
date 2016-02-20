@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.function.Consumer;
 import org.jboss.errai.common.client.function.Function;
 import org.jboss.errai.common.client.function.Optional;
@@ -31,7 +32,6 @@ import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHan
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.TakesValue;
@@ -251,16 +251,16 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    */
   static <M, C extends TakesValue<M> & IsWidget> Builder<M, C> forIsWidgetComponent(final Supplier<C> supplier,
           final Consumer<C> destroyer) {
-    return new Builder<M, C>(root -> new DefaultListComponent<>(root, supplier, destroyer, c -> c.asWidget().getElement()));
+    return new Builder<M, C>(root -> new DefaultListComponent<>(root, supplier, destroyer, c -> (HTMLElement) c.asWidget().getElement()));
   }
 
   /**
    * Allows for building {@link ListComponent ListComponents} with different kinds of container elements.
    */
   static class Builder<M, C extends TakesValue<M>> {
-    private final Function<Element, ListComponent<M, C>> factory;
+    private final Function<HTMLElement, ListComponent<M, C>> factory;
 
-    private Builder(final Function<Element, ListComponent<M, C>> factory) {
+    private Builder(final Function<HTMLElement, ListComponent<M, C>> factory) {
       this.factory = factory;
     }
 
@@ -270,7 +270,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
      * @return A list component that displays UI components for individual models in an element with the given tag name.
      */
     public ListComponent<M, C> inElement(final String tagName) {
-      return factory.apply(Document.get().createElement(tagName));
+      return factory.apply((HTMLElement) Document.get().createElement(tagName));
     }
 
     /**

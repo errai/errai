@@ -23,6 +23,7 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.function.Consumer;
 import org.jboss.errai.common.client.function.Function;
 import org.jboss.errai.common.client.function.Optional;
@@ -36,7 +37,6 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
@@ -54,16 +54,16 @@ public class ListComponentProvider implements ContextualTypeProvider<ListCompone
   public ListComponent provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
     final Annotation[] filteredQualifiers = filterQualifiers(qualifiers);
     final Optional<ListContainer> listContainer = getListContainer(qualifiers);
-    final Element root = Document.get().createElement(listContainer.map(anno -> anno.value()).orElse("div"));
+    final HTMLElement root = (HTMLElement) Document.get().createElement(listContainer.map(anno -> anno.value()).orElse("div"));
     final SyncBeanDef<?> beanDef = IOC.getBeanManager().lookupBean(typeargs[1], filteredQualifiers);
     final Supplier<?> supplier = () -> beanDef.getInstance();
     final Consumer<?> destroyer = (Dependent.class.equals(beanDef.getScope()) ? c -> {} : c -> IOC.getBeanManager().destroyBean(c));
-    final Function<?, Element> elementAccessor;
+    final Function<?, HTMLElement> elementAccessor;
     if (beanDef.isAssignableTo(IsElement.class)) {
       elementAccessor = c -> ((IsElement) c).getElement();
     }
     else if (beanDef.isAssignableTo(IsWidget.class)) {
-      elementAccessor = c -> ((IsWidget) c).asWidget().getElement();
+      elementAccessor = c -> (HTMLElement) ((IsWidget) c).asWidget().getElement();
     }
     else {
       throw new RuntimeException("Cannot create element accessor for " + beanDef.getType().getName() + ". Must implement IsElement or IsWidget.");

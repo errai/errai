@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
+import org.jboss.errai.databinding.client.BoundUtil;
 import org.jboss.errai.databinding.client.ComponentAlreadyBoundException;
 import org.jboss.errai.databinding.client.DeclarativeBindingModule;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingBinder;
@@ -1289,7 +1290,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     final TestModel model = DataBinder.forType(TestModel.class).bind(presenter, "value").getModel();
 
     presenter.setValue("UI change");
-    presenter.getElement().dispatchEvent(Document.get().createChangeEvent());
+    BoundUtil.asElement(presenter.getElement()).dispatchEvent(Document.get().createChangeEvent());
     assertEquals("Model not properly updated", "UI change", model.getValue());
 
     model.setValue("model change");
@@ -1304,7 +1305,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertFalse("Expected model.isActive() to start as false.", model.isActive());
 
     presenter.setValue(true);
-    presenter.getElement().dispatchEvent(Document.get().createChangeEvent());
+    BoundUtil.asElement(presenter.getElement()).dispatchEvent(Document.get().createChangeEvent());
     assertTrue("Model not properly updated", model.isActive());
 
     model.setActive(false);
@@ -1318,7 +1319,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     final TestModel model = instance.getBinder().getModel();
 
     presenter.setValue("UI change");
-    presenter.getElement().dispatchEvent(Document.get().createChangeEvent());
+    BoundUtil.asElement(presenter.getElement()).dispatchEvent(Document.get().createChangeEvent());
     assertEquals("Model not properly updated", "UI change", model.getValue());
 
     model.setValue("model change");
@@ -1334,7 +1335,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertFalse("Expected model.isActive() to start as false.", model.isActive());
 
     presenter.setValue(true);
-    presenter.getElement().dispatchEvent(Document.get().createChangeEvent());
+    BoundUtil.asElement(presenter.getElement()).dispatchEvent(Document.get().createChangeEvent());
     assertTrue("Model not properly updated", model.isActive());
 
     model.setActive(false);

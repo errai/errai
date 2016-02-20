@@ -37,6 +37,9 @@ public class TemplateWidget extends Panel {
     this.children = children;
 
     for (Widget child : children) {
+      if (child.getParent() instanceof TemplateWidget) {
+        child = child.getParent();
+      }
       child.removeFromParent();
       adopt(child);
     }

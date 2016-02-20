@@ -20,9 +20,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.IsElement;
-
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
+import org.jboss.errai.common.client.dom.HTMLDivElement;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -31,10 +29,10 @@ import com.google.gwt.dom.client.Element;
 public class ElementPresenter implements IsElement {
 
   @Inject
-  private DivElement element;
+  private HTMLDivElement element;
 
   @Override
-  public Element getElement() {
+  public HTMLDivElement getElement() {
     return element;
   }
 

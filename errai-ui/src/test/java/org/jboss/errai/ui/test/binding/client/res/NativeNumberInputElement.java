@@ -16,9 +16,9 @@
 
 package org.jboss.errai.ui.test.binding.client.res;
 
+import org.jboss.errai.common.client.api.annotations.Element;
+import org.jboss.errai.common.client.api.annotations.Property;
 import org.jboss.errai.common.client.ui.HasValue;
-import org.jboss.errai.ui.shared.api.annotations.Element;
-import org.jboss.errai.ui.shared.api.annotations.Property;
 
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;

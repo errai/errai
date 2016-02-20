@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.shared.api.annotations;
+package org.jboss.errai.common.client.dom;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import javax.inject.Qualifier;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
- * Used when declaring a type with {@link Element}. Indicates that the declared {@link Element} will have the all the
- * declared {@link Property properties}.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-@Documented
-@Target(ElementType.TYPE)
-public @interface Properties {
+@JsType(isNative = true)
+public interface CharacterData extends Node {
+  @JsProperty String getData();
+  @JsProperty void setData(String data);
+  @JsProperty int getLength();
 
-  Property[] value();
-
+  String substringData(int offset, int count);
+  void appendData(String arg);
+  void insertData(int offset, String arg);
+  void deleteData(int offset, int count);
+  void replaceData(int offset, int count, String arg);
 }

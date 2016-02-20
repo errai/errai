@@ -17,10 +17,10 @@
 package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.dom.HTMLElement;
+import org.jboss.errai.common.client.dom.HTMLInputElement;
 
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.user.client.TakesValue;
 
 /**
@@ -30,10 +30,10 @@ import com.google.gwt.user.client.TakesValue;
  */
 public class TakesValueCheckInputPresenter implements IsElement, TakesValue<Boolean> {
 
-  private InputElement element = Document.get().createTextInputElement();
+  private HTMLInputElement element = (HTMLInputElement) Document.get().createTextInputElement();
 
   @Override
-  public Element getElement() {
+  public HTMLElement getElement() {
     return element;
   }
 

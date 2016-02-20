@@ -19,6 +19,7 @@ package org.jboss.errai.common.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.ui.NativeHasValueAccessors.Accessor;
 
 import com.google.gwt.dom.client.Element;
@@ -42,13 +43,22 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class ElementWrapperWidget<T> extends Widget {
-  private static Map<Element, ElementWrapperWidget<?>> widgetMap = new HashMap<>();
+  private static Map<Object, ElementWrapperWidget<?>> widgetMap = new HashMap<>();
 
   public static ElementWrapperWidget<?> getWidget(final Element element) {
     return getWidget(element, null);
   }
 
+  public static ElementWrapperWidget<?> getWidget(final HTMLElement element) {
+    return getWidget(element, null);
+  }
+
   public static ElementWrapperWidget<?> getWidget(final Element element, final Class<?> valueType) {
+    return getWidget((Object) element, valueType);
+  }
+
+  public static ElementWrapperWidget<?> getWidget(final Object obj, final Class<?> valueType) {
+    final Element element = asElement(obj);
     ElementWrapperWidget<?> widget = widgetMap.get(element);
     if (widget == null) {
       widget = createElementWrapperWidget(element, valueType);
@@ -62,6 +72,10 @@ public abstract class ElementWrapperWidget<T> extends Widget {
 
     return widget;
   }
+
+  private static native Element asElement(Object obj) /*-{
+    return obj;
+  }-*/;
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private static ElementWrapperWidget<?> createElementWrapperWidget(final Element element, final Class<?> valueType) {

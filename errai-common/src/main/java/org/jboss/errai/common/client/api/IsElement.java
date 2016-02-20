@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.api;
 
+import org.jboss.errai.common.client.dom.HTMLElement;
+
 import com.google.gwt.dom.client.Element;
 
 /**
@@ -29,6 +31,6 @@ public interface IsElement {
   /**
    * @return The {@link Element} aspect of the implementor.
    */
-  Element getElement();
+  HTMLElement getElement();
 
 }
