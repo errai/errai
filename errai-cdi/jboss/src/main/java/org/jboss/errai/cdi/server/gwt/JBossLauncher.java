@@ -38,6 +38,10 @@ public class JBossLauncher extends ServletContainerLauncher {
   private final String CLASS_HIDING_JAVA_AGENT_PROPERTY = "errai.jboss.javaagent.path";
   private final String JBOSS_JAVA_OPTS_PROPERTY = "errai.jboss.javaopts";
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
+  
+  // Added 02/13/2016
+  private final String JBOSS_HTTP_REMOTING_ADDRESS     = "errai.jboss.httpremotingaddress";
+  private final String JBOSS_NATIVE_REMOTING_ADDRESS  = "errai.jboss.nativeremotingaddress";
 
   private StackTreeLogger logger;
 
@@ -45,13 +49,17 @@ public class JBossLauncher extends ServletContainerLauncher {
   public ServletContainer start(TreeLogger treeLogger, int port, File appRootDir) throws BindException, Exception {
     logger = new StackTreeLogger(treeLogger);
 
-    logger.branch(Type.INFO, "Starting launcher...");
+    logger.branch(Type.INFO, "JBoss / WildFly launcher starting..");
 
     // Get properties
-    final String DEBUG_PORT = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
-    final String TEMPLATE_CONFIG_FILE = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
+    final String DEBUG_PORT 		     = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
+    final String TEMPLATE_CONFIG_FILE    = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
     final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
     String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "");
+    
+    // Added new properties to allow overriding of default ones.
+    final String HTTP_REMOTING_ADDRESS      =System.getProperty(JBOSS_HTTP_REMOTING_ADDRESS, "http-remoting://localhost:9990");
+    final String NATIVE_REMOTING_ADDRESS    =System.getProperty(JBOSS_NATIVE_REMOTING_ADDRESS, "remote://localhost:9999");
 
     final String jbossHome = JBossUtil.getJBossHome(logger);
     validateClassHidingJavaAgent(CLASS_HIDING_JAVA_AGENT);
@@ -109,8 +117,9 @@ public class JBossLauncher extends ServletContainerLauncher {
     logger.branch(Type.INFO, "Creating servlet container controller...");
 
     try {
-      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, JBossUtil.getDeploymentContext(),
-              logger.peek(), process);
+      
+      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir, JBossUtil.getDeploymentContext(), logger.peek(), process, HTTP_REMOTING_ADDRESS, NATIVE_REMOTING_ADDRESS);
+      
       logger.log(Type.INFO, "Controller created");
       logger.unbranch();
       return controller;
