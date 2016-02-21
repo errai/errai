@@ -49,7 +49,7 @@ public class JBossLauncher extends ServletContainerLauncher {
   public ServletContainer start(TreeLogger treeLogger, int port, File appRootDir) throws BindException, Exception {
     logger = new StackTreeLogger(treeLogger);
 
-    logger.branch(Type.INFO, "JBoss / WildFly launcher starting..");
+    logger.branch(Type.INFO, "Server launcher starting..");
 
     // Get properties
     final String DEBUG_PORT 		     = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
