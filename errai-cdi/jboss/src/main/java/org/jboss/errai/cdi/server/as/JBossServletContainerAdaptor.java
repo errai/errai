@@ -34,8 +34,8 @@ public class JBossServletContainerAdaptor extends ServletContainer {
   @SuppressWarnings("unused")
   private final Process jbossProcess;
 
-  private static String NATIVE_CONTROLLER_PATH = "remote://localhost:9999";
-  private static String HTTP_CONTROLLER_PATH = "http-remoting://localhost:9990";
+  private String nativeControllerPath = "remote://localhost:9999";
+  private String httpControllerPath = "http-remoting://localhost:9990";
   private static final int MAX_RETRIES = 9;
 
   /**
@@ -51,7 +51,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
    *          For logging events from this container.
    * @throws UnableToCompleteException
    *           Thrown if this container cannot properly connect or deploy.
-   */
+   */ 
   
   public JBossServletContainerAdaptor(int port, File appRootDir, String context, TreeLogger treeLogger,
           Process jbossProcess) throws UnableToCompleteException {
@@ -86,14 +86,14 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     
     logger.branch(Type.INFO, "Starting container initialization...");
     // Overrides remoting address if and only if an ovverride is passed.
-    if(httpRemotingAddress != null && !httpRemotingAddress.trim().equalsIgnoreCase(HTTP_CONTROLLER_PATH)) {
-    	logger.branch(Type.INFO, "Changing default HTTP_CONTROLLER_PATH property from ["+HTTP_CONTROLLER_PATH+"] to ["+httpRemotingAddress+"]");
-    	HTTP_CONTROLLER_PATH = httpRemotingAddress;
+    if (httpRemotingAddress != null && !httpRemotingAddress.trim().equalsIgnoreCase(httpControllerPath)) {
+    	logger.branch(Type.INFO, "Changing default 'httpControllerPath' property from ["+httpControllerPath+"] to ["+httpRemotingAddress+"]");
+    	httpControllerPath = httpRemotingAddress;
     }
 
-    if(nativeRemotingAddress != null && !nativeRemotingAddress.trim().equalsIgnoreCase(NATIVE_CONTROLLER_PATH)) {
-    	logger.branch(Type.INFO, "Changing default NATIVE_CONTROLLER_PATH property from ["+NATIVE_CONTROLLER_PATH+"] to ["+nativeRemotingAddress+"]");
-    	NATIVE_CONTROLLER_PATH = nativeRemotingAddress;
+    if (nativeRemotingAddress != null && !nativeRemotingAddress.trim().equalsIgnoreCase(nativeControllerPath)) {
+    	logger.branch(Type.INFO, "Changing default 'nativeControllerPath' property from ["+nativeControllerPath+"] to ["+nativeRemotingAddress+"]");
+    	nativeControllerPath = nativeRemotingAddress;
     }
 
     
@@ -204,7 +204,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
   private void attemptCommandContextConnection(final int maxRetries)
           throws UnableToCompleteException {
 
-    String[] controllers = new String[] { HTTP_CONTROLLER_PATH,  NATIVE_CONTROLLER_PATH  };
+    String[] controllers = new String[] { httpControllerPath,  nativeControllerPath  };
     
     final String[] protocols = new String[controllers.length];
     for (int i = 0; i < controllers.length; i++) {

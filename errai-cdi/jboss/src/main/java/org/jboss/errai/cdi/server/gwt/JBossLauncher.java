@@ -39,9 +39,8 @@ public class JBossLauncher extends ServletContainerLauncher {
   private final String JBOSS_JAVA_OPTS_PROPERTY = "errai.jboss.javaopts";
   private final String TMP_CONFIG_FILE = "standalone-errai-dev.xml";
   
-  // Added 02/13/2016
-  private final String JBOSS_HTTP_REMOTING_ADDRESS     = "errai.jboss.httpremotingaddress";
-  private final String JBOSS_NATIVE_REMOTING_ADDRESS  = "errai.jboss.nativeremotingaddress";
+  private final String JBOSS_HTTP_REMOTING_ADDRESS = "errai.jboss.httpremotingaddress";
+  private final String JBOSS_NATIVE_REMOTING_ADDRESS = "errai.jboss.nativeremotingaddress";
 
   private StackTreeLogger logger;
 
@@ -52,14 +51,13 @@ public class JBossLauncher extends ServletContainerLauncher {
     logger.branch(Type.INFO, "Server launcher starting..");
 
     // Get properties
-    final String DEBUG_PORT 		     = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
-    final String TEMPLATE_CONFIG_FILE    = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
+    final String DEBUG_PORT = System.getProperty(JBOSS_DEBUG_PORT_PROPERTY, "8001");
+    final String TEMPLATE_CONFIG_FILE = System.getProperty(TEMPLATE_CONFIG_FILE_PROPERTY, "standalone-full.xml");
     final String CLASS_HIDING_JAVA_AGENT = System.getProperty(CLASS_HIDING_JAVA_AGENT_PROPERTY);
     String JAVA_OPTS = System.getProperty(JBOSS_JAVA_OPTS_PROPERTY, "");
     
-    // Added new properties to allow overriding of default ones.
-    final String HTTP_REMOTING_ADDRESS      =System.getProperty(JBOSS_HTTP_REMOTING_ADDRESS, "http-remoting://localhost:9990");
-    final String NATIVE_REMOTING_ADDRESS    =System.getProperty(JBOSS_NATIVE_REMOTING_ADDRESS, "remote://localhost:9999");
+    final String HTTP_REMOTING_ADDRESS = System.getProperty(JBOSS_HTTP_REMOTING_ADDRESS, "http-remoting://localhost:9990");
+    final String NATIVE_REMOTING_ADDRESS = System.getProperty(JBOSS_NATIVE_REMOTING_ADDRESS, "remote://localhost:9999");
 
     final String jbossHome = JBossUtil.getJBossHome(logger);
     validateClassHidingJavaAgent(CLASS_HIDING_JAVA_AGENT);
@@ -68,7 +66,7 @@ public class JBossLauncher extends ServletContainerLauncher {
       createTempConfigFile(TEMPLATE_CONFIG_FILE, TMP_CONFIG_FILE, jbossHome, port);
       logger.log(Type.INFO,
               String.format("Created temporary config file %s, copied from %s.", TMP_CONFIG_FILE, TEMPLATE_CONFIG_FILE));
-    }
+    } 
     catch (IOException e) {
       logger.log(
               Type.ERROR,
