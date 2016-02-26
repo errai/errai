@@ -57,6 +57,7 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.PageRequest;
+import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
@@ -143,9 +144,10 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     if (hasNonBlacklistedPages) {
       for (MetaClass pageClass : pages) {
-        if (!(pageClass.isAssignableTo(IsWidget.class) || pageClass.isAnnotationPresent(Templated.class))) {
-          throw new GenerationException(
-              "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must implement IsWidget or be @Templated");
+        if (!(pageClass.isAssignableTo(IsWidget.class) || pageClass.isAssignableTo(IsElement.class)
+                || pageClass.isAnnotationPresent(Templated.class))) {
+          throw new GenerationException("Class " + pageClass.getFullyQualifiedName()
+                  + " is annotated with @Page, so it must implement IsWidget or be @Templated");
         }
         Page annotation = pageClass.getAnnotation(Page.class);
         String pageName = getPageName(pageClass);
@@ -332,9 +334,6 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     if (path.equals("")) {
       return pageName;
     }
-
-    if (path.startsWith("/"))
-      path = path.substring(1);
 
     return path;
   }

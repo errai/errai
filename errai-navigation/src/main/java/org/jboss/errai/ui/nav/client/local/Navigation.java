@@ -26,8 +26,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.common.client.util.CreationalCallback;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.Proxy;
@@ -392,33 +393,42 @@ public class Navigation {
    * Call navigation and page related lifecycle methods. If the {@link Access} is fired successfully, load the new page.
    */
   private <C> void maybeShowPage(final Request<C> request, final boolean fireEvent) {
-    request.pageNode.produceContent(new CreationalCallback<C>() {
-      @Override
-      public void callback(final C component) {
-        if (component == null) {
-          throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
-        }
+    request.pageNode.produceContent(component -> {
+      if (component == null) {
+        throw new NullPointerException("Target page " + request.pageNode + " returned a null content widget");
+      }
 
-        final C unwrappedComponent = Factory.maybeUnwrapProxy(component);
-        final Widget widget = (unwrappedComponent instanceof IsWidget ? ((IsWidget) unwrappedComponent).asWidget()
-                : TemplateWidgetMapper.get(unwrappedComponent));
-        maybeAttachContentPanel();
-        currentPageToken = request.state;
+      final C unwrappedComponent = Factory.maybeUnwrapProxy(component);
+      final Widget widget;
+      if (unwrappedComponent instanceof IsWidget) {
+        widget = ((IsWidget) unwrappedComponent).asWidget();
+      }
+      else if (unwrappedComponent instanceof IsElement) {
+        widget = ElementWrapperWidget.getWidget(((IsElement) unwrappedComponent).getElement());
+      }
+      else if (TemplateWidgetMapper.containsKey(unwrappedComponent)) {
+        widget = TemplateWidgetMapper.get(unwrappedComponent);
+      }
+      else {
+        throw new RuntimeException("Page must implement IsWidget or be @Templated.");
+      }
 
-        if ((unwrappedComponent instanceof Composite) && (getCompositeWidget((Composite) unwrappedComponent) == null)) {
-          final HandlerRegistration reg = widget.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-              if (event.isAttached() && currentWidget != unwrappedComponent) {
-                pageHiding(unwrappedComponent, widget, request, fireEvent);
-              }
+      maybeAttachContentPanel();
+      currentPageToken = request.state;
+
+      if ((unwrappedComponent instanceof Composite) && (getCompositeWidget((Composite) unwrappedComponent) == null)) {
+        final HandlerRegistration reg = widget.addAttachHandler(new Handler() {
+          @Override
+          public void onAttachOrDetach(AttachEvent event) {
+            if (event.isAttached() && currentWidget != unwrappedComponent) {
+              pageHiding(unwrappedComponent, widget, request, fireEvent);
             }
-          });
-          attachHandlerRegistrations.put(widget, reg);
-        }
-        else {
-          pageHiding(unwrappedComponent, widget, request, fireEvent);
-        }
+          }
+        });
+        attachHandlerRegistrations.put(widget, reg);
+      }
+      else {
+        pageHiding(unwrappedComponent, widget, request, fireEvent);
       }
     });
   }
@@ -543,7 +553,7 @@ public class Navigation {
    * application context in your web.xml
    *
    * @return The application context. This may return the empty String (but never null). If non-empty, the return value
-   *         always ends with a slash.
+   *         always starts with a slash and never ends with one.
    */
   public static String getAppContext() {
     if (PushStateUtil.isPushStateActivated())
@@ -552,19 +562,25 @@ public class Navigation {
       return "";
   }
 
-  private static native String getAppContextFromHostPage() /*-{
-   if ($wnd.erraiApplicationWebContext === undefined) {
-      return null;
-   }
-   else if ($wnd.erraiApplicationWebContext.length === 0) {
+  private static String getAppContextFromHostPage() {
+    String context = getRawAppContextFromHostPage();
+    if (!context.isEmpty() && !context.startsWith("/")) {
+      context = "/" + context;
+    }
+    if (context.endsWith("/")) {
+      context = context.substring(0, context.length()-1);
+    }
+
+    return context;
+  }
+
+  private static native String getRawAppContextFromHostPage() /*-{
+   if ($wnd.erraiApplicationWebContext === undefined || $wnd.erraiApplicationWebContext.length === 0) {
      return "";
    }
    else {
-       if ($wnd.erraiApplicationWebContext.substr(-1) !== "/") {
-         return $wnd.erraiApplicationWebContext + "/";
-       }
-       return $wnd.erraiApplicationWebContext;
-     }
+     return $wnd.erraiApplicationWebContext;
+   }
   }-*/;
 
   private void maybeConvertHistoryToken(String token) {

@@ -31,6 +31,7 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.AppScopedPageWithNoLifecycleMethods;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
+import org.jboss.errai.ui.nav.client.local.testpages.IsElementPageWithLeadingSlashPath;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingPageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingUniquePageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.NonCompositePage;
@@ -42,6 +43,7 @@ import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithNavigationControl;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithTransitionToIsElement;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithTransitionToNonComposite;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -53,6 +55,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -282,6 +285,33 @@ public class NavigationTest extends AbstractErraiCDITest {
 
   }
 
+  public void testTransitionToIsElementPage() throws Exception {
+    final PageWithTransitionToIsElement pageWithTransition = IOC.getBeanManager().lookupBean(PageWithTransitionToIsElement.class).getInstance();
+    navigation.goTo("");
+    assertFalse("Precondition failed: Should not start test on " + IsElementPageWithLeadingSlashPath.class.getSimpleName(),
+            navigation.currentPage.contentType().equals(IsElementPageWithLeadingSlashPath.class));
+    pageWithTransition.transition.go();
+    assertEquals("Should have navigated to " + IsElementPageWithLeadingSlashPath.class.getSimpleName(),
+            IsElementPageWithLeadingSlashPath.class, navigation.currentPage.contentType());
+
+  }
+
+  public void testTransitionToPageWithLeadingSlash() throws Exception {
+    final PageWithTransitionToIsElement pageWithTransition = IOC.getBeanManager().lookupBean(PageWithTransitionToIsElement.class).getInstance();
+    try {
+      navigation.goTo("");
+      assertFalse("Precondition failed: Should not start test on " + IsElementPageWithLeadingSlashPath.class.getSimpleName(),
+              navigation.currentPage.contentType().equals(IsElementPageWithLeadingSlashPath.class));
+      pageWithTransition.transition.go();
+      assertEquals("Should have navigated to " + IsElementPageWithLeadingSlashPath.class.getSimpleName(),
+              IsElementPageWithLeadingSlashPath.class, navigation.currentPage.contentType());
+    } catch (Exception e) {
+      throw new AssertionError("Precondition failed.", e);
+    }
+
+    assertEquals("#" + IsElementPageWithLeadingSlashPath.IS_ELEMENT_PAGE, Location.getHash());
+  }
+
   public void testIsWidgetAnchorTransition() {
     final PageWithLinkToIsWidget page = IOC.getBeanManager().lookupBean(PageWithLinkToIsWidget.class).getInstance();
     final PageIsWidget targetPage = IOC.getBeanManager().lookupBean(PageIsWidget.class).getInstance();
@@ -445,7 +475,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testURLWithExtraKeyValuePairs() throws Exception {
-    String url = "page/123/string;var3=4";
+    String url = "/page/123/string;var3=4";
     HistoryToken encodedToken = htFactory.parseURL(url);
     assertEquals("Unexpected state map contents: " + encodedToken.getState(), "123", encodedToken.getState()
             .get("var1").iterator().next());
@@ -456,7 +486,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testURLWithNonAsciiCharset() throws Exception {
-    String url = "page/123/параметр パラメーター 参数;var3=4";
+    String url = "/page/123/параметр パラメーター 参数;var3=4";
     HistoryToken encodedToken = htFactory.parseURL(url);
     assertEquals("Unexpected state map contents: " + encodedToken.getState(), "123", encodedToken.getState()
             .get("var1").iterator().next());
@@ -475,7 +505,7 @@ public class NavigationTest extends AbstractErraiCDITest {
 
     Multimap<String, String> pageStateMap = builder.build();
     String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap).toString());
-    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/параметр パラメーター 参数;var3=4", decodedToken);
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "/page/123/параметр パラメーター 参数;var3=4", decodedToken);
   }
 
   public void testPageStateWithOneExtraParam() throws Exception {
@@ -488,7 +518,7 @@ public class NavigationTest extends AbstractErraiCDITest {
     Multimap<String, String> pageStateMap = builder.build();
     String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
                                                                .toString());
-    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4", decodedToken);
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "/page/123/string;var3=4", decodedToken);
   }
 
   public void testPageStateWithMultipleExtraParams() throws Exception {
@@ -502,7 +532,7 @@ public class NavigationTest extends AbstractErraiCDITest {
     Multimap<String, String> pageStateMap = builder.build();
     String decodedToken = URLPattern.decodeParsingCharacters(htFactory.createHistoryToken(pageName, pageStateMap)
                                                                .toString());
-    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "page/123/string;var3=4&var4=thing", decodedToken);
+    assertEquals("Incorrect HistoryToken URL generated: " + decodedToken, "/page/123/string;var3=4&var4=thing", decodedToken);
   }
 
   public void testPageReloadWithChangedPageStateUsingGoTo() throws Exception {
