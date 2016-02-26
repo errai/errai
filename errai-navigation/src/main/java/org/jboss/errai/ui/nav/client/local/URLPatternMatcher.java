@@ -72,6 +72,12 @@ public class URLPatternMatcher {
 
     // Ensure matching at beginning of line
     sb.append("^");
+    // Match patterns with or without leading slash
+    sb.append("/?");
+    // Since we handle an optional leading slash, strip it from the url template.
+    if (urlTemplate.startsWith("/")) {
+      urlTemplate.substring(1);
+    }
 
     int endOfPreviousPattern = 0;
     int startOfNextPattern = 0;

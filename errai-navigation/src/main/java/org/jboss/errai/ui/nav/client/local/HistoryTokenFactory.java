@@ -66,15 +66,10 @@ public class HistoryTokenFactory {
    * @return A HistoryToken with the parsed URL matching information.
    */
   public HistoryToken parseURL(String url) {
-    // Remove the leading slash from the context and the URL for pushstate/non-pushstate URL compatibility.
     String context = Navigation.getAppContext();
-    if ((!(context.equals(""))) && (context.startsWith("/")))
+    if (!context.isEmpty() && !url.startsWith("/")) {
       context = context.substring(1);
-
-    if (url.startsWith("/")) {
-      url = url.substring(1);
     }
-
     if (url.startsWith(context)) {
       url = url.substring(context.length());
     }

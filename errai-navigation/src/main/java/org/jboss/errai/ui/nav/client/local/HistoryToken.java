@@ -26,11 +26,11 @@ import com.google.common.collect.Multimap;
  * its state parameters.
  * <p>
  * A history token consists of a mandatory page name followed by optional key=value pairs. For example:
- * 
+ *
  * <pre>
  *     MyPage;key1=value1&key2=value2&multiKey=value1&multiKey=value2
  * </pre>
- * 
+ *
  * Keys are case-sensitive, so <tt>key</tt> and <tt>kEy</tt> are different keys.
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
@@ -54,8 +54,15 @@ public class HistoryToken {
    */
   @Override
   public String toString() {
-    String url = pattern.printURL(state);
-    return Navigation.getAppContext() + url;
+    final String url = pattern.printURL(state);
+    final String context = Navigation.getAppContext();
+
+    if (!context.isEmpty() && !url.startsWith("/")) {
+      return context + "/" + url;
+    }
+    else {
+      return context + url;
+    }
   }
 
   /**
