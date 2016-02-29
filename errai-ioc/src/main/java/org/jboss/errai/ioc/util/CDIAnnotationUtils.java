@@ -19,15 +19,34 @@ package org.jboss.errai.ioc.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.util.Nonbinding;
+import javax.inject.Named;
+import javax.inject.Qualifier;
 
 import org.apache.commons.lang3.AnnotationUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * <p>
@@ -397,5 +416,87 @@ public class CDIAnnotationUtils {
 
         return builder.toString();
       }
+    }
+
+    public static Iterable<MetaClass> getTranslatableQualifiers(final TypeOracle oracle) {
+      final Set<Class<?>> typesAnnotatedWith = getQualifiersAsClasses();
+
+      final Iterator<Class<?>> iter = typesAnnotatedWith.iterator();
+
+      return () -> {
+        return new Iterator<MetaClass>() {
+          private MetaClass next;
+
+          @Override
+          public MetaClass next() {
+            if (hasNext()) {
+              final MetaClass retVal = next;
+              next = null;
+
+              return retVal;
+            }
+            else {
+              throw new NoSuchElementException();
+            }
+          }
+
+          @Override
+          public boolean hasNext() {
+            if (next == null) {
+              while (iter.hasNext()) {
+                final Class<?> aClass = iter.next();
+                try {
+                  next = GWTClass.newInstance(oracle, oracle.getType(aClass.getName()));
+                  break;
+                } catch (NotFoundException e) {}
+              }
+            }
+
+            return next != null;
+          }
+        };
+      };
+    }
+
+    private static Set<Class<?>> getQualifiersAsClasses() {
+      final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+      final Set<Class<?>> typesAnnotatedWith = scanner.getTypesAnnotatedWith(Qualifier.class);
+      typesAnnotatedWith.add(Named.class);
+      return typesAnnotatedWith;
+    }
+
+    public static Set<MetaClass> getQualifiers() {
+      final Set<Class<?>> qualifiersAsClasses = getQualifiersAsClasses();
+      final Set<MetaClass> qualifiersAsMetaClasses = qualifiersAsClasses.stream().map(c -> MetaClassFactory.get(c)).collect(Collectors.toSet());
+
+      if (qualifiersAsClasses.size() > qualifiersAsMetaClasses.size()) {
+        throw new RuntimeException("Lost some qualifiers when converting from Class to MetaClass");
+      }
+
+      return qualifiersAsMetaClasses;
+    }
+
+    public static Collection<MetaMethod> getAnnotationAttributes(final MetaClass annoClass) {
+      final List<MetaMethod> methods = new ArrayList<MetaMethod>();
+      for (final MetaMethod method : annoClass.getDeclaredMethods()) {
+      if (!method.isAnnotationPresent(Nonbinding.class) && method.isPublic() && !method.getName().equals("equals")
+              && !method.getName().equals("hashCode")) {
+          methods.add(method);
+        }
+      }
+
+      return (methods.isEmpty() ? Collections.emptyList() : methods);
+    }
+
+    public static Collection<MetaMethod> getNonBindingAttributes(final MetaClass annoClass) {
+      final List<MetaMethod> methods = new ArrayList<MetaMethod>();
+      for (final MetaMethod method : annoClass.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(Nonbinding.class) && method.isPublic() && !method.getName().equals("equals")
+              && !method.getName().equals("hashCode")) {
+          methods.add(method);
+        }
+      }
+
+      return (methods.isEmpty() ? Collections.emptyList() : methods);
     }
 }

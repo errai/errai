@@ -18,30 +18,35 @@ package org.jboss.errai.codegen.util;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import org.eclipse.jdt.core.compiler.CompilationProgress;
-import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.slf4j.Logger;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+
+import org.eclipse.jdt.core.compiler.CompilationProgress;
+import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.slf4j.Logger;
 
 /**
  * @author Mike Brock
@@ -576,6 +581,128 @@ public class ClassChangeUtil {
     }
     else {
       return fqcn.substring(index + 1);
+    }
+  }
+
+  public static List<String> urlToFile(Enumeration<URL> urls) {
+    final ArrayList<String> files = new ArrayList<String>();
+    while (urls.hasMoreElements()) {
+      files.add(urls.nextElement().getFile());
+    }
+    return files;
+  }
+
+  public static Set<String> getClassLocations(final String packageName, final String simpleClassName) throws IOException {
+      final String classResource = packageName.replaceAll("\\.", "/") + "/" + simpleClassName + ".class";
+      final Set<String> locations = new LinkedHashSet<String>();
+
+      // look for the class in every classloader we can think of. For example, current thread
+      // classloading works in Jetty but not JBoss AS 7.
+      locations.addAll(urlToFile(Thread.currentThread().getContextClassLoader().getResources(classResource)));
+      locations.addAll(urlToFile(ClassChangeUtil.class.getClassLoader().getResources(classResource)));
+      locations.addAll(urlToFile(ClassLoader.getSystemResources(classResource)));
+
+      return locations;
+  }
+
+  public static Optional<File> getNewest(final Set<String> locations) {
+    return locations.stream()
+                    .map(url -> getFileIfExists(url))
+                    .filter(f -> f != null)
+                    .max(Comparator.comparingLong(f -> f.lastModified()));
+  }
+
+  public static Optional<Class<?>> loadClassIfPresent(final String packageName, final String simpleClassName) {
+    final String fullyQualifiedClassName = packageName + "." + simpleClassName;
+
+    try {
+      log.debug("searching for marshaller class: {}.{}", packageName, simpleClassName);
+      final Set<String> locations = getClassLocations(packageName, simpleClassName);
+
+      final Optional<File> newest = getNewest(locations);
+
+      if (locations.size() > 1) {
+        log.warn("*** MULTIPLE VERSIONS OF " + fullyQualifiedClassName + " FOUND IN CLASSPATH: " +
+                "Attempted to guess the newest one based on file dates. But you should clean your output directories");
+
+        locations.stream().forEach(loc -> log.warn(" Ambiguous version -> {}", loc));
+      }
+
+      if (newest.isPresent()) {
+        return Optional.of(loadClassDefinition(newest.get().getAbsolutePath(), packageName, simpleClassName));
+      }
+      else {
+        try {
+          // maybe we're in an appserver with a VFS, so try to load anyways.
+          return Optional.of(Thread.currentThread().getContextClassLoader().loadClass(fullyQualifiedClassName));
+        }
+        catch (ClassNotFoundException e) {
+          log.warn("could not locate {} class.", fullyQualifiedClassName);
+
+          return Optional.empty();
+        }
+      }
+    }
+    catch (IOException e) {
+      log.warn("could not read {} classes: " + fullyQualifiedClassName, e);
+
+      return Optional.empty();
+    }
+  }
+
+  public static String generateClassFile(final String packageName, final String simpleClassName,
+          final String sourceDir, final String source, final String outputPath) {
+    final File outputDir = new File(sourceDir + File.separator +
+        RebindUtils.packageNameToDirName(packageName) + File.separator);
+
+    final File classOutputPath = new File(outputPath);
+
+    //noinspection ResultOfMethodCallIgnored
+    outputDir.mkdirs();
+
+    final File sourceFile
+        = new File(outputDir.getAbsolutePath() + File.separator + simpleClassName + ".java");
+
+    RebindUtils.writeStringToFile(sourceFile, source);
+
+    compileClass(outputDir.getAbsolutePath(),
+        packageName,
+        simpleClassName,
+        classOutputPath.getAbsolutePath());
+
+    return new File(outputDir.getAbsolutePath() + File.separator + simpleClassName + ".class")
+        .getAbsolutePath();
+  }
+
+  public static Class<?> compileAndLoadFromSource(final String packageName, final String simpleClassName,
+          final String source) {
+    final File directory =
+            new File(RebindUtils.getTempDirectory()
+                    + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
+
+    final File sourceFile = new File(directory.getAbsolutePath() + File.separator + simpleClassName + ".java");
+
+    try {
+      if (directory.exists()) {
+        for (File file : directory.listFiles()) {
+          file.delete();
+        }
+        directory.delete();
+      }
+      directory.mkdirs();
+
+      final FileOutputStream outputStream = new FileOutputStream(sourceFile);
+      outputStream.write(source.getBytes("UTF-8"));
+      outputStream.flush();
+      outputStream.close();
+
+      String compiledClassPath = compileClass(directory.getAbsolutePath(), packageName, simpleClassName,
+              directory.getAbsolutePath());
+
+      return loadClassDefinition(compiledClassPath, packageName, simpleClassName);
+    }
+    catch (IOException e) {
+      throw new RuntimeException("failed to generate class ", e);
     }
   }
 }

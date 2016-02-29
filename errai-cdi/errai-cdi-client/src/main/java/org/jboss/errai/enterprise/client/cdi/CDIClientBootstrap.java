@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 
 /**
  * The GWT entry point for the Errai CDI module.
@@ -113,6 +114,9 @@ public class CDIClientBootstrap implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
+    if (!EventQualifierSerializer.isSet()) {
+      EventQualifierSerializer.set(GWT.create(EventQualifierSerializer.class));
+    }
     InitVotes.registerPersistentPreInitCallback(declareServices);
     InitVotes.waitFor(CDI.class);
 

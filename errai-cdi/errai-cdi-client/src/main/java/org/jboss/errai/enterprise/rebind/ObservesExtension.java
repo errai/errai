@@ -47,6 +47,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
+import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -75,6 +76,10 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
   @Override
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
+    if (!EventQualifierSerializer.isSet()) {
+      NonGwtEventQualifierSerializerGenerator.loadAndSetEventQualifierSerializer();
+    }
+
     final Context ctx = decorable.getCodegenContext();
     final MetaParameter parm = decorable.getAsParameter();
     final MetaMethod method = (MetaMethod) parm.getDeclaringMember();

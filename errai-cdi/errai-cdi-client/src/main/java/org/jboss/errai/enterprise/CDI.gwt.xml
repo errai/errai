@@ -24,4 +24,8 @@
     
     <inherits name="javax.enterprise.Support"/>
     <entry-point class='org.jboss.errai.enterprise.client.cdi.CDIClientBootstrap'/>
+
+    <generate-with class="org.jboss.errai.enterprise.rebind.EventQualifierSerializerGenerator">
+      <when-type-is class="org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer"/>
+    </generate-with>
 </module>

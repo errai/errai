@@ -78,7 +78,9 @@ import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.rebind.NonGwtEventQualifierSerializerGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +94,7 @@ import org.slf4j.LoggerFactory;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class CDIExtensionPoints implements Extension {
-  private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
+  public static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
   private final TypeRegistry managedTypes = new TypeRegistry();
 
@@ -113,6 +115,10 @@ public class CDIExtensionPoints implements Extension {
     veto.add(ErraiService.class.getName());
 
     vetoClasses = Collections.unmodifiableSet(veto);
+
+    if (!EventQualifierSerializer.isSet()) {
+      NonGwtEventQualifierSerializerGenerator.loadAndSetEventQualifierSerializer();
+    }
   }
 
   public void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd) {
@@ -226,7 +232,7 @@ public class CDIExtensionPoints implements Extension {
       final Set<Annotation> annotations = processObserverMethod.getObserverMethod().getObservedQualifiers();
       final Annotation[] methodQualifiers = annotations.toArray(new Annotation[annotations.size()]);
       for (final Annotation qualifier : methodQualifiers) {
-        eventQualifiers.put(qualifier.annotationType().getName(), qualifier);
+        eventQualifiers.put(EventQualifierSerializer.get().serialize(qualifier), qualifier);
       }
 
       observableEvents.add(type.getName());

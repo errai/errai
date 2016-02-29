@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.
- * 
+ *
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
@@ -64,19 +64,19 @@ public class EventDispatcher implements MessageCallback {
   private final EventRoutingTable eventRoutingTable;
   private final MessageBus messagebus;
   private final Set<String> observedEvents;
-  private final Map<String, Annotation> allQualifiers;
+  private final Map<String, Annotation> eventQualifiers;
 
   private final Set<ClientObserverMetadata> clientObservers = Collections
           .newSetFromMap(new ConcurrentHashMap<ClientObserverMetadata, Boolean>());
 
   public EventDispatcher(final BeanManager beanManager, final EventRoutingTable eventRoutingTable,
-          final MessageBus messageBus, final Set<String> observedEvents, final Map<String, Annotation> qualifiers) {
+          final MessageBus messageBus, final Set<String> observedEvents, final Map<String, Annotation> eventQualifiers) {
 
     this.beanManager = beanManager;
     this.eventRoutingTable = eventRoutingTable;
     this.messagebus = messageBus;
     this.observedEvents = observedEvents;
-    this.allQualifiers = qualifiers;
+    this.eventQualifiers = eventQualifiers;
   }
 
   @Override
@@ -121,8 +121,8 @@ public class EventDispatcher implements MessageCallback {
           List<Annotation> qualifiers = new ArrayList<Annotation>();
 
           if (qualifierNames != null) {
-            for (final String qualifierName : qualifierNames) {
-              final Annotation qualifier = allQualifiers.get(qualifierName);
+            for (final String serializedQualifier : qualifierNames) {
+              final Annotation qualifier = eventQualifiers.get(serializedQualifier);
               if (qualifier != null) {
                 qualifiers.add(qualifier);
               }

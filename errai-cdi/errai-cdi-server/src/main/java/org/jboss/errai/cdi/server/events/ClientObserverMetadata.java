@@ -28,7 +28,7 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 /**
  * Represents an active client-side event observer (an observer that at least
  * one client currently listens to).
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ClientObserverMetadata {

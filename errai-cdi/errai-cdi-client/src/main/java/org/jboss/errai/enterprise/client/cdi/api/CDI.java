@@ -45,6 +45,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
 import org.jboss.errai.enterprise.client.cdi.WindowEventObservers;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -75,7 +76,7 @@ public class CDI {
   private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<String, List<MessageFireDeferral>>();
 
   private static Logger logger = LoggerFactory.getLogger(CDI.class);
-  
+
   public static final MessageCallback ROUTING_CALLBACK = new MessageCallback() {
     @Override
     public void callback(final Message message) {
@@ -123,11 +124,15 @@ public class CDI {
         if (qualifiersPart == null)
           qualifiersPart = new HashSet<String>(qualifiers.length);
 
-        qualifiersPart.add(qualifier.annotationType().getName());
+        qualifiersPart.add(asString(qualifier));
       }
     }
     return qualifiersPart == null ? Collections.<String>emptySet() : qualifiersPart;
 
+  }
+
+  private static String asString(final Annotation qualifier) {
+    return EventQualifierSerializer.get().serialize(qualifier);
   }
 
   public static void fireEvent(final Object payload, final Annotation... qualifiers) {
@@ -149,7 +154,7 @@ public class CDI {
     else {
       beanRef = payload;
     }
-    
+
     final Map<String, Object> messageMap = new HashMap<String, Object>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
     messageMap.put(CDIProtocol.BeanType.name(), beanRef.getClass().getName());
@@ -183,15 +188,15 @@ public class CDI {
        }
      };
   }
-  
+
   private static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback,
           boolean isLocalOnly) {
-    
+
     if (!eventObservers.containsKey(eventType)) {
       eventObservers.put(eventType, new ArrayList<AbstractCDIEventCallback<?>>());
     }
     eventObservers.get(eventType).add(callback);
-    
+
     if (isLocalOnly) {
       localOnlyObserverTypes.add(eventType);
     }
@@ -222,7 +227,7 @@ public class CDI {
   private static void unsubscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
     if (eventObservers.containsKey(eventType)) {
       eventObservers.get(eventType).remove(callback);
-      
+
       if (!localOnlyObserverTypes.contains(eventType)) {
         boolean shouldUnsubscribe = true;
         for (AbstractCDIEventCallback<?> cb : eventObservers.get(eventType)) {
@@ -232,7 +237,7 @@ public class CDI {
             break;
           }
         }
-        
+
         if (isRemoteCommunicationEnabled() && shouldUnsubscribe) {
           MessageBuilder.createMessage()
               .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
@@ -241,7 +246,7 @@ public class CDI {
               .with(CDIProtocol.Qualifiers, callback.getQualifiers())
               .noErrorHandling().sendNowWith(ErraiBus.get());
         }
-        
+
         if (eventObservers.get(eventType).isEmpty()) {
           eventObservers.remove(eventType);
         }
