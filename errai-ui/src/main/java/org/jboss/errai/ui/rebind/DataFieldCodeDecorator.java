@@ -60,8 +60,9 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
     controller.ensureMemberExposed(decorable.get());
     Statement instance = decorable.getAccessStatement();
-    String name = getTemplateDataFieldName((DataField) decorable.getAnnotation(), decorable.getName());
-    if (decorable.getType().isAnnotationPresent(Templated.class)) {
+    final String name = getTemplateDataFieldName((DataField) decorable.getAnnotation(), decorable.getName());
+    final boolean isWidget = decorable.getType().isAssignableTo(Widget.class);
+    if (!isWidget && decorable.getType().isAnnotationPresent(Templated.class)) {
       instance = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", instance);
     } else if (decorable.getType().isAssignableTo(Element.class)) {
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
@@ -76,9 +77,12 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
       else {
         instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
       }
-    } else if (!decorable.getType().isAssignableTo(Widget.class)) {
-      throw new GenerationException("Unable to use [" + name + "] in class [" + decorable.getDecorableDeclaringType()
-              + "] as a @DataField. The field must be a Widget or a DOM element as either a JavaScriptObject, native @JsType, or IsElement.");
+    }
+    else {
+      if (!isWidget) {
+        throw new GenerationException("Unable to use [" + name + "] in class [" + decorable.getDecorableDeclaringType()
+                + "] as a @DataField. The field must be a Widget or a DOM element as either a JavaScriptObject, native @JsType, or IsElement.");
+      }
     }
 
     saveDataField(decorable, decorable.getType(), name, decorable.getName(), instance);
