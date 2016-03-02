@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -261,7 +262,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         final URL classpathElement;
         final String pathRoot = getPathRoot(bundleClass, resource);
         try {
-          String urlString = new File(pathRoot).toURI().toURL().toString();
+          String urlString = new URI(pathRoot).toURL().toString();
 
           // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
           // a HTML form encoded String, which is why we escape the plus symbols here.
@@ -281,6 +282,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   private String getPathRoot(final MetaClass bundleClass, final URL resource) {
     final String fullPath = resource.getPath();
     final String resourcePath = bundleClass.getAnnotation(Bundle.class).value();
+    final String protocol = resource.getProtocol();
 
     final String relativePath;
     if (resourcePath.startsWith("/"))
@@ -289,7 +291,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       // Do NOT use File.separatorChar here: Url.getPath() always uses forward-slashes
       relativePath = bundleClass.getPackageName().replace('.', '/');
 
-    return fullPath.substring(0, fullPath.indexOf(relativePath));
+    final String pathRoot = fullPath.substring(0, fullPath.indexOf(relativePath));
+    return protocol + ":" + pathRoot;
   }
 
   /**
