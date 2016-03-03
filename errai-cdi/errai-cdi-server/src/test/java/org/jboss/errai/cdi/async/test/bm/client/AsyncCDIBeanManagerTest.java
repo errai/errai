@@ -62,12 +62,15 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanQuery;
+
+import com.google.gwt.core.shared.GWT;
 
 /**
  * @author Mike Brock
@@ -593,11 +596,14 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
 
   public void testErrorWhenUsingInstanceWithAsyncType() throws Exception {
     final ViaInstanceModule module = IOC.getBeanManager().lookupBean(ViaInstanceModule.class).getInstance();
+    assertTrue("Precondition failed: This test must run with the async bean manager.", GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync());
     try {
       module.asyncViaInstance.get();
       fail("Should have failed from an unsatisfied dependency exception.");
+    } catch (AssertionError ae) {
+      throw ae;
     } catch (Throwable t) {
-      assertTrue("The exception thrown did not have the @LoadAsync hint.", t.getMessage().contains("@LoadAsync"));
+      assertTrue("The exception thrown did not have the @LoadAsync hint. Observed: " + t.getMessage(), t.getMessage().contains("@LoadAsync"));
     }
   }
 
