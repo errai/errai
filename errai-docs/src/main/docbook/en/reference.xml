@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2016-01-12</date>
+    <date>2016-03-03</date>
     
     
     
@@ -5821,13 +5821,16 @@ public class HelloWorldForm extends Composite {
 <simpara>User interfaces often need to be available in different languages. Errai&#8217;s i18n support makes it easier for you to publish your web app in multiple languages. This section explains how to use this feature in your application.</simpara>
 <section id="_html_template_translation">
 <title>HTML Template Translation</title>
-<simpara>To get started with Errai&#8217;s internationalization support, simply put the <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.</simpara>
-<simpara>Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called <literal><phrase role="code">errai-bundle-all.json</phrase></literal> and put it in your <literal><phrase role="code">.errai</phrase></literal> directory. You can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.</simpara>
-<simpara>The translation bundle files use the same naming scheme as Java (e.g. <literal><phrase role="code">bundle_nl_BE.json</phrase></literal> for Belgian Dutch and <literal><phrase role="code">bundle_nl.json</phrase></literal> for plain Dutch). Errai will also generate a file called <literal><phrase role="code">errai-bundle-missing.json</phrase></literal> in the <literal><phrase role="code">.errai</phrase></literal> folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations:</simpara>
-<programlisting language="java" linenumbering="unnumbered">{
+<simpara>To get started with Errai&#8217;s internationalization support, simply put <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> or <literal><phrase role="code">@Bundle("bundle.properties")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> or <literal><phrase role="code">bundle.properties</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently provided the file extension is <literal>.json</literal> or <literal>.properties</literal>.</simpara>
+<simpara>Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called <literal><phrase role="code">errai-bundle-all.json</phrase></literal> and put it in your <literal><phrase role="code">.errai</phrase></literal> directory. If you used a JSON file in you <literal><phrase role="code">@Bundle</phrase></literal> annotation, you can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.</simpara>
+<simpara>The translation bundle files use the same naming scheme as Java (e.g. <literal><phrase role="code">bundle_nl_BE.json</phrase></literal> or <literal><phrase role="code">bundel_nl_BE.properties</phrase></literal> for Belgian Dutch, and <literal><phrase role="code">bundle_nl.json</phrase></literal> or <literal><phrase role="code">bundle_nl.properties</phrase></literal> for plain Dutch). Errai will also generate a file called <literal><phrase role="code">errai-bundle-missing.json</phrase></literal> in the <literal><phrase role="code">.errai</phrase></literal> folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations when you use a JSON file:</simpara>
+<programlisting language="javascript" linenumbering="unnumbered">{
 "StoresPage.Stores!" : "Stores!",
 "WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front._-734987445" : "As you move toward a more and more declarative style, you allow the compiler and the framework to catch more mistakes up front. Broken links? A thing of the past!"
 }</programlisting>
+<simpara>Here are the same translations as specified by a properties file:</simpara>
+<screen>StoresPage.Stores! = Stores!
+WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front._-734987445 = As you move toward a more and more declarative style, you allow the compiler and the framework to catch more mistakes up front. Broken links? A thing of the past!</screen>
 <simpara>If you want to use your own keys instead of these generated ones you can specify them in your templates using the <literal><phrase role="code">data-i18n-key</phrase></literal> attribute:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;html&gt;
 &lt;body&gt;
@@ -5836,9 +5839,11 @@ public class HelloWorldForm extends Composite {
 &lt;div&gt;
 ...</programlisting>
 <simpara>By adding this attribute in the template you can translate it with the following:</simpara>
-<programlisting language="java" linenumbering="unnumbered">{
+<programlisting language="javascript" linenumbering="unnumbered">{
     "Widget.welcome": "Willkommen bei Errai-ui i18n."
 }</programlisting>
+<simpara>or</simpara>
+<screen>Widget.welcome=Willkommen bei Errai-ui i18n.</screen>
 <simpara>Because your templates are designer templates and can contain some mock data that doesn&#8217;t need to be translated, Errai has the ability to indicate that with an attribute <literal><phrase role="code">data-role=dummy</phrase></literal>:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;div id=navbar data-role=dummy&gt;
   &lt;div class="navbar navbar-fixed-top"&gt;
