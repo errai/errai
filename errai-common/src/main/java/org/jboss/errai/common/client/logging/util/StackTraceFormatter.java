@@ -61,7 +61,7 @@ public class StackTraceFormatter {
 
       stack = stack.substring(stack.indexOf('\n'));
       return stack;
-    } catch (NullPointerException npe) {
+    } catch (Throwable ignore) {
       return null;
     }
   }
