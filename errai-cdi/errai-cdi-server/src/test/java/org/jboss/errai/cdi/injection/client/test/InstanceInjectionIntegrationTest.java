@@ -133,4 +133,13 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
     assertFalse(instanceDependentBeanA.isAmbiguous());
   }
 
+  public void testIterator() {
+    final DependentInstanceTestBean testBean
+            = getBeanManager().lookupBean(DependentInstanceTestBean.class).getInstance();
+
+    final Instance<DependentBeanA> injectedBean = testBean.getInjectDependentBeanA();
+
+    assertTrue(injectedBean.iterator().hasNext());
+    assertEquals(DependentBeanA.class, injectedBean.iterator().next().getClass());
+  }
 }
