@@ -22,6 +22,7 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
@@ -48,6 +49,8 @@ import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Provider;
 
+import org.jboss.errai.codegen.ArithmeticExpression;
+import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -55,6 +58,8 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
@@ -69,6 +74,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
@@ -180,19 +186,47 @@ public class IOCProcessor {
     declareAndRegisterFactories(processingContext, dependencyGraph, scopeContexts, scopeContextSet, registerFactoriesBody);
     final String contextManagerFieldName = declareContextManagerField(processingContext);
     declareWindowInjectionContextField(processingContext);
+    declareStaticLogger(processingContext);
     if (injectionContext.isAsync()) {
       declareAsyncBeanManagerSetupField(processingContext);
     }
 
     registerFactoriesBody.finish();
+    bootstrapContainer(processingContext, dependencyGraph, scopeContextSet, contextLocalVarInvocation, contextManagerFieldName);
+    log.debug("Processed factory GWT.create calls in {}ms", System.currentTimeMillis() - start);
+  }
 
+  private void bootstrapContainer(final IOCProcessingContext processingContext, final DependencyGraph dependencyGraph,
+          final Set<MetaClass> scopeContextSet, final Statement[] contextLocalVarInvocation,
+          final String contextManagerFieldName) {
     processingContext.getBlockBuilder()
       .appendAll(contextLocalVarDeclarations(scopeContextSet))
-      ._(loadVariable("this").invoke("registerFactories", (Object[]) contextLocalVarInvocation));
+      .append(loadVariable("logger").invoke("debug", "Registering factories with contexts."))
+      .append(declareVariable("start", long.class, currentTime()))
+      .append(loadVariable("this").invoke("registerFactories", (Object[]) contextLocalVarInvocation))
+      .append(loadVariable("logger").invoke("debug",
+              "Registered " + dependencyGraph.getNumberOfInjectables() + " factories in {}ms", subtractFromCurrentTime(loadVariable("start"))))
+      .append(loadVariable("logger").invoke("debug", "Adding contexts to context manager..."))
+      .append(loadVariable("start").assignValue(currentTime()));
     addContextsToContextManager(scopeContextSet, contextManagerFieldName, processingContext.getBlockBuilder());
+    processingContext.getBlockBuilder()
+      .append(loadVariable("logger").invoke("debug",
+            "Added " + scopeContextSet.size() + " contexts in {}ms", subtractFromCurrentTime(loadVariable("start"))))
+      .append(loadVariable("logger").invoke("debug", "Calling finishInit on " + ContextManager.class.getSimpleName()))
+      .append(loadVariable("start").assignValue(currentTime()));
     callFinishInitOnContextManager(contextManagerFieldName, processingContext.getBlockBuilder());
+    processingContext.getBlockBuilder()
+      .append(loadVariable("logger").invoke("debug",
+            "ContextManager#finishInit ran in {}ms", subtractFromCurrentTime(loadVariable("start"))));
+  }
 
-    log.debug("Processed factory GWT.create calls in {}ms", System.currentTimeMillis() - start);
+  private static ContextualStatementBuilder currentTime() {
+    return invokeStatic(System.class, "currentTimeMillis");
+  }
+
+  private static ArithmeticExpression subtractFromCurrentTime(final Statement toSubtract) {
+    return ArithmeticExpressionBuilder.create(currentTime(),
+            ArithmeticOperator.Subtraction, toSubtract);
   }
 
   private void runExtensionCallbacks(final Collection<MetaClass> allMetaClasses) {
@@ -233,6 +267,15 @@ public class IOCProcessor {
       .finish();
 
     return contextManagerFieldName;
+  }
+
+  @SuppressWarnings("unchecked")
+  private void declareStaticLogger(IOCProcessingContext processingContext) {
+    processingContext.getBootstrapBuilder()
+      .privateField("logger", Logger.class)
+      .modifiers(Modifier.Static, Modifier.Final)
+      .initializesWith(invokeStatic(LoggerFactory.class, "getLogger", Bootstrapper.class))
+      .finish();
   }
 
   @SuppressWarnings("unchecked")

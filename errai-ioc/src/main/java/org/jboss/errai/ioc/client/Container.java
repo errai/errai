@@ -39,38 +39,52 @@ public class Container implements EntryPoint {
   }
 
   public void bootstrapContainer() {
+    logger.info("Starting to bootstrap IOC container...");
+    final long bootstrapStart = System.currentTimeMillis();
     try {
       init = false;
 
-      QualifierUtil.initFromFactoryProvider(new QualifierEqualityFactoryProvider() {
-        @Override
-        public QualifierEqualityFactory provide() {
-          return GWT.create(QualifierEqualityFactory.class);
-        }
-      });
-
+      logger.debug("Initializing {}...", QualifierEqualityFactory.class.getSimpleName());
+      long start = System.currentTimeMillis();
+      QualifierUtil.initFromFactoryProvider(() -> GWT.create(QualifierEqualityFactory.class));
+      logger.debug("{} initialized in {}ms", QualifierEqualityFactory.class.getSimpleName(), System.currentTimeMillis() - start);
 
       final BeanManagerSetup beanManager;
       if (GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync()) {
-        logger.info("bean manager initialized in async mode.");
+        logger.info("Bean manager initialized in async mode.");
         beanManager = (BeanManagerSetup) IOC.getAsyncBeanManager();
       } else {
         beanManager = (BeanManagerSetup) IOC.getBeanManager();
       }
 
+      logger.debug("Creating new {} instance...", Bootstrapper.class.getSimpleName());
+      start = System.currentTimeMillis();
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-      final ContextManager contextManager = bootstrapper.bootstrapContainer();
+      logger.debug("Created {} instance in {}ms", Bootstrapper.class.getSimpleName(), System.currentTimeMillis() - start);
 
+      logger.debug("Creating new {} instance...", ContextManager.class.getSimpleName());
+      start = System.currentTimeMillis();
+      final ContextManager contextManager = bootstrapper.bootstrapContainer();
+      logger.debug("Created {} instance in {}ms", ContextManager.class.getSimpleName(), System.currentTimeMillis() - start);
+
+      logger.debug("Initializing bean manager...");
+      start = System.currentTimeMillis();
       beanManager.setContextManager(contextManager);
+      logger.debug("Bean manager initialized in {}ms", System.currentTimeMillis() - start);
+
+      logger.debug("Running post initialization runnables...");
+      start = System.currentTimeMillis();
       init = true;
       for (final Runnable run : afterInit) {
         run.run();
       }
       afterInit.clear();
-      logger.info("IOC bootstrapper successfully initialized.");
+      logger.debug("All post initialization runnables finished in {}ms", System.currentTimeMillis() - start);
+
+      logger.info("IOC bootstrapper successfully initialized in {}ms", System.currentTimeMillis() - bootstrapStart);
     }
     catch (RuntimeException ex) {
-      logger.error("critical error in IOC container bootstrap: " + ex.getClass().getName() + ": "
+      logger.error("Critical error in IOC container bootstrap: " + ex.getClass().getName() + ": "
           + ex.getMessage());
 
       throw ex;
