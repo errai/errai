@@ -23,6 +23,7 @@ import jsinterop.annotations.JsType;
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/CSSRule">Web API</a>
  */
 @JsType(isNative = true)
 public interface CSSRule {

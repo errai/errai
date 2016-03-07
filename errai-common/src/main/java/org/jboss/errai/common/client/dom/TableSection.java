@@ -24,6 +24,7 @@ import jsinterop.annotations.JsType;
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableSectionElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element({"thead", "tfoot", "tbody"})

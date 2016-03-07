@@ -22,6 +22,7 @@ import jsinterop.annotations.JsType;
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @see <a href="https://developer.mozilla.org/en/docs/Web/HTML/Element/menu">Web API</a>
  */
 @JsType(isNative = true)
 public interface Menu extends HTMLElement {

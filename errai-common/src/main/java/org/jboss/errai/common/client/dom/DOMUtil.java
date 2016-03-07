@@ -24,12 +24,19 @@ import org.jboss.errai.common.client.function.Optional;
 import com.google.gwt.regexp.shared.RegExp;
 
 /**
+ * Provides utitlity methods for interacting with the DOM.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public abstract class DOMUtil {
   private DOMUtil() {}
 
+  /**
+   * @param element
+   *          Must not be null.
+   * @return If the given element has any child elements, return an optional containing the first child element.
+   *         Otherwise return an empty optional.
+   */
   public static Optional<Element> getFirstChildElement(final Element element) {
     for (final Node child : nodeIterable(element.getChildNodes())) {
       if (isElement(child)) {
@@ -40,6 +47,12 @@ public abstract class DOMUtil {
     return Optional.empty();
   }
 
+  /**
+   * @param element
+   *          Must not be null.
+   * @return If the given element has any child elements, return an optional containing the last child element.
+   *         Otherwise return an empty optional.
+   */
   public static Optional<Element> getLastChildElement(final Element element) {
     final NodeList children = element.getChildNodes();
     for (int i = children.getLength()-1; i > -1; i--) {
@@ -51,14 +64,29 @@ public abstract class DOMUtil {
     return Optional.empty();
   }
 
+  /**
+   * @param node
+   *          Must not be null.
+   * @return True iff the given node is an element.
+   */
   public static boolean isElement(final Node node) {
     return node.getNodeType() == Node.ELEMENT_NODE;
   }
 
+  /**
+   * @param nodeList
+   *          Must not be null.
+   * @return An iterable for the given node list.
+   */
   public static Iterable<Node> nodeIterable(final NodeList nodeList) {
     return () -> DOMUtil.nodeIterator(nodeList);
   }
 
+  /**
+   * @param nodeList
+   *          Must not be null.
+   * @return An iterator for the given node list.
+   */
   public static Iterator<Node> nodeIterator(final NodeList nodeList) {
     return new Iterator<Node>() {
       int index = 0;
@@ -85,10 +113,20 @@ public abstract class DOMUtil {
     };
   }
 
+  /**
+   * @param nodeList
+   *          Must not be null.
+   * @return An iterable for the given node list that ignores non-element nodes.
+   */
   public static Iterable<Element> elementIterable(final NodeList nodeList) {
     return () -> elementIterator(nodeList);
   }
 
+  /**
+   * @param nodeList
+   *          Must not be null.
+   * @return An iterator for the given node list that ignores non-element nodes.
+   */
   public static Iterator<Element> elementIterator(final NodeList nodeList) {
     return new Iterator<Element>() {
 
@@ -119,7 +157,15 @@ public abstract class DOMUtil {
     };
   }
 
-  public static boolean removeFromParent(final Node element) {
+  /**
+   * Detaches an element from its parent.
+   *
+   * @param element
+   *          Must not be null.
+   * @return True if calling this method detaches the given element from a parent node. False if there is no parent to
+   *         be removed from.
+   */
+  public static boolean removeFromParent(final Element element) {
     if (element.getParentElement() != null) {
       element.getParentElement().removeChild(element);
 
@@ -130,6 +176,13 @@ public abstract class DOMUtil {
     }
   }
 
+  /**
+   * Detaches all children from a node.
+   *
+   * @param node
+   *          Must not be null.
+   * @return True iff any children were detached by this call.
+   */
   public static boolean removeAllChildren(final Node node) {
     final boolean hadChildren = node.getLastChild() != null;
     while (node.getLastChild() != null) {
@@ -139,6 +192,13 @@ public abstract class DOMUtil {
     return hadChildren;
   }
 
+  /**
+   * Detaches all element children from a node.
+   *
+   * @param node
+   *          Must not be null.
+   * @return True iff any element children were detached by this call.
+   */
   public static boolean removeAllElementChildren(final Node node) {
     boolean elementRemoved = false;
     for (final Element child : elementIterable(node.getChildNodes())) {
@@ -149,6 +209,16 @@ public abstract class DOMUtil {
     return elementRemoved;
   }
 
+  /**
+   * Removes a CSS class from an element's class list.
+   *
+   * @param element
+   *          Must not be null.
+   * @param className
+   *          The name of a CSS class. Must not be null.
+   * @return True if the given class was removed from the given element. False if the given element did not have the
+   *         given class as part of its class list.
+   */
   public static boolean removeCSSClass(final HTMLElement element, final String className) {
     if (hasCSSClass(element, className)) {
       element.setClassName(element.getClassName().replaceAll("\\b" + className + "\\b", "").trim());
@@ -160,6 +230,16 @@ public abstract class DOMUtil {
     }
   }
 
+  /**
+   * Adds a CSS class to an element's class list.
+   *
+   * @param element
+   *          Must not be null.
+   * @param className
+   *          The name of a CSS class. Must not be null.
+   * @return True if the given class was added to the given element. False if the given element already had the
+   *         given class as part of its class list.
+   */
   public static boolean addCSSClass(final HTMLElement element, final String className) {
     if (hasCSSClass(element, className)) {
       return false;
@@ -171,6 +251,13 @@ public abstract class DOMUtil {
     }
   }
 
+  /**
+   * @param element
+   *          Must not be null.
+   * @param className
+   *          The name of a CSS class. Must not be null.
+   * @return True iff the given element has the given CSS class as part of its class list.
+   */
   public static boolean hasCSSClass(final HTMLElement element, final String className) {
     final RegExp pattern = RegExp.compile("\\b" + className + "\\b");
 

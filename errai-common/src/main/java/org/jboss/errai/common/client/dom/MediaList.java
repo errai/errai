@@ -22,6 +22,7 @@ import jsinterop.annotations.JsType;
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @see <a href="https://www.w3.org/TR/cssom/#the-medialist-interface">Web API</a>
  */
 @JsType(isNative = true)
 public interface MediaList {
