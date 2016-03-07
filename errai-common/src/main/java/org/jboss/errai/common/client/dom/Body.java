@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.nav.client.local.testpages;
+package org.jboss.errai.common.client.dom;
 
-import javax.inject.Inject;
-
-import org.jboss.errai.common.client.api.IsElement;
-import org.jboss.errai.common.client.dom.Div;
-import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.ui.nav.client.local.Page;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Page(path = IsElementPageWithLeadingSlashPath.IS_ELEMENT_PAGE)
-public class IsElementPageWithLeadingSlashPath implements IsElement {
+@JsType(isNative = true)
+public interface Body extends HTMLElement, WindowEventHandlers {
+  @JsProperty String getALink();
+  @JsProperty void setALink(String aLink);
 
-  public static final String IS_ELEMENT_PAGE = "/is-element-page";
+  @JsProperty String getBackground();
+  @JsProperty void setBackground(String background);
 
-  @Inject
-  private Div div;
+  @JsProperty String getBgColor();
+  @JsProperty void setBgColor(String bgColor);
 
-  @Override
-  public HTMLElement getElement() {
-    return div;
-  }
+  @JsProperty String getLink();
+  @JsProperty void setLink(String link);
 
+  @JsProperty String getText();
+  @JsProperty void setText(String text);
+
+  @JsProperty String getVLink();
+  @JsProperty void setVLink(String vLink);
 }

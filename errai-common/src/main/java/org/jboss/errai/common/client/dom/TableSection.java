@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.dom;
 
+import org.jboss.errai.common.client.api.annotations.Element;
+
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
@@ -24,19 +26,21 @@ import jsinterop.annotations.JsType;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true)
-public interface Document extends Node, GlobalEventHandlers {
-  @JsProperty DocumentType getDoctype();
-  @JsProperty DOMImplementation getImplementation();
-  @JsProperty Element getDocumentElement();
-  @JsProperty Body getBody();
+@Element({"thead", "tfoot", "tbody"})
+public interface TableSection extends HTMLElement {
+  @JsProperty String getAlign();
+  @JsProperty void setAlign(String align);
 
-  HTMLElement createElement(String tagName);
-  DocumentFragment createDocumentFragment();
-  Text createTextNode(String data);
-  Comment createComment(String data);
-  CDATASection createCDATASection(String data);
-  ProcessingInstruction createProcessingInstruction(String target, String data);
-  Attr createAttribute(String name);
-  EntityReference createEntityReference(String name);
-  NodeList getElementsByTagName(String tagname);
+  @JsProperty String getCh();
+  @JsProperty void setCh(String ch);
+
+  @JsProperty String getChOff();
+  @JsProperty void setChOff(String chOff);
+
+  @JsProperty String getVAlign();
+  @JsProperty void setVAlign(String vAlign);
+
+  @JsProperty HTMLCollection getRows();
+  HTMLElement insertRow(int index);
+  void deleteRow(int index);
 }

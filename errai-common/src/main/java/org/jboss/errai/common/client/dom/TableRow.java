@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.dom;
 
+import org.jboss.errai.common.client.api.annotations.Element;
+
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
@@ -24,19 +26,27 @@ import jsinterop.annotations.JsType;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true)
-public interface Document extends Node, GlobalEventHandlers {
-  @JsProperty DocumentType getDoctype();
-  @JsProperty DOMImplementation getImplementation();
-  @JsProperty Element getDocumentElement();
-  @JsProperty Body getBody();
+@Element("tr")
+public interface TableRow extends HTMLElement {
+  @JsProperty int getRowIndex();
+  @JsProperty int getSectionRowIndex();
+  @JsProperty HTMLCollection getCells();
 
-  HTMLElement createElement(String tagName);
-  DocumentFragment createDocumentFragment();
-  Text createTextNode(String data);
-  Comment createComment(String data);
-  CDATASection createCDATASection(String data);
-  ProcessingInstruction createProcessingInstruction(String target, String data);
-  Attr createAttribute(String name);
-  EntityReference createEntityReference(String name);
-  NodeList getElementsByTagName(String tagname);
+  @JsProperty String getAlign();
+  @JsProperty void setAlign(String align);
+
+  @JsProperty String getBgColor();
+  @JsProperty void setBgColor(String bgColor);
+
+  @JsProperty String getCh();
+  @JsProperty void setCh(String ch);
+
+  @JsProperty String getChOff();
+  @JsProperty void setChOff(String chOff);
+
+  @JsProperty String getVAlign();
+  @JsProperty void setVAlign(String vAlign);
+
+  HTMLElement insertCell(int index);
+  void deleteCell(int index);
 }

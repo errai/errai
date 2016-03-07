@@ -87,8 +87,8 @@ public interface HTMLElement extends Element, GlobalEventHandlers {
 
   @JsProperty(name="isContentEditable") boolean isContentEditable();
 
-  @JsProperty HTMLMenuElement getContextMenu();
-  @JsProperty void setContextMenu(HTMLMenuElement menuElement);
+  @JsProperty Menu getContextMenu();
+  @JsProperty void setContextMenu(Menu menuElement);
 
   @JsProperty boolean getSpellcheck();
   @JsProperty void setSpellcheck(boolean spellcheck);

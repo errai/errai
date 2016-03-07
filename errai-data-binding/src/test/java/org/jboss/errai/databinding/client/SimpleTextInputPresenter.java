@@ -18,7 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.dom.HTMLInputElement;
+import org.jboss.errai.common.client.dom.Input;
 
 import com.google.gwt.dom.client.Document;
 
@@ -29,7 +29,7 @@ import com.google.gwt.dom.client.Document;
  */
 public class SimpleTextInputPresenter implements IsElement {
 
-  private HTMLInputElement element = (HTMLInputElement) Document.get().createTextInputElement();
+  private Input element = (Input) Document.get().createTextInputElement();
 
   @Override
   public HTMLElement getElement() {

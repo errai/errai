@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.nav.client.local.testpages;
+package org.jboss.errai.common.client.dom;
 
-import javax.inject.Inject;
-
-import org.jboss.errai.common.client.api.IsElement;
-import org.jboss.errai.common.client.dom.Div;
-import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.ui.nav.client.local.Page;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Page(path = IsElementPageWithLeadingSlashPath.IS_ELEMENT_PAGE)
-public class IsElementPageWithLeadingSlashPath implements IsElement {
-
-  public static final String IS_ELEMENT_PAGE = "/is-element-page";
-
-  @Inject
-  private Div div;
-
-  @Override
-  public HTMLElement getElement() {
-    return div;
-  }
-
+@JsType(isNative = true)
+public interface OptionsCollection {
+  @JsProperty int getLength();
+  Node item(int index);
+  Node namedItem(String name);
 }

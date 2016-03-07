@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.dom;
 
+import org.jboss.errai.common.client.api.annotations.Element;
+
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
@@ -24,19 +26,29 @@ import jsinterop.annotations.JsType;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true)
-public interface Document extends Node, GlobalEventHandlers {
-  @JsProperty DocumentType getDoctype();
-  @JsProperty DOMImplementation getImplementation();
-  @JsProperty Element getDocumentElement();
-  @JsProperty Body getBody();
+@Element("option")
+public interface Option extends HTMLElement {
+  @JsProperty Form getForm();
 
-  HTMLElement createElement(String tagName);
-  DocumentFragment createDocumentFragment();
-  Text createTextNode(String data);
-  Comment createComment(String data);
-  CDATASection createCDATASection(String data);
-  ProcessingInstruction createProcessingInstruction(String target, String data);
-  Attr createAttribute(String name);
-  EntityReference createEntityReference(String name);
-  NodeList getElementsByTagName(String tagname);
+  @JsProperty boolean getDefaultSelected();
+  @JsProperty void setDefaultSelected(boolean defaultSelected);
+
+  @JsProperty String getText();
+  @JsProperty void setText(String text);
+
+  @JsProperty int getIndex();
+
+  @Override
+  @JsProperty boolean getDisabled();
+  @JsProperty void setDisabled(boolean disabled);
+
+  @Override
+  @JsProperty String getLabel();
+  @JsProperty void setLabel(String label);
+
+  @JsProperty boolean getSelected();
+  @JsProperty void setSelected(boolean selected);
+
+  @JsProperty String getValue();
+  @JsProperty void setValue(String value);
 }

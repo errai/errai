@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.dom;
 
+import org.jboss.errai.common.client.api.annotations.Element;
+
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
@@ -24,19 +26,29 @@ import jsinterop.annotations.JsType;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true)
-public interface Document extends Node, GlobalEventHandlers {
-  @JsProperty DocumentType getDoctype();
-  @JsProperty DOMImplementation getImplementation();
-  @JsProperty Element getDocumentElement();
-  @JsProperty Body getBody();
+@Element("form")
+public interface Form extends HTMLElement {
+  @JsProperty HTMLCollection getElements();
+  @JsProperty int getLength();
 
-  HTMLElement createElement(String tagName);
-  DocumentFragment createDocumentFragment();
-  Text createTextNode(String data);
-  Comment createComment(String data);
-  CDATASection createCDATASection(String data);
-  ProcessingInstruction createProcessingInstruction(String target, String data);
-  Attr createAttribute(String name);
-  EntityReference createEntityReference(String name);
-  NodeList getElementsByTagName(String tagname);
+  @JsProperty String getName();
+  @JsProperty void setName(String name);
+
+  @JsProperty String getAcceptCharset();
+  @JsProperty void setAcceptCharset(String acceptCharSet);
+
+  @JsProperty String getAction();
+  @JsProperty void setAction(String action);
+
+  @JsProperty String getEnctype();
+  @JsProperty void setEnctype(String enctype);
+
+  @JsProperty String getMethod();
+  @JsProperty void setMethod(String method);
+
+  @JsProperty String getTarget();
+  @JsProperty void setTarget(String target);
+
+  void submit();
+  void reset();
 }

@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.nav.client.local.testpages;
+package org.jboss.errai.common.client.dom;
 
-import javax.inject.Inject;
+import org.jboss.errai.common.client.api.annotations.Element;
 
-import org.jboss.errai.common.client.api.IsElement;
-import org.jboss.errai.common.client.dom.Div;
-import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.ui.nav.client.local.Page;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Page(path = IsElementPageWithLeadingSlashPath.IS_ELEMENT_PAGE)
-public class IsElementPageWithLeadingSlashPath implements IsElement {
+@JsType(isNative = true)
+@Element("ol")
+public interface OrderedList extends HTMLElement {
+  @JsProperty boolean getCompact();
+  @JsProperty void setCompact(boolean compact);
 
-  public static final String IS_ELEMENT_PAGE = "/is-element-page";
+  @JsProperty String getType();
+  @JsProperty void setType(String type);
 
-  @Inject
-  private Div div;
-
-  @Override
-  public HTMLElement getElement() {
-    return div;
-  }
-
+  @JsProperty int getStart();
+  @JsProperty void setStart(int start);
 }
