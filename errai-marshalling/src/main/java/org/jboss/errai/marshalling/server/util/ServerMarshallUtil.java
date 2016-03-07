@@ -46,7 +46,7 @@ public abstract class ServerMarshallUtil {
     if (generatedMarshaller.isPresent()) {
       return (Class<? extends MarshallerFactory>) generatedMarshaller.get();
     }
-    else if (MarshallingGenUtil.isForceStaticMarshallers()) {
+    else if (!MarshallingGenUtil.isForceStaticMarshallers()) {
       return null;
     }
     else {
