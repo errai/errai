@@ -22,7 +22,7 @@ import java.util.Map;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
 
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsType;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

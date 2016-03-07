@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsType;
 
 @JsType
 public class WindowEventObservers {
@@ -40,21 +40,21 @@ public class WindowEventObservers {
     }
     observers.get(eventType).add(observer);
   }
-  
+
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void fireEvent(final String eventType, final Object evt) {
     for (JsTypeEventObserver observer : get(eventType)) {
       observer.onEvent(evt);
     }
   }
-  
+
   public List<JsTypeEventObserver<?>> get(final String eventType) {
     if (!observers.containsKey(eventType)) {
       return new ArrayList<JsTypeEventObserver<?>>();
     }
     return observers.get(eventType);
   }
-  
+
   private static native WindowEventObservers getWindowEventObservers() /*-{
     return $wnd.eventObservers;
   }-*/;

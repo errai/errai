@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsType;
 
 @JsType
 public class JsTypeProvider<T> {

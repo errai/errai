@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.event.client.shared;
 
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsType;
 
 @JsType
 public class JsTypeEvent {

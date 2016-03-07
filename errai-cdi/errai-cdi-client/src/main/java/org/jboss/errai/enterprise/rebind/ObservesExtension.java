@@ -57,7 +57,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsType;
 
 /**
  * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>
