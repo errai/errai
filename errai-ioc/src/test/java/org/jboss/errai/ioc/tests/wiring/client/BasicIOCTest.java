@@ -25,6 +25,7 @@ import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
@@ -37,6 +38,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithPackageConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithPrivateConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithProtectedConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
+import org.jboss.errai.ioc.tests.wiring.client.res.IfaceProducer;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstrThrowsNPE;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableNonPublicPostconstruct;
@@ -289,5 +291,13 @@ public class BasicIOCTest extends IOCClientTestCase {
   public void testNoFactoryGeneratedForInnerClassOfNonPublicClass() throws Exception {
     final Collection<SyncBeanDef<PublicInnerClassIface>> foundBeans = IOC.getBeanManager().lookupBeans(PublicInnerClassIface.class, QualifierUtil.ANY_ANNOTATION);
     assertEquals(0, foundBeans.size());
+  }
+
+  public void testInterfaceStaticProducer() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(IfaceProducer.class).getInstance();
+    } catch (IOCResolutionException ex) {
+      throw new AssertionError("Could not produce " + IfaceProducer.class.getSimpleName(), ex);
+    }
   }
 }
