@@ -587,6 +587,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
         final Collection<ConcreteInjectable> resolved = resolvedByPriority.get(priority);
         if (resolved.size() > 1) {
           problems.add(ambiguousDependencyMessage(dep, concrete, new ArrayList<ConcreteInjectable>(resolved)));
+
           return null;
         } else {
           Injectable injectable = resolved.iterator().next();
@@ -600,6 +601,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
             customProvidedInjectables.put(injectable.getFactoryName(), injectable);
             dep.injectable = copyAbstractInjectable(dep.injectable);
           }
+
           return (dep.injectable.resolution = injectable);
         }
       }

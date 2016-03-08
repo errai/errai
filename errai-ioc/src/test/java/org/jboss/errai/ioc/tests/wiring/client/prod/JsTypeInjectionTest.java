@@ -23,6 +23,7 @@ import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
+import org.jboss.errai.ioc.tests.wiring.client.res.ConsumesProducedJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeConsumer;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentInterface;
@@ -30,6 +31,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeTypeTestModule;
+import org.jboss.errai.ioc.tests.wiring.client.res.ProducedJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.UnimplementedType;
 
 import com.google.gwt.core.client.Callback;
@@ -169,7 +171,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
     });
   }
 
-  public void testProducerMethodOfJsType() throws Exception {
+  public void testProducerMethodNativeOfJsType() throws Exception {
     injectScriptThenRun(new Runnable() {
 
       @Override
@@ -183,5 +185,12 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         }
       }
     });
+  }
+
+  public void testProducerMethodOfJsType() throws Exception {
+    final ConsumesProducedJsType consumer = IOC.getBeanManager().lookupBean(ConsumesProducedJsType.class).getInstance();
+    assertNotNull(consumer.instance);
+    assertTrue(consumer.instance instanceof ProducedJsType);
+    assertEquals(2, IOC.getBeanManager().lookupBeans(ProducedJsType.class).size());
   }
 }

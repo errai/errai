@@ -52,10 +52,19 @@ public enum ResolutionPriority {
    * Category for explicitly scoped concrete types, or producer methods.
    */
   NormalType {
-    final Collection<InjectableType> matchingTypes = Arrays.<InjectableType>asList(InjectableType.Type, InjectableType.Producer, InjectableType.JsType);
+    final Collection<InjectableType> matchingTypes = Arrays.<InjectableType>asList(InjectableType.Type, InjectableType.Producer);
     @Override
     public boolean matches(final Injectable injectable) {
       return matchingTypes.contains(injectable.getInjectableType()) && !injectable.getWiringElementTypes().contains(WiringElementType.Simpleton);
+    }
+  },
+  /**
+   * Category for injectables that may or may not be satisfied by separately compiled GWT modules at runtime.
+   */
+  JsType {
+    @Override
+    public boolean matches(final Injectable injectable) {
+      return InjectableType.JsType.equals(injectable.getInjectableType());
     }
   },
   /**
@@ -81,7 +90,7 @@ public enum ResolutionPriority {
     }
   },
   /**
-   * Category for concrete types with no explicity scopes or injection points, and that are default constructible.
+   * Category for concrete types with no explicit scopes or injection points, and that are default constructible.
    */
   Simpleton {
     @Override
