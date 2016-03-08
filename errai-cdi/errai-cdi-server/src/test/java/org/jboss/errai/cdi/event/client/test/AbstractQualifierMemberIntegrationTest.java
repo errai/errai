@@ -37,7 +37,7 @@ import com.google.gwt.user.client.Timer;
  */
 public abstract class AbstractQualifierMemberIntegrationTest extends AbstractErraiCDITest {
 
-  private static final int DURATION = 10000;
+  private static final int DURATION = 30000;
 
   @Override
   public String getModuleName() {
