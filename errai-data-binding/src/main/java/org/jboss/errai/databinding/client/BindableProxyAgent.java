@@ -109,7 +109,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * change outside a setter method.
    */
   void copyValues() {
-    for (String property : propertyTypes.keySet()) {
+    for (final String property : propertyTypes.keySet()) {
       if (!"this".equals(property)) {
         knownValues.put(property, proxy.get(property));
       }
@@ -222,6 +222,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private Binding bindHelper(final Object component, final String property, final Converter converter,
           final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
           final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
+    
     validatePropertyExpr(property);
 
     if (property.contains(".")) {
@@ -235,6 +236,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private Binding bindNestedProperty(final Object component, final String property, final Converter<?, ?> converter,
           final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
           final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
+    
       final DataBinder nestedBinder = createNestedBinder(property);
       final String subProperty = property.substring(property.indexOf('.') + 1);
       final BindableProxyAgent<?> nestedAgent = ((BindableProxy<?>) nestedBinder.getModel()).getBindableProxyAgent();
@@ -249,7 +251,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           final Object newValue) {
     try {
       proxy.set(property, newValue);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("Error while setting property [" + property + "] to [" + newValue
               + "] converted from [" + uiValue + "] with converter [" + converter.getModelType().getName() + " -> "
               + converter.getComponentType().getName() + "].", t);
@@ -296,7 +298,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   private void checkComponentNotAlreadyBound(final Object component, final String property) {
-    for (Binding binding : bindings.values()) {
+    for (final Binding binding : bindings.values()) {
       if (binding.getComponent().equals(component) && !property.equals(binding.getProperty())) {
         throw new ComponentAlreadyBoundException("Widget already bound to property: " + binding.getProperty());
       }
@@ -409,21 +411,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     return registrar;
   }
 
-  private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeNativeChangeEventListener(
-          final Object component, final Optional<Supplier<Object>> uiGetter, final Consumer<Object> modelUpdater,
-          Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
-    registrar = mergeToLeft(registrar, () -> {
-      final JavaScriptObject listener = wrap(() ->
-        uiGetter.ifPresent(getter ->
-          modelUpdater.accept(getter.get())));
-      addChangeEventListener(component, listener);
-
-      return Collections.singletonMap(ValueChangeEvent.class, () -> removeChangeEventListener(component, listener));
-    });
-
-    return registrar;
-  }
-
   private static boolean isElement(Object obj) {
     return obj instanceof JavaScriptObject && Node.is((JavaScriptObject) obj) && Element.is((Node) obj);
   }
@@ -445,6 +432,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeValueBoxKeyUpHandler(
           final Object component, final Consumer<Object> modelUpdater,
           Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
+    
     registrar = mergeToLeft(registrar, () -> {
       final HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) component)
               .addKeyUpHandler(event -> modelUpdater.accept(((ValueBoxBase) component).getText()));
@@ -458,6 +446,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeHasValueChangeHandler(
           final Object component, final Consumer<Object> modelUpdater,
           Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
+    
     registrar = mergeToLeft(registrar, () -> {
       final HandlerRegistration valueHandlerReg = ((HasValue) component).addValueChangeHandler(event -> {
         final Object value = ((HasValue) component).getValue();
@@ -466,6 +455,21 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
       return Collections.singletonMap(ValueChangeEvent.class, valueHandlerReg);
     });
+    return registrar;
+  }
+  
+  private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeNativeChangeEventListener(
+          final Object component, final Optional<Supplier<Object>> uiGetter, final Consumer<Object> modelUpdater,
+          Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
+    
+    registrar = mergeToLeft(registrar, () -> {
+      final JavaScriptObject listener = wrap(() -> uiGetter.ifPresent(getter -> modelUpdater.accept(getter.get())));
+      addChangeEventListener(component, listener);
+      
+      final HandlerRegistration hr = () -> removeChangeEventListener(component, listener);
+      return Collections.singletonMap(ValueChangeEvent.class, hr);
+    });
+
     return registrar;
   }
 
@@ -497,7 +501,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          The property must be of a @Bindable type.
    */
   private DataBinder createNestedBinder(final String property) {
-    String bindableProperty = property.substring(0, property.indexOf("."));
+    final String bindableProperty = property.substring(0, property.indexOf("."));
     DataBinder<Object> binder = binders.get(bindableProperty);
 
     if (!propertyTypes.containsKey(bindableProperty)) {
@@ -517,7 +521,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         binder = DataBinder.forModel(proxy.get(bindableProperty));
       }
       binders.put(bindableProperty, binder);
-      for (PropertyChangeHandler<?> handler : propertyChangeHandlerSupport.specificPropertyHandlers.get("**")) {
+      for (final PropertyChangeHandler<?> handler : propertyChangeHandlerSupport.specificPropertyHandlers.get("**")) {
         binder.addPropertyChangeHandler("**", handler);
       }
     }
@@ -552,17 +556,17 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          the name of the model property to unbind, must not be null.
    */
   public void unbind(final Binding binding) {
-    String property = binding.getProperty();
+    final String property = binding.getProperty();
     validatePropertyExpr(property);
 
-    int dotPos = property.indexOf(".");
+    final int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       final String bindableProperty = property.substring(0, dotPos);
       final DataBinder binder = binders.get(bindableProperty);
       if (binder != null) {
         final BindableProxyAgent<T> nestedAgent = ((BindableProxy<T>) binder.getModel()).getBindableProxyAgent();
         final Collection<Binding> nestedBindings = nestedAgent.bindings.get(property.substring(dotPos + 1));
-        for (Binding nestedBinding : nestedBindings.toArray(new Binding[nestedBindings.size()])) {
+        for (final Binding nestedBinding : nestedBindings.toArray(new Binding[nestedBindings.size()])) {
           if (binding.getComponent() == nestedBinding.getComponent()) {
             nestedAgent.unbind(nestedBinding);
           }
@@ -583,13 +587,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * the property's write method (when using a non accessor method).
    */
   void updateWidgetsAndFireEvents() {
-    for (String property : propertyTypes.keySet()) {
-      Object knownValue = knownValues.get(property);
-      Object actualValue = proxy.get(property);
+    for (final String property : propertyTypes.keySet()) {
+      final Object knownValue = knownValues.get(property);
+      final Object actualValue = proxy.get(property);
 
       if ((knownValue == null && actualValue != null) || (knownValue != null && !knownValue.equals(actualValue))) {
 
-        DataBinder nestedBinder = binders.get(property);
+        final DataBinder nestedBinder = binders.get(property);
         if (nestedBinder != null) {
           nestedBinder.setModel(actualValue, StateSync.FROM_MODEL, true);
           proxy.set(property, nestedBinder.getModel());
@@ -641,7 +645,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private <P> void updateWidgetsAndFireEvent(final boolean sync, final String property, final P oldValue, final P newValue,
           final Object excluding) {
 
-    for (Binding binding : bindings.get(property)) {
+    for (final Binding binding : bindings.get(property)) {
       final Object component = binding.getComponent();
       final Converter converter = binding.getConverter();
 
@@ -674,12 +678,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   private <P> void updateComponentValue(final P newValue, final HasText component, final Converter converter) {
     assert String.class.equals(converter.getComponentType());
-    Object widgetValue = converter.toWidgetValue(newValue);
+    final Object widgetValue = converter.toWidgetValue(newValue);
     component.setText((String) widgetValue);
   }
 
   private <P> void updateComponentValue(final P newValue, final TakesValue component, final Converter converter) {
-    Object widgetValue = converter.toWidgetValue(newValue);
+    final Object widgetValue = converter.toWidgetValue(newValue);
     component.setValue(widgetValue);
   }
 
@@ -701,7 +705,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private <P> boolean maybeFirePropertyChangeEvent(final String property, final P oldValue, final P newValue) {
     knownValues.put(property, newValue);
 
-    PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, Assert.notNull(property), oldValue, newValue);
+    final PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, Assert.notNull(property), oldValue, newValue);
 
     if (!"this".equals(property) || propertyTypes.size() == 1) {
       propertyChangeHandlerSupport.notifyHandlers(event);
@@ -743,7 +747,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         updateWidgetsAndFireEvent(true, property, knownValues.get(property), value);
       }
       else if (initialState == StateSync.FROM_UI) {
-        Object newValue = converter.toModelValue(value);
+        final Object newValue = converter.toModelValue(value);
         proxy.set(property, newValue);
         maybeFirePropertyChangeEvent(property, knownValues.get(property), newValue);
         updateWidgetsAndFireEvent(true, property, knownValues.get(property), newValue, component);
@@ -838,9 +842,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     final Collection<PropertyChangeUnsubscribeHandle> unsubHandles = new ArrayList<PropertyChangeUnsubscribeHandle>();
 
-    int dotPos = property.indexOf(".");
+    final int dotPos = property.indexOf(".");
     if (dotPos > 0) {
-      DataBinder nested = createNestedBinder(property);
+      final DataBinder nested = createNestedBinder(property);
       unsubHandles.add(nested.addPropertyChangeHandler(property.substring(dotPos + 1), handler));
     }
     else if (property.equals("*")) {
@@ -854,7 +858,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       });
     }
     else if (property.equals("**")) {
-      for (DataBinder nested : binders.values()) {
+      for (final DataBinder nested : binders.values()) {
         unsubHandles.add(nested.addPropertyChangeHandler(property, handler));
       }
       propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
@@ -899,14 +903,14 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   public void mergePropertyChangeHandlers(PropertyChangeHandlerSupport pchs) {
     Assert.notNull(pchs);
 
-    for (PropertyChangeHandler pch : pchs.handlers) {
+    for (final PropertyChangeHandler pch : pchs.handlers) {
       if (!propertyChangeHandlerSupport.handlers.contains(pch)) {
         addPropertyChangeHandler(pch);
       }
     }
 
-    for (String pchKey : pchs.specificPropertyHandlers.keys()) {
-      for (PropertyChangeHandler pch : pchs.specificPropertyHandlers.get(pchKey)) {
+    for (final String pchKey : pchs.specificPropertyHandlers.keys()) {
+      for (final PropertyChangeHandler pch : pchs.specificPropertyHandlers.get(pchKey)) {
         if (!propertyChangeHandlerSupport.specificPropertyHandlers.containsEntry(pchKey, pch)) {
           addPropertyChangeHandler(pchKey, pch);
         }
@@ -926,7 +930,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          {@link StateSync#FROM_MODEL}.
    */
   public void fireChangeEvents(BindableProxyAgent other, final StateSync initialState) {
-    for (String property : propertyTypes.keySet()) {
+    for (final String property : propertyTypes.keySet()) {
       final Object curValue,
                    oldValue,
                    thisValue = knownValues.get(property),
@@ -938,11 +942,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
       if ((curValue == null && oldValue != null) || (curValue != null && !curValue.equals(oldValue))) {
 
-        DataBinder nestedBinder = binders.get(property);
-        DataBinder otherNestedBinder = (DataBinder) other.binders.get(property);
+        final DataBinder nestedBinder = binders.get(property);
+        final DataBinder otherNestedBinder = (DataBinder) other.binders.get(property);
         if (nestedBinder != null && otherNestedBinder != null) {
-          BindableProxyAgent nestedAgent = ((BindableProxy<T>) nestedBinder.getModel()).getBindableProxyAgent();
-          BindableProxyAgent otherNestedAgent = ((BindableProxy<T>) otherNestedBinder.getModel()).getBindableProxyAgent();
+          final BindableProxyAgent nestedAgent = ((BindableProxy<T>) nestedBinder.getModel()).getBindableProxyAgent();
+          final BindableProxyAgent otherNestedAgent = ((BindableProxy<T>) otherNestedBinder.getModel()).getBindableProxyAgent();
           nestedAgent.fireChangeEvents(otherNestedAgent, state);
         }
 
