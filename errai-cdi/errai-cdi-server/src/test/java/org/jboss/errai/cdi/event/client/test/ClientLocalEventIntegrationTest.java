@@ -16,8 +16,6 @@
 
 package org.jboss.errai.cdi.event.client.test;
 
-import java.util.List;
-
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
@@ -130,9 +128,9 @@ public class ClientLocalEventIntegrationTest extends AbstractErraiCDITest {
     new Timer() {
       @Override
       public void run() {
-        final List<JsTypeEventObserver<?>> jsTypeObservers = WindowEventObservers.createOrGet().get(JsTypeEvent.class.getName());
+        final JsTypeEventObserver<?>[] jsTypeObservers = WindowEventObservers.createOrGet().get(JsTypeEvent.class.getName());
         
-        assertFalse(jsTypeObservers.isEmpty());
+        assertTrue(jsTypeObservers.length > 0);
         assertTrue(IOC.getBeanManager().lookupBean(ClientLocalEventAObserver.class).getInstance().isJsTypeEventObserved());
         finishTest();
       }

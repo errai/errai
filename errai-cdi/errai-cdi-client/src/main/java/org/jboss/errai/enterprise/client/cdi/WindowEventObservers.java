@@ -25,7 +25,7 @@ import jsinterop.annotations.JsType;
 
 @JsType
 public class WindowEventObservers {
-  private Map<String,  List<JsTypeEventObserver<?>>> observers = new HashMap<String, List<JsTypeEventObserver<?>>>();
+  private final Map<String,  List<JsTypeEventObserver<?>>> observers = new HashMap<String, List<JsTypeEventObserver<?>>>();
 
   public static WindowEventObservers createOrGet() {
     if (!windowEventObserversDefined()) {
@@ -43,16 +43,16 @@ public class WindowEventObservers {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void fireEvent(final String eventType, final Object evt) {
-    for (JsTypeEventObserver observer : get(eventType)) {
+    for (final JsTypeEventObserver observer : get(eventType)) {
       observer.onEvent(evt);
     }
   }
 
-  public List<JsTypeEventObserver<?>> get(final String eventType) {
+  public JsTypeEventObserver<?>[] get(final String eventType) {
     if (!observers.containsKey(eventType)) {
-      return new ArrayList<JsTypeEventObserver<?>>();
+      return new JsTypeEventObserver<?>[0];
     }
-    return observers.get(eventType);
+    return observers.get(eventType).toArray(new JsTypeEventObserver[0]);
   }
 
   private static native WindowEventObservers getWindowEventObservers() /*-{
