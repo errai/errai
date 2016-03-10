@@ -16,11 +16,13 @@
 
 package org.jboss.errai.ioc.client;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 import jsinterop.annotations.JsType;
 
@@ -30,13 +32,17 @@ import jsinterop.annotations.JsType;
  */
 @JsType
 public class WindowInjectionContext {
-  private Map<String, JsTypeProvider<?>> beanProviders = new HashMap<String, JsTypeProvider<?>>();
+  private ListMultimap<String, JsTypeProvider<?>> beanProviders = ArrayListMultimap.create();
 
   public static WindowInjectionContext createOrGet() {
     if (!isWindowInjectionContextDefined()) {
       setWindowInjectionContext(new WindowInjectionContext());
     }
     return getWindowInjectionContext();
+  }
+
+  public static void reset() {
+    setWindowInjectionContext(null);
   }
 
   public static native WindowInjectionContext getWindowInjectionContext() /*-{
@@ -48,7 +54,7 @@ public class WindowInjectionContext {
   }-*/;
 
   public static native boolean isWindowInjectionContextDefined() /*-{
-    return !($wnd.injectionContext === undefined);
+    return !($wnd.injectionContext === undefined || $wnd.injectionContext === null);
   }-*/;
 
   public void addBeanProvider(final String name, final JsTypeProvider<?> provider) {
@@ -56,21 +62,32 @@ public class WindowInjectionContext {
   }
 
   public void addSuperTypeAlias(final String superTypeName, final String typeName) {
-    final JsTypeProvider<?> provider = beanProviders.get(typeName);
-
-    if (provider != null) {
-      beanProviders.put(superTypeName, provider);
-    }
+    beanProviders.putAll(superTypeName, beanProviders.get(typeName));
   }
 
   public Object getBean(final String name) {
-    final JsTypeProvider<?> provider = beanProviders.get(name);
+    final List<JsTypeProvider<?>> providers = beanProviders.get(name);
 
-    if (provider == null) {
+    if (providers.isEmpty()) {
       throw new IOCResolutionException("no matching bean instances for: " + name);
     }
+    else if (providers.size() > 1) {
+      throw new IOCResolutionException("multiple matching bean instances for: " + name);
+    }
+    else {
+      return providers.get(0).getInstance();
+    }
+  }
 
-    return provider.getInstance();
+  public JsArray<?> getBeans(final String name) {
+    final List<JsTypeProvider<?>> providers = beanProviders.get(name);
+    final Object[] retVal = new Object[providers.size()];
+
+    for (int i = 0; i < providers.size(); i++) {
+      retVal[i] = providers.get(i).getInstance();
+    }
+
+    return new JsArray<>(retVal);
   }
 
 }

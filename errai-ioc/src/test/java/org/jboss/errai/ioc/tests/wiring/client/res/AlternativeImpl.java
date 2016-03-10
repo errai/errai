@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,29 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.container;
+package org.jboss.errai.ioc.tests.wiring.client.res;
+
+import javax.enterprise.inject.Alternative;
 
 import jsinterop.annotations.JsType;
 
+/**
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+@Alternative
 @JsType
-public interface JsTypeProvider<T> {
-  T getInstance();
+public class AlternativeImpl implements MultipleImplementationsJsType {
+
+  private int value;
+
+  public AlternativeImpl(final int value) {
+    this.value = value;
+  }
+
+  @Override
+  public int value() {
+    return value;
+  }
+
 }

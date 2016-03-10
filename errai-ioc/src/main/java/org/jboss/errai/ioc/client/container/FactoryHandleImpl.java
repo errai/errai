@@ -37,9 +37,6 @@ public class FactoryHandleImpl implements FactoryHandle {
   private final String beanName;
   private final Class<? extends BeanActivator> activatorType;
 
-
-
-
   public FactoryHandleImpl(final Class<?> actualType, final String factoryName, final Class<? extends Annotation> scope,
           final boolean eager, final String beanName, final Class<? extends BeanActivator> activatorType) {
     this.actualType = actualType;
@@ -105,6 +102,11 @@ public class FactoryHandleImpl implements FactoryHandle {
   @Override
   public Class<? extends BeanActivator> getBeanActivatorType() {
     return activatorType;
+  }
+
+  @Override
+  public boolean isAvailableByLookup() {
+    return true;
   }
 
 }

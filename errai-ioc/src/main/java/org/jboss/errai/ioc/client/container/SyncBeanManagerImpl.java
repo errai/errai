@@ -20,13 +20,17 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 
+import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.QualifierUtil;
+import org.jboss.errai.ioc.client.WindowInjectionContext;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -112,11 +116,17 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   public Collection<SyncBeanDef> lookupBeans(final String name) {
     final Collection<FactoryHandle> handles = handlesByName.get(name);
     final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByName.get(name);
+    final JsArray<?> jsBeans = WindowInjectionContext.createOrGet().getBeans(name);
 
-    final Collection beanDefs = new ArrayList<SyncBeanDef<Object>>(handles.size()+runtimeBeanDefs.size());
+    final Collection beanDefs = new ArrayList<SyncBeanDef<Object>>(handles.size()+runtimeBeanDefs.size()+jsBeans.length());
     beanDefs.addAll(runtimeBeanDefs);
     for (final FactoryHandle handle : handles) {
-      beanDefs.add(new IOCBeanDefImplementation<Object>(handle, this.<Object>getType(name, handle, handle.getActualType())));
+      if (handle.isAvailableByLookup()) {
+        beanDefs.add(new IOCBeanDefImplementation<Object>(handle, this.<Object>getType(name, handle, handle.getActualType())));
+      }
+    }
+    for (final Object jsBean : JsArray.iterable(jsBeans)) {
+      beanDefs.add(new JsTypeBeanDefImplementation(jsBean, name));
     }
 
     return beanDefs;
@@ -193,6 +203,73 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     contextManager = null;
     handlesByName.clear();
     runtimeBeanDefsByName.clear();
+  }
+
+  // TODO Find way to properly get scope, qualifiers, and assignable types.
+  @SuppressWarnings("rawtypes")
+  private final class JsTypeBeanDefImplementation implements SyncBeanDef {
+    private final Object jsBean;
+    private final String name;
+
+    private JsTypeBeanDefImplementation(final Object jsBean, final String name) {
+      this.jsBean = jsBean;
+      this.name = name;
+    }
+
+    @Override
+    public boolean isAssignableTo(Class type) {
+      return type != null && type.getName().equals(name);
+    }
+
+    @Override
+    public Class getType() {
+      return null;
+    }
+
+    @Override
+    public Class getBeanClass() {
+      return null;
+    }
+
+    @Override
+    public Class getScope() {
+      return Dependent.class;
+    }
+
+    @Override
+    public Set getQualifiers() {
+      return Collections.emptySet();
+    }
+
+    @Override
+    public boolean matches(Set annotations) {
+      return true;
+    }
+
+    @Override
+    public String getName() {
+      return null;
+    }
+
+    @Override
+    public boolean isActivated() {
+      return true;
+    }
+
+    @Override
+    public Object getInstance() {
+      return jsBean;
+    }
+
+    @Override
+    public Object newInstance() {
+      throw new UnsupportedOperationException("Cannot create new instance of JsType bean.");
+    }
+
+    @Override
+    public String toString() {
+      return "[JsTypeBeanDef]";
+    }
   }
 
   private final class IOCBeanDefImplementation<T> implements SyncBeanDef<T> {

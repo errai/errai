@@ -58,6 +58,7 @@ public class QualifierUtil {
       ANY_ANNOTATION
   };
 
+  @SuppressWarnings("serial")
   private static final Map<String, Annotation> DEFAULT_MATCHING_MAP = new HashMap<String, Annotation>() {
     {
       for (final Annotation a : DEFAULT_QUALIFIERS) {

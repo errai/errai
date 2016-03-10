@@ -687,18 +687,8 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return controller.getDestructionStatements();
   }
 
-  private void implementGetHandle(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable) {
-    final Statement newObject;
-    if (injectable.getInjectedType().isAnnotationPresent(ActivatedBy.class)) {
-      final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().getAnnotation(ActivatedBy.class).value();
-      newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
-              injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
-              injectable.getBeanName(), loadLiteral(activatorType));
-    } else {
-      newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
-              injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
-              injectable.getBeanName());
-    }
+  protected void implementGetHandle(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable) {
+    final Statement newObject = generateFactoryHandleStatement(injectable);
     bodyBlockBuilder.privateField("handle", FactoryHandleImpl.class).initializesWith(newObject).finish();
     final ConstructorBlockBuilder<?> con = bodyBlockBuilder.publicConstructor();
     for (final MetaClass assignableType : getAllAssignableTypes(injectable.getInjectedType())) {
@@ -714,13 +704,28 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
             .finish();
   }
 
-  private Object isEager(final MetaClass injectedType) {
+  protected Statement generateFactoryHandleStatement(final Injectable injectable) {
+    final Statement newObject;
+    if (injectable.getInjectedType().isAnnotationPresent(ActivatedBy.class)) {
+      final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().getAnnotation(ActivatedBy.class).value();
+      newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
+              injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
+              injectable.getBeanName(), loadLiteral(activatorType));
+    } else {
+      newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
+              injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
+              injectable.getBeanName());
+    }
+    return newObject;
+  }
+
+  protected static Object isEager(final MetaClass injectedType) {
     return injectedType.isAnnotationPresent(EntryPoint.class) ||
             // TODO review this before adding any scopes other than app-scoped and depdendent
             (!injectedType.isAnnotationPresent(Dependent.class) && hasStartupAnnotation(injectedType));
   }
 
-  private boolean hasStartupAnnotation(final MetaClass injectedType) {
+  protected static boolean hasStartupAnnotation(final MetaClass injectedType) {
     for (final Annotation anno : injectedType.getAnnotations()) {
       if (anno.annotationType().getName().equals("javax.ejb.Startup")) {
         return true;
@@ -730,7 +735,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return false;
   }
 
-  private Statement annotationLiteral(final Annotation qual) {
+  protected static Statement annotationLiteral(final Annotation qual) {
     if (qual.annotationType().equals(Any.class)) {
       return loadStatic(QualifierUtil.class, "ANY_ANNOTATION");
     } else if (qual.annotationType().equals(Default.class)) {
@@ -751,7 +756,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return annos;
   }
 
-  private Collection<MetaClass> getAllAssignableTypes(final MetaClass injectedType) {
+  protected static Collection<MetaClass> getAllAssignableTypes(final MetaClass injectedType) {
     return injectedType.getAllSuperTypesAndInterfaces();
   }
 
