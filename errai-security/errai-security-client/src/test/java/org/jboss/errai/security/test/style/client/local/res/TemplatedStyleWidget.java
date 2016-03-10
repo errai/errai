@@ -18,10 +18,12 @@ package org.jboss.errai.security.test.style.client.local.res;
 
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -64,6 +66,16 @@ public class TemplatedStyleWidget extends Composite {
   @RestrictedAccess(providers = { TestAnchorRoleProvider.class })
   private Anchor anchorWithProvidedRoles;
 
+  @Inject
+  @DataField
+  @RestrictedAccess(roles = "admin")
+  private DivElement adminGwtDivElement;
+
+  @Inject
+  @DataField
+  @RestrictedAccess(roles = "admin")
+  private Div adminErraiDivElement;
+
   public Anchor getUserAnchor() {
     return userAnchor;
   }
@@ -95,5 +107,13 @@ public class TemplatedStyleWidget extends Composite {
 
   public Anchor getAnchorWithProvidedRoles() {
     return anchorWithProvidedRoles;
+  }
+
+  public DivElement getAdminGwtDivElement() {
+    return adminGwtDivElement;
+  }
+
+  public Div getAdminErraiDivElement() {
+    return adminErraiDivElement;
   }
 }
