@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.rebind.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -221,6 +222,15 @@ public class OutputDirectoryUtil {
               source, outputDirCdt.getAbsolutePath());
       log.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
     });
+  }
+
+  public static void generateClassFileInTmpDir(final String packageName, final String simpleClassName, final String source, final String tmpDirPath) {
+    final String classFilePath = ClassChangeUtil.generateClassFile(packageName, simpleClassName, tmpDirPath, source, tmpDirPath);
+    try {
+      ClassChangeUtil.loadClassDefinition(classFilePath, packageName, simpleClassName);
+    } catch (IOException e) {
+      throw new RuntimeException("Could not load " + packageName + "." + simpleClassName, e);
+    }
   }
 
 }

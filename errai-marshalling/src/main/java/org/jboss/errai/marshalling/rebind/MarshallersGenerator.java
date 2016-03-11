@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.rebind;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
@@ -104,13 +103,11 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
             final String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
             log.info("*** using temporary path: " + tmpLocation + " ***");
 
-            final String toLoad = ClassChangeUtil.generateClassFile(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, tmpLocation, serverSource, tmpLocation);
-
             try {
-              ClassChangeUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+              OutputDirectoryUtil.generateClassFileInTmpDir(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, serverSource, tmpLocation);
             }
-            catch (IOException e) {
-              throw new RuntimeException("failed to load server marshallers", e);
+            catch (Throwable t) {
+              throw new RuntimeException("failed to load server marshallers", t);
             }
           }
         }

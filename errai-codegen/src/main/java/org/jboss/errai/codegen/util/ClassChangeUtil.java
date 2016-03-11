@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -584,15 +585,21 @@ public class ClassChangeUtil {
     }
   }
 
-  public static List<String> urlToFile(Enumeration<URL> urls) {
+  private static List<String> urlToFile(Enumeration<URL> urls) {
     final ArrayList<String> files = new ArrayList<String>();
     while (urls.hasMoreElements()) {
-      files.add(urls.nextElement().getFile());
+      final URL url = urls.nextElement();
+      if (url.getProtocol().equals("file")) {
+        files.add(url.getFile());
+      }
     }
     return files;
   }
 
-  public static Set<String> getClassLocations(final String packageName, final String simpleClassName) throws IOException {
+  /**
+   * Finds all urls of classes that are not in jars.
+   */
+  private static Set<String> getClassLocations(final String packageName, final String simpleClassName) throws IOException {
       final String classResource = packageName.replaceAll("\\.", "/") + "/" + simpleClassName + ".class";
       final Set<String> locations = new LinkedHashSet<String>();
 

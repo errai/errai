@@ -26,6 +26,7 @@ import javax.inject.Qualifier;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.ioc.util.CDIAnnotationUtils;
@@ -42,6 +43,8 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 @GenerateAsync(EventQualifierSerializer.class)
 public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
 
+  private static final String OUTPUT_TMP = RebindUtils.getTempDirectory() + File.separator + "errai.cdi" + File.separator + "gen";
+
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
@@ -52,10 +55,20 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
     final String source = NonGwtEventQualifierSerializerGenerator.generateSource(CDIAnnotationUtils.getTranslatableQualifiers(context.getTypeOracle()));
-    OutputDirectoryUtil.generateClassFileInDiscoveredDirs(context, SERIALIZER_PACKAGE_NAME,
-            SERIALIZER_CLASS_NAME,
-            RebindUtils.getTempDirectory() + File.separator + "gen" + File.separator + "event-qualifier-serializer",
-            source);
+
+    if (EnvUtil.isProdMode()) {
+      OutputDirectoryUtil
+        .generateClassFileInDiscoveredDirs(
+                context,
+                SERIALIZER_PACKAGE_NAME,
+                SERIALIZER_CLASS_NAME,
+                OUTPUT_TMP + File.separator + "event-qualifier-serializer",
+                source);
+    }
+    else {
+      final String tmpPath = new File(OUTPUT_TMP).getAbsolutePath();
+      OutputDirectoryUtil.generateClassFileInTmpDir(SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME, source, tmpPath);
+    }
 
     return source;
   }
