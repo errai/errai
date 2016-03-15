@@ -16,15 +16,17 @@
 
 package org.jboss.errai.cdi.server;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.bus.server.util.ServiceParser;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 /**
  * Holds references to the types discovered when CDI bootraps.
@@ -37,37 +39,43 @@ import org.jboss.errai.bus.server.util.ServiceParser;
  */
 public class TypeRegistry {
 
-  private final Set<Class<?>> remoteInterfaces = new HashSet<Class<?>>();
-  private final Map<Class<?>, List<ServiceParser>> services = new HashMap<Class<?>, List<ServiceParser>>();
+  private final Map<Class<?>, Set<Class<?>>> remoteInterfaces = new HashMap<>();
+  private final ListMultimap<Class<?>, ServiceParser> services = ArrayListMultimap.create();
 
   public void addRemoteInterface(final Class<?> intf) {
-    remoteInterfaces.add(intf);
+    remoteInterfaces.computeIfAbsent(intf, k -> new HashSet<>());
+  }
+
+  public void addRemoteServiceImplementation(final Class<?> remoteClass, final Class<?> serviceClass) {
+    remoteInterfaces.computeIfAbsent(remoteClass, k -> new HashSet<>()).add(serviceClass);
   }
 
   public Set<Class<?>> getRemoteInterfaces() {
-    return remoteInterfaces;
+    return remoteInterfaces.keySet();
   }
-  
+
+  public boolean isRemoteInterfaceImplemented(final Class<?> intf) {
+    return !remoteInterfaces.getOrDefault(intf, Collections.emptySet()).isEmpty();
+  }
+
   /**
    * @return All registered beans which are services or contain methods which are services.
    */
   public Collection<Class<?>> getDelegateClasses() {
     return services.keySet();
   }
-  
+
   /**
    * Get all the services associated with a delegate class.
    */
   public Collection<ServiceParser> getDelegateServices(Class<?> delegateClass) {
     return services.get(delegateClass);
   }
-  
+
   /**
    * Register a service.
    */
   public void addService(ServiceParser service) {
-    if (!services.containsKey(service.getDelegateClass()))
-      services.put(service.getDelegateClass(), new ArrayList<ServiceParser>());
-    services.get(service.getDelegateClass()).add(service);
+    services.put(service.getDelegateClass(), service);
   }
 }
