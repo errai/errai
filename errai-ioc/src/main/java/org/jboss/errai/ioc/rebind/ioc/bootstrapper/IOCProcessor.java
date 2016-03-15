@@ -238,7 +238,7 @@ public class IOCProcessor {
   }
 
   private void callFinishInitOnContextManager(final String contextManagerFieldName, final BlockBuilder<?> methodBody) {
-    methodBody._(loadVariable(contextManagerFieldName).invoke("finishInit"));
+    methodBody.append(loadVariable(contextManagerFieldName).invoke("finishInit"));
   }
 
   private void addAllInjectableProviders(final DependencyGraphBuilder graphBuilder) {
@@ -254,7 +254,7 @@ public class IOCProcessor {
   private void addContextsToContextManager(final Collection<MetaClass> scopeContextImpls,
           final String contextManagerFieldName, @SuppressWarnings("rawtypes") final BlockBuilder methodBody) {
     for (final MetaClass scopeContextImpl : scopeContextImpls) {
-      methodBody._(loadVariable(contextManagerFieldName).invoke("addContext", loadVariable(getContextVarName(scopeContextImpl))));
+      methodBody.append(loadVariable(contextManagerFieldName).invoke("addContext", loadVariable(getContextVarName(scopeContextImpl))));
     }
   }
 
@@ -306,7 +306,7 @@ public class IOCProcessor {
       if (registeredInThisMethod % 500 == 0) {
         if (curMethod != null) {
           curMethod.finish();
-          registerFactoriesBody._(loadVariable("this").invoke("registerFactories" + methodNumber, (Object[]) contextLocalVarInvocation));
+          registerFactoriesBody.append(loadVariable("this").invoke("registerFactories" + methodNumber, (Object[]) contextLocalVarInvocation));
           methodNumber++;
           registeredInThisMethod = 0;
         }
@@ -317,7 +317,7 @@ public class IOCProcessor {
     }
     if (curMethod != null) {
       curMethod.finish();
-      registerFactoriesBody._(loadVariable("this").invoke("registerFactories" + methodNumber, (Object[]) contextLocalVarInvocation));
+      registerFactoriesBody.append(loadVariable("this").invoke("registerFactories" + methodNumber, (Object[]) contextLocalVarInvocation));
     }
   }
 
@@ -338,10 +338,10 @@ public class IOCProcessor {
           @SuppressWarnings("rawtypes") final BlockBuilder curMethod, final MetaClass factoryClass) {
     final Statement handle = generateFactoryHandle(injectable, curMethod);
     final Statement loader = generateFactoryLoader(injectable, factoryClass);
-    curMethod._(loadVariable("asyncBeanManagerSetup").invoke("registerAsyncBean", handle, loader));
+    curMethod.append(loadVariable("asyncBeanManagerSetup").invoke("registerAsyncBean", handle, loader));
     for (final Dependency dep : injectable.getDependencies()) {
       if (dep.getInjectable().loadAsync()) {
-        curMethod._(loadVariable("asyncBeanManagerSetup").invoke("registerAsyncDependency", injectable.getFactoryName(),
+        curMethod.append(loadVariable("asyncBeanManagerSetup").invoke("registerAsyncDependency", injectable.getFactoryName(),
                 dep.getInjectable().getFactoryName()));
       }
     }
@@ -349,7 +349,7 @@ public class IOCProcessor {
 
   private Statement generateFactoryLoader(final Injectable injectable, final MetaClass factoryClass) {
     final Statement runAsyncCallback = ObjectBuilder.newInstanceOf(DefaultRunAsyncCallback.class).extend()
-            .publicOverridesMethod("onSuccess")._(loadVariable("callback").invoke("callback",
+            .publicOverridesMethod("onSuccess").append(loadVariable("callback").invoke("callback",
                     castTo(Factory.class, invokeStatic(GWT.class, "create", loadLiteral(factoryClass)))))
             .finish().finish();
     final Class<?> fragmentId = getAsyncFragmentId(injectable);
@@ -358,7 +358,7 @@ public class IOCProcessor {
 
     return ObjectBuilder.newInstanceOf(FactoryLoader.class).extend()
             .publicOverridesMethod("call", finalOf(FactoryLoaderCallback.class, "callback"))
-            ._(invokeStatic(GWT.class, "runAsync", runAsyncParams)).finish().finish();
+            .append(invokeStatic(GWT.class, "runAsync", runAsyncParams)).finish().finish();
   }
 
   private Class<?> getAsyncFragmentId(final Injectable injectable) {
@@ -373,18 +373,18 @@ public class IOCProcessor {
   private Statement generateFactoryHandle(final Injectable injectable,
           @SuppressWarnings("rawtypes") final BlockBuilder curMethod) {
     final String handleVarName = "handleFor" + injectable.getFactoryName();
-    curMethod._(declareFinalVariable(handleVarName, FactoryHandleImpl.class, ObjectBuilder.newInstanceOf(FactoryHandleImpl.class)
+    curMethod.append(declareFinalVariable(handleVarName, FactoryHandleImpl.class, ObjectBuilder.newInstanceOf(FactoryHandleImpl.class)
                          .withParameters(loadLiteral(injectable.getInjectedType()),
                                          loadLiteral(injectable.getFactoryName()),
                                          loadLiteral(injectable.getScope()),
                                          loadLiteral(false),
                                          loadLiteral(injectable.getBeanName()))));
     for (final MetaClass assignable : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
-      curMethod._(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable)));
+      curMethod.append(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable)));
     }
 
     for (final Annotation qualifier : injectable.getQualifier()) {
-      curMethod._(loadVariable(handleVarName).invoke("addQualifier", loadLiteral(qualifier)));
+      curMethod.append(loadVariable(handleVarName).invoke("addQualifier", loadLiteral(qualifier)));
     }
 
     return loadVariable(handleVarName);
@@ -396,11 +396,11 @@ public class IOCProcessor {
     final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
     registerFactoryWithContext(injectable, factoryClass, scopeContexts, registerFactoriesBody);
     if (injectable.getWiringElementTypes().contains(WiringElementType.JsType)) {
-      registerFactoriesBody._(loadVariable("windowContext").invoke("addBeanProvider",
+      registerFactoriesBody.append(loadVariable("windowContext").invoke("addBeanProvider",
               injectable.getInjectedType().getFullyQualifiedName(), createJsTypeProviderFor(injectable)));
       for (final MetaClass mc : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
         if (mc.isPublic() && !mc.equals(injectable.getInjectedType()) && !mc.getFullyQualifiedName().equals("java.lang.Object")) {
-          registerFactoriesBody._(loadVariable("windowContext").invoke("addSuperTypeAlias",
+          registerFactoriesBody.append(loadVariable("windowContext").invoke("addSuperTypeAlias",
                   mc.getFullyQualifiedName(), injectable.getInjectedType().getFullyQualifiedName()));
         }
       }
@@ -411,7 +411,7 @@ public class IOCProcessor {
     final MetaClass type = injectable.getInjectedType();
     final AnonymousClassStructureBuilder jsTypeProvider = newInstanceOf(parameterizedAs(JsTypeProvider.class, typeParametersOf(type))).extend();
     jsTypeProvider.publicOverridesMethod("getInstance")
-            ._(Stmt.castTo(type, loadVariable("contextManager").invoke("getInstance", injectable.getFactoryName()))
+            .append(Stmt.castTo(type, loadVariable("contextManager").invoke("getInstance", injectable.getFactoryName()))
                     .returnValue())
             .finish();
 
@@ -472,7 +472,7 @@ public class IOCProcessor {
     final Class<? extends Annotation> scope = injectable.getScope();
     final MetaClass injectedType = injectable.getInjectedType();
     final String contextVarName = getContextVarName(scopeContexts.get(scope));
-    registerFactoriesBody._(loadVariable(contextVarName).invoke("registerFactory",
+    registerFactoriesBody.append(loadVariable(contextVarName).invoke("registerFactory",
             Stmt.castTo(parameterizedAs(Factory.class, typeParametersOf(injectedType)),
                     invokeStatic(GWT.class, "create", factoryClass))));
   }
