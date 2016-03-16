@@ -74,6 +74,10 @@ public class FactoryGenerator extends IncrementalGenerator {
     FactoryGenerator.graph = graph;
   }
 
+  public static DependencyGraph getDependencyGraph() {
+    return graph;
+  }
+
   public static void setInjectionContext(final InjectionContext injectionContext) {
     log.debug("Injection context set.");
     FactoryGenerator.injectionContext = injectionContext;

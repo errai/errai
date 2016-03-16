@@ -156,6 +156,12 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
 
   private void addDependency(final Injectable concreteInjectable, Dependency dependency) {
     assert (concreteInjectable instanceof ConcreteInjectable);
+    if (InjectableType.Disabled.equals(concreteInjectable.getInjectableType())
+            && (!DependencyType.ProducerMember.equals(dependency.getDependencyType())
+                    || !concreteInjectable.getDependencies().isEmpty())) {
+      throw new RuntimeException("The injectable, " + concreteInjectable + ", is disabled."
+              + " A disabled injectable may only have a single dependency if it is produced by a disabled bean.");
+    }
 
     final ConcreteInjectable concrete = (ConcreteInjectable) concreteInjectable;
 
@@ -163,14 +169,12 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   }
 
   @Override
-  public DependencyGraph createGraph(boolean removeUnreachable) {
+  public DependencyGraph createGraph() {
     resolveSpecializations();
     linkAbstractInjectables();
     resolveDependencies();
     validateConcreteInjectables(createValidators());
-    if (removeUnreachable) {
-      removeUnreachableConcreteInjectables();
-    }
+    removeUnreachableConcreteInjectables();
 
     return new DependencyGraphImpl();
   }
@@ -428,6 +432,10 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
 
   private void validateDependentScopedInjectable(final Injectable injectable, final Set<Injectable> visiting,
           final Set<Injectable> visited, final Collection<String> problems, final boolean onlyConstuctorDeps) {
+    if (InjectableType.Disabled.equals(injectable.getInjectedType())) {
+      visited.add(injectable);
+      return;
+    }
     if (visiting.contains(injectable)) {
       problems.add(createCycleMessage(visiting, injectable));
       return;
@@ -484,7 +492,9 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     final Set<String> reachableNames = new HashSet<String>();
     final Queue<Injectable> processingQueue = new LinkedList<Injectable>();
     for (final Injectable injectable : concretesByName.values()) {
-      if (!injectable.getWiringElementTypes().contains(WiringElementType.Simpleton) && !reachableNames.contains(injectable.getFactoryName())) {
+      if (!injectable.getWiringElementTypes().contains(WiringElementType.Simpleton)
+              && !reachableNames.contains(injectable.getFactoryName())
+              && !InjectableType.Disabled.equals(injectable.getInjectableType())) {
         processingQueue.add(injectable);
         do {
           final Injectable processedInjectable = processingQueue.poll();
@@ -569,7 +579,8 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   }
 
   private Injectable resolveDependency(final BaseDependency dep, final Injectable concrete,
-          final Collection<String> problems, final Map<String, Injectable> customProvidedInjectables) {
+          final Collection<String> problems,
+          final Map<String, Injectable> customProvidedInjectables) {
     if (dep.injectable.resolution != null) {
       return dep.injectable.resolution;
     }
@@ -581,34 +592,59 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
 
     processResolutionQueue(resolutionQueue, resolvedByPriority);
 
+    final Iterable<ResolutionPriority> priorities;
+    final boolean reportProblems;
+    if (InjectableType.Disabled.equals(concrete.getInjectableType())) {
+      priorities = Collections.singleton(ResolutionPriority.Disabled);
+      reportProblems = false;
+    }
+    else {
+      priorities = ResolutionPriority.enabledValues();
+      reportProblems = true;
+    }
+
     // Iterates through priorities from highest to lowest.
-    for (final ResolutionPriority priority : ResolutionPriority.values()) {
+    for (final ResolutionPriority priority : priorities) {
       if (resolvedByPriority.containsKey(priority)) {
         final Collection<ConcreteInjectable> resolved = resolvedByPriority.get(priority);
         if (resolved.size() > 1) {
-          problems.add(ambiguousDependencyMessage(dep, concrete, new ArrayList<ConcreteInjectable>(resolved)));
+          if (reportProblems) {
+            problems.add(ambiguousDependencyMessage(dep, concrete, new ArrayList<ConcreteInjectable>(resolved)));
+          }
 
           return null;
         } else {
-          Injectable injectable = resolved.iterator().next();
-          if (injectable.isExtension()) {
-            final ExtensionInjectable providedInjectable = (ExtensionInjectable) injectable;
-            final Collection<Injectable> otherResolvedInjectables = new ArrayList<Injectable>(resolvedByPriority.values());
-            otherResolvedInjectables.remove(injectable);
-
-            final InjectionSite site = new InjectionSite(concrete.getInjectedType(), getAnnotated(dep), otherResolvedInjectables);
-            injectable = providedInjectable.provider.getInjectable(site, nameGenerator);
-            customProvidedInjectables.put(injectable.getFactoryName(), injectable);
-            dep.injectable = copyAbstractInjectable(dep.injectable);
-          }
+          final Injectable injectable = maybeProcessAsExtension(dep, concrete, customProvidedInjectables, resolvedByPriority, resolved);
 
           return (dep.injectable.resolution = injectable);
         }
       }
     }
 
-    problems.add(unsatisfiedDependencyMessage(dep, concrete));
+    if (reportProblems) {
+      problems.add(unsatisfiedDependencyMessage(dep, concrete, resolvedByPriority.get(ResolutionPriority.Disabled),
+              problems, customProvidedInjectables));
+    }
     return null;
+  }
+
+  private Injectable maybeProcessAsExtension(final BaseDependency dep, final Injectable injectableWithDep,
+          final Map<String, Injectable> customProvidedInjectables,
+          final Multimap<ResolutionPriority, ConcreteInjectable> resolvedByPriority,
+          final Collection<ConcreteInjectable> resolved) {
+    Injectable injectable = resolved.iterator().next();
+    if (injectable.isExtension()) {
+      final ExtensionInjectable providedInjectable = (ExtensionInjectable) injectable;
+      final Collection<Injectable> otherResolvedInjectables = new ArrayList<Injectable>(resolvedByPriority.values());
+      otherResolvedInjectables.remove(injectable);
+
+      final InjectionSite site = new InjectionSite(injectableWithDep.getInjectedType(), getAnnotated(dep), otherResolvedInjectables);
+      injectable = providedInjectable.provider.getInjectable(site, nameGenerator);
+      customProvidedInjectables.put(injectable.getFactoryName(), injectable);
+      dep.injectable = copyAbstractInjectable(dep.injectable);
+    }
+
+    return injectable;
   }
 
   private AbstractInjectable addMatchingExactTypeInjectables(final AbstractInjectable depInjectable) {
@@ -636,10 +672,37 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     } while (resolutionQueue.size() > 0);
   }
 
-  private String unsatisfiedDependencyMessage(final BaseDependency dep, final Injectable concrete) {
-    final String message = "Unsatisfied " + dep.dependencyType.toString().toLowerCase() + " dependency " + dep.injectable + " for " + concrete;
+  private String unsatisfiedDependencyMessage(final BaseDependency dep, final Injectable concrete,
+          final Collection<ConcreteInjectable> resolvedDisabledBeans, final Collection<String> problems,
+          final Map<String, Injectable> customProvidedInjectables) {
+    final StringBuilder message = new StringBuilder()
+            .append("Unsatisfied ")
+            .append(dep.dependencyType.toString().toLowerCase())
+            .append(" dependency ")
+            .append(dep.injectable)
+            .append(" for ")
+            .append(concrete)
+            .append('.');
 
-    return message;
+    if (!resolvedDisabledBeans.isEmpty()) {
+      message.append(" Some beans were found that satisfied this dependency, but must be enabled:\n");
+      resolvedDisabledBeans.stream().forEach(inj -> message
+              .append(getRootDisabledBeanTypeName(inj, problems, customProvidedInjectables)).append('\n'));
+    }
+
+    return message.toString();
+  }
+
+  private String getRootDisabledBeanTypeName(Injectable inj, final Collection<String> problems,
+          final Map<String, Injectable> customProvidedInjectables) {
+    while (inj.getDependencies().size() == 1) {
+      final Dependency dep = inj.getDependencies().iterator().next();
+      if (DependencyType.ProducerMember.equals(dep.getDependencyType())) {
+        inj = resolveDependency((BaseDependency) dep, inj, problems, customProvidedInjectables);
+      }
+    }
+
+    return inj.getInjectedType().getFullyQualifiedName();
   }
 
   private String ambiguousDependencyMessage(final BaseDependency dep, final Injectable concrete, final List<ConcreteInjectable> resolved) {

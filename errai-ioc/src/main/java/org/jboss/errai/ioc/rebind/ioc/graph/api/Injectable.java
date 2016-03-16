@@ -75,7 +75,7 @@ public interface Injectable {
   /**
    * @return The dependencies of this injectable. These depencies will not be
    *         resolved until after
-   *         {@link DependencyGraphBuilder#createGraph(boolean)} is called.
+   *         {@link DependencyGraphBuilder#createGraph()} is called.
    */
   Collection<Dependency> getDependencies();
 

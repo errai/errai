@@ -134,6 +134,12 @@
         test scope -->
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -178,7 +184,17 @@
                 <exclude>**/IOCTests.java</exclude>
                 <exclude>**/org/jboss/errai/ioc/async/test/**/*.java</exclude>
                 <exclude>**/prod/**/*.java</exclude>
+                <exclude>**/unit/**/*.java</exclude>
               </excludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+              <includes>
+                <include>**/unit/**/*Test.java</include>
+              </includes>
             </configuration>
           </plugin>
         </plugins>

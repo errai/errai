@@ -35,7 +35,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
  * will be filtered by priority and only injectables in the highest non-empty
  * priority will be considered.
  *
- * @see DependencyGraphBuilder#createGraph(boolean)
+ * @see DependencyGraphBuilder#createGraph()
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public enum ResolutionPriority {
@@ -45,17 +45,20 @@ public enum ResolutionPriority {
   EnabledAlternative {
     @Override
     public boolean matches(final Injectable injectable) {
-      return injectable.getWiringElementTypes().contains(WiringElementType.AlternativeBean);
+      return injectable.getWiringElementTypes().contains(WiringElementType.AlternativeBean)
+              && !InjectableType.Disabled.equals(injectable.getInjectableType());
     }
   },
   /**
    * Category for explicitly scoped concrete types, or producer methods.
    */
   NormalType {
-    final Collection<InjectableType> matchingTypes = Arrays.<InjectableType>asList(InjectableType.Type, InjectableType.Producer);
+    final Collection<InjectableType> matchingTypes = Arrays.<InjectableType> asList(InjectableType.Type,
+            InjectableType.Producer);
     @Override
     public boolean matches(final Injectable injectable) {
-      return matchingTypes.contains(injectable.getInjectableType()) && !injectable.getWiringElementTypes().contains(WiringElementType.Simpleton);
+      return matchingTypes.contains(injectable.getInjectableType())
+              && !injectable.getWiringElementTypes().contains(WiringElementType.Simpleton);
     }
   },
   /**
@@ -71,7 +74,8 @@ public enum ResolutionPriority {
    * Category for types form {@link IOCProvider providers}.
    */
   Provided {
-    private final Collection<InjectableType> providerTypes = Arrays.<InjectableType>asList(InjectableType.Provider, InjectableType.ContextualProvider);
+    private final Collection<InjectableType> providerTypes = Arrays.<InjectableType> asList(InjectableType.Provider,
+            InjectableType.ContextualProvider);
     @Override
     public boolean matches(final Injectable injectable) {
       return providerTypes.contains(injectable.getInjectableType());
@@ -97,6 +101,15 @@ public enum ResolutionPriority {
     public boolean matches(final Injectable injectable) {
       return injectable.getWiringElementTypes().contains(WiringElementType.Simpleton);
     }
+  },
+  /**
+   * Category for disabled beans. These cannot satisfy dependencies, but are used for giving hints when errors occur.
+   */
+  Disabled {
+    @Override
+    public boolean matches(final Injectable injectable) {
+      return InjectableType.Disabled.equals(injectable.getInjectableType());
+    }
   };
 
   public abstract boolean matches(final Injectable injectable);
@@ -109,5 +122,9 @@ public enum ResolutionPriority {
     }
 
     throw new RuntimeException("The injectable " + injectable + " does not match any resolution priority.");
+  }
+
+  public static Iterable<ResolutionPriority> enabledValues() {
+    return () -> Arrays.stream(values()).filter(p -> !Disabled.equals(p)).iterator();
   }
 }

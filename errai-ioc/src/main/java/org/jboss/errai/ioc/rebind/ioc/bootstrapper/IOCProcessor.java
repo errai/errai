@@ -167,7 +167,7 @@ public class IOCProcessor {
     log.debug("Added {} classes to dependency graph in {}ms", allMetaClasses.size(), System.currentTimeMillis() - start);
 
     start = System.currentTimeMillis();
-    final DependencyGraph dependencyGraph = graphBuilder.createGraph(true);
+    final DependencyGraph dependencyGraph = graphBuilder.createGraph();
     log.debug("Resolved dependency graph with {} reachable injectables in {}ms", dependencyGraph.getNumberOfInjectables(), System.currentTimeMillis() - start);
 
     FactoryGenerator.resetTotalTime();
@@ -556,16 +556,25 @@ public class IOCProcessor {
     try {
       if (isTypeAccessible(type)) {
         if (type.isConcrete()) {
+          final boolean enabled;
           if (isSimpleton(type)) {
             builder.addInjectable(type, qualFactory.forSource(type), Dependent.class, InjectableType.Type,
                     WiringElementType.DependentBean, WiringElementType.Simpleton);
-          } else if (isTypeInjectable(type, problems)) {
+          }
+          else if ((enabled = isEnabled(type)) && isConstructable(type, problems)) {
             final Class<? extends Annotation> directScope = getScope(type);
             final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type),
                     directScope, InjectableType.Type, getWiringTypes(type, directScope));
             processInjectionPoints(typeInjectable, builder, problems);
-            maybeProcessAsProducer(builder, type, typeInjectable);
-            maybeProcessAsProvider(typeInjectable, builder);
+            maybeProcessAsProducer(builder, type, typeInjectable, true);
+            maybeProcessAsProvider(typeInjectable, builder, true);
+          }
+          else if (!enabled) {
+            final Class<? extends Annotation> directScope = getScope(type);
+            final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type), directScope,
+                    InjectableType.Disabled, getWiringTypes(type, directScope));
+            maybeProcessAsProducer(builder, type, typeInjectable, false);
+            maybeProcessAsProvider(typeInjectable, builder, false);
           }
         }
         else {
@@ -581,7 +590,7 @@ public class IOCProcessor {
   }
 
   private void maybeProcessAsStaticOnlyProducer(final DependencyGraphBuilder builder, final MetaClass type) {
-    maybeProcessAsProducer(builder, type, null);
+    maybeProcessAsProducer(builder, type, null, true);
   }
 
   private boolean isPublishableJsType(final MetaClass type) {
@@ -596,12 +605,14 @@ public class IOCProcessor {
 
   /**
    * @param typeInjectable If null, only static members will be processed.
+   * @param b
    */
-  private void maybeProcessAsProducer(final DependencyGraphBuilder builder, final MetaClass producerType, final Injectable typeInjectable) {
+  private void maybeProcessAsProducer(final DependencyGraphBuilder builder, final MetaClass producerType,
+          final Injectable typeInjectable, final boolean enabled) {
     // TODO log error/warning for unused @Disposes methods?
     final Collection<MetaMethod> disposesMethods = getAllDisposesMethods(producerType, (typeInjectable == null));
-    processProducerMethods(typeInjectable, producerType, builder, disposesMethods);
-    processProducerFields(typeInjectable, producerType, builder, disposesMethods);
+    processProducerMethods(typeInjectable, producerType, builder, disposesMethods, enabled);
+    processProducerFields(typeInjectable, producerType, builder, disposesMethods, enabled);
   }
 
   private boolean isTopLevel(MetaClass type) {
@@ -691,16 +702,18 @@ public class IOCProcessor {
     return wiringTypes.toArray(new WiringElementType[wiringTypes.size()]);
   }
 
-  private void maybeProcessAsProvider(final Injectable typeInjectable, final DependencyGraphBuilder builder) {
+  private void maybeProcessAsProvider(final Injectable typeInjectable, final DependencyGraphBuilder builder,
+          final boolean enabled) {
     final MetaClass type = typeInjectable.getInjectedType();
-    final Collection<Class<? extends Annotation>> providerAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.Provider);
+    final Collection<Class<? extends Annotation>> providerAnnotations = injectionContext
+            .getAnnotationsForElementType(WiringElementType.Provider);
     for (final Class<? extends Annotation> anno : providerAnnotations) {
       if (type.isAnnotationPresent(anno)) {
         if (type.isAssignableTo(Provider.class)) {
-          addProviderInjectable(typeInjectable, builder);
+          addProviderInjectable(typeInjectable, builder, enabled);
         }
         else if (type.isAssignableTo(ContextualTypeProvider.class)) {
-          addContextualProviderInjectable(typeInjectable, builder);
+          addContextualProviderInjectable(typeInjectable, builder, enabled);
         }
 
         break;
@@ -708,22 +721,26 @@ public class IOCProcessor {
     }
   }
 
-  private void addContextualProviderInjectable(final Injectable providerInjectable, final DependencyGraphBuilder builder) {
+  private void addContextualProviderInjectable(final Injectable providerInjectable,
+          final DependencyGraphBuilder builder, final boolean enabled) {
     final MetaClass providerImpl = providerInjectable.getInjectedType();
     final MetaMethod providerMethod = providerImpl.getMethod("provide", Class[].class, Annotation[].class);
     final MetaClass providedType = providerMethod.getReturnType();
+    final InjectableType injectableType = (enabled ? InjectableType.ContextualProvider : InjectableType.Disabled);
     final Injectable providedInjectable = builder.addInjectable(providedType,
-            qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.ContextualProvider,
+            qualFactory.forUniversallyQualified(), Dependent.class, injectableType,
             WiringElementType.Provider, WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
     builder.addProducerMemberDependency(providedInjectable, providerImpl, providerInjectable.getQualifier(), providerMethod);
   }
 
-  private void addProviderInjectable(final Injectable providerImplInjectable, final DependencyGraphBuilder builder) {
+  private void addProviderInjectable(final Injectable providerImplInjectable, final DependencyGraphBuilder builder,
+          final boolean enabled) {
     final MetaClass providerImpl = providerImplInjectable.getInjectedType();
     final MetaMethod providerMethod = providerImpl.getMethod("get", new Class[0]);
     final MetaClass providedType = providerMethod.getReturnType();
+    final InjectableType injectableType = (enabled ? InjectableType.Provider : InjectableType.Disabled);
     final Injectable providedInjectable = builder.addInjectable(providedType, qualFactory.forSource(providerMethod),
-            Dependent.class, InjectableType.Provider, WiringElementType.Provider, WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
+            Dependent.class, injectableType, WiringElementType.Provider, WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
     builder.addProducerMemberDependency(providedInjectable, providerImplInjectable.getInjectedType(), providerImplInjectable.getQualifier(), providerMethod);
   }
 
@@ -755,27 +772,29 @@ public class IOCProcessor {
 
   /**
    * @param producerTypeInjectable If this parameter is null, only static methods will be processed.
+   * @param enabled
    */
   private void processProducerMethods(final Injectable producerTypeInjectable, final MetaClass producerType,
-          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods) {
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final boolean enabled) {
     final boolean staticOnly = (producerTypeInjectable == null);
     final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
     for (final Class<? extends Annotation> anno : producerAnnos) {
       final List<MetaMethod> methods = producerType.getDeclaredMethodsAnnotatedWith(anno);
       for (final MetaMethod method : methods) {
         if (!staticOnly || method.isStatic()) {
-          processProducerMethod(producerTypeInjectable, producerType, builder, disposesMethods, method);
+          processProducerMethod(producerTypeInjectable, producerType, builder, disposesMethods, method, enabled);
         }
       }
     }
   }
 
   private void processProducerMethod(final Injectable producerTypeInjectable, final MetaClass producerType,
-          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final MetaMethod method) {
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final MetaMethod method, final boolean enabled) {
     final Class<? extends Annotation> directScope = getScope(method);
     final WiringElementType[] wiringTypes = getWiringTypeForProducer(producerType, method, directScope);
+    final InjectableType injectableType = (enabled ? InjectableType.Producer : InjectableType.Disabled);
     final Injectable producedInjectable = builder.addInjectable(method.getReturnType(),
-            qualFactory.forSource(method), directScope, InjectableType.Producer, wiringTypes);
+            qualFactory.forSource(method), directScope, injectableType, wiringTypes);
     if (method.isStatic()) {
       builder.addProducerMemberDependency(producedInjectable, producerType, method);
     }
@@ -783,6 +802,13 @@ public class IOCProcessor {
       builder.addProducerMemberDependency(producedInjectable, producerType, producerTypeInjectable.getQualifier(), method);
     }
 
+    if (enabled) {
+      processProducerAndDisposerMethodsDependencies(builder, disposesMethods, method, producedInjectable);
+    }
+  }
+
+  private void processProducerAndDisposerMethodsDependencies(final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods,
+          final MetaMethod method, final Injectable producedInjectable) {
     final MetaParameter[] params = method.getParameters();
     for (int i = 0; i < params.length; i++) {
       final MetaParameter param = params[i];
@@ -880,26 +906,29 @@ public class IOCProcessor {
 
   /**
    * @param producerInjectable If null then only static fields will be processed.
+   * @param enabled
    */
   private void processProducerFields(final Injectable producerInjectable, final MetaClass producerType,
-          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods) {
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final boolean enabled) {
     final boolean staticOnly = (producerInjectable == null);
     final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
     for (final Class<? extends Annotation> producerAnno : producerAnnos) {
       final List<MetaField> fields = producerType.getFieldsAnnotatedWith(producerAnno);
       for (final MetaField field : fields) {
         if (!staticOnly || field.isStatic()) {
-          processProducerField(producerInjectable, producerType, builder, disposesMethods, field);
+          processProducerField(producerInjectable, producerType, builder, disposesMethods, field, enabled);
         }
       }
     }
   }
 
   private void processProducerField(final Injectable producerInjectable, final MetaClass producerType,
-          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final MetaField field) {
+          final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods, final MetaField field,
+          final boolean enabled) {
     final Class<? extends Annotation> scopeAnno = getScope(field);
+    final InjectableType injectableType = (enabled ? InjectableType.Producer : InjectableType.Disabled);
     final Injectable producedInjectable = builder.addInjectable(field.getType(),
-            qualFactory.forSource(field), scopeAnno, InjectableType.Producer,
+            qualFactory.forSource(field), scopeAnno, injectableType,
             getWiringTypeForProducer(producerType, field, scopeAnno));
 
     if (field.isStatic()) {
@@ -909,6 +938,13 @@ public class IOCProcessor {
       builder.addProducerMemberDependency(producedInjectable, producerInjectable.getInjectedType(), producerInjectable.getQualifier(), field);
     }
 
+    if (enabled) {
+      processDisposerDependencies(builder, disposesMethods, field, producedInjectable);
+    }
+  }
+
+  private void processDisposerDependencies(final DependencyGraphBuilder builder, final Collection<MetaMethod> disposesMethods,
+          final MetaField field, final Injectable producedInjectable) {
     final Collection<MetaMethod> matchingDisposers = getMatchingMethods(field, disposesMethods);
     if (matchingDisposers.size() > 1) {
       // TODO add descriptive error message.
@@ -982,10 +1018,6 @@ public class IOCProcessor {
     }
 
     return null;
-  }
-
-  private boolean isTypeInjectable(final MetaClass type, final List<String> problems) {
-    return isEnabled(type) && isConstructable(type, problems);
   }
 
   private boolean isConstructable(final MetaClass type, final List<String> problems) {

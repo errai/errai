@@ -44,7 +44,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
  * {@link Qualifier qualifiers} of the dependencies.
  *
  * When all injectables and dependencies are added, calling
- * {@link #createGraph(boolean)} will return a fully-resolved dependency graph.
+ * {@link #createGraph()} will return a fully-resolved dependency graph.
  *
  * @see DependencyGraph
  * @author Max Barkley <mbarkley@redhat.com>
@@ -192,16 +192,12 @@ public interface DependencyGraphBuilder {
    * exceptions if any dependencies are unsastisfied or are ambiguously
    * satisfied.
    *
-   * @param removeUnreachable
-   *          If true, non-explicitly scoped dependencies that are not used in
-   *          any injection points will not be part of the returned
-   *          {@link DependencyGraph}.
    * @return A {@link DependencyGraph} where all contained {@link Injectable
    *         injectables} have fully resolved dependencies.
    *
    * @see ResolutionPriority
    */
-  DependencyGraph createGraph(boolean removeUnreachable);
+  DependencyGraph createGraph();
 
   /**
    * The kinds of {@link Injectable injectables}.
@@ -209,7 +205,7 @@ public interface DependencyGraphBuilder {
    * @author Max Barkley <mbarkley@redhat.com>
    */
   public static enum InjectableType {
-    Type, JsType, Producer, Provider, ContextualProvider, Abstract, Extension, ExtensionProvided, Static
+    Type, JsType, Producer, Provider, ContextualProvider, Abstract, Extension, ExtensionProvided, Static, Disabled
   }
 
   /**
@@ -234,7 +230,7 @@ public interface DependencyGraphBuilder {
   public static interface Dependency {
 
     /**
-     * This will only return a meaningful value after {@link DependencyGraphBuilder#createGraph(boolean)} is called.
+     * This will only return a meaningful value after {@link DependencyGraphBuilder#createGraph()} is called.
      *
      * @return The injectable that satisfied this dependency.
      */
