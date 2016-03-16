@@ -23,29 +23,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
-import org.apache.commons.lang3.Validate;
-import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -62,14 +58,14 @@ import com.google.common.collect.Multimap;
  * @see DependencyGraphBuilder
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
+public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
 
   private final QualifierFactory qualFactory;
-  private final Map<InjectableHandle, AbstractInjectable> abstractInjectables = new HashMap<InjectableHandle, AbstractInjectable>();
-  private final Multimap<MetaClass, AbstractInjectable> directAbstractInjectablesByAssignableTypes = HashMultimap.create();
-  private final Multimap<MetaClass, ConcreteInjectable> exactTypeConcreteInjectablesByType = HashMultimap.create();
-  private final Map<String, Injectable> concretesByName = new HashMap<String, Injectable>();
-  private final List<ConcreteInjectable> specializations = new ArrayList<ConcreteInjectable>();
+  private final Map<InjectableHandle, InjectableReference> injectableReferences = new HashMap<>();
+  private final Multimap<MetaClass, InjectableReference> directInjectableReferencesByAssignableTypes = HashMultimap.create();
+  private final Multimap<MetaClass, InjectableImpl> exactTypeInjectablesByType = HashMultimap.create();
+  private final Map<String, Injectable> injectablesByName = new HashMap<>();
+  private final List<InjectableImpl> specializations = new ArrayList<>();
   private final FactoryNameGenerator nameGenerator = new FactoryNameGenerator();
   private final boolean async;
 
@@ -81,179 +77,117 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   @Override
   public Injectable addInjectable(final MetaClass injectedType, final Qualifier qualifier, Class<? extends Annotation> literalScope,
           final InjectableType injectableType, final WiringElementType... wiringTypes) {
-    final ConcreteInjectable concrete = new ConcreteInjectable(injectedType, qualifier,
+    final InjectableImpl injectable = new InjectableImpl(injectedType, qualifier,
             nameGenerator.generateFor(injectedType, qualifier, injectableType), literalScope, injectableType,
             Arrays.asList(wiringTypes));
-    return registerNewConcreteInjectable(concrete);
+    return registerNewInjectable(injectable);
   }
 
-  private Injectable registerNewConcreteInjectable(final ConcreteInjectable concrete) {
-    final String factoryName = concrete.getFactoryName();
-    if (concretesByName.containsKey(factoryName)) {
-      throwDuplicateConcreteInjectableException(factoryName, concretesByName.get(factoryName), concrete);
+  private Injectable registerNewInjectable(final InjectableImpl injectable) {
+    final String factoryName = injectable.getFactoryName();
+    if (injectablesByName.containsKey(factoryName)) {
+      GraphUtil.throwDuplicateConcreteInjectableException(factoryName, injectablesByName.get(factoryName), injectable);
     }
-    concretesByName.put(factoryName, concrete);
-    if (concrete.wiringTypes.contains(WiringElementType.Specialization)) {
-      specializations.add(concrete);
+    injectablesByName.put(factoryName, injectable);
+    if (injectable.wiringTypes.contains(WiringElementType.Specialization)) {
+      specializations.add(injectable);
     }
-    if (concrete.wiringTypes.contains(WiringElementType.ExactTypeMatching)) {
-      exactTypeConcreteInjectablesByType.put(concrete.type.getErased(), concrete);
+    if (injectable.wiringTypes.contains(WiringElementType.ExactTypeMatching)) {
+      exactTypeInjectablesByType.put(injectable.type.getErased(), injectable);
     } else {
-      linkDirectAbstractInjectable(concrete);
+      linkDirectInjectableReference(injectable);
     }
 
-    return concrete;
+    return injectable;
   }
 
   @Override
   public Injectable addExtensionInjectable(final MetaClass injectedType, final Qualifier qualifier,
           final InjectableProvider provider, final WiringElementType... wiringTypes) {
-    final ConcreteInjectable concrete = new ExtensionInjectable(injectedType, qualifier,
+    final InjectableImpl injectable = new ExtensionInjectable(injectedType, qualifier,
             nameGenerator.generateFor(injectedType, qualifier, InjectableType.Extension), null,
             InjectableType.Extension, Arrays.asList(wiringTypes), provider);
-    return registerNewConcreteInjectable(concrete);
+    return registerNewInjectable(injectable);
   }
 
-  private void throwDuplicateConcreteInjectableException(final String name, final Injectable first,
-          final Injectable second) {
-    final String message = "Two concrete injectables exist with the same name (" + name + "):\n"
-                            + "\t" + first + "\n"
-                            + "\t" + second;
-
-    throw new RuntimeException(message);
+  private void linkDirectInjectableReference(final InjectableImpl injectable) {
+    final InjectableReference injectableReference = lookupInjectableReference(injectable.type, injectable.qualifier);
+    injectableReference.linked.add(injectable);
   }
 
-  private void linkDirectAbstractInjectable(final ConcreteInjectable concreteInjectable) {
-    final AbstractInjectable abstractInjectable = lookupAsAbstractInjectable(concreteInjectable.type, concreteInjectable.qualifier);
-    abstractInjectable.linked.add(concreteInjectable);
-  }
-
-  private void processAssignableTypes(final AbstractInjectable abstractInjectable) {
-    for (final MetaClass assignable : abstractInjectable.type.getAllSuperTypesAndInterfaces()) {
+  private void processAssignableTypes(final InjectableReference injectableReference) {
+    for (final MetaClass assignable : injectableReference.type.getAllSuperTypesAndInterfaces()) {
       try {
-        directAbstractInjectablesByAssignableTypes.put(assignable.getErased(), abstractInjectable);
+        directInjectableReferencesByAssignableTypes.put(assignable.getErased(), injectableReference);
       } catch (Throwable t) {
         throw new RuntimeException("Error occurred adding the assignable type " + assignable.getFullyQualifiedName(), t);
       }
     }
   }
 
-  private Injectable lookupAbstractInjectable(final MetaClass type, final Qualifier qualifier) {
-    return lookupAsAbstractInjectable(type, qualifier);
-  }
-
-  private AbstractInjectable lookupAsAbstractInjectable(final MetaClass type, final Qualifier qualifier) {
+  private InjectableReference lookupInjectableReference(final MetaClass type, final Qualifier qualifier) {
     final InjectableHandle handle = new InjectableHandle(type, qualifier);
-    AbstractInjectable abstractInjectable = abstractInjectables.get(handle);
-    if (abstractInjectable == null) {
-      abstractInjectable = new AbstractInjectable(type, qualifier);
-      abstractInjectables.put(handle, abstractInjectable);
-      processAssignableTypes(abstractInjectable);
+    InjectableReference injectableReference = injectableReferences.get(handle);
+    if (injectableReference == null) {
+      injectableReference = new InjectableReference(type, qualifier);
+      injectableReferences.put(handle, injectableReference);
+      processAssignableTypes(injectableReference);
     }
 
-    return abstractInjectable;
+    return injectableReference;
   }
 
-  private void addDependency(final Injectable concreteInjectable, Dependency dependency) {
-    assert (concreteInjectable instanceof ConcreteInjectable);
-    if (InjectableType.Disabled.equals(concreteInjectable.getInjectableType())
+  private void addDependency(final Injectable injectable, Dependency dependency) {
+    assert (injectable instanceof InjectableImpl);
+    if (InjectableType.Disabled.equals(injectable.getInjectableType())
             && (!DependencyType.ProducerMember.equals(dependency.getDependencyType())
-                    || !concreteInjectable.getDependencies().isEmpty())) {
-      throw new RuntimeException("The injectable, " + concreteInjectable + ", is disabled."
+                    || !injectable.getDependencies().isEmpty())) {
+      throw new RuntimeException("The injectable, " + injectable + ", is disabled."
               + " A disabled injectable may only have a single dependency if it is produced by a disabled bean.");
     }
 
-    final ConcreteInjectable concrete = (ConcreteInjectable) concreteInjectable;
-
-    concrete.dependencies.add(BaseDependency.class.cast(dependency));
+    final InjectableImpl injectableAsImpl = (InjectableImpl) injectable;
+    injectableAsImpl.dependencies.add(BaseDependency.class.cast(dependency));
   }
 
   @Override
   public DependencyGraph createGraph() {
     resolveSpecializations();
-    linkAbstractInjectables();
+    linkInjectableReferences();
     resolveDependencies();
-    validateConcreteInjectables(createValidators());
-    removeUnreachableConcreteInjectables();
+    validateInjectables();
+    removeUnreachableInjectables();
 
-    return new DependencyGraphImpl();
+    return new DependencyGraphImpl(injectablesByName);
   }
 
   private Collection<Validator> createValidators() {
     final Collection<Validator> validators = new ArrayList<Validator>();
-    validators.add(createCycleValidator());
+    validators.add(new CycleValidator());
     if (async) {
-      validators.add(createAsyncValidator());
+      validators.add(new AsyncValidator());
     }
 
     return validators;
   }
 
-  private Validator createCycleValidator() {
-    return new Validator() {
-
-      private final Set<Injectable> visited = new HashSet<Injectable>();
-      private final Set<Injectable> visiting = new LinkedHashSet<Injectable>();
-
-      @Override
-      public boolean canValidate(final Injectable injectable) {
-        return injectable.getWiringElementTypes().contains(WiringElementType.DependentBean) && !visited.contains(injectable);
-      }
-
-      @Override
-      public void validate(final Injectable injectable, final Collection<String> problems) {
-        validateDependentScopedInjectable(injectable, visiting, visited, problems, false);
-      }
-
-    };
-  }
-
-  private Validator createAsyncValidator() {
-    return new Validator() {
-
-      @Override
-      public boolean canValidate(final Injectable injectable) {
-        return !injectable.loadAsync();
-      }
-
-      @Override
-      public void validate(final Injectable injectable, final Collection<String> problems) {
-        for (final Dependency dep : injectable.getDependencies()) {
-          if (dep.getInjectable().loadAsync()) {
-            problems.add("The bean " + injectable + " is not @LoadAsync but depends on the @LoadAsync bean " + dep.getInjectable());
-          }
-        }
-      }
-
-    };
-  }
-
   private void resolveSpecializations() {
-    final Set<ConcreteInjectable> toBeRemoved = new HashSet<ConcreteInjectable>();
-    moveSuperTypesBeforeSubTypes(specializations);
-    for (final ConcreteInjectable specialization : specializations) {
+    final Set<InjectableImpl> toBeRemoved = new HashSet<>();
+    GraphUtil.sortSuperTypesBeforeSubtypes(specializations);
+    for (final InjectableImpl specialization : specializations) {
       if (specialization.injectableType.equals(InjectableType.Producer)) {
         resolveProducerSpecialization(specialization, toBeRemoved);
       } else {
         resolveTypeSpecialization(specialization, toBeRemoved);
       }
     }
-    concretesByName.values().removeAll(toBeRemoved);
+    injectablesByName.values().removeAll(toBeRemoved);
   }
 
-  private ProducerInstanceDependencyImpl findProducerInstanceDep(final ConcreteInjectable concrete) {
-    for (final BaseDependency dep : concrete.dependencies) {
-      if (dep.dependencyType.equals(DependencyType.ProducerMember)) {
-        return (ProducerInstanceDependencyImpl) dep;
-      }
-    }
-    throw new RuntimeException("Could not find producer member.");
-  }
-
-  private void resolveProducerSpecialization(final ConcreteInjectable specialization, final Set<ConcreteInjectable> toBeRemoved) {
-    final ProducerInstanceDependencyImpl producerMemberDep = findProducerInstanceDep(specialization);
+  private void resolveProducerSpecialization(final InjectableImpl specialization, final Set<InjectableImpl> toBeRemoved) {
+    final ProducerInstanceDependencyImpl producerMemberDep = GraphUtil.findProducerInstanceDep(specialization);
     if (producerMemberDep.producingMember instanceof MetaMethod) {
-      final MetaMethod specializedMethod = getOverridenMethod((MetaMethod) producerMemberDep.producingMember);
+      final MetaMethod specializedMethod = GraphUtil.getOverridenMethod((MetaMethod) producerMemberDep.producingMember);
       final MetaClass specializingType = producerMemberDep.producingMember.getDeclaringClass();
       if (specializedMethod != null && specializedMethod.isAnnotationPresent(Produces.class)) {
         updateLinksToSpecialized(specialization, toBeRemoved, specializedMethod, specializingType);
@@ -264,109 +198,89 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     }
   }
 
-  private void updateLinksToSpecialized(final ConcreteInjectable specialization, final Set<ConcreteInjectable> toBeRemoved,
+  private void updateLinksToSpecialized(final InjectableImpl specialization, final Set<InjectableImpl> toBeRemoved,
           final MetaMethod specializedMethod, final MetaClass specializingType) {
     final MetaClass enclosingType = specializedMethod.getDeclaringClass();
     final MetaClass producedType = specializedMethod.getReturnType().getErased();
 
     /*
-     * Need to copy this because the call to lookupAsAbstractInjectable may modify the collection.
+     * Need to copy this because the call to lookupInjectableReference may modify the collection.
      */
-    final Collection<AbstractInjectable> directAbstractInjectablesOfProducedType = new ArrayList<AbstractInjectable>(
-            directAbstractInjectablesByAssignableTypes.get(producedType));
-    for (final AbstractInjectable injectable : directAbstractInjectablesOfProducedType) {
+    final Collection<InjectableReference> directInjectableReferencesOfProducedType = new ArrayList<InjectableReference>(
+            directInjectableReferencesByAssignableTypes.get(producedType));
+    for (final InjectableReference injectable : directInjectableReferencesOfProducedType) {
       if (injectable.type.equals(producedType)) {
-        final Iterator<BaseInjectable> linkedIter = injectable.linked.iterator();
+        final Iterator<InjectableBase> linkedIter = injectable.linked.iterator();
         while (linkedIter.hasNext()) {
-          final BaseInjectable link = linkedIter.next();
-          if (link instanceof ConcreteInjectable) {
-            final ConcreteInjectable concreteLink = (ConcreteInjectable) link;
+          final InjectableBase link = linkedIter.next();
+          if (link instanceof InjectableImpl) {
+            final InjectableImpl concreteLink = (InjectableImpl) link;
             removeSpecializedAndSpecializingLinks(specialization, toBeRemoved, specializingType, enclosingType, linkedIter, concreteLink);
           }
         }
-        injectable.linked.add(lookupAsAbstractInjectable(specialization.type, specialization.qualifier));
+        injectable.linked.add(lookupInjectableReference(specialization.type, specialization.qualifier));
       }
     }
   }
 
-  private void removeSpecializedAndSpecializingLinks(final ConcreteInjectable specialization, final Set<ConcreteInjectable> toBeRemoved,
-          final MetaClass specializingType, final MetaClass enclosingType, final Iterator<BaseInjectable> linkedIter,
-          final ConcreteInjectable concreteLink) {
-    if (concreteLink.injectableType.equals(InjectableType.Producer)) {
-      final MetaClass foundProducerType = findProducerInstanceDep(concreteLink).injectable.type.getErased();
+  private void removeSpecializedAndSpecializingLinks(final InjectableImpl specialization, final Set<InjectableImpl> toBeRemoved,
+          final MetaClass specializingType, final MetaClass enclosingType, final Iterator<InjectableBase> linkedIter,
+          final InjectableImpl linkedInjectable) {
+    if (linkedInjectable.injectableType.equals(InjectableType.Producer)) {
+      final MetaClass foundProducerType = GraphUtil.findProducerInstanceDep(linkedInjectable).injectable.type.getErased();
       if (foundProducerType.equals(enclosingType.getErased())
               || foundProducerType.equals(specializingType.getErased())) {
         linkedIter.remove();
       }
       if (foundProducerType.equals(enclosingType.getErased())) {
-        toBeRemoved.add(concreteLink);
-        specialization.qualifier = qualFactory.combine(specialization.qualifier, concreteLink.qualifier);
+        toBeRemoved.add(linkedInjectable);
+        specialization.qualifier = qualFactory.combine(specialization.qualifier, linkedInjectable.qualifier);
       }
     }
   }
 
-  private MetaMethod getOverridenMethod(final MetaMethod specializingMethod) {
-    final MetaClass[] producerParams = getParameterTypes(specializingMethod);
-    MetaClass enclosingType = specializingMethod.getDeclaringClass();
-    MetaMethod specializedMethod = null;
-    while (specializedMethod == null && enclosingType.getSuperClass() != null) {
-      enclosingType = enclosingType.getSuperClass();
-      specializedMethod = enclosingType.getDeclaredMethod(specializingMethod.getName(), producerParams);
-    }
-
-    return specializedMethod;
-  }
-
-  private MetaClass[] getParameterTypes(final MetaMethod producerMethod) {
-    final MetaClass[] paramTypes = new MetaClass[producerMethod.getParameters().length];
-    for (int i = 0; i < paramTypes.length; i++) {
-      paramTypes[i] = producerMethod.getParameters()[i].getType();
-    }
-
-    return paramTypes;
-  }
-
-  private void resolveTypeSpecialization(final ConcreteInjectable specialization, final Set<ConcreteInjectable> toBeRemoved) {
+  private void resolveTypeSpecialization(final InjectableImpl specialization, final Set<InjectableImpl> toBeRemoved) {
     final MetaClass specializedType = specialization.type.getSuperClass().getErased();
-    for (final AbstractInjectable injectable : directAbstractInjectablesByAssignableTypes.get(specializedType)) {
+    for (final InjectableReference injectable : directInjectableReferencesByAssignableTypes.get(specializedType)) {
       if (injectable.type.equals(specializedType)) {
         if (!injectable.linked.isEmpty()) {
-          updateSpecializedInjectableLinks(specialization, toBeRemoved, injectable);
+          updateSpecializedReferenceLinks(specialization, toBeRemoved, injectable);
           break;
         }
       }
     }
   }
 
-  private void updateSpecializedInjectableLinks(final ConcreteInjectable specialization, final Set<ConcreteInjectable> toBeRemoved,
-          final AbstractInjectable injectable) {
-    assert injectable.linked.size() == 1 : "The injectable " + injectable + " should have one link but instead has:\n" + injectable.linked;
-    final ConcreteInjectable specialized = (ConcreteInjectable) injectable.linked.iterator().next();
+  private void updateSpecializedReferenceLinks(final InjectableImpl specialization,
+          final Set<InjectableImpl> toBeRemoved, final InjectableReference injectableReference) {
+    assert injectableReference.linked.size() == 1 : "The injectable " + injectableReference
+            + " should have one link but instead has:\n" + injectableReference.linked;
+    final InjectableImpl specialized = (InjectableImpl) injectableReference.linked.iterator().next();
     specialization.qualifier = qualFactory.combine(specialization.qualifier, specialized.qualifier);
     toBeRemoved.add(specialized);
-    injectable.linked.clear();
-    injectable.linked.add(lookupAsAbstractInjectable(specialization.type, specialization.qualifier));
+    injectableReference.linked.clear();
+    injectableReference.linked.add(lookupInjectableReference(specialization.type, specialization.qualifier));
     removeLinksToProducedTypes(specialized, toBeRemoved);
   }
 
-  private void removeLinksToProducedTypes(final ConcreteInjectable specialized, final Set<ConcreteInjectable> toBeRemoved) {
-    final Collection<AbstractInjectable> producedReferences = new ArrayList<AbstractInjectable>();
+  private void removeLinksToProducedTypes(final InjectableImpl specialized, final Set<InjectableImpl> toBeRemoved) {
+    final Collection<InjectableReference> producedReferences = new ArrayList<InjectableReference>();
     for (final MetaMethod method : specialized.type.getDeclaredMethodsAnnotatedWith(Produces.class)) {
-      producedReferences.add(lookupAsAbstractInjectable(method.getReturnType(), qualFactory.forSource(method)));
+      producedReferences.add(lookupInjectableReference(method.getReturnType(), qualFactory.forSource(method)));
     }
     for (final MetaField field : specialized.type.getDeclaredFields()) {
       if (field.isAnnotationPresent(Produces.class)) {
-        producedReferences.add(lookupAsAbstractInjectable(field.getType(), qualFactory.forSource(field)));
+        producedReferences.add(lookupInjectableReference(field.getType(), qualFactory.forSource(field)));
       }
     }
 
-    for (final AbstractInjectable reference : producedReferences) {
-      final Iterator<BaseInjectable> linkIter = reference.linked.iterator();
+    for (final InjectableReference reference : producedReferences) {
+      final Iterator<InjectableBase> linkIter = reference.linked.iterator();
       while (linkIter.hasNext()) {
-        final BaseInjectable link = linkIter.next();
-        if (link instanceof ConcreteInjectable && ((ConcreteInjectable) link).injectableType.equals(InjectableType.Producer)) {
-          final ConcreteInjectable concreteLink = (ConcreteInjectable) link;
-          final ProducerInstanceDependencyImpl producerMemberDep = findProducerInstanceDep(concreteLink);
+        final InjectableBase link = linkIter.next();
+        if (link instanceof InjectableImpl && ((InjectableImpl) link).injectableType.equals(InjectableType.Producer)) {
+          final InjectableImpl concreteLink = (InjectableImpl) link;
+          final ProducerInstanceDependencyImpl producerMemberDep = GraphUtil.findProducerInstanceDep(concreteLink);
           if (producerMemberDep.producingMember.getDeclaringClass().equals(specialized.type)) {
             linkIter.remove();
             toBeRemoved.add(concreteLink);
@@ -376,122 +290,24 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     }
   }
 
-  /**
-   * Required so that subtypes get all the qualifiers of supertypes when there
-   * are multiple @Specializes in the hierarchy.
-   */
-  private void moveSuperTypesBeforeSubTypes(final List<ConcreteInjectable> specializations) {
-    Collections.sort(specializations, new Comparator<ConcreteInjectable>() {
-      @Override
-      public int compare(final ConcreteInjectable c1, final ConcreteInjectable c2) {
-        return getScore(c1) - getScore(c2);
-      }
-
-      private int getScore(final ConcreteInjectable c) {
-        if (c.injectableType.equals(InjectableType.Producer)) {
-          return getDistanceFromObject(findProducerInstanceDep(c).producingMember.getDeclaringClass());
-        } else {
-          return getDistanceFromObject(c.type);
-        }
-      }
-
-      private int getDistanceFromObject(MetaClass type) {
-        int distance = 0;
-        for (; type.getSuperClass() != null; type = type.getSuperClass()) {
-          distance++;
-        }
-
-        return distance;
-      }
-    });
-  }
-
-  private void validateConcreteInjectables(final Collection<Validator> validators) {
+  private void validateInjectables() {
     final Collection<String> problems = new ArrayList<String>();
-    for (final Injectable injectable : concretesByName.values()) {
-      for (final Validator validator : validators) {
+    for (final Injectable injectable : injectablesByName.values()) {
+      for (final Validator validator : createValidators()) {
         if (validator.canValidate(injectable)) {
           validator.validate(injectable, problems);
         }
       }
     }
     if (!problems.isEmpty()) {
-      throw new RuntimeException(combineProblemMessages(problems));
+      throw new RuntimeException(GraphUtil.combineProblemMessages(problems));
     }
   }
 
-  private String combineProblemMessages(final Collection<String> problems) {
-    final StringBuilder builder = new StringBuilder("The following problems were found:\n\n");
-    for (final String problem : problems) {
-      builder.append(problem)
-             .append("\n");
-    }
-
-    return builder.toString();
-  }
-
-  private void validateDependentScopedInjectable(final Injectable injectable, final Set<Injectable> visiting,
-          final Set<Injectable> visited, final Collection<String> problems, final boolean onlyConstuctorDeps) {
-    if (InjectableType.Disabled.equals(injectable.getInjectedType())) {
-      visited.add(injectable);
-      return;
-    }
-    if (visiting.contains(injectable)) {
-      problems.add(createCycleMessage(visiting, injectable));
-      return;
-    }
-
-    visiting.add(injectable);
-    for (final Dependency dep : injectable.getDependencies()) {
-      if (onlyConstuctorDeps && !dep.getDependencyType().equals(DependencyType.Constructor)) {
-        continue;
-      }
-
-      final Injectable resolved = getResolvedDependency(dep, injectable);
-      if (!visited.contains(resolved)) {
-        if (dep.getDependencyType().equals(DependencyType.ProducerMember)) {
-          validateDependentScopedInjectable(resolved, visiting, visited, problems, true);
-        } else if (resolved.getWiringElementTypes().contains(WiringElementType.DependentBean)) {
-          validateDependentScopedInjectable(resolved, visiting, visited, problems, false);
-        }
-      }
-    }
-    visiting.remove(injectable);
-    visited.add(injectable);
-  }
-
-  private String createCycleMessage(Set<Injectable> visiting, Injectable injectable) {
-    final StringBuilder builder = new StringBuilder();
-    boolean cycleStarted = false;
-    boolean hasProducer = false;
-
-    for (final Injectable visitingInjectable : visiting) {
-      if (visitingInjectable.equals(injectable)) {
-        cycleStarted = true;
-      }
-      if (cycleStarted) {
-        builder.append("\t")
-               .append(visitingInjectable.getInjectedType().getFullyQualifiedName())
-               .append("\n");
-        if (visitingInjectable.getInjectableType().equals(InjectableType.Producer)) {
-          hasProducer = true;
-        }
-      }
-    }
-
-    if (hasProducer) {
-      builder.insert(0, "A cycle was found containing a producer and no other normal scoped types:\n");
-    } else {
-      builder.insert(0, "A dependent scoped cycle was found:\n");
-    }
-
-    return builder.toString();
-  }
-
-  private void removeUnreachableConcreteInjectables() {
+  private void removeUnreachableInjectables() {
     final Set<String> reachableNames = new HashSet<String>();
     final Queue<Injectable> processingQueue = new LinkedList<Injectable>();
-    for (final Injectable injectable : concretesByName.values()) {
+    for (final Injectable injectable : injectablesByName.values()) {
       if (!injectable.getWiringElementTypes().contains(WiringElementType.Simpleton)
               && !reachableNames.contains(injectable.getFactoryName())
               && !InjectableType.Disabled.equals(injectable.getInjectableType())) {
@@ -500,7 +316,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
           final Injectable processedInjectable = processingQueue.poll();
           reachableNames.add(processedInjectable.getFactoryName());
           for (final Dependency dep : processedInjectable.getDependencies()) {
-            final Injectable resolvedDep = getResolvedDependency(dep, processedInjectable);
+            final Injectable resolvedDep = GraphUtil.getResolvedDependency(dep, processedInjectable);
             if (!reachableNames.contains(resolvedDep.getFactoryName())) {
               processingQueue.add(resolvedDep);
             }
@@ -509,11 +325,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
       }
     }
 
-    concretesByName.keySet().retainAll(reachableNames);
-  }
-
-  private Injectable getResolvedDependency(final Dependency dep, final Injectable processedInjectable) {
-    return Validate.notNull(dep.getInjectable(), "The dependency %s in %s should have already been resolved.", dep, processedInjectable);
+    injectablesByName.keySet().retainAll(reachableNames);
   }
 
   private void resolveDependencies() {
@@ -522,71 +334,34 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     final List<String> dependencyProblems = new ArrayList<String>();
     final Map<String, Injectable> customProvidedInjectables = new IdentityHashMap<String, Injectable>();
 
-    for (final Injectable concrete : concretesByName.values()) {
-      if (concrete.isExtension()) {
-        transientInjectableNames.add(concrete.getFactoryName());
+    for (final Injectable injectable : injectablesByName.values()) {
+      if (injectable.isExtension()) {
+        transientInjectableNames.add(injectable.getFactoryName());
       }
-      if (!visited.contains(concrete)) {
-        for (final Dependency dep : concrete.getDependencies()) {
-          resolveDependency(asBaseDependency(dep), concrete, dependencyProblems, customProvidedInjectables);
+      if (!visited.contains(injectable)) {
+        for (final Dependency dep : injectable.getDependencies()) {
+          resolveDependency(BaseDependency.as(dep), injectable, dependencyProblems, customProvidedInjectables);
         }
       }
     }
 
-    concretesByName.keySet().removeAll(transientInjectableNames);
-    concretesByName.putAll(customProvidedInjectables);
+    injectablesByName.keySet().removeAll(transientInjectableNames);
+    injectablesByName.putAll(customProvidedInjectables);
 
     if (!dependencyProblems.isEmpty()) {
-      throw new RuntimeException(buildMessageFromProblems(dependencyProblems));
+      throw new RuntimeException(GraphUtil.buildMessageFromProblems(dependencyProblems));
     }
   }
 
-  private String buildMessageFromProblems(final List<String> dependencyProblems) {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("The following dependency problems were found:\n");
-    for (final String problem : dependencyProblems) {
-      builder.append('\t')
-             .append(problem)
-             .append('\n');
-    }
-
-    return builder.toString();
-  }
-
-  private AbstractInjectable copyAbstractInjectable(final AbstractInjectable injectable) {
-    final AbstractInjectable retVal = new AbstractInjectable(injectable.type, injectable.qualifier);
-    retVal.linked.addAll(injectable.linked);
-
-    return retVal;
-  }
-
-  private HasAnnotations getAnnotated(BaseDependency dep) {
-    switch (dep.dependencyType) {
-    case Field:
-      final FieldDependencyImpl fieldDep = (FieldDependencyImpl) dep;
-      return fieldDep.field;
-    case ProducerParameter:
-    case Constructor:
-      final ParamDependencyImpl paramDep = (ParamDependencyImpl) dep;
-      return paramDep.parameter;
-    case SetterParameter:
-      final SetterParameterDependencyImpl setterParamDep = (SetterParameterDependencyImpl) dep;
-      return setterParamDep.method.getParameters()[0];
-    case ProducerMember:
-    default:
-      throw new RuntimeException("Not yet implemented!");
-    }
-  }
-
-  private Injectable resolveDependency(final BaseDependency dep, final Injectable concrete,
+  private Injectable resolveDependency(final BaseDependency dep, final Injectable depOwner,
           final Collection<String> problems,
           final Map<String, Injectable> customProvidedInjectables) {
     if (dep.injectable.resolution != null) {
       return dep.injectable.resolution;
     }
 
-    final Multimap<ResolutionPriority, ConcreteInjectable> resolvedByPriority = HashMultimap.create();
-    final Queue<AbstractInjectable> resolutionQueue = new LinkedList<AbstractInjectable>();
+    final Multimap<ResolutionPriority, InjectableImpl> resolvedByPriority = HashMultimap.create();
+    final Queue<InjectableReference> resolutionQueue = new LinkedList<InjectableReference>();
     resolutionQueue.add(dep.injectable);
     resolutionQueue.add(addMatchingExactTypeInjectables(dep.injectable));
 
@@ -594,7 +369,7 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
 
     final Iterable<ResolutionPriority> priorities;
     final boolean reportProblems;
-    if (InjectableType.Disabled.equals(concrete.getInjectableType())) {
+    if (InjectableType.Disabled.equals(depOwner.getInjectableType())) {
       priorities = Collections.singleton(ResolutionPriority.Disabled);
       reportProblems = false;
     }
@@ -606,15 +381,15 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     // Iterates through priorities from highest to lowest.
     for (final ResolutionPriority priority : priorities) {
       if (resolvedByPriority.containsKey(priority)) {
-        final Collection<ConcreteInjectable> resolved = resolvedByPriority.get(priority);
+        final Collection<InjectableImpl> resolved = resolvedByPriority.get(priority);
         if (resolved.size() > 1) {
           if (reportProblems) {
-            problems.add(ambiguousDependencyMessage(dep, concrete, new ArrayList<ConcreteInjectable>(resolved)));
+            problems.add(GraphUtil.ambiguousDependencyMessage(dep, depOwner, new ArrayList<InjectableImpl>(resolved)));
           }
 
           return null;
         } else {
-          final Injectable injectable = maybeProcessAsExtension(dep, concrete, customProvidedInjectables, resolvedByPriority, resolved);
+          final Injectable injectable = maybeProcessAsExtension(dep, depOwner, customProvidedInjectables, resolvedByPriority, resolved);
 
           return (dep.injectable.resolution = injectable);
         }
@@ -622,35 +397,41 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     }
 
     if (reportProblems) {
-      problems.add(unsatisfiedDependencyMessage(dep, concrete, resolvedByPriority.get(ResolutionPriority.Disabled),
-              problems, customProvidedInjectables));
+      final Collection<Injectable> resolvedDisabledInjectables =
+              resolvedByPriority
+                .get(ResolutionPriority.Disabled)
+                .stream()
+                .map(inj -> getRootDisabledInjectable(inj, problems, customProvidedInjectables))
+                .collect(Collectors.toList());
+
+      problems.add(GraphUtil.unsatisfiedDependencyMessage(dep, depOwner, resolvedDisabledInjectables));
     }
     return null;
   }
 
-  private Injectable maybeProcessAsExtension(final BaseDependency dep, final Injectable injectableWithDep,
+  private Injectable maybeProcessAsExtension(final BaseDependency dep, final Injectable depOwner,
           final Map<String, Injectable> customProvidedInjectables,
-          final Multimap<ResolutionPriority, ConcreteInjectable> resolvedByPriority,
-          final Collection<ConcreteInjectable> resolved) {
+          final Multimap<ResolutionPriority, InjectableImpl> resolvedByPriority,
+          final Collection<InjectableImpl> resolved) {
     Injectable injectable = resolved.iterator().next();
     if (injectable.isExtension()) {
       final ExtensionInjectable providedInjectable = (ExtensionInjectable) injectable;
       final Collection<Injectable> otherResolvedInjectables = new ArrayList<Injectable>(resolvedByPriority.values());
       otherResolvedInjectables.remove(injectable);
 
-      final InjectionSite site = new InjectionSite(injectableWithDep.getInjectedType(), getAnnotated(dep), otherResolvedInjectables);
+      final InjectionSite site = new InjectionSite(depOwner.getInjectedType(), dep, otherResolvedInjectables);
       injectable = providedInjectable.provider.getInjectable(site, nameGenerator);
       customProvidedInjectables.put(injectable.getFactoryName(), injectable);
-      dep.injectable = copyAbstractInjectable(dep.injectable);
+      dep.injectable = GraphUtil.copyInjectableReference(dep.injectable);
     }
 
     return injectable;
   }
 
-  private AbstractInjectable addMatchingExactTypeInjectables(final AbstractInjectable depInjectable) {
-    final AbstractInjectable exactTypeLinker = new AbstractInjectable(depInjectable.type, depInjectable.qualifier);
-    for (final ConcreteInjectable candidate : exactTypeConcreteInjectablesByType.get(depInjectable.type.getErased())) {
-      if (candidateSatisfiesInjectable(depInjectable, candidate)) {
+  private InjectableReference addMatchingExactTypeInjectables(final InjectableReference depInjectable) {
+    final InjectableReference exactTypeLinker = new InjectableReference(depInjectable.type, depInjectable.qualifier);
+    for (final InjectableImpl candidate : exactTypeInjectablesByType.get(depInjectable.type.getErased())) {
+      if (GraphUtil.candidateSatisfiesInjectable(depInjectable, candidate)) {
         exactTypeLinker.linked.add(candidate);
       }
     }
@@ -658,42 +439,21 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
     return exactTypeLinker;
   }
 
-  private void processResolutionQueue(final Queue<AbstractInjectable> resolutionQueue,
-          final Multimap<ResolutionPriority, ConcreteInjectable> resolvedByPriority) {
+  private void processResolutionQueue(final Queue<InjectableReference> resolutionQueue,
+          final Multimap<ResolutionPriority, InjectableImpl> resolvedByPriority) {
     do {
-      final AbstractInjectable cur = resolutionQueue.poll();
-      for (final BaseInjectable link : cur.linked) {
-        if (link instanceof AbstractInjectable) {
-          resolutionQueue.add((AbstractInjectable) link);
-        } else if (link instanceof ConcreteInjectable) {
-          resolvedByPriority.put(getMatchingPriority(link), (ConcreteInjectable) link);
+      final InjectableReference cur = resolutionQueue.poll();
+      for (final InjectableBase link : cur.linked) {
+        if (link instanceof InjectableReference) {
+          resolutionQueue.add((InjectableReference) link);
+        } else if (link instanceof InjectableImpl) {
+          resolvedByPriority.put(getMatchingPriority((InjectableImpl) link), (InjectableImpl) link);
         }
       }
     } while (resolutionQueue.size() > 0);
   }
 
-  private String unsatisfiedDependencyMessage(final BaseDependency dep, final Injectable concrete,
-          final Collection<ConcreteInjectable> resolvedDisabledBeans, final Collection<String> problems,
-          final Map<String, Injectable> customProvidedInjectables) {
-    final StringBuilder message = new StringBuilder()
-            .append("Unsatisfied ")
-            .append(dep.dependencyType.toString().toLowerCase())
-            .append(" dependency ")
-            .append(dep.injectable)
-            .append(" for ")
-            .append(concrete)
-            .append('.');
-
-    if (!resolvedDisabledBeans.isEmpty()) {
-      message.append(" Some beans were found that satisfied this dependency, but must be enabled:\n");
-      resolvedDisabledBeans.stream().forEach(inj -> message
-              .append(getRootDisabledBeanTypeName(inj, problems, customProvidedInjectables)).append('\n'));
-    }
-
-    return message.toString();
-  }
-
-  private String getRootDisabledBeanTypeName(Injectable inj, final Collection<String> problems,
+  private Injectable getRootDisabledInjectable(Injectable inj, final Collection<String> problems,
           final Map<String, Injectable> customProvidedInjectables) {
     while (inj.getDependencies().size() == 1) {
       final Dependency dep = inj.getDependencies().iterator().next();
@@ -702,99 +462,35 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
       }
     }
 
-    return inj.getInjectedType().getFullyQualifiedName();
+    return inj;
   }
 
-  private String ambiguousDependencyMessage(final BaseDependency dep, final Injectable concrete, final List<ConcreteInjectable> resolved) {
-    final StringBuilder messageBuilder = new StringBuilder();
-    messageBuilder.append("Ambiguous resolution for ")
-                  .append(dep.dependencyType.toString().toLowerCase())
-                  .append(" ")
-                  .append(dep.injectable)
-                  .append(" in ")
-                  .append(concrete)
-                  .append(".\n")
-                  .append("Resolved types:\n")
-                  .append(resolved.get(0));
-    for (int i = 1; i < resolved.size(); i++) {
-      messageBuilder.append(", ")
-                    .append(resolved.get(i));
-    }
-
-    return messageBuilder.toString();
-  }
-
-  private void linkAbstractInjectables() {
-    final Set<AbstractInjectable> linked = new HashSet<AbstractInjectable>(abstractInjectables.size());
-    for (final Injectable concrete : concretesByName.values()) {
-      for (final Dependency dep : concrete.getDependencies()) {
-        final BaseDependency baseDep = asBaseDependency(dep);
+  private void linkInjectableReferences() {
+    final Set<InjectableReference> linked = new HashSet<>(injectableReferences.size());
+    for (final Injectable injectable : injectablesByName.values()) {
+      for (final Dependency dep : injectable.getDependencies()) {
+        final BaseDependency baseDep = BaseDependency.as(dep);
         if (!linked.contains(baseDep.injectable)) {
-          linkAbstractInjectable(baseDep.injectable);
+          linkInjectableReference(baseDep.injectable);
           linked.add(baseDep.injectable);
         }
       }
     }
   }
 
-  private BaseDependency asBaseDependency(final Dependency dep) {
-    if (dep instanceof BaseDependency) {
-      return (BaseDependency) dep;
-    } else {
-      throw new RuntimeException("Dependency was not an instance of " + BaseDependency.class.getSimpleName()
-              + ". Make sure you only create dependencies using methods in "
-              + DependencyGraphBuilder.class.getSimpleName() + ".");
-    }
-  }
-
-  private void linkAbstractInjectable(final AbstractInjectable abstractInjectable) {
-    final Collection<AbstractInjectable> candidates = directAbstractInjectablesByAssignableTypes.get(abstractInjectable.type.getErased());
-    for (final AbstractInjectable candidate : candidates) {
-      if (candidateSatisfiesInjectable(abstractInjectable, candidate)) {
-        abstractInjectable.linked.add(candidate);
+  private void linkInjectableReference(final InjectableReference injectableReference) {
+    final Collection<InjectableReference> candidates = directInjectableReferencesByAssignableTypes
+            .get(injectableReference.type.getErased());
+    for (final InjectableReference candidate : candidates) {
+      if (GraphUtil.candidateSatisfiesInjectable(injectableReference, candidate)) {
+        injectableReference.linked.add(candidate);
       }
     }
   }
 
-  private boolean candidateSatisfiesInjectable(final AbstractInjectable abstractInjectable, final Injectable candidate) {
-    return abstractInjectable.qualifier.isSatisfiedBy(candidate.getQualifier())
-            && hasAssignableTypeParameters(candidate.getInjectedType(), abstractInjectable.type)
-            && !candidate.equals(abstractInjectable);
-  }
-
-  private boolean hasAssignableTypeParameters(final MetaClass fromType, final MetaClass toType) {
-    final MetaParameterizedType toParamType = toType.getParameterizedType();
-    final MetaParameterizedType fromParamType = getFromTypeParams(fromType, toType);
-
-    return toParamType == null || toParamType.isAssignableFrom(fromParamType);
-  }
-
-  private MetaParameterizedType getFromTypeParams(final MetaClass fromType, final MetaClass toType) {
-    if (toType.isInterface()) {
-      if (fromType.getFullyQualifiedName().equals(toType.getFullyQualifiedName())) {
-        return fromType.getParameterizedType();
-      }
-      for (final MetaClass type : fromType.getAllSuperTypesAndInterfaces()) {
-        if (type.isInterface() && type.getFullyQualifiedName().equals(toType.getFullyQualifiedName())) {
-          return type.getParameterizedType();
-        }
-      }
-      throw new RuntimeException("Could not find interface " + toType.getFullyQualifiedName() + " through type " + fromType.getFullyQualifiedName());
-    } else {
-      MetaClass clazz = fromType;
-      do {
-        if (clazz.getFullyQualifiedName().equals(toType.getFullyQualifiedName())) {
-          return clazz.getParameterizedType();
-        }
-        clazz = clazz.getSuperClass();
-      } while (!clazz.getFullyQualifiedName().equals("java.lang.Object"));
-      throw new RuntimeException("Could not find class " + toType.getFullyQualifiedName() + " through type " + fromType.getFullyQualifiedName());
-    }
-  }
-
-  private AbstractInjectable createStaticMemberInjectable(final MetaClass producerType, final MetaClassMember member) {
-    final AbstractInjectable retVal = new AbstractInjectable(producerType, qualFactory.forUniversallyQualified());
-    retVal.resolution = new ConcreteInjectable(producerType, qualFactory.forUniversallyQualified(), "",
+  private InjectableReference createStaticMemberInjectable(final MetaClass producerType, final MetaClassMember member) {
+    final InjectableReference retVal = new InjectableReference(producerType, qualFactory.forUniversallyQualified());
+    retVal.resolution = new InjectableImpl(producerType, qualFactory.forUniversallyQualified(), "",
             ApplicationScoped.class, InjectableType.Static, Collections.<WiringElementType>emptyList());
 
     return retVal;
@@ -803,44 +499,41 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   @Override
   public void addFieldDependency(final Injectable concreteInjectable, final MetaClass type, final Qualifier qualifier,
           final MetaField dependentField) {
-    final Injectable abstractInjectable = lookupAbstractInjectable(type, qualifier);
-    final FieldDependency dep = new FieldDependencyImpl(AbstractInjectable.class.cast(abstractInjectable), dependentField);
+    final InjectableReference injectableReference = lookupInjectableReference(type, qualifier);
+    final FieldDependency dep = new FieldDependencyImpl(injectableReference, dependentField);
     addDependency(concreteInjectable, dep);
   }
 
   @Override
   public void addConstructorDependency(final Injectable concreteInjectable, final MetaClass type,
           final Qualifier qualifier, final int paramIndex, final MetaParameter param) {
-    final Injectable abstractInjectable = lookupAbstractInjectable(type, qualifier);
-    final int paramIndex1 = paramIndex;
-    final MetaParameter param1 = param;
-    final ParamDependency dep = new ParamDependencyImpl(AbstractInjectable.class.cast(abstractInjectable), DependencyType.Constructor, paramIndex1, param1);
+    final InjectableReference injectableReference = lookupInjectableReference(type, qualifier);
+    final ParamDependency dep = new ParamDependencyImpl(injectableReference, DependencyType.Constructor, paramIndex,
+            param);
     addDependency(concreteInjectable, dep);
   }
 
   @Override
   public void addProducerParamDependency(final Injectable concreteInjectable, final MetaClass type,
           final Qualifier qualifier, final int paramIndex, final MetaParameter param) {
-    final Injectable abstractInjectable = lookupAbstractInjectable(type, qualifier);
-    final int paramIndex1 = paramIndex;
-    final MetaParameter param1 = param;
-    final ParamDependency dep = new ParamDependencyImpl(AbstractInjectable.class.cast(abstractInjectable), DependencyType.ProducerParameter, paramIndex1, param1);
+    final InjectableReference injectableReference = lookupInjectableReference(type, qualifier);
+    final ParamDependency dep = new ParamDependencyImpl(injectableReference, DependencyType.ProducerParameter,
+            paramIndex, param);
     addDependency(concreteInjectable, dep);
   }
 
   @Override
   public void addProducerMemberDependency(final Injectable concreteInjectable, final MetaClass type,
           final Qualifier qualifier, final MetaClassMember producingMember) {
-    final Injectable abstractInjectable = lookupAbstractInjectable(type, qualifier);
-    final MetaClassMember member = producingMember;
-    final ProducerInstanceDependency dep = new ProducerInstanceDependencyImpl(
-            AbstractInjectable.class.cast(abstractInjectable), DependencyType.ProducerMember, member);
+    final InjectableReference injectableReference = lookupInjectableReference(type, qualifier);
+    final ProducerInstanceDependency dep = new ProducerInstanceDependencyImpl(injectableReference,
+            DependencyType.ProducerMember, producingMember);
     addDependency(concreteInjectable, dep);
   }
 
   @Override
   public void addProducerMemberDependency(Injectable producedInjectable, MetaClass producerType, MetaClassMember member) {
-    final AbstractInjectable abstractInjectable = createStaticMemberInjectable(producerType, member);
+    final InjectableReference abstractInjectable = createStaticMemberInjectable(producerType, member);
     final ProducerInstanceDependency dep = new ProducerInstanceDependencyImpl(
             abstractInjectable, DependencyType.ProducerMember, member);
     addDependency(producedInjectable, dep);
@@ -849,54 +542,25 @@ public class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
   @Override
   public void addSetterMethodDependency(final Injectable concreteInjectable, final MetaClass type,
           final Qualifier qualifier, final MetaMethod setter) {
-    final Injectable abstractInjectable = lookupAbstractInjectable(type, qualifier);
-    final MetaMethod setter1 = setter;
-    final SetterParameterDependency dep = new SetterParameterDependencyImpl(AbstractInjectable.class.cast(abstractInjectable), setter1);
+    final InjectableReference injectableReference = lookupInjectableReference(type, qualifier);
+    final SetterParameterDependency dep = new SetterParameterDependencyImpl(injectableReference, setter);
     addDependency(concreteInjectable, dep);
   }
 
   @Override
   public void addDisposesMethodDependency(final Injectable concreteInjectable, final MetaClass type, final Qualifier qualifier, final MetaMethod disposer) {
-    final Injectable abstractInjectable = lookupAbstractInjectable(type, qualifier);
-    final DisposerMethodDependency dep = new DisposerMethodDependencyImpl(AbstractInjectable.class.cast(abstractInjectable), disposer);
+    final InjectableReference injectableReference = lookupInjectableReference(type, qualifier);
+    final DisposerMethodDependency dep = new DisposerMethodDependencyImpl(injectableReference, disposer);
     addDependency(concreteInjectable, dep);
   }
 
   @Override
   public void addDisposesParamDependency(final Injectable concreteInjectable, final MetaClass type, final Qualifier qualifier,
           final Integer index, final MetaParameter param) {
-    final Injectable abstractInjectable = lookupAbstractInjectable(type, qualifier);
-    final ParamDependency dep = new ParamDependencyImpl(AbstractInjectable.class.cast(abstractInjectable), DependencyType.DisposerParameter, index, param);
+    final InjectableReference injectableReference = lookupInjectableReference(type, qualifier);
+    final ParamDependency dep = new ParamDependencyImpl(injectableReference, DependencyType.DisposerParameter, index,
+            param);
     addDependency(concreteInjectable, dep);
-  }
-
-  /**
-   * @see DependencyGraph
-   * @author Max Barkley <mbarkley@redhat.com>
-   */
-  class DependencyGraphImpl implements DependencyGraph {
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Iterator<Injectable> iterator() {
-      return Iterator.class.cast(concretesByName.values().iterator());
-    }
-
-    @Override
-    public Injectable getConcreteInjectable(final String injectableName) {
-      return concretesByName.get(injectableName);
-    }
-
-    @Override
-    public int getNumberOfInjectables() {
-      return concretesByName.size();
-    }
-
-  }
-
-  private static interface Validator {
-    boolean canValidate(Injectable injectable);
-    void validate(Injectable injectable, Collection<String> problems);
   }
 
 }

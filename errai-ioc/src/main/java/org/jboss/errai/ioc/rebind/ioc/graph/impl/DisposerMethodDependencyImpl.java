@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DisposerMethodDependency;
@@ -28,13 +29,18 @@ class DisposerMethodDependencyImpl extends BaseDependency implements DisposerMet
 
   final MetaMethod disposer;
 
-  DisposerMethodDependencyImpl(final AbstractInjectable abstractInjectable, final MetaMethod disposer) {
+  DisposerMethodDependencyImpl(final InjectableReference abstractInjectable, final MetaMethod disposer) {
     super(abstractInjectable, DependencyType.DisposerMethod);
     this.disposer = disposer;
   }
 
   @Override
   public MetaMethod getDisposerMethod() {
+    return disposer;
+  }
+
+  @Override
+  protected HasAnnotations getAnnotated() {
     return disposer;
   }
 

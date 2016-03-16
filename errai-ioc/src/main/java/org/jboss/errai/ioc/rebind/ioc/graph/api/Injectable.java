@@ -27,7 +27,6 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
-import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 /**
@@ -37,17 +36,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
  * @see DependencyGraphBuilder
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface Injectable {
-
-  /**
-   * @return A handle that can be used for looking up this injectable.
-   */
-  InjectableHandle getHandle();
-
-  /**
-   * @return The class of the injectable.
-   */
-  MetaClass getInjectedType();
+public interface Injectable extends HasInjectableHandle {
 
   /**
    * @return The scope of the injectable. For pseudo-dependent injectables, this
@@ -60,11 +49,6 @@ public interface Injectable {
    *         present.
    */
   String getBeanName();
-
-  /**
-   * @return The qualifier of this injectable.
-   */
-  Qualifier getQualifier();
 
   /**
    * @return The unique name of the factory that will produce this injectable at

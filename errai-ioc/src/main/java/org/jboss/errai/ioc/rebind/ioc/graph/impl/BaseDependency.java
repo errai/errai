@@ -16,7 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
+import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
 
@@ -25,11 +29,11 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependenc
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-class BaseDependency implements Dependency {
-  AbstractInjectable injectable;
+abstract class BaseDependency implements Dependency {
+  InjectableReference injectable;
   final DependencyType dependencyType;
 
-  BaseDependency(final AbstractInjectable abstractInjectable, final DependencyType dependencyType) {
+  BaseDependency(final InjectableReference abstractInjectable, final DependencyType dependencyType) {
     this.injectable = abstractInjectable;
     this.dependencyType = dependencyType;
   }
@@ -47,5 +51,27 @@ class BaseDependency implements Dependency {
   @Override
   public DependencyType getDependencyType() {
     return dependencyType;
+  }
+
+  @Override
+  public Annotation[] getAnnotations() {
+    return getAnnotated().getAnnotations();
+  }
+
+  @Override
+  public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
+    return getAnnotated().isAnnotationPresent(annotation);
+  }
+
+  protected abstract HasAnnotations getAnnotated();
+
+  static BaseDependency as(final Dependency dep) {
+    if (dep instanceof BaseDependency) {
+      return (BaseDependency) dep;
+    } else {
+      throw new RuntimeException("Dependency was not an instance of " + BaseDependency.class.getSimpleName()
+              + ". Make sure you only create dependencies using methods using the "
+              + DependencyGraphBuilder.class.getSimpleName() + ".");
+    }
   }
 }

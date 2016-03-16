@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,33 +16,34 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
-import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.HasInjectableHandle;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 /**
+ * This is used in the {@link DependencyGraphBuilderImpl} for representing
+ * injectables in dependencies that have not yet been resolved.
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class DefaultCustomFactoryInjectable extends InjectableImpl implements CustomFactoryInjectable {
+class InjectableReference extends InjectableBase implements HasInjectableHandle {
+  // TODO needs to be renamed and not be an Injectable
 
-  private final FactoryBodyGenerator generator;
+  final Collection<InjectableBase> linked = new HashSet<InjectableBase>();
+  Injectable resolution;
 
-  public DefaultCustomFactoryInjectable(final MetaClass type, final Qualifier qualifier, final String factoryName,
-          final Class<? extends Annotation> literalScope, final Collection<WiringElementType> wiringTypes,
-          final FactoryBodyGenerator generator) {
-    super(type, qualifier, factoryName, literalScope, InjectableType.ExtensionProvided, wiringTypes);
-    this.generator = generator;
+  InjectableReference(final MetaClass type, final Qualifier qualifier) {
+    super(type, qualifier);
   }
 
   @Override
-  public FactoryBodyGenerator getGenerator() {
-    return generator;
+  public InjectableType getInjectableType() {
+    return InjectableType.Reference;
   }
 
 }

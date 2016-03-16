@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.ParamDependency;
@@ -29,7 +30,7 @@ class ParamDependencyImpl extends BaseDependency implements ParamDependency {
   final int paramIndex;
   final MetaParameter parameter;
 
-  ParamDependencyImpl(final AbstractInjectable abstractInjectable, final DependencyType dependencyType, final int paramIndex, final MetaParameter parameter) {
+  ParamDependencyImpl(final InjectableReference abstractInjectable, final DependencyType dependencyType, final int paramIndex, final MetaParameter parameter) {
     super(abstractInjectable, dependencyType);
     this.paramIndex = paramIndex;
     this.parameter = parameter;
@@ -42,6 +43,11 @@ class ParamDependencyImpl extends BaseDependency implements ParamDependency {
 
   @Override
   public MetaParameter getParameter() {
+    return parameter;
+  }
+
+  @Override
+  protected HasAnnotations getAnnotated() {
     return parameter;
   }
 

@@ -33,7 +33,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
  * @see DependencyGraphBuilder#addExtensionInjectable(MetaClass, Qualifier, Class, WiringElementType...)
  * @author Max Barkley <mbarkley@redhat.com>
  */
-class ExtensionInjectable extends ConcreteInjectable {
+class ExtensionInjectable extends InjectableImpl {
 
   final Collection<InjectionSite> injectionSites = new ArrayList<InjectionSite>();
   final InjectableProvider provider;

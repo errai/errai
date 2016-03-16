@@ -26,15 +26,15 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
-import org.jboss.errai.ioc.rebind.ioc.graph.impl.DependencyGraphBuilderImpl.DependencyGraphImpl;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 /**
  * Concrete here does not mean "for a concrete class". Rather, it means that
  * this injectable was for bean that we know how to produce (either because it
  * is a scoped type or from producer member). In contrast,
- * {@link AbstractInjectable abstract injectables} are used in unresolved
+ * {@link InjectableReference abstract injectables} are used in unresolved
  * dependencies to represent a injectable that we do not yet know how to
  * construct.
  *
@@ -43,7 +43,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-class ConcreteInjectable extends BaseInjectable {
+class InjectableImpl extends InjectableBase implements Injectable {
   final InjectableType injectableType;
   final Collection<WiringElementType> wiringTypes;
   final List<BaseDependency> dependencies = new ArrayList<BaseDependency>();
@@ -51,17 +51,24 @@ class ConcreteInjectable extends BaseInjectable {
   Boolean proxiable = null;
   boolean requiresProxy = false;
   Integer hashContent = null;
+  final String factoryName;
 
-  ConcreteInjectable(final MetaClass type,
+  InjectableImpl(final MetaClass type,
                      final Qualifier qualifier,
                      final String factoryName,
                      final Class<? extends Annotation> literalScope,
                      final InjectableType injectorType,
                      final Collection<WiringElementType> wiringTypes) {
-    super(type, qualifier, factoryName);
+    super(type, qualifier);
+    this.factoryName = factoryName;
     this.literalScope = literalScope;
     this.wiringTypes = wiringTypes;
     this.injectableType = injectorType;
+  }
+
+  @Override
+  public String getFactoryName() {
+    return factoryName;
   }
 
   @Override
@@ -87,7 +94,7 @@ class ConcreteInjectable extends BaseInjectable {
   @Override
   public boolean requiresProxy() {
     switch (injectableType) {
-    case Abstract:
+    case Reference:
     case ContextualProvider:
     case Provider:
       return false;

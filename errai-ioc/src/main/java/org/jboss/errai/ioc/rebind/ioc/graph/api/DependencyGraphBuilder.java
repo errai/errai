@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import javax.inject.Scope;
 
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -205,7 +206,7 @@ public interface DependencyGraphBuilder {
    * @author Max Barkley <mbarkley@redhat.com>
    */
   public static enum InjectableType {
-    Type, JsType, Producer, Provider, ContextualProvider, Abstract, Extension, ExtensionProvided, Static, Disabled
+    Type, JsType, Producer, Provider, ContextualProvider, Reference, Extension, ExtensionProvided, Static, Disabled
   }
 
   /**
@@ -227,7 +228,7 @@ public interface DependencyGraphBuilder {
    *
    * @author Max Barkley <mbarkley@redhat.com>
    */
-  public static interface Dependency {
+  public static interface Dependency extends HasAnnotations {
 
     /**
      * This will only return a meaningful value after {@link DependencyGraphBuilder#createGraph()} is called.
