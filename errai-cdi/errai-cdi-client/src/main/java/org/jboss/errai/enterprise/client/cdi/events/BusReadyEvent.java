@@ -16,7 +16,6 @@
 
 package org.jboss.errai.enterprise.client.cdi.events;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 
 /**
