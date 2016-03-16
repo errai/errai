@@ -36,32 +36,23 @@ public class CdiErraiWebSocketChannel extends DefaultErraiWebSocketChannel {
   }
 
   public void doErraiMessage(final String message) {
-    activateBuildinScopes();
-    try {
-      super.doErraiMessage(message);
-    } 
-    finally {
-      deactivateBuiltinScopes();
-    }
-  }
-
-  /**
-   * Deactivate builtin CDI scopes. Must be invoked after message processing.
-   */
-  private void deactivateBuiltinScopes() {
-    conversationScopeAdapter.deactivateContext();
-    sessionScopeAdapter.deactivateContext();
-    // bean store should be destroyed after each message
-    requestScopeAdapter.invalidateContext();
-  }
-
-  /**
-   * Activate builtin CDI scopes
-   */
-  private void activateBuildinScopes() {
     requestScopeAdapter.activateContext();
-    sessionScopeAdapter.activateContext(httpSession);
-    conversationScopeAdapter.activateContext(conversationState);
+    try {
+      sessionScopeAdapter.activateContext(httpSession);
+      try {
+        conversationScopeAdapter.activateContext(conversationState);
+        try {
+       	  super.doErraiMessage(message);
+        } finally {
+          conversationScopeAdapter.deactivateContext();
+        }
+      } finally {
+        sessionScopeAdapter.deactivateContext();
+      }
+    } finally {
+      // bean store should be destroyed after each message
+      requestScopeAdapter.invalidateContext();
+    }
   }
 
   /**
