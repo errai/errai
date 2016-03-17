@@ -238,8 +238,14 @@
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>false</skipTests>
+            <!-- Override exclusions in parent -->
+            <configuration combine.self="override">
+              <excludes>
+              </excludes>
+              <includes>
+                <include>**/mocksafe/**/*Test.java</include>
+                <include>**/mocksafe/**/*Tests.java</include>
+              </includes>
               <useSystemClassLoader>true</useSystemClassLoader>
               <useManifestOnlyJar>true</useManifestOnlyJar>
               <additionalClasspathElements>
@@ -248,10 +254,6 @@
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
-              <includes>
-                <include>**/mocksafe/**/*Test.java</include>
-                <include>**/mocksafe/**/*Tests.java</include>
-              </includes>
             </configuration>
           </plugin>
           <plugin>

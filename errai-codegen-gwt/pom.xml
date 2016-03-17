@@ -54,12 +54,10 @@
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <skipTests>false</skipTests>
           <additionalClasspathElements>
             <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/test/resources/</additionalClasspathElement>
-
           </additionalClasspathElements>
           <useSystemClassLoader>false</useSystemClassLoader>
 
