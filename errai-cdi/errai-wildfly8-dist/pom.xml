@@ -1,0 +1,116 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>cdi-integration-parent</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>errai-wildfly8-dist</artifactId>
+  <name>Errai::WildFly::Distribution</name>
+  <packaging>jar</packaging>
+
+  <properties>
+    <as.version>8.2.1.Final</as.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-server</artifactId>
+      <version>${as.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <outputDirectory>${project.build.directory}/wildfly-undertow-${as.version}/</outputDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <!-- Unpacks Wildfly without the wildfly-undertow jar -->
+                <artifactItem>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-dist</artifactId>
+                  <version>${as.version}</version>
+                  <type>zip</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <excludes>**/org/wildfly/extension/undertow/main/wildfly-undertow-${as.version}.jar</excludes>
+                </artifactItem>
+                <!-- Unpack everything but ServletContainerInitializerDeploymentProcessor.class 
+                  from wildfly-undertow.jar -->
+                <artifactItem>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-undertow</artifactId>
+                  <version>${as.version}</version>
+                  <type>jar</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}/wildfly-undertow-${as.version}/</outputDirectory>
+                  <excludes>**/ServletContainerInitializerDeploymentProcessor.class</excludes>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Builds replacement jar for wildfly-undertow that has replaced 
+        ServletContainerInitializerDeploymentProcessor.class -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <jar
+                  destfile="${project.build.directory}/wildfly-${as.version}/modules/system/layers/base/org/wildfly/extension/undertow/main/wildfly-undertow-${as.version}.jar"
+                  basedir="${project.build.directory}/wildfly-undertow-${as.version}"
+                  compress="false" />
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>assemble</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>assembly.xml</descriptor>
+              </descriptors>
+              <finalName>wildfly-${as.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <outputDirectory>target/</outputDirectory>
+              <workDirectory>target/assembly/work</workDirectory>              
+            </configuration>
+          </execution>        
+        </executions>
+      </plugin>
+    </plugins>
+
+  </build>
+</project>
