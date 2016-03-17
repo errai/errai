@@ -188,7 +188,9 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <skipTests>true</skipTests>
+          <excludes>
+            <exclude>**/*.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
       
@@ -701,12 +703,6 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>true</skipTests>
-            </configuration>
           </plugin>
         </plugins>
       </build>

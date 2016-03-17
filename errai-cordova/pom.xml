@@ -89,17 +89,15 @@
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>false</skipTests>
-
+            <!-- Override exclusions in parent -->
+            <configuration combine.self="override">
+              <excludes>
+                <exclude>**/events/**</exclude>
+              </excludes>
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>
-
-              <excludes>
-                <exclude>**/events/**</exclude>
-              </excludes>
             </configuration>
             <executions>
               <execution>

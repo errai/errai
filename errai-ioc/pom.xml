@@ -177,6 +177,17 @@
               </excludes>
             </configuration>
           </plugin>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <!-- Override exclusions in parent -->
+            <configuration combine.self="override">
+              <excludes>
+              </excludes>
+              <includes>
+                <include>**/unit/**/*Test.java</include>
+              </includes>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>

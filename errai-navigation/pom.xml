@@ -113,8 +113,10 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>false</skipTests>
+            <!-- Override exclusions in parent -->
+            <configuration combine.self="override">
+              <excludes>
+              </excludes>
               <includes>
                 <include>**/rebind/**/*Test.java</include>
                 <include>**/rebind/**/*Tests.java</include>
