@@ -16,21 +16,29 @@
 
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.ioc.client.container.ClientBeanManager;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
+
 /**
+ * Contract for injectable client-side instances for run-time bean management in
+ * asynchronous IOC mode.
+ * 
  * @author Mike Brock
+ * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface AsyncBeanManager extends ClientBeanManager {
 
   /**
-   * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
+   * Looks up all beans by name. The name is either the fully qualified type
+   * name of an assignable type or a given name as specified by
+   * {@link javax.inject.Named}.
    *
    * @param name
-   *     the name of bean to lookup
+   *          the fqcn of an assignable type, or a given name specified by
+   *          {@link javax.inject.Named}, must not be null.
    *
    * @return and unmodifiable list of all beans with the specified name.
    */

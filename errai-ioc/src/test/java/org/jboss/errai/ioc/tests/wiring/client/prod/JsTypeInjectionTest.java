@@ -33,6 +33,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.ConsumesProducedJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeConsumer;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeNamedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.MultipleImplementationsJsType;
@@ -62,11 +63,21 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       public Object getInstance() {
         return new AlternativeImpl(1);
       }
+
+      @Override
+      public String getName() {
+        return null;
+      }
     });
     windowInjContext.addBeanProvider(MultipleImplementationsJsType.class.getName(), new JsTypeProvider<Object>() {
       @Override
       public Object getInstance() {
         return new AlternativeImpl(2);
+      }
+
+      @Override
+      public String getName() {
+        return null;
       }
     });
     super.gwtSetUp();
@@ -95,6 +106,18 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
     assertNotSame(bean1, bean2);
   }
+  
+  public void testNamedJsTypeInWindowContext() {
+    final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+
+    final Object bean1 = wndContext.getBean(JsTypeNamedBean.class.getName());
+    assertNotNull("@JsType bean was not registered in window context", bean1);
+
+    final Object bean2 = wndContext.getBean("olaf");
+    assertNotNull("@JsType bean was not registered using its interface", bean2);
+
+    assertSame(bean1, bean2);
+  }
 
   public void testConsumingOfUnimplementedJsType() throws Exception {
     injectScriptThenRun(() -> {
@@ -110,7 +133,19 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       };
 
       final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
-      wndContext.addBeanProvider("org.jboss.errai.ioc.tests.wiring.client.res.UnimplementedType", () -> ref);
+      wndContext.addBeanProvider("org.jboss.errai.ioc.tests.wiring.client.res.UnimplementedType", new JsTypeProvider<Object>(){
+
+        @Override
+        public Object getInstance() {
+          return ref;
+        }
+
+        @Override
+        public String getName() {
+          return null;
+        }
+        
+      });
 
       final SyncBeanDef<JsTypeConsumer> consumer = IOC.getBeanManager().lookupBean(JsTypeConsumer.class);
 
@@ -163,7 +198,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       try {
         context.getBean("org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsType");
         fail("There should not be a provider in the WindowInjectionContext for NativeConcreteJsType.");
-      } catch (IOCResolutionException ex) {
+      } catch (final IOCResolutionException ex) {
       }
     });
   }
@@ -174,7 +209,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         final NativeTypeTestModule module = IOC.getBeanManager().lookupBean(NativeTypeTestModule.class).getInstance();
         final NativeConcreteJsType instance = module.nativeConcreteJsType;
         assertEquals("Not the expected implementation (in native.js).", "I am a native type!", instance.message());
-      } catch (IOCResolutionException ex) {
+      } catch (final IOCResolutionException ex) {
         fail("Precondition failed: Problem looking up test module.");
       }
     });
@@ -186,7 +221,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         final NativeTypeTestModule module = IOC.getBeanManager().lookupBean(NativeTypeTestModule.class).getInstance();
         assertNotNull(module.producedNativeIface);
         assertEquals("Not the expected implementation (in native.js).", "please", module.producedNativeIface.getMagicWord());
-      } catch (IOCResolutionException ex) {
+      } catch (final IOCResolutionException ex) {
         fail("Precondition failed: Problem looking up test module.");
       }
     });
@@ -216,6 +251,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       @Override
       public Object getInstance() {
         return new AlternativeImpl(3);
+      }
+
+      @Override
+      public String getName() {
+        return null;
       }
     });
     values.clear();

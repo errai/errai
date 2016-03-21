@@ -27,12 +27,14 @@ import com.google.common.collect.ListMultimap;
 import jsinterop.annotations.JsType;
 
 /**
+ * Client-side global context for sharing bean definitions across different scripts.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType
 public class WindowInjectionContext {
-  private ListMultimap<String, JsTypeProvider<?>> beanProviders = ArrayListMultimap.create();
+  private final ListMultimap<String, JsTypeProvider<?>> beanProviders = ArrayListMultimap.create();
 
   public static WindowInjectionContext createOrGet() {
     if (!isWindowInjectionContextDefined()) {
@@ -59,6 +61,9 @@ public class WindowInjectionContext {
 
   public void addBeanProvider(final String name, final JsTypeProvider<?> provider) {
     beanProviders.put(name, provider);
+    if (provider.getName() != null) {
+      beanProviders.put(provider.getName(), provider);
+    }
   }
 
   public void addSuperTypeAlias(final String superTypeName, final String typeName) {

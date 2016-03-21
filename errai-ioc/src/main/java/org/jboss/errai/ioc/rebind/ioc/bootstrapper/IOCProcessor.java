@@ -47,6 +47,7 @@ import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 import org.jboss.errai.codegen.ArithmeticExpression;
@@ -410,12 +411,20 @@ public class IOCProcessor {
   private Statement createJsTypeProviderFor(Injectable injectable) {
     final MetaClass type = injectable.getInjectedType();
     final AnonymousClassStructureBuilder jsTypeProvider = newInstanceOf(parameterizedAs(JsTypeProvider.class, typeParametersOf(type))).extend();
-    jsTypeProvider.publicOverridesMethod("getInstance")
+    jsTypeProvider
+      .publicOverridesMethod("getInstance")
             .append(Stmt.castTo(type, loadVariable("contextManager").invoke("getInstance", injectable.getFactoryName()))
-                    .returnValue())
+                    .returnValue()).finish()
+      .publicOverridesMethod("getName")
+            .append(Stmt.loadLiteral(getBeanName(injectable)).returnValue())
             .finish();
 
     return jsTypeProvider.finish();
+  }
+
+  private String getBeanName(final Injectable injectable) {
+    final Named named = injectable.getInjectedType().getAnnotation(Named.class);
+    return (named != null) ? named.value() : null;
   }
 
   @SuppressWarnings("rawtypes")
@@ -584,7 +593,7 @@ public class IOCProcessor {
           }
         }
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("A fatal error occurred while processing " + type.getFullyQualifiedName(), t);
     }
   }
@@ -620,7 +629,7 @@ public class IOCProcessor {
     // Workaround for http://bugs.java.com/view_bug.do?bug_id=2210448
     try {
       isTopLevel = (type.asClass() == null || type.asClass().getDeclaringClass() == null);
-    } catch (IncompatibleClassChangeError ex) {
+    } catch (final IncompatibleClassChangeError ex) {
       isTopLevel = false;
     }
     return isTopLevel;
@@ -633,7 +642,7 @@ public class IOCProcessor {
     try {
       enclosing = (type.asClass() == null ? null : type.asClass().getDeclaringClass());
       hasEnclosingClass = true;
-    } catch (IncompatibleClassChangeError ex) {
+    } catch (final IncompatibleClassChangeError ex) {
       enclosing = null;
       hasEnclosingClass = true;
     }
@@ -1055,7 +1064,7 @@ public class IOCProcessor {
       } else {
         final boolean instantiable = noArgConstructor != null && (noArgConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class));
         final boolean proxiable = noArgConstructor != null && (noArgConstructor.isPublic() || noArgConstructor.isProtected());
-        boolean passesProxiability = scopeDoesNotRequireProxy(type) || proxiable;
+        final boolean passesProxiability = scopeDoesNotRequireProxy(type) || proxiable;
 
         if (explicitlyScoped) {
           if (!instantiable) {
@@ -1136,7 +1145,7 @@ public class IOCProcessor {
     }
     try {
       return Boolean.parseBoolean(propertyValue);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("Could not parse " + propName + " value, " + propertyValue + ", to boolean.", t);
     }
   }

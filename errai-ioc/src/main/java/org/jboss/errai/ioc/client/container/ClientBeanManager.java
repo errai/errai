@@ -19,7 +19,11 @@ package org.jboss.errai.ioc.client.container;
 import javax.enterprise.context.spi.CreationalContext;
 
 /**
+ * Contract for injectable client-side instances for run-time bean management.
+ * 
  * @author Mike Brock
+ * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ClientBeanManager {
   /**

@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
@@ -41,6 +42,8 @@ import com.google.common.collect.Multimap;
  * code at bootstrap time.
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Alternative
 public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
@@ -114,6 +117,8 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Collection<SyncBeanDef> lookupBeans(final String name) {
+    Assert.notNull(name);
+    
     final Collection<FactoryHandle> handles = handlesByName.get(name);
     final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByName.get(name);
     final JsArray<?> jsBeans = WindowInjectionContext.createOrGet().getBeans(name);
