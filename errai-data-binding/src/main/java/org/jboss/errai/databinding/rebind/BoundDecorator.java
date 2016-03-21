@@ -96,14 +96,20 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       }
 
       // Check if the bound property exists in data model type
-      Bound bound = (Bound) decorable.getAnnotation();
-      String property = bound.property().equals("") ? decorable.getName() : bound.property();
+      final Bound bound = (Bound) decorable.getAnnotation();
+      final boolean propertyIsEmpty = bound.property().equals("");
+      String property = propertyIsEmpty ? decorable.getName() : bound.property();
       if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
-        throw new GenerationException("Invalid binding of field " + decorable.getName()
+        if (propertyIsEmpty && binderLookup.getDataModelType().equals(getValueType(decorable.getType()))) {
+          property = "this";
+        }
+        else {
+          throw new GenerationException("Invalid binding of field " + decorable.getName()
             + " in class " + targetClass + "! Property " + property
             + " not resolvable from class " + binderLookup.getDataModelType()
             + "! Hint: Is " + binderLookup.getDataModelType() + " marked as @Bindable? When binding to a "
             + "property chain, all properties but the last in a chain must be of a @Bindable type!");
+        }
       }
 
       Statement component = decorable.getAccessStatement();
@@ -161,6 +167,15 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
     if (!hasRunForType) {
       controller.addDestructionStatements(Collections.<Statement> singletonList(
               nestedCall(controller.getReferenceStmt(DataBindingUtil.BINDER_VAR_NAME, DataBinder.class)).invoke("unbind")));
+    }
+  }
+
+  private MetaClass getValueType(final MetaClass type) {
+    if (type.isAssignableTo(TakesValue.class)) {
+      return type.getMethod("getValue", new Class[0]).getReturnType();
+    }
+    else {
+      return null;
     }
   }
 

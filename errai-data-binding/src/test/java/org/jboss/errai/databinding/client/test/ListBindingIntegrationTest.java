@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.errai.databinding.client.DirectBindingListComponentModule;
 import org.jboss.errai.databinding.client.ListComponentContainerModule;
 import org.jboss.errai.databinding.client.ListComponentModule;
 import org.jboss.errai.databinding.client.QualifiedListComponentModule;
@@ -77,6 +78,24 @@ public class ListBindingIntegrationTest extends AbstractErraiIOCTest {
     final TestModelWithListOfTestModels model = module.binder.getModel();
     model.setList(new ArrayList<>());
     final List<TestModel> list = model.getList();
+    final TestModel one = new TestModel("one");
+    final TestModel two = new TestModel("two");
+    final TestModel three = new TestModel("three");
+
+    list.add(one);
+    assertFalse(component.getComponent(0).isQualified());
+    assertIndexOutOfBounds(component, 1);
+    list.remove(0);
+    assertIndexOutOfBounds(component, 0);
+
+    runTestModelListAssertions(list, component, one, two, three);
+  }
+
+  public void testDeclarativeBindingDirectlyToList() throws Exception {
+    final DirectBindingListComponentModule module = IOC.getBeanManager()
+            .lookupBean(DirectBindingListComponentModule.class).getInstance();
+    final ListComponent<TestModel, TestModelWidget> component = module.list;
+    final List<TestModel> list = module.binder.getModel();
     final TestModel one = new TestModel("one");
     final TestModel two = new TestModel("two");
     final TestModel three = new TestModel("three");
