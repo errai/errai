@@ -253,7 +253,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public String getName() {
-      return null;
+      return name;
     }
 
     @Override

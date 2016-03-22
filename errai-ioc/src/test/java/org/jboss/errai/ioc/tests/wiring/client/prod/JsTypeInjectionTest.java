@@ -108,7 +108,8 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
     assertNotSame(bean1, bean2);
   }
-
+  
+  @SuppressWarnings("rawtypes")
   public void testNamedJsTypeInWindowContext() {
     final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
 
@@ -117,8 +118,13 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
     final Object bean2 = wndContext.getBean("olaf");
     assertNotNull("@JsType bean was not registered using its interface", bean2);
-
     assertSame(bean1, bean2);
+    
+    final Collection<SyncBeanDef> beans = IOC.getBeanManager().lookupBeans("olaf");
+    
+    for (final SyncBeanDef bean : beans) {
+      assertEquals("olaf", bean.getName());
+    }
   }
 
   public void testConsumingOfUnimplementedJsType() throws Exception {
