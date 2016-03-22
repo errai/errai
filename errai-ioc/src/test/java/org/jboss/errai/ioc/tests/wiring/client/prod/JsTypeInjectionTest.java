@@ -38,6 +38,8 @@ import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.MultipleImplementationsJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsType;
+import org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsTypeWithConstructorDependency;
+import org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsTypeWithFieldDependency;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeTypeTestModule;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProducedJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.UnimplementedType;
@@ -106,7 +108,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
     assertNotSame(bean1, bean2);
   }
-  
+
   public void testNamedJsTypeInWindowContext() {
     final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
 
@@ -144,52 +146,13 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         public String getName() {
           return null;
         }
-        
+
       });
 
       final SyncBeanDef<JsTypeConsumer> consumer = IOC.getBeanManager().lookupBean(JsTypeConsumer.class);
 
       assertSame(ref, Factory.maybeUnwrapProxy(consumer.getInstance().getIface()));
     });
-  }
-
-  private void injectScriptThenRun(final Runnable test) {
-    final String scriptUrl = getScriptUrl();
-    final Timer timeoutFail = new Timer() {
-
-      @Override
-      public void run() {
-        fail("Timed out waiting to load " + scriptUrl);
-      }
-    };
-
-    timeoutFail.schedule(9000);
-    delayTestFinish(10000);
-    ScriptInjector.fromUrl(scriptUrl)
-                  .setWindow(ScriptInjector.TOP_WINDOW)
-                  .setCallback(new Callback<Void, Exception>() {
-
-                    @Override
-                    public void onFailure(Exception reason) {
-                      timeoutFail.cancel();
-                      fail("Could not load " + scriptUrl);
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                      try {
-                        test.run();
-                        finishTest();
-                      } finally {
-                        timeoutFail.cancel();
-                      }
-                    }
-                  }).inject();
-  }
-
-  private String getScriptUrl() {
-    final String scriptUrl = GWT.getModuleBaseForStaticFiles() + "native.js";
-    return scriptUrl;
   }
 
   public void testNativeJsTypesNotInWindowContext() throws Exception {
@@ -203,12 +166,38 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
     });
   }
 
-  public void testInstantiableNativeJsTypeIsInjectable() throws Exception {
+  public void testNoArgInstantiableNativeJsTypeIsInjectable() throws Exception {
     injectScriptThenRun(() -> {
       try {
         final NativeTypeTestModule module = IOC.getBeanManager().lookupBean(NativeTypeTestModule.class).getInstance();
         final NativeConcreteJsType instance = module.nativeConcreteJsType;
         assertEquals("Not the expected implementation (in native.js).", "I am a native type!", instance.message());
+      } catch (final IOCResolutionException ex) {
+        fail("Precondition failed: Problem looking up test module.");
+      }
+    });
+  }
+
+  public void testInstantiableNativeJsTypeWithConstructorDependencyIsInjectable() throws Exception {
+    injectScriptThenRun(() -> {
+      try {
+        final NativeTypeTestModule module = IOC.getBeanManager().lookupBean(NativeTypeTestModule.class).getInstance();
+        final NativeConcreteJsTypeWithConstructorDependency instance = module.nativeWithConstructorDep;
+        assertNotNull(instance.get());
+        assertEquals("Not the expected implementation (in native.js).", "I am a native type!", instance.get().message());
+      } catch (final IOCResolutionException ex) {
+        fail("Precondition failed: Problem looking up test module.");
+      }
+    });
+  }
+
+  public void testInstantiableNativeJsTypeWithFieldDependencyIsInjectable() throws Exception {
+    injectScriptThenRun(() -> {
+      try {
+        final NativeTypeTestModule module = IOC.getBeanManager().lookupBean(NativeTypeTestModule.class).getInstance();
+        final NativeConcreteJsTypeWithFieldDependency instance = module.nativeWithFieldDep;
+        assertNotNull(instance.get());
+        assertEquals("Not the expected implementation (in native.js).", "I am a native type!", instance.get().message());
       } catch (final IOCResolutionException ex) {
         fail("Precondition failed: Problem looking up test module.");
       }
@@ -264,5 +253,44 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       values.add(bean.getInstance().value());
     }
     assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), values);
+  }
+
+  private void injectScriptThenRun(final Runnable test) {
+    final String scriptUrl = getScriptUrl();
+    final Timer timeoutFail = new Timer() {
+
+      @Override
+      public void run() {
+        fail("Timed out waiting to load " + scriptUrl);
+      }
+    };
+
+    timeoutFail.schedule(9000);
+    delayTestFinish(10000);
+    ScriptInjector.fromUrl(scriptUrl)
+                  .setWindow(ScriptInjector.TOP_WINDOW)
+                  .setCallback(new Callback<Void, Exception>() {
+
+                    @Override
+                    public void onFailure(Exception reason) {
+                      timeoutFail.cancel();
+                      fail("Could not load " + scriptUrl);
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                      try {
+                        test.run();
+                        finishTest();
+                      } finally {
+                        timeoutFail.cancel();
+                      }
+                    }
+                  }).inject();
+  }
+
+  private String getScriptUrl() {
+    final String scriptUrl = GWT.getModuleBaseForStaticFiles() + "native.js";
+    return scriptUrl;
   }
 }

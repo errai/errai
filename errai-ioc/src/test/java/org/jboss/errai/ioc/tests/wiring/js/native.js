@@ -4,6 +4,20 @@ NativeConcreteJsType = function() {
   };
 };
 
+NativeConcreteJsTypeWithConstructorDependency = function(nativeConcreteJsType) {
+  this.get = function() {
+    return nativeConcreteJsType;
+  };
+};
+
+
+NativeConcreteJsTypeWithFieldDependency = function() {
+  var ref = this;
+  this.get = function() {
+    return ref.nativeConcreteJsType;
+  };
+};
+
 ProducedNativeIface = function() {
   this.getMagicWord = function() {
     return "please";
