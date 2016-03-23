@@ -25,6 +25,8 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct
@@ -32,10 +34,12 @@ import org.jboss.errai.common.client.protocols.MessageParts;
  */
 public class ErrorHelper {
 
+  private static final Logger logger = LoggerFactory.getLogger(ErrorHelper.class);
+
   /**
    * Creates the stacktrace for the error message and sends it via conversation to the
    * <tt>ClientBusErrors</tt> subject
-   * 
+   *
    * @param bus
    *          - the <tt>MessageBus</tt> that has received the <tt>message</tt> and
    *          <tt>errorMessage</tt>
@@ -52,9 +56,9 @@ public class ErrorHelper {
        * Trying to send an error to the client when the client obviously can't receive it!
        */
 
-      System.err.println("*** An error occured that could not be delivered to the client.");
-      System.err.println("Error Message: " + message.get(String.class, "ErrorMessage"));
-      System.err.println("Details      : "
+      logger.error("*** An error occured that could not be delivered to the client.");
+      logger.error("Error Message: " + message.get(String.class, "ErrorMessage"));
+      logger.error("Details      : "
           + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
     }
     else {
@@ -114,7 +118,7 @@ public class ErrorHelper {
 
   /**
    * Sends the error message via conversation to the <tt>ClientBusErrors</tt> subject
-   * 
+   *
    * @param bus
    *          - the <tt>MessageBus</tt> that has received the <tt>message</tt> and
    *          <tt>errorMessage</tt>
@@ -132,21 +136,25 @@ public class ErrorHelper {
          * Trying to send an error to the client when the client obviously can't receive it!
          */
 
-        System.err.println("*** An error occured that could not be delivered to the client.");
-        System.err.println("Error Message: " + message.get(String.class, "ErrorMessage"));
-        System.err.println("Details      : "
+        logger.error("*** An error occured that could not be delivered to the client.");
+        logger.error("Error Message: " + message.get(String.class, "ErrorMessage"));
+        logger.error("Details      : "
             + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
 
       }
-      else {
+      else  {
+        final String errorTo = message.get(String.class, MessageParts.ErrorTo);
+        if (errorTo != null) {
+          final String subject = errorTo;
 
-        MessageBuilder.createConversation(message)
-            .toSubject(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
-            .with("ErrorMessage", errorMessage)
-            .with("AdditionalDetails", additionalDetails)
-            .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
-            .with(MessageParts.Throwable, message.getResource(Object.class, "Exception"))
-            .noErrorHandling().sendNowWith(bus);
+          MessageBuilder.createConversation(message)
+          .toSubject(subject)
+          .with("ErrorMessage", errorMessage)
+          .with("AdditionalDetails", additionalDetails)
+          .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
+          .with(MessageParts.Throwable, message.getResource(Object.class, "Exception"))
+          .noErrorHandling().sendNowWith(bus);
+        }
       }
     }
     catch (RuntimeException e) {
@@ -179,7 +187,7 @@ public class ErrorHelper {
 
   /**
    * Sends a disconnect command message to the client bus
-   * 
+   *
    * @param bus
    *          - the bus responsible for sending messages for the server
    * @param message
@@ -194,7 +202,7 @@ public class ErrorHelper {
 
   /**
    * Handles the failed delivery of a message, and sends the error to the appropriate place
-   * 
+   *
    * @param bus
    *          - the <tt>MessageBus</tt> that has received the <tt>message</tt> and
    *          <tt>errorMessage</tt>
@@ -219,9 +227,11 @@ public class ErrorHelper {
 
     if (!(e instanceof MessageDeliveryFailure && ((MessageDeliveryFailure) e).isRpcEndpointException())) {
       if (e != null) {
-        e.printStackTrace();
+        logger.error(logMessage);
       }
-      System.err.println(logMessage);
+      else {
+        logger.error(logMessage, e);
+      }
     }
 
     try {

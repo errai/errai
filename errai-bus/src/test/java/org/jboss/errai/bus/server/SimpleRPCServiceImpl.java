@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.tests.support.SimpleRPCService;
+import org.jboss.errai.bus.server.annotations.Service;
 
 /**
- * @author Mike Brock
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface BusErrorCallback extends ErrorCallback<Message> {
+@Service
+public class SimpleRPCServiceImpl implements SimpleRPCService {
+
+  @Override
+  public Long currentTime() {
+    return System.currentTimeMillis();
+  }
+
 }

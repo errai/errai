@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
@@ -120,7 +121,12 @@ public class DefaultRemoteCallBuilder {
                     bus.unsubscribeAll(replyTo);
                   }
                   message.set(MessageParts.AdditionalDetails, m.get(String.class, MessageParts.AdditionalDetails));
-                  message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
+                  final Throwable throwable = m.get(Throwable.class, MessageParts.Throwable);
+                  final boolean defaultErrorHandling = message.getErrorCallback().error(message,
+                      throwable);
+                  if (defaultErrorHandling) {
+                    DefaultErrorCallback.INSTANCE.error(message, throwable);
+                  }
                 }
               }
           );
@@ -133,7 +139,7 @@ public class DefaultRemoteCallBuilder {
 
     final RemoteCallErrorDef errorDef = new RemoteCallErrorDef() {
       @Override
-      public RemoteCallSendable errorsHandledBy(ErrorCallback errorCallback) {
+      public RemoteCallSendable errorsHandledBy(@SuppressWarnings("rawtypes") ErrorCallback errorCallback) {
         message.errorsCall(errorCallback);
         return sendable;
       }

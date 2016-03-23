@@ -37,12 +37,12 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * {@link IOCProvider} to make {@link BatchCaller} instances injectable.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @IOCProvider
 @Singleton
-@SuppressWarnings({"rawtypes", "unchecked"}) 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class BatchCallerProvider implements Provider<BatchCaller> {
   private static final RemoteServiceProxyFactory factory = new RemoteServiceProxyFactory();
 
@@ -50,7 +50,7 @@ public class BatchCallerProvider implements Provider<BatchCaller> {
   public BatchCaller get() {
     return new BatchCaller() {
       private RpcBatchImpl batch = new RpcBatchImpl();
-      
+
       @Override
       public <T> T call(RemoteCallback<?> callback, Class<T> remoteService) {
         return call(callback, null, remoteService);
@@ -110,31 +110,31 @@ public class BatchCallerProvider implements Provider<BatchCaller> {
       }
       queuedRequests.clear();
     }
-    
+
     public void onSuccess(RemoteCallback<?> callback) {
       pendingCallbacks.remove(callback);
       if (pendingCallbacks.isEmpty() && successCallback != null) {
         successCallback.callback(null);
       }
     }
-    
+
     public void onError(Message m, Throwable t) {
       if (errorCallback != null) {
         errorCallback.error(m, t);
       }
     }
   }
-  
+
   private class BatchRemoteCallback<R> implements RemoteCallback<R> {
     private final RpcBatchImpl batch;
     private final RemoteCallback<R> remoteCallback;
-    
+
     public BatchRemoteCallback(RpcBatchImpl batch, RemoteCallback<R> remoteCallback) {
       this.batch = batch;
       this.remoteCallback = remoteCallback;
       this.batch.pendingCallbacks.add(remoteCallback);
     }
-    
+
     @Override
     public void callback(R response) {
       remoteCallback.callback(response);
@@ -142,15 +142,15 @@ public class BatchCallerProvider implements Provider<BatchCaller> {
     }
   }
 
-  private class BatchErrorCallback extends BusErrorCallback {
+  private class BatchErrorCallback implements BusErrorCallback {
     private final RpcBatchImpl batch;
     private final ErrorCallback errorCallback;
-    
+
     public BatchErrorCallback(RpcBatchImpl batch, ErrorCallback errorCallback) {
       this.batch = batch;
       this.errorCallback = errorCallback;
     }
-    
+
     @Override
     public boolean error(Message message, Throwable throwable) {
       if (errorCallback != null) {
@@ -159,7 +159,7 @@ public class BatchCallerProvider implements Provider<BatchCaller> {
       else {
         DefaultErrorCallback.INSTANCE.error(message, throwable);
       }
-      
+
       batch.onError(message, throwable);
       return false;
     }

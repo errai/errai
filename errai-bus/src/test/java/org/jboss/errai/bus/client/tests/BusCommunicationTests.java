@@ -27,7 +27,6 @@ import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.tests.support.GenericServiceB;
@@ -41,6 +40,7 @@ import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestInterceptorRPCService;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -707,16 +707,17 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
         subs.remove();
 
-        try {
-          MessageBuilder.createMessage()
-              .toSubject(subjectToSubscribe).done().sendNowWith(bus);
-        }
-        catch (NoSubscribersToDeliverTo e) {
-          finishTest();
-          return;
-        }
+        MessageBuilder.createMessage()
+            .toSubject(subjectToSubscribe)
+            .errorsHandledBy((ErrorCallback<Message>) (m, t) -> {
+              finishTest();
+              return false;
+            })
+            .repliesTo(m -> {
+              fail("should have thrown exception because service should have been de-registered");
+            })
+            .sendNowWith(bus);
 
-        fail("should have thrown exception because service should have been de-registered");
       }
     });
   }

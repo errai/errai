@@ -20,7 +20,7 @@ import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.security.shared.exception.SecurityException;
 
-public class ErrorCountingCallback extends BusErrorCallback {
+public class ErrorCountingCallback implements BusErrorCallback {
   private final Counter counter;
   private final Class<? extends SecurityException> throwType;
 

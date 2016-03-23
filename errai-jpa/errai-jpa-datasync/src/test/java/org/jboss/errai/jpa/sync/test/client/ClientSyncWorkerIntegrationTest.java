@@ -47,7 +47,7 @@ public class ClientSyncWorkerIntegrationTest extends GWTTestCase {
     }
   }
 
-  class CountingErrorCallback extends BusErrorCallback {
+  class CountingErrorCallback implements BusErrorCallback {
 
     private int errorCount;
 

@@ -47,7 +47,7 @@ import org.jboss.errai.common.client.util.TimeUnit;
  * @author Mike Brock
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@SuppressWarnings({"ConstantConditions", "unchecked"})
+@SuppressWarnings({"unchecked"})
 class DefaultMessageBuilder<R extends Sendable> {
   private final Message message;
 
@@ -406,25 +406,31 @@ class DefaultMessageBuilder<R extends Sendable> {
       }
       // XXX why does this return R?
       @Override
-      public R errorsHandledBy(final ErrorCallback callback) {
+      public R errorsHandledBy(@SuppressWarnings("rawtypes") final ErrorCallback callback) {
         message.errorsCall(callback);
+        message.set(MessageParts.ErrorTo, DefaultErrorCallback.CLIENT_ERROR_SUBJECT);
         return (R) sendable;
 
       }
 
       @Override
       public R noErrorHandling() {
+        message.errorsCall(NoHandlingErrorCallback.INSTANCE);
         return (R) sendable;
       }
 
       @Override
       public R defaultErrorHandling() {
         message.errorsCall(DefaultErrorCallback.INSTANCE);
+        message.set(MessageParts.ErrorTo, DefaultErrorCallback.CLIENT_ERROR_SUBJECT);
         return (R) sendable;
       }
 
       @Override
       public R done() {
+        if (message.getErrorCallback() == null) {
+          defaultErrorHandling();
+        }
         return (R) sendable;
       }
 

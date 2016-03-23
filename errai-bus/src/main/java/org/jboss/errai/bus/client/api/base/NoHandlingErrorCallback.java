@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.ErrorCallback;
 
 /**
- * @author Mike Brock
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface BusErrorCallback extends ErrorCallback<Message> {
+public class NoHandlingErrorCallback implements ErrorCallback<Message> {
+  public static NoHandlingErrorCallback INSTANCE = new NoHandlingErrorCallback();
+
+  @Override
+  public boolean error(Message message, Throwable throwable) {
+    return false;
+  }
+
 }

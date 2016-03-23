@@ -61,6 +61,7 @@ import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.util.ManagementConsole;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.slf4j.Logger;
@@ -121,7 +122,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       if (errorTo == null) {
         Throwable t = message.get(Throwable.class, MessageParts.Throwable);
-        GWT.getUncaughtExceptionHandler().onUncaughtException(t);
+        Optional.ofNullable(GWT.getUncaughtExceptionHandler())
+                .ifPresent(h -> h.onUncaughtException(t));
 
         if (!uncaughtExceptionHandlers.isEmpty()) {
           for (UncaughtExceptionHandler handler : uncaughtExceptionHandlers) {
@@ -281,7 +283,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private Timer initialConnectTimer;
 
-  private static final Logger logger = LoggerFactory.getLogger(ClientMessageBusImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ClientMessageBus.class);
 
   public ClientMessageBusImpl() {
     setBusToInitializableState();
@@ -672,8 +674,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           callback.callback(message);
         }
         catch (Exception e) {
-          managementConsole
-              .displayError("receiver '" + subject + "' threw an exception:\n\t" + e.getMessage(), decodeCommandMessage(message), e);
+          handleCallbackError(message, e);
         }
       }
     };
@@ -775,8 +776,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public void send(final Message message) {
     message.setResource(RequestDispatcher.class.getName(), BusToolsCli.getRequestDispatcherProvider())
         .setResource("Session", BusToolsCli.getClientSession()).commit();
-
-  //  LogUtil.log("[bus] send(" + message.getParts() + ")");
+    logger.debug("send({})", message.getParts());
 
     try {
       boolean deferred = false;
@@ -790,7 +790,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             deferred = true;
           }
           else if (getState() != BusState.CONNECTED) {
-          //  LogUtil.log("[bus] deferred: " + message);
+            logger.debug("deferred: {}", message);
             deferredMessages.add(message);
             deferred = true;
           }
@@ -799,7 +799,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         boolean routedToRemote = false;
 
         if (!localOnly && remotes.containsKey(subject)) {
-        //  LogUtil.log("[bus] sent to remote: " + message);
+          logger.debug("sent to remote: {}", message);
           remotes.get(subject).callback(message);
           routedToRemote = true;
         }
@@ -820,10 +820,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
     catch (RuntimeException e) {
-      boolean defaultErrorHandling = callErrorHandler(message, e);
-
-      if (defaultErrorHandling)
-        throw e;
+      callErrorHandler(message, e);
     }
   }
 
@@ -847,16 +844,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     if (defaultErrorHandling) {
-      managementConsole.displayError(t.getMessage(), "none", t);
+      DefaultErrorCallback.INSTANCE.error(message, t);
     }
 
     return defaultErrorHandling;
   }
 
   public void encodeAndTransmit(final Message message) {
-  //  LogUtil.log("[bus] encodeAndTransmit(" + message.getParts() + ")");
+    logger.debug("encodeAndTransmit({})", message.getParts());
     if (getState() == BusState.LOCAL_ONLY) {
-    //  LogUtil.log("[bus] encodeAndTransmit(" + message.getParts() + ") NOT ROUTED - LOCAL ONLY");
+      logger.debug("encodeAndTransmit({}) NOT ROUTED - LOCAL ONLY", message.getParts());
       return;
     }
 
@@ -983,6 +980,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return transportError.isStopDefaultErrorHandler();
   }
 
+  private void handleCallbackError(final Message message, final Throwable t) {
+    boolean defaultErrorHandling = true;
+    if (message.getErrorCallback() != null) {
+      try {
+        defaultErrorHandling = message.getErrorCallback().error(message, t);
+      }
+      catch (Throwable secondaryError) {
+        logger.error("Encountered an error while calling error callback for message to " + message.getSubject(), secondaryError);
+      }
+    }
+
+    if (defaultErrorHandling) {
+      DefaultErrorCallback.INSTANCE.error(message, t);
+    }
+  }
+
   private void loadRpcProxies() {
     RpcProxyLoader proxyLoader = ((RpcProxyLoader) GWT.create(RpcProxyLoader.class));
     proxyLoader.loadProxies(ClientMessageBusImpl.this);
@@ -1010,18 +1023,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void addUnsubscribeListener(final UnsubscribeListener listener) {
     this.onUnsubscribeHooks.add(listener);
-  }
-
-  private static String decodeCommandMessage(final Message msg) {
-    final StringBuilder decode = new StringBuilder(
-        "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
-
-    for (final Map.Entry<String, Object> entry : msg.getParts().entrySet()) {
-      decode.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue())
-          .append("</td></tr>");
-    }
-
-    return decode.append("</tbody></table>").toString();
   }
 
   /**
