@@ -417,6 +417,9 @@ public class IOCProcessor {
                     .returnValue()).finish()
       .publicOverridesMethod("getName")
             .append(Stmt.loadLiteral(getBeanName(injectable)).returnValue())
+            .finish()
+      .publicOverridesMethod("getFactoryName")
+            .append(Stmt.loadLiteral(injectable.getFactoryName()).returnValue())
             .finish();
 
     return jsTypeProvider.finish();

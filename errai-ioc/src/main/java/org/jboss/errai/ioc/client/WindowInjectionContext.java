@@ -28,7 +28,7 @@ import jsinterop.annotations.JsType;
 
 /**
  * Client-side global context for sharing bean definitions across different scripts.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -84,15 +84,10 @@ public class WindowInjectionContext {
     }
   }
 
-  public JsArray<?> getBeans(final String name) {
+  public JsArray<JsTypeProvider<?>> getProviders(final String name) {
     final List<JsTypeProvider<?>> providers = beanProviders.get(name);
-    final Object[] retVal = new Object[providers.size()];
 
-    for (int i = 0; i < providers.size(); i++) {
-      retVal[i] = providers.get(i).getInstance();
-    }
-
-    return new JsArray<>(retVal);
+    return new JsArray<>(providers.toArray(new JsTypeProvider<?>[providers.size()]));
   }
 
 }

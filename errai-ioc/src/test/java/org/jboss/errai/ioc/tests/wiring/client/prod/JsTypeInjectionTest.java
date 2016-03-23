@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.prod;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -70,6 +71,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       public String getName() {
         return null;
       }
+
+      @Override
+      public String getFactoryName() {
+        return null;
+      }
     });
     windowInjContext.addBeanProvider(MultipleImplementationsJsType.class.getName(), new JsTypeProvider<Object>() {
       @Override
@@ -79,6 +85,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
       @Override
       public String getName() {
+        return null;
+      }
+
+      @Override
+      public String getFactoryName() {
         return null;
       }
     });
@@ -108,7 +119,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
     assertNotSame(bean1, bean2);
   }
-  
+
   @SuppressWarnings("rawtypes")
   public void testNamedJsTypeInWindowContext() {
     final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
@@ -119,12 +130,25 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
     final Object bean2 = wndContext.getBean("olaf");
     assertNotNull("@JsType bean was not registered using its interface", bean2);
     assertSame(bean1, bean2);
-    
-    final Collection<SyncBeanDef> beans = IOC.getBeanManager().lookupBeans("olaf");
-    
+
+    final Collection<SyncBeanDef> beans = new ArrayList<>(IOC.getBeanManager().lookupBeans("olaf"));
+    beans.addAll(IOC.getBeanManager().lookupBeans(JsTypeNamedBean.class.getName()));
     for (final SyncBeanDef bean : beans) {
       assertEquals("olaf", bean.getName());
     }
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void testNoDuplicateJsTypeThroughBeanManager() {
+    final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+
+    final Object bean1 = wndContext.getBean(JsTypeNamedBean.class.getName());
+    assertNotNull("@JsType bean was not registered in window context", bean1);
+
+    final Collection<SyncBeanDef> beans = IOC.getBeanManager().lookupBeans(JsTypeNamedBean.class.getName());
+    assertEquals(1, beans.size());
+    assertEquals("olaf", beans.iterator().next().getName());
+    assertSame(bean1, beans.iterator().next().getInstance());
   }
 
   public void testConsumingOfUnimplementedJsType() throws Exception {
@@ -153,6 +177,10 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
           return null;
         }
 
+        @Override
+        public String getFactoryName() {
+          return null;
+        }
       });
 
       final SyncBeanDef<JsTypeConsumer> consumer = IOC.getBeanManager().lookupBean(JsTypeConsumer.class);
@@ -250,6 +278,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
       @Override
       public String getName() {
+        return null;
+      }
+
+      @Override
+      public String getFactoryName() {
         return null;
       }
     });

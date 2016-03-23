@@ -118,20 +118,24 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   @Override
   public Collection<SyncBeanDef> lookupBeans(final String name) {
     Assert.notNull(name);
-    
+
     final Collection<FactoryHandle> handles = handlesByName.get(name);
     final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByName.get(name);
-    final JsArray<?> jsBeans = WindowInjectionContext.createOrGet().getBeans(name);
+    final JsArray<JsTypeProvider<?>> jsProviders = WindowInjectionContext.createOrGet().getProviders(name);
 
-    final Collection beanDefs = new ArrayList<SyncBeanDef<Object>>(handles.size()+runtimeBeanDefs.size()+jsBeans.length());
+    final Set<String> beanDefFactoryNames = new HashSet<>();
+    final Collection beanDefs = new ArrayList<SyncBeanDef<Object>>(handles.size()+runtimeBeanDefs.size()+jsProviders.length());
     beanDefs.addAll(runtimeBeanDefs);
     for (final FactoryHandle handle : handles) {
       if (handle.isAvailableByLookup()) {
         beanDefs.add(new IOCBeanDefImplementation<Object>(handle, this.<Object>getType(name, handle, handle.getActualType())));
+        beanDefFactoryNames.add(handle.getFactoryName());
       }
     }
-    for (final Object jsBean : JsArray.iterable(jsBeans)) {
-      beanDefs.add(new JsTypeBeanDefImplementation(jsBean, name));
+    for (final JsTypeProvider<?> provider : JsArray.iterable(jsProviders)) {
+      if (provider.getFactoryName() == null || !beanDefFactoryNames.contains(provider.getFactoryName())) {
+        beanDefs.add(new JsTypeBeanDefImplementation(provider, name));
+      }
     }
 
     return beanDefs;
@@ -213,17 +217,17 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   // TODO Find way to properly get scope, qualifiers, and assignable types.
   @SuppressWarnings("rawtypes")
   private final class JsTypeBeanDefImplementation implements SyncBeanDef {
-    private final Object jsBean;
+    private final JsTypeProvider provider;
     private final String name;
 
-    private JsTypeBeanDefImplementation(final Object jsBean, final String name) {
-      this.jsBean = jsBean;
+    private JsTypeBeanDefImplementation(final JsTypeProvider provider, final String name) {
+      this.provider = provider;
       this.name = name;
     }
 
     @Override
     public boolean isAssignableTo(Class type) {
-      return type != null && type.getName().equals(name);
+      return Object.class.equals(type) || (type != null && type.getName().equals(name));
     }
 
     @Override
@@ -243,7 +247,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public Set getQualifiers() {
-      return Collections.emptySet();
+      return Collections.singleton(QualifierUtil.ANY_ANNOTATION);
     }
 
     @Override
@@ -253,7 +257,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public String getName() {
-      return name;
+      return provider.getName();
     }
 
     @Override
@@ -263,7 +267,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public Object getInstance() {
-      return jsBean;
+      return provider.getInstance();
     }
 
     @Override
@@ -273,7 +277,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public String toString() {
-      return "[JsTypeBeanDef]";
+      return "[JsTypeBeanDef: factoryName=" + provider.getFactoryName() + ", name=" + provider.getName() + "]";
     }
   }
 
