@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -31,6 +32,9 @@ import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeImpl;
 import org.jboss.errai.ioc.tests.wiring.client.res.ConsumesProducedJsType;
+import org.jboss.errai.ioc.tests.wiring.client.res.DuplicateInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.JsSubTypeWithDuplicateInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.JsSuperTypeWithDuplicateInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeConsumer;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentInterface;
@@ -292,6 +296,20 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       values.add(bean.getInstance().value());
     }
     assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), values);
+  }
+
+  public void testNoDuplicatesWithSuperTypeAliases() throws Exception {
+    final JsArray<JsTypeProvider<?>> providers = WindowInjectionContext.createOrGet()
+            .getProviders(DuplicateInterface.class.getName());
+
+    assertEquals(2, providers.length());
+    assertEquals(
+            new HashSet<>(Arrays.asList(
+                    JsSubTypeWithDuplicateInterface.class.getName(),
+                    JsSuperTypeWithDuplicateInterface.class.getName())),
+            new HashSet<>(Arrays.asList(
+                    providers.get(0).getInstance().getClass().getName(),
+                    providers.get(1).getInstance().getClass().getName())));
   }
 
   private void injectScriptThenRun(final Runnable test) {
