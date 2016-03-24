@@ -52,4 +52,5 @@ public interface Form extends HTMLElement {
 
   void submit();
   void reset();
+  boolean checkValidity();
 }
