@@ -16,9 +16,19 @@
 
 package org.jboss.errai.common.client.ui;
 
+import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsType;
 
 /**
+ * Like {@link com.google.gwt.user.client.ui.HasValue} but for native {@link JsType JsTypes}.
+ *
+ * When a native type implementing {@link HasValue} is bound with Errai Data-Binding, the {@link #getValue()} and
+ * {@link #setValue(Object)} will be used. (This is only supported in declarative data-binding because of limitations
+ * with native JS types.)
+ *
+ * It is possible to create a native {@link JsType} where {@link #getValue()} and {@link #setValue(Object)} are
+ * implemented as {@link JsOverlay} methods, providing an easy way to define value accessors for native types with Errai
+ * Data-Binding.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
