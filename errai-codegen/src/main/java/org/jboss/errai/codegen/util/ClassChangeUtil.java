@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -404,7 +403,10 @@ public class ClassChangeUtil {
       for (final Enumeration resEnum : enumerations) {
         while (resEnum.hasMoreElements()) {
           try {
-            final File file = getFileIfExists(((URL) resEnum.nextElement()).getFile());
+            String path = ((URL) resEnum.nextElement()).getFile();
+            path = path.substring(0, path.length() - JarFile.MANIFEST_NAME.length() - 1);
+
+            final File file = getFileIfExists(path);
             if (file != null) {
               cp.append(File.pathSeparator).append(file.getAbsolutePath());
             }
