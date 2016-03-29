@@ -16,13 +16,11 @@
 
 package org.jboss.errai.security.client.local;
 
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.*;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.security.client.local.res.Counter;
 import org.jboss.errai.security.client.local.res.CountingMessageCallback;
@@ -47,13 +45,10 @@ public class ServerBusSecurityInterceptorTest extends BusSecurityInterceptorTest
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     counter = 0;
-    errorSubscription = ErraiBus.get().subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-      @Override
-      public void callback(Message message) {
-        final Throwable throwable = message.get(Throwable.class, MessageParts.Throwable);
-        if (throwable instanceof org.jboss.errai.security.shared.exception.SecurityException) {
-          counter++;
-        }
+    errorSubscription = ErraiBus.get().subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, message -> {
+      final Throwable throwable = message.get(Throwable.class, MessageParts.Throwable);
+      if (throwable instanceof org.jboss.errai.security.shared.exception.SecurityException) {
+        counter++;
       }
     });
   }

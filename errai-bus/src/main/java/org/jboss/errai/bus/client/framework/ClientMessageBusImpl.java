@@ -120,7 +120,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void callback(final Message message) {
       final String errorTo = message.get(String.class, MessageParts.ErrorTo);
 
-      if (errorTo == null) {
+      if (errorTo == null || DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(errorTo)) {
         Throwable t = message.get(Throwable.class, MessageParts.Throwable);
         Optional.ofNullable(GWT.getUncaughtExceptionHandler())
                 .ifPresent(h -> h.onUncaughtException(t));
