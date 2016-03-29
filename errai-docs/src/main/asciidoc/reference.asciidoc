@@ -9971,6 +9971,63 @@ Here are the steps you'll need to take to get your project running after you upd
 
 Starting from Errai 3.2.0.Final, Errai Security only supports Keycloak 1.2.0.Final and higher. Errai Security is no longer compatible with earlier versions of Keycloak. 
 
+=== Upgrading to Errai 4.0 from 3.2
+
+Here are the steps you'll need to take to get your project running after you update:
+
+* Rename dependencies on `errai-weld-integration` to `errai-cdi-server`.
+
+* Upgrade to GWT 2.8, the supported GWT version for Errai 4.0.
+
+* Fix ambigious dependencies on pseudo-dependent beans. For example in the past the following code would correctly compile and execute in Errai:
++
+[source,java]
+---------------
+public class SuperType {
+}
+---------------
++
+[source,java]
+---------------
+public class SubType extends SuperType {
+}
+---------------
++
+[source,java]
+---------------
+public class Usage {
+  @Inject
+  private SuperType bean;
+}
+---------------
++
+In Errai 4.0 this is ambiguous because both the `SubType` and `SuperType` classes satisfy this injection site, as is the case in CDI. Some ways to fix this problem:
+
+** Make the base class abstract or @Alternative if you are not also using it.
+** Use different qualifiers on each type (or at least make only one type @Default).
+
+* Make any `@ApplicationScoped` or `@Singleton` beans proxiable. To be proxiable a bean class must:
+** Be non-final.
+** Have a public, no-argument constructor.
+
+* Remove package-private methods from `@ApplicationScoped` and `@Singleton` beans. Because these beans are proxied, the container must be able to override any non-private methods. Private methods are fine as they do not require proxying.
+
+* Explicitly enable any `@Alternative` beans used by your application in ErraiApp.properties.
+
+* Add explicit scopes to beans that are only looked up through the bean manager. If a type is not injected anywhere and does not have an explicit scope, it will not be available for lookup by the bean manager at runtime.
+
+* Replace usages of `@TestMock` with `@Alternative`. Whenever this is done, you will also have to explicitly activate the bean in the ErraiApp.properties for your test.
+
+* Remove usages of the `@New` qualifier. This has been removed from Errai and deprecated in CDI. Instead, consider making your bean `@Dependent` scoped.
+
+* Remove injection sites of `@LoadAsync` inside types that are no async. In Errai 4.0, it is only possible to inject async types into eachother.
+
+* Check your usages of the bean manager. There have been some changes to the `SyncBeanManager` and `SyncBeanDef` interfaces (and their async counter-parts).
+
+* Add an explicit converter for `@Bound` fileds where there is conversion between `java.util.Date` and `String`.
+
+* Remove any usage of the `@StyleDescriptor`. Plain CSS files can be declared in Java code via the `@Templated` annotation. Errai no longer provides annotations for using LESS.
+
 [[sid-5833087]]
 
 == Downloads
