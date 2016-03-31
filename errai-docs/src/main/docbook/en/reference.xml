@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2015-10-27</date>
+    <date>2016-03-30</date>
     
     
     
@@ -704,7 +704,7 @@ public class App {
 <title>Scopes</title>
 <simpara>Scopes, put simply, are the context within which beans live. Some scopes are short-lived and some are long-lived. For instance, there are beans which you may only want to create during a request, and beans which you want to live for as long as the application is running.</simpara>
 <simpara>It turns out that CDI includes a set of default scopes which represent these very things.</simpara>
-<simpara>We&#8217;ll start by taking a look at the <emphasis>application scope</emphasis>, which is lovingly represented by the annotation <literal><phrase role="code">@ApplicationScoped</phrase></literal>. An application-scoped bean is a bean which will live for the entire duration of the application. In this sense, it is essentially like a singleton. And it&#8217;s generally okay to think of it in that way.</simpara>
+<simpara>We&#8217;ll start by taking a look at the <emphasis>application scope</emphasis>, which is conveniently represented by the annotation <literal><phrase role="code">@ApplicationScoped</phrase></literal>. An application-scoped bean is a lazily-instantiated bean which will live for the entire duration of the application. In this sense, it is essentially like a singleton. And it&#8217;s generally okay to think of it in that way.</simpara>
 <simpara>So let&#8217;s declare an application-scoped bean:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class Bar {
@@ -712,7 +712,6 @@ public class Bar {
     return "Mr. Bar";
   }
 }</programlisting>
-<simpara>That was <emphasis>almost</emphasis> as easy as making the last bean. The difference between this bean and the last, is <literal><phrase role="code">Bar</phrase></literal> will actually be instantiated by the container automatically, and <literal><phrase role="code">Foo</phrase></literal> will not.</simpara>
 <simpara>So what can we do with <literal><phrase role="code">Foo</phrase></literal>? Well, let&#8217;s go ahead and get familiar with dependency injection, shall we?</simpara>
 <programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class Bar {
@@ -753,8 +752,7 @@ public class Bar {
 <title>EntryPoints</title>
 <simpara>Now that we&#8217;re getting the gist of how dependency injection works, let&#8217;s go back to our sample project.</simpara>
 <simpara>In the <literal><phrase role="code">App</phrase></literal> class that was created you may have noticed that the bean&#8217;s scope is <literal><phrase role="code">@EntryPoint</phrase></literal>.</simpara>
-<simpara>The <literal><phrase role="code">@EntryPoint</phrase></literal> annotation is an annotation which provides a an analogue to the GWT EntryPoint concept within the context of CDI in Errai. Basically you want to think of <literal><phrase role="code">@EntryPoint</phrase></literal> beans as the Errai CDI-equalivalent of <literal><phrase role="code">main()</phrase></literal> methods. But as of Errai 2.2., that might actually be going a little far. In fact, you might be asking what is the real difference between <literal><phrase role="code">@ApplicationScoped</phrase></literal> and <literal><phrase role="code">@EntryPoint</phrase></literal> in practice. The short answer is: nothing.</simpara>
-<simpara>When Errai IOC, the technology which powers Errai&#8217;s client-side CDI, was first built, it lacked the concept of scopes. To create entry point objects into the application which would automatically run, this annotation was added.</simpara>
+<simpara>The <literal><phrase role="code">@EntryPoint</phrase></literal> annotation is an annotation which provides a an analogue to the GWT EntryPoint concept within the context of CDI in Errai. Basically you want to think of <literal><phrase role="code">@EntryPoint</phrase></literal> beans as the Errai CDI-equalivalent of <literal><phrase role="code">main()</phrase></literal> methods. But as of Errai 2.2., that might actually be going a little far. In fact, you might be asking what is the real difference between <literal><phrase role="code">@ApplicationScoped</phrase></literal> and <literal><phrase role="code">@EntryPoint</phrase></literal> in practice. The answer is that beans annotated with <literal><phrase role="code">@EntryPoint</phrase></literal> are eagerly instantiated while those annotated with <literal><phrase role="code">@ApplicationScoped</phrase></literal> are created when accessed. This makes <literal><phrase role="code">@EntryPoint</phrase></literal> useful for bootstrapping your application and <literal><phrase role="code">@ApplicationScoped</phrase></literal> useful for creating client-side services.</simpara>
 <simpara>If you&#8217;re not convinced, try running this example with the <literal>mvn clean gwt:run</literal> command (described <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">above</link>).</simpara>
 <note>
 <title>Launching maven the first time</title>
@@ -1955,10 +1953,18 @@ public class SignupServiceShadow implements SignupService {
     System.out.println(this.timeService.getTime());
   }
 }</programlisting>
-<simpara>In order to inject <literal><phrase role="code">TimeService</phrase></literal>, you must annotate it with <literal><phrase role="code">@ApplicationScoped</phrase></literal> or the Errai DI container will not acknowledge the type as a bean.</simpara>
+<simpara>Below is an example of an <literal><phrase role="code">@ApplicationScoped TimeService</phrase></literal>, meaning a single instance of <literal><phrase role="code">TimeService</phrase></literal> would be provided by the container for all injection sites.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
 public class TimeService {
 }</programlisting>
+<simpara>We could also annotate the type <literal><phrase role="code">@Dependent</phrase></literal> so that every injection site has its own unique instance.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Dependent
+public class TimeService {
+}</programlisting>
+<note>
+<title>Implicitly Dependent Beans</title>
+<simpara>Types lacking explicit scopes may also be injected, in which case they will be implicitly <literal><phrase role="code">@Dependent</phrase></literal>.</simpara>
+</note>
 <tip>
 <title>Best Practices</title>
 <simpara>Although field injection results in less code, a major disadvantage is that you cannot create immutable classes using the pattern, since the container must first call the default, no-argument constructor, and then iterate through its injection tasks, which leaves the potential albeit remote that the object could be left in an partially or improperly initialized state. The advantage of constructor injection is that fields can be immutable (final), and invariance rules applied at construction time, leading to earlier failures, and the guarantee of consistent state.</simpara>
@@ -2340,8 +2346,6 @@ IOCBeanDef&lt;SimpleBean&gt; bean = beanManager.lookupBean(SimpleBean.class, qua
 </section>
 </section>
 <section id="sid-22872133">
-<title>Alternatives and Mocks</title>
-<section id="sid-22872133_AlternativesandMocks-Alternatives">
 <title>Alternatives</title>
 <simpara>It may be desirable to have multiple matching dependencies for a given injection point with the ability to specify which implementation to use at runtime. For instance, you may have different versions of your application which target different browsers or capabilities of the browser. Using alternatives allows you to share common interfaces among your beans, while still using dependency injection, by exporting consideration of what implementation to use to the container&#8217;s configuration.</simpara>
 <simpara>Consider the following example:</simpara>
@@ -2369,37 +2373,6 @@ public class MyApp {
                                org.foo.HTML5Orientation \
                                org.foo.MobileStorage</programlisting>
 <simpara>You can only have one enabled alternative for a matching set of alternatives, otherwise you will get ambiguous resolution errors from the container.</simpara>
-</section>
-<section id="sid-22872133_AlternativesandMocks-TestMocks">
-<title>Test Mocks</title>
-<simpara>Similar to alternatives, but specifically designed for testing scenarios, you can replace beans with mocks at runtime for the purposes of running unit tests. This is accomplished simply by annotating a bean with the <literal><phrase role="code">org.jboss.errai.ioc.client.api.TestMock</phrase></literal> annotation. Doing so will prioritize consideration of the bean over any other matching beans while running unit tests.</simpara>
-<simpara>Consider the following:</simpara>
-<programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
-public class UserManagementImpl implements UserManagement {
-  public List&lt;User&gt; listUsers() {
-     // do user listy things!
-  }
-}</programlisting>
-<simpara>You can specify a mock implementation of this class by implementing its common parent type (<literal><phrase role="code">UserManagement</phrase></literal>) and annotating that class with the <literal><phrase role="code">@TestMock</phrase></literal> annotation inside your test package like so:</simpara>
-<programlisting language="java" linenumbering="unnumbered">@TestMock @ApplicationScoped
-public class MockUserManagementImpl implements UserManagement {
-  public List&lt;User&gt; listUsers() {
-     // return only a test user.
-     return Collections.singletonList(TestUser.INSTANCE);
-  }
-}</programlisting>
-<simpara>In this case, the container will replace the <literal><phrase role="code">UserManagementImpl</phrase></literal> with the <literal><phrase role="code">MockUserManagementImpl</phrase></literal> automatically when running the unit tests.</simpara>
-<simpara>The <literal><phrase role="code">@TestMock</phrase></literal> annotation can also be used to specify alternative providers during test execution. For example, it can be used to mock a <literal><phrase role="code">Caller&lt;T&gt;</phrase></literal>. <literal><phrase role="code">Callers</phrase></literal> are used to invoke RPC or JAX-RS endpoints. During tests you might want to replace theses callers with mock implementations. For details on providers see <link linkend="sid-5931407">Container Wiring</link>.</simpara>
-<programlisting language="java" linenumbering="unnumbered">@TestMock @IOCProvider
-public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&lt;Caller&lt;HappyService&gt;&gt; {
-
-  @Override
-  public Caller&lt;HappyService&gt; provide(Class&lt;?&gt;[] typeargs, Annotation[] qualifiers) {
-    return new Caller&lt;HappyService&gt;() {
-      ...
-    }
-}</programlisting>
-</section>
 </section>
 <section id="sid-22872238">
 <title>Bean Lifecycle</title>
@@ -2493,7 +2466,7 @@ public class SimpleBean {
 <title>Manual Setup</title>
 <simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add Errai CDI to your project.</simpara>
 </note>
-<simpara>CDI (Contexts and Dependency Injection) is the Jave EE standard (JSR-299) for handling dependency injection. In addition to dependency injection, the standard encompasses component lifecycle, application configuration, call-interception and a decoupled, type-safe eventing specification.</simpara>
+<simpara>CDI (Contexts and Dependency Injection) is the Java EE standard (JSR-299) for handling dependency injection. In addition to dependency injection, the standard encompasses component lifecycle, application configuration, call-interception and a decoupled, type-safe eventing specification.</simpara>
 <simpara>The Errai CDI extension implements a subset of the specification for use inside of client-side applications within Errai, as well as additional capabilities such as distributed eventing.</simpara>
 <simpara>Errai CDI does not currently implement all life cycles specified in JSR-299 or interceptors. These deficiencies may be addressed in future versions.</simpara>
 <important>
@@ -4721,7 +4694,7 @@ their respective databases for all entities reachable from the given query resul
 </chapter>
 <chapter id="sid-51282340">
 <title>Data Binding</title>
-<simpara>Errai&#8217;s data binding module provides the ability to bind model objects to UI fields/widgets. The bound properties of the model and the UI components will automatically be kept in sync for as long as they are bound. So, there is no need to write code for UI updates in response to model changes and no need to register listeners to update the model in response to UI changes.</simpara>
+<simpara>Errai&#8217;s data binding module provides the ability to bind model objects to UI components. The bound properties of the model and the UI components will automatically be kept in sync for as long as they are bound. With Errai Data Binding there is no need to write code for UI updates in response to model changes and no need to register listeners to update the model in response to UI changes.</simpara>
 <section id="sid-51282340_DataBinding-GettingStarted">
 <title>Getting Started</title>
 <simpara>The data binding module is directly integrated with <link linkend="sid-51806600">Errai UI</link> and <link linkend="sid-54493688">Errai JPA</link> but can also be used as a standalone project in any GWT client application:</simpara>
@@ -4852,7 +4825,7 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
 </section>
 <section id="sid-51282340_DataBinding-DeclarativeBinding">
 <title>Declarative Binding</title>
-<simpara>Programmatic binding as described above (see <link linkend="sid-51282340_DataBinding-CreatingBindings">Creating Bindings</link>) can be tedious when working with UI components that contain a large number of input fields. Errai provides an annotation-driven binding API that can be used to create bindings automatically which cuts a lot of boilerplate code. The declarative API will work in any <link linkend="sid-5931402">Errai IOC</link> managed bean (including <link linkend="sid-51806600">Errai UI</link> templates). Simply inject a data binder or model object and declare the bindings using <literal><phrase role="code">@Bound</phrase></literal>.</simpara>
+<simpara>Programmatic binding as described above (see <link linkend="sid-51282340_DataBinding-CreatingBindings">Creating Bindings</link>) can be tedious when working with UI components that contain a large number of input fields. Errai provides an annotation-driven binding API that can be used to create bindings automatically which cuts a lot of boilerplate code. Additionally the declarative API also supports binding properties to native jsinterop types or <literal><phrase role="code">JavaScriptObjects</phrase></literal> that wrap DOM elements. The declarative API will work in any <link linkend="sid-5931402">Errai IOC</link> managed bean (including <link linkend="sid-51806600">Errai UI</link> templates). Simply inject a data binder or model object and declare the bindings using <literal><phrase role="code">@Bound</phrase></literal>.</simpara>
 <simpara>Here is a simple example using an injected model object provided by the <literal><phrase role="code">@Model</phrase></literal> annotation (field injection is used here, but constructor and method injection are supported as well):</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Dependent
 public class CustomerView {
@@ -4860,7 +4833,7 @@ public class CustomerView {
   private Customer customer;
 
   @Inject @Bound
-  private TextBox name;
+  private InputElement name;
 
   @Bound
   private Label id = new Label();
@@ -4874,14 +4847,14 @@ public class CustomerView {
   private DataBinder&lt;Customer&gt; customerBinder;
 
   @Inject @Bound
-  private TextBox name;
+  private InputElement name;
 
   @Bound
   private Label id = new Label();
 
   ...
 }</programlisting>
-<simpara>In both examples above an instance of the <literal><phrase role="code">Customer</phrase></literal> model is automatically bound to the corresponding UI widgets based on matching field names. The model object and the UI fields will automatically be kept in sync. The widgets are inferred from all enclosing fields and methods annotated with <literal><phrase role="code">@Bound</phrase></literal> of the class that defines the <literal><phrase role="code">@AutoBound DataBinder</phrase></literal> or <literal><phrase role="code">@Model</phrase></literal> and all its super classes.</simpara>
+<simpara>In both examples above an instance of the <literal><phrase role="code">Customer</phrase></literal> model is automatically bound to the corresponding UI components based on matching field names. The model object and the UI fields will automatically be kept in sync. UI components from all enclosing fields and methods annotated with <literal><phrase role="code">@Bound</phrase></literal>, of the class that defines the <literal><phrase role="code">@AutoBound DataBinder</phrase></literal> or <literal><phrase role="code">@Model</phrase></literal> and all its super classes, are used.</simpara>
 <section id="sid-51282340_DataBinding-Default%2CSimple%2CandChainedPropertyBindings">
 <title>Default, Simple, and Chained Property Bindings</title>
 <simpara>By default, bindings are determined by matching field names to property names on the model object. In the examples above, the field <literal><phrase role="code">name</phrase></literal> was automatically bound to the JavaBeans property <literal><phrase role="code">name</phrase></literal> of the model (<literal><phrase role="code">user</phrase></literal> object). If the field name does not match the model property name, you can use the <literal><phrase role="code">property</phrase></literal> attribute of the <literal><phrase role="code">@Bound</phrase></literal> annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example, <literal><phrase role="code">user.address.streetName</phrase></literal>). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.</simpara>
@@ -5034,7 +5007,7 @@ errai.validation.blacklist = some.fully.qualified.ClassName \
 </chapter>
 <chapter id="sid-51806600">
 <title>Errai UI</title>
-<simpara>One of the primary complaints of GWT to date has been that it is difficult to use "pure HTML" when building and skinning widgets. Inevitably one must turn to Java-based configuration in order to finish the job. Errai, however, strives to remove the need for Java styling. HTML template files are placed in the project source tree, and referenced from custom "Composite components" (Errai UI Widgets) in Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency injection is supported in all custom components. Errai UI provides rapid prototyping and HTML5 templating for GWT.</simpara>
+<simpara>One of the primary complaints of GWT to date has been that it is difficult to use "pure HTML" when building and skinning components. Inevitably one must turn to Java-based configuration in order to finish the job. In contrast, Errai strives to remove the need for Java styling. HTML template files are placed in the project source tree and referenced from custom Errai UI components in Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency injection is supported in all custom components. Errai UI provides rapid prototyping and HTML5 templating for GWT.</simpara>
 <section id="sid-51806600_ErraiUI-Getstarted">
 <title>Get started</title>
 <simpara>The Errai UI module is directly integrated with <link linkend="sid-51282340">Data Binding</link> and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using <link linkend="sid-19398999">Errai CDI&#8217;s @Inject</link> to instantiate your widgets:</simpara>
@@ -5048,10 +5021,19 @@ errai.validation.blacklist = some.fully.qualified.ClassName \
 </note>
 </section>
 <section id="sid-51806600_ErraiUI-UseErraiUICompositecomponents">
-<title>Use Errai UI Composite components</title>
-<simpara>Before explaining how to create Errai UI components, it should be noted that these components behave no differently from any other GWT Widget once built. The primary difference is in A) their construction, and B) their instantiation. As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI, you should always <literal><phrase role="code">@Inject</phrase></literal> references to your Composite components.</simpara>
+<title>Use Errai UI Components</title>
+<simpara>There are two kinds of UI components you can build with Errai UI: composite components and non-composite components. Composite components extends the <literal><phrase role="code">com.google.gwt.user.client.ui.Composite</phrase></literal> class, making the components widgets. Non-composite components do not require extending any base class and can be used without widgets.</simpara>
+<section id="_composite_components">
+<title>Composite Components</title>
+<warning>
+<title>Widget-based Components</title>
+<simpara>Since Errai 4.0, there is no longer a required base class for Errai UI components. In fact, extending <literal><phrase role="code">Composite</phrase></literal> is deprecated.</simpara>
+</warning>
+<simpara>Composite components behave no differently from any other GWT Widget once built. The primary difference is in A) their construction, and B) their instantiation. As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI, you should always <literal><phrase role="code">@Inject</phrase></literal> references to your Composite components.</simpara>
+</section>
 <section id="sid-51806600_ErraiUI-Injectasingleinstance">
-<title>Inject a single instance</title>
+<title>Inject a single composite component instance</title>
+<simpara>In this example we inject a single composite component and add it to the <literal><phrase role="code">RootPanel</phrase></literal>.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@EntryPoint
 public class Application {
    @Inject
@@ -5064,8 +5046,27 @@ public class Application {
    }
 }</programlisting>
 </section>
+<section id="_inject_a_single_non_composite_component_instance">
+<title>Inject a single non-composite component instance</title>
+<simpara>In this example we inject a single non-composite component and add it to the DOM.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@EntryPoint
+public class Application {
+   @Inject
+   private NonComposite comp;
+
+   @PostConstruct
+   public void init() {
+     Document.get().getBody().appendChild(comp.getRootElement());
+   }
+}</programlisting>
+<note>
+<title>Manually attaching non-composite components</title>
+<simpara>In order to manually attach a non-composite component to the DOM it is necessary access the root element of the template. How this is done will be demonstrated later on when we discuss using <literal><phrase role="code">@DataFields</phrase></literal>.</simpara>
+</note>
+</section>
 <section id="sid-51806600_ErraiUI-Injectmultipleinstances%28foriteration%29">
 <title>Inject multiple instances (for iteration)</title>
+<simpara>Here we create and add many composite components to the <literal><phrase role="code">RootPanel</phrase></literal> using an injected <literal><phrase role="code">Instance</phrase></literal>.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@EntryPoint
 public class Application {
    private String[] colors = new String[]{"Blue", "Yellow", "Red"};
@@ -5085,12 +5086,18 @@ public class Application {
 </section>
 </section>
 <section id="sid-51806600_ErraiUI-Createa@TemplatedCompositecomponent">
-<title>Create a @Templated Composite component</title>
+<title>Create a @Templated Component</title>
 <simpara>Custom components in Errai UI are single classes extending from <literal><phrase role="code">com.google.gwt.user.client.ui.Composite</phrase></literal>, and must be annotated with @Templated.</simpara>
 <section id="sid-51806600_ErraiUI-Basiccomponent">
 <title>Basic component</title>
+<simpara>Here is a basic composite component.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class LoginForm extends Composite {
+public class LoginFormWidget extends Composite {
+   /* looks for LoginForm.html in LoginForm's package */
+}</programlisting>
+<simpara>Here is the same component again as a non-composite.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated
+public class LoginForm {
    /* looks for LoginForm.html in LoginForm's package */
 }</programlisting>
 </section>
@@ -5098,12 +5105,12 @@ public class LoginForm extends Composite {
 <title>Custom template names</title>
 <simpara>With default values, @Templated informs Errai UI to look in the current package for a parallel <literal><phrase role="code">".html"</phrase></literal> template next to the Composite component Class; however, the template name may be overridden by passing a String into the @Templated annotation, like so:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html")
-public class LoginForm extends Composite {
+public class LoginForm {
    /* Looks for my-template.html in LoginForm's package */
 }</programlisting>
 <simpara>Fully qualified template paths are also supported, but must begin with a leading <emphasis>/</emphasis>:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("/org/example/my-template.html")
-public class LoginForm extends Composite {
+public class LoginForm {
    /* Looks for my-template.html in package org.example */
 }</programlisting>
 </section>
@@ -5111,12 +5118,12 @@ public class LoginForm extends Composite {
 <title>Template providers</title>
 <simpara>The previous examples specify template files at compile time, but it is possible to use templates provided at runtime using a <literal>TemplateProvider</literal>. These providers run asynchronously so that it is possible to fetch templates via HTTP requests. In fact Errai UI contains an implementation, <literal>ServerTemplateProvider</literal>, that fetches templates using the <literal>@Templated</literal> value as a url.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated(value="home.html", provider=ServerTemplateProvider.class)
-public class LoginForm extends Composite {
+public class LoginForm {
   /* Makes an HTTP request for the relative path "home.html" */
 }</programlisting>
 <simpara>Custom implementations can also be used.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated(provider=MyTemplateProvider.class)
-public class LoginForm extends Composite {
+public class LoginForm {
   /* Makes an HTTP request for the relative path "home.html" */
 }
 
@@ -5139,8 +5146,8 @@ public class MyTemplateProvider implements TemplateProvider {
 </section>
 <section id="sid-51806600_ErraiUI-CreateanHTMLtemplate">
 <title>Create an HTML template</title>
-<simpara>Templates in Errai UI may be designed either as an HTML snippet or as a full HTML document. You can even take an existing HTML page and use it as a template. With either approach, the <literal><phrase role="code">id</phrase></literal>, <literal><phrase role="code">class</phrase></literal>, and <literal><phrase role="code">data-field</phrase></literal> attributes in the template identify elements by name. These elements and their children are used in the Composite component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.</simpara>
-<simpara>We will begin by creating a simple HTML login form to accompany our <literal><phrase role="code">@Templated LoginForm</phrase></literal> composite component.</simpara>
+<simpara>Templates in Errai UI may be designed either as an HTML snippet or as a full HTML document. You can even take an existing HTML page and use it as a template. With either approach, the <literal><phrase role="code">id</phrase></literal>, <literal><phrase role="code">class</phrase></literal>, and <literal><phrase role="code">data-field</phrase></literal> attributes in the template identify elements by name. These elements and their children are used in the component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.</simpara>
+<simpara>We will begin by creating a simple HTML login form to accompany our <literal><phrase role="code">@Templated LoginForm</phrase></literal> component.</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;form&gt;
   &lt;legend&gt;Log in to your account&lt;/legend&gt;
 
@@ -5157,8 +5164,8 @@ public class MyTemplateProvider implements TemplateProvider {
 <title>Select a template from a larger HTML file</title>
 <simpara>Or as a full HTML document which may be more easily previewed during design without running the application; however, in this case we must also specify the location of our component&#8217;s root DOM Element using a <literal><phrase role="code">"data-field"</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attribute matching the value of the @Templated annotation. There is no limit to how many component classes may share a given HTML template.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html#login-form")
-public class LoginForm extends Composite {
-   /* Specifies that &lt;... id="login-form"&gt; be used as the root Element of this Widget */
+public class LoginForm {
+   /* Specifies that &lt;... id="login-form"&gt; be used as the root Element of this component */
 }</programlisting>
 <simpara>Notice the corresponding HTML <literal><phrase role="code">id</phrase></literal> attribute in the form Element below (we could have used <literal><phrase role="code">data-field</phrase></literal> or <literal><phrase role="code">class</phrase></literal> instead). Note that multiple components may use the same template provided that they specify a corresponding <literal><phrase role="code">data-field</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attribute. Also note that two or more components may share the same DOM elements; there is no conflict since components each receive a unique copy of the template DOM rooted at the designated element at runtime (or from the root element if a fragment is not specified.)</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;!DOCTYPE html&gt;
@@ -5190,22 +5197,27 @@ public class LoginForm extends Composite {
 &lt;/html&gt;</programlisting>
 <simpara>For example&#8217;s sake, the component below could also use the same template. All it needs to do is reference the template name, and specify a fragment.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html#theme-footer")
-public class Footer extends Composite {
+public class Footer {
    /* Specifies that &lt;... id="theme-footer"&gt; be used as the root Element of this Widget */
 }</programlisting>
 </section>
 </section>
 <section id="sid-51806600_ErraiUI-UseotherWidgetsinacompositecomponent">
-<title>Use other Widgets in a composite component</title>
-<simpara>Now that we have created the @Templated Composite component and an HTML template, we can start wiring in functionality and behavior; this is done by annotating fields and methods to replace specific sub-elements of the template DOM with other Widgets. We can even replace portions of the template with other Errai UI Widgets!</simpara>
+<title>Use other Widgets in a component</title>
+<simpara>Now that we have created the @Templated component and an HTML template, we can start wiring in functionality and behavior; this is done by annotating fields and methods to replace specific sub-elements of the template DOM with other Widgets. We can even replace portions of the template with other Errai UI components!</simpara>
 <section id="sid-51806600_ErraiUI-AnnotateWidgetsinthetemplatewith@DataField">
-<title>Annotate Widgets in the template with @DataField</title>
-<simpara>In order to composite Widgets into the template DOM, you annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a correspondingly named <literal><phrase role="code">data-field</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attribute. This informs Errai UI which element in the template the Widget should replace. All replacements happen while the @Templated Composite component is being constructed; thus, fields annotated with @DataField must either be <literal><phrase role="code">@Inject</phrase></literal>ed or provide their own Widget or Element instances in field initializers.</simpara>
-<programlisting language="java" linenumbering="unnumbered">@Templated
-public class LoginForm extends Composite {
-   // This element must be initialized manually because Element is not @Inject-able
+<title>Annotate Widgets or Elements in the template with @DataField</title>
+<simpara>In order to composite widgets or elements into the template DOM, you annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a correspondingly named <literal><phrase role="code">data-field</phrase></literal>, <literal><phrase role="code">id</phrase></literal>, or <literal><phrase role="code">class</phrase></literal> attribute. This informs Errai UI which element in the template the widget or element should replace. All replacements happen while the @Templated Composite component is being constructed; thus, fields annotated with @DataField must either be <literal><phrase role="code">@Inject</phrase></literal>ed or provide their own Widget or Element instances in field initializers.</simpara>
+<programlisting language="java" linenumbering="unnumbered">/*
+* Here the template file is implicitly LoginForm.html.
+* The root element has id, class, or data-field "form".
+*/
+@Templated("#form")
+public class LoginForm {
+   // This is the root element of the template, for adding this component to the DOM.
+   @Inject
    @DataField
-   private Element form = DOM.createForm();
+   private FormElement form;
 
    // If not otherwise specified, the name to match in the HTML template defaults
    // to the name of the field; in this case, the name would be "username"
@@ -5225,6 +5237,102 @@ public class LoginForm extends Composite {
 <important>
 <simpara>Note: Field, method, and constructor injection are all supported by @DataField.</simpara>
 </important>
+</section>
+<section id="_allowed_datafield_types">
+<title>Allowed DataField types</title>
+<simpara>The previous <literal><phrase role="code">LoginForm</phrase></literal> example uses <literal><phrase role="code">Widgets</phrase></literal> and a DOM element from gwt-user, but there are other types that can be used as <literal><phrase role="code">@DataFields</phrase></literal>. Here is a full list:</simpara>
+<orderedlist numeration="arabic">
+  
+    <listitem>
+      <simpara>Any <literal><phrase role="code">com.google.gwt.user.client.ui.Widget</phrase></literal> type.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Any <literal><phrase role="code">com.google.gwt.dom.client.Element</phrase></literal> type.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Any Errai UI component (composite or non-composite).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Any element interfaces from gwt-elemental.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Any native <literal><phrase role="code">JsType</phrase></literal> that is a wrapper for a DOM element.</simpara>
+      
+    </listitem>
+  
+</orderedlist>
+</section>
+<section id="_using_jstype_element_wrappers">
+<title>Using JsType element wrappers</title>
+<warning>
+<title>Jsinterop ahead</title>
+<simpara>This section assumes basic familiarity with jsinterop in GWT 2.8+.</simpara>
+</warning>
+<simpara>Since 4.0, Errai UI supports working with jsinterop wrappers of DOM elements. Additionally, Errai provides a concise way of allowing your custom jsinterop wrappers to be injected into components.</simpara>
+<section id="_loginform_with_a_jsinterop_element">
+<title>LoginForm with a jsinterop element</title>
+<simpara>Let&#8217;s redo our previous login form, but with a new jsinterop form element as the root. First we need our element wrapper.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@JsType(isNative = true)
+@Element("form")
+public interface NativeForm {
+  // Element methods and properties go here
+}</programlisting>
+<simpara>Here we have a defined a jsinterop interface that will be backed by a FormElement javascript object at runtime. The <literal><phrase role="code">org.jboss.errai.ui.shared.api.annotation.Element</phrase></literal> annotation tells the Errai DI container to call <literal>document.createElement("form")</literal> in javascript to satisfy injection sites for this type.</simpara>
+<simpara>Once you&#8217;ve defined your element wrapper, using it as a <literal><phrase role="code">@DataField</phrase></literal> works exactly as in previous examples.</simpara>
+<programlisting language="java" linenumbering="unnumbered">/*
+* Like the component from the previous example, but with a native element as its root.
+*/
+@Templated("#form")
+public class LoginForm {
+   // Now are root element is a native JsType
+   @Inject
+   @DataField
+   private NativeForm form;
+
+   @Inject
+   @DataField
+   private TextBox username;
+
+   @Inject
+   @DataField("pass")
+   private PasswordTextBox password;
+
+   @DataField
+   private Button submit = new Button();
+}</programlisting>
+</section>
+</section>
+<section id="_injecting_jstypes_and_elements_that_have_multiple_tag_names">
+<title>Injecting JsTypes and Elements that have multiple tag names</title>
+<simpara>In our previous examples injecting <literal><phrase role="code">Elements</phrase></literal> or native <literal><phrase role="code">JsTypes</phrase></literal>, we did so with types that had a single possible tag name. But consider the heading tags (h1, h2, &#8230;, h6). In gwt-user these are all represented by <literal><phrase role="code">HeadingElement</phrase></literal>. We might also wish to make our own <literal><phrase role="code">JsType</phrase></literal> wrapper that also represents these tags:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@JsType(isNative = true)
+@Element({ "h1", "h2", "h3", "h4", "h5", "h6" })
+public interface NativeHeading {
+  // Heading element methods and properties go here
+}</programlisting>
+<simpara>For both <literal><phrase role="code">Elements</phrase></literal> and native <literal><phrase role="code">JsTypes</phrase></literal> one can use the <literal><phrase role="code">javax.inject.Named</phrase></literal> annotation to specify a tag name at a injection site.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated
+public class Component {
+  // Injects a gwt-user HeadingElement with tag name "h1"
+  @Inject
+  @Named("h1")
+  @DataField
+  private HeadingElement h1;
+
+  // Injects a NativeHeading wrapper for an "h6" element
+  @Inject
+  @Named("h6")
+  @DataField
+  private NativeHeading h6;
+}</programlisting>
 </section>
 <section id="sid-51806600_ErraiUI-AddcorrespondingattributestotheHTMLtemplate">
 <title>Add corresponding attributes to the HTML template</title>
@@ -5284,7 +5392,7 @@ public class ErroneousTemplate extends Composite {
   &lt;button id="submit"&gt;Log in&lt;/button&gt;
   &lt;button&gt;Cancel&lt;/button&gt;
 &lt;/form&gt;</programlisting>
-<simpara>Now, when we run our application, we will be able to interact with these fields in our Widget.</simpara>
+<simpara>Now, when we run our application, we will be able to interact with these fields in our component.</simpara>
 </section>
 </section>
 <section id="sid-51806600_ErraiUI-HowHTMLtemplatesaremergedwithComponents">
@@ -5303,7 +5411,7 @@ public class ErroneousTemplate extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>Template element inner text and inner HTML are preserved when the given <literal><phrase role="code">@DataField Widget</phrase></literal> implements <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal></simpara>
+      <simpara>Template element inner text and inner HTML are preserved when the given <literal><phrase role="code">@DataField</phrase></literal> is a <literal><phrase role="code">Widget</phrase></literal> that implements <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal> or if it is a DOM element that has no children.</simpara>
       
     </listitem>
   
@@ -5342,7 +5450,7 @@ This text will be ignored.</programlisting>
 </section>
 <section id="sid-51806600_ErraiUI-Elementattributes%28templatewins%29">
 <title>Element attributes (template wins)</title>
-<simpara>When styling your templates, you should keep in mind that all attributes defined in the template file will take precedence over any preset attributes in your Widgets. This "attribute merge" occurs only when the components are instantiated; subsequent changes to any attributes after Widget construction will function normally. In the example we defined a Composite component that applied several styles to a child Widget in its constructor, but we can see from the output that the styles from the template have overridden them. If styles must be applied in Java, instead of the template, <literal><phrase role="code">@PostConstruct</phrase></literal> or other methods should be favored over constructors to apply styles to fully-constructed Composite components.</simpara>
+<simpara>When styling your templates, you should keep in mind that all attributes defined in the template file will take precedence over any preset attributes in your <literal><phrase role="code">@DataFields</phrase></literal>. This "attribute merge" occurs only when the components are instantiated; subsequent changes to any attributes after construction will function normally. In the example we defined a Composite component that applied several styles to a child Widget in its constructor, but we can see from the output that the styles from the template have overridden them. If styles must be applied in Java, instead of the template, <literal><phrase role="code">@PostConstruct</phrase></literal> or other methods should be favored over constructors to apply styles to fully-constructed components.</simpara>
 </section>
 <section id="sid-51806600_ErraiUI-DOMElements%28componentfieldwins%29">
 <title>DOM Elements (component field wins)</title>
@@ -5350,7 +5458,7 @@ This text will be ignored.</programlisting>
 </section>
 <section id="sid-51806600_ErraiUI-InnertextandinnerHTML%28preservedwhencomponentimplementsHasTextorHasHTML%29">
 <title>Inner text and inner HTML (preserved when component implements HasText or HasHTML)</title>
-<simpara>Additionally, because <literal><phrase role="code">Label</phrase></literal> implements both <literal><phrase role="code">HasText</phrase></literal> and <literal><phrase role="code">HasHTML</phrase></literal> (only one is required,) the contents of this &lt;span&gt; "field-1" Element in the template were preserved; however, this would not have been the case if the <literal><phrase role="code">@DataField</phrase></literal> specified for the element did not implement <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal>. In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a <literal><phrase role="code">@DataField</phrase></literal> reference, or ensure that the Widget being composited implements <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal>.</simpara>
+<simpara>Additionally, because <literal><phrase role="code">Label</phrase></literal> implements both <literal><phrase role="code">HasText</phrase></literal> and <literal><phrase role="code">HasHTML</phrase></literal> (only one is required,) the contents of this &lt;span&gt; "field-1" Element in the template were preserved; however, this would not have been the case if the <literal><phrase role="code">@DataField</phrase></literal> specified for the element did not implement <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal>. In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a <literal><phrase role="code">@DataField</phrase></literal> reference, or ensure that the UI component being composited implements <literal><phrase role="code">HasText</phrase></literal> or <literal><phrase role="code">HasHTML</phrase></literal> or is a a DOM element with no children.</simpara>
 </section>
 </section>
 <section id="sid-51806600_ErraiUI-Eventhandlers">
@@ -5411,6 +5519,10 @@ public class ElementHandlerComponent extends Composite {
      // do something
    }
 }</programlisting>
+<note>
+<title>Events with native JsTypes</title>
+<simpara>As with previous features, the <literal><phrase role="code">DivElement</phrase></literal> above could be replaced with a native <literal><phrase role="code">JsType</phrase></literal>.</simpara>
+</note>
 </section>
 <section id="sid-51806600_ErraiUI-NativeDOMeventsonElements">
 <title>Native DOM events on Elements</title>
@@ -5558,7 +5670,7 @@ public class LoginForm extends AbstractForm { <co id="CO1-1"/>
 <simpara>A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks require a significant amount of boilerplate code which can be alleviated by Errai. Errai&#8217;s <link linkend="sid-51282340">data binding module</link> provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when used together with Errai UI.</simpara>
 <simpara>In the following example, all <literal><phrase role="code">@DataFields</phrase></literal> annotated with <literal><phrase role="code">@Bound</phrase></literal> have their contents bound to properties of the data model (a <literal><phrase role="code">User</phrase></literal> object). The model object is injected and annotated with <literal><phrase role="code">@Model</phrase></literal>, which indicates automatic binding should be carried out. Alternatively, the model object could be provided by an injected <literal><phrase role="code">DataBinder</phrase></literal> instance annotated with <literal><phrase role="code">@AutoBound</phrase></literal>, see <link linkend="sid-51282340_DataBinding-DeclarativeBinding">Declarative Binding</link> for details.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class LoginForm extends Composite {
+public class LoginForm {
 
    @Inject
    @Model
@@ -5567,7 +5679,7 @@ public class LoginForm extends Composite {
    @Inject
    @Bound
    @DataField
-   private TextBox name;
+   private InputElement name;
 
    @Inject
    @Bound
@@ -5605,21 +5717,21 @@ public class User {
 }
 
 @Templated
-public class UserWidget extends Composite {
+public class UserComponent {
   @Inject @AutoBound DataBinder&lt;User&gt; user;
-  @Inject @Bound TextBox name;
+  @Inject @Bound InputElement name;
   @Inject @Bound(property="dob") DatePicker dateOfBirth;
   @Inject @Bound(property="address.city") TextBox city;
 }</programlisting>
-<simpara>In <literal><phrase role="code">UserWidget</phrase></literal> above, the <literal><phrase role="code">name</phrase></literal> text box is bound to <literal><phrase role="code">user.name</phrase></literal> using the default name matching; the <literal><phrase role="code">dateOfBirth</phrase></literal> date picker is bound to <literal><phrase role="code">user.dob</phrase></literal> using a simple property name mapping; finally, the <literal><phrase role="code">city</phrase></literal> text box is bound to <literal><phrase role="code">user.address.city</phrase></literal> using a property chain. Note that the <literal><phrase role="code">Address</phrase></literal> class is required to be <literal><phrase role="code">@Bindable</phrase></literal> in this case.</simpara>
+<simpara>In <literal><phrase role="code">UserComponent</phrase></literal> above, the <literal><phrase role="code">name</phrase></literal> input element is bound to <literal><phrase role="code">user.name</phrase></literal> using the default name matching; the <literal><phrase role="code">dateOfBirth</phrase></literal> date picker is bound to <literal><phrase role="code">user.dob</phrase></literal> using a simple property name mapping; finally, the <literal><phrase role="code">city</phrase></literal> text box is bound to <literal><phrase role="code">user.address.city</phrase></literal> using a property chain. Note that the <literal><phrase role="code">Address</phrase></literal> class is required to be <literal><phrase role="code">@Bindable</phrase></literal> in this case.</simpara>
 </section>
 <section id="sid-51806600_ErraiUI-BindingofLists">
 <title>Binding of Lists</title>
-<simpara>Often you will need to bind a list of model objects so that every object in the list is bound to a corresponding widget. This task can be accomplished using Errai UI&#8217;s <literal><phrase role="code">ListWidget</phrase></literal> class. Here&#8217;s an example of binding a list of users using the <literal><phrase role="code">UserWidget</phrase></literal> class from the previous example. First, we need to enhance <literal><phrase role="code">UserWidget</phrase></literal> to implement <literal><phrase role="code">HasModel</phrase></literal>.</simpara>
+<simpara>Often you will need to bind a list of model objects so that every object in the list is bound to a corresponding component. This task can be accomplished using Errai UI&#8217;s <literal><phrase role="code">ListWidget</phrase></literal> class. Here&#8217;s an example of binding a list of users using the <literal><phrase role="code">UserComponent</phrase></literal> class from the previous example. First, we need to enhance <literal><phrase role="code">UserComponent</phrase></literal> to implement <literal><phrase role="code">HasModel</phrase></literal>.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class UserWidget extends Composite implements HasModel&lt;User&gt; {
+public class UserWidget implements HasModel&lt;User&gt; {
   @Inject @AutoBound DataBinder&lt;User&gt; userBinder;
-  @Inject @Bound TextBox name;
+  @Inject @Bound InputElement name;
   @Inject @Bound(property="dob") DatePicker dateOfBirth;
   @Inject @Bound(property="address.city") TextBox city;
 
@@ -5631,11 +5743,11 @@ public class UserWidget extends Composite implements HasModel&lt;User&gt; {
     userBinder.setModel(user);
   }
 }</programlisting>
-<simpara>Now we can use <literal><phrase role="code">UserWidget</phrase></literal> to display items in a list.</simpara>
+<simpara>Now we can use <literal><phrase role="code">UserComponent</phrase></literal> to display items in a list.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class MyComposite extends Composite {
+public class MyComponent {
 
-  @Inject @DataField ListWidget&lt;User, UserWidget&gt; userListWidget;
+  @Inject @DataField ListWidget&lt;User, UserComponent&gt; userListWidget;
 
   @PostConstruct
   public void init() {
@@ -5643,7 +5755,7 @@ public class MyComposite extends Composite {
     userListWidget.setItems(users);
   }
 }</programlisting>
-<simpara>Calling <literal><phrase role="code">setItems</phrase></literal> on the <literal><phrase role="code">userListWidget</phrase></literal> causes an instance of <literal><phrase role="code">UserWidget</phrase></literal> to be displayed for each user in the list. The <literal><phrase role="code">UserWidget</phrase></literal> is then bound to the corresponding user object. By default, the widgets are arranged in a vertical panel. However, <literal><phrase role="code">ListWidget</phrase></literal> can also be subclassed to provide alternative behaviour. In the following example, we use a horizontal panel to display the widgets.</simpara>
+<simpara>Calling <literal><phrase role="code">setItems</phrase></literal> on the <literal><phrase role="code">userListWidget</phrase></literal> causes an instance of <literal><phrase role="code">UserComponent</phrase></literal> to be displayed for each user in the list. The <literal><phrase role="code">UserComponent</phrase></literal> is then bound to the corresponding user object. By default, the widgets are arranged in a vertical panel. However, <literal><phrase role="code">ListWidget</phrase></literal> can also be subclassed to provide alternative behaviour. In the following example, we use a horizontal panel to display the widgets.</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class UserListWidget extends ListWidget&lt;User, UserWidget&gt; {
 
   public UserList() {
@@ -5665,12 +5777,12 @@ public class MyComposite extends Composite {
 <title>Binding lists with @Bound</title>
 <simpara>An instance of <literal><phrase role="code">ListWidget</phrase></literal> can also participate in automatic bindings using <literal><phrase role="code">@Bound</phrase></literal>. In this case, <literal><phrase role="code">setItems</phrase></literal> never needs to be called manually. The bound list property and displayed items will automatically be kept in sync. In the example below a list of user roles is bound to a <literal><phrase role="code">ListWidget</phrase></literal> that displays and manages a <literal><phrase role="code">RoleWidget</phrase></literal> for each role in the list. Every change to the list returned by <literal><phrase role="code">user.getRoles()</phrase></literal> will now trigger a corresponding update in the UI.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class UserDetailView extends Composite {
+public class UserDetailView {
 
    @Inject
    @Bound
    @DataField
-   private TextBox name;
+   private InputElement name;
 
    @Inject
    @Bound
@@ -5701,23 +5813,26 @@ private TextBox date;</programlisting>
 </section>
 </section>
 <section id="sid-51806600_ErraiUI-NestCompositecomponents">
-<title>Nest Composite components</title>
-<simpara>Using Composite components to build up a hierarchy of widgets functions exactly the same as when building hierarchies of GWT widgets. The only distinction might be that with Errai UI, <literal><phrase role="code">@Inject</phrase></literal> is preferred to manual instantiation.</simpara>
+<title>Nest components</title>
+<simpara>Using components to build up a hierarchy of UI componenets functions exactly the same as when building hierarchies of GWT widgets or DOM elements. The only distinction might be that with Errai UI, <literal><phrase role="code">@Inject</phrase></literal> is preferred to manual instantiation.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class ComponentOne extends Composite {
+public class ComponentOne {
 
    @Inject
    @DataField("other-comp")
    private ComponentTwo two;
 }</programlisting>
+<note>
+<simpara>This example works whether <literal><phrase role="code">ComponentTwo</phrase></literal> is a composite or non-composite component.</simpara>
+</note>
 </section>
 <section id="sid-51806600_ErraiUI-ExtendCompositecomponents">
-<title>Extend Composite components</title>
-<simpara>Templating would not be complete without the ability to inherit from parent templates, and Errai UI also makes this possible using simple Java inheritance. The only additional requirement is that Composite components extending from a parent Composite component must also be annotated with @Templated, and the path to the template file must also be specified in the child component&#8217;s annotation. Child components may specify <literal><phrase role="code">@DataField</phrase></literal> references that were omitted in the parent class, and they may also override <literal><phrase role="code">@DataField</phrase></literal> references (by using the same <literal><phrase role="code">data-field</phrase></literal> name) that were already specified in the parent component.</simpara>
+<title>Extend components</title>
+<simpara>Templating would not be complete without the ability to inherit from parent templates, and Errai UI also makes this possible using simple Java inheritance. The only additional requirement is that components extending from a parent component must also be annotated with @Templated, and the path to the template file must also be specified in the child component&#8217;s annotation. Child components may specify <literal><phrase role="code">@DataField</phrase></literal> references that were omitted in the parent class, and they may also override <literal><phrase role="code">@DataField</phrase></literal> references (by using the same <literal><phrase role="code">data-field</phrase></literal> name) that were already specified in the parent component.</simpara>
 <section id="sid-51806600_ErraiUI-Template">
 <title>Template</title>
 <simpara>Extension templating is particularly useful for creating reusable page layouts with some shared content (navigation menus, side-bars, footers, etc.) where certain sections will be filled with unique content for each page that extends from the base template; this is commonly seen when combined with the MVP design pattern traditionally used in GWT applications.</simpara>
-<programlisting language="xml" linenumbering="unnumbered">&lt;div class="container"&gt;
+<programlisting language="html" linenumbering="unnumbered">&lt;div class="container"&gt;
    &lt;div id="header"&gt; Default header &lt;/div&gt;
    &lt;div id="content"&gt; Default content &lt;/div&gt;
    &lt;div id="footer"&gt; Default footer &lt;/div&gt;
@@ -5727,7 +5842,7 @@ public class ComponentOne extends Composite {
 <title>Parent component</title>
 <simpara>This component provides the common features of our page layout, including header and footer, but does not specify any content. The missing @DataField "content" will be provided by the individual page components extending from this parent component.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class PageLayout extends Composite {
+public class PageLayout {
 
    @Inject
    @DataField
@@ -5745,7 +5860,7 @@ public class PageLayout extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-Childcomponent">
 <title>Child component</title>
-<simpara>We are free to fill in the missing "content" @DataField with a Widget of our choosing. Note that it is not required to fill in all omitted @DataField references.</simpara>
+<simpara>We are free to fill in the missing "content" @DataField with a component of our choosing. Note that it is not required to fill in all omitted @DataField references.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("PageLayout.html")
 public class LoginLayout extends PageLayout {
 
@@ -5785,8 +5900,8 @@ public @interface Admin {
 <simpara>This defines <literal><phrase role="code">Admin</phrase></literal> as a stylebinding now we can use it like this:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@EntryPoint
 @Templated
-public class HelloWorldForm extends Composite {
-  @Inject @Admin @DataField Button deleteButton;
+public class HelloWorldForm {
+  @Inject @Admin @DataField ButtonElement deleteButton;
   @Inject SessionManager sessionManager;
 
 
@@ -5821,13 +5936,16 @@ public class HelloWorldForm extends Composite {
 <simpara>User interfaces often need to be available in different languages. Errai&#8217;s i18n support makes it easier for you to publish your web app in multiple languages. This section explains how to use this feature in your application.</simpara>
 <section id="_html_template_translation">
 <title>HTML Template Translation</title>
-<simpara>To get started with Errai&#8217;s internationalization support, simply put the <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently.</simpara>
-<simpara>Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called <literal><phrase role="code">errai-bundle-all.json</phrase></literal> and put it in your <literal><phrase role="code">.errai</phrase></literal> directory. You can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.</simpara>
-<simpara>The translation bundle files use the same naming scheme as Java (e.g. <literal><phrase role="code">bundle_nl_BE.json</phrase></literal> for Belgian Dutch and <literal><phrase role="code">bundle_nl.json</phrase></literal> for plain Dutch). Errai will also generate a file called <literal><phrase role="code">errai-bundle-missing.json</phrase></literal> in the <literal><phrase role="code">.errai</phrase></literal> folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations:</simpara>
-<programlisting language="java" linenumbering="unnumbered">{
+<simpara>To get started with Errai&#8217;s internationalization support, simply put <literal><phrase role="code">@Bundle("bundle.json")</phrase></literal> or <literal><phrase role="code">@Bundle("bundle.properties")</phrase></literal> annotation on your entry point and add an empty <literal><phrase role="code">bundle.json</phrase></literal> or <literal><phrase role="code">bundle.properties</phrase></literal> file to your classpath (e.g. to src/main/java or src/main/resources). Of course, you can name it differently provided the file extension is <literal>.json</literal> or <literal>.properties</literal>.</simpara>
+<simpara>Errai will scan your HTML templates and process all text elements to generate key/value pairs for translation. It will generate a file called <literal><phrase role="code">errai-bundle-all.json</phrase></literal> and put it in your <literal><phrase role="code">.errai</phrase></literal> directory. If you used a JSON file in you <literal><phrase role="code">@Bundle</phrase></literal> annotation, you can copy this generated file and use it as a starting point for your custom translation bundles. If the text value is longer than 128 characters the key will get cut off and a hash appended at the end.</simpara>
+<simpara>The translation bundle files use the same naming scheme as Java (e.g. <literal><phrase role="code">bundle_nl_BE.json</phrase></literal> or <literal><phrase role="code">bundel_nl_BE.properties</phrase></literal> for Belgian Dutch, and <literal><phrase role="code">bundle_nl.json</phrase></literal> or <literal><phrase role="code">bundle_nl.properties</phrase></literal> for plain Dutch). Errai will also generate a file called <literal><phrase role="code">errai-bundle-missing.json</phrase></literal> in the <literal><phrase role="code">.errai</phrase></literal> folder containing all template values for which no translations have been defined. You can copy the key/value pairs out of this file to create our own translations when you use a JSON file:</simpara>
+<programlisting language="javascript" linenumbering="unnumbered">{
 "StoresPage.Stores!" : "Stores!",
 "WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front._-734987445" : "As you move toward a more and more declarative style, you allow the compiler and the framework to catch more mistakes up front. Broken links? A thing of the past!"
 }</programlisting>
+<simpara>Here are the same translations as specified by a properties file:</simpara>
+<screen>StoresPage.Stores! = Stores!
+WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front._-734987445 = As you move toward a more and more declarative style, you allow the compiler and the framework to catch more mistakes up front. Broken links? A thing of the past!</screen>
 <simpara>If you want to use your own keys instead of these generated ones you can specify them in your templates using the <literal><phrase role="code">data-i18n-key</phrase></literal> attribute:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;html&gt;
 &lt;body&gt;
@@ -5836,9 +5954,11 @@ public class HelloWorldForm extends Composite {
 &lt;div&gt;
 ...</programlisting>
 <simpara>By adding this attribute in the template you can translate it with the following:</simpara>
-<programlisting language="java" linenumbering="unnumbered">{
+<programlisting language="javascript" linenumbering="unnumbered">{
     "Widget.welcome": "Willkommen bei Errai-ui i18n."
 }</programlisting>
+<simpara>or</simpara>
+<screen>Widget.welcome=Willkommen bei Errai-ui i18n.</screen>
 <simpara>Because your templates are designer templates and can contain some mock data that doesn&#8217;t need to be translated, Errai has the ability to indicate that with an attribute <literal><phrase role="code">data-role=dummy</phrase></literal>:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;div id=navbar data-role=dummy&gt;
   &lt;div class="navbar navbar-fixed-top"&gt;
@@ -5856,7 +5976,7 @@ public class HelloWorldForm extends Composite {
 <simpara>Here the template fills out a navbar with dummy elements, useful for creating a design, adding <literal><phrase role="code">data-role=dummy</phrase></literal> will not only exclude it form being translated it will also strip the children nodes from the template that will be used by the application.</simpara>
 <simpara>When you have setup a translation of your application Errai will look at the browser locale and select the locale, if it&#8217;s available, if not it will use the default (<literal><phrase role="code">bundle.json</phrase></literal>). If the users of your application need to be able to switch the language manually, Errai offers a pre build component you can easily add to your page: <literal><phrase role="code">LocaleListBox</phrase></literal> will render a Listbox with all available languages. If you want more control of what this language selector looks like there is also a <literal><phrase role="code">LocaleSelector</phrase></literal> that you can use to query and select the locale for example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class NavBar extends Composite {
+public class NavBar {
 
   @Inject
   private LocaleSelector selector;
@@ -6038,7 +6158,7 @@ public class MyStyleDescriptor {
 <itemizedlist>
   
     <listitem>
-      <simpara>The <literal><phrase role="code">@Page</phrase></literal> annotation marks any widget as a page.</simpara>
+      <simpara>The <literal><phrase role="code">@Page</phrase></literal> annotation marks any widget or Errai UI component as a page.</simpara>
       
     </listitem>
   
@@ -6054,23 +6174,24 @@ public class MyStyleDescriptor {
   
 </itemizedlist>
 
-<simpara>The <literal><phrase role="code">Navigation</phrase></literal> singleton owns a GWT Panel called the <emphasis>navigation panel</emphasis>. This panel always contains a widget corresponding to the fragment ID (the part after the # symbol) in the browser&#8217;s location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser&#8217;s location bar is updated to reflect the new current page.</simpara>
+<simpara>The <literal><phrase role="code">Navigation</phrase></literal> singleton owns a GWT Panel called the <emphasis>navigation panel</emphasis>. This panel always contains a widget or component corresponding to the fragment ID (the part after the # symbol) in the browser&#8217;s location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser&#8217;s location bar is updated to reflect the new current page.</simpara>
 <section id="sid-54493676_ErraiUINavigation-DeclaringaPage">
 <title>Declaring a Page</title>
-<simpara>To declare a page, annotate any subclass of Widget with the <literal><phrase role="code">@Page</phrase></literal> annotation:</simpara>
+<simpara>To declare a page, annotate any subclass of Widget or Errai UI templated component with the <literal><phrase role="code">@Page</phrase></literal> annotation:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page
 public class ItemListPage extends Composite {
   // Anything goes...
 }</programlisting>
-<simpara>By default, the name of a page is the simple name of the class that declares it. In the above example, the <literal><phrase role="code">ItemListPage</phrase></literal> will fill the navigation panel whenever the browser&#8217;s location bar ends with <literal><phrase role="code">#ItemListPage</phrase></literal>. If you prefer a different page name, use the <literal><phrase role="code">@Page</phrase></literal> annotation&#8217;s <literal><phrase role="code">path</phrase></literal> attribute:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Page
+@Templated
+public class ComponentPage {
+  // Anything goes...
+}</programlisting>
+<simpara>By default, the name of a page is the simple name of the class that declares it. In the above examples, the <literal><phrase role="code">ItemListPage</phrase></literal> will fill the navigation panel whenever the browser&#8217;s location bar ends with <literal><phrase role="code">#ItemListPage</phrase></literal> and similarly <literal><phrase role="code">ComponentPage</phrase></literal> will be displayed when the location bar ends with <literal><phrase role="code">#ComponentPage</phrase></literal>. If you prefer a different page name, use the <literal><phrase role="code">@Page</phrase></literal> annotation&#8217;s <literal><phrase role="code">path</phrase></literal> attribute:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(path="items")
 public class ItemListPage extends Composite {
   // Anything goes...
 }</programlisting>
-<important>
-<title>Navigation and Errai UI</title>
-<simpara>Any widget can be a page. This includes Errai UI <literal><phrase role="code">@Templated</phrase></literal> classes! Simply annotate any Errai UI templated class with <literal><phrase role="code">@Page</phrase></literal>, and it will become a page that can be navigated to.</simpara>
-</important>
 <section id="sid-54493676_ErraiUINavigation-TheStartingPage">
 <title>The Default (Starting) Page</title>
 <simpara>Each application must have exactly one <emphasis>default page</emphasis>. This requirement is enforced at compile time. This default page is displayed when there is no fragment ID present in the browser&#8217;s location bar.</simpara>
@@ -6204,7 +6325,7 @@ public class ItemPage extends VerticalPanel {
   // Anything goes...
 }</programlisting>
 <simpara></simpara>
-<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal>; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal>, or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a URL properly.)</simpara>
+<simpara>There are three ways to pass state information to a page: by passing a Multimap to <literal><phrase role="code">TransitionTo.go()</phrase></literal>; by passing a Multimap to <literal><phrase role="code">Navigation.goTo()</phrase></literal>; or by including the state information in the path parameter or fragment identifier of a hyperlink as illustrated in the previous paragraph (use the <literal><phrase role="code">HistoryToken</phrase></literal> class to construct such a URL properly.)</simpara>
 <simpara>A page widget can have any number of <literal><phrase role="code">@PageState</phrase></literal> fields. The fields can be of any primitive or boxed primitive type (except <literal><phrase role="code">char</phrase></literal> or <literal><phrase role="code">Character</phrase></literal>), <literal><phrase role="code">String</phrase></literal>, or a <literal><phrase role="code">Collection</phrase></literal>, <literal><phrase role="code">List</phrase></literal>, or <literal><phrase role="code">Set</phrase></literal> of the allowable scalar types. Nested collections are not supported.</simpara>
 <simpara><literal><phrase role="code">@PageState</phrase></literal> fields can be private, protected, default access, or public. They are always updated by direct field access; never via a setter method. The updates occur just before the <literal><phrase role="code">@PageShowing</phrase></literal> method is invoked.</simpara>
 <simpara>In addition to receiving page state information via direct writes to <literal><phrase role="code">@PageState</phrase></literal> fields, you can also receive the whole Multimap in the <literal><phrase role="code">@PageShowing</phrase></literal> and <literal><phrase role="code">@PageShown</phrase></literal> methods through a parameter of type <literal><phrase role="code">HistoryToken</phrase></literal>. Whether or not a lifecycle method has such a parameter, the <literal><phrase role="code">@PageState</phrase></literal> fields will still be written as usual.</simpara>
@@ -6254,7 +6375,7 @@ public class ItemPage extends VerticalPanel {
 <simpara>Here is an example declaring an anchor link from the templated welcome page to the item list page. The first code sample would go in WelcomePage.java while the second would go in the WelcomePage.html, the associated html template.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(role = DefaultPage.class)
 @Templated
-public class WelcomePage extends Composite {
+public class WelcomePage {
 
   @Inject @DataField TransitionAnchor&lt;ItemListPage&gt; itemLink;
 
@@ -6262,7 +6383,7 @@ public class WelcomePage extends Composite {
 <programlisting language="xml" linenumbering="unnumbered">&lt;div&gt;
   &lt;a data-field="itemLink"&gt;Go to Item List Page&lt;/a&gt;
 &lt;/div&gt;</programlisting>
-<simpara>You can inject any number of links into a page. The only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal>. When the user clicks the link Errai will transition to the item list page.</simpara>
+<simpara>You can inject any number of links into a page. The only restriction is that the target of the link must be a Widget type or Errai UI component that is annotated with <literal><phrase role="code">@Page</phrase></literal>. When the user clicks the link Errai will transition to the item list page.</simpara>
 </section>
 <section id="sid-54493676_ErraiUINavigation-DeclaringaManualLink">
 <title>Declaring a Manual Link</title>
@@ -6275,7 +6396,7 @@ public class WelcomePage extends Composite {
 
 }</programlisting>
 <simpara>You do not need to implement the <literal><phrase role="code">TransitionTo</phrase></literal> interface yourself; the framework creates the appropriate instance for you.</simpara>
-<simpara>As with <literal><phrase role="code">TransitionAnchor</phrase></literal>, the only restriction is that the target of the link must be a Widget type that is annotated with <literal><phrase role="code">@Page</phrase></literal>.</simpara>
+<simpara>As with <literal><phrase role="code">TransitionAnchor</phrase></literal>, the only restriction is that the target of the link must be a Widget type or Errai UI component that is annotated with <literal><phrase role="code">@Page</phrase></literal>.</simpara>
 </section>
 <section id="sid-54493676_ErraiUINavigation-FollowingaManualLink">
 <title>Following a Manual Link</title>
@@ -6316,21 +6437,24 @@ public class Bootstrap {
   }
 }</programlisting>
 <simpara>This last example demonstrates a simple approach to defining the page structure with an Errai UI template. The final product is identical to the above example, but in this case the overall page structure is declared in an HTML template rather than being defined programmatically in procedural logic:</simpara>
-<programlisting language="java" linenumbering="unnumbered">@Templated
+<programlisting language="java" linenumbering="unnumbered">@Templated("#root")
 @EntryPoint
-public class OverallPageStructure extends Composite {
+public class OverallPageStructure {
 
   @Inject
   private Navigation navigation;
 
   @Inject @DataField
-  private HeaderWidget header;
+  private DivElement root;
+
+  @Inject @DataField
+  private Header header;
 
   @Inject @DataField
   private SimplePanel content;
 
   @Inject @DataField
-  private FooterWidget footer;
+  private Footer footer;
 
   @PostConstruct
   public void clientMain() {
@@ -6338,8 +6462,8 @@ public class OverallPageStructure extends Composite {
     // give over the contents of this.content to the navigation panel
     content.add(navigation.getContentPanel());
 
-    // add this whole templated widget to the root panel
-    RootPanel.get().add(this);
+    // add this whole component to the DOM
+    Document.get().getBody().appendChild(root);
   }
 
 }</programlisting>
@@ -7194,44 +7318,6 @@ public class NavBar extends Composite {
 </section>
 <section id="_form_based_login">
 <title>Form Based Login</title>
-<section id="_errai_security_cookie">
-<title>Errai Security Cookie</title>
-<warning>
-<title>User cookie is deprecated</title>
-<simpara>For users with many roles, the serialized string may be too large to fit in a cookie. For this reason, the user cookie is not recommended and is kept only for backwards compatibility.</simpara>
-<simpara>For the recommended approach to form-based login, please skip to the section on the <xref linkend="ErraiUserHostPageFilter"/>.</simpara>
-</warning>
-<simpara>If you do enable the Errai Security cookie, it is possible to use a form-based login from outside your GWT/Errai app. The <literal>errai-security-server</literal> jar contains a servlet filter for encoding the currently authenticated user as a cookie in the http response. Here are the steps for setting this up:</simpara>
-<orderedlist numeration="arabic">
-  
-    <listitem>
-      <simpara>Create a login page using an html form that posts to a servlet-filter. If you are using Errai Security with PicketLink you will want to use the <literal>org.picketlink.authentication.web.AuthenticationFilter</literal> servlet-filter. Otherwise, you will need to implement one yourself that authenticates the user by calling <literal>AuthenticationService.login(String, String)</literal> method.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Add this filter-mapping for setting the Errai Security user cookie:</simpara>
-      
-<programlisting language="xml" linenumbering="unnumbered">  &lt;filter-mapping&gt;
-    &lt;filter-name&gt;ErraiUserCookieFilter&lt;/filter-name&gt;
-    &lt;url-mapping&gt;/gwt-host-page.html&lt;/url-mapping&gt;
-  &lt;/filter-mapping&gt;</programlisting>
-<simpara>The mapped URL should be that of your GWT Host Page.</simpara>
-<important>
-<title>This mapping must come after the filter that authenticates the user</title>
-<simpara>If this filter maps to the same URL as the filter for authentication, this filter must come after the authentication filter or else it will set the cookie before the user has logged in.</simpara>
-</important>
-
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>Make sure this is in your ErraiApp.properties file: <literal>errai.security.user_cookie_enabled=true</literal></simpara>
-      
-    </listitem>
-  
-</orderedlist>
-</section>
 <section id="ErraiUserHostPageFilter">
 <title>Errai User Host Page Filter</title>
 <simpara>The <literal>errai-security-server</literal> jar contains a servlet filter for encoding the currently authenticated user in an html page. By configuring this filter for your GWT host page, a user will be logged-in as soon as your Errai app loads. Here are the steps for setting this up:</simpara>
@@ -13077,6 +13163,123 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <section id="_upgrading_to_errai_3_2_from_3_1">
 <title>Upgrading to Errai 3.2 from 3.1</title>
 <simpara>Starting from Errai 3.2.0.Final, Errai Security only supports Keycloak 1.2.0.Final and higher. Errai Security is no longer compatible with earlier versions of Keycloak.</simpara>
+</section>
+<section id="_upgrading_to_errai_4_0_from_3_2">
+<title>Upgrading to Errai 4.0 from 3.2</title>
+<simpara>Here are the steps you&#8217;ll need to take to get your project running after you update:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Rename dependencies on <literal>errai-weld-integration</literal> to <literal>errai-cdi-server</literal>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Upgrade to GWT 2.8, the supported GWT version for Errai 4.0.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Fix ambigious dependencies on pseudo-dependent beans. For example in the past the following code would correctly compile and execute in Errai:</simpara>
+      
+<programlisting language="java" linenumbering="unnumbered">public class SuperType {
+}</programlisting>
+<programlisting language="java" linenumbering="unnumbered">public class SubType extends SuperType {
+}</programlisting>
+<programlisting language="java" linenumbering="unnumbered">public class Usage {
+  @Inject
+  private SuperType bean;
+}</programlisting>
+<simpara>In Errai 4.0 this is ambiguous because both the <literal>SubType</literal> and <literal>SuperType</literal> classes satisfy this injection site, as is the case in CDI. Some ways to fix this problem:</simpara>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Make the base class abstract or @Alternative if you are not also using it.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Use different qualifiers on each type (or at least make only one type @Default).</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Make any <literal>@ApplicationScoped</literal> or <literal>@Singleton</literal> beans proxiable. To be proxiable a bean class must:</simpara>
+      
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara>Be non-final.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Have a public, no-argument constructor.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Remove package-private methods from <literal>@ApplicationScoped</literal> and <literal>@Singleton</literal> beans. Because these beans are proxied, the container must be able to override any non-private methods. Private methods are fine as they do not require proxying.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Explicitly enable any <literal>@Alternative</literal> beans used by your application in ErraiApp.properties.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add explicit scopes to beans that are only looked up through the bean manager. If a type is not injected anywhere and does not have an explicit scope, it will not be available for lookup by the bean manager at runtime.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Replace usages of <literal>@TestMock</literal> with <literal>@Alternative</literal>. Whenever this is done, you will also have to explicitly activate the bean in the ErraiApp.properties for your test.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Remove usages of the <literal>@New</literal> qualifier. This has been removed from Errai and deprecated in CDI. Instead, consider making your bean <literal>@Dependent</literal> scoped.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Remove injection sites of <literal>@LoadAsync</literal> inside types that are no async. In Errai 4.0, it is only possible to inject async types into eachother.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Check your usages of the bean manager. There have been some changes to the <literal>SyncBeanManager</literal> and <literal>SyncBeanDef</literal> interfaces (and their async counter-parts).</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Add an explicit converter for <literal>@Bound</literal> fileds where there is conversion between <literal>java.util.Date</literal> and <literal>String</literal>.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Remove any usage of the <literal>@StyleDescriptor</literal>. Plain CSS files can be declared in Java code via the <literal>@Templated</literal> annotation. Errai no longer provides annotations for using LESS.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
 </section>
 </chapter>
 <chapter id="sid-5833087">
