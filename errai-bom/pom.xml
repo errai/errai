@@ -6,8 +6,7 @@
   <parent>
     <groupId>org.jboss.integration-platform</groupId>
     <artifactId>jboss-integration-platform-parent</artifactId>
-    <version>6.0.2.Final</version>
-    <relativePath></relativePath>
+    <version>7.0.0.CR1</version>
   </parent>
 
   <groupId>org.jboss.errai.bom</groupId>
@@ -77,6 +76,7 @@
     <javassist.version>3.19.0-GA</javassist.version>    
     <javax.persitence.api.version>1.0</javax.persitence.api.version>    
     <jboss.ejb.api.spec.version>1.0.2.Final</jboss.ejb.api.spec.version>
+    <jboss-integration-platform-bom.version>7.0.0.CR1</jboss-integration-platform-bom.version>
     <jboss.interceptors.api12.spec.version>1.0.0.Alpha3</jboss.interceptors.api12.spec.version>
     <jboss.jaxrs.api.spec.1.1.version>1.0.0.Final</jboss.jaxrs.api.spec.1.1.version>
     <jboss.remoting.version>4.0.0.Final</jboss.remoting.version>
@@ -126,9 +126,17 @@
     <name>JBoss, a division of Red Hat</name>
     <url>http://www.jboss.org</url>
   </organization>
+
   <dependencyManagement>
 
-    <dependencies>      
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.integration-platform</groupId>
+        <artifactId>jboss-integration-platform-bom</artifactId>
+        <version>${jboss-integration-platform-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.jboss.spec</groupId>
         <artifactId>jboss-javaee-7.0</artifactId>
