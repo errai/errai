@@ -111,9 +111,10 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
             }
           }
         }
-        else if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
-          ClassChangeUtil.generateClassFile(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, sourceOutputTemp, serverSource, SERVER_MARSHALLER_OUTPUT_DIR);
-          logger.info("** deposited marshaller class in : " + new File(SERVER_MARSHALLER_OUTPUT_DIR).getAbsolutePath());
+        else if (SERVER_MARSHALLER_OUTPUT_DIR != null || OutputDirectoryUtil.OUTPUT_DIR.isPresent()) {
+          final String outputDir = (SERVER_MARSHALLER_OUTPUT_DIR != null ? SERVER_MARSHALLER_OUTPUT_DIR : OutputDirectoryUtil.OUTPUT_DIR.get());
+          ClassChangeUtil.generateClassFile(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, sourceOutputTemp, serverSource, outputDir);
+          logger.info("** deposited marshaller class in : " + new File(outputDir).getAbsolutePath());
         }
         else {
           writeServerSideMarshallerToDiscoveredOutputDirs(context, serverSource);

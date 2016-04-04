@@ -24,6 +24,7 @@ import java.io.File;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -44,6 +45,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
 
   private static final String OUTPUT_TMP = RebindUtils.getTempDirectory() + File.separator + "errai.cdi" + File.separator + "gen";
+  private static final String SOURCE_OUTPUT_TMP = OUTPUT_TMP + File.separator + "event-qualifier-serializer";
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
@@ -57,13 +59,12 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
     final String source = NonGwtEventQualifierSerializerGenerator.generateSource(CDIAnnotationUtils.getTranslatableQualifiers(context.getTypeOracle()));
 
     if (EnvUtil.isProdMode()) {
-      OutputDirectoryUtil
-        .generateClassFileInDiscoveredDirs(
-                context,
-                SERIALIZER_PACKAGE_NAME,
-                SERIALIZER_CLASS_NAME,
-                OUTPUT_TMP + File.separator + "event-qualifier-serializer",
-                source);
+      if (OutputDirectoryUtil.OUTPUT_DIR.isPresent()) {
+        generateAndWriteToDir(OutputDirectoryUtil.OUTPUT_DIR.get(), source);
+      }
+      else {
+        generateAndWriteToDiscoveredDirs(context, source);
+      }
     }
     else {
       final String tmpPath = new File(OUTPUT_TMP).getAbsolutePath();
@@ -71,6 +72,20 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
     }
 
     return source;
+  }
+
+  private void generateAndWriteToDiscoveredDirs(final GeneratorContext context, final String source) {
+    OutputDirectoryUtil
+      .generateClassFileInDiscoveredDirs(
+              context,
+              SERIALIZER_PACKAGE_NAME,
+              SERIALIZER_CLASS_NAME,
+              SOURCE_OUTPUT_TMP,
+              source);
+  }
+
+  private void generateAndWriteToDir(final String classOutputDir, final String source) {
+    ClassChangeUtil.generateClassFile(SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME, SOURCE_OUTPUT_TMP, source, classOutputDir);
   }
 
   @Override

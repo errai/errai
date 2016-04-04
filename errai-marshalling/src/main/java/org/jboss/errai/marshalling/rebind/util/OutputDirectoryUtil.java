@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -43,6 +44,10 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 public class OutputDirectoryUtil {
 
   private static Logger log = LoggerFactory.getLogger(OutputDirectoryUtil.class);
+
+  public static final String OUTPUT_DIR_PROP = "errai.server.classOutput";
+
+  public static final Optional<String> OUTPUT_DIR = Optional.ofNullable(System.getProperty(OUTPUT_DIR_PROP, null));
 
   private static final String[] candidateOutputDirectories =
   {
