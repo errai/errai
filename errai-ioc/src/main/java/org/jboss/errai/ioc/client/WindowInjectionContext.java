@@ -90,4 +90,8 @@ public class WindowInjectionContext {
     return new JsArray<>(providers.toArray(new JsTypeProvider<?>[providers.size()]));
   }
 
+  public boolean hasProvider(final String name) {
+    return getProviders(name).length() > 0;
+  }
+
 }

@@ -31,8 +31,15 @@ import org.jboss.errai.ioc.client.container.JsTypeProvider;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeImpl;
+import org.jboss.errai.ioc.tests.wiring.client.res.ConcreteWindowScopedJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.ConsumesProducedJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.DuplicateInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.ExternalJsTypeIface;
+import org.jboss.errai.ioc.tests.wiring.client.res.ExternalJsTypeImpl;
+import org.jboss.errai.ioc.tests.wiring.client.res.ExternalTestModule;
+import org.jboss.errai.ioc.tests.wiring.client.res.InternallySatisfiedImpl;
+import org.jboss.errai.ioc.tests.wiring.client.res.InternallySatisfiedJsTypeIface;
+import org.jboss.errai.ioc.tests.wiring.client.res.InternallyUnsatisfiedJsTypeIface;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsSubTypeWithDuplicateInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsSuperTypeWithDuplicateInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeConsumer;
@@ -97,6 +104,77 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         return null;
       }
     });
+    windowInjContext.addBeanProvider(InternallyUnsatisfiedJsTypeIface.class.getName(),
+            new JsTypeProvider<InternallyUnsatisfiedJsTypeIface>() {
+
+      @Override
+      public InternallyUnsatisfiedJsTypeIface getInstance() {
+        return new InternallyUnsatisfiedJsTypeIface() {
+          @Override
+          public String message() {
+            return "external";
+          }
+        };
+      }
+
+      @Override
+      public String getName() {
+        return null;
+      }
+
+      @Override
+      public String getFactoryName() {
+        return null;
+      }
+    });
+    windowInjContext.addBeanProvider(ExternalJsTypeImpl.class.getName(),
+            new JsTypeProvider<ExternalJsTypeIface>() {
+
+              @Override
+              public ExternalJsTypeIface getInstance() {
+                return new ExternalJsTypeIface() {
+
+                  @Override
+                  public String message() {
+                    return "external";
+                  }
+                };
+              }
+
+              @Override
+              public String getName() {
+                return null;
+              }
+
+              @Override
+              public String getFactoryName() {
+                return null;
+              }
+    });
+    windowInjContext.addBeanProvider(ConcreteWindowScopedJsType.class.getName(),
+            new JsTypeProvider<ConcreteWindowScopedJsType>() {
+
+      @Override
+      public ConcreteWindowScopedJsType getInstance() {
+        return new ConcreteWindowScopedJsType() {
+          @Override
+          public String message() {
+            return "external";
+          }
+        };
+      }
+
+      @Override
+      public String getName() {
+        return null;
+      }
+
+      @Override
+      public String getFactoryName() {
+        return null;
+      }
+    });
+    windowInjContext.addSuperTypeAlias(ExternalJsTypeIface.class.getName(), ExternalJsTypeImpl.class.getName());
     super.gwtSetUp();
   }
 
@@ -310,6 +388,57 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
             new HashSet<>(Arrays.asList(
                     providers.get(0).getInstance().getClass().getName(),
                     providers.get(1).getInstance().getClass().getName())));
+  }
+
+  public void testLocalBeanSatisfiesJsTypeInterfaceForDefaultInjectionSite() throws Exception {
+    final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
+    assertNotNull(module.defaultSatisfiedIface);
+    assertTrue(module.defaultSatisfiedIface instanceof InternallySatisfiedImpl);
+    assertSame(module.defaultSatisfiedIface, IOC.getBeanManager().lookupBean(InternallySatisfiedJsTypeIface.class).getInstance());
+  }
+
+  public void testLocalBeanSatisfiesJsTypeInterfaceForExternalInjectionSite() throws Exception {
+    final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
+    assertNotNull(module.externalSatisfiedIface);
+    assertTrue(module.externalSatisfiedIface instanceof InternallySatisfiedImpl);
+    assertSame(module.externalSatisfiedIface,
+            IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance().externalSatisfiedIface);
+  }
+
+  public void testWindowContextBeanSatisfiesJsTypeInterfaceForDefaultInjectionSite() throws Exception {
+    final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
+    assertNotNull(module.defaultUnsatisfiedIface);
+    assertEquals("external", module.defaultUnsatisfiedIface.message());
+  }
+
+  public void testWindowContextBeanSatisfiesJsTypeInterfaceForExternalInjectionSite() throws Exception {
+    final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
+    assertNotNull(module.defaultUnsatisfiedIface);
+    assertEquals("external", module.defaultUnsatisfiedIface.message());
+  }
+
+  public void testImplNotPublishedUnderExternalJsTypeIfaceWhenAlreadyInWindowContext() throws Exception {
+    assertEquals(1, WindowInjectionContext.createOrGet().getProviders(ExternalJsTypeIface.class.getName()).length());
+  }
+
+  public void testLocalBeanSatisfiesExternalJsTypeInterfaceForDefaultInjectionSite() throws Exception {
+    final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
+    assertNotNull(module.defaultExternalIface);
+    assertEquals(ExternalJsTypeImpl.class.getSimpleName(), module.defaultExternalIface.message());
+    assertTrue(module.defaultExternalIface instanceof ExternalJsTypeImpl);
+  }
+
+  public void testWindowContextBeanSatisfiesExternalJsTypeInterfaceForExternalInjectionSite() throws Exception {
+    final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
+    assertNotNull(module.externalExternalIface);
+    assertEquals("external", module.externalExternalIface.message());
+    assertFalse(module.externalExternalIface instanceof ExternalJsTypeImpl);
+  }
+
+  public void testWindowContextBeanSatisfiesConcreteWindowScopedJsTypeForDefaultInjectionSite() throws Exception {
+    final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
+    assertNotNull(module.defaultConcreteWindowScopedJsType);
+    assertEquals("external", module.defaultConcreteWindowScopedJsType.message());
   }
 
   private void injectScriptThenRun(final Runnable test) {

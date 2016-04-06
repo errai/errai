@@ -72,6 +72,8 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
@@ -83,6 +85,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.api.ScopeContext;
+import org.jboss.errai.ioc.client.api.WindowScoped;
 import org.jboss.errai.ioc.client.container.Context;
 import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.ContextManagerImpl;
@@ -391,19 +394,35 @@ public class IOCProcessor {
     return loadVariable(handleVarName);
   }
 
+  @SuppressWarnings("unchecked")
   private void declareAndRegisterConcreteInjectable(final Injectable injectable,
           final IOCProcessingContext processingContext, final Map<Class<? extends Annotation>, MetaClass> scopeContexts,
           @SuppressWarnings("rawtypes") final BlockBuilder registerFactoriesBody) {
     final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
     registerFactoryWithContext(injectable, factoryClass, scopeContexts, registerFactoriesBody);
-    if (injectable.getWiringElementTypes().contains(WiringElementType.JsType)) {
-      registerFactoriesBody.append(loadVariable("windowContext").invoke("addBeanProvider",
+    final boolean windowScoped = injectable.getWiringElementTypes().contains(WiringElementType.WindowScoped);
+    final boolean jsType = injectable.getWiringElementTypes().contains(WiringElementType.JsType);
+    if (jsType || windowScoped) {
+      final List<Statement> stmts = new ArrayList<>();
+      stmts.add(loadVariable("windowContext").invoke("addBeanProvider",
               injectable.getInjectedType().getFullyQualifiedName(), createJsTypeProviderFor(injectable)));
       for (final MetaClass mc : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
-        if (mc.isPublic() && !mc.equals(injectable.getInjectedType()) && !mc.getFullyQualifiedName().equals("java.lang.Object")) {
-          registerFactoriesBody.append(loadVariable("windowContext").invoke("addSuperTypeAlias",
+        if (mc.isPublic() && !mc.equals(injectable.getInjectedType())
+                && !mc.getFullyQualifiedName().equals("java.lang.Object") && mc.isAnnotationPresent(JsType.class)) {
+          stmts.add(loadVariable("windowContext").invoke("addSuperTypeAlias",
                   mc.getFullyQualifiedName(), injectable.getInjectedType().getFullyQualifiedName()));
         }
+      }
+
+      if (windowScoped) {
+        registerFactoriesBody
+                .append(If
+                        .cond(Bool.expr(loadVariable("windowContext").invoke("hasProvider",
+                                injectable.getInjectedType().getFullyQualifiedName())).negate())
+                        .appendAll(stmts).finish());
+      }
+      else {
+        registerFactoriesBody.appendAll(stmts);
       }
     }
   }
@@ -490,7 +509,6 @@ public class IOCProcessor {
   }
 
   private String getContextVarName(final MetaClass scopeContextImpl) {
-    // TODO cache in map?
     return scopeContextImpl.getFullyQualifiedName().replace('.', '_') + "_context";
   }
 
@@ -591,9 +609,11 @@ public class IOCProcessor {
         }
         else {
           maybeProcessAsStaticOnlyProducer(builder, type);
-          if (isPublishableJsType(type)) {
-            builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, WiringElementType.DependentBean);
-          }
+        }
+        if (isPublishableJsType(type)) {
+          final WiringElementType scopeWiringType = (type.isAnnotationPresent(WindowScoped.class)
+                  ? WiringElementType.WindowScoped : WiringElementType.DependentBean);
+          builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, scopeWiringType);
         }
       }
     } catch (final Throwable t) {
@@ -701,6 +721,9 @@ public class IOCProcessor {
 
     if (isPublishableJsType(type)) {
       wiringTypes.add(WiringElementType.JsType);
+    }
+    if (type.isAnnotationPresent(WindowScoped.class)) {
+      wiringTypes.add(WiringElementType.WindowScoped);
     }
 
     if (type.isAnnotationPresent(Specializes.class)) {

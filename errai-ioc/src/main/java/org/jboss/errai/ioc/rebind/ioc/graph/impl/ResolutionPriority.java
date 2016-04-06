@@ -22,6 +22,7 @@ import java.util.Collection;
 import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.WindowScoped;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -47,6 +48,17 @@ public enum ResolutionPriority {
     public boolean matches(final Injectable injectable) {
       return injectable.getWiringElementTypes().contains(WiringElementType.AlternativeBean)
               && !InjectableType.Disabled.equals(injectable.getInjectableType());
+    }
+  },
+  /**
+   * Category for {@link WindowScoped} {@link jsinterop.annotations.JsType} beans so that the local instance does not
+   * override the single global instance.
+   */
+  WindowScopedJsType {
+    @Override
+    public boolean matches(final Injectable injectable) {
+      return injectable.getInjectableType().equals(InjectableType.JsType)
+              && injectable.getWiringElementTypes().contains(WiringElementType.WindowScoped);
     }
   },
   /**

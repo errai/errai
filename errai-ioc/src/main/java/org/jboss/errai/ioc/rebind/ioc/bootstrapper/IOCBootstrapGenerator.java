@@ -56,6 +56,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TaskOrder;
+import org.jboss.errai.ioc.client.api.WindowScoped;
 import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
@@ -391,6 +392,7 @@ public class IOCBootstrapGenerator {
   private static void defaultConfigureProcessor(final InjectionContext injectionContext) {
     injectionContext.mapElementType(WiringElementType.NormalScopedBean, Singleton.class);
     injectionContext.mapElementType(WiringElementType.NormalScopedBean, ApplicationScoped.class);
+    injectionContext.mapElementType(WiringElementType.NormalScopedBean, WindowScoped.class);
     injectionContext.mapElementType(WiringElementType.NormalScopedBean, EntryPoint.class);
 
     injectionContext.mapElementType(WiringElementType.ProducerElement, IOCProducer.class);
