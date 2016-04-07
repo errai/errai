@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.WindowScoped;
+import org.jboss.errai.ioc.client.api.SharedSingleton;
 
 import jsinterop.annotations.JsType;
 
@@ -25,7 +25,7 @@ import jsinterop.annotations.JsType;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType
-@WindowScoped
+@SharedSingleton
 public class ConcreteWindowScopedJsType {
 
   public String message() {

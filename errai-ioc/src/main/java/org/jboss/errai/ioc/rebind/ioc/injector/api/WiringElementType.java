@@ -26,7 +26,7 @@ public enum WiringElementType {
   SingletonBean,
   NormalScopedBean,
   JsType,
-  WindowScoped,
+  SharedSingleton,
   LoadAsync,
   DependentBean,
   Simpleton, // TODO review name

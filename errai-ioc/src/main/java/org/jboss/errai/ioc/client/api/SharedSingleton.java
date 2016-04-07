@@ -17,31 +17,40 @@
 package org.jboss.errai.ioc.client.api;
 
 import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.inject.Qualifier;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.NormalScope;
 
 import jsinterop.annotations.JsType;
 
 /**
- * A qualifier indicating that the injected type should be satisfied by a {@link JsType}, potentially defined in a
- * separately compiled script.
+ * Within a single compiled GWT script this scope is synonymous with
+ * {@link ApplicationScoped}.
  *
- * This is useful when you have a locally defined type that implements a {@link JsType} interface. In this case adding
- * {@link External} to an injection site of the interface ensures that you will get an external implementation (if one
- * exists) rather than the local non-JsType one.
+ * When multiple separately compiled GWT scripts are loaded on a page, this
+ * scope indicates that there should be exactly one instance of this bean used
+ * to satisfy {@link Shared} injection points in all of the scripts, for all
+ * injection sites using {@link JsType}s.
+ *
+ * If both scripts are compiled with the same {@link SharedSingleton} type, the
+ * instance in the script executing first will be used.
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented
-@Qualifier
 @Retention(RUNTIME)
-@Target({ FIELD, PARAMETER })
-public @interface External {
+@Target({ TYPE, METHOD, FIELD })
+@NormalScope
+@Inherited
+public @interface SharedSingleton {
 
 }

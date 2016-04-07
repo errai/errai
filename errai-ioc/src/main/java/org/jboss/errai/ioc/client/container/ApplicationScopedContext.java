@@ -27,7 +27,7 @@ import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.ScopeContext;
-import org.jboss.errai.ioc.client.api.WindowScoped;
+import org.jboss.errai.ioc.client.api.SharedSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@ScopeContext({ApplicationScoped.class, Singleton.class, EntryPoint.class, WindowScoped.class})
+@ScopeContext({ApplicationScoped.class, Singleton.class, EntryPoint.class, SharedSingleton.class})
 public class ApplicationScopedContext extends AbstractContext {
 
   private static final Logger logger = LoggerFactory.getLogger(ApplicationScopedContext.class);

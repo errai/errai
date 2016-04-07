@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.WindowScoped;
+import org.jboss.errai.ioc.client.api.SharedSingleton;
 
 import jsinterop.annotations.JsMethod;
 
@@ -24,7 +24,7 @@ import jsinterop.annotations.JsMethod;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@WindowScoped
+@SharedSingleton
 public class ExternalJsTypeImpl implements ExternalJsTypeIface {
 
   @JsMethod

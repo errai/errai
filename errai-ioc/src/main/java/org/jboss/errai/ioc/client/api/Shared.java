@@ -17,39 +17,34 @@
 package org.jboss.errai.ioc.client.api;
 
 import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.NormalScope;
+import javax.inject.Qualifier;
 
 import jsinterop.annotations.JsType;
 
 /**
- * Within a single compiled GWT script this scope is synonymous with {@link ApplicationScoped}.
+ * A qualifier indicating that the injected type should be satisfied by a
+ * {@link JsType} instance provided by a a separately compiled script if
+ * available.
  *
- * When two separately compiled GWT scripts are loaded on a page, this scope indicates that there should be exactly one
- * instance of this bean used to satisfy {@link External} injection points in either app.
- *
- * If the type annotated with {@link WindowScoped} is not a {@link JsType}, then it will only be used across script
- * boundaries to satisfy {@link JsType JsTypes} to which it can be assigned.
- *
- * If both scripts are compiled with the same {@link WindowScoped} type, the instance in the script executing first will
- * be used.
+ * This is useful when you have a locally defined type that implements a
+ * {@link JsType} interface. In this case adding {@link Shared} to an injection
+ * site ensures that an external implementation is used (if one exists) rather
+ * than the local non-JsType one.
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented
+@Qualifier
 @Retention(RUNTIME)
-@Target({TYPE, METHOD, FIELD})
-@NormalScope
-@Inherited
-public @interface WindowScoped {
+@Target({ FIELD, PARAMETER })
+public @interface Shared {
 
 }

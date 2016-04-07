@@ -85,7 +85,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.api.ScopeContext;
-import org.jboss.errai.ioc.client.api.WindowScoped;
+import org.jboss.errai.ioc.client.api.SharedSingleton;
 import org.jboss.errai.ioc.client.container.Context;
 import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.ContextManagerImpl;
@@ -400,7 +400,7 @@ public class IOCProcessor {
           @SuppressWarnings("rawtypes") final BlockBuilder registerFactoriesBody) {
     final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
     registerFactoryWithContext(injectable, factoryClass, scopeContexts, registerFactoriesBody);
-    final boolean windowScoped = injectable.getWiringElementTypes().contains(WiringElementType.WindowScoped);
+    final boolean windowScoped = injectable.getWiringElementTypes().contains(WiringElementType.SharedSingleton);
     final boolean jsType = injectable.getWiringElementTypes().contains(WiringElementType.JsType);
     if (jsType || windowScoped) {
       final List<Statement> stmts = new ArrayList<>();
@@ -611,8 +611,8 @@ public class IOCProcessor {
           maybeProcessAsStaticOnlyProducer(builder, type);
         }
         if (isPublishableJsType(type)) {
-          final WiringElementType scopeWiringType = (type.isAnnotationPresent(WindowScoped.class)
-                  ? WiringElementType.WindowScoped : WiringElementType.DependentBean);
+          final WiringElementType scopeWiringType = (type.isAnnotationPresent(SharedSingleton.class)
+                  ? WiringElementType.SharedSingleton : WiringElementType.DependentBean);
           builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, scopeWiringType);
         }
       }
@@ -722,8 +722,8 @@ public class IOCProcessor {
     if (isPublishableJsType(type)) {
       wiringTypes.add(WiringElementType.JsType);
     }
-    if (type.isAnnotationPresent(WindowScoped.class)) {
-      wiringTypes.add(WiringElementType.WindowScoped);
+    if (type.isAnnotationPresent(SharedSingleton.class)) {
+      wiringTypes.add(WiringElementType.SharedSingleton);
     }
 
     if (type.isAnnotationPresent(Specializes.class)) {

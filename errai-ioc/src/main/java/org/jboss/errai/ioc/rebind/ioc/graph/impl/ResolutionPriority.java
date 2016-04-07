@@ -22,7 +22,7 @@ import java.util.Collection;
 import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.WindowScoped;
+import org.jboss.errai.ioc.client.api.SharedSingleton;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -58,7 +58,7 @@ public enum ResolutionPriority {
     @Override
     public boolean matches(final Injectable injectable) {
       return injectable.getInjectableType().equals(InjectableType.JsType)
-              && injectable.getWiringElementTypes().contains(WiringElementType.WindowScoped);
+              && injectable.getWiringElementTypes().contains(WiringElementType.SharedSingleton);
     }
   },
   /**

@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.tests.wiring.client.res;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.ioc.client.api.External;
+import org.jboss.errai.ioc.client.api.Shared;
 
 /**
  *
@@ -29,14 +29,14 @@ import org.jboss.errai.ioc.client.api.External;
 public class ExternalTestModule {
 
   @Inject
-  @External
+  @Shared
   public InternallySatisfiedJsTypeIface externalSatisfiedIface;
 
   @Inject
   public InternallySatisfiedJsTypeIface defaultSatisfiedIface;
 
   @Inject
-  @External
+  @Shared
   public InternallyUnsatisfiedJsTypeIface externalUnsatisfiedIface;
 
   @Inject
@@ -46,7 +46,7 @@ public class ExternalTestModule {
   public ExternalJsTypeIface defaultExternalIface;
 
   @Inject
-  @External
+  @Shared
   public ExternalJsTypeIface externalExternalIface;
 
   @Inject
