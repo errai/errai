@@ -31,6 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBeanInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
+import org.jboss.errai.ioc.tests.wiring.client.res.AppScopedBeanInvokingSelf;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentOnInnerType;
@@ -299,5 +300,10 @@ public class BasicIOCTest extends IOCClientTestCase {
     } catch (IOCResolutionException ex) {
       throw new AssertionError("Could not produce " + IfaceProducer.class.getSimpleName(), ex);
     }
+  }
+
+  public void testAppScopedBeanInvokingSelfInPostConstruct() throws Exception {
+    final AppScopedBeanInvokingSelf instance = IOC.getBeanManager().lookupBean(AppScopedBeanInvokingSelf.class).getInstance();
+    assertEquals("foo", instance.getValue());
   }
 }
