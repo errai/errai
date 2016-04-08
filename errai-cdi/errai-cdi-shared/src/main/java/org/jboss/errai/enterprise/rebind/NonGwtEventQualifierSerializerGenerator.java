@@ -54,8 +54,11 @@ public class NonGwtEventQualifierSerializerGenerator {
 
   @SuppressWarnings("unchecked")
   public static Class<? extends EventQualifierSerializer> generateAndLoad() {
+    logger.info("Generating source for {}.{}...", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
     final String source = generateSource(CDIAnnotationUtils.getQualifiers());
+    logger.info("Successfully generated source for {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
 
+    logger.info("Attempting to compile and load {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
     return (Class<? extends EventQualifierSerializer>) ClassChangeUtil
             .compileAndLoadFromSource(SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME, source);
   }
@@ -100,16 +103,19 @@ public class NonGwtEventQualifierSerializerGenerator {
   }
 
   public static void loadAndSetEventQualifierSerializer() {
+    logger.info("Attempting to load {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
     final Optional<Class<?>> loadedImpl = ClassChangeUtil.loadClassIfPresent(
             SERIALIZER_PACKAGE_NAME,
             SERIALIZER_CLASS_NAME);
 
     if (loadedImpl.isPresent()) {
+      logger.info("Successfully loaded {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
       final Class<?> clazz = loadedImpl.get();
       instantiateAndSetEventQualifierSerializer(clazz);
     }
     else {
-      logger.warn("No " + EventQualifierSerializer.SERIALIZER_CLASS_NAME + " found on the classpath. Attempting to generate.");
+      logger.warn("No {}.{} found on the classpath. Attempting to generate and load.",
+              SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
       final Class<? extends EventQualifierSerializer> clazz;
       try {
         clazz = Assert.notNull(generateAndLoad());
@@ -117,6 +123,7 @@ public class NonGwtEventQualifierSerializerGenerator {
         throw new RuntimeException("Could not generate " + EventQualifierSerializer.SERIALIZER_CLASS_NAME, t);
       }
 
+      logger.info("Successfully generated and loaded {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
       instantiateAndSetEventQualifierSerializer(clazz);
     }
   }

@@ -57,7 +57,7 @@ public class ClassChangeUtil {
 
   private static final String classLoadingMode;
   private static final boolean useNativeJavac = Boolean.getBoolean(USE_NATIVE_JAVA_COMPILER);
-  private static Logger log = getLogger("ErraiMarshalling");
+  private static Logger log = getLogger(ClassChangeUtil.class);
 
   static {
     if (System.getProperty(CLASSLOADING_MODE_PROPERTY) != null) {
@@ -192,14 +192,14 @@ public class ClassChangeUtil {
       final List<File> classpathElements = new ArrayList<File>(configUrls.size());
       classpathElements.add(new File(outputPath));
 
-      log.debug(">>> Searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
+      log.debug(">>> Searching for all jars using " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
       for (final URL url : configUrls) {
         final File file = getFileIfExists(url.getFile());
         if (file != null) {
           classpathElements.add(file);
         }
       }
-      log.debug("<<< Done searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
+      log.debug("<<< Done searching for all jars using " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
 
       for (final File file : classpathElements) {
         sb.append(file.getAbsolutePath()).append(File.pathSeparator);
@@ -216,11 +216,11 @@ public class ClassChangeUtil {
       if (adapter.compile(System.out, errorOutputStream, outputPath,
           new File(sourcePath + File.separator + className + ".java").getAbsolutePath(), classPath) != 0) {
 
-        System.out.println("*** FAILED TO COMPILE CLASS ***");
-        System.out.println("*** Classpath Used: " + classPath);
+        System.err.println("*** FAILED TO COMPILE CLASS ***");
+        System.err.println("*** Classpath Used: " + classPath);
 
         for (final byte b : errorOutputStream.toByteArray()) {
-          System.out.print((char) b);
+          System.err.print((char) b);
         }
         return null;
       }
@@ -402,10 +402,11 @@ public class ClassChangeUtil {
     }
   }
 
+  @SuppressWarnings("rawtypes")
   private static String findAllJarsByManifest() {
     final StringBuilder cp = new StringBuilder();
     try {
-      log.debug(">>> Searching for all jars by " + JarFile.MANIFEST_NAME);
+      log.debug(">>> Searching for all jars using " + JarFile.MANIFEST_NAME);
       final Enumeration[] enumerations = new Enumeration[]
           {
               Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME),
@@ -424,17 +425,16 @@ public class ClassChangeUtil {
             }
           }
           catch (Exception e) {
-            log.warn("ignoring classpath entry with invalid manifest", e);
+            log.warn("Ignoring classpath entry with invalid manifest", e);
           }
         }
       }
     }
     catch (IOException e1) {
-      // Silently ignore wrong manifests on classpath?
-      log.warn("failed to build classpath using manifest discovery. Expect compile failures...", e1);
+      log.warn("Failed to build classpath using manifest discovery. Expect compilation failures...", e1);
     }
     finally {
-      log.debug("<<< Done searching for all jars by " + JarFile.MANIFEST_NAME);
+      log.debug("<<< Done searching for all jars using " + JarFile.MANIFEST_NAME);
     }
 
     return cp.toString();
@@ -636,35 +636,38 @@ public class ClassChangeUtil {
     final String fullyQualifiedClassName = packageName + "." + simpleClassName;
 
     try {
-      log.debug("searching for marshaller class: {}.{}", packageName, simpleClassName);
+      log.info("Searching for class: {}", fullyQualifiedClassName);
       final Set<String> locations = getClassLocations(packageName, simpleClassName);
-
       final Optional<File> newest = getNewest(locations);
 
       if (locations.size() > 1) {
         log.warn("*** MULTIPLE VERSIONS OF " + fullyQualifiedClassName + " FOUND IN CLASSPATH: " +
-                "Attempted to guess the newest one based on file dates. But you should clean your output directories");
+                "Attempted to guess the newest one based on file dates. But you should clean your output directories.");
 
         locations.stream().forEach(loc -> log.warn(" Ambiguous version -> {}", loc));
       }
 
       if (newest.isPresent()) {
+        log.info("Loading class {} found at {}", fullyQualifiedClassName, newest.get().getAbsolutePath().toString());
         return Optional.of(loadClassDefinition(newest.get().getAbsolutePath(), packageName, simpleClassName));
       }
       else {
+        log.info("Could not find URL for {}. Attempting to load with context class loader.", fullyQualifiedClassName);
         try {
           // maybe we're in an appserver with a VFS, so try to load anyways.
-          return Optional.of(Thread.currentThread().getContextClassLoader().loadClass(fullyQualifiedClassName));
+          final Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(fullyQualifiedClassName);
+          log.info("Successfully loaded {} with context class loader.", fullyQualifiedClassName);
+          return Optional.of(loadedClass);
         }
         catch (ClassNotFoundException e) {
-          log.warn("could not locate {} class.", fullyQualifiedClassName);
+          log.warn("Could not load {} class.", fullyQualifiedClassName);
 
           return Optional.empty();
         }
       }
     }
     catch (IOException e) {
-      log.warn("could not read {} classes: " + fullyQualifiedClassName, e);
+      log.warn("Could not read {} class: " + fullyQualifiedClassName, e);
 
       return Optional.empty();
     }
@@ -693,30 +696,43 @@ public class ClassChangeUtil {
 
   public static Class<?> compileAndLoadFromSource(final String packageName, final String simpleClassName,
           final String source) {
+    log.info("Compiling and loading {}.{} from source...", packageName, simpleClassName);
     final File directory =
             new File(RebindUtils.getTempDirectory()
                     + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
-
     final File sourceFile = new File(directory.getAbsolutePath() + File.separator + simpleClassName + ".java");
+    log.info("Using temporary directory for source and class files: {}", directory.getAbsolutePath());
 
     try {
       if (directory.exists()) {
+        log.info("Directory {} already exists. Deleting directory and contents (enable debug logging to see deleted files).", directory.getAbsolutePath());
         for (File file : directory.listFiles()) {
+          log.debug("Deleting {}", file.getAbsolutePath());
           file.delete();
         }
+        log.debug("Deleting {}", directory.getAbsolutePath());
         directory.delete();
       }
       directory.mkdirs();
 
+      log.info("Writing source file {}...", sourceFile.getAbsolutePath());
       final FileOutputStream outputStream = new FileOutputStream(sourceFile);
       outputStream.write(source.getBytes("UTF-8"));
       outputStream.flush();
       outputStream.close();
 
-      String compiledClassPath = compileClass(directory.getAbsolutePath(), packageName, simpleClassName,
+      log.info("Compiling {}.{} in source file {}...", packageName, simpleClassName, sourceFile.getAbsolutePath());
+      final String compiledClassPath = compileClass(directory.getAbsolutePath(), packageName, simpleClassName,
               directory.getAbsolutePath());
 
-      return loadClassDefinition(compiledClassPath, packageName, simpleClassName);
+      if (compiledClassPath == null) {
+        log.warn("Could not compile {}.{} in source file {}...", packageName, simpleClassName, sourceFile.getAbsolutePath());
+        return null;
+      }
+      else {
+        log.info("Loading compiled class at {}...", compiledClassPath);
+        return loadClassDefinition(compiledClassPath, packageName, simpleClassName);
+      }
     }
     catch (IOException e) {
       throw new RuntimeException("failed to generate class ", e);

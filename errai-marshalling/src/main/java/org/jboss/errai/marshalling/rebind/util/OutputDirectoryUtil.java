@@ -182,7 +182,7 @@ public class OutputDirectoryUtil {
     };
 
   public static void forEachDiscoveredOutputDir(final GeneratorContext context, final Consumer<File> consumer) {
-    log.debug("searching candidate output directories for generated marshallers");
+    log.info("Searching candidate output directories...");
     File outputDirCdt;
 
     int deposits = 0;
@@ -192,7 +192,7 @@ public class OutputDirectoryUtil {
       final DiscoveryContext discoveryContext = DiscoveryContext.create();
       for (final String rootPath : strategy.getCandidate(context, discoveryContext)) {
         for (final String candidate : discoveryContext.isAbsolute() ? new String[]{"/"} : candidateOutputDirectories) {
-          log.info("considering '" + rootPath + candidate + "' as module output path ...");
+          log.info("Considering '" + rootPath + candidate + "' as an output path...");
 
           if (discoveryContext.isVetoed()) {
             continue Strategies;
@@ -200,12 +200,12 @@ public class OutputDirectoryUtil {
 
           outputDirCdt = new File(rootPath + "/" + candidate).getAbsoluteFile();
           if (outputDirCdt.exists()) {
-            log.info("   found '" + outputDirCdt + "' output directory");
+            log.info("   Accepting '" + outputDirCdt + "' output directory.");
             consumer.accept(outputDirCdt);
             deposits++;
           }
           else {
-            log.debug("   " + outputDirCdt + " does not exist");
+            log.info("   Rejecting " + outputDirCdt + " because it does not exist");
           }
         }
       }
@@ -215,17 +215,22 @@ public class OutputDirectoryUtil {
     }
 
     if (deposits == 0) {
-      log.warn(" *** the server marshaller was not deposited into your build output!\n" +
-          "   A target output could not be resolved through configuration or auto-detection!");
+      log.warn("   A target output could not be resolved through configuration or auto-detection!\n"
+              + "   Your deployment may be missing required class files.");
     }
   }
 
   public static void generateClassFileInDiscoveredDirs(final GeneratorContext context, final String packageName, final String simpleClassName,
           final String sourceOutputTemp, final String source) {
     forEachDiscoveredOutputDir(context, outputDirCdt -> {
-      ClassChangeUtil.generateClassFile(packageName, simpleClassName, sourceOutputTemp,
-              source, outputDirCdt.getAbsolutePath());
-      log.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+      try {
+        final String classFilePath = ClassChangeUtil.generateClassFile(packageName, simpleClassName, sourceOutputTemp,
+                source, outputDirCdt.getAbsolutePath());
+        log.info("** Wrote {}.{} class to {}", packageName, simpleClassName, classFilePath);
+      }
+      catch (Throwable t) {
+        log.warn("Encountered error while trying to generate {}.{} class in {}", packageName, simpleClassName, outputDirCdt.getAbsolutePath());
+      }
     });
   }
 
