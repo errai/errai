@@ -121,7 +121,7 @@ public class ClassChangeUtil {
     }
   }
 
-  public static Class compileAndLoad(final File sourceFile,
+  public static Class<?> compileAndLoad(final File sourceFile,
                                      final String fullyQualifiedName) throws IOException {
     final String packageName = getPackageFromFQCN(fullyQualifiedName);
     final String className = getNameFromFQCN(fullyQualifiedName);
@@ -129,7 +129,7 @@ public class ClassChangeUtil {
     return compileAndLoad(sourceFile, packageName, className);
   }
 
-  public static Class compileAndLoad(final File sourceFile,
+  public static Class<?> compileAndLoad(final File sourceFile,
                                      final String packageName,
                                      final String className) throws IOException {
 
@@ -137,7 +137,7 @@ public class ClassChangeUtil {
 
   }
 
-  public static Class compileAndLoad(final String sourcePath,
+  public static Class<?> compileAndLoad(final String sourcePath,
                                      final String packageName,
                                      final String className) throws IOException {
     final String tempDirectory = RebindUtils.getTempDirectory();
@@ -146,7 +146,7 @@ public class ClassChangeUtil {
   }
 
 
-  public static Class compileAndLoad(final String sourcePath,
+  public static Class<?> compileAndLoad(final String sourcePath,
                                      final String packageName,
                                      final String className,
                                      final String outputPath) throws IOException {
@@ -233,7 +233,7 @@ public class ClassChangeUtil {
     }
   }
 
-  public static Class loadClassDefinition(final String path,
+  public static Class<?> loadClassDefinition(final String path,
                                           final String packageName,
                                           final String className) throws IOException {
     if (path == null) return null;
@@ -256,11 +256,23 @@ public class ClassChangeUtil {
       fqcn = packageName + "." + className;
     }
 
+    boolean success = false;
     try {
-      return clsLoader.loadClass(fqcn);
+      final Class<?> loadClass = clsLoader.loadClass(fqcn);
+      success = true;
+      return loadClass;
     }
     catch (Throwable t) {
       // fall through
+    }
+    finally {
+      if (success) {
+        try {
+          inputStream.close();
+        }
+        catch (Throwable ignore) {
+        }
+      }
     }
 
     inputStream.read(classDefinition);
@@ -272,7 +284,7 @@ public class ClassChangeUtil {
 
         final String nestedClassName = fqcn + "$" + s;
 
-        Class cls = null;
+        Class<?> cls = null;
         try {
           cls = clsLoader.loadClass(nestedClassName);
         }
@@ -310,7 +322,7 @@ public class ClassChangeUtil {
 
       final String nestedClassName = fqcn + "$" + i;
 
-      Class cls = null;
+      Class<?> cls = null;
       try {
         cls = clsLoader.loadClass(nestedClassName);
       }
@@ -493,7 +505,6 @@ public class ClassChangeUtil {
     return matching;
   }
 
-  @SuppressWarnings("ConstantConditions")
   private static void _findMatchingOutputDirectoryByModel(final Set<File> matching,
                                                           final Map<String, String> toMatch,
                                                           final File from) {
@@ -674,13 +685,10 @@ public class ClassChangeUtil {
 
     RebindUtils.writeStringToFile(sourceFile, source);
 
-    compileClass(outputDir.getAbsolutePath(),
+    return compileClass(outputDir.getAbsolutePath(),
         packageName,
         simpleClassName,
         classOutputPath.getAbsolutePath());
-
-    return new File(outputDir.getAbsolutePath() + File.separator + simpleClassName + ".class")
-        .getAbsolutePath();
   }
 
   public static Class<?> compileAndLoadFromSource(final String packageName, final String simpleClassName,

@@ -98,8 +98,9 @@ public class MockIOCGenerator {
 
       System.out.println("wrote file: " + sourceFile.getAbsolutePath());
 
+      @SuppressWarnings("unchecked")
       final Class<? extends Bootstrapper> bsClass =
-          ClassChangeUtil.compileAndLoad(sourceFile, packageName, className);
+          (Class<? extends Bootstrapper>) ClassChangeUtil.compileAndLoad(sourceFile, packageName, className);
 
       return bsClass;
 

@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 public abstract class ServerMarshallUtil {
   private static Logger log = getLogger("ErraiMarshalling");
 
+  @SuppressWarnings("unchecked")
   public static Class<? extends MarshallerFactory> getGeneratedMarshallerFactoryForServer() {
     final String packageName = MarshallersGenerator.SERVER_MARSHALLER_PACKAGE_NAME;
     final String simpleClassName = MarshallersGenerator.SERVER_MARSHALLER_CLASS_NAME;
