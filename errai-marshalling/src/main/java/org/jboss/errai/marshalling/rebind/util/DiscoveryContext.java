@@ -21,10 +21,6 @@ interface DiscoveryContext {
 
   public boolean isVetoed();
 
-  public boolean isAbsolute();
-
-  public void resultsAbsolute();
-
   static DiscoveryContext create() {
     return new DiscoveryContextImpl();
   }

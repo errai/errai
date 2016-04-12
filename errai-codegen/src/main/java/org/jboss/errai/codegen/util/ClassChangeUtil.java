@@ -27,13 +27,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarFile;
@@ -472,110 +469,6 @@ public class ClassChangeUtil {
       log.debug("  !EXISTS: " + originalPath + " -> " + file.getAbsolutePath());
     }
     return null;
-  }
-
-  public static Set<File> findAllMatching(final String fileName, final File from) {
-    final HashSet<File> matching = new HashSet<File>();
-    _findAllMatching(matching, fileName, from);
-    return matching;
-  }
-
-  public static void _findAllMatching(final HashSet<File> matching, final String fileName, final File from) {
-    if (from.isDirectory()) {
-      final File[] files = from.listFiles();
-      if (files != null) {
-        for (final File file : from.listFiles()) {
-          _findAllMatching(matching, fileName, file);
-        }
-      }
-      else {
-        log.debug("Failed to read: " + from.getAbsolutePath());
-      }
-    }
-    else {
-      if (fileName.equals(from.getName())) {
-        matching.add(from);
-      }
-    }
-  }
-
-  public static Set<File> findMatchingOutputDirectoryByModel(final Map<String, String> toMatch, final File from) {
-    final HashSet<File> matching = new HashSet<File>();
-    _findMatchingOutputDirectoryByModel(matching, toMatch, from);
-    return matching;
-  }
-
-  private static void _findMatchingOutputDirectoryByModel(final Set<File> matching,
-                                                          final Map<String, String> toMatch,
-                                                          final File from) {
-    if (from.isDirectory()) {
-      for (final File file : from.listFiles()) {
-        final int currMatch = matching.size();
-        _findMatchingOutputDirectoryByModel(matching, toMatch, file);
-        if (matching.size() > currMatch) {
-          break;
-        }
-      }
-    }
-    else {
-      String name = from.getName();
-      if (name.endsWith(".class") && toMatch.containsKey(name = name.substring(0, name.length() - 6))) {
-        final String full = toMatch.get(name);
-        final ReverseMatchResult res = reversePathMatch(full, from);
-
-        if (res.isMatch()) {
-          matching.add(res.getMatchRoot());
-        }
-      }
-    }
-  }
-
-  private static ReverseMatchResult reversePathMatch(final String fqcn, final File location) {
-    final List<String> stk = new ArrayList<String>(Arrays.asList(fqcn.split("\\.")));
-
-    File curr = location;
-
-    if (!stk.isEmpty()) {
-      // remove the last element -- as that would be the file name.
-      stk.remove(stk.size() - 1);
-    }
-
-    while (!stk.isEmpty()) {
-      final String el = stk.remove(stk.size() - 1);
-      curr = curr.getParentFile();
-      if (curr == null || !curr.getName().equals(el)) {
-        break;
-      }
-    }
-
-    if (curr != null) {
-      curr = curr.getParentFile();
-    }
-
-    if (stk.isEmpty()) {
-      return new ReverseMatchResult(true, curr);
-    }
-    else {
-      return new ReverseMatchResult(false, curr);
-    }
-  }
-
-  private static class ReverseMatchResult {
-    private final boolean match;
-    private final File matchRoot;
-
-    private ReverseMatchResult(final boolean match, final File matchRoot) {
-      this.match = match;
-      this.matchRoot = matchRoot;
-    }
-
-    public boolean isMatch() {
-      return match;
-    }
-
-    public File getMatchRoot() {
-      return matchRoot;
-    }
   }
 
   private static String getPackageFromFQCN(final String fqcn) {

@@ -18,7 +18,6 @@ package org.jboss.errai.marshalling.rebind.util;
 
 class DiscoveryContextImpl implements DiscoveryContext {
   boolean vetoed = false;
-  boolean absolute = false;
 
   @Override
   public void veto() {
@@ -26,17 +25,7 @@ class DiscoveryContextImpl implements DiscoveryContext {
   }
 
   @Override
-  public void resultsAbsolute() {
-    this.absolute = true;
-  }
-
-  @Override
   public boolean isVetoed() {
     return vetoed;
-  }
-
-  @Override
-  public boolean isAbsolute() {
-    return absolute;
   }
 }
