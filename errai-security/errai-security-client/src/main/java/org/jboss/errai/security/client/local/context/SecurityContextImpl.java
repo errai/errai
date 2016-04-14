@@ -26,8 +26,11 @@ import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
@@ -48,7 +51,6 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -63,11 +65,17 @@ public class SecurityContextImpl implements SecurityContext {
    * performance reasons, this is preferable to scanning the whole classpath.
    */
   @Page
-  public static class SecurityRolesConstraintPage extends SimplePanel {
+  public static class SecurityRolesConstraintPage implements IsElement {
     @SuppressWarnings("unused")
     @Inject private TransitionToRole<LoginPage> loginTransition;
     @SuppressWarnings("unused")
     @Inject private TransitionToRole<SecurityError> securityErrorTransition;
+    @Inject private Div element;
+
+    @Override
+    public HTMLElement getElement() {
+      return element;
+    }
   }
 
   @Inject
