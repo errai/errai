@@ -13,7 +13,7 @@ execute the following command:
 
     mvn clean package -Pintegration-test -P<app-server-profile>
 
-Available app server profile names are jboss7, jboss6, jetty, and tomcat. Remember to clean every
+Available app server profile names are wildfly and tomcat. Remember to clean every
 time you build for a different app server.
 
 

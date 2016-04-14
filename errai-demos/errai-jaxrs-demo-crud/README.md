@@ -16,9 +16,9 @@ To try it in dev mode, ensure you have Maven 3 installed, then type the followin
 
     % mvn gwt:run
 
-To build a .war file that you can deploy to JBoss EAP 6, AS 7 or the OpenShift cloud:
+To build a .war file that you can deploy to Wildfly 8 or the OpenShift cloud:
 
-    % mvn clean package -Pjboss7
+    % mvn clean package -Pwildfly
 
 Then copy target/errai-jaxrs-demo-crud.war to the appropriate location.
 

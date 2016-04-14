@@ -48,7 +48,6 @@
     <url>scm:git:git@github.com:errai/errai.git</url>
   </scm>
   <properties>
-    <errai.dev.context>${project.artifactId}</errai.dev.context>
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
     <jetty.version>6.1.25</jetty.version>    
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
@@ -60,8 +59,9 @@
     <skipTests>true</skipTests>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <argLine></argLine>
-    <!-- Set this property to the full path to your Wildfly installation to run DevMode -->
-    <errai.jboss.home></errai.jboss.home>
+    <wildfly.version>8.1.0.Final</wildfly.version>
+    <errai.dev.context>${project.artifactId}</errai.dev.context>
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
   </properties>
 
   <!-- These must be here in this order because of missing guava-gwt snapshots in the JBoss Public Repository. -->
@@ -144,7 +144,6 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -159,6 +158,10 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jboss-as-support</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-common</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -341,6 +344,31 @@
         </executions>
       </plugin>
       <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-dist</artifactId>
+                  <version>${wildfly.version}</version>
+                  <type>zip</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.wildfly.plugins</groupId>
         <artifactId>wildfly-maven-plugin</artifactId>
         <version>${wildfly.plugin.version}</version>
@@ -387,12 +415,12 @@
           <strict>true</strict>
           <logLevel>INFO</logLevel>
           <noServer>false</noServer>
-          <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
+          <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -Derrai.jboss.config.file=standalone.xml -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
         </configuration>
         <!-- TODO Remove this once a gwt-maven-plugin version is released supporting GWT 2.8 -->
         <dependencies>
@@ -412,7 +440,7 @@
   </build>
   <profiles>
     <profile>
-      <id>jboss7</id>
+      <id>wildfly</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>

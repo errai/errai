@@ -38,7 +38,7 @@
         
         (it doesn't have to be PostgreSQL; you can use any Hibernate-compatible database)
        -->
-      <jta-data-source>java:jboss/datasources/ErraiTodoDS</jta-data-source>
+      <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
         <class>org.picketlink.idm.jpa.model.sample.simple.PartitionTypeEntity</class>
         <class>org.picketlink.idm.jpa.model.sample.simple.AttributeTypeEntity</class>
         <class>org.picketlink.idm.jpa.model.sample.simple.AccountTypeEntity</class>

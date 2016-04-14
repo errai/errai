@@ -23,7 +23,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.gwt.event.dom.client.ClickEvent;
 
 @Templated("TodoListPage.html#item")
-public class LockedTodoItemWidget extends TodoItemWidget {
+public class LockedTodoItemWidget extends BaseTodoItemWidget {
 
   @PostConstruct
   private void disableCheckbox() {

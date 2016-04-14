@@ -340,9 +340,9 @@
     </profile>
 
     <profile>
-      <id>jboss7</id>
+      <id>wildfly</id>
       <properties>
-        <webDescriptor>jboss7</webDescriptor>
+        <webDescriptor>wildfly</webDescriptor>
         <errai-jboss-as-support.scope>compile</errai-jboss-as-support.scope>
       </properties>
     </profile>

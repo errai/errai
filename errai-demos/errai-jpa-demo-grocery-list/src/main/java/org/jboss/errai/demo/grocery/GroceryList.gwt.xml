@@ -34,6 +34,7 @@
 
     <set-property name="gwt.logging.logLevel" value="INFO"/>
     <set-property name="gwt.logging.enabled" value="TRUE"/>
+    <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
 
     <replace-with class="org.jboss.errai.demo.grocery.client.local.Config">
         <when-type-is class="org.jboss.errai.bus.client.framework.Configuration" />

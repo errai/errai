@@ -339,12 +339,12 @@
           <webappDirectory>src/main/webapp</webappDirectory>
           <logLevel>INFO</logLevel>
           <noServer>false</noServer>
-          <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
+          <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.jboss.javaopts="-Xmx512M" -Derrai.dev.context=${errai.dev.context} -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${project.version}/errai-client-local-class-hider-${project.version}.jar</extraJvmArgs>
+          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
         </configuration>
         <!-- TODO Remove this once a gwt-maven-plugin version is released supporting GWT 2.8 -->
         <dependencies>
@@ -364,7 +364,7 @@
   </build>
   <profiles>
     <profile>
-      <id>jboss7</id>
+      <id>wildfly</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -470,11 +470,6 @@
         <dependency>
           <groupId>hsqldb</groupId>
           <artifactId>hsqldb</artifactId>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-naming</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>

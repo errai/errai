@@ -24,7 +24,6 @@ import org.jboss.errai.bus.client.framework.Configuration;
 public class Config implements Configuration {
     @Override
     public String getRemoteLocation() {
-        // return "https://grocery-edewit.rhcloud.com/errai-jpa-demo-grocery-list";
-        return "http://127.0.0.1:8888/";
+        return "http://127.0.0.1:8888/errai-jpa-demo-grocery-list/";
     }
 }

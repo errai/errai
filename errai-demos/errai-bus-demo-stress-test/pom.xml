@@ -54,7 +54,7 @@
   <properties>
     <skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <webDescriptor>jboss7</webDescriptor>
+    <webDescriptor>wildfly</webDescriptor>
     <!-- maven plugins versions -->
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
@@ -334,9 +334,9 @@
     </profile>
 
     <profile>
-      <id>jboss7</id>
+      <id>wildfly</id>
       <properties>
-        <webDescriptor>jboss7</webDescriptor>
+        <webDescriptor>wildfly</webDescriptor>
         <errai-jboss-as-support.scope>compile</errai-jboss-as-support.scope>
       </properties>
       
