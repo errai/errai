@@ -102,6 +102,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.ReachabilityStrategy;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
@@ -130,6 +131,8 @@ import jsinterop.annotations.JsType;
 public class IOCProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(IOCProcessor.class);
+
+  public static final String REACHABILITY_PROPERTY = "errai.ioc.reachability";
 
   private final Set<Class<? extends Annotation>> nonSimpletonTypeAnnotations = new HashSet<Class<? extends Annotation>>();
 
@@ -171,7 +174,7 @@ public class IOCProcessor {
     log.debug("Added {} classes to dependency graph in {}ms", allMetaClasses.size(), System.currentTimeMillis() - start);
 
     start = System.currentTimeMillis();
-    final DependencyGraph dependencyGraph = graphBuilder.createGraph();
+    final DependencyGraph dependencyGraph = graphBuilder.createGraph(getReachabilityStrategy());
     log.debug("Resolved dependency graph with {} reachable injectables in {}ms", dependencyGraph.getNumberOfInjectables(), System.currentTimeMillis() - start);
 
     FactoryGenerator.resetTotalTime();
@@ -198,6 +201,17 @@ public class IOCProcessor {
     registerFactoriesBody.finish();
     bootstrapContainer(processingContext, dependencyGraph, scopeContextSet, contextLocalVarInvocation, contextManagerFieldName);
     log.debug("Processed factory GWT.create calls in {}ms", System.currentTimeMillis() - start);
+  }
+
+  private ReachabilityStrategy getReachabilityStrategy() {
+    final String reachabilityStrategyName = System.getProperty(REACHABILITY_PROPERTY, ReachabilityStrategy.Annotated.name());
+    log.info("Reachability strategy set to " + reachabilityStrategyName);
+    try {
+      return ReachabilityStrategy.valueOf(reachabilityStrategyName);
+    } catch (IllegalArgumentException iae) {
+      throw new RuntimeException("Unrecognized reachability strategy, " + reachabilityStrategyName
+              + ". Please use one of the following: " + Arrays.toString(ReachabilityStrategy.values()), iae);
+    }
   }
 
   private void bootstrapContainer(final IOCProcessingContext processingContext, final DependencyGraph dependencyGraph,

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -42,6 +43,7 @@ import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -151,12 +153,12 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   @Override
-  public DependencyGraph createGraph() {
+  public DependencyGraph createGraph(final ReachabilityStrategy strategy) {
     resolveSpecializations();
     linkInjectableReferences();
     resolveDependencies();
     validateInjectables();
-    removeUnreachableInjectables();
+    removeUnreachableInjectables(strategy);
 
     return new DependencyGraphImpl(injectablesByName);
   }
@@ -304,11 +306,12 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     }
   }
 
-  private void removeUnreachableInjectables() {
+  private void removeUnreachableInjectables(final ReachabilityStrategy strategy) {
     final Set<String> reachableNames = new HashSet<String>();
     final Queue<Injectable> processingQueue = new LinkedList<Injectable>();
+    final Predicate<Injectable> reachabilityRoot = reachabilityRootPredicate(strategy);
     for (final Injectable injectable : injectablesByName.values()) {
-      if (!injectable.getWiringElementTypes().contains(WiringElementType.Simpleton)
+      if (reachabilityRoot.test(injectable)
               && !reachableNames.contains(injectable.getFactoryName())
               && !InjectableType.Disabled.equals(injectable.getInjectableType())) {
         processingQueue.add(injectable);
@@ -326,6 +329,19 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     }
 
     injectablesByName.keySet().retainAll(reachableNames);
+  }
+
+  private Predicate<Injectable> reachabilityRootPredicate(final ReachabilityStrategy strategy) {
+    switch (strategy) {
+    case All:
+      return inj -> true;
+    case Annotated:
+      return inj -> !inj.getWiringElementTypes().contains(WiringElementType.Simpleton);
+    case Aggressive:
+      return inj -> EntryPoint.class.equals(inj.getScope()) || inj.getWiringElementTypes().contains(WiringElementType.JsType);
+    default:
+      throw new RuntimeException("Unrecognized reachability strategy, " + strategy.toString());
+    }
   }
 
   private void resolveDependencies() {

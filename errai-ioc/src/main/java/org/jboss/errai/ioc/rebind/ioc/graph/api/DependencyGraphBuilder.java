@@ -18,6 +18,8 @@ package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
 import java.lang.annotation.Annotation;
 
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 import javax.inject.Scope;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
@@ -26,11 +28,14 @@ import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.extension.builtin.LoggerFactoryIOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.ResolutionPriority;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+
+import jsinterop.annotations.JsType;
 
 /**
  * Builds and resolves a dependency graph.
@@ -189,16 +194,36 @@ public interface DependencyGraphBuilder {
   void addDisposesParamDependency(Injectable injectable, MetaClass type, Qualifier qualifier, Integer index, MetaParameter param);
 
   /**
-   * Resolve all dependencies of added injectables. This method throws
-   * exceptions if any dependencies are unsastisfied or are ambiguously
-   * satisfied.
+   * Resolve all dependencies of added injectables. This method throws exceptions if any dependencies are unsastisfied
+   * or are ambiguously satisfied.
    *
-   * @return A {@link DependencyGraph} where all contained {@link Injectable
-   *         injectables} have fully resolved dependencies.
+   * @param strategy
+   *          Defines what strategy is used to determine reachability of beans. Beans considered unreachable will not be
+   *          available at runtime (reducing the size of the generated code).
+   *
+   * @return A {@link DependencyGraph} where all contained {@link Injectable injectables} have fully resolved
+   *         dependencies.
    *
    * @see ResolutionPriority
    */
-  DependencyGraph createGraph();
+  DependencyGraph createGraph(ReachabilityStrategy strategy);
+
+  public static enum ReachabilityStrategy {
+    /**
+     * With this strategy all types are considered reachable.
+     */
+    All,
+    /**
+     * With this strategy only beans reachable from beans that have explicit annotations relevant to the IoC are
+     * considered availablbe such as a scope, {@link Inject}, {@link Produces}, {@link JsType}, etc.
+     */
+    Annotated,
+    /**
+     * With this strategy only types annotated with reachable from a type that is an {@link EntryPoint} or a
+     * {@link JsType} are kept.
+     */
+    Aggressive
+  }
 
   /**
    * The kinds of {@link Injectable injectables}.
