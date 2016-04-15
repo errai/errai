@@ -49,6 +49,7 @@ import org.jboss.errai.ioc.client.AnnotationComparator;
 import org.jboss.errai.ioc.client.QualifierEqualityFactory;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.util.CDIAnnotationUtils;
+import org.jboss.errai.ioc.util.TranslatableAnnotationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +118,7 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     final ConstructorBlockBuilder<? extends ClassStructureBuilder<?>> constrBuilder = builder.publicConstructor();
 
-    for (final MetaClass MC_annotationClass : CDIAnnotationUtils.getTranslatableQualifiers(oracle)) {
+    for (final MetaClass MC_annotationClass : TranslatableAnnotationUtils.getTranslatableQualifiers(oracle)) {
       final Collection<MetaMethod> methods = CDIAnnotationUtils.getAnnotationAttributes(MC_annotationClass);
 
       if (methods.isEmpty()) continue;

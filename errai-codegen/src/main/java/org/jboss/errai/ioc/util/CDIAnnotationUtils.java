@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,12 +39,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * <p>
@@ -418,47 +412,7 @@ public class CDIAnnotationUtils {
       }
     }
 
-    public static Iterable<MetaClass> getTranslatableQualifiers(final TypeOracle oracle) {
-      final Set<Class<?>> typesAnnotatedWith = getQualifiersAsClasses();
-
-      final Iterator<Class<?>> iter = typesAnnotatedWith.iterator();
-
-      return () -> {
-        return new Iterator<MetaClass>() {
-          private MetaClass next;
-
-          @Override
-          public MetaClass next() {
-            if (hasNext()) {
-              final MetaClass retVal = next;
-              next = null;
-
-              return retVal;
-            }
-            else {
-              throw new NoSuchElementException();
-            }
-          }
-
-          @Override
-          public boolean hasNext() {
-            if (next == null) {
-              while (iter.hasNext()) {
-                final Class<?> aClass = iter.next();
-                try {
-                  next = GWTClass.newInstance(oracle, oracle.getType(aClass.getName()));
-                  break;
-                } catch (NotFoundException e) {}
-              }
-            }
-
-            return next != null;
-          }
-        };
-      };
-    }
-
-    private static Set<Class<?>> getQualifiersAsClasses() {
+    public static Set<Class<?>> getQualifiersAsClasses() {
       final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
       final Set<Class<?>> typesAnnotatedWith = scanner.getTypesAnnotatedWith(Qualifier.class);
       typesAnnotatedWith.add(Named.class);

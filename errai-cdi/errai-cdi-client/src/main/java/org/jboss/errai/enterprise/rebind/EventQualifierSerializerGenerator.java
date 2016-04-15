@@ -30,7 +30,7 @@ import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
-import org.jboss.errai.ioc.util.CDIAnnotationUtils;
+import org.jboss.errai.ioc.util.TranslatableAnnotationUtils;
 import org.jboss.errai.marshalling.rebind.util.OutputDirectoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(final TreeLogger treeLogger, final GeneratorContext context) {
     logger.info("Generating {}.{}...", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
-    final String source = NonGwtEventQualifierSerializerGenerator.generateSource(CDIAnnotationUtils.getTranslatableQualifiers(context.getTypeOracle()));
+    final String source = NonGwtEventQualifierSerializerGenerator.generateSource(TranslatableAnnotationUtils.getTranslatableQualifiers(context.getTypeOracle()));
 
     logger.info("Generating class file for server.");
     if (EnvUtil.isProdMode()) {
