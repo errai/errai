@@ -100,10 +100,6 @@ public interface HTMLElement extends Element, GlobalEventHandlers {
 
   @JsProperty String getIcon();
 
-  @JsProperty boolean getDisabled();
-
-  @JsProperty boolean getChecked();
-
   @JsProperty CSSStyleDeclaration getStyle();
 
   @JsProperty EventListener getOncopy();
