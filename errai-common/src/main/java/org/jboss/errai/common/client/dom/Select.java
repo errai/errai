@@ -44,7 +44,6 @@ public interface Select extends HTMLElement {
 
   @JsProperty OptionsCollection getOptions();
 
-  @Override
   @JsProperty boolean getDisabled();
   @JsProperty void setDisabled(boolean disabled);
 

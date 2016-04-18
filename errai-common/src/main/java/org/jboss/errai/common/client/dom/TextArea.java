@@ -42,7 +42,6 @@ public interface TextArea extends HTMLElement {
   @JsProperty int getCols();
   @JsProperty void setCols(int cols);
 
-  @Override
   @JsProperty boolean getDisabled();
   @JsProperty void setDisabled(boolean disabled);
 

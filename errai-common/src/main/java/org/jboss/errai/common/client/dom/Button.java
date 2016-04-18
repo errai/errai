@@ -36,7 +36,6 @@ public interface Button extends HTMLElement {
   @Override
   @JsProperty void setAccessKey(String accessKey);
 
-  @Override
   @JsProperty boolean getDisabled();
   @JsProperty void setDisabled(boolean disabled);
 

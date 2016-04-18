@@ -39,7 +39,6 @@ public interface Option extends HTMLElement {
 
   @JsProperty int getIndex();
 
-  @Override
   @JsProperty boolean getDisabled();
   @JsProperty void setDisabled(boolean disabled);
 

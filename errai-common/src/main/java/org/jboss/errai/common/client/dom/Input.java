@@ -51,11 +51,9 @@ public interface Input extends HTMLElement {
   @JsProperty String getAlt();
   @JsProperty void setAlt(String alt);
 
-  @Override
   @JsProperty boolean getChecked();
   @JsProperty void setChecked(boolean checked);
 
-  @Override
   @JsProperty boolean getDisabled();
   @JsProperty void setDisabled(boolean disabled);
 
