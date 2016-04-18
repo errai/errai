@@ -28,7 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element({"h1", "h2", "h3", "h4", "h5", "h6"})
-public interface Heading {
+public interface Heading extends HTMLElement {
   @JsProperty String getAlign();
   @JsProperty void setAlign(String align);
 }
