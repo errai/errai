@@ -6488,6 +6488,8 @@ public class LoginLayout extends PageLayout {
 }
 ----
 
+Be aware that templates shouldn't all be [code]+@Singleton+. Singleton templates will be shared, so you can't attach the same template component twice. Duplicated template components should be dependent-scoped, so several instances will be created when they are injected.
+
 [[sid-51806600_ErraiUI-Stylesheetbinding]]
 
 === Stylesheet binding
