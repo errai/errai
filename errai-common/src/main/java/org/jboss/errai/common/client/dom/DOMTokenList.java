@@ -32,4 +32,6 @@ public interface DOMTokenList {
   void add(String token);
   void remove(String token);
   boolean toggle(String token);
+  void replace(String token,String newToken);
+  boolean supports(String token);
 }
