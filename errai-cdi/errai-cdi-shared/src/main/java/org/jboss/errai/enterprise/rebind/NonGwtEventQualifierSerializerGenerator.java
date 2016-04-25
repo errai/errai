@@ -34,11 +34,11 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.function.Function;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
-import org.jboss.errai.ioc.util.CDIAnnotationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,9 +71,8 @@ public class NonGwtEventQualifierSerializerGenerator {
 
     for (final MetaClass qual : qualifiers) {
       final Collection<MetaMethod> bindingAttributes = CDIAnnotationUtils.getAnnotationAttributes(qual);
-      final Collection<MetaMethod> nonBindingAttributes = CDIAnnotationUtils.getNonBindingAttributes(qual);
       if (!bindingAttributes.isEmpty()) {
-        ctor.append(loadVariable("serializers").invoke("put", qual.getFullyQualifiedName(), generateEntryStatement(qual, bindingAttributes, nonBindingAttributes)));
+        ctor.append(loadVariable("serializers").invoke("put", qual.getFullyQualifiedName(), generateEntryStatement(qual, bindingAttributes)));
       }
     }
     ctor.finish();
@@ -82,7 +81,7 @@ public class NonGwtEventQualifierSerializerGenerator {
   }
 
   private static ContextualStatementBuilder generateEntryStatement(final MetaClass qual,
-          final Collection<MetaMethod> bindingAttributes, final Collection<MetaMethod> nonBindingAttributes) {
+          final Collection<MetaMethod> bindingAttributes) {
     ContextualStatementBuilder entryStmt = invokeStatic(EventQualifierSerializer.EntryBuilder.class, "create");
 
     for (final MetaMethod attr : bindingAttributes) {

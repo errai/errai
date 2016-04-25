@@ -117,7 +117,12 @@ public class CDIExtensionPoints implements Extension {
     vetoClasses = Collections.unmodifiableSet(veto);
 
     if (!EventQualifierSerializer.isSet()) {
-      NonGwtEventQualifierSerializerGenerator.loadAndSetEventQualifierSerializer();
+      try {
+        NonGwtEventQualifierSerializerGenerator.loadAndSetEventQualifierSerializer();
+      } catch (Throwable t) {
+        log.warn("Failed to load static or create static " + EventQualifierSerializer.class.getSimpleName() + ". Falling back to dynamic serialization.");
+        EventQualifierSerializer.set(new DynamicEventQualifierSerializer());
+      }
     }
   }
 

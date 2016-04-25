@@ -14,18 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ioc.util;
+package org.jboss.errai.codegen.util;
+
+import static java.lang.reflect.Modifier.isPublic;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Named;
@@ -431,26 +432,30 @@ public class CDIAnnotationUtils {
     }
 
     public static Collection<MetaMethod> getAnnotationAttributes(final MetaClass annoClass) {
-      final List<MetaMethod> methods = new ArrayList<MetaMethod>();
-      for (final MetaMethod method : annoClass.getDeclaredMethods()) {
-      if (!method.isAnnotationPresent(Nonbinding.class) && method.isPublic() && !method.getName().equals("equals")
-              && !method.getName().equals("hashCode")) {
-          methods.add(method);
-        }
-      }
+      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
+              method -> !method.isAnnotationPresent(Nonbinding.class) && method.isPublic()
+                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
+    }
 
-      return (methods.isEmpty() ? Collections.emptyList() : methods);
+    public static Collection<Method> getAnnotationAttributes(final Class<?> annoClass) {
+      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
+              method -> !method.isAnnotationPresent(Nonbinding.class) && isPublic(method.getModifiers())
+                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
     }
 
     public static Collection<MetaMethod> getNonBindingAttributes(final MetaClass annoClass) {
-      final List<MetaMethod> methods = new ArrayList<MetaMethod>();
-      for (final MetaMethod method : annoClass.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(Nonbinding.class) && method.isPublic() && !method.getName().equals("equals")
-              && !method.getName().equals("hashCode")) {
-          methods.add(method);
-        }
-      }
+      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
+              method -> method.isAnnotationPresent(Nonbinding.class) && method.isPublic()
+                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
+    }
 
-      return (methods.isEmpty() ? Collections.emptyList() : methods);
+    public static Collection<Method> getNonBindingAttributes(final Class<?> annoClass) {
+      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
+              method -> method.isAnnotationPresent(Nonbinding.class) && isPublic(method.getModifiers())
+                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
+    }
+
+    private static <T, M> Collection<M> filterAnnotationMethods(final Stream<M> methods, final Predicate<M> methodPredicate) {
+      return methods.filter(methodPredicate).collect(Collectors.toList());
     }
 }

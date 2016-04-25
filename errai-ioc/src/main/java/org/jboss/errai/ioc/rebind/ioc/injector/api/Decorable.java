@@ -41,10 +41,10 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
-import org.jboss.errai.ioc.util.CDIAnnotationUtils;
 
 /**
  * Contains metadata for an element of a particular {@link DecorableType}.

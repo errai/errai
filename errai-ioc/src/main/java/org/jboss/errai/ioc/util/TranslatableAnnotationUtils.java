@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;

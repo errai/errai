@@ -36,9 +36,9 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
-import org.jboss.errai.ioc.util.CDIAnnotationUtils;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
