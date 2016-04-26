@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +41,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.common.client.util.AnnotationPropertyAccessor;
+import org.jboss.errai.common.client.util.AnnotationPropertyAccessorBuilder;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 
@@ -101,9 +104,10 @@ public class CDIAnnotationUtils {
         @Override
         protected String getShortClassName(java.lang.Class<?> cls) {
             Class<? extends Annotation> annotationType = null;
-            for (Class<?> iface : ClassUtils.getAllInterfaces(cls)) {
+            for (final Class<?> iface : ClassUtils.getAllInterfaces(cls)) {
                 if (Annotation.class.isAssignableFrom(iface)) {
                     @SuppressWarnings("unchecked")
+                    final
                     //because we just checked the assignability
                     Class<? extends Annotation> found = (Class<? extends Annotation>) iface;
                     annotationType = found;
@@ -156,28 +160,28 @@ public class CDIAnnotationUtils {
         if (a1 == null || a2 == null) {
             return false;
         }
-        Class<? extends Annotation> type = a1.annotationType();
-        Class<? extends Annotation> type2 = a2.annotationType();
+        final Class<? extends Annotation> type = a1.annotationType();
+        final Class<? extends Annotation> type2 = a2.annotationType();
         Validate.notNull(type, "Annotation %s with null annotationType()", a1);
         Validate.notNull(type2, "Annotation %s with null annotationType()", a2);
         if (!type.equals(type2)) {
             return false;
         }
         try {
-            for (Method m : type.getDeclaredMethods()) {
+            for (final Method m : type.getDeclaredMethods()) {
                 if (m.getParameterTypes().length == 0
                         && isValidAnnotationMemberType(m.getReturnType())
                         && !m.isAnnotationPresent(Nonbinding.class)) {
-                    Object v1 = m.invoke(a1);
-                    Object v2 = m.invoke(a2);
+                    final Object v1 = m.invoke(a1);
+                    final Object v2 = m.invoke(a2);
                     if (!memberEquals(m.getReturnType(), v1, v2)) {
                         return false;
                     }
                 }
             }
-        } catch (IllegalAccessException ex) {
+        } catch (final IllegalAccessException ex) {
             return false;
-        } catch (InvocationTargetException ex) {
+        } catch (final InvocationTargetException ex) {
             return false;
         }
         return true;
@@ -197,19 +201,19 @@ public class CDIAnnotationUtils {
      */
     public static int hashCode(Annotation a) {
         int result = 0;
-        Class<? extends Annotation> type = a.annotationType();
-        for (Method m : type.getDeclaredMethods()) {
+        final Class<? extends Annotation> type = a.annotationType();
+        for (final Method m : type.getDeclaredMethods()) {
             if (!m.isAnnotationPresent(Nonbinding.class)) {
               try {
-                Object value = m.invoke(a);
+                final Object value = m.invoke(a);
                 if (value == null) {
                   throw new IllegalStateException(
                           String.format("Annotation method %s returned null", m));
                 }
                 result += hashMember(m.getName(), value);
-              } catch (RuntimeException ex) {
+              } catch (final RuntimeException ex) {
                 throw ex;
-              } catch (Exception ex) {
+              } catch (final Exception ex) {
                 throw new RuntimeException(ex);
               }
             }
@@ -226,16 +230,16 @@ public class CDIAnnotationUtils {
      * {@code null}
      */
     public static String toString(final Annotation a) {
-        ToStringBuilder builder = new ToStringBuilder(a, TO_STRING_STYLE);
-        for (Method m : a.annotationType().getDeclaredMethods()) {
+        final ToStringBuilder builder = new ToStringBuilder(a, TO_STRING_STYLE);
+        for (final Method m : a.annotationType().getDeclaredMethods()) {
             if (m.getParameterTypes().length > 0) {
                 continue; //wtf?
             }
             try {
                 builder.append(m.getName(), m.invoke(a));
-            } catch (RuntimeException ex) {
+            } catch (final RuntimeException ex) {
                 throw ex;
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
@@ -273,7 +277,7 @@ public class CDIAnnotationUtils {
      * @return a hash code for this member
      */
     private static int hashMember(String name, Object value) {
-        int part1 = name.hashCode() * 127;
+        final int part1 = name.hashCode() * 127;
         if (value.getClass().isArray()) {
             return part1 ^ arrayMemberHash(value.getClass().getComponentType(), value);
         }
@@ -457,5 +461,47 @@ public class CDIAnnotationUtils {
 
     private static <T, M> Collection<M> filterAnnotationMethods(final Stream<M> methods, final Predicate<M> methodPredicate) {
       return methods.filter(methodPredicate).collect(Collectors.toList());
+    }
+
+    public static AnnotationPropertyAccessor createDynamicSerializer(final Class<? extends Annotation> annotationType) {
+      final AnnotationPropertyAccessorBuilder builder = AnnotationPropertyAccessorBuilder.create();
+
+      final Collection<Method> annoAttrs = CDIAnnotationUtils.getAnnotationAttributes(annotationType);
+      for (final Method attr : annoAttrs) {
+        builder.with(attr.getName(), anno -> {
+          try {
+            final String retVal;
+            final Function<Object, String> toString = componentToString(
+                  attr.getReturnType().isArray() ? attr.getReturnType().getComponentType() : attr.getReturnType());
+            if (attr.getReturnType().isArray()) {
+              final StringBuilder sb = new StringBuilder();
+              final Object[] array = (Object[]) attr.invoke(anno);
+              sb.append("[");
+              for (final Object obj : array) {
+                sb.append(toString.apply(obj)).append(",");
+              }
+              sb.replace(sb.length()-1, sb.length(), "]");
+              retVal = sb.toString();
+            }
+            else {
+              retVal = toString.apply(attr.invoke(anno));
+            }
+            return retVal;
+          } catch (final Exception e) {
+            throw new RuntimeException(String.format("Could not access '%s' property while serializing %s.", attr.getName(), anno.annotationType()), e);
+          }
+        });
+      }
+
+      return builder.build();
+    }
+
+    private static Function<Object, String> componentToString(final Class<?> returnType) {
+      if (Class.class.equals(returnType)) {
+        return o -> ((Class<?>) o).getName();
+      }
+      else {
+        return o -> String.valueOf(o);
+      }
     }
 }

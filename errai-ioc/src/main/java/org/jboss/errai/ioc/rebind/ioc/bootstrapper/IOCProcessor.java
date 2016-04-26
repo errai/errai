@@ -72,12 +72,14 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.util.AnnotationSerializer;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.Bootstrapper;
+import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
@@ -208,7 +210,7 @@ public class IOCProcessor {
     log.info("Reachability strategy set to " + reachabilityStrategyName);
     try {
       return ReachabilityStrategy.valueOf(reachabilityStrategyName);
-    } catch (IllegalArgumentException iae) {
+    } catch (final IllegalArgumentException iae) {
       throw new RuntimeException("Unrecognized reachability strategy, " + reachabilityStrategyName
               + ". Please use one of the following: " + Arrays.toString(ReachabilityStrategy.values()), iae);
     }
@@ -453,6 +455,10 @@ public class IOCProcessor {
             .finish()
       .publicOverridesMethod("getFactoryName")
             .append(Stmt.loadLiteral(injectable.getFactoryName()).returnValue())
+            .finish()
+      .publicOverridesMethod("getQualifiers")
+            .append(Stmt.nestedCall(Stmt.newObject(parameterizedAs(JsArray.class,  typeParametersOf(String.class)),
+                    Stmt.loadLiteral(AnnotationSerializer.serialize(injectable.getQualifier().iterator())))).returnValue())
             .finish();
 
     return jsTypeProvider.finish();

@@ -17,10 +17,9 @@
 package org.jboss.errai.cdi.server;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Collection;
 
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
+import org.jboss.errai.common.client.util.AnnotationPropertyAccessor;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 
 /**
@@ -36,26 +35,11 @@ public class DynamicEventQualifierSerializer extends EventQualifierSerializer {
   @Override
   public String serialize(final Annotation qualifier) {
     if (!serializers.containsKey(qualifier.annotationType().getName())) {
-      serializers.put(qualifier.annotationType().getName(), createDynamicSerializer(qualifier.annotationType()));
+      final AnnotationPropertyAccessor serializer = CDIAnnotationUtils.createDynamicSerializer(qualifier.annotationType());
+      serializers.put(qualifier.annotationType().getName(), serializer);
     }
 
     return super.serialize(qualifier);
   }
-
-  private Entry createDynamicSerializer(final Class<? extends Annotation> annotationType) {
-    final EntryBuilder builder = EntryBuilder.create();
-
-    final Collection<Method> annoAttrs = CDIAnnotationUtils.getAnnotationAttributes(annotationType);
-    for (final Method attr : annoAttrs) {
-      builder.with(attr.getName(), anno -> {
-        try {
-          return attr.invoke(anno).toString();
-        } catch (Exception e) {
-          throw new RuntimeException(String.format("Could not access '%s' property while serializing %s.", attr.getName(), anno.annotationType()), e);
-        }
-      });
-    }
-
-    return builder.build();
-  }
+  
 }

@@ -38,6 +38,7 @@ import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.function.Function;
+import org.jboss.errai.common.client.util.AnnotationPropertyAccessorBuilder;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public class NonGwtEventQualifierSerializerGenerator {
 
   private static ContextualStatementBuilder generateEntryStatement(final MetaClass qual,
           final Collection<MetaMethod> bindingAttributes) {
-    ContextualStatementBuilder entryStmt = invokeStatic(EventQualifierSerializer.EntryBuilder.class, "create");
+    ContextualStatementBuilder entryStmt = invokeStatic(AnnotationPropertyAccessorBuilder.class, "create");
 
     for (final MetaMethod attr : bindingAttributes) {
       entryStmt = entryStmt.invoke("with", attr.getName(), anonymousAttributeAccessorFor(attr));

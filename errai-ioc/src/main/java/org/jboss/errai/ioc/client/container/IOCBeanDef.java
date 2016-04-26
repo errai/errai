@@ -22,8 +22,10 @@ import java.util.Set;
 import org.jboss.errai.ioc.client.api.ActivatedBy;
 
 /**
- *
+ * Definition of a managed bean.
+ * 
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface IOCBeanDef<T> {
 
@@ -75,17 +77,28 @@ public interface IOCBeanDef<T> {
   /**
    * Returns the name of the bean.
    *
-   * @return the name of the bean. If the bean does not have a name, returns null.
+   * @return the name of the bean. If the bean does not have a name, returns
+   *         null.
    */
   public String getName();
 
   /**
-   * Returns true if the bean is activated. All managed beans are activated by default unless a
-   * {@link BeanActivator} was specified using {@link ActivatedBy} which will be consulted when
-   * invoking this method.
+   * Returns true if the bean is activated. All managed beans are activated by
+   * default unless a {@link BeanActivator} was specified using
+   * {@link ActivatedBy} which will be consulted when invoking this method.
    *
    * @return true if activated, otherwise false.
    */
   public boolean isActivated();
+
+  /**
+   * Returns true if this bean definition was discovered and loaded at runtime from
+   * an external script.
+   * 
+   * @return true if dynamic, otherwise false.
+   */
+  public default boolean isDynamic() {
+    return false;
+  }
 
 }

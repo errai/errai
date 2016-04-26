@@ -17,14 +17,12 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.function.Function;
+import org.jboss.errai.common.client.util.AnnotationPropertyAccessor;
+import org.jboss.errai.common.client.util.SharedAnnotationSerializer;
 
 /**
  *
@@ -34,38 +32,6 @@ public abstract class EventQualifierSerializer {
 
   public static final String SERIALIZER_CLASS_NAME = "EventQualifierSerializerImpl";
   public static final String SERIALIZER_PACKAGE_NAME = "org.jboss.errai.cdi";
-
-  protected static class Entry {
-    private final Map<String, Function<Annotation, String>> accessorsByPropertyName;
-
-    private Entry(final Map<String, Function<Annotation, String>> accessorsByPropertyName) {
-      this.accessorsByPropertyName = accessorsByPropertyName;
-    }
-  }
-
-  public static class EntryBuilder {
-    private final SortedMap<String, Function<Annotation, String>> accessorsByPropertyName = new TreeMap<>();
-
-    private EntryBuilder() {}
-
-    public static EntryBuilder create() {
-      return new EntryBuilder();
-    }
-
-    public EntryBuilder with(final String propertyName, final Function<Annotation, String> accessor) {
-      accessorsByPropertyName.put(propertyName, accessor);
-
-      return this;
-    }
-
-    public Entry build() {
-      return new Entry(createOrderedPropertyMap());
-    }
-
-    private Map<String, Function<Annotation, String>> createOrderedPropertyMap() {
-      return (accessorsByPropertyName.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(accessorsByPropertyName));
-    }
-  }
 
   private static EventQualifierSerializer instance;
 
@@ -87,31 +53,14 @@ public abstract class EventQualifierSerializer {
             + ".get() without first setting an instance.", instance);
   }
 
-  protected final Map<String, Entry> serializers = new HashMap<>();
+  protected final Map<String, AnnotationPropertyAccessor> serializers = new HashMap<>();
 
   protected EventQualifierSerializer() {
   }
 
   public String serialize(final Annotation qualifier) {
-    final Entry entry = serializers.get(qualifier.annotationType().getName());
-    if (entry != null) {
-      final StringBuilder builder = new StringBuilder(qualifier.annotationType().getName());
-      if (!entry.accessorsByPropertyName.isEmpty()) {
-        builder.append('(');
-        for (final Map.Entry<String, Function<Annotation, String>> e : entry.accessorsByPropertyName.entrySet()) {
-          builder.append(e.getKey())
-                 .append('=')
-                 .append(e.getValue().apply(qualifier))
-                 .append(',');
-        }
-        builder.replace(builder.length()-1, builder.length(), ")");
-      }
-
-      return builder.toString();
-    }
-    else {
-      return qualifier.annotationType().getName();
-    }
+    final AnnotationPropertyAccessor entry = serializers.get(qualifier.annotationType().getName());
+    return SharedAnnotationSerializer.serialize(qualifier, entry);
   }
 
   public String qualifierName(final String serializedQualifier) {

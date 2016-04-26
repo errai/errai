@@ -20,10 +20,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import javax.enterprise.inject.Any;
+import javax.inject.Named;
 
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
+import org.jboss.errai.ioc.client.container.DynamicAnnotation;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
@@ -48,12 +53,14 @@ import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeDependentInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeNamedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeSingletonInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.JsTypeWithQualifiers;
 import org.jboss.errai.ioc.tests.wiring.client.res.MultipleImplementationsJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsType;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsTypeWithConstructorDependency;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsTypeWithFieldDependency;
 import org.jboss.errai.ioc.tests.wiring.client.res.NativeTypeTestModule;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProducedJsType;
+import org.jboss.errai.ioc.tests.wiring.client.res.QualWithMultiMembers;
 import org.jboss.errai.ioc.tests.wiring.client.res.UnimplementedType;
 
 import com.google.gwt.core.client.Callback;
@@ -439,6 +446,39 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
     final ExternalTestModule module = IOC.getBeanManager().lookupBean(ExternalTestModule.class).getInstance();
     assertNotNull(module.defaultConcreteWindowScopedJsType);
     assertEquals("external", module.defaultConcreteWindowScopedJsType.message());
+  }
+
+  // TODO: fix this test.
+  public void ignoreQualifiersOnJsType() throws Exception {
+    final SyncBeanDef<JsTypeWithQualifiers> beanDef = IOC.getBeanManager().lookupBeans(JsTypeWithQualifiers.class).iterator().next();
+    assertTrue(beanDef.isDynamic());
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    final Set<DynamicAnnotation> quals = (Set) beanDef.getQualifiers();
+    assertEquals(3, quals.size());
+
+    final Set<String> notYetFound = new HashSet<>(Arrays.asList(Named.class.getName(),
+            QualWithMultiMembers.class.getName(), Any.class.getName()));
+    for (final DynamicAnnotation qual : quals) {
+      final Map<String, String> members = qual.getMembers();
+      if (Any.class.getName().equals(qual.getName())) {
+        assertEquals(0, members.size());
+        notYetFound.remove(Any.class.getName());
+      }
+      else if (Named.class.getName().equals(qual.getName())) {
+        assertEquals(1, members.size());
+        assertEquals("Moogah", members.get("value"));
+        notYetFound.remove(Named.class.getName());
+      }
+      else if (QualWithMultiMembers.class.getName().equals(qual.getName())) {
+        assertEquals(3, members.size());
+        assertEquals("1", members.get("num"));
+        assertEquals("foo", members.get("text"));
+        assertEquals(Arrays.toString(new Class<?>[] {JsTypeWithQualifiers.class}), members.get("clazzes"));
+        notYetFound.remove(QualWithMultiMembers.class.getName());
+      }
+    }
+
+    assertEquals(0, notYetFound.size());
   }
 
   private void injectScriptThenRun(final Runnable test) {

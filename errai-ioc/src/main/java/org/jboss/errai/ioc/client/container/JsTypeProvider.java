@@ -18,6 +18,8 @@ package org.jboss.errai.ioc.client.container;
 
 import javax.inject.Named;
 
+import org.jboss.errai.ioc.client.JsArray;
+
 import jsinterop.annotations.JsType;
 
 /**
@@ -44,4 +46,12 @@ public interface JsTypeProvider<T> {
    * Returns the name of the {@link Factory} that generates this bean, or else null.
    */
   String getFactoryName();
+  
+  /**
+   * Returns string representations of the qualifiers and their members. 
+   */
+  default JsArray<String> getQualifiers() {
+    return new JsArray<String>(new String[0]);
+  }
+  
 }

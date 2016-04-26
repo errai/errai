@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -217,7 +216,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   // TODO Find way to properly get scope, qualifiers, and assignable types.
   @SuppressWarnings("rawtypes")
   private final class JsTypeBeanDefImplementation implements SyncBeanDef {
-    private final JsTypeProvider provider;
+    private final JsTypeProvider<?> provider;
     private final String name;
 
     private JsTypeBeanDefImplementation(final JsTypeProvider provider, final String name) {
@@ -247,7 +246,12 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public Set getQualifiers() {
-      return Collections.singleton(QualifierUtil.ANY_ANNOTATION);
+      final Set<DynamicAnnotation> qualifiers = new HashSet<>();
+      for (final String serializedQualifier : JsArray.iterable(provider.getQualifiers())) {
+        qualifiers.add(DynamicAnnotation.create(serializedQualifier));
+      }
+
+      return qualifiers;
     }
 
     @Override
@@ -273,6 +277,11 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     @Override
     public Object newInstance() {
       throw new UnsupportedOperationException("Cannot create new instance of JsType bean.");
+    }
+
+    @Override
+    public boolean isDynamic() {
+      return true;
     }
 
     @Override
