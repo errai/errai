@@ -20,10 +20,11 @@ import javax.inject.Inject;
 import javax.validation.Validator;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.validation.client.dynamic.DynamicValidator;
 
 /**
  * Module used for integration testing.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
@@ -32,8 +33,15 @@ public class ModuleWithInjectedValidator {
   @Inject
   private Validator validator;
 
+  @Inject
+  private DynamicValidator dynamicValidator;
+
   public Validator getValidator() {
     return validator;
   }
-  
+
+  public DynamicValidator getDynamicValidator() {
+    return dynamicValidator;
+  }
+
 }

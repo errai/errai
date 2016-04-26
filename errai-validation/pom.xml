@@ -96,7 +96,7 @@
               </additionalClasspathElements>
               <useManifestOnlyJar>false</useManifestOnlyJar>
               <forkMode>pertest</forkMode>
-              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false</argLine>
+              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false -Derrai.dynamic_validation.enabled=true</argLine>
 
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->

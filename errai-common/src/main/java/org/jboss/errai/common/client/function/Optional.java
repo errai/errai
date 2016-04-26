@@ -88,4 +88,13 @@ public class Optional<T> {
     return value != null;
   }
 
+  public T get() {
+    if (value == null) {
+      throw new NullPointerException();
+    }
+    else {
+      return value;
+    }
+  }
+
 }
