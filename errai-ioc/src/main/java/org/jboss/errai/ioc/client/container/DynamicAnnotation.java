@@ -29,4 +29,14 @@ public interface DynamicAnnotation extends Annotation {
    * @return map of members if present, otherwise an empty map.
    */
   Map<String, String> getMembers();
+  
+  /**
+   * Returns the annotation member with the given name. 
+   * 
+   * @param name of the member, must not be null.
+   * @return String representation of the member value, null if member doesn't exist.
+   */
+  default String getMember(final String name) {
+    return getMembers().get(name);
+  }
 }
