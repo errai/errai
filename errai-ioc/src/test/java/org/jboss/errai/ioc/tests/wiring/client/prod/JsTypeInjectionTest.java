@@ -34,6 +34,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeImpl;
 import org.jboss.errai.ioc.tests.wiring.client.res.ConcreteWindowScopedJsType;
@@ -448,10 +449,18 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
     assertEquals("external", module.defaultConcreteWindowScopedJsType.message());
   }
 
-  // TODO: fix this test.
-  public void ignoreQualifiersOnJsType() throws Exception {
-    final SyncBeanDef<JsTypeWithQualifiers> beanDef = IOC.getBeanManager().lookupBeans(JsTypeWithQualifiers.class).iterator().next();
-    assertTrue(beanDef.isDynamic());
+  public void testQualifiersOnJsType() throws Exception {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    final Collection<SyncBeanDef<JsTypeWithQualifiers>> beans = (Collection) ((SyncBeanManagerImpl) IOC.getBeanManager())
+            .lookupBeans(JsTypeWithQualifiers.class.getName(), true);
+    SyncBeanDef<JsTypeWithQualifiers> beanDef = null;
+    for (final SyncBeanDef<JsTypeWithQualifiers> bd : beans) {
+      if (bd.isDynamic()) {
+        beanDef = bd;
+      }
+    }
+    assertNotNull("No bean JS bean def found", beanDef);
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     final Set<DynamicAnnotation> quals = (Set) beanDef.getQualifiers();
     assertEquals(3, quals.size());
@@ -473,7 +482,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         assertEquals(3, members.size());
         assertEquals("1", members.get("num"));
         assertEquals("foo", members.get("text"));
-        assertEquals(Arrays.toString(new Class<?>[] {JsTypeWithQualifiers.class}), members.get("clazzes"));
+        assertEquals(Arrays.toString(new String[] {JsTypeWithQualifiers.class.getName()}), members.get("clazzes"));
         notYetFound.remove(QualWithMultiMembers.class.getName());
       }
     }

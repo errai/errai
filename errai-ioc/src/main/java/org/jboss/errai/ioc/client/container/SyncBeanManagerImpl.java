@@ -113,9 +113,14 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     }
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({ "rawtypes" })
   @Override
   public Collection<SyncBeanDef> lookupBeans(final String name) {
+    return lookupBeans(name, false);
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  public Collection<SyncBeanDef> lookupBeans(final String name, final boolean keepJsDups) {
     Assert.notNull(name);
 
     final Collection<FactoryHandle> handles = handlesByName.get(name);
@@ -132,7 +137,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
       }
     }
     for (final JsTypeProvider<?> provider : JsArray.iterable(jsProviders)) {
-      if (provider.getFactoryName() == null || !beanDefFactoryNames.contains(provider.getFactoryName())) {
+      if (keepJsDups || provider.getFactoryName() == null || !beanDefFactoryNames.contains(provider.getFactoryName())) {
         beanDefs.add(new JsTypeBeanDefImplementation(provider, name));
       }
     }
