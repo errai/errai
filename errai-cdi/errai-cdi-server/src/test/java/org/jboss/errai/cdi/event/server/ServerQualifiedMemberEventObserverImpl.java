@@ -28,6 +28,7 @@ import javax.inject.Named;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.cdi.client.qualifier.Value;
+import org.jboss.errai.cdi.client.qualifier.WithClazz;
 import org.jboss.errai.cdi.client.qualifier.WithEnum;
 import org.jboss.errai.cdi.client.qualifier.WithInt;
 import org.jboss.errai.cdi.client.qualifier.WithMultiple;
@@ -51,6 +52,11 @@ public class ServerQualifiedMemberEventObserverImpl implements ServerQualifierMe
   @Override
   public void setActive(final boolean active) {
     this.active = active;
+  }
+
+  public void observeWithClazz(@Observes @WithClazz(Object.class) PortableEvent value) {
+    if (active)
+      event.fire(new FiredQualifier(WithClazz.class.getName(), Collections.singletonMap("value", Object.class.getName())));
   }
 
   public void observeWithEnumOne(@Observes @WithEnum(Value.ONE) PortableEvent value) {

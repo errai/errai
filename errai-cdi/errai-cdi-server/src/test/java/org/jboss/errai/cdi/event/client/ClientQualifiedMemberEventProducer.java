@@ -22,6 +22,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jboss.errai.cdi.client.qualifier.Value;
+import org.jboss.errai.cdi.client.qualifier.WithClazz;
+import org.jboss.errai.cdi.client.qualifier.WithClazzArray;
 import org.jboss.errai.cdi.client.qualifier.WithEnum;
 import org.jboss.errai.cdi.client.qualifier.WithInt;
 import org.jboss.errai.cdi.client.qualifier.WithMultiple;
@@ -47,6 +49,8 @@ public class ClientQualifiedMemberEventProducer implements QualifiedMemberEventP
   private final Event<PortableEvent> multiple3;
   private final Event<PortableEvent> multipleNone;
   private final Event<PortableEvent> namedEvent;
+  private final Event<PortableEvent> clazzEvent;
+  private final Event<PortableEvent> clazzArray;
 
   @Inject
   public ClientQualifiedMemberEventProducer(@WithEnum(Value.ONE) Event<PortableEvent> enumOne,
@@ -60,7 +64,9 @@ public class ClientQualifiedMemberEventProducer implements QualifiedMemberEventP
                                 @WithMultiple(enumValue = Value.ONE, intValue = 0, strValue = "") Event<PortableEvent> multiple1,
                                 @WithMultiple(enumValue = Value.ONE, intValue = 1, strValue = "") Event<PortableEvent> multiple2,
                                 @WithMultiple(enumValue = Value.ONE, intValue = 0, strValue = "foo") Event<PortableEvent> multiple3,
-                                @WithMultiple(enumValue = Value.TWO, intValue = 0, strValue = "") Event<PortableEvent> multipleNone) {
+                                @WithMultiple(enumValue = Value.TWO, intValue = 0, strValue = "") Event<PortableEvent> multipleNone,
+                                @WithClazz(Object.class) Event<PortableEvent> clazzEvent,
+                                @WithClazzArray({Object.class, Class.class}) Event<PortableEvent> clazzArray) {
                                   this.enumOne = enumOne;
                                   this.enumTwo = enumTwo;
                                   this.enumThree = enumThree;
@@ -73,6 +79,8 @@ public class ClientQualifiedMemberEventProducer implements QualifiedMemberEventP
                                   this.multiple2 = multiple2;
                                   this.multiple3 = multiple3;
                                   this.multipleNone = multipleNone;
+                                  this.clazzEvent = clazzEvent;
+                                  this.clazzArray = clazzArray;
   }
 
   @Override
@@ -133,6 +141,16 @@ public class ClientQualifiedMemberEventProducer implements QualifiedMemberEventP
   @Override
   public void fireMultipleNone() {
     multipleNone.fire(new PortableEvent());
+  }
+
+  @Override
+  public void fireClazzObject() {
+    clazzEvent.fire(new PortableEvent());
+  }
+
+  @Override
+  public void fireClazzArray() {
+    clazzArray.fire(new PortableEvent());
   }
 
 }

@@ -19,6 +19,7 @@ package org.jboss.errai.cdi.event.client.test;
 import javax.inject.Named;
 
 import org.jboss.errai.cdi.client.qualifier.Value;
+import org.jboss.errai.cdi.client.qualifier.WithClazz;
 import org.jboss.errai.cdi.client.qualifier.WithEnum;
 import org.jboss.errai.cdi.client.qualifier.WithInt;
 import org.jboss.errai.cdi.client.qualifier.WithMultiple;
@@ -30,6 +31,7 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 import com.google.gwt.user.client.Timer;
 
+
 /**
  * Test sending and receiving events with qualifier members like {@code @Named("literal value")}.
  *
@@ -37,7 +39,7 @@ import com.google.gwt.user.client.Timer;
  */
 public abstract class AbstractQualifierMemberIntegrationTest extends AbstractErraiCDITest {
 
-  private static final int DURATION = 30000;
+  protected static final int DURATION = 30000;
 
   @Override
   public String getModuleName() {
@@ -49,6 +51,24 @@ public abstract class AbstractQualifierMemberIntegrationTest extends AbstractErr
   protected abstract QualifiedMemberEventProducer getEventProducer();
 
   protected abstract void setup(Runnable run);
+
+  public void testClazzMember() throws Exception {
+    delayTestFinish(DURATION);
+    CDI.addPostInitTask(() -> {
+      final QualifiedMemberEventProducer producer = getEventProducer();
+      final FiredQualifierObserver observer = getQualifierObserver();
+
+      assertEquals(0, observer.observedQualifiers.size());
+
+      assertUntil(DURATION - 1000,
+                  () -> producer.fireClazzObject(),
+                  () -> {
+                    assertEquals(1, observer.observedQualifiers.size());
+                    assertEquals(WithClazz.class.getName(), observer.observedQualifiers.get(0).getAnnoType());
+                    assertEquals(Object.class.getName(), observer.observedQualifiers.get(0).getValues().get("value"));
+                  });
+    });
+  }
 
   public void testEnumMember() throws Exception {
     delayTestFinish(DURATION);
@@ -219,7 +239,7 @@ public abstract class AbstractQualifierMemberIntegrationTest extends AbstractErr
   /**
    * @param runnables A list of runnables alternating between assertions and setup.
    */
-  private void assertUntil(final long duration, final Runnable... runnables) {
+  protected void assertUntil(final long duration, final Runnable... runnables) {
     final long start = System.currentTimeMillis();
 
     setup(() -> {

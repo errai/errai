@@ -16,11 +16,15 @@
 
 package org.jboss.errai.cdi.event.client.test;
 
+import java.util.Arrays;
+
+import org.jboss.errai.cdi.client.qualifier.WithClazzArray;
 import org.jboss.errai.cdi.event.client.ClientQualifiedMemberEventObserver;
 import org.jboss.errai.cdi.event.client.ClientQualifiedMemberEventProducer;
 import org.jboss.errai.cdi.event.client.FiredQualifierObserver;
 import org.jboss.errai.cdi.event.client.QualifierMemberTestHelper;
 import org.jboss.errai.cdi.event.client.shared.QualifiedMemberEventProducer;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 
 /**
@@ -43,6 +47,24 @@ public class ClientOnlyQualifierMemberIntegrationTest extends AbstractQualifierM
   protected void setup(Runnable run) {
     IOC.getBeanManager().lookupBean(ClientQualifiedMemberEventObserver.class).getInstance();
     IOC.getBeanManager().lookupBean(QualifierMemberTestHelper.class).getInstance().setActive(false, run);
+  }
+
+  public void testClazzArrayMember() throws Exception {
+    delayTestFinish(DURATION);
+    CDI.addPostInitTask(() -> {
+      final QualifiedMemberEventProducer producer = getEventProducer();
+      final FiredQualifierObserver observer = getQualifierObserver();
+
+      assertEquals(0, observer.observedQualifiers.size());
+
+      assertUntil(DURATION - 1000,
+                  () -> producer.fireClazzArray(),
+                  () -> {
+                    assertEquals(1, observer.observedQualifiers.size());
+                    assertEquals(WithClazzArray.class.getName(), observer.observedQualifiers.get(0).getAnnoType());
+                    assertEquals(Arrays.toString(new Class<?>[] {Object.class, Class.class}), observer.observedQualifiers.get(0).getValues().get("value"));
+                  });
+    });
   }
 
 }

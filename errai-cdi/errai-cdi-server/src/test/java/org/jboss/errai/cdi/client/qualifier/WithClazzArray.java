@@ -14,43 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.event.client.shared;
+package org.jboss.errai.cdi.client.qualifier;
 
-import org.jboss.errai.bus.server.annotations.Remote;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import javax.inject.Qualifier;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Remote
-public interface QualifiedMemberEventProducer {
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface WithClazzArray {
 
-  void fireClazzObject();
-
-  void fireEnumOne();
-
-  void fireEnumTwo();
-
-  void fireEnumThree();
-
-  void fireInt0();
-
-  void fireInt100();
-
-  void fireIntNeg1();
-
-  void fireEnumAndIntOne();
-
-  void fireNamedEvent();
-
-  void fireMultiple1();
-
-  void fireMultiple2();
-
-  void fireMultiple3();
-
-  void fireMultipleNone();
-
-  void fireClazzArray();
+  Class<?>[] value();
 
 }

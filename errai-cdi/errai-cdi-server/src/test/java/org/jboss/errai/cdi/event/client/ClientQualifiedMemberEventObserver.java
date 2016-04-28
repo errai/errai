@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.event.client;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jboss.errai.cdi.client.qualifier.Value;
+import org.jboss.errai.cdi.client.qualifier.WithClazz;
+import org.jboss.errai.cdi.client.qualifier.WithClazzArray;
 import org.jboss.errai.cdi.client.qualifier.WithEnum;
 import org.jboss.errai.cdi.client.qualifier.WithInt;
 import org.jboss.errai.cdi.client.qualifier.WithMultiple;
@@ -42,6 +45,15 @@ public class ClientQualifiedMemberEventObserver {
 
   @Inject
   private Event<FiredQualifier> event;
+
+  public void observeWithClazzArray(@Observes @WithClazzArray({Object.class, Class.class}) PortableEvent value) {
+    event.fire(new FiredQualifier(WithClazzArray.class.getName(),
+            Collections.singletonMap("value", Arrays.toString(new Class<?>[] { Object.class, Class.class }))));
+  }
+
+  public void observeWithClazz(@Observes @WithClazz(Object.class) PortableEvent value) {
+    event.fire(new FiredQualifier(WithClazz.class.getName(), Collections.singletonMap("value", Object.class.getName())));
+  }
 
   public void observeWithEnumOne(@Observes @WithEnum(Value.ONE) PortableEvent value) {
     event.fire(new FiredQualifier(WithEnum.class.getName(), Collections.singletonMap("value", Value.ONE)));

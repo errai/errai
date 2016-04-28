@@ -92,4 +92,14 @@ public class ProxyServerQualifierMemberEventProducer implements QualifiedMemberE
     caller.call().fireMultipleNone();
   }
 
+  @Override
+  public void fireClazzObject() {
+    caller.call().fireClazzObject();
+  }
+
+  @Override
+  public void fireClazzArray() {
+    caller.call().fireClazzArray();
+  }
+
 }

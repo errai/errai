@@ -17,6 +17,7 @@
 package org.jboss.errai.common.client.util;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.jboss.errai.common.client.function.Function;
@@ -48,4 +49,39 @@ public class SharedAnnotationSerializer {
     }
   }
 
+  public static String stringify(final Object value) {
+    return String.valueOf(value);
+  }
+
+  public static String stringify(final Class<?>[] value) {
+    return Arrays.toString(value);
+  }
+
+  public static String stringify(final byte[] value) {
+    return Arrays.toString(value);
+  }
+
+  public static String stringify(final int[] value) {
+    return Arrays.toString(value);
+  }
+
+  public static String stringify(final short[] value) {
+    return Arrays.toString(value);
+  }
+
+  public static String stringify(final char[] value) {
+    return Arrays.toString(value);
+  }
+
+  public static String stringify(final float[] value) {
+    return Arrays.toString(value);
+  }
+
+  public static String stringify(final double[] value) {
+    return Arrays.toString(value);
+  }
+
+  public static String stringify(final String[] value) {
+    return Arrays.toString(value);
+  }
 }

@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.function.Function;
 import org.jboss.errai.common.client.util.AnnotationPropertyAccessorBuilder;
+import org.jboss.errai.common.client.util.SharedAnnotationSerializer;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +97,7 @@ public class NonGwtEventQualifierSerializerGenerator {
   private static ObjectBuilder anonymousAttributeAccessorFor(final MetaMethod attr) {
     return newInstanceOf(Function.class).extend()
             .publicOverridesMethod("apply", Parameter.finalOf(Object.class, "anno"))
-            .append(invokeStatic(String.class, "valueOf",
+            .append(invokeStatic(SharedAnnotationSerializer.class, "stringify",
                             castTo(attr.getDeclaringClass(), loadVariable("anno")).invoke(attr))
                     .returnValue())
             .finish().finish();
