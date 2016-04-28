@@ -17,21 +17,25 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Singleton;
 
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.SyncBeanDef;
 
 import com.google.gwt.core.client.GWT;
-import org.jboss.errai.ioc.client.container.SyncBeanDef;
 
 @SuppressWarnings("rawtypes")
 @IOCProvider
@@ -52,7 +56,15 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
      * setup, see the README in the root of errai-javax-enterprise.
      */
 
-    return new InstanceImpl(typeargs[0], qualifiers);
+    return new InstanceImpl(typeargs[0], qualifiers.length == 0 ? new Annotation[] { QualifierUtil.DEFAULT_ANNOTATION } : qualifiers);
+  }
+
+  private static Annotation[] joinQualifiers(Annotation[] a1, Annotation[] a2) {
+    final Set<Annotation> annos = new HashSet<>();
+    annos.addAll(Arrays.asList(a1));
+    annos.addAll(Arrays.asList(a2));
+
+    return annos.toArray(new Annotation[annos.size()]);
   }
 
   static class InstanceImpl implements Instance<Object> {
@@ -67,12 +79,12 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
     @Override
     public Instance<Object> select(final Annotation... qualifiers) {
-      return new InstanceImpl(type, qualifiers);
+      return new InstanceImpl(type, joinQualifiers(this.qualifiers, qualifiers));
     }
 
     @Override
     public Instance select(final Class subtype, final Annotation... qualifiers) {
-      return new InstanceImpl(subtype, qualifiers);
+      return new InstanceImpl(subtype, joinQualifiers(this.qualifiers, qualifiers));
     }
 
     @Override

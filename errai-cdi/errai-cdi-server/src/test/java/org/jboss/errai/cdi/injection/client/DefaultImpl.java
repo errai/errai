@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2011 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,12 @@
 package org.jboss.errai.cdi.injection.client;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
 
 /**
- * @author Mike Brock
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @Dependent
-public class DependentInstanceTestBean {
-  @Inject
-  private Instance<ApplicationScopedBeanA> injectApplicationScoped;
+public class DefaultImpl implements IfaceWithMultipleDefaultImpls, IfaceWithMultipleImpls {
 
-  @Inject
-  private Instance<DependentBeanA> injectDependentBeanA;
-
-
-  public Instance<ApplicationScopedBeanA> getInjectApplicationScoped() {
-    return injectApplicationScoped;
-  }
-
-  public Instance<DependentBeanA> getInjectDependentBeanA() {
-    return injectDependentBeanA;
-  }
 }
