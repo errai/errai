@@ -16,7 +16,6 @@
 
 package org.jboss.errai.config.rebind;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashSet;
@@ -202,8 +201,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
         final String gen = future.get();
         printWriter.append(gen);
 
-        final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
-        RebindUtils.writeStringToFile(tmpFile, gen);
+        RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(packageName, className, gen);
 
         context.commit(logger, printWriter);
       }

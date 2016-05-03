@@ -71,10 +71,7 @@ public class MockIOCGenerator {
 
     final String classStr = bootstrapGenerator.generate(packageName, className);
 
-    final File fileCacheDir = RebindUtils.getErraiCacheDir();
-    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-
-    RebindUtils.writeStringToFile(cacheFile, classStr);
+    RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(packageName, className, classStr);
 
     try {
       final File directory =

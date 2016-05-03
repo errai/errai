@@ -252,6 +252,25 @@ public class RebindUtils {
     return changed;
   }
 
+  /**
+   * Writes the given Java class source to a file in the correct package subdirectory within the directory returned by
+   * {@link #getErraiCacheDir()}.
+   *
+   * @param packageName
+   *          The package name of the Java class.
+   * @param simpleClassName
+   *          The simple name of the Java class.
+   * @param source
+   *          The source of the Java class.
+   */
+  public static void writeStringToJavaSourceFileInErraiCacheDir(final String packageName, final String simpleClassName, final String source) {
+    final File dir = new File(getErraiCacheDir() + File.separator + packageName.replace('.', File.separatorChar));
+    dir.mkdirs();
+    final File sourceFile = new File(dir, simpleClassName + ".java");
+
+    writeStringToFile(sourceFile, source);
+  }
+
   public static void writeStringToFile(final File file, final String data) {
     try {
       final OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file, false));
@@ -410,7 +429,7 @@ public class RebindUtils {
           "(you may be using an incompatible GWT version)");
     }
   }
-  
+
   public static boolean isModuleInherited(final GeneratorContext context, String moduleName) {
     return getInheritedModules(context).contains(moduleName);
   }
@@ -421,7 +440,7 @@ public class RebindUtils {
     if (module == null) {
       return result;
     }
-    
+
     String moduleName = module.getCanonicalName().replace(".JUnit", "");
     result.add(StringUtils.substringBeforeLast(moduleName, "."));
 

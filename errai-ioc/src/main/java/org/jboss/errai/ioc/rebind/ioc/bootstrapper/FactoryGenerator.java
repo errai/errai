@@ -20,7 +20,6 @@ import static org.jboss.errai.codegen.builder.impl.ClassBuilder.define;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,8 +152,7 @@ public class FactoryGenerator extends IncrementalGenerator {
   }
 
   private void writeToDotErraiFolder(final String factorySimpleClassName, final String factorySource) {
-    final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + factorySimpleClassName + ".java");
-    RebindUtils.writeStringToFile(tmpFile, factorySource);
+    RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(GENERATED_PACKAGE, factorySimpleClassName, factorySource);
   }
 
   private boolean isCacheUsable(final String typeName, final Injectable givenInjectable) {

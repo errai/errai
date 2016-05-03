@@ -16,7 +16,6 @@
 
 package org.jboss.errai.validation.rebind;
 
-import java.io.File;
 import java.io.PrintWriter;
 
 import javax.validation.ValidatorFactory;
@@ -43,12 +42,12 @@ import com.google.gwt.validation.client.impl.AbstractGwtValidator;
 /**
  * Generates an implementation of {@link ValidatorFactory} which provides a generated implementation
  * of a GWT {@link javax.validation.Validator}.
- * 
+ *
  * @author Johannes Barop <jb@barop.de>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ValidatorFactoryGenerator extends Generator {
-  
+
   private static final Logger log = LoggerFactory.getLogger(ValidatorFactoryGenerator.class);
   private final String packageName = "org.jboss.errai.validation.client";
   private final String className = ValidatorFactory.class.getSimpleName() + "Impl";
@@ -89,10 +88,8 @@ public class ValidatorFactoryGenerator extends Generator {
 
       String gen = builder.toJavaString();
       printWriter.append(gen);
-      
-      final File tmpFile =
-          new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
-      RebindUtils.writeStringToFile(tmpFile, gen);
+
+      RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(packageName, className, gen);
 
       log.info("Generated validator factory in " + (System.currentTimeMillis() - start) + "ms");
       context.commit(logger, printWriter);

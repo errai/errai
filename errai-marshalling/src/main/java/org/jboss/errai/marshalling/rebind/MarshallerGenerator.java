@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,8 +115,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
     }
     printWriter.append(gen);
 
-    final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
-    RebindUtils.writeStringToFile(tmpFile, gen);
+    RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(packageName, className, gen);
 
     context.commit(logger, printWriter);
 

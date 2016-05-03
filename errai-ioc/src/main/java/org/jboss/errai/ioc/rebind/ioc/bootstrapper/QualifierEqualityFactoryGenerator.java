@@ -20,7 +20,6 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -169,9 +168,7 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     final String csq = builder.toJavaString();
 
-    final File fileCacheDir = RebindUtils.getErraiCacheDir();
-    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-    RebindUtils.writeStringToFile(cacheFile, csq);
+    RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(packageName, className, csq);
 
     printWriter.append(csq);
 
