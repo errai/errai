@@ -39,16 +39,20 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.inject.Scope;
 
 import org.jboss.errai.codegen.ArithmeticExpression;
 import org.jboss.errai.codegen.ArithmeticOperator;
@@ -71,15 +75,12 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.MetaWildcardType;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaWildcardType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.AnnotationSerializer;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.Bootstrapper;
@@ -156,6 +157,7 @@ public class IOCProcessor {
     nonSimpletonTypeAnnotations.add(LoadAsync.class);
     nonSimpletonTypeAnnotations.add(EnabledByProperty.class);
     nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean));
+    nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.PseudoScopedBean));
     nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.NormalScopedBean));
     nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.AlternativeBean));
   }
@@ -526,7 +528,8 @@ public class IOCProcessor {
           @SuppressWarnings("rawtypes") final BlockBuilder registerFactoriesBody) {
     final Class<? extends Annotation> scope = injectable.getScope();
     final MetaClass injectedType = injectable.getInjectedType();
-    final String contextVarName = getContextVarName(scopeContexts.get(scope));
+    final MetaClass scopeContextImpl = Assert.notNull("No scope context for " + scope.getSimpleName(), scopeContexts.get(scope));
+    final String contextVarName = getContextVarName(scopeContextImpl);
     registerFactoriesBody.append(loadVariable(contextVarName).invoke("registerFactory",
             Stmt.castTo(parameterizedAs(Factory.class, typeParametersOf(injectedType)),
                     invokeStatic(GWT.class, "create", factoryClass))));
@@ -733,11 +736,7 @@ public class IOCProcessor {
 
   private WiringElementType[] getWiringTypes(final MetaClass type, final Class<? extends Annotation> directScope) {
     final List<WiringElementType> wiringTypes = new ArrayList<WiringElementType>();
-    if (injectionContext.isElementType(WiringElementType.DependentBean, directScope)) {
-      wiringTypes.add(WiringElementType.DependentBean);
-    } else {
-      wiringTypes.add(WiringElementType.NormalScopedBean);
-    }
+    wiringTypes.addAll(getWiringTypesForScopeAnnotation(directScope));
 
     if (type.isAnnotationPresent(Alternative.class)) {
       wiringTypes.add(WiringElementType.AlternativeBean);
@@ -814,19 +813,41 @@ public class IOCProcessor {
     final Set<Class<? extends Annotation>> scopeAnnoTypes = new HashSet<Class<? extends Annotation>>();
     scopeAnnoTypes.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean));
     scopeAnnoTypes.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.NormalScopedBean));
+    scopeAnnoTypes.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.PseudoScopedBean));
+
+    final Predicate<Class<? extends Annotation>> isExplicitScope =
+            type -> Arrays.stream(type.getAnnotations())
+                          .map(a -> a.annotationType())
+                          .filter(aType -> NormalScope.class.equals(aType) || Scope.class.equals(aType))
+                          .findAny()
+                          .isPresent();
+
+    final PriorityQueue<Class<? extends Annotation>> pq = new PriorityQueue<>((o1, o2) -> {
+      final int score1, score2;
+      score1 = (isExplicitScope.test(o1) ? 1 : -1);
+      score2 = (isExplicitScope.test(o2) ? 1 : -1);
+
+      return score2 - score1;
+    });
+
     for (final Annotation anno : annotated.getAnnotations()) {
       final Class<? extends Annotation> annoType = anno.annotationType();
       if (scopeAnnoTypes.contains(annoType)) {
-        return annoType;
+        pq.add(annoType);
       } else if (annoType.isAnnotationPresent(Stereotype.class)) {
         final Class<? extends Annotation> stereotypeScope = getDirectScope(MetaClassFactory.get(annoType));
         if (stereotypeScope != null) {
-          return stereotypeScope;
+          pq.add(stereotypeScope);
         }
       }
     }
 
-    return null;
+    if (pq.isEmpty()) {
+      return null;
+    }
+    else {
+      return pq.poll();
+    }
   }
 
   /**
@@ -887,7 +908,7 @@ public class IOCProcessor {
           final Class<? extends Annotation> directScope) {
     final List<WiringElementType> wiringTypes = new ArrayList<WiringElementType>();
 
-    wiringTypes.add(getWiringTypesForScopeAnnotation(directScope));
+    wiringTypes.addAll(getWiringTypesForScopeAnnotation(directScope));
     if (annotated.isAnnotationPresent(Specializes.class)) {
       wiringTypes.add(WiringElementType.Specialization);
     }
@@ -955,11 +976,13 @@ public class IOCProcessor {
     }
   }
 
-  private WiringElementType getWiringTypesForScopeAnnotation(Class<? extends Annotation> directScope) {
-    if (directScope.equals(Dependent.class)) {
-      return WiringElementType.DependentBean;
+  private Collection<WiringElementType> getWiringTypesForScopeAnnotation(final Class<? extends Annotation> directScope) {
+    if (injectionContext.isElementType(WiringElementType.NormalScopedBean, directScope)) {
+      return Collections.singleton(WiringElementType.NormalScopedBean);
+    } else if (injectionContext.isElementType(WiringElementType.DependentBean, directScope)) {
+      return Arrays.asList(WiringElementType.DependentBean, WiringElementType.PseudoScopedBean);
     } else {
-      return WiringElementType.NormalScopedBean;
+      return Collections.singleton(WiringElementType.PseudoScopedBean);
     }
   }
 
@@ -1044,8 +1067,7 @@ public class IOCProcessor {
   }
 
   private void addFieldInjectionPoints(final Injectable typeInjectable, final DependencyGraphBuilder builder, final List<String> problems) {
-    final boolean noPublicFieldsAllowed = typeInjectable.getWiringElementTypes()
-            .contains(WiringElementType.NormalScopedBean) && !typeInjectable.getScope().equals(EntryPoint.class);
+    final boolean noPublicFieldsAllowed = typeInjectable.getWiringElementTypes().contains(WiringElementType.NormalScopedBean);
     final MetaClass type = typeInjectable.getInjectedType();
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> inject : injectAnnotations) {

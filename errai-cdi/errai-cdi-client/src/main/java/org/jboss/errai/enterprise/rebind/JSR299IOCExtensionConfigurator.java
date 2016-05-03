@@ -19,7 +19,6 @@ package org.jboss.errai.enterprise.rebind;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
 
@@ -43,8 +42,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext) {
-
-    injectionContext.mapElementType(WiringElementType.SingletonBean, ApplicationScoped.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
   }
 

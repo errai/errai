@@ -6,6 +6,7 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.Inje
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.NormalScopedBean;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.ProducerElement;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.Provider;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.PseudoScopedBean;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -15,16 +16,16 @@ import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.Collections;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassCache;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
@@ -41,12 +42,16 @@ import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultQualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.unit.res.BeanWithAlternativeDependency;
+import org.jboss.errai.ioc.unit.res.DepCycleA;
+import org.jboss.errai.ioc.unit.res.DepCycleB;
 import org.jboss.errai.ioc.unit.res.DependencyIface;
 import org.jboss.errai.ioc.unit.res.DisabledAlternative;
 import org.jboss.errai.ioc.unit.res.DisabledAlternativeContextualProvider;
 import org.jboss.errai.ioc.unit.res.DisabledAlternativeProducerField;
 import org.jboss.errai.ioc.unit.res.DisabledAlternativeProducerMethod;
 import org.jboss.errai.ioc.unit.res.DisabledAlternativeProvider;
+import org.jboss.errai.ioc.unit.res.PseudoCycleA;
+import org.jboss.errai.ioc.unit.res.PseudoCycleB;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +66,7 @@ import com.google.common.collect.HashMultimap;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @RunWith(MockitoJUnitRunner.class)
-public class IOCProcessorDisabledBeanErrorTest {
+public class IOCProcessorErrorTest {
 
   private IOCProcessor processor;
 
@@ -85,7 +90,8 @@ public class IOCProcessorDisabledBeanErrorTest {
     when(injContext.getInjectableProviders()).thenReturn(HashMultimap.create());
     when(injContext.getExactTypeInjectableProviders()).thenReturn(HashMultimap.create());
     when(injContext.getAnnotationsForElementType(DependentBean)).thenReturn(Arrays.asList(Dependent.class));
-    when(injContext.getAnnotationsForElementType(NormalScopedBean)).thenReturn(Collections.emptyList());
+    when(injContext.getAnnotationsForElementType(NormalScopedBean)).thenReturn(Arrays.asList(ApplicationScoped.class));
+    when(injContext.getAnnotationsForElementType(PseudoScopedBean)).thenReturn(Arrays.asList(Singleton.class, Dependent.class));
     when(injContext.getAnnotationsForElementType(AlternativeBean)).thenReturn(Arrays.asList(Alternative.class));
     when(injContext.getAnnotationsForElementType(InjectionPoint)).thenReturn(Arrays.asList(Inject.class));
     when(injContext.getAnnotationsForElementType(ProducerElement)).thenReturn(Arrays.asList(IOCProducer.class));
@@ -112,10 +118,10 @@ public class IOCProcessorDisabledBeanErrorTest {
   @Test
   public void hintWhenUnsatisfiedTypeHasMissingAlternative() throws Exception {
     addToMetaClassCache(
-            JavaReflectionClass.newInstance(Object.class),
-            JavaReflectionClass.newInstance(DependencyIface.class),
-            JavaReflectionClass.newInstance(BeanWithAlternativeDependency.class),
-            JavaReflectionClass.newInstance(DisabledAlternative.class));
+            Object.class,
+            DependencyIface.class,
+            BeanWithAlternativeDependency.class,
+            DisabledAlternative.class);
 
     final String injSiteTypeName = DependencyIface.class.getName();
     final String typeWithDepName = BeanWithAlternativeDependency.class.getName();
@@ -127,10 +133,10 @@ public class IOCProcessorDisabledBeanErrorTest {
   @Test
   public void hintWhenUnsatisfiedTypeHasMissingAlternativeProducerMethod() throws Exception {
     addToMetaClassCache(
-            JavaReflectionClass.newInstance(Object.class),
-            JavaReflectionClass.newInstance(DependencyIface.class),
-            JavaReflectionClass.newInstance(BeanWithAlternativeDependency.class),
-            JavaReflectionClass.newInstance(DisabledAlternativeProducerMethod.class));
+            Object.class,
+            DependencyIface.class,
+            BeanWithAlternativeDependency.class,
+            DisabledAlternativeProducerMethod.class);
 
     final String injSiteTypeName = DependencyIface.class.getName();
     final String typeWithDepName = BeanWithAlternativeDependency.class.getName();
@@ -142,10 +148,10 @@ public class IOCProcessorDisabledBeanErrorTest {
   @Test
   public void hintWhenUnsatisfiedTypeHasMissingAlternativeProducerField() throws Exception {
     addToMetaClassCache(
-            JavaReflectionClass.newInstance(Object.class),
-            JavaReflectionClass.newInstance(DependencyIface.class),
-            JavaReflectionClass.newInstance(BeanWithAlternativeDependency.class),
-            JavaReflectionClass.newInstance(DisabledAlternativeProducerField.class));
+            Object.class,
+            DependencyIface.class,
+            BeanWithAlternativeDependency.class,
+            DisabledAlternativeProducerField.class);
 
     final String injSiteTypeName = DependencyIface.class.getName();
     final String typeWithDepName = BeanWithAlternativeDependency.class.getName();
@@ -157,10 +163,10 @@ public class IOCProcessorDisabledBeanErrorTest {
   @Test
   public void hintWhenUnsatisfiedTypeHasMissingAlternativeProvider() throws Exception {
     addToMetaClassCache(
-            JavaReflectionClass.newInstance(Object.class),
-            JavaReflectionClass.newInstance(DependencyIface.class),
-            JavaReflectionClass.newInstance(BeanWithAlternativeDependency.class),
-            JavaReflectionClass.newInstance(DisabledAlternativeProvider.class));
+            Object.class,
+            DependencyIface.class,
+            BeanWithAlternativeDependency.class,
+            DisabledAlternativeProvider.class);
 
     final String injSiteTypeName = DependencyIface.class.getName();
     final String typeWithDepName = BeanWithAlternativeDependency.class.getName();
@@ -172,10 +178,10 @@ public class IOCProcessorDisabledBeanErrorTest {
   @Test
   public void hintWhenUnsatisfiedTypeHasMissingAlternativeContextualProvider() throws Exception {
     addToMetaClassCache(
-            JavaReflectionClass.newInstance(Object.class),
-            JavaReflectionClass.newInstance(DependencyIface.class),
-            JavaReflectionClass.newInstance(BeanWithAlternativeDependency.class),
-            JavaReflectionClass.newInstance(DisabledAlternativeContextualProvider.class));
+            Object.class,
+            DependencyIface.class,
+            BeanWithAlternativeDependency.class,
+            DisabledAlternativeContextualProvider.class);
 
     final String injSiteTypeName = DependencyIface.class.getName();
     final String typeWithDepName = BeanWithAlternativeDependency.class.getName();
@@ -187,14 +193,50 @@ public class IOCProcessorDisabledBeanErrorTest {
   @Test
   public void doNotMakeDisabledAlternativesAvailableForLookup() throws Exception {
     addToMetaClassCache(
-            JavaReflectionClass.newInstance(Object.class),
-            JavaReflectionClass.newInstance(DependencyIface.class),
-            JavaReflectionClass.newInstance(DisabledAlternative.class));
+            Object.class,
+            DependencyIface.class,
+            DisabledAlternative.class);
 
     processor.process(procContext);
     final DependencyGraph graph = FactoryGenerator.getDependencyGraph();
     assertNotNull("The dependency graph was not set.", graph);
     assertEquals("The dependency graph should not have any injectables.", 0, graph.getNumberOfInjectables());
+  }
+
+  @Test
+  public void dependentCycleCausesError() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            DepCycleA.class,
+            DepCycleB.class);
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error for @Depenent scope cycle.");
+    } catch (RuntimeException e) {
+      final String message = e.getMessage();
+      assertTrue(
+              "Message did not reference types in dependent scoped cycle.\n\tMessage: " + message,
+              message.contains(DepCycleA.class.getSimpleName()) && message.contains(DepCycleB.class.getSimpleName()));
+    }
+  }
+
+  @Test
+  public void pseudoScopeCycleCausesError() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            PseudoCycleA.class,
+            PseudoCycleB.class);
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error for pseudo scope cycle.");
+    } catch (RuntimeException e) {
+      final String message = e.getMessage();
+      assertTrue(
+              "Message did not reference types in pseudo scoped cycle.\n\tMessage: " + message,
+              message.contains(PseudoCycleA.class.getSimpleName()) && message.contains(PseudoCycleB.class.getSimpleName()));
+    }
   }
 
   private void assertDisabledTypeReported(final String injSiteTypeName, final String typeWithDepName, final String disabledTypeName)
@@ -222,9 +264,9 @@ public class IOCProcessorDisabledBeanErrorTest {
     }
   }
 
-  private void addToMetaClassCache(final MetaClass... metaClasses) {
-    Arrays.asList(metaClasses)
-          .stream()
+  private void addToMetaClassCache(final Class<?>... metaClasses) {
+    Arrays.stream(metaClasses)
+          .map(type -> JavaReflectionClass.newInstance(type))
           .forEach(mc -> MetaClassFactory.getMetaClassCache().pushCache(mc));
   }
 

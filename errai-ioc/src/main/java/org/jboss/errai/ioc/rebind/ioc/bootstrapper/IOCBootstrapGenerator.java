@@ -390,10 +390,10 @@ public class IOCBootstrapGenerator {
    *     an instance of the injection context
    */
   private static void defaultConfigureProcessor(final InjectionContext injectionContext) {
-    injectionContext.mapElementType(WiringElementType.NormalScopedBean, Singleton.class);
+    injectionContext.mapElementType(WiringElementType.PseudoScopedBean, Singleton.class);
     injectionContext.mapElementType(WiringElementType.NormalScopedBean, ApplicationScoped.class);
     injectionContext.mapElementType(WiringElementType.NormalScopedBean, SharedSingleton.class);
-    injectionContext.mapElementType(WiringElementType.NormalScopedBean, EntryPoint.class);
+    injectionContext.mapElementType(WiringElementType.PseudoScopedBean, EntryPoint.class);
 
     injectionContext.mapElementType(WiringElementType.ProducerElement, IOCProducer.class);
 

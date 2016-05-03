@@ -17,6 +17,9 @@
 package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
 import java.lang.annotation.Annotation;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Named;
 
@@ -44,5 +47,9 @@ public interface Qualifier extends Iterable<Annotation> {
    * @return The value of {@link Named} if it is present.
    */
   String getName();
+
+  default Stream<Annotation> stream() {
+    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), 0), false);
+  }
 
 }

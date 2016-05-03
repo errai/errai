@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.injector.api;
+package org.jboss.errai.ioc.unit.res;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 /**
- * @author Mike Brock
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-public enum WiringElementType {
-  Type,
-  Specialization,
-  ExactTypeMatching,
-  NormalScopedBean,
-  PseudoScopedBean,
-  JsType,
-  SharedSingleton,
-  LoadAsync,
-  DependentBean,
-  Simpleton, // TODO review name
-  Provider,
-  InjectionPoint,
-  ProducerElement,
-  AlternativeBean,
-  NotSupported
+@Dependent
+public class PseudoCycleB {
+
+  @Inject
+  PseudoCycleA a;
+
 }

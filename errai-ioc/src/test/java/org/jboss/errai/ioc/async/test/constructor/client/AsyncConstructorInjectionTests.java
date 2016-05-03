@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.async.test.constructor.client;
 
-import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.async.test.constructor.client.res.ConstrInjBean;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
@@ -43,24 +42,21 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(ConstrInjBean.class)
-            .getInstance(new CreationalCallback<ConstrInjBean>() {
-              @Override
-              public void callback(final ConstrInjBean bean) {
+            .getInstance(bean -> {
+              assertNotNull(bean.getMyself());
+              assertNotNull(bean.getApple());
+              assertNotNull(bean.getPear());
+              assertNotNull(bean.getOrange());
 
-                assertNotNull(bean.getMyself());
-                assertNotNull(bean.getApple());
-                assertNotNull(bean.getPear());
-                assertNotNull(bean.getOrange());
+              assertNotNull(bean.getPeanut());
+              assertNotNull(bean.getCashew());
 
-                assertNotNull(bean.getPeanut());
-                assertNotNull(bean.getCashew());
+              assertTrue(bean.isPostConstructFired());
 
-                assertTrue(bean.isPostConstructFired());
+              assertSame(IOC.getAsyncBeanManager().getActualBeanReference(bean),
+                  IOC.getAsyncBeanManager().getActualBeanReference(bean.getMyself()));
 
-                assertSame(IOC.getAsyncBeanManager().getActualBeanReference(bean), IOC.getAsyncBeanManager().getActualBeanReference(bean.getMyself()));
-
-                finishTest();
-              }
+              finishTest();
             });
       }
     });

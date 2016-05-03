@@ -17,13 +17,13 @@
 package org.jboss.errai.ioc.async.test.constructor.client.res;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * @author Mike Brock
  */
-@Singleton
+@ApplicationScoped
 public class ConstrInjBean {
   private ConstrInjBean myself;
   private Apple apple;
@@ -51,7 +51,7 @@ public class ConstrInjBean {
   public void setPeanut(final Peanut peanut) {
     this.peanut = peanut;
   }
-  
+
   @Inject
   public void setCashew(final Cashew cashew) {
     this.cashew = cashew;

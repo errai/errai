@@ -16,16 +16,16 @@
 
 package org.jboss.errai.ioc.async.test.beanmanager.client.res;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.jboss.errai.ioc.client.api.Disposer;
 import org.jboss.errai.ioc.client.api.LoadAsync;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * @author Mike Brock
  */
-@Singleton @LoadAsync
+@ApplicationScoped @LoadAsync
 public class Foo {
   @Inject Bar bar;
   @Inject Bar2 bar2;

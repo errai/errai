@@ -21,10 +21,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 final class CycleValidator implements Validator {
@@ -33,7 +33,7 @@ final class CycleValidator implements Validator {
 
   @Override
   public boolean canValidate(final Injectable injectable) {
-    return injectable.getWiringElementTypes().contains(WiringElementType.DependentBean) && !visited.contains(injectable);
+    return injectable.getWiringElementTypes().contains(WiringElementType.PseudoScopedBean) && !visited.contains(injectable);
   }
 
   @Override
@@ -62,7 +62,7 @@ final class CycleValidator implements Validator {
       if (!visited.contains(resolved)) {
         if (dep.getDependencyType().equals(DependencyType.ProducerMember)) {
           validateDependentScopedInjectable(resolved, visiting, visited, problems, true);
-        } else if (resolved.getWiringElementTypes().contains(WiringElementType.DependentBean)) {
+        } else if (resolved.getWiringElementTypes().contains(WiringElementType.PseudoScopedBean)) {
           validateDependentScopedInjectable(resolved, visiting, visited, problems, false);
         }
       }
@@ -81,8 +81,10 @@ final class CycleValidator implements Validator {
         cycleStarted = true;
       }
       if (cycleStarted) {
-        builder.append("\t")
-               .append(visitingInjectable.getInjectedType().getFullyQualifiedName())
+        builder.append("\t");
+        visitingInjectable.getQualifier().stream()
+          .forEach(anno -> builder.append(anno.toString()).append(' '));
+        builder.append(visitingInjectable.getInjectedType().getFullyQualifiedName())
                .append("\n");
         if (visitingInjectable.getInjectableType().equals(InjectableType.Producer)) {
           hasProducer = true;
@@ -93,7 +95,7 @@ final class CycleValidator implements Validator {
     if (hasProducer) {
       builder.insert(0, "A cycle was found containing a producer and no other normal scoped types:\n");
     } else {
-      builder.insert(0, "A dependent scoped cycle was found:\n");
+      builder.insert(0, "A cycle of only pseudo-scoped beans was found:\n");
     }
 
     return builder.toString();

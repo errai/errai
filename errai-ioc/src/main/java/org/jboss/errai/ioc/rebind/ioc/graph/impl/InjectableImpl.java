@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -102,7 +101,7 @@ class InjectableImpl extends InjectableBase implements Injectable {
     case Type:
     case JsType:
     case ExtensionProvided:
-      return requiresProxy || !(wiringTypes.contains(WiringElementType.DependentBean) || literalScope.equals(EntryPoint.class));
+      return requiresProxy || wiringTypes.contains(WiringElementType.NormalScopedBean);
     case Extension:
     default:
       throw new RuntimeException("Not yet implemented!");

@@ -21,8 +21,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -37,18 +41,52 @@ import com.google.common.collect.ListMultimap;
 public abstract class AbstractContext implements Context {
 
   private final Map<String, Factory<?>> factories = new HashMap<String, Factory<?>>();
-  private final Map<String, Proxy<?>> proxies = new HashMap<String, Proxy<?>>();
+  private final Map<String, Proxy<?>> proxies = new LinkedHashMap<String, Proxy<?>>();
   private final Map<Object, Factory<?>> factoriesByCreatedInstances = new IdentityHashMap<Object, Factory<?>>();
   private final Set<String> factoriesCurrentlyCreatingInstances = new HashSet<String>();
   private final ListMultimap<Object, DestructionCallback<?>> destructionCallbacksByInstance = ArrayListMultimap.create();
 
+  private final Logger logger = LoggerFactory.getLogger(getClass());
+
   private ContextManager contextManager;
 
-  protected void beforeCreateInstance(final String factoryName) {
+  @Override
+  public <T> T getActiveNonProxiedInstance(final String factoryName) {
+    if (hasActiveInstance(factoryName)) {
+      return getActiveInstance(factoryName);
+    } else if (isCurrentlyCreatingInstance(factoryName)) {
+      final Factory<T> factory = this.<T>getFactory(factoryName);
+      final T incomplete = factory.getIncompleteInstance();
+      if (incomplete == null) {
+        throw new RuntimeException("Could not obtain an incomplete instance of " + factory.getHandle().getActualType().getName() + " to break a circular injection.");
+      } else {
+        logger.warn("An incomplete " + factory.getHandle().getActualType() + " was required to break a circular injection.");
+        return incomplete;
+      }
+    } else {
+      return createNewUnproxiedInstance(factoryName);
+    }
+  }
+
+  protected <T> T createNewUnproxiedInstance(final String factoryName) {
+    final Factory<T> factory = this.<T>getFactory(factoryName);
+    registerIncompleteInstance(factoryName);
+    final T instance = factory.createInstance(getContextManager());
+    unregisterIncompleteInstance(factoryName, instance);
+    registerInstance(instance, factory);
+    factory.invokePostConstructs(instance);
+    return instance;
+  }
+
+  protected abstract <T> T getActiveInstance(final String factoryName);
+
+  protected abstract boolean hasActiveInstance(final String factoryName);
+
+  private void registerIncompleteInstance(final String factoryName) {
     factoriesCurrentlyCreatingInstances.add(factoryName);
   }
 
-  protected void afterCreateInstance(final String factoryName) {
+  private void unregisterIncompleteInstance(final String factoryName, final Object instance) {
     factoriesCurrentlyCreatingInstances.remove(factoryName);
   }
 
@@ -75,16 +113,28 @@ public abstract class AbstractContext implements Context {
     factories.put(factory.getHandle().getFactoryName(), factory);
   }
 
+  @Override
+  public <T> T getInstance(final String factoryName) {
+    final Proxy<T> proxy = getOrCreateProxy(factoryName);
+    if (proxy == null) {
+      return getActiveNonProxiedInstance(factoryName);
+    } else {
+      return proxy.asBeanType();
+    }
+  }
+
   /**
    * @return Returns null if a proxy cannot be created.
    */
   protected <T> Proxy<T> getOrCreateProxy(final String factoryName) {
     @SuppressWarnings("unchecked")
     Proxy<T> proxy = (Proxy<T>) proxies.get(factoryName);
-    if (proxy == null && !proxies.containsKey(factoryName)) {
+    if (proxy == null) {
       final Factory<T> factory = getFactory(factoryName);
       proxy = factory.createProxy(this);
-      proxies.put(factoryName, proxy);
+      if (proxy != null) {
+        proxies.put(factoryName, proxy);
+      }
     }
 
     return proxy;
@@ -164,6 +214,10 @@ public abstract class AbstractContext implements Context {
   public <P> P getInstanceProperty(final Object instance, final String propertyName, final Class<P> type) {
     final Object unwrapped = maybeUnwrap(instance);
     return ((Factory<Object>) factoriesByCreatedInstances.get(unwrapped)).getReferenceAs(unwrapped, propertyName, type);
+  }
+
+  protected Collection<Proxy<?>> getExistingProxies() {
+    return proxies.values();
   }
 
 }

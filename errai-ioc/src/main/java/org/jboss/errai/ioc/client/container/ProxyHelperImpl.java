@@ -52,7 +52,7 @@ public class ProxyHelperImpl<T> implements ProxyHelper<T> {
     if (context.isActive()) {
       instance = context.getActiveNonProxiedInstance(factoryName);
     } else {
-      throw new RuntimeException("Cannot invoke method on bean from inactive " + context.getScope().getSimpleName() + " context.");
+      throw new RuntimeException("Cannot access a bean from the inactive " + context.getScope().getSimpleName() + " context.");
     }
   }
 

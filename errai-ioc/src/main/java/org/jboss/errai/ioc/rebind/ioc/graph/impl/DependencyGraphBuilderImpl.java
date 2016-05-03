@@ -294,8 +294,9 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
 
   private void validateInjectables() {
     final Collection<String> problems = new ArrayList<String>();
+    final Collection<Validator> validators = createValidators();
     for (final Injectable injectable : injectablesByName.values()) {
-      for (final Validator validator : createValidators()) {
+      for (final Validator validator : validators) {
         if (validator.canValidate(injectable)) {
           validator.validate(injectable, problems);
         }

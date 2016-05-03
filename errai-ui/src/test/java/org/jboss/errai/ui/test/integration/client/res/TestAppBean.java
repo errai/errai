@@ -16,26 +16,27 @@
 
 package org.jboss.errai.ui.test.integration.client.res;
 
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.ioc.client.api.EntryPoint;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Mike Brock
  */
-@EntryPoint
+@ApplicationScoped
 @Templated("TestTemplate.html")
 public class TestAppBean extends Composite {
   @Inject @ContentPanel @DataField("content") private Widget w;
 
   @Produces
   @ContentPanel
-  public Widget produceContentPanel(final SomeDependency someDependency) {
+  public static Widget produceContentPanel(final SomeDependency someDependency) {
     return someDependency.makeWidget();
   }
 
