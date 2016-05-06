@@ -16,53 +16,88 @@
 
 package org.jboss.errai.codegen.meta.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.MetaWildcardType;
+import org.jboss.errai.common.client.api.Assert;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class AbstractMetaParameterizedType implements MetaParameterizedType {
   @Override
-  public boolean isAssignableFrom(final MetaParameterizedType type) {
-    final MetaType[] compareFrom = getTypeParameters();
-    final MetaType[] compareTo;
-
-    if (type == null) {
-      compareTo = new MetaType[compareFrom.length];
-      for (int i = 0; i < compareFrom.length; i++) {
-        compareTo[i] = new MetaType() {
-          @Override
-          public String toString() {
-            return getName();
-          }
-
-          @Override
-          public String getName() {
-            return "?";
-          }
-        };
-      }
-    }
-    else {
-      compareTo = type.getTypeParameters();
-    }
+  public boolean isAssignableFrom(final MetaParameterizedType fromType) {
+    final MetaType[] compareFrom = Assert.notNull(fromType).getTypeParameters();
+    final MetaType[] compareTo = getTypeParameters();
 
     if (compareTo.length != compareFrom.length) return false;
 
     for (int i = 0; i < compareTo.length; i++) {
-      if (compareFrom[i].toString().equals("?")) {
-        continue;
+      final MetaType from = compareFrom[i];
+      final MetaType to = compareTo[i];
+      if (from instanceof MetaClass && to instanceof MetaClass) {
+        if (!((MetaClass) from).isAssignableTo((MetaClass) to)) {
+          return false;
+        }
       }
-      if (compareFrom[i] instanceof MetaClass && compareTo[i] instanceof MetaClass) {
-        if (!((MetaClass) compareFrom[i]).isAssignableFrom((MetaClass) compareTo[i])) {
+      else if (to instanceof MetaParameterizedType) {
+        return false;
+      }
+      else if (to instanceof MetaWildcardType) {
+        if (from instanceof MetaClass) {
+          final MetaClass fromMC = (MetaClass) from;
+          final boolean violatesUpperBound = getConcreteBounds(((MetaWildcardType) to).getUpperBounds())
+            .filter(bound -> !fromMC.isAssignableTo(bound))
+            .findAny()
+            .isPresent();
+          final boolean violatesLowerBound = getConcreteBounds(((MetaWildcardType) to).getLowerBounds())
+            .filter(bound -> !bound.isAssignableTo(fromMC))
+            .findAny()
+            .isPresent();
+
+          if (violatesLowerBound || violatesUpperBound) {
+            return false;
+          }
+        }
+        else {
+          return false;
+        }
+      }
+      else if (from instanceof MetaTypeVariable && to instanceof MetaClass) {
+        final boolean hasAssignableUpperBound = getConcreteBounds(((MetaTypeVariable) from).getBounds())
+          .filter(fromBound -> fromBound.isAssignableFrom((MetaClass) to))
+          .findAny()
+          .isPresent();
+        if (!hasAssignableUpperBound) {
           return false;
         }
       }
     }
 
     return true;
+  }
+
+  private static Stream<MetaClass> getConcreteBounds(final MetaType[] bounds) {
+    return Arrays
+      .stream(bounds)
+      .flatMap(bound -> {
+        if (bound instanceof MetaClass) {
+          return Collections.singletonList(bound).stream();
+        }
+        else if (bound instanceof MetaTypeVariable) {
+          final MetaTypeVariable mtv = (MetaTypeVariable) bound;
+          return getConcreteBounds(mtv.getBounds());
+        }
+        else {
+          return Collections.emptyList().stream();
+        }
+      }).map(mt -> (MetaClass) mt);
   }
 
   @Override

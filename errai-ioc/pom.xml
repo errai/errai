@@ -185,6 +185,7 @@
                 <exclude>**/org/jboss/errai/ioc/async/test/**/*.java</exclude>
                 <exclude>**/prod/**/*.java</exclude>
                 <exclude>**/unit/**/*.java</exclude>
+                <exclude>**/*UnitTest.java</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -196,6 +197,7 @@
               </excludes>
               <includes>
                 <include>**/unit/**/*Test.java</include>
+                <include>**/*UnitTest.java</include>
               </includes>
             </configuration>
           </plugin>

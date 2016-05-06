@@ -29,7 +29,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -284,7 +286,7 @@ public final class MetaClassFactory {
     buildMetaClass.setFinal(clazz.isFinal());
     buildMetaClass.setStatic(clazz.isStatic());
     buildMetaClass.setInterface(clazz.isInterface());
-    buildMetaClass.setInterfaces(Arrays.asList(clazz.getInterfaces()));
+    addInterfaces(clazz, buildMetaClass, parameterizedType);
     buildMetaClass.setScope(GenUtil.scopeOf(clazz));
     buildMetaClass.setSuperClass(clazz.getSuperClass());
 
@@ -388,6 +390,56 @@ public final class MetaClassFactory {
     }
 
     return buildMetaClass;
+  }
+
+  private static void addInterfaces(final MetaClass clazz, final BuildMetaClass buildMetaClass, final MetaParameterizedType parameterizedType) {
+    final MetaType[] typeParams = (clazz.getParameterizedType() != null ? clazz.getParameterizedType().getTypeParameters() : clazz.getTypeParameters());
+    final MetaType[] typeArgs = parameterizedType.getTypeParameters();
+    validateTypeArgumentsAgainstParameters(clazz, typeParams, typeArgs);
+
+    final Map<String, MetaType> typeArgsByTypeParam = mapTypeArgsByTypeParamName(typeParams, typeArgs);
+    final List<MetaClass> ifaces = Arrays
+            .stream(clazz.getInterfaces())
+            .map(iface -> getParameterizedInterface(typeArgsByTypeParam, iface))
+            .collect(Collectors.toList());
+    buildMetaClass.setInterfaces(ifaces);
+  }
+
+  private static BuildMetaClass getParameterizedInterface(final Map<String, MetaType> typeArgsByTypeParam, final MetaClass iface) {
+    final MetaType[] ifaceTypeArgs = getTypeArgumentsForInterface(typeArgsByTypeParam, iface);
+    return cloneToBuildMetaClass(iface, typeParametersOf(ifaceTypeArgs), true);
+  }
+
+  private static MetaType[] getTypeArgumentsForInterface(final Map<String, MetaType> typeArgsByTypeParam, final MetaClass iface) {
+    return Arrays
+      .stream(Optional.ofNullable(iface.getParameterizedType())
+                      .map(i -> i.getTypeParameters())
+                      .orElseGet(() -> iface.getTypeParameters()))
+      .map(mt -> {
+        if (typeArgsByTypeParam.containsKey(mt.getName())) {
+          return typeArgsByTypeParam.get(mt.getName());
+        }
+        else {
+          return mt;
+        }
+    }).toArray(size -> new MetaType[size]);
+  }
+
+  private static Map<String, MetaType> mapTypeArgsByTypeParamName(final MetaType[] typeParams, final MetaType[] typeArgs) {
+    final Map<String, MetaType> typeArgsByTypeParam = new HashMap<>();
+    for (int i = 0; i < typeParams.length; i++) {
+      typeArgsByTypeParam.put(typeParams[i].getName(), typeArgs[i]);
+    }
+    return typeArgsByTypeParam;
+  }
+
+  private static void validateTypeArgumentsAgainstParameters(final MetaClass clazz, final MetaType[] typeParams, final MetaType[] assignedTypes) {
+    if (typeParams.length != assignedTypes.length) {
+      final String message = "Number of provided types does not match the number of type parameters for " + clazz.getFullyQualifiedName()
+      + ".\nType parameters: " + Arrays.toString(typeParams)
+      + "\nProvided types: " + Arrays.toString(assignedTypes);
+      throw new IllegalArgumentException(message);
+    }
   }
 
   private static MetaClass getTypeVariableValue(final MetaTypeVariable typeVariable, final MetaClass clazz) {

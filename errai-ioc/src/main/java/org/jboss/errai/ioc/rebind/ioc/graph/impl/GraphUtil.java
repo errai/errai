@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
@@ -44,7 +45,7 @@ final class GraphUtil {
     final String message = "Two concrete injectables exist with the same name (" + name + "):\n"
                             + "\t" + first + "\n"
                             + "\t" + second;
-  
+
     throw new RuntimeException(message);
   }
 
@@ -65,7 +66,7 @@ final class GraphUtil {
       enclosingType = enclosingType.getSuperClass();
       specializedMethod = enclosingType.getDeclaredMethod(specializingMethod.getName(), producerParams);
     }
-  
+
     return specializedMethod;
   }
 
@@ -74,7 +75,7 @@ final class GraphUtil {
     for (int i = 0; i < paramTypes.length; i++) {
       paramTypes[i] = producerMethod.getParameters()[i].getType();
     }
-  
+
     return paramTypes;
   }
 
@@ -88,7 +89,7 @@ final class GraphUtil {
       public int compare(final InjectableImpl c1, final InjectableImpl c2) {
         return getScore(c1) - getScore(c2);
       }
-  
+
       private int getScore(final InjectableImpl c) {
         if (c.injectableType.equals(InjectableType.Producer)) {
           return getDistanceFromObject(findProducerInstanceDep(c).producingMember.getDeclaringClass());
@@ -96,13 +97,13 @@ final class GraphUtil {
           return getDistanceFromObject(c.type);
         }
       }
-  
+
       private int getDistanceFromObject(MetaClass type) {
         int distance = 0;
         for (; type.getSuperClass() != null; type = type.getSuperClass()) {
           distance++;
         }
-  
+
         return distance;
       }
     });
@@ -114,7 +115,7 @@ final class GraphUtil {
       builder.append(problem)
              .append("\n");
     }
-  
+
     return builder.toString();
   }
 
@@ -130,14 +131,14 @@ final class GraphUtil {
              .append(problem)
              .append('\n');
     }
-  
+
     return builder.toString();
   }
 
   static InjectableReference copyInjectableReference(final InjectableReference injectable) {
     final InjectableReference copy = new InjectableReference(injectable.type, injectable.qualifier);
     copy.linked.addAll(injectable.linked);
-  
+
     return copy;
   }
 
@@ -151,13 +152,13 @@ final class GraphUtil {
             .append(" for ")
             .append(concrete)
             .append('.');
-  
+
     if (!resolvedDisabledBeans.isEmpty()) {
       message.append(" Some beans were found that satisfied this dependency, but must be enabled:\n");
       resolvedDisabledBeans.stream().forEach(inj -> message
               .append(inj.getInjectedType().getFullyQualifiedName()).append('\n'));
     }
-  
+
     return message.toString();
   }
 
@@ -176,44 +177,74 @@ final class GraphUtil {
       messageBuilder.append(", ")
                     .append(resolved.get(i));
     }
-  
+
     return messageBuilder.toString();
   }
 
   static boolean candidateSatisfiesInjectable(final InjectableReference injectableReference,
+          final HasInjectableHandle candidate, final boolean considerTypeParameters) {
+    return qualifiersMatch(injectableReference, candidate)
+            && (!considerTypeParameters || typeParametersMatch(injectableReference, candidate))
+            && notSameReference(injectableReference, candidate);
+  }
+
+  static boolean candidateSatisfiesInjectable(final InjectableReference injectableReference,
           final HasInjectableHandle candidate) {
-    return injectableReference.qualifier.isSatisfiedBy(candidate.getQualifier())
-            && GraphUtil.hasAssignableTypeParameters(candidate.getInjectedType(), injectableReference.type)
-            && !candidate.equals(injectableReference);
+    return candidateSatisfiesInjectable(injectableReference, candidate, true);
+  }
+
+  private static boolean notSameReference(final InjectableReference injectableReference, final HasInjectableHandle candidate) {
+    return !candidate.equals(injectableReference);
+  }
+
+  private static boolean typeParametersMatch(final InjectableReference injectableReference, final HasInjectableHandle candidate) {
+    return GraphUtil.hasAssignableTypeParameters(candidate.getInjectedType(), injectableReference.type);
+  }
+
+  private static boolean qualifiersMatch(final InjectableReference injectableReference, final HasInjectableHandle candidate) {
+    return injectableReference.qualifier.isSatisfiedBy(candidate.getQualifier());
   }
 
   static boolean hasAssignableTypeParameters(final MetaClass fromType, final MetaClass toType) {
     final MetaParameterizedType toParamType = toType.getParameterizedType();
     final MetaParameterizedType fromParamType = GraphUtil.getFromTypeParams(fromType, toType);
-  
+
     return toParamType == null || toParamType.isAssignableFrom(fromParamType);
   }
 
   static MetaParameterizedType getFromTypeParams(final MetaClass fromType, final MetaClass toType) {
+    MetaClass parameterContainingType = null;
     if (toType.isInterface()) {
       if (fromType.getFullyQualifiedName().equals(toType.getFullyQualifiedName())) {
-        return fromType.getParameterizedType();
+        parameterContainingType = fromType;
       }
-      for (final MetaClass type : fromType.getAllSuperTypesAndInterfaces()) {
+      else for (final MetaClass type : fromType.getAllSuperTypesAndInterfaces()) {
         if (type.isInterface() && type.getFullyQualifiedName().equals(toType.getFullyQualifiedName())) {
-          return type.getParameterizedType();
+          parameterContainingType = type;
+          break;
         }
       }
-      throw new RuntimeException("Could not find interface " + toType.getFullyQualifiedName() + " through type " + fromType.getFullyQualifiedName());
     } else {
       MetaClass clazz = fromType;
       do {
         if (clazz.getFullyQualifiedName().equals(toType.getFullyQualifiedName())) {
-          return clazz.getParameterizedType();
+          parameterContainingType = clazz;
+          break;
         }
         clazz = clazz.getSuperClass();
       } while (!clazz.getFullyQualifiedName().equals("java.lang.Object"));
-      throw new RuntimeException("Could not find class " + toType.getFullyQualifiedName() + " through type " + fromType.getFullyQualifiedName());
+    }
+
+    if (parameterContainingType == null) {
+      final String classOrIface = (toType.isInterface() ? "interface" : "class");
+      throw new RuntimeException("Could not find " + classOrIface + " " + toType.getFullyQualifiedName()
+      + " through type " + fromType.getFullyQualifiedName());
+    }
+    else if (parameterContainingType.getParameterizedType() != null) {
+      return parameterContainingType.getParameterizedType();
+    }
+    else {
+      return MetaClassFactory.typeParametersOf(parameterContainingType.getTypeParameters());
     }
   }
 

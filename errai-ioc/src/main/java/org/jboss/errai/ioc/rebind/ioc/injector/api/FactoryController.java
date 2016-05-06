@@ -45,6 +45,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.Factory;
@@ -248,7 +249,7 @@ public class FactoryController {
    *         {@link ContextManager#getInstanceProperty(Object, String, Class)}.
    */
   public ContextualStatementBuilder getInstancePropertyStmt(final Statement instanceStmt, final String name, final Class<?> refType) {
-    return loadVariable("contextManager").invoke("getInstanceProperty", instanceStmt, name, refType);
+    return Stmt.castTo(refType, loadVariable("contextManager").invoke("getInstanceProperty", instanceStmt, name, refType));
   }
 
   /**

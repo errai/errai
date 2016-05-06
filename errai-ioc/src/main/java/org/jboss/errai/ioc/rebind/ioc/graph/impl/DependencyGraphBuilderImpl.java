@@ -447,7 +447,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   private InjectableReference addMatchingExactTypeInjectables(final InjectableReference depInjectable) {
     final InjectableReference exactTypeLinker = new InjectableReference(depInjectable.type, depInjectable.qualifier);
     for (final InjectableImpl candidate : exactTypeInjectablesByType.get(depInjectable.type.getErased())) {
-      if (GraphUtil.candidateSatisfiesInjectable(depInjectable, candidate)) {
+      if (GraphUtil.candidateSatisfiesInjectable(depInjectable, candidate, !candidate.isContextual())) {
         exactTypeLinker.linked.add(candidate);
       }
     }
