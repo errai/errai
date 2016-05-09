@@ -16,7 +16,9 @@
 
 package org.jboss.errai.cdi.server.gwt;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.BindException;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -26,11 +28,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.as.embedded.EmbeddedServerFactory;
-import org.jboss.as.embedded.StandaloneServer;
 import org.jboss.errai.cdi.server.as.JBossServletContainerAdaptor;
 import org.jboss.errai.cdi.server.gwt.util.JBossUtil;
 import org.jboss.errai.cdi.server.gwt.util.StackTreeLogger;
+import org.wildfly.core.embedded.EmbeddedProcessFactory;
+import org.wildfly.core.embedded.StandaloneServer;
 
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
@@ -95,7 +97,8 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
         System.setProperty("jboss.cli.config", cliConfigFile.getAbsolutePath());
       }
 
-      final StandaloneServer embeddedWildFly = EmbeddedServerFactory.create(jbossHome, null, null, new String[0], cmdArgs);
+      final StandaloneServer embeddedWildFly = EmbeddedProcessFactory.createStandaloneServer(jbossHome, null,
+              new String[0], cmdArgs);
       embeddedWildFly.start();
 
       prepareBeansXml(appRootDir);
