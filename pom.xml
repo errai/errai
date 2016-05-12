@@ -110,6 +110,7 @@
     <module>errai-client-local-class-hider</module>
     <module>errai-annotation-processors</module>
     <module>errai-forge-addon</module>
+    <module>errai-api</module>
   </modules>
 
   <!-- These must be here in this order because of missing guava-gwt snapshots in the JBoss Public Repository. -->
