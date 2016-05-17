@@ -17,9 +17,16 @@
 package org.jboss.errai.ui.test.error.client;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.test.error.client.res.MissingPackagePrivateFieldInTemplate;
 import org.jboss.errai.ui.test.error.client.res.MissingPackagePrivateSubclass;
 import org.jboss.errai.ui.test.error.client.res.MissingPrivateFieldInTemplate;
@@ -38,6 +45,8 @@ import org.jboss.errai.ui.test.error.client.res.SubclassWithTemplateMissingPacka
 import org.jboss.errai.ui.test.error.client.res.SubclassWithTemplateMissingPrivateField;
 import org.jboss.errai.ui.test.error.client.res.SubclassWithTemplateMissingProtectedField;
 import org.jboss.errai.ui.test.error.client.res.SubclassWithTemplateMissingPublicField;
+import org.jboss.errai.ui.test.error.client.res.TemplateWithDifferentDataFieldElementKind;
+import org.jboss.errai.ui.test.error.client.res.TemplateWithNullDataField;
 
 public class TemplateErrorTest extends AbstractErraiCDITest {
 
@@ -272,5 +281,45 @@ public class TemplateErrorTest extends AbstractErraiCDITest {
       assertTrue("Message did not reference the unsatisfied data-field: " + t.getMessage(),
               t.getMessage().contains(SubclassMissingField.class.getSimpleName() + ".field"));
     }
+  }
+
+  public void testNullDataFieldReferencesDataFieldAndTemplatedBeanNames() throws Exception {
+    try {
+      IOC.getBeanManager().lookupBean(TemplateWithNullDataField.class).getInstance();
+      fail("No error was thrown for a template with a null @DataField.");
+    } catch (AssertionError ae) {
+      throw ae;
+    } catch (Throwable t) {
+      assertTrue("Error message does not contain name of the @Templated type: " + t.getMessage(),
+              t.getMessage().contains(TemplateWithNullDataField.class.getName()));
+      assertTrue("Error message does not the name of the @DataField: " + t.getMessage(),
+              t.getMessage().contains("field"));
+    }
+  }
+
+  public void testElementConversionWarningReferencesDataFieldAndTemplatedBeanNames() throws Exception {
+    // Setup log handler to capture warning message.
+    final Logger rootLogger = Logger.getLogger("");
+    final List<LogRecord> logRecords = new ArrayList<>();
+    rootLogger.addHandler(new Handler() {
+
+      @Override
+      public void publish(final LogRecord record) {
+        if (record.getLoggerName().contains(TemplateUtil.class.getSimpleName()) && record.getLevel().equals(Level.WARNING)) {
+          logRecords.add(record);
+        }
+      }
+
+      @Override public void flush() {}
+      @Override public void close() {}
+    });
+
+    IOC.getBeanManager().lookupBean(TemplateWithDifferentDataFieldElementKind.class).getInstance();
+    assertFalse("No warnings captured from TemplateUtil. Please ensure logging is enabled for this test.", logRecords.isEmpty());
+    assertEquals("There should only be a single warning logged from TemplateUtil.", 1, logRecords.size());
+    final String logMessage = logRecords.get(0).getMessage();
+    assertTrue("Log message did not reference the @Templated bean type: " + logMessage,
+            logMessage.contains(TemplateWithDifferentDataFieldElementKind.class.getSimpleName()));
+    assertTrue("Log message did not reference the field name for the @DataField: " + logMessage, logMessage.contains("field"));
   }
 }

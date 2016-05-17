@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Logger;
 
+import org.jboss.errai.common.client.function.Supplier;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -73,6 +74,16 @@ public final class TemplateUtil {
   private TemplateUtil() {
   }
 
+  public static void compositeComponentReplace(String componentType, String templateFile, Supplier<Widget> field,
+          final Map<String, Element> dataFieldElements, String fieldName) {
+    try {
+      compositeComponentReplace(componentType, templateFile, field.get(), dataFieldElements, fieldName);
+    } catch (Throwable t) {
+      throw new RuntimeException("There was an error initializing the @DataField " + fieldName + " in the @Templated "
+              + componentType + ": " + t.getMessage(), t);
+    }
+  }
+
   /**
    * Replace the {@link Element} with the data-field of the given
    * {@link String} with the root {@link Element} of the given {@link UIObject}
@@ -92,8 +103,8 @@ public final class TemplateUtil {
             + field.getClass().getName() + " [" + field.getElement() + "]");
 
     if (!element.getTagName().equals(field.getElement().getTagName())) {
-      logger.warning("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
-              + field.getElement().getTagName() + "]");
+      logger.warning("Replacing Element type [" + element.getTagName() + "] in " + templateFile + "  with type ["
+              + field.getElement().getTagName() + "] for " + fieldName + " in " + componentType);
     }
 
     Element parentElement = element.getParentElement();

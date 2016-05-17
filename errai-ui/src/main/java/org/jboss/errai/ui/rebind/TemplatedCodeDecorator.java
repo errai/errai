@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ui.rebind;
 
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
@@ -59,6 +62,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.function.Supplier;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -129,7 +133,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       logger.warn("The @Templated class, {}, extends Composite. This will not be supported in future versions.", declaringClass.getFullyQualifiedName());
     }
     if (!defaultStyleSheetPath && !styleSheet) {
-      throw new GenerationException("@Tempalted class [" + declaringClass.getFullyQualifiedName()
+      throw new GenerationException("@Templated class [" + declaringClass.getFullyQualifiedName()
               + "] declared a stylesheet [" + styleSheetPath + "] that could not be found.");
     }
 
@@ -573,7 +577,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(decorable, decorable.getEnclosingInjectable().getInjectedType());
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(invokeStatic(TemplateUtil.class, "compositeComponentReplace", decorable.getDecorableDeclaringType()
-          .getFullyQualifiedName(), getTemplateFileName(decorable.getDecorableDeclaringType()), Cast.to(Widget.class, field.getValue()),
+          .getFullyQualifiedName(), getTemplateFileName(decorable.getDecorableDeclaringType()), supplierOf(Cast.to(Widget.class, field.getValue())),
           dataFieldElements, field.getKey()));
     }
 
@@ -598,6 +602,15 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     initStmts.add(Stmt.invokeStatic(TemplateUtil.class, initMethodName, component, rootTemplateElement,
             Stmt.nestedCall(fieldsMap).invoke("values")));
 
+  }
+
+  private static Statement supplierOf(final Statement value) {
+    return newInstanceOf(parameterizedAs(Supplier.class, typeParametersOf(value.getType())))
+            .extend()
+            .publicOverridesMethod("get")
+            .append(Stmt.nestedCall(value).returnValue())
+            .finish()
+            .finish();
   }
 
   /**
