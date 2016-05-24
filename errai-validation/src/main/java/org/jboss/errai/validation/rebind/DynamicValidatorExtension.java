@@ -33,6 +33,9 @@ import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.validation.client.dynamic.DynamicValidator;
+import org.mvel2.util.NullType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link IOCExtension} for generating an injectable {@link DynamicValidator}. Does nothing by default unless
@@ -44,6 +47,8 @@ import org.jboss.errai.validation.client.dynamic.DynamicValidator;
 @IOCExtension
 public class DynamicValidatorExtension implements IOCExtensionConfigurator {
 
+  private static final Logger logger = LoggerFactory.getLogger(DynamicValidatorExtension.class);
+
   /**
    * System property used to enable generation of dynamic validators.
    */
@@ -51,7 +56,7 @@ public class DynamicValidatorExtension implements IOCExtensionConfigurator {
 
   public static final boolean DYNAMIC_VALIDATION_ENABLED = Boolean.getBoolean(DYNAMIC_VALIDATION_ENABLED_PROP);
 
-  private List<MetaClass> validators = new ArrayList<>();
+  private final List<MetaClass> validators = new ArrayList<>();
 
   @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext) {
@@ -61,7 +66,9 @@ public class DynamicValidatorExtension implements IOCExtensionConfigurator {
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
     if (DYNAMIC_VALIDATION_ENABLED) {
       injectionContext.registerExtensionTypeCallback(type -> {
-        if (type.isConcrete() && type.isAssignableTo(ConstraintValidator.class)) {
+        if (type.isConcrete() && type.isAssignableTo(ConstraintValidator.class)
+                && !type.getFullyQualifiedName().equals(NullType.class.getName())) {
+          logger.debug("Found ConstraintValidator, {}", type.getFullyQualifiedName());
           validators.add(type);
         }
       });

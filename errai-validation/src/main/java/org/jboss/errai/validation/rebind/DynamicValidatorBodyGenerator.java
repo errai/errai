@@ -185,7 +185,7 @@ public class DynamicValidatorBodyGenerator extends AbstractBodyGenerator {
     final Optional<MetaClass> ifaceOptional = validator.getAllSuperTypesAndInterfaces().stream()
             .filter(iface -> iface.getFullyQualifiedName().equals(ConstraintValidator.class.getName())).findAny();
     if (!ifaceOptional.isPresent()) {
-      throw new RuntimeException("Tried to generate dynamice validator for type that isn't a ConstraintValidator: "
+      throw new RuntimeException("Tried to generate dynamic validator for type that isn't a ConstraintValidator: "
               + validator.getFullyQualifiedName());
     }
     return ifaceOptional.get();
