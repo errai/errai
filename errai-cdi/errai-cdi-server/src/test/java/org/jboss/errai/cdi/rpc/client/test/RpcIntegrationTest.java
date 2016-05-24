@@ -16,7 +16,11 @@
 
 package org.jboss.errai.cdi.rpc.client.test;
 
-import org.jboss.errai.common.client.api.RemoteCallback;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.jboss.errai.cdi.client.payload.GenericPayload;
+import org.jboss.errai.cdi.client.payload.ParameterizedSubtypePayload;
 import org.jboss.errai.cdi.rpc.client.RpcTestBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -33,92 +37,49 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testRpcToCDIBeanQualifiedWithA() {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        RpcTestBean.getInstance().callRemoteCallerA(new RemoteCallback<String>() {
-          @Override
-          public void callback(String response) {
-            assertEquals("fooA", response);
-            finishTest();
-          }
-        }, "foo");
-
-      }
-    });
+    CDI.addPostInitTask(() -> RpcTestBean.getInstance().callRemoteCallerA(response -> {
+      assertEquals("fooA", response);
+      finishTest();
+    }, "foo"));
 
     delayTestFinish(60000);
   }
 
   public void testRpcToCDIBeanQualifiedWithB() {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        RpcTestBean.getInstance().callRemoteCallerB(new RemoteCallback<String>() {
-          @Override
-          public void callback(String response) {
-            assertEquals("barB", response);
-            finishTest();
-          }
-        }, "bar");
-      }
-    });
+    CDI.addPostInitTask(() -> RpcTestBean.getInstance().callRemoteCallerB(response -> {
+      assertEquals("barB", response);
+      finishTest();
+    }, "bar"));
 
     delayTestFinish(60000);
   }
 
   public void testRpcToUnqualifiedCDIBean() {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        RpcTestBean.getInstance().callRemoteCaller(new RemoteCallback<String>() {
-          @Override
-          public void callback(String response) {
-            assertEquals("bar", response);
-            finishTest();
-          }
-        }, "bar");
-      }
-    });
+    CDI.addPostInitTask(() -> RpcTestBean.getInstance().callRemoteCaller(response -> {
+      assertEquals("bar", response);
+      finishTest();
+    }, "bar"));
 
     delayTestFinish(60000);
   }
 
   public void testInterceptedRpc() {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        RpcTestBean.getInstance().callInterceptedRemoteCaller(new RemoteCallback<String>() {
-          @Override
-          public void callback(String response) {
-            assertEquals("foo_intercepted", response);
-            finishTest();
-          }
-        }, "foo");
-      }
-    });
+    CDI.addPostInitTask(() -> RpcTestBean.getInstance()
+    .callInterceptedRemoteCaller(response -> {
+      assertEquals("foo_intercepted", response);
+      finishTest();
+    }, "foo"));
 
     delayTestFinish(60000);
   }
 
   public void testRpcAccesssingHttpSession() {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        RpcTestBean.getInstance().callSetSessionAttribute(new RemoteCallback<Void>() {
-          @Override
-          public void callback(Void response) {
-            RpcTestBean.getInstance().callGetSessionAttribute(new RemoteCallback<String>() {
-              @Override
-              public void callback(String response) {
-                assertEquals("success", response);
+    CDI.addPostInitTask(() -> RpcTestBean.getInstance()
+      .callSetSessionAttribute(response -> RpcTestBean.getInstance()
+              .callGetSessionAttribute(response1 -> {
+                assertEquals("success", response1);
                 finishTest();
-              }
-            }, "test");
-          }
-        }, "test", "success");
-      }
-    });
+    }, "test"), "test", "success"));
 
     delayTestFinish(60000);
   }
@@ -130,18 +91,55 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
    * similar, yet independent, implementation of ErraiRPC.
    */
   public void testRpcToInheritedMethod() {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        RpcTestBean.getInstance().callSubServiceInheritedMethod(new RemoteCallback<Integer>() {
-          @Override
-          public void callback(Integer response) {
-            assertNotNull(response);
-            assertEquals(1, (int) response);
-            finishTest();
-          }
-        });
-      }
+    CDI.addPostInitTask(() -> RpcTestBean.getInstance().callSubServiceInheritedMethod(response -> {
+      assertNotNull(response);
+      assertEquals(1, (int) response);
+      finishTest();
+    }));
+
+    delayTestFinish(60000);
+  }
+
+  public void testGenericRpcPayload() throws Exception {
+    CDI.addPostInitTask(() -> {
+      final GenericPayload<Double, Double> payload = new GenericPayload<>();
+      payload.setA(1.0);
+      payload.setB(new ArrayList<>(Arrays.asList(1.1, 2.1)));
+      RpcTestBean.getInstance().callGenericRoundTrip(p -> {
+        assertNotNull(p);
+        assertEquals(payload, p);
+        finishTest();
+      }, payload);
+    });
+
+    delayTestFinish(60000);
+  }
+
+  public void testParameterizedRpcPayload() throws Exception {
+    CDI.addPostInitTask(() -> {
+      final GenericPayload<String, Integer> payload = new GenericPayload<>();
+      payload.setA("foo");
+      payload.setB(new ArrayList<>(Arrays.asList(1, 2, 3)));
+      RpcTestBean.getInstance().callParameterizedRoundTrip(p -> {
+        assertNotNull(p);
+        assertEquals(payload, p);
+        finishTest();
+      }, payload);
+    });
+
+    delayTestFinish(60000);
+  }
+
+  public void testParameterizedSubtypeRpcPayload() throws Exception {
+    CDI.addPostInitTask(() -> {
+      final ParameterizedSubtypePayload payload = new ParameterizedSubtypePayload();
+      payload.setA("foo");
+      payload.setB(new ArrayList<>(Arrays.asList(1, 2, 3)));
+      RpcTestBean.getInstance().callParameterizedSubtypeRoundTrip(p -> {
+        assertNotNull(p);
+        assertEquals(payload, p);
+        finishTest();
+      }, payload);
     });
 
     delayTestFinish(60000);

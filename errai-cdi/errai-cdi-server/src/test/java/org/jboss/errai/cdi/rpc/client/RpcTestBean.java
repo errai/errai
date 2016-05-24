@@ -21,14 +21,17 @@ import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.cdi.client.payload.GenericPayload;
+import org.jboss.errai.cdi.client.payload.ParameterizedSubtypePayload;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
+import org.jboss.errai.cdi.client.remote.GenericService;
 import org.jboss.errai.cdi.client.remote.MyInterceptedRemote;
 import org.jboss.errai.cdi.client.remote.MyRemote;
 import org.jboss.errai.cdi.client.remote.MySessionAttributeSettingRemote;
 import org.jboss.errai.cdi.client.remote.SubService;
 import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.RemoteCallback;
 
 /**
  * @author Mike Brock
@@ -56,6 +59,9 @@ public class RpcTestBean {
   @Inject
   private Caller<SubService> subServiceCaller;
 
+  @Inject
+  private Caller<GenericService> genericService;
+
   private static RpcTestBean instance;
 
   @PostConstruct
@@ -63,33 +69,45 @@ public class RpcTestBean {
     instance = this;
   }
 
-  public void callRemoteCaller(RemoteCallback<String> callback, String val) {
+  public void callRemoteCaller(final RemoteCallback<String> callback, final String val) {
     myRemoteCaller.call(callback).call(val);
   }
 
-  public void callInterceptedRemoteCaller(RemoteCallback<String> callback, String val) {
+  public void callInterceptedRemoteCaller(final RemoteCallback<String> callback, final String val) {
     myInterceptedRemoteCaller.call(callback).interceptedCall(val);
   }
 
-  public void callRemoteCallerA(RemoteCallback<String> callback, String val) {
+  public void callRemoteCallerA(final RemoteCallback<String> callback, final String val) {
     myRemoteCallerA.call(callback).call(val);
   }
 
-  public void callRemoteCallerB(RemoteCallback<String> callback, String val) {
+  public void callRemoteCallerB(final RemoteCallback<String> callback, final String val) {
     myRemoteCallerB.call(callback).call(val);
   }
 
-  public void callSetSessionAttribute(RemoteCallback<Void> callback, String key, String value) {
+  public void callSetSessionAttribute(final RemoteCallback<Void> callback, final String key, final String value) {
      mySessionAttributeSettingRemoteCaller.call(callback).setSessionAttribute(key, value);
   }
 
-  public void callGetSessionAttribute(RemoteCallback<String> callback, String key) {
+  public void callGetSessionAttribute(final RemoteCallback<String> callback, final String key) {
     mySessionAttributeSettingRemoteCaller.call(callback).getSessionAttribute(key);
   }
 
   /** Invokes the inherited baseServiceMethod() on the remote SubService implementation. */
-  public void callSubServiceInheritedMethod(RemoteCallback<Integer> callback) {
+  public void callSubServiceInheritedMethod(final RemoteCallback<Integer> callback) {
     subServiceCaller.call(callback).baseServiceMethod();
+  }
+
+  public void callGenericRoundTrip(final RemoteCallback<GenericPayload<?, ?>> callback, final GenericPayload<?, ?> payload) {
+    genericService.call(callback).genericRoundTrip(payload);
+  }
+
+  public void callParameterizedRoundTrip(final RemoteCallback<GenericPayload<String, Integer>> callback, final GenericPayload<String, Integer> payload) {
+    genericService.call(callback).parameterizedRoundTrip(payload);
+  }
+
+  public void callParameterizedSubtypeRoundTrip(final RemoteCallback<ParameterizedSubtypePayload> callback, final ParameterizedSubtypePayload payload) {
+    genericService.call(callback).parameterizedSubtypeRoundTrip(payload);
   }
 
   public static RpcTestBean getInstance() {
