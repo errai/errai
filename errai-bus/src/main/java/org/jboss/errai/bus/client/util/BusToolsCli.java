@@ -115,7 +115,7 @@ public class BusToolsCli {
   }
 
   private static final QueueSession clientSession = new QueueSession() {
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
 
     @Override
     public String getSessionId() {
@@ -194,7 +194,6 @@ public class BusToolsCli {
    * @param path
    *     path to use when sending requests to the JAX-RS endpoint
    */
-  @SuppressWarnings("UnusedDeclaration")
   public static native void setApplicationRoot(final String path) /*-{
       if (path == null) {
           $wnd.erraiBusApplicationRoot = undefined;

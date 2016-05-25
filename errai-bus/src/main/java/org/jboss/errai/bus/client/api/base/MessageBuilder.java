@@ -18,14 +18,14 @@ package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.HasEncoded;
-import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
 import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageProvider;
-import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.api.RemoteCallback;
 
 /**
@@ -119,7 +119,6 @@ public class MessageBuilder {
    * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
    *         constructs messages properly
    */
-  @SuppressWarnings({ "unchecked" })
   public static MessageBuildSubject<MessageReplySendable> createConversation(final Message message) {
     final Message newMessage = provider.get();
     newMessage.setFlag(RoutingFlag.NonGlobalRouting);
@@ -143,7 +142,6 @@ public class MessageBuilder {
    * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
    *         constructs messages properly
    */
-  @SuppressWarnings({ "unchecked" })
   public static MessageBuildCommand<MessageReplySendable> createConversation(final Message message, final String subject) {
     final Message newMessage = provider.get();
     if (newMessage instanceof HasEncoded) {

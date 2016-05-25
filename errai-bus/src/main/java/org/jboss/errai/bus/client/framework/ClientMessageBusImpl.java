@@ -121,12 +121,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       final String errorTo = message.get(String.class, MessageParts.ErrorTo);
 
       if (errorTo == null || DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(errorTo)) {
-        Throwable t = message.get(Throwable.class, MessageParts.Throwable);
+        final Throwable t = message.get(Throwable.class, MessageParts.Throwable);
         Optional.ofNullable(GWT.getUncaughtExceptionHandler())
                 .ifPresent(h -> h.onUncaughtException(t));
 
         if (!uncaughtExceptionHandlers.isEmpty()) {
-          for (UncaughtExceptionHandler handler : uncaughtExceptionHandlers) {
+          for (final UncaughtExceptionHandler handler : uncaughtExceptionHandlers) {
             handler.onUncaughtException(t);
           }
         }
@@ -319,12 +319,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void setupDefaultHandlers() {
     if (availableHandlers != null) {
-      for (TransportHandler handler : availableHandlers.values()) {
+      for (final TransportHandler handler : availableHandlers.values()) {
         handler.close();
       }
     }
 
-    Map<String, TransportHandler> m = new LinkedHashMap<String, TransportHandler>();
+    final Map<String, TransportHandler> m = new LinkedHashMap<String, TransportHandler>();
     m.put(Capabilities.WebSockets.name(), new WebsocketHandler(ClientMessageBusImpl.this));
     m.put(Capabilities.SSE.name(), new SSEHandler(ClientMessageBusImpl.this));
     m.put(Capabilities.LongPolling.name(),
@@ -673,7 +673,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         try {
           callback.callback(message);
         }
-        catch (Exception e) {
+        catch (final Exception e) {
           handleCallbackError(message, e);
         }
       }
@@ -779,7 +779,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     logger.debug("send({})", message.getParts());
 
     try {
-      boolean deferred = false;
+      boolean delivered = false;
       final boolean localOnly = message.isFlagSet(RoutingFlag.DeliverLocalOnly);
       final String subject = message.getSubject();
 
@@ -787,21 +787,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (isRemoteCommunicationEnabled() && !localOnly) {
           if (getState().isShadowDeliverable() && shadowSubscriptions.containsKey(subject)) {
             deliverToSubscriptions(shadowSubscriptions, subject, message);
-            deferred = true;
+            delivered = true;
           }
           else if (getState() != BusState.CONNECTED) {
             logger.debug("deferred: {}", message);
             deferredMessages.add(message);
-            deferred = true;
+            delivered = true;
           }
-        }
-
-        boolean routedToRemote = false;
-
-        if (!localOnly && remotes.containsKey(subject)) {
-          logger.debug("sent to remote: {}", message);
-          remotes.get(subject).callback(message);
-          routedToRemote = true;
+          else if (remotes.containsKey(subject)) {
+            logger.debug("sent to remote: {}", message);
+            remotes.get(subject).callback(message);
+            delivered = true;
+          }
         }
 
         if (subscriptions.containsKey(subject)) {
@@ -810,8 +807,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         else if (localSubscriptions.containsKey(subject)) {
           deliverToSubscriptions(localSubscriptions, subject, message);
         }
-        else if (!deferred && !routedToRemote) {
-          throw new NoSubscribersToDeliverTo(subject);
+        else if (!delivered) {
+          if (shadowSubscriptions.containsKey(subject)) {
+            deliverToSubscriptions(shadowSubscriptions, subject, message);
+          }
+          else {
+            throw new NoSubscribersToDeliverTo(subject);
+          }
         }
       }
       else {
@@ -819,7 +821,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             + " if the message does not contain a ToSubject field.");
       }
     }
-    catch (RuntimeException e) {
+    catch (final RuntimeException e) {
       callErrorHandler(message, e);
     }
   }
@@ -986,7 +988,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       try {
         defaultErrorHandling = message.getErrorCallback().error(message, t);
       }
-      catch (Throwable secondaryError) {
+      catch (final Throwable secondaryError) {
         logger.error("Encountered an error while calling error callback for message to " + message.getSubject(), secondaryError);
       }
     }
@@ -997,7 +999,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void loadRpcProxies() {
-    RpcProxyLoader proxyLoader = ((RpcProxyLoader) GWT.create(RpcProxyLoader.class));
+    final RpcProxyLoader proxyLoader = ((RpcProxyLoader) GWT.create(RpcProxyLoader.class));
     proxyLoader.loadProxies(ClientMessageBusImpl.this);
   }
 
@@ -1218,7 +1220,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         try {
           et.deliverTo(lifecycleListeners.get(i), e);
         }
-        catch (Throwable t) {
+        catch (final Throwable t) {
           logger.error("listener threw exception: " + t);
           t.printStackTrace();
         }

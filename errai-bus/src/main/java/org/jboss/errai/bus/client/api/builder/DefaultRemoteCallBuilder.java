@@ -173,7 +173,7 @@ public class DefaultRemoteCallBuilder {
 
         if (qualifiers != null) {
           final List<String> qualNames = new ArrayList<String>(qualifiers.length);
-          for (Annotation a : qualifiers) {
+          for (final Annotation a : qualifiers) {
             qualNames.add(a.annotationType().getName());
           }
 
