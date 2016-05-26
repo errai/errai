@@ -40,7 +40,7 @@ abstract class BaseDependency implements Dependency {
 
   @Override
   public String toString() {
-    return "[depType=" + dependencyType.toString() + ", abstractInjectable=" + injectable.toString() + "]";
+    return "[dependencyType=" + dependencyType.toString() + ", reference=" + injectable.toString() + "]";
   }
 
   @Override

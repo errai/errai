@@ -52,6 +52,8 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -61,6 +63,8 @@ import com.google.common.collect.Multimap;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder {
+
+  private static final Logger logger = LoggerFactory.getLogger(DependencyGraphBuilder.class);
 
   private final QualifierFactory qualFactory;
   private final Map<InjectableHandle, InjectableReference> injectableReferences = new HashMap<>();
@@ -77,15 +81,17 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   @Override
-  public Injectable addInjectable(final MetaClass injectedType, final Qualifier qualifier, Class<? extends Annotation> literalScope,
+  public Injectable addInjectable(final MetaClass injectedType, final Qualifier qualifier, final Class<? extends Annotation> literalScope,
           final InjectableType injectableType, final WiringElementType... wiringTypes) {
     final InjectableImpl injectable = new InjectableImpl(injectedType, qualifier,
             nameGenerator.generateFor(injectedType, qualifier, injectableType), literalScope, injectableType,
             Arrays.asList(wiringTypes));
+
     return registerNewInjectable(injectable);
   }
 
   private Injectable registerNewInjectable(final InjectableImpl injectable) {
+    logAddedInjectable(injectable);
     final String factoryName = injectable.getFactoryName();
     if (injectablesByName.containsKey(factoryName)) {
       GraphUtil.throwDuplicateConcreteInjectableException(factoryName, injectablesByName.get(factoryName), injectable);
@@ -101,6 +107,14 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     }
 
     return injectable;
+  }
+
+  private void logAddedInjectable(final Injectable injectable) {
+    logger.debug("Adding new injectable: {}", injectable);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Injectable type: {}", injectable.getInjectableType());
+      logger.trace("Injectable wiring types: {}", injectable.getWiringElementTypes());
+    }
   }
 
   @Override
@@ -121,7 +135,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     for (final MetaClass assignable : injectableReference.type.getAllSuperTypesAndInterfaces()) {
       try {
         directInjectableReferencesByAssignableTypes.put(assignable.getErased(), injectableReference);
-      } catch (Throwable t) {
+      } catch (final Throwable t) {
         throw new RuntimeException("Error occurred adding the assignable type " + assignable.getFullyQualifiedName(), t);
       }
     }
@@ -139,7 +153,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     return injectableReference;
   }
 
-  private void addDependency(final Injectable injectable, Dependency dependency) {
+  private void addDependency(final Injectable injectable, final Dependency dependency) {
     assert (injectable instanceof InjectableImpl);
     if (InjectableType.Disabled.equals(injectable.getInjectableType())
             && (!DependencyType.ProducerMember.equals(dependency.getDependencyType())
@@ -154,11 +168,13 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
 
   @Override
   public DependencyGraph createGraph(final ReachabilityStrategy strategy) {
+    logger.debug("Creating dependency graph...");
     resolveSpecializations();
     linkInjectableReferences();
     resolveDependencies();
     validateInjectables();
     removeUnreachableInjectables(strategy);
+    logger.debug("Finished creating dependency graph.");
 
     return new DependencyGraphImpl(injectablesByName);
   }
@@ -174,6 +190,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   private void resolveSpecializations() {
+    logger.debug("Processing {} specializations...", specializations.size());
     final Set<InjectableImpl> toBeRemoved = new HashSet<>();
     GraphUtil.sortSuperTypesBeforeSubtypes(specializations);
     for (final InjectableImpl specialization : specializations) {
@@ -183,6 +200,8 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
         resolveTypeSpecialization(specialization, toBeRemoved);
       }
     }
+    logger.debug("Removed {} beans that were specialized.", toBeRemoved.size());
+    logger.trace("Types removed by specialization: {}", toBeRemoved);
     injectablesByName.values().removeAll(toBeRemoved);
   }
 
@@ -293,6 +312,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   private void validateInjectables() {
+    logger.debug("Validating dependency graph...");
     final Collection<String> problems = new ArrayList<String>();
     final Collection<Validator> validators = createValidators();
     for (final Injectable injectable : injectablesByName.values()) {
@@ -308,6 +328,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   private void removeUnreachableInjectables(final ReachabilityStrategy strategy) {
+    logger.debug("Removing unreachable injectables from dependency graph using {} strategy.", strategy);
     final Set<String> reachableNames = new HashSet<String>();
     final Queue<Injectable> processingQueue = new LinkedList<Injectable>();
     final Predicate<Injectable> reachabilityRoot = reachabilityRootPredicate(strategy);
@@ -319,6 +340,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
         do {
           final Injectable processedInjectable = processingQueue.poll();
           reachableNames.add(processedInjectable.getFactoryName());
+          logger.trace("Marked as reachable: {}", processedInjectable);
           for (final Dependency dep : processedInjectable.getDependencies()) {
             final Injectable resolvedDep = GraphUtil.getResolvedDependency(dep, processedInjectable);
             if (!reachableNames.contains(resolvedDep.getFactoryName())) {
@@ -329,7 +351,9 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
       }
     }
 
+    final int initialSize = injectablesByName.size();
     injectablesByName.keySet().retainAll(reachableNames);
+    logger.debug("Removed {} unreachable injectables.", initialSize - injectablesByName.size());
   }
 
   private Predicate<Injectable> reachabilityRootPredicate(final ReachabilityStrategy strategy) {
@@ -346,6 +370,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   private void resolveDependencies() {
+    logger.debug("Resolving dependencies for {} injectables...", injectablesByName.size());
     final Set<Injectable> visited = new HashSet<Injectable>();
     final Set<String> transientInjectableNames = new HashSet<String>();
     final List<String> dependencyProblems = new ArrayList<String>();
@@ -356,6 +381,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
         transientInjectableNames.add(injectable.getFactoryName());
       }
       if (!visited.contains(injectable)) {
+        logger.debug("Resolving {} dependencies for: {}", injectable.getDependencies().size(), injectable);
         for (final Dependency dep : injectable.getDependencies()) {
           resolveDependency(BaseDependency.as(dep), injectable, dependencyProblems, customProvidedInjectables);
         }
@@ -377,6 +403,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
       return dep.injectable.resolution;
     }
 
+    logger.trace("Resolving dependency: {}", dep);
     final Multimap<ResolutionPriority, InjectableImpl> resolvedByPriority = HashMultimap.create();
     final Queue<InjectableReference> resolutionQueue = new LinkedList<InjectableReference>();
     resolutionQueue.add(dep.injectable);
@@ -407,6 +434,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
           return null;
         } else {
           final Injectable injectable = maybeProcessAsExtension(dep, depOwner, customProvidedInjectables, resolvedByPriority, resolved);
+          logger.trace("Resolved dependency: {}", injectable);
 
           return (dep.injectable.resolution = injectable);
         }
@@ -458,16 +486,21 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
 
   private void processResolutionQueue(final Queue<InjectableReference> resolutionQueue,
           final Multimap<ResolutionPriority, InjectableImpl> resolvedByPriority) {
+    logger.trace("Processing resolution queue with {} initial references...", resolutionQueue.size());
     do {
       final InjectableReference cur = resolutionQueue.poll();
+      logger.trace("Processing links of reference: {}", cur);
       for (final InjectableBase link : cur.linked) {
         if (link instanceof InjectableReference) {
+          logger.trace("Adding linked reference to resolution queue: {}", link);
           resolutionQueue.add((InjectableReference) link);
         } else if (link instanceof InjectableImpl) {
+          logger.trace("Adding linked injectable to resolution results: {}", link);
           resolvedByPriority.put(getMatchingPriority((InjectableImpl) link), (InjectableImpl) link);
         }
       }
     } while (resolutionQueue.size() > 0);
+    logger.trace("Finished processing resolution queue. Resolved {} injectables.", resolvedByPriority.size());
   }
 
   private Injectable getRootDisabledInjectable(Injectable inj, final Collection<String> problems,
@@ -483,11 +516,13 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   private void linkInjectableReferences() {
+    logger.debug("Linking {} references in dependencies...", injectableReferences.size());
     final Set<InjectableReference> linked = new HashSet<>(injectableReferences.size());
     for (final Injectable injectable : injectablesByName.values()) {
       for (final Dependency dep : injectable.getDependencies()) {
         final BaseDependency baseDep = BaseDependency.as(dep);
         if (!linked.contains(baseDep.injectable)) {
+          logger.debug("Processing dependency: {}", baseDep);
           linkInjectableReference(baseDep.injectable);
           linked.add(baseDep.injectable);
         }
@@ -498,8 +533,10 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   private void linkInjectableReference(final InjectableReference injectableReference) {
     final Collection<InjectableReference> candidates = directInjectableReferencesByAssignableTypes
             .get(injectableReference.type.getErased());
+    logger.debug("Found {} candidate references.", candidates.size());
     for (final InjectableReference candidate : candidates) {
       if (GraphUtil.candidateSatisfiesInjectable(injectableReference, candidate)) {
+        logger.trace("Candidate has been linked: {}", candidate);
         injectableReference.linked.add(candidate);
       }
     }
@@ -549,7 +586,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
   }
 
   @Override
-  public void addProducerMemberDependency(Injectable producedInjectable, MetaClass producerType, MetaClassMember member) {
+  public void addProducerMemberDependency(final Injectable producedInjectable, final MetaClass producerType, final MetaClassMember member) {
     final InjectableReference abstractInjectable = createStaticMemberInjectable(producerType, member);
     final ProducerInstanceDependency dep = new ProducerInstanceDependencyImpl(
             abstractInjectable, DependencyType.ProducerMember, member);
