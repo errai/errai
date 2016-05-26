@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.AbstractOneWayConverter;
 import org.jboss.errai.databinding.client.ConverterRegistrationKey;
@@ -57,7 +58,7 @@ public class Convert {
     }
 
     @Override
-    public String convert(D value) {
+    public String convert(final D value) {
       if (value == null) {
         return "";
       }
@@ -73,7 +74,7 @@ public class Convert {
     }
 
     @Override
-    public T convert(T value) {
+    public T convert(final T value) {
       return value;
     }
   }
@@ -84,7 +85,7 @@ public class Convert {
     }
 
     @Override
-    public Integer convert(String value) {
+    public Integer convert(final String value) {
       if (isEmpty(value)) {
         return null;
       }
@@ -100,7 +101,7 @@ public class Convert {
     }
 
     @Override
-    public Long convert(String value) {
+    public Long convert(final String value) {
       if (isEmpty(value)) {
         return null;
       }
@@ -116,7 +117,7 @@ public class Convert {
     }
 
     @Override
-    public Float convert(String value) {
+    public Float convert(final String value) {
       if (isEmpty(value)) {
         return null;
       }
@@ -132,7 +133,7 @@ public class Convert {
     }
 
     @Override
-    public Double convert(String value) {
+    public Double convert(final String value) {
       if (isEmpty(value)) {
         return null;
       }
@@ -148,7 +149,7 @@ public class Convert {
     }
 
     @Override
-    public BigInteger convert(String value) {
+    public BigInteger convert(final String value) {
       if (isEmpty(value)) {
         return null;
       }
@@ -164,7 +165,7 @@ public class Convert {
     }
 
     @Override
-    public BigDecimal convert(String value) {
+    public BigDecimal convert(final String value) {
       if (isEmpty(value)) {
         return null;
       }
@@ -180,7 +181,7 @@ public class Convert {
     }
 
     @Override
-    public Boolean convert(String value) {
+    public Boolean convert(final String value) {
       if (isEmpty(value)) {
         return null;
       }
@@ -300,7 +301,7 @@ public class Convert {
    * Return an converter that does not modify model or component values.
    */
   public static <T> Converter<T, T> identityConverter(final Class<T> type) {
-    IdentityConverter<T> idOneWay = new IdentityConverter<>(type);
+    final IdentityConverter<T> idOneWay = new IdentityConverter<>(type);
 
     return TwoWayConverter.createConverter(idOneWay, idOneWay);
   }
@@ -321,8 +322,8 @@ public class Convert {
    * @param converter
    *          The converter to register as a default for the provided model and widget types.
    */
-  public static <M, W> void registerDefaultConverter(Class<M> modelValueType, Class<W> widgetValueType,
-      Converter<M, W> converter) {
+  public static <M, W> void registerDefaultConverter(final Class<M> modelValueType, final Class<W> widgetValueType,
+      final Converter<M, W> converter) {
     Assert.notNull(modelValueType);
     Assert.notNull(widgetValueType);
     defaultConverters.put(new ConverterRegistrationKey(modelValueType, widgetValueType), converter);
@@ -336,7 +337,7 @@ public class Convert {
   }
 
   @SuppressWarnings("rawtypes")
-  public static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
+  public static Class inferWidgetValueType(final Widget widget, final Class<?> defaultWidgetValueType) {
     Class widgetValueType = null;
 
     if (widget instanceof ElementWrapperWidget) {
@@ -345,6 +346,9 @@ public class Convert {
     else if (widget instanceof TakesValue) {
       Object value = ((TakesValue) widget).getValue();
       if (value != null) {
+        if (value instanceof WrappedPortable) {
+          value = ((WrappedPortable) value).unwrap();
+        }
         widgetValueType = value.getClass();
       }
       else if (widget instanceof TextBoxBase) {
