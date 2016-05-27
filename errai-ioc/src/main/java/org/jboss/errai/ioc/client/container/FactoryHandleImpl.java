@@ -17,9 +17,10 @@
 package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @see FactoryHandle
@@ -28,8 +29,9 @@ import java.util.Set;
 public class FactoryHandleImpl implements FactoryHandle {
 
   // TODO intern qualifiers for all FactoryHandle instances
-  private final Set<Annotation> qualifiers = new HashSet<Annotation>();
-  private final Set<Class<?>> assignableTypes = new HashSet<Class<?>>();
+  // Initialize size to 2 because most types have exactly two qualifiers: @Any and @Default
+  private final List<Annotation> qualifiers = new ArrayList<>(2);
+  private final List<Class<?>> assignableTypes = new ArrayList<>();
   private final Class<?> actualType;
   private final String factoryName;
   private final Class<? extends Annotation> scope;
@@ -57,13 +59,13 @@ public class FactoryHandleImpl implements FactoryHandle {
   }
 
   @Override
-  public Set<Annotation> getQualifiers() {
-    return qualifiers;
+  public Collection<Annotation> getQualifiers() {
+    return Collections.unmodifiableCollection(qualifiers);
   }
 
   @Override
-  public Set<Class<?>> getAssignableTypes() {
-    return Collections.unmodifiableSet(assignableTypes);
+  public Collection<Class<?>> getAssignableTypes() {
+    return Collections.unmodifiableCollection(assignableTypes);
   }
 
   @Override

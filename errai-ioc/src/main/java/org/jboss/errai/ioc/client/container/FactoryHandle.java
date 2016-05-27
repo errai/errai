@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
-import java.util.Set;
+import java.util.Collection;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Named;
@@ -36,12 +36,12 @@ public interface FactoryHandle {
   /**
    * @return The set of {@link Qualifier} annotations for this factory's bean.
    */
-  Set<Annotation> getQualifiers();
+  Collection<Annotation> getQualifiers();
 
   /**
    * @return The set of all types that this factory's bean can be assigned to.
    */
-  Set<Class<?>> getAssignableTypes();
+  Collection<Class<?>> getAssignableTypes();
 
   /**
    * @return This will be the literal class of a type that was type-injectable. If the factory was for a producer

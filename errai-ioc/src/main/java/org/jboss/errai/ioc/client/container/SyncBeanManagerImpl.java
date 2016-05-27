@@ -52,22 +52,22 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   private final Multimap<String, SyncBeanDef<?>> runtimeBeanDefsByName = ArrayListMultimap.create();
 
   @Override
-  public void destroyBean(Object ref) {
+  public void destroyBean(final Object ref) {
     contextManager.destroy(ref);
   }
 
   @Override
-  public boolean isManaged(Object ref) {
+  public boolean isManaged(final Object ref) {
     return contextManager.isManaged(ref);
   }
 
   @Override
-  public Object getActualBeanReference(Object ref) {
+  public Object getActualBeanReference(final Object ref) {
     return Factory.maybeUnwrapProxy(ref);
   }
 
   @Override
-  public boolean isProxyReference(Object ref) {
+  public boolean isProxyReference(final Object ref) {
     return ref instanceof Proxy;
   }
 
@@ -163,7 +163,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   }
 
   @Override
-  public <T> Collection<SyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
+  public <T> Collection<SyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
     final Set<Annotation> qualifierSet = new HashSet<Annotation>(Arrays.asList(qualifiers));
     final Collection<SyncBeanDef<T>> candidates = lookupBeans(type);
     final Iterator<SyncBeanDef<T>> iter = candidates.iterator();
@@ -179,7 +179,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public <T> SyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
+  public <T> SyncBeanDef<T> lookupBean(final Class<T> type, Annotation... qualifiers) {
     if (qualifiers.length == 0) {
       qualifiers = new Annotation[] { QualifierUtil.DEFAULT_ANNOTATION };
     }
@@ -230,7 +230,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     }
 
     @Override
-    public boolean isAssignableTo(Class type) {
+    public boolean isAssignableTo(final Class type) {
       return Object.class.equals(type) || (type != null && type.getName().equals(name));
     }
 
@@ -260,7 +260,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     }
 
     @Override
-    public boolean matches(Set annotations) {
+    public boolean matches(final Set annotations) {
       return true;
     }
 
@@ -298,6 +298,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   private final class IOCBeanDefImplementation<T> implements SyncBeanDef<T> {
     private final FactoryHandle handle;
     private final Class<T> type;
+    private Set<Annotation> qualifiers;
 
     private IOCBeanDefImplementation(final FactoryHandle handle, final Class<T> type) {
       this.handle = handle;
@@ -345,11 +346,15 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     @Override
     public Set<Annotation> getQualifiers() {
-      return handle.getQualifiers();
+      if (qualifiers == null) {
+        qualifiers = new HashSet<>(handle.getQualifiers());
+      }
+
+      return qualifiers;
     }
 
     @Override
-    public boolean matches(Set<Annotation> annotations) {
+    public boolean matches(final Set<Annotation> annotations) {
       return QualifierUtil.matches(annotations, handle.getQualifiers());
     }
 

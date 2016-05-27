@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,7 +93,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public Collection<AsyncBeanDef> lookupBeans(String name) {
+  public Collection<AsyncBeanDef> lookupBeans(final String name) {
     final Collection syncBeans = innerBeanManager.lookupBeans(name);
     final Collection beans = wrapSyncBeans(syncBeans);
     addUnloadedBeans(beans, name);
@@ -150,7 +151,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
+  public <T> AsyncBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
     final Collection beans = lookupBeans(type, qualifiers);
 
     if (beans.size() > 1) {
@@ -361,6 +362,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     private class FactoryLoaderBeanDef implements AsyncBeanDef<T> {
 
       private final Class<T> type;
+      private Set<Annotation> qualifiers;
 
       public FactoryLoaderBeanDef(final Class<T> type) {
         this.type = type;
@@ -420,7 +422,10 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
 
       @Override
       public Set<Annotation> getQualifiers() {
-        return handle.getQualifiers();
+        if (qualifiers == null) {
+          qualifiers = Collections.unmodifiableSet(new HashSet<>(handle.getQualifiers()));
+        }
+        return qualifiers;
       }
 
       @Override
