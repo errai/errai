@@ -22,10 +22,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Indicates that the annotated client-side class implements a remote interface
+ * (see {@link Remote}) and is to be used as a service endpoint in the following
+ * scenarios:
+ * 
+ * <ul>
+ * <li>Remote communication is turned off
+ * <li>Errai's message bus is not in connected state
+ * <li>A remote endpoint for the service does not exist
+ * </ul>
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 public @interface ShadowService {
 
   /**
