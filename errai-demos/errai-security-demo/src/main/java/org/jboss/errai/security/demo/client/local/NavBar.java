@@ -20,20 +20,18 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.Navigation;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.api.LoginPage;
+import org.jboss.errai.ui.nav.client.local.api.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.api.TransitionToRole;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-
-import elemental.client.Browser;
-import elemental.html.AnchorElement;
-import elemental.js.html.JsAnchorElement;
 
 /**
  * <p>
@@ -54,45 +52,34 @@ import elemental.js.html.JsAnchorElement;
 @Dependent
 public class NavBar {
 
-  /*
-   * Calling Browser.getDocument().createAnchorElement() makes an <anchor> tag instead of an <a> tag.
-   */
-  @DataField AnchorElement messages = (JsAnchorElement) Browser.getDocument().createElement("a");
-  @DataField @RestrictedAccess AnchorElement login = (JsAnchorElement) Browser.getDocument().createElement("a");
-  @DataField @RestrictedAccess(roles = "admin") AnchorElement admin = (JsAnchorElement) Browser.getDocument().createElement("a");
-  @DataField @RestrictedAccess AnchorElement logout = (JsAnchorElement) Browser.getDocument().createElement("a");
+  @Inject
+  @DataField
+  @TransitionTo(Messages.class)
+  Anchor messages;
 
-  @Inject TransitionTo<WelcomePage> welcomePage;
-  @Inject TransitionTo<Messages> messagesTab;
-  @Inject TransitionTo<LoginForm> loginTab;
-  @Inject TransitionTo<AdminPage> adminTab;
+  @Inject
+  @DataField
+  @TransitionToRole(LoginPage.class)
+  @RestrictedAccess
+  Anchor login;
+
+  @Inject
+  @DataField
+  @TransitionTo(AdminPage.class)
+  @RestrictedAccess(roles = "admin")
+  Anchor admin;
+
+  @Inject
+  @DataField
+  @RestrictedAccess
+  Anchor logout;
+
+  @Inject org.jboss.errai.ui.nav.client.local.TransitionTo<WelcomePage> welcomePage;
 
   @Inject Caller<AuthenticationService> authServiceCaller;
 
-  @EventHandler("messages")
-  public void onHomeButtonClick(ClickEvent e) {
-    messagesTab.go();
-  }
-
-  @EventHandler("login")
-  public void onLoginButtonClicked(ClickEvent event) {
-    loginTab.go();
-  }
-
-  @EventHandler("admin")
-  public void onAdminTabClicked(ClickEvent event) {
-    adminTab.go();
-  }
-
   @EventHandler("logout")
   public void logoutClicked(final ClickEvent event) {
-    authServiceCaller.call(new RemoteCallback<Void>() {
-
-      @Override
-      public void callback(Void response) {
-        welcomePage.go();
-      }
-
-    }).logout();
+    authServiceCaller.call(response -> welcomePage.go()).logout();
   }
 }

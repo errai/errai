@@ -16,8 +16,12 @@
 
 package org.jboss.errai.ui.nav.rebind;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -26,19 +30,34 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionToRole;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
@@ -48,6 +67,63 @@ import com.google.gwt.user.client.ui.SimplePanel;
 @PrepareForTest(ClassScanner.class)
 public class ValidationRulesTest {
   private final NavigationGraphGenerator generator = new NavigationGraphGenerator();
+  private TransitionProviderIOCExtension transitionProvider;
+
+  @Mock
+  private InjectionContext injContext;
+
+  @Mock
+  private GeneratorContext genContext;
+
+  @Mock
+  private IOCProcessingContext procContext;
+
+  @Mock
+  private InjectionSite injSite;
+
+  @Mock
+  private FactoryNameGenerator nameGenerator;
+
+  @Mock
+  private Qualifier transitionToRole;
+
+  @Mock
+  private Qualifier transitionTo;
+
+  @Mock
+  private org.jboss.errai.ui.nav.client.local.api.TransitionToRole toRoleAnno;
+
+  @Captor
+  private ArgumentCaptor<InjectableHandle> handleCaptor;
+
+  @Captor
+  private ArgumentCaptor<InjectableProvider> providerCaptor;
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @Before
+  public void setup() {
+    transitionProvider = new TransitionProviderIOCExtension();
+    final QualifierFactory qualFactory = mock(QualifierFactory.class);
+
+    when(nameGenerator.generateFor(Mockito.any(), Mockito.any())).thenReturn("FactoryName");
+    when(procContext.getGeneratorContext()).thenReturn(genContext);
+    when(injContext.getProcessingContext()).thenReturn(procContext);
+    when(injContext.getQualifierFactory()).thenReturn(qualFactory);
+    when(toRoleAnno.annotationType()).thenReturn((Class) org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class);
+    when(qualFactory.forSource(Mockito.any())).then(invocation -> {
+      final HasAnnotations hasAnno = (HasAnnotations) invocation.getArguments()[0];
+      if (hasAnno.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)) {
+        return transitionToRole;
+      }
+      else if (hasAnno.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionTo.class)) {
+        return transitionTo;
+      }
+      else {
+        throw new IllegalStateException();
+      }
+    });
+    doNothing().when(injContext).registerExactTypeInjectableProvider(handleCaptor.capture(), providerCaptor.capture());
+  }
 
 
   @Test
@@ -59,19 +135,19 @@ public class ValidationRulesTest {
     try {
       generator.generate(null, null);
       fail("GenerationException should have been thrown because more then one start page was defined.");
-    } catch (GenerationException e) {
+    } catch (final GenerationException e) {
 
       // then
-      String message = e.getMessage();
+      final String message = e.getMessage();
       assertTrue(message.contains(StartPage1.class.getName()));
       assertTrue(message.contains(StartPage2.class.getName()));
     }
     verify(ClassScanner.class);
   }
 
-  private List<MetaClass> createMetaClassList(Class<?>... classes) {
-    List<MetaClass> result = new ArrayList<MetaClass>(classes.length);
-    for (Class<?> aClass : classes) {
+  private List<MetaClass> createMetaClassList(final Class<?>... classes) {
+    final List<MetaClass> result = new ArrayList<MetaClass>(classes.length);
+    for (final Class<?> aClass : classes) {
       result.add(JavaReflectionClass.newInstance(aClass));
     }
     return result;
@@ -86,8 +162,8 @@ public class ValidationRulesTest {
     try {
       generator.generate(null, null);
       fail("GenerationException should have been thrown because more then one unique page was defined");
-    } catch (GenerationException e) {
-      String message = e.getMessage();
+    } catch (final GenerationException e) {
+      final String message = e.getMessage();
       assertTrue(message.contains(Page1.class.getName()));
       assertTrue(message.contains(Page2.class.getName()));
     }
@@ -103,8 +179,8 @@ public class ValidationRulesTest {
     try {
       generator.generate(null, null);
       fail("GenerationException should have been thrown because no default start page was defined");
-    } catch (GenerationException e) {
-      String message = e.getMessage();
+    } catch (final GenerationException e) {
+      final String message = e.getMessage();
       assertTrue(message.contains("DefaultPage"));
     }
     verify(ClassScanner.class);
@@ -125,18 +201,59 @@ public class ValidationRulesTest {
     try {
       generator.generate(null, null);
     }
-    catch (GenerationException e) {
+    catch (final GenerationException e) {
       fail("Validation should not have ocurred.");
     }
   }
-  
+
   @Test(expected = GenerationException.class)
   public void shouldThrowExceptionForDefaultPageWithPathParam() throws Exception {
     mockClassScanner(DefaultPageWithPathParam.class);
     generator.generate(null, null);
   }
 
-  private void mockClassScanner(Class<?>... pages) {
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test(expected = GenerationException.class)
+  public void shouldThrowExceptionWithTransitionToMissingRole() throws Exception {
+    mockClassScanner();
+    transitionProvider.afterInitialization(procContext, injContext);
+
+    final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
+    when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
+    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
+    when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
+
+    transitionToRoleProvider.getInjectable(injSite, nameGenerator);
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test(expected = GenerationException.class)
+  public void shouldThrowExceptionWithTransitionToUniqueRoleWithMultiplePages() throws Exception {
+    mockClassScanner(Page1.class, Page2.class);
+    transitionProvider.afterInitialization(procContext, injContext);
+
+    final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
+    when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
+    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
+    when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
+
+    transitionToRoleProvider.getInjectable(injSite, nameGenerator);
+  }
+
+  private InjectableProvider getTransitionToRoleProvider() {
+    final List<InjectableHandle> handles = handleCaptor.getAllValues();
+    for (int i = 0; i < handles.size(); i++) {
+      final InjectableHandle handle = handles.get(i);
+      if (handle.getQualifier() == transitionToRole) {
+        return providerCaptor.getAllValues().get(i);
+      }
+    }
+
+    throw new IllegalStateException();
+  }
+
+
+  private void mockClassScanner(final Class<?>... pages) {
     PowerMockito.mockStatic(ClassScanner.class);
     when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(createMetaClassList(pages));
   }
@@ -171,14 +288,15 @@ public class ValidationRulesTest {
 
   @Page
   private static class PageWithTransitionToMyUniquePageRole extends SimplePanel {
+    @SuppressWarnings("unused")
     private TransitionToRole<MyUniquePageRole> transition;
   }
 
   @Page
   private static class BlacklistedPage extends SimplePanel {
   }
-  
+
   @Page(role = DefaultPage.class, path = "{var}/text")
   private static class DefaultPageWithPathParam extends SimplePanel {}
-  
+
 }

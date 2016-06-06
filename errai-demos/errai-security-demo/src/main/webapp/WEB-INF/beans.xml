@@ -27,7 +27,6 @@
     <exclude name = "org.jboss.errai.security.demo.client.local.NavBar" />
     <exclude name = "org.jboss.errai.security.demo.client.local.SecurityErrorPage" />
     <exclude name = "org.jboss.errai.security.demo.client.local.WelcomePage$2" />
-    <exclude name = "org.jboss.errai.security.demo.client.local.NavBar$1" />
     <exclude name = "org.jboss.errai.security.demo.client.local.WelcomePage$1" />
     <!-- End of Errai exclusions -->
   </scan>
