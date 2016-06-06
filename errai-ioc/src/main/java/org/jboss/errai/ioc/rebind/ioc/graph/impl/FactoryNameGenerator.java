@@ -51,6 +51,10 @@ public class FactoryNameGenerator {
     return factoryName;
   }
 
+  public String generateFor(final InjectableHandle handle, final InjectableType injectableType) {
+    return generateFor(handle.getType(), handle.getQualifier(), injectableType);
+  }
+
   private String shorten(final String compoundName) {
     final String[] names = compoundName.split("__");
     final StringBuilder builder = new StringBuilder();

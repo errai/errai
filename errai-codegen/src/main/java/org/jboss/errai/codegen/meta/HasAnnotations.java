@@ -26,10 +26,12 @@ import java.util.Arrays;
 public interface HasAnnotations {
   public Annotation[] getAnnotations();
 
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotation);
+  public default boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
 
   @SuppressWarnings("unchecked")
-  public default <A extends Annotation> A getAnnotation(Class<A> annotation) {
+  public default <A extends Annotation> A getAnnotation(final Class<A> annotation) {
     // Please no hate or else null.
     return (A) Arrays.stream(getAnnotations())
             .filter(a -> a.annotationType().equals(annotation))

@@ -40,6 +40,13 @@ public class DefaultCustomFactoryInjectable extends InjectableImpl implements Cu
     this.generator = generator;
   }
 
+  public DefaultCustomFactoryInjectable(final InjectableHandle handle, final String factoryName,
+          final Class<? extends Annotation> literalScope, final Collection<WiringElementType> wiringTypes,
+          final FactoryBodyGenerator generator) {
+    this(handle.getType(), handle.getQualifier(), factoryName, literalScope, wiringTypes, generator);
+  }
+
+
   @Override
   public FactoryBodyGenerator getGenerator() {
     return generator;
