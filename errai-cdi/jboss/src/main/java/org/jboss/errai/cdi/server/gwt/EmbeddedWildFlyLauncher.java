@@ -85,10 +85,16 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
   public ServletContainer start(final TreeLogger treeLogger, final int port, final File appRootDir) throws BindException, Exception {
     logger = new StackTreeLogger(treeLogger);
     try {
-      System.setProperty("jboss.http.port", "" + port);
-
       final String jbossHome = JBossUtil.getJBossHome(logger);
       final String[] cmdArgs = JBossUtil.getCommandArguments(logger);
+
+      System.setProperty("jboss.http.port", "" + port);
+
+      File cliConfigFile = new File(jbossHome, JBossUtil.CLI_CONFIGURATION_FILE);
+      if (cliConfigFile.exists()) {
+        System.setProperty("jboss.cli.config", cliConfigFile.getAbsolutePath());
+      }
+
       final StandaloneServer embeddedWildFly = EmbeddedServerFactory.create(jbossHome, null, null, new String[0], cmdArgs);
       embeddedWildFly.start();
 
