@@ -45,6 +45,10 @@ public interface PathParamTestService {
   @GET 
   @Path("/t1/{id:[0-9][0-9]*}")
   public long getWithPathParamRegex(@PathParam("id") long id);
+  
+  @GET 
+  @Path("/t1/{id:[0-9]{1}[0-9]{0,}}")
+  public long getWithPathParamRegexAndCurlyBracesQuantifier(@PathParam("id") long id);
 
   @GET 
   @Path("/t2/{id}")

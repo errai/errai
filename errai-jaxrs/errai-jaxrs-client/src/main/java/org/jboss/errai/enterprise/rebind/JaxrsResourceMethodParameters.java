@@ -62,13 +62,13 @@ public class JaxrsResourceMethodParameters {
   private Map<Class<? extends Annotation>, MultivaluedMap<String, Statement>> parameters;
 
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method) {
-    List<Parameter> defParams = DefParameters.from(method).getParameters();
+    final List<Parameter> defParams = DefParameters.from(method).getParameters();
     return fromMethod(method, defParams);
   }
 
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method, String parameterArrayVarName) {
-    List<Statement> params = new ArrayList<Statement>();
-    Parameter[] defParms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
+    final List<Statement> params = new ArrayList<Statement>();
+    final Parameter[] defParms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
     for (int i = 0; i < defParms.length; i++) {
       final MetaClass type = defParms[i].getType().asBoxed();
       final Statement s = Cast.to(type, Stmt.loadVariable(parameterArrayVarName, i));
@@ -89,11 +89,11 @@ public class JaxrsResourceMethodParameters {
   }
 
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method, List<? extends Statement> parameterValues) {
-    JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
+    final JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
     int i = 0;
-    for (MetaParameter param : method.getParameters()) {
+    for (final MetaParameter param : method.getParameters()) {
 
-      Statement paramValue = parameterValues.get(i++);
+      final Statement paramValue = parameterValues.get(i++);
       Annotation a = param.getAnnotation(PathParam.class);
       if (a != null) {
         params.add(PathParam.class, ((PathParam) a).value(), paramValue);
@@ -222,7 +222,7 @@ public class JaxrsResourceMethodParameters {
     Statement param = null;
 
     if (get(type) != null) {
-      List<Statement> params = get(type).get(name);
+      final List<Statement> params = get(type).get(name);
       if (params != null && !params.isEmpty()) {
         param = params.get(0);
       }
@@ -231,15 +231,18 @@ public class JaxrsResourceMethodParameters {
     return param;
   }
 
-  public static List<String> getPathParameterNames(String path) {
-    List<String> pathParamNames = new ArrayList<String>();
-    Matcher matcher = PATH_PARAM_PATTERN.matcher(path);
-
+  public static List<String> getPathParameterExpressions(String path) {
+    final String pathWithNestedBracesRemoved = replaceNestedCurlyBraces(path);
+    final List<String> pathParamNames = new ArrayList<String>();
+    final Matcher matcher = PATH_PARAM_PATTERN.matcher(pathWithNestedBracesRemoved);
+    
     while (matcher.find()) {
-      String id = matcher.group(2);
-      String regex = matcher.group(3);
-      if (id != null)
-        pathParamNames.add(id + ((regex != null) ? regex : ""));
+      final String id = matcher.group(2);
+      final String regex = matcher.group(3);
+      if (id != null) {
+        final String pathParamExpr = recoverNestedCurlyBraces(id + ((regex != null) ? regex : ""));
+        pathParamNames.add(pathParamExpr);
+      }
     }
 
     return pathParamNames;
@@ -253,4 +256,31 @@ public class JaxrsResourceMethodParameters {
       
     return true;
   }
+  
+  private static final char openCurlyReplacement = 6;
+  private static final char closeCurlyReplacement = 7;
+  
+  private static String replaceNestedCurlyBraces(String str) {
+    final char[] chars = str.toCharArray();
+    int open = 0;
+    for (int i = 0; i < chars.length; i++) {
+      if (chars[i] == '{') {
+        if (open != 0)
+          chars[i] = openCurlyReplacement;
+        open++;
+      }
+      else if (chars[i] == '}') {
+        open--;
+        if (open != 0) {
+          chars[i] = closeCurlyReplacement;
+        }
+      }
+    }
+    return new String(chars);
+  }
+
+  private static String recoverNestedCurlyBraces(String str) {
+    return str.replace(openCurlyReplacement, '{').replace(closeCurlyReplacement, '}');
+  }
+
 }

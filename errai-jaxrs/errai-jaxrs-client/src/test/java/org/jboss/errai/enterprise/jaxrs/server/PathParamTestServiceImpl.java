@@ -40,6 +40,11 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   }
   
   @Override
+  public long getWithPathParamRegexAndCurlyBracesQuantifier(long id) {
+    return id;
+  }
+  
+  @Override
   public String getWithStringPathParam(String id) {
     return id;
   }
@@ -82,4 +87,5 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   public String getWithDatePathParam(Date date) {
     return date.toString();
   }
+
 }

@@ -135,16 +135,16 @@ public class JaxrsProxyMethodGenerator {
     String path = resourceMethod.getPath();
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
 
-    for (String pathParamName : JaxrsResourceMethodParameters.getPathParameterNames(path)) {
-      String pathParamId = pathParamName;
-      if (pathParamName.contains(":")) {
-        pathParamId = pathParamName.split(":")[0];
+    for (String pathParamExpr : JaxrsResourceMethodParameters.getPathParameterExpressions(path)) {
+      String pathParamId = pathParamExpr;
+      if (pathParamExpr.contains(":")) {
+        pathParamId = pathParamExpr.split(":")[0];
       }
       Statement pathParam = marshal(params.getPathParameter(pathParamId));
       if (params.needsEncoding(pathParamId)) {
         pathParam = encodePath(pathParam);
       }
-      pathValue = pathValue.invoke("replace", "{" + pathParamName + "}", pathParam);
+      pathValue = pathValue.invoke("replace", "{" + pathParamExpr + "}", pathParam);
     }
 
     if (params.getMatrixParameters() != null) {

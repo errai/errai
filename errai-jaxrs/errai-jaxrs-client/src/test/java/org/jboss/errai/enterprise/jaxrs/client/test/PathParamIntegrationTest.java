@@ -50,17 +50,23 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
     call(PathParamTestService.class,
         new AssertionCallback<Long>("@GET with @PathParam using regex failed", 2l)).getWithPathParamRegex(2l);
   }
+  
+  @Test
+  public void testGetWithPathParamRegexAndCurlyBracesQuantifier() {
+    call(PathParamTestService.class,
+        new AssertionCallback<Long>("@GET with @PathParam using regex failed", 2l)).getWithPathParamRegexAndCurlyBracesQuantifier(2l);
+  }
 
   @Test
   public void testGetWithEncodedPathParam() {
-    String pathWithSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
+    final String pathWithSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
     call(PathParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @PathParam failed",
         pathWithSpecialChars)).getWithStringPathParam(pathWithSpecialChars);
   }
 
   @Test
   public void testGetWithPathSegmentPathParam() {
-    PathSegment ps = new PathSegmentImpl("path;name=nameValue;author=authorValue;empty=");
+    final PathSegment ps = new PathSegmentImpl("path;name=nameValue;author=authorValue;empty=");
     assertEquals("path", ps.getPath());
     assertEquals("nameValue", ps.getMatrixParameters().getFirst("name"));
     assertEquals("authorValue", ps.getMatrixParameters().getFirst("author"));
@@ -73,8 +79,8 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   }
   @Test
   public void testGetWithDatePathParam() {
-    Date d = new Date();
-    String expected = d.toString();
+    final Date d = new Date();
+    final String expected = d.toString();
     call(PathParamTestService.class,
         new AssertionCallback<String>("@GET with @PathParams using java.util.Date failed", 
             expected)).getWithDatePathParam(d);
