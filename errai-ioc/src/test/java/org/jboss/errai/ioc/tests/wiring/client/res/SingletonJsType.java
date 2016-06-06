@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,15 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jsinterop.annotations.JsType;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Dependent
-public class NativeTypeTestModule {
+@JsType(isNative = true)
+public interface SingletonJsType {
 
-  @Inject
-  public ProducedNativeIface producedNativeIface;
-
-  @Inject
-  public NativeConcreteJsType nativeConcreteJsType;
-
-  @Inject
-  public NativeConcreteJsTypeWithConstructorDependency nativeWithConstructorDep;
-
-  @Inject
-  public NativeConcreteJsTypeWithFieldDependency nativeWithFieldDep;
-
-  @Inject
-  public SingletonJsType singletonJsType;
+  String magicWord();
 
 }

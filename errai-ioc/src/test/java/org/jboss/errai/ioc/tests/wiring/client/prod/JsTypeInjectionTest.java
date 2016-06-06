@@ -33,6 +33,7 @@ import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
+import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
@@ -246,7 +247,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       final UnimplementedType ref = new UnimplementedType() {
 
         @Override
-        public void overloaded(Object obj) {
+        public void overloaded(final Object obj) {
         }
 
         @Override
@@ -490,6 +491,12 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
     assertEquals(0, notYetFound.size());
   }
 
+  public void testSingletonJsTypeIsNotProxied() throws Exception {
+    final NativeTypeTestModule module = IOC.getBeanManager().lookupBean(NativeTypeTestModule.class).getInstance();
+    assertEquals("Sanity check for correct bean failed.", "please", module.singletonJsType.magicWord());
+    assertFalse("Singleton JS bean should not be proxied.", module.singletonJsType instanceof Proxy);
+  }
+
   private void injectScriptThenRun(final Runnable test) {
     final String scriptUrl = getScriptUrl();
     final Timer timeoutFail = new Timer() {
@@ -507,13 +514,13 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
                   .setCallback(new Callback<Void, Exception>() {
 
                     @Override
-                    public void onFailure(Exception reason) {
+                    public void onFailure(final Exception reason) {
                       timeoutFail.cancel();
                       fail("Could not load " + scriptUrl);
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
+                    public void onSuccess(final Void result) {
                       try {
                         test.run();
                         finishTest();
