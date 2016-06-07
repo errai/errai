@@ -71,6 +71,7 @@
               </includes>
             </filter>
           </filters>
+          <createSourcesJar>true</createSourcesJar>
         </configuration>
       </plugin>
     </plugins>
