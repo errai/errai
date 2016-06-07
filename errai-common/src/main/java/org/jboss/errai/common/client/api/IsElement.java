@@ -19,10 +19,14 @@ package org.jboss.errai.common.client.api;
 import org.jboss.errai.common.client.dom.HTMLElement;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
- * Marks an object as being a UI component having some root element. Typically this should be implemented by presenters
- * that add behaviour to DOM fragments.
+ * This interface is analogous to {@link IsWidget}, but for views built with native DOM wrappers.
+ *
+ * Extended by view interfaces that are likely to be implemented by native elements.
+ * Provides access to that widget, if it exists, without compromising the
+ * ability to provide a mock view instance in JRE unit tests.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
