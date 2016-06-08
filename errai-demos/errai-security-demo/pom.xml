@@ -55,7 +55,7 @@
     <url>http://www.jboss.org</url>
   </organization>
   <properties>
-    <wildfly.version>8.1.0.Final</wildfly.version>
+    <wildfly.version>10.0.0.Final</wildfly.version>
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
