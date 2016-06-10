@@ -23,6 +23,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.WithAnnotations;
 
 import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
@@ -36,7 +37,7 @@ import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
  */
 public class SecurityAnnotationExtension implements Extension {
 
-  public void addParameterLogger(@Observes ProcessAnnotatedType<?> processAnnotatedType) {
+  public void addParameterLogger(@Observes @WithAnnotations( RestrictedAccess.class ) ProcessAnnotatedType<?> processAnnotatedType) {
     final Class<?>[] interfaces = processAnnotatedType.getAnnotatedType().getJavaClass().getInterfaces();
 
     for (Class<?> anInterface : interfaces) {
