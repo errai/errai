@@ -48,6 +48,7 @@ import org.jboss.errai.databinding.client.TestModelWidget;
 import org.jboss.errai.databinding.client.TestModelWithList;
 import org.jboss.errai.databinding.client.TestModelWithNestedConfiguredBindable;
 import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
+import org.jboss.errai.databinding.client.ViewWithInput;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
@@ -682,7 +683,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     binder.addPropertyChangeHandler(new PropertyChangeHandler<Long>() {
       @Override
-      public void onPropertyChange(PropertyChangeEvent<Long> event) {
+      public void onPropertyChange(final PropertyChangeEvent<Long> event) {
         changedProperties.add(event.getPropertyName());
       }
     });
@@ -798,7 +799,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     testDeclarativeBinding(module);
   }
 
-  public void testDeclarativeBinding(DeclarativeBindingModule module) {
+  public void testDeclarativeBinding(final DeclarativeBindingModule module) {
     final Label idLabel = module.getLabel();
     assertNotNull(idLabel);
     assertEquals("", idLabel.getText());
@@ -1340,5 +1341,25 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     model.setActive(false);
     assertFalse("Component not properly updated", presenter.getValue());
+  }
+
+  /**
+   * Regression tests for ERRAI-945.
+   */
+  @Test
+  public void testDeclarativeBindingToErraiTextInput() throws Exception {
+    final ViewWithInput view = IOC.getBeanManager().lookupBean(ViewWithInput.class).getInstance();
+    final TestModel model = view.binder.getModel();
+    // Preconditions
+    assertNull(model.getValue());
+    assertTrue(view.value.getValue().isEmpty());
+
+    // Test
+    model.setValue("foo");
+    assertEquals(model.getValue(), view.value.getValue());
+
+    view.value.setValue("bar");
+    view.value.dispatchEvent(Document.get().createHtmlEvent("change", true, true).cast());
+    assertEquals(view.value.getValue(), model.getValue());
   }
 }

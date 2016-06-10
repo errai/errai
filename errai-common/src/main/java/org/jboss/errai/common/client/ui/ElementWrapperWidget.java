@@ -33,6 +33,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -62,6 +63,9 @@ public abstract class ElementWrapperWidget<T> extends Widget {
     ElementWrapperWidget<?> widget = widgetMap.get(element);
     if (widget == null) {
       widget = createElementWrapperWidget(element, valueType);
+      // Always call onAttach so that events propogatge even if this has no widget parent.
+      widget.onAttach();
+      RootPanel.detachOnWindowClose(widget);
       widgetMap.put(element, widget);
     }
     else if (valueType != null && !valueType.equals(widget.getValueType())) {
@@ -155,16 +159,16 @@ public abstract class ElementWrapperWidget<T> extends Widget {
     public T get() {
       try {
         return instance.getValue();
-      } catch (Throwable t) {
+      } catch (final Throwable t) {
         throw new RuntimeException("Unable to invoke getValue() on JsType: " + t.getMessage(), t);
       }
     }
 
     @Override
-    public void set(T value) {
+    public void set(final T value) {
       try {
         instance.setValue(value);
-      } catch (Throwable t) {
+      } catch (final Throwable t) {
         throw new RuntimeException("Unable to invoke setValue(T value) on JsType: " + t.getMessage(), t);
       }
     }
@@ -188,7 +192,7 @@ public abstract class ElementWrapperWidget<T> extends Widget {
     }
 
     @Override
-    public void setValue(T value) {
+    public void setValue(final T value) {
       accessor.set(value);
     }
 
@@ -283,7 +287,7 @@ public abstract class ElementWrapperWidget<T> extends Widget {
     }
   };
 
-  private ElementWrapperWidget(Element wrapped) {
+  private ElementWrapperWidget(final Element wrapped) {
     if (wrapped == null) {
       throw new IllegalArgumentException(
               "Element to be wrapped must not be null - Did you forget to initialize or @Inject a UI field?");
@@ -302,7 +306,7 @@ public abstract class ElementWrapperWidget<T> extends Widget {
   }
 
   @Override
-  public void onBrowserEvent(Event event) {
+  public void onBrowserEvent(final Event event) {
     listener.onBrowserEvent(event);
   }
 
