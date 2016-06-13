@@ -159,4 +159,24 @@ public class PropertiesTest {
     assertEquals(2, props.size());
   }
 
+  @Test
+  public void parseValueEndingWithEscapedEquals() {
+    final String data = "key1=value1\\=\nkey2=value2";
+    final Map<String, String> props = Properties.load(data);
+
+    assertEquals("value1=", props.get("key1"));
+    assertEquals("value2", props.get("key2"));
+    assertEquals(2, props.size());
+  }
+
+  @Test
+  public void parseValueEndingWithEscapedTwoPoints() {
+    final String data = "key1=value1\\:\nkey2=value2";
+    final Map<String, String> props = Properties.load(data);
+
+    assertEquals("value1:", props.get("key1"));
+    assertEquals("value2", props.get("key2"));
+    assertEquals(2, props.size());
+  }
+
 }
