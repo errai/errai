@@ -28,26 +28,26 @@ import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 
 /**
- * This {@link Extension} allows type level {@link RestrictedAccess} annotations to
- * trigger server-side interceptors on their method calls.
+ * This {@link Extension} allows {@link RestrictedAccess} annotations on a type, an implemented interface, and
+ * implemented interface methods to trigger server-side interceptors.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  * @author edewit@redhat.com
  */
 public class SecurityAnnotationExtension implements Extension {
 
-  public void addParameterLogger(@Observes ProcessAnnotatedType<?> processAnnotatedType) {
+  public void addParameterLogger(@Observes final ProcessAnnotatedType<?> processAnnotatedType) {
     final Class<?>[] interfaces = processAnnotatedType.getAnnotatedType().getJavaClass().getInterfaces();
 
-    for (Class<?> anInterface : interfaces) {
-      for (Method method : anInterface.getMethods()) {
+    for (final Class<?> anInterface : interfaces) {
+      for (final Method method : anInterface.getMethods()) {
         copyAnnotation(processAnnotatedType, anInterface, method, RestrictedAccess.class);
       }
     }
   }
 
-  private <X> void copyAnnotation(ProcessAnnotatedType<X> annotatedType, Class<?> anInterface, Method method,
-          Class<? extends Annotation> annotation) {
+  private <X> void copyAnnotation(final ProcessAnnotatedType<X> annotatedType, final Class<?> anInterface, final Method method,
+          final Class<? extends Annotation> annotation) {
     final Annotation methodAnnotation = method.getAnnotation(annotation);
     final Annotation typeAnnotation = anInterface.getAnnotation(annotation);
 
@@ -65,8 +65,8 @@ public class SecurityAnnotationExtension implements Extension {
     }
   }
 
-  private <X> AnnotatedMethod<? super X> getMethod(ProcessAnnotatedType<X> annotatedType, String name) {
-    for (AnnotatedMethod<? super X> annotatedMethod : annotatedType.getAnnotatedType().getMethods()) {
+  private <X> AnnotatedMethod<? super X> getMethod(final ProcessAnnotatedType<X> annotatedType, final String name) {
+    for (final AnnotatedMethod<? super X> annotatedMethod : annotatedType.getAnnotatedType().getMethods()) {
       if (name.equals(annotatedMethod.getJavaMember().getName())) {
         return annotatedMethod;
       }
