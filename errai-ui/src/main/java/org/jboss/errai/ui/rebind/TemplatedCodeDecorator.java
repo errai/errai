@@ -24,6 +24,7 @@ import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
+import static org.jboss.errai.ioc.util.GeneratedNamesUtil.qualifiedClassNameToShortenedIdentifier;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -123,7 +124,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final MetaClass declaringClass = decorable.getDecorableDeclaringType();
 
     final Templated anno = (Templated) decorable.getAnnotation();
-    Class<?> templateProvider = anno.provider();
+    final Class<?> templateProvider = anno.provider();
     final boolean customProvider = templateProvider != Templated.DEFAULT_PROVIDER.class;
     final boolean defaultStyleSheetPath = "".equals(anno.stylesheet());
     final String styleSheetPath = getTemplateStyleSheetPath(declaringClass);
@@ -146,7 +147,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     }
 
     if (customProvider) {
-      Statement init =
+      final Statement init =
         Stmt.invokeStatic(TemplateUtil.class, "provideTemplate",
           templateProvider,
           getTemplateUrl(declaringClass),
@@ -174,14 +175,14 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * @return statement representing the template destruction logic.
    */
   private List<Statement> generateTemplateDestruction(final Decorable decorable) {
-    List<Statement> destructionStatements = new ArrayList<Statement>();
+    final List<Statement> destructionStatements = new ArrayList<Statement>();
     final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(decorable, decorable.getDecorableDeclaringType());
     final Map<String, MetaClass> dataFieldTypes =
       DataFieldCodeDecorator.aggregateDataFieldTypeMap(decorable, decorable.getDecorableDeclaringType());
 
     for (final String fieldName : dataFields.keySet()) {
-      Statement field = dataFields.get(fieldName);
-      MetaClass fieldType = dataFieldTypes.get(fieldName);
+      final Statement field = dataFields.get(fieldName);
+      final MetaClass fieldType = dataFieldTypes.get(fieldName);
 
       if (fieldType.isAssignableTo(Element.class)) {
         destructionStatements.add(Stmt.invokeStatic(ElementWrapperWidget.class, "removeWidget", field));
@@ -393,7 +394,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         try {
           handlerType = getHandlerForEvent(eventType);
         }
-        catch (GenerationException e) {
+        catch (final GenerationException e) {
           /*
            *  see ERRAI-373 for details on this crazy inference (without this message, the cause of the
            *  problem is nearly impossible to diagnose)
@@ -550,8 +551,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * @param initStmts
    * @param rootTemplateElement
    */
-  private void translateTemplate(Decorable decorable, List<Statement> initStmts,
-          Statement rootTemplateElement) {
+  private void translateTemplate(final Decorable decorable, final List<Statement> initStmts,
+          final Statement rootTemplateElement) {
     initStmts.add(
             Stmt.invokeStatic(
                     TemplateUtil.class,
@@ -712,7 +713,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * Get the name of the {@link Template} class of the given {@link MetaClass} type
    */
   private String getTemplateTypeName(final MetaClass type) {
-    return type.getFullyQualifiedName().replace('.', '_').replace('$', '_') + "TemplateResource";
+    return qualifiedClassNameToShortenedIdentifier(type) + "TemplateResource";
   }
 
   /**

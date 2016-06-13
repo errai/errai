@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
+import static org.jboss.errai.ioc.util.GeneratedNamesUtil.qualifiedClassNameToIdentifier;
+
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,7 +63,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
       return "@Any";
     }
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
       return obj instanceof Any;
     }
   };
@@ -78,7 +80,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
       return "@Default";
     }
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
       return obj instanceof Default;
     }
   };
@@ -250,7 +252,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
       if (identifier == null) {
         final StringBuilder builder = new StringBuilder();
         for (final AnnotationWrapper wrapper : annotations) {
-          builder.append(wrapper.anno.annotationType().getName().replace('.', '_'))
+          builder.append(qualifiedClassNameToIdentifier(wrapper.anno.annotationType()))
                  .append("__");
         }
         // Remove last delimeter
@@ -363,7 +365,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
       if (!(obj instanceof AnnotationWrapper)) {
         return false;
       }
