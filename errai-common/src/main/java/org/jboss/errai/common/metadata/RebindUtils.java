@@ -574,13 +574,7 @@ public class RebindUtils {
   public static Set<String> findTranslatablePackagesInModule(final GeneratorContext context) {
     final Set<String> packages = new HashSet<String>();
     try {
-      final StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
-      final Field field = StandardGeneratorContext.class.getDeclaredField("module");
-      field.setAccessible(true);
-      final Object o = field.get(stdContext);
-
-      final ModuleDef moduleDef = (ModuleDef) o;
-
+      final ModuleDef moduleDef = getModuleDef(context);
       if (moduleDef == null) {
         return Collections.emptySet();
       }
@@ -596,10 +590,6 @@ public class RebindUtils {
           packages.add(packageName);
         }
       }
-    }
-    catch (NoSuchFieldException e) {
-      logger.error("the version of GWT you are running does not appear to be compatible with this version of Errai", e);
-      throw new RuntimeException("could not access the module field in the GeneratorContext");
     }
     catch (Exception e) {
       throw new RuntimeException("could not determine module package", e);
