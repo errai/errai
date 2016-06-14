@@ -69,7 +69,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
   private static final long GENERATOR_VERSION_ID = 1L;
 
   @Override
-  public RebindResult generateIncrementally(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+  public RebindResult generateIncrementally(final TreeLogger logger, final GeneratorContext context, final String typeName) throws UnableToCompleteException {
     final String fullyQualifiedTypeName = distillTargetTypeName(typeName);
     final MetaClass type = MetaClassFactory.get(fullyQualifiedTypeName);
     final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type);
@@ -78,7 +78,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter != null) {
-      if (cachedType != null && cachedType.hashContent() == type.hashContent() && !type.isArray()) {
+      if (cachedType != null && cachedType.hashContent() == type.hashContent()) {
         log.debug("Reusing cached marshaller for {}", fullyQualifiedTypeName);
         printWriter.append(cachedSourceByTypeName.get(fullyQualifiedTypeName));
         context.commit(logger, printWriter);
@@ -99,13 +99,13 @@ public class MarshallerGenerator extends IncrementalGenerator {
   private String generateMarshaller(final GeneratorContext context, final MetaClass type, final String className,
           final String marshallerTypeName, final TreeLogger logger, final PrintWriter printWriter) {
 
-    MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
+    final MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
     final MappingStrategy strategy =
         MappingStrategyFactory.createStrategy(true, GeneratorMappingContextFactory.getFor(context, target), type);
 
     String gen = null;
     if (type.isArray()) {
-      BuildMetaClass marshallerClass =
+      final BuildMetaClass marshallerClass =
           MarshallerGeneratorFactory.generateArrayMarshaller(type, marshallerTypeName, true);
       gen = marshallerClass.toJavaString();
     }
@@ -122,23 +122,23 @@ public class MarshallerGenerator extends IncrementalGenerator {
     return gen;
   }
 
-  private String distillTargetTypeName(String marshallerName) {
-    int pos = marshallerName.lastIndexOf(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX);
+  private String distillTargetTypeName(final String marshallerName) {
+    final int pos = marshallerName.lastIndexOf(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX);
     String typeName = marshallerName.substring(pos).replace(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX, "");
 
-    boolean isArrayType = typeName.startsWith(MarshallingGenUtil.ARRAY_VAR_PREFIX);
+    final boolean isArrayType = typeName.startsWith(MarshallingGenUtil.ARRAY_VAR_PREFIX);
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ARRAY_VAR_PREFIX, "");
     typeName = StringUtils.replace(typeName, "_", ".");
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_DOLLARSIGN_REPLACEMENT, "$");
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_UNDERSCORE_REPLACEMENT, "_");
 
     if (isArrayType) {
-      int lastDot = typeName.lastIndexOf(".");
-      int dimension = Integer.parseInt(typeName.substring(lastDot + 2));
+      final int lastDot = typeName.lastIndexOf(".");
+      final int dimension = Integer.parseInt(typeName.substring(lastDot + 2));
       typeName = typeName.substring(0, lastDot);
 
-      String primitiveName = AbstractMetaClass.getInternalPrimitiveNameFrom(typeName);
-      boolean isPrimitiveArrayType = !primitiveName.equals(typeName);
+      final String primitiveName = AbstractMetaClass.getInternalPrimitiveNameFrom(typeName);
+      final boolean isPrimitiveArrayType = !primitiveName.equals(typeName);
 
       typeName = "";
       for (int i = 0; i < dimension; i++) {
