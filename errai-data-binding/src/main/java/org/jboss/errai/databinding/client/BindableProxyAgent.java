@@ -99,7 +99,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final BindableProxy<T> proxy;
   T target;
 
-  BindableProxyAgent(BindableProxy<T> proxy, T target) {
+  BindableProxyAgent(final BindableProxy<T> proxy, final T target) {
     this.proxy = proxy;
     this.target = target;
   }
@@ -186,7 +186,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   private Consumer<Object> modelUpdater(final Object component, final Converter converter, final String lastSubProperty,
-          BindableProxyAgent<?> agent) {
+          final BindableProxyAgent<?> agent) {
     return uiValue -> {
       final Object oldValue = agent.proxy.get(lastSubProperty);
       final Object newValue = converter.toModelValue(uiValue);
@@ -222,7 +222,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private Binding bindHelper(final Object component, final String property, final Converter converter,
           final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
           final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
-    
+
     validatePropertyExpr(property);
 
     if (property.contains(".")) {
@@ -236,7 +236,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private Binding bindNestedProperty(final Object component, final String property, final Converter<?, ?> converter,
           final Function<BindableProxyAgent<?>, Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>>> registrar,
           final Optional<Supplier<Object>> uiGetter, final StateSync initialState) {
-    
+
       final DataBinder nestedBinder = createNestedBinder(property);
       final String subProperty = property.substring(property.indexOf('.') + 1);
       final BindableProxyAgent<?> nestedAgent = ((BindableProxy<?>) nestedBinder.getModel()).getBindableProxyAgent();
@@ -361,7 +361,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     }
   }
 
-  private boolean oneTypeIsInterface(Class<?> propertyType, Class<?> converterModelType) {
+  private boolean oneTypeIsInterface(final Class<?> propertyType, final Class<?> converterModelType) {
     return propertyType.isInterface() ^ converterModelType.isInterface();
   }
 
@@ -402,16 +402,25 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       if (component instanceof ValueBoxBase) {
         registrar = mergeValueBoxKeyUpHandler(component, modelUpdater, registrar);
       }
+      else if (component instanceof ElementWrapperWidget) {
+        registrar = mergeNativeKeyUpEventListener(((ElementWrapperWidget) component).getElement(), uiGetter, modelUpdater, registrar);
+      }
+      else if (component instanceof IsElement) {
+        registrar = mergeNativeKeyUpEventListener(((IsElement) component).getElement(), uiGetter, modelUpdater, registrar);
+      }
+      else if (isElement(component)) {
+        registrar = mergeNativeKeyUpEventListener(component, uiGetter, modelUpdater, registrar);
+      }
       else {
-        throw new RuntimeException("Cannot bind widget " + component.toString() + " on KeyUpEvents, " + component.toString()
-                + " is not an instance of ValueBoxBase");
+        throw new RuntimeException("Cannot bind component " + component.toString() + " on key up events, " + component.toString()
+                + " is not a ValueBoxBase or an element wrapper");
       }
     }
 
     return registrar;
   }
 
-  private static boolean isElement(Object obj) {
+  private static boolean isElement(final Object obj) {
     return obj instanceof JavaScriptObject && Node.is((JavaScriptObject) obj) && Element.is((Node) obj);
   }
 
@@ -425,14 +434,22 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     element.addEventListener("change", listener);
   }-*/;
 
+  private static native void addKeyUpEventListener(Object element, JavaScriptObject listener) /*-{
+    element.addEventListener("keyup", listener);
+  }-*/;
+
   private static native void removeChangeEventListener(Object element, JavaScriptObject listener) /*-{
     element.removeEventListener("change", listener);
+  }-*/;
+
+  private static native void removeKeyUpEventListener(Object element, JavaScriptObject listener) /*-{
+    element.removeEventListener("keyup", listener);
   }-*/;
 
   private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeValueBoxKeyUpHandler(
           final Object component, final Consumer<Object> modelUpdater,
           Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
-    
+
     registrar = mergeToLeft(registrar, () -> {
       final HandlerRegistration keyUpHandlerReg = ((ValueBoxBase) component)
               .addKeyUpHandler(event -> modelUpdater.accept(((ValueBoxBase) component).getText()));
@@ -446,7 +463,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeHasValueChangeHandler(
           final Object component, final Consumer<Object> modelUpdater,
           Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
-    
+
     registrar = mergeToLeft(registrar, () -> {
       final HandlerRegistration valueHandlerReg = ((HasValue) component).addValueChangeHandler(event -> {
         final Object value = ((HasValue) component).getValue();
@@ -457,16 +474,31 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     });
     return registrar;
   }
-  
+
   private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeNativeChangeEventListener(
           final Object component, final Optional<Supplier<Object>> uiGetter, final Consumer<Object> modelUpdater,
           Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
-    
+
     registrar = mergeToLeft(registrar, () -> {
       final JavaScriptObject listener = wrap(() -> uiGetter.ifPresent(getter -> modelUpdater.accept(getter.get())));
       addChangeEventListener(component, listener);
-      
+
       final HandlerRegistration hr = () -> removeChangeEventListener(component, listener);
+      return Collections.singletonMap(ValueChangeEvent.class, hr);
+    });
+
+    return registrar;
+  }
+
+  private static Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> mergeNativeKeyUpEventListener(
+          final Object component, final Optional<Supplier<Object>> uiGetter, final Consumer<Object> modelUpdater,
+          Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar) {
+
+    registrar = mergeToLeft(registrar, () -> {
+      final JavaScriptObject listener = wrap(() -> uiGetter.ifPresent(getter -> modelUpdater.accept(getter.get())));
+      addKeyUpEventListener(component, listener);
+
+      final HandlerRegistration hr = () -> removeKeyUpEventListener(component, listener);
       return Collections.singletonMap(ValueChangeEvent.class, hr);
     });
 
@@ -538,7 +570,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     return binder;
   }
 
-  private void validatePropertyExpr(String property) {
+  private void validatePropertyExpr(final String property) {
     if (property.startsWith(".") || property.endsWith(".")) {
       throw new InvalidPropertyExpressionException(
               "Binding expression (property chain) cannot start or end with '.' : " + property);
@@ -765,7 +797,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @return a new the wrapped (proxied) list or the provided list if already
    *         proxied
    */
-  private List ensureBoundListIsProxied(String property) {
+  private List ensureBoundListIsProxied(final String property) {
     final List oldList = (List) proxy.get(property);
     final List newList = ensureBoundListIsProxied(property, oldList);
     if (oldList != newList)
@@ -800,7 +832,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private void addHandlersForBindableListWrapper(final String property, final BindableListWrapper newList) {
     modelChangeHandlers.add(newList.addChangeHandler(new UnspecificListChangeHandler() {
       @Override
-      void onListChanged(List oldList) {
+      void onListChanged(final List oldList) {
         updateWidgetsAndFireEvent(false, property, oldList, newList);
       }
     }));
@@ -900,7 +932,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          the instance who's change handlers will be merged, must not be
    *          null.
    */
-  public void mergePropertyChangeHandlers(PropertyChangeHandlerSupport pchs) {
+  public void mergePropertyChangeHandlers(final PropertyChangeHandlerSupport pchs) {
     Assert.notNull(pchs);
 
     for (final PropertyChangeHandler pch : pchs.handlers) {
@@ -929,7 +961,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          {@link StateSync#FROM_UI} the state from the other agent's model overrides this one. If null, default to
    *          {@link StateSync#FROM_MODEL}.
    */
-  public void fireChangeEvents(BindableProxyAgent other, final StateSync initialState) {
+  public void fireChangeEvents(final BindableProxyAgent other, final StateSync initialState) {
     for (final String property : propertyTypes.keySet()) {
       final Object curValue,
                    oldValue,

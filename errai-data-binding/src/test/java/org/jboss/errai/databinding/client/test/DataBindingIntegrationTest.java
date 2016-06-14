@@ -49,6 +49,7 @@ import org.jboss.errai.databinding.client.TestModelWithList;
 import org.jboss.errai.databinding.client.TestModelWithNestedConfiguredBindable;
 import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
 import org.jboss.errai.databinding.client.ViewWithInput;
+import org.jboss.errai.databinding.client.ViewWithOnKeyUpInput;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
@@ -1360,6 +1361,23 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     view.value.setValue("bar");
     view.value.dispatchEvent(Document.get().createHtmlEvent("change", true, true).cast());
+    assertEquals(view.value.getValue(), model.getValue());
+  }
+
+  @Test
+  public void testDeclarativeBindingWithOnKeyUpForTextInput() throws Exception {
+    final ViewWithOnKeyUpInput view = IOC.getBeanManager().lookupBean(ViewWithOnKeyUpInput.class).getInstance();
+    final TestModel model = view.binder.getModel();
+    // Preconditions
+    assertNull(model.getValue());
+    assertTrue(view.value.getValue().isEmpty());
+
+    // Test
+    model.setValue("foo");
+    assertEquals(model.getValue(), view.value.getValue());
+
+    view.value.setValue("bar");
+    view.value.dispatchEvent(Document.get().createHtmlEvent("keyup", true, true).cast());
     assertEquals(view.value.getValue(), model.getValue());
   }
 }
