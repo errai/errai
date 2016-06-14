@@ -161,6 +161,12 @@ public class Properties {
               case 'n':
                 state.value.append('\n');
                 break;
+              case '=':
+                state.value.append('=');
+                break;
+              case ':':
+                state.value.append(':');
+                break;
               case '\\':
                 state.value.append('\\');
                 break;
