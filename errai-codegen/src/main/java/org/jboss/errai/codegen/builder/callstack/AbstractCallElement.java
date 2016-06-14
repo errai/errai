@@ -30,8 +30,9 @@ public abstract class AbstractCallElement implements CallElement {
   protected CallElement next;
   protected MetaClass resultType = null;
 
-  protected final RuntimeException blame = new RuntimeException("Problem was caused by this call");
-
+  private final static boolean blameDetailsEnabled = Boolean.getBoolean("errai.codegen.details");
+  private final RuntimeException blame = (blameDetailsEnabled) ? new RuntimeException("Problem was caused by this call") : null;
+  
   public void nextOrReturn(CallWriter writer, Context ctx, Statement statement) {
     try {
       if (statement != null) {
@@ -46,7 +47,7 @@ public abstract class AbstractCallElement implements CallElement {
         getNext().handleCall(writer, ctx, statement);
       }
     }
-    catch (GenerationException e) {
+    catch (final GenerationException e) {
       blameAndRethrow(e);
     }
   }
@@ -80,10 +81,16 @@ public abstract class AbstractCallElement implements CallElement {
   }
 
   protected void blameAndRethrow(GenerationException e) {
-    if (e.getCause() == null) {
-      GenUtil.rewriteBlameStackTrace(blame);
+    if (!blameDetailsEnabled) {
+      final RuntimeException blamePlaceHolder = new RuntimeException(
+              "Problem during Errai code generation. Please set system property -Derrai.codegen.details=true for more details.");
+      blamePlaceHolder.initCause(e);
+      throw blamePlaceHolder;
+    }
 
-      e.initCause(blame);
+    if (e.getCause() == null) {
+        GenUtil.rewriteBlameStackTrace(blame);
+        e.initCause(blame);
     }
     throw e;
   }
