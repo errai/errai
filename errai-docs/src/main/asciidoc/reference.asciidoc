@@ -5740,7 +5740,77 @@ The previous [code]+LoginForm+ example uses [code]+Widgets+ and a DOM element fr
 
 . Any element interfaces from gwt-elemental.
 
-. Any native [code]+JsType+ that is a wrapper for a DOM element.
+. Any native [code]+JsType+ that is a wrapper for a DOM element (including those provided in errai-common).
+
+. Any type implementing [code]+org.jboss.errai.common.client.api.IsElement+.
+
+==== Accessing the root element of a non-composite template
+
+Since non-composite templated beans are not widgets, it is necessary to access their HTMLElement roots when programmatically adding them to the DOM. Errai UI provides two ways of doing this.
+
+===== Inject the root element as a DataField
+
+Errai UI supports injecting any element in a template html file as a DataField in the templated bean, including the root element. Below is a simple example.
+
+====== MyBean.html
+[source, html]
+----
+<div class="root">
+  <h1>Hello World!</h1>
+</div>
+----
+
+====== MyBean.java
+[source, java]
+----
+@Templated
+public class MyBean {
+  @Inject @DataField Div root;
+}
+----
+
+This method has the advantage that any valid @DataField type can be used.
+
+===== Implement org.jboss.errai.ui.client.local.api.IsElement
+
+This interface provides a default implementation of [code]+org.jboss.errai.common.client.api.IsElement+ that works for any @Templated bean. For example:
+
+====== MyBean.html
+[source, html]
+----
+<div class="root">
+  <h1>Hello World!</h1>
+</div>
+----
+
+====== MyBean.java
+[source, java]
+----
+@Templated
+public class MyBean implements org.jboss.errai.ui.client.local.api.IsElement {
+}
+----
+
+====== Usage
+[source, java]
+----
+@EntryPoint
+public class Setup {
+  @Inject MyBean bean;
+  @Inject Document doc;
+
+  @PostConstruct
+  public void attachBean() {
+    doc.getBody().appendChild(bean.getElement());
+  }
+}
+----
+
+[NOTE]
+.Uses DOM wrappers from Errai Common
+====
+The `getElement` call in the usage above returns the element as the type [code]+org.jboss.errai.common.client.dom.HTMLElement+.
+====
 
 ==== Using JsType element wrappers
 
