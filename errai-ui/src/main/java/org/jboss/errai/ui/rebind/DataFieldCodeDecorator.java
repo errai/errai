@@ -52,7 +52,7 @@ import com.google.gwt.user.client.ui.Widget;
 @CodeDecorator
 public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
 
-  public DataFieldCodeDecorator(Class<DataField> decoratesWith) {
+  public DataFieldCodeDecorator(final Class<DataField> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -88,13 +88,13 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     saveDataField(decorable, decorable.getType(), name, decorable.getName(), instance);
   }
 
-  private void saveDataField(Decorable decorable, MetaClass type, String name, String fieldName, Statement instance) {
+  private void saveDataField(final Decorable decorable, final MetaClass type, final String name, final String fieldName, final Statement instance) {
     dataFieldMap(decorable, decorable.getDecorableDeclaringType()).put(name, instance);
     dataFieldTypeMap(decorable, decorable.getDecorableDeclaringType()).put(name, type);
   }
 
-  private String getTemplateDataFieldName(DataField annotation, String deflt) {
-    String value = Strings.nullToEmpty(annotation.value()).trim();
+  private String getTemplateDataFieldName(final DataField annotation, final String deflt) {
+    final String value = Strings.nullToEmpty(annotation.value()).trim();
     return value.isEmpty() ? deflt : value;
   }
 
@@ -102,8 +102,8 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
    * Get the map of {@link DataField} names and {@link Statement} instances.
    */
   @SuppressWarnings("unchecked")
-  private static Map<String, Statement> dataFieldMap(Decorable decorable, MetaClass templateType) {
-    String dataFieldMapName = dataFieldMapName(templateType);
+  private static Map<String, Statement> dataFieldMap(final Decorable decorable, final MetaClass templateType) {
+    final String dataFieldMapName = dataFieldMapName(templateType);
 
     Map<String, Statement> dataFields = (Map<String, Statement>) decorable.getInjectionContext().getAttribute(
         dataFieldMapName);
@@ -119,8 +119,8 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
    * Get the map of {@link DataField} names and {@link MetaClass} types.
    */
   @SuppressWarnings("unchecked")
-  private static Map<String, MetaClass> dataFieldTypeMap(Decorable decorable, MetaClass templateType) {
-    String dataFieldTypeMapName = dataFieldTypeMapName(templateType);
+  private static Map<String, MetaClass> dataFieldTypeMap(final Decorable decorable, final MetaClass templateType) {
+    final String dataFieldTypeMapName = dataFieldTypeMapName(templateType);
 
     Map<String, MetaClass> dataFieldTypes = (Map<String, MetaClass>) decorable.getInjectionContext().getAttribute(
         dataFieldTypeMapName);
@@ -138,15 +138,15 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
    * by {@link MetaClass#getSuperClass()}.
    */
   @SuppressWarnings("unchecked")
-  public static Map<String, Statement> aggregateDataFieldMap(Decorable decorable, MetaClass componentType) {
+  public static Map<String, Statement> aggregateDataFieldMap(final Decorable decorable, final MetaClass componentType) {
 
-    Map<String, Statement> result = new LinkedHashMap<String, Statement>();
+    final Map<String, Statement> result = new LinkedHashMap<String, Statement>();
 
     if (componentType.getSuperClass() != null) {
       result.putAll(aggregateDataFieldMap(decorable, componentType.getSuperClass()));
     }
 
-    Map<String, Statement> dataFields = (Map<String, Statement>) decorable.getInjectionContext().getAttribute(
+    final Map<String, Statement> dataFields = (Map<String, Statement>) decorable.getInjectionContext().getAttribute(
         dataFieldMapName(componentType));
     if (dataFields != null) {
       result.putAll(dataFields);
@@ -161,15 +161,15 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
    * returned by {@link MetaClass#getSuperClass()}.
    */
   @SuppressWarnings("unchecked")
-  public static Map<String, MetaClass> aggregateDataFieldTypeMap(Decorable decorable, MetaClass componentType) {
+  public static Map<String, MetaClass> aggregateDataFieldTypeMap(final Decorable decorable, final MetaClass componentType) {
 
-    Map<String, MetaClass> result = new LinkedHashMap<String, MetaClass>();
+    final Map<String, MetaClass> result = new LinkedHashMap<String, MetaClass>();
 
     if (componentType.getSuperClass() != null) {
       result.putAll(aggregateDataFieldTypeMap(decorable, componentType.getSuperClass()));
     }
 
-    Map<String, MetaClass> dataFields = (Map<String, MetaClass>) decorable.getInjectionContext().getAttribute(
+    final Map<String, MetaClass> dataFields = (Map<String, MetaClass>) decorable.getInjectionContext().getAttribute(
         dataFieldTypeMapName(componentType));
 
     if (dataFields != null) {
@@ -183,15 +183,15 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
    * Using the given composite {@link Template} type, return the name of the map
    * of {@link DataField} names and variable {@link Statement} instances.
    */
-  private static final String dataFieldMapName(MetaClass composite) {
-    return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
+  private static final String dataFieldMapName(final MetaClass composite) {
+    return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_MAP_" + composite.getFullyQualifiedName();
   }
 
   /**
    * Using the given composite {@link Template} type, return the name of the map
    * of {@link DataField} names and variable {@link MetaClass} types.
    */
-  private static final String dataFieldTypeMapName(MetaClass composite) {
-    return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_TYPE_MAP_" + composite.getName();
+  private static final String dataFieldTypeMapName(final MetaClass composite) {
+    return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_TYPE_MAP_" + composite.getFullyQualifiedName();
   }
 }
