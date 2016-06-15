@@ -350,6 +350,9 @@ public final class MetaClassFactory {
               typeVarValues.add(MetaClassFactory.get(Object.class));
             }
           }
+          else {
+            typeVarValues.add(metaType);
+          }
         }
 
         if (reifyRecursively && !defaultOnly) {
@@ -520,7 +523,7 @@ public final class MetaClassFactory {
       }
       return cls;
     }
-    catch (ClassNotFoundException e) {
+    catch (final ClassNotFoundException e) {
       final URL url = MetaClassFactory.class.getClassLoader()
           .getResource(fullyQualifiedName.replace('.', '/') + ".java");
 
@@ -541,7 +544,7 @@ public final class MetaClassFactory {
             return ClassChangeUtil.loadClassDefinition(location,
                 packageName, className);
           }
-          catch (Exception e2) {
+          catch (final Exception e2) {
             throw new RuntimeException("Could not load class: " + fullyQualifiedName, e2);
           }
         }
@@ -556,7 +559,7 @@ public final class MetaClassFactory {
       final Class cls = loadClass(fullyQualifiedName);
       return cls != null;
     }
-    catch (Throwable t) {
+    catch (final Throwable t) {
       return false;
     }
   }
@@ -606,7 +609,7 @@ public final class MetaClassFactory {
     return getMetaClassCache().getAllNewClasses();
   }
 
-  public static boolean isChangedOrDeleted(String fqcn) {
+  public static boolean isChangedOrDeleted(final String fqcn) {
     return getMetaClassCache().getAllDeletedClasses().contains(fqcn) || getMetaClassCache().isNewOrUpdated(fqcn);
   }
 
@@ -618,7 +621,7 @@ public final class MetaClassFactory {
     return getMetaClassCache().getAllCached();
   }
 
-  public static boolean isKnownType(String fqcn) {
+  public static boolean isKnownType(final String fqcn) {
     return getMetaClassCache().isKnownType(fqcn);
   }
 
