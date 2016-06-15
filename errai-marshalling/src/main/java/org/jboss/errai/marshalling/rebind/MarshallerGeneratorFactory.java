@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.util.TypeLiteral;
@@ -104,7 +105,7 @@ public class MarshallerGeneratorFactory {
     }
 
     @Override
-    public Statement deferred(MetaClass type, MetaClass marshaller) {
+    public Statement deferred(final MetaClass type, final MetaClass marshaller) {
       return
       Stmt.newObject(parameterizedAs(DeferredMarshallerCreationCallback.class, typeParametersOf(type)))
           .extend()
@@ -182,9 +183,10 @@ public class MarshallerGeneratorFactory {
 
     @SuppressWarnings({ "serial", "rawtypes" })
     final MetaClass javaUtilMap = MetaClassFactory.get(new TypeLiteral<Map<String, Marshaller>>() {});
-    autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
+    final Class<?> mapClass = (MarshallerOutputTarget.GWT.equals(target) ? HashMap.class : ConcurrentHashMap.class);
+    autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, mapClass);
 
-    ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
+    final ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
 
     processExposedClasses(constructor);
     constructor.finish();
@@ -272,7 +274,7 @@ public class MarshallerGeneratorFactory {
   }
 
   private BlockBuilder<ElseBlockBuilder> addLoadMarshallerMethod(BlockBuilder<ElseBlockBuilder> getMarshallerConditionalBlock,
-          int methodIndex, ElseBlockBuilder elseBlockBuilder) {
+          final int methodIndex, final ElseBlockBuilder elseBlockBuilder) {
     final String helperMethodName = "loadMarshaller" + methodIndex;
     /*
      * Using the StringStatement is a workaround because the following line exposes a codegen bug,
@@ -291,7 +293,7 @@ public class MarshallerGeneratorFactory {
     return getMarshallerConditionalBlock;
   }
 
-  private void addLoadMarshallerMethod(ElseBlockBuilder elseBlockBuilder, final String helperMethodName) {
+  private void addLoadMarshallerMethod(final ElseBlockBuilder elseBlockBuilder, final String helperMethodName) {
     classStructureBuilder
     .privateMethod(boolean.class, helperMethodName)
     .parameters(String.class)
@@ -302,7 +304,7 @@ public class MarshallerGeneratorFactory {
     .finish();
   }
 
-  private void processExposedClasses(ConstructorBlockBuilder<?> constructor) {
+  private void processExposedClasses(final ConstructorBlockBuilder<?> constructor) {
     mappingContext
       .getDefinitionsFactory()
       .getExposedClasses()
@@ -310,7 +312,7 @@ public class MarshallerGeneratorFactory {
       .forEachOrdered(cls -> processExposedClass(cls, constructor));
   }
 
-  private void processExposedClass(MetaClass cls, ConstructorBlockBuilder<?> constructor) {
+  private void processExposedClass(final MetaClass cls, final ConstructorBlockBuilder<?> constructor) {
     final String clsName = cls.getFullyQualifiedName();
 
     if (!mappingContext.getDefinitionsFactory().hasDefinition(clsName)) {
@@ -332,7 +334,7 @@ public class MarshallerGeneratorFactory {
 
     Statement marshaller = null;
     if (marshallerCls.isAnnotationPresent(AlwaysQualify.class)) {
-      MetaClass type = MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
+      final MetaClass type = MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
           MetaClassFactory.typeParametersOf(cls));
 
       marshaller = Stmt.declareFinalVariable(varName, type, Stmt.newObject(QualifyingMarshallerWrapper.class)
@@ -362,7 +364,7 @@ public class MarshallerGeneratorFactory {
       mappingContext.registerGeneratedMarshaller(clazz.getFullyQualifiedName());
     }
 
-    boolean lazyEnabled = CommonConfigAttribs.LAZY_LOAD_BUILTIN_MARSHALLERS.getBoolean();
+    final boolean lazyEnabled = CommonConfigAttribs.LAZY_LOAD_BUILTIN_MARSHALLERS.getBoolean();
 
     for (final MetaClass cls : exposed) {
       final MetaClass compType = cls.getOuterComponentType();
@@ -462,7 +464,7 @@ public class MarshallerGeneratorFactory {
         .entrySet()) {
 
       if (aliasEntry.getValue().equals(type.getFullyQualifiedName())) {
-        MetaClass aliasType = MetaClassFactory.get(aliasEntry.getKey());
+        final MetaClass aliasType = MetaClassFactory.get(aliasEntry.getKey());
         if (!mappingContext.isRendered(aliasType)) {
           addMarshaller(marshaller, aliasType);
         }
@@ -470,7 +472,7 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  private String addArrayMarshaller(final MetaClass type, boolean gwtTarget) {
+  private String addArrayMarshaller(final MetaClass type, final boolean gwtTarget) {
     final String varName = getVarName(type);
 
     if (!arrayMarshallers.contains(varName)) {
@@ -507,8 +509,8 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  static BuildMetaClass generateArrayMarshaller(final MetaClass arrayType, final String marshallerClassName, boolean gwtTarget) {
-    MetaClass toMap = arrayType.getOuterComponentType();
+  static BuildMetaClass generateArrayMarshaller(final MetaClass arrayType, final String marshallerClassName, final boolean gwtTarget) {
+    final MetaClass toMap = arrayType.getOuterComponentType();
 
     final int dimensions = GenUtil.getArrayDimensions(arrayType);
 
@@ -565,7 +567,7 @@ public class MarshallerGeneratorFactory {
     return classStructureBuilder.getClassDefinition();
   }
 
-  static void arrayDemarshallCode(MetaClass toMap,
+  static void arrayDemarshallCode(final MetaClass toMap,
                                    final int dim,
                                    final ClassStructureBuilder<?> classBuilder,
                                    final BlockBuilder<?> initMethod) {
@@ -650,8 +652,8 @@ public class MarshallerGeneratorFactory {
   }
 
 
-  public static BuildMetaClass createArrayMarshallerClass(MetaClass type) {
-    BuildMetaClass arrayMarshaller =
+  public static BuildMetaClass createArrayMarshallerClass(final MetaClass type) {
+    final BuildMetaClass arrayMarshaller =
         ClassBuilder
             .define(MARSHALLER_NAME_PREFIX + getVarName(type)).packageScope()
             .abstractClass()
