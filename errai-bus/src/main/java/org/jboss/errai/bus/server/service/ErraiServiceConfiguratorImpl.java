@@ -16,10 +16,7 @@
 
 package org.jboss.errai.bus.server.service;
 
-import com.google.inject.Inject;
-import org.jboss.errai.common.client.api.ResourceProvider;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
+import static java.util.ResourceBundle.getBundle;
 
 import java.util.Collections;
 import java.util.Enumeration;
@@ -29,18 +26,22 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import static java.util.ResourceBundle.getBundle;
+import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+
+import com.google.inject.Inject;
 
 /**
  * Default implementation of the ErraiBus server-side configurator.
  */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
-  private MetaDataScanner scanner;
+  private final MetaDataScanner scanner;
   private Map<String, String> properties;
 
   private final Map<String, String> attributeMap;
   private Map<Class<?>, ResourceProvider> extensionBindings;
-  private Map<String, ResourceProvider> resourceProviders;
+  private final Map<String, ResourceProvider> resourceProviders;
   private Set<Class> serializableTypes;
 
   /**
@@ -65,18 +66,18 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
   private void loadServiceProperties() {
     properties = new HashMap<String, String>();
-    String bundlePath = System.getProperty("errai.service_config_prefix_path");
+    final String bundlePath = System.getProperty("errai.service_config_prefix_path");
 
     try {
-      ResourceBundle erraiServiceConfig = getBundle(bundlePath == null ? "ErraiService" : bundlePath + ".ErraiService");
-      Enumeration<String> keys = erraiServiceConfig.getKeys();
+      final ResourceBundle erraiServiceConfig = getBundle(bundlePath == null ? "ErraiService" : bundlePath + ".ErraiService");
+      final Enumeration<String> keys = erraiServiceConfig.getKeys();
       String key;
       while (keys.hasMoreElements()) {
         key = keys.nextElement();
         properties.put(key, erraiServiceConfig.getString(key));
       }
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       if (bundlePath == null) {
         // try to load the default service bundle -- used for testing, etc.
         System.setProperty("errai.service_config_prefix_path", "org.jboss.errai.bus");
@@ -85,6 +86,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     }
   }
 
+  @Override
   public MetaDataScanner getMetaDataScanner() {
     return scanner;
   }
@@ -94,6 +96,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
    *
    * @return the resource providers associated with this configurator
    */
+  @Override
   public Map<String, ResourceProvider> getResourceProviders() {
     return this.resourceProviders;
   }
@@ -106,7 +109,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
    *
    * @return false if the property does not exist
    */
-  public boolean hasProperty(String key) {
+  @Override
+  public boolean hasProperty(final String key) {
     return properties.containsKey(key) || System.getProperty(key) != null;
   }
 
@@ -118,29 +122,30 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
    *
    * @return the property, if it exists, null otherwise
    */
-  public String getProperty(String key) {
-    if (properties.containsKey(key)) {
-      return properties.get(key);
-    }
-    else{
+  @Override
+  public String getProperty(final String key) {
+    if (System.getProperties().containsKey(key)) {
       return System.getProperty(key);
+    }
+    else {
+      return properties.get(key);
     }
   }
 
   @Override
-  public boolean getBooleanProperty(String key) {
+  public boolean getBooleanProperty(final String key) {
     return hasProperty(key) && "true".equals(getProperty(key));
   }
 
 
   @Override
-  public Integer getIntProperty(String key) {
+  public Integer getIntProperty(final String key) {
     if (hasProperty(key)) {
-      String val = getProperty(key);
+      final String val = getProperty(key);
       try {
         return Integer.parseInt(val);
       }
-      catch (NumberFormatException e) {
+      catch (final NumberFormatException e) {
         throw new RuntimeException("expected an integer value for key '" + key + "': but got: "
             + val);
       }
@@ -158,8 +163,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
    *
    * @return the resource of type <tt>T</tt>
    */
+  @Override
   @SuppressWarnings({"unchecked"})
-  public <T> T getResource(Class<? extends T> resourceClass) {
+  public <T> T getResource(final Class<? extends T> resourceClass) {
     if (extensionBindings.containsKey(resourceClass)) {
       return (T) extensionBindings.get(resourceClass).get();
     }
@@ -177,7 +183,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   }
 
   @Override
-  public void setProperty(String key, String value) {
+  public void setProperty(final String key, final String value) {
     this.properties.put(key, value);
   }
 }
