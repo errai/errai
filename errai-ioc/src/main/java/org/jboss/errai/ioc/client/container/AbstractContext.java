@@ -54,7 +54,7 @@ public abstract class AbstractContext implements Context {
   public <T> T getActiveNonProxiedInstance(final String factoryName) {
     if (hasActiveInstance(factoryName)) {
       return getActiveInstance(factoryName);
-    } else if (isCurrentlyCreatingInstance(factoryName)) {
+    } else if (isCurrentlyCreatingActiveInstance(factoryName)) {
       final Factory<T> factory = this.<T>getFactory(factoryName);
       final T incomplete = factory.getIncompleteInstance();
       if (incomplete == null) {
@@ -90,7 +90,7 @@ public abstract class AbstractContext implements Context {
     factoriesCurrentlyCreatingInstances.remove(factoryName);
   }
 
-  protected boolean isCurrentlyCreatingInstance(final String factoryName) {
+  protected boolean isCurrentlyCreatingActiveInstance(final String factoryName) {
     return factoriesCurrentlyCreatingInstances.contains(factoryName);
   }
 

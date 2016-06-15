@@ -44,7 +44,7 @@ public class DependentScopeContext extends AbstractContext {
   }
 
   @Override
-  public boolean handlesScope(Class<? extends Annotation> scope) {
+  public boolean handlesScope(final Class<? extends Annotation> scope) {
     return Dependent.class.equals(scope);
   }
 
@@ -55,6 +55,15 @@ public class DependentScopeContext extends AbstractContext {
 
   @Override
   protected boolean hasActiveInstance(final String factoryName) {
+    return false;
+  }
+
+  @Override
+  protected boolean isCurrentlyCreatingActiveInstance(final String factoryName) {
+    /**
+     * Even if a factory of a dependent-scoped bean is creating an instance, that instance is never re-used so we return
+     * false here.
+     */
     return false;
   }
 
