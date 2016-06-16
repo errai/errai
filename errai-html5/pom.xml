@@ -34,20 +34,6 @@
     <dependency>
       <groupId>org.jboss.errai.reflections</groupId>
       <artifactId>reflections</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-classic</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -104,13 +90,6 @@
         </testResources>
         <plugins>
           <plugin>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <source>1.6</source>
-              <target>1.6</target>
-            </configuration>
-          </plugin>
-          <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <additionalClasspathElements>
@@ -127,7 +106,7 @@
       <dependencies>
         <dependency>
           <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>

@@ -200,7 +200,7 @@
 
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -277,6 +277,7 @@
       <groupId>com.github.branflake2267</groupId>
       <artifactId>gwt-maps-api</artifactId>
       <scope>provided</scope>
+      <version>3.9.0-build-16</version>
     </dependency>
 
     <!-- Other GWT Maps Dependency from Google -->
@@ -284,12 +285,14 @@
       <groupId>com.google.gwt.google-apis</groupId>
       <artifactId>gwt-ajaxloader</artifactId>
       <scope>provided</scope>
+      <version>1.1.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.gwtopenmaps.openlayers</groupId>
       <artifactId>gwt-openlayers-client</artifactId>
       <scope>provided</scope>
+      <version>0.8</version>
     </dependency>
 
     <!-- Runtime / Container dependencies -->

@@ -60,9 +60,9 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <!-- Do not put version here. Managed version will be used. -->
                   <groupId>org.jboss.spec.javax.ws.rs</groupId>
                   <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
+                  <version>1.0.1.Final</version>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
                   <outputDirectory>target/generated-sources/javax/ws/rs/super</outputDirectory>
@@ -130,8 +130,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>jaxrs-api</artifactId>
+      <groupId>org.jboss.spec.javax.ws.rs</groupId>
+      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
     </dependency>
 
     <dependency>
@@ -194,7 +194,7 @@
                   <name>errai.hosted_mode_testing</name>
                   <value>true</value>
                 </property>
-                <!-- Do not accidently package server test marshallers when building Errai -->
+                <!-- Do not accidentally package server test marshallers when building Errai -->
                 <property>
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>

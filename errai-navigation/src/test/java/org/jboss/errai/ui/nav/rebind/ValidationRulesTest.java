@@ -33,6 +33,8 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
@@ -58,7 +60,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
  * @author edewit@redhat.com
@@ -273,30 +274,65 @@ public class ValidationRulesTest {
   }
 
   @Page(role = DefaultPage.class)
-  private static class StartPage1 extends SimplePanel {}
+  private static class StartPage1 implements IsElement {
+    @Override
+    public HTMLElement getElement() {
+      throw new RuntimeException("Not yet implemented.");
+    }
+  }
 
   @Page(role = DefaultPage.class)
-  private static class StartPage2 extends SimplePanel {}
+  private static class StartPage2 implements IsElement {
+
+    @Override
+    public HTMLElement getElement() {
+      throw new RuntimeException("Not yet implemented.");
+    }}
 
   private static class MyUniquePageRole implements UniquePageRole {}
 
   @Page(role = {ValidationRulesTest.MyUniquePageRole.class, DefaultPage.class})
-  private static class Page1 extends SimplePanel {}
+  private static class Page1 implements IsElement {
+
+    @Override
+    public HTMLElement getElement() {
+      throw new RuntimeException("Not yet implemented.");
+    }}
 
   @Page(role = ValidationRulesTest.MyUniquePageRole.class)
-  private static class Page2 extends SimplePanel {}
+  private static class Page2 implements IsElement {
+
+    @Override
+    public HTMLElement getElement() {
+      throw new RuntimeException("Not yet implemented.");
+    }}
 
   @Page
-  private static class PageWithTransitionToMyUniquePageRole extends SimplePanel {
+  private static class PageWithTransitionToMyUniquePageRole implements IsElement {
     @SuppressWarnings("unused")
     private TransitionToRole<MyUniquePageRole> transition;
+
+    @Override
+    public HTMLElement getElement() {
+      throw new RuntimeException("Not yet implemented.");
+    }
   }
 
   @Page
-  private static class BlacklistedPage extends SimplePanel {
+  private static class BlacklistedPage implements IsElement {
+
+    @Override
+    public HTMLElement getElement() {
+      throw new RuntimeException("Not yet implemented.");
+    }
   }
 
   @Page(role = DefaultPage.class, path = "{var}/text")
-  private static class DefaultPageWithPathParam extends SimplePanel {}
+  private static class DefaultPageWithPathParam implements IsElement {
+
+    @Override
+    public HTMLElement getElement() {
+      throw new RuntimeException("Not yet implemented.");
+    }}
 
 }

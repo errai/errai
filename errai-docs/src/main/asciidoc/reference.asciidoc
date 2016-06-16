@@ -9285,7 +9285,7 @@ For those not using maven, here is the dependency tree of Errai project jars.
 *** javax.annotation:jsr250-api:jar:1.0:compile
 *** javax.enterprise:cdi-api:jar:1.0-SP4:compile
 **** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-** org.jboss.spec.javax.servlet:jboss-servlet-api_3.0_spec:jar:1.0.0.Final:provided
+** org.jboss.spec.javax.servlet:jboss-servlet-api_3.1_spec:jar:1.0.0.Final:provided
 ** com.google.gwt:gwt-user:jar:2.5.1:provided
 *** javax.validation:validation-api:jar:1.0.0.GA:provided
 *** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
@@ -9351,7 +9351,7 @@ For those not using maven, here is the dependency tree of Errai project jars.
 ** com.google.gwt:gwt-dev:jar:2.5.1:provided
 ** javax.validation:validation-api:jar:1.0.0.GA:provided
 ** javax.validation:validation-api:jar:sources:1.0.0.GA:provided
-** org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided
+** org.jboss.spec.javax.ejb:jboss-ejb-api_3.2_spec:jar:1.0.0.Final:provided
 ** org.quartz-scheduler:quartz:jar:2.1.6:provided
 *** c3p0:c3p0:jar:0.9.1.1:provided
 ** junit:junit:jar:4.10:provided
@@ -9392,7 +9392,7 @@ For those not using maven, here is the dependency tree of Errai project jars.
 *** javax.annotation:jsr250-api:jar:1.0:compile
 *** javax.enterprise:cdi-api:jar:1.0-SP4:compile
 **** org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1:compile
-** org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided
+** org.jboss.spec.javax.ejb:jboss-ejb-api_3.2_spec:jar:1.0.0.Final:provided
 ** org.quartz-scheduler:quartz:jar:2.1.6:provided
 *** c3p0:c3p0:jar:0.9.1.1:provided
 ** org.jboss.errai:errai-ioc:jar:compile

@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests the contexts and scopes.
- * 
+ *
  * @author Michel Werren
  */
 @RunWith(Arquillian.class)
@@ -65,10 +65,10 @@ public class ContainerOnlyTest {
     war.addClasses(RequestScopedBean.class, SessionScopedBean.class, FakeHttpSession.class, ConversationScopeBean.class);
     war.addPackages(true, "org.jboss.errai.bus.server.websocket.jsr356");
     final File[] files = Maven.resolver().loadPomFromFile("./pom.xml", "test-dependency-override")
-            .resolve("org.jboss.errai:errai-bus:?", "com.google.guava:guava:13.0.1")
+            .resolve("org.jboss.errai:errai-bus:?", "com.google.guava:guava:?")
             .withTransitivity()
             .asFile();
-    for (File file : files) {
+    for (final File file : files) {
       war.addAsLibrary(file);
     }
     return war;
@@ -96,7 +96,7 @@ public class ContainerOnlyTest {
   /**
    * Test for 6 concurrent {@link javax.enterprise.context.RequestScoped} beans.
    * Each one has its own {@link Thread}.
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -113,7 +113,7 @@ public class ContainerOnlyTest {
         requestScopedBean.setTimestamp(timestamp);
         try {
           Thread.sleep(500);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           Assert.fail();
         }
         Assert.assertEquals(timestamp, requestScopedBean.getTimestamp());
@@ -152,7 +152,7 @@ public class ContainerOnlyTest {
    * Test 2 concurrent sessions in each 3 {@link Thread}. That's each
    * {@link Thread} obtain the correct
    * {@link javax.enterprise.context.SessionScoped} bean and its value.
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -209,7 +209,7 @@ public class ContainerOnlyTest {
 
       private final Short id;
 
-      SessionRunner(HttpSession httpSession, Short id) {
+      SessionRunner(final HttpSession httpSession, final Short id) {
         this.httpSession = httpSession;
         this.id = id;
       }
@@ -255,7 +255,7 @@ public class ContainerOnlyTest {
    * {@link HttpSession} {@link ConversationScopeBean} must anytime have the
    * same id as the {@link ConversationState}. Runs with 4 concurrent
    * {@link Thread} per {@link Conversation}.
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -337,7 +337,7 @@ public class ContainerOnlyTest {
 
       private final Conversation conversation;
 
-      ConversationRunner(ConversationState conversationState, Conversation conversation) {
+      ConversationRunner(final ConversationState conversationState, final Conversation conversation) {
         this.conversationState = conversationState;
         this.conversation = conversation;
       }
@@ -398,7 +398,7 @@ public class ContainerOnlyTest {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T getInstance(Class<T> clazz) {
+  public <T> T getInstance(final Class<T> clazz) {
     final Set<Bean<?>> beans = beanManager.getBeans(clazz);
     final Bean<?> bean = beans.iterator().next();
     final Object reference = beanManager.getReference(bean, bean.getBeanClass(),

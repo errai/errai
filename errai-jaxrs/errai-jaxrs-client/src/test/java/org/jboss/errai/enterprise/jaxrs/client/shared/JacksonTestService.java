@@ -21,11 +21,14 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallCustomTypeResultManipulatingInterceptor;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * This service is used to test support for Jackson generated JSON.
@@ -60,6 +63,7 @@ public interface JacksonTestService {
    */
   @POST
   @Path("/1")
+  @Produces(APPLICATION_JSON)
   @InterceptedCall(RestCallCustomTypeResultManipulatingInterceptor.class)
   public User postJacksonIntercepted(String jackson);
 

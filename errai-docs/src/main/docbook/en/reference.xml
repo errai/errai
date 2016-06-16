@@ -8728,7 +8728,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>org.jboss.spec.javax.servlet:jboss-servlet-api_3.0_spec:jar:1.0.0.Final:provided</simpara>
+      <simpara>org.jboss.spec.javax.servlet:jboss-servlet-api_3.1_spec:jar:1.0.0.Final:provided</simpara>
       
     </listitem>
   
@@ -9191,7 +9191,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided</simpara>
+      <simpara>org.jboss.spec.javax.ejb:jboss-ejb-api_3.2_spec:jar:1.0.0.Final:provided</simpara>
       
     </listitem>
   
@@ -9259,7 +9259,6 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
   
     <listitem>
       <simpara>com.google.guava:guava-gwt:jar:14.0.1:provided</simpara>
-      
 
 <itemizedlist>
   
@@ -9496,7 +9495,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>org.jboss.spec.javax.ejb:jboss-ejb-api_3.1_spec:jar:1.0.2.Final:provided</simpara>
+      <simpara>org.jboss.spec.javax.ejb:jboss-ejb-api_3.2_spec:jar:1.0.0.Final:provided</simpara>
       
     </listitem>
   
