@@ -21,6 +21,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
@@ -34,6 +35,8 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterc
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallListParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallResultManipulatingInterceptor;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * This service is used to test client-side JAX-RS call interceptors.
@@ -66,6 +69,7 @@ public interface InterceptedCallTestService {
   @GET
   @Path("/4")
   @InterceptedCall(RestCallListParameterManipulatingInterceptor.class)
+  @Produces(APPLICATION_JSON)
   public List<String> interceptedGetWithListParameterManipulation(@QueryParam("result") List<String> result);
   
   @GET

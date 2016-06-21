@@ -103,8 +103,6 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <encoding>UTF-8</encoding>
-          <source>1.5</source>
-          <target>1.5</target>
         </configuration>
       </plugin>
       <plugin>

@@ -14,49 +14,10 @@
   <description>JEE 7 / CDI (Weld) extension to the JSR-356 compliant Errai Bus endpoint.</description>
 
   <properties>
-    <wildfly.version>8.0.0.Final</wildfly.version>
+    <wildfly.version>10.0.0.Final</wildfly.version>
     <unpack-as-folder>${project.build.directory}/as-test</unpack-as-folder>
     <test-as-folder>${unpack-as-folder}/wildfly-${wildfly.version}</test-as-folder>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.jboss.arquillian</groupId>
-        <artifactId>arquillian-bom</artifactId>
-        <version>1.1.4.Final</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.spec</groupId>
-        <artifactId>jboss-javaee-7.0</artifactId>
-        <version>1.0.0.Final</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-       <groupId>org.eclipse.aether</groupId>
-       <artifactId>aether-api</artifactId>
-       <version>0.9.0.M2</version>
-      </dependency>
-      <dependency>
-       <groupId>org.eclipse.aether</groupId>
-       <artifactId>aether-impl</artifactId>
-       <version>0.9.0.M2</version>
-      </dependency>
-      <dependency>
-       <groupId>org.eclipse.aether</groupId>
-       <artifactId>aether-spi</artifactId>
-       <version>0.9.0.M2</version>
-      </dependency>
-      <dependency>
-       <groupId>org.eclipse.aether</groupId>
-       <artifactId>aether-util</artifactId>
-       <version>0.9.0.M2</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -82,6 +43,7 @@
       <groupId>org.jboss.spec.javax.websocket</groupId>
       <artifactId>jboss-websocket-api_1.0_spec</artifactId>
       <scope>provided</scope>
+      <version>1.0.0.Final</version>
     </dependency>
 
     <dependency>
@@ -118,9 +80,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.wildfly</groupId>
+      <groupId>org.wildfly.arquillian</groupId>
       <artifactId>wildfly-arquillian-container-embedded</artifactId>
-      <version>${wildfly.version}</version>
+      <version>2.0.0.Final</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -159,7 +121,6 @@
         <dependency>
           <artifactId>maven-aether-provider</artifactId>
           <groupId>org.apache.maven</groupId>
-          <version>3.2.1</version>
         </dependency>
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -174,8 +135,11 @@
         <dependency>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
-          <version>13.0.1</version>
           <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.logging</groupId>
+          <artifactId>jboss-logging</artifactId>
         </dependency>
       </dependencies>
       <build>

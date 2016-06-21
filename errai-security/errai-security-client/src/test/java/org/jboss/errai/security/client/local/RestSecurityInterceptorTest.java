@@ -81,7 +81,7 @@ public class RestSecurityInterceptorTest extends AbstractSecurityInterceptorTest
   }
 
   @Test
-  public void testAnybodyServiceNotblocked() throws Exception {
+  public void testAnybodyServiceNotBlocked() throws Exception {
     final Counter callbackCounter = new Counter();
     helper(new Runnable() {
       @Override

@@ -55,7 +55,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
-    <weld.version>1.1.6.Final</weld.version>
+    <weld.version>2.3.3.Final</weld.version>
     <argLine></argLine>
     <!-- maven plugins versions -->
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
@@ -64,7 +64,7 @@
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version> 
     <maven.gwt.plugin.version>2.8.0-SNAPSHOT</maven.gwt.plugin.version>   
     <jetty.version>6.1.25</jetty.version>
-    <weld.version>1.1.6.Final</weld.version>
+    <weld.version>2.3.3.Final</weld.version>
   </properties>
 
   <!-- These must be here in this order because of missing guava-gwt snapshots in the JBoss Public Repository. -->
@@ -151,7 +151,7 @@
 
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -424,7 +424,7 @@
       <dependencies>
         <dependency>
           <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>

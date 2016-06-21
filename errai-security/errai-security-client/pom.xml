@@ -32,10 +32,6 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.el</groupId>
-      <artifactId>el-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.spec.javax.interceptor</groupId>
       <artifactId>jboss-interceptors-api_1.2_spec</artifactId>
     </dependency>
@@ -79,15 +75,14 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.el</groupId>
-      <artifactId>jboss-el-api_2.2_spec</artifactId>
+      <artifactId>jboss-el-api_3.0_spec</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
+      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
     </dependency>
 
     <!-- GWT -->
-    <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -101,11 +96,6 @@
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cdi-server</artifactId>
       <scope>test</scope>
@@ -114,10 +104,6 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jaxrs-provider</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>jaxrs-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.weld.servlet</groupId>
@@ -210,9 +196,9 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <!-- Do not put verison here. Managed version will be used. -->
-                  <groupId>org.apache.geronimo.specs</groupId>
-                  <artifactId>geronimo-interceptor_1.1_spec</artifactId>
+                  <!-- Do not put version here. Managed version will be used. -->
+                  <groupId>org.jboss.spec.javax.interceptor</groupId>
+                  <artifactId>jboss-interceptors-api_1.2_spec</artifactId>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
                   <outputDirectory>target/generated-sources/javax/interceptor/super</outputDirectory>

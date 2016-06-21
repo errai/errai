@@ -11,6 +11,7 @@
             <property name="jbossHome">${test-as-folder}</property>
             <property name="managementAddress">localhost</property>
             <property name="managementPort">9990</property>
+            <property name="modulePath">${test-as-folder}/modules</property>
         </configuration>
     </container>
 </arquillian>

@@ -51,9 +51,9 @@ public class FilterTest {
     war.addClasses(FooFilter.class, BarFilter.class, CdiDelegationListener.class);
     war.addPackages(true, "org.jboss.errai.bus.server.websocket.jsr356");
     final File[] files = Maven.resolver().loadPomFromFile("./pom.xml", "test-dependency-override")
-            .resolve("org.jboss.errai:errai-bus:?", "com.google.guava:guava:13.0.1").withTransitivity()
+            .resolve("org.jboss.errai:errai-bus:?", "com.google.guava:guava:?").withTransitivity()
             .asFile();
-    for (File file : files) {
+    for (final File file : files) {
       war.addAsLibrary(file);
     }
     return war;
@@ -62,7 +62,7 @@ public class FilterTest {
   /**
    * Test for the overridden non-jee {@link FilterLookup} and the cdi'fied
    * filters.
-   * 
+   *
    * @throws Exception
    */
   @Test(expected = RuntimeException.class)
@@ -81,7 +81,7 @@ public class FilterTest {
     boolean barFilter = false;
 
     // Test also for proxied classes
-    for (WebSocketFilter filter : filters) {
+    for (final WebSocketFilter filter : filters) {
       fooFilter = fooFilter || ((filter instanceof FooFilter) && !filter.getClass().equals(FooFilter.class));
       barFilter = barFilter || ((filter instanceof BarFilter) && !filter.getClass().equals(BarFilter.class));
     }

@@ -305,4 +305,9 @@ public class MockServletContext implements ServletContext {
     throw new UnsupportedOperationException("Not implemented.");
   }
 
+  @Override
+  public String getVirtualServerName() {
+    throw new UnsupportedOperationException("Not implemented.");
+  }
+
 }

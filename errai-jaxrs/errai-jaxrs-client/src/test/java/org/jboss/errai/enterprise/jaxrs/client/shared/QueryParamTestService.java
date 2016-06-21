@@ -25,7 +25,9 @@ import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
 
@@ -35,6 +37,7 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Path("/test/queryparam/")
+@Produces(MediaType.APPLICATION_JSON)
 public interface QueryParamTestService {
 
   @GET

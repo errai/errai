@@ -118,4 +118,50 @@ public class MultivaluedMapImpl<K, V> implements MultivaluedMap<K, V> {
     }
     return null;
   }
+
+  @Override
+  public void addAll(K key, V... newValues) {
+    for (V value : newValues) {
+      add(key, value);
+    }
+  }
+
+  @Override
+  public void addAll(K key, List<V> valueList) {
+    for (V value : valueList) {
+      add(key, value);
+    }
+  }
+
+  @Override
+  public void addFirst(K key, V value) {
+    List<V> list = get(key);
+    if (list == null) {
+      add(key, value);
+    } else {
+      list.add(0, value);
+    }
+  }
+
+  @Override
+  public boolean equalsIgnoreValueOrder(MultivaluedMap<K, V> otherMap) {
+    if (this == otherMap) {
+      return true;
+    }
+    if (!keySet().equals(otherMap.keySet())) {
+      return false;
+    }
+    for (Entry<K, List<V>> e : entrySet()) {
+      List<V> olist = otherMap.get(e.getKey());
+      if (e.getValue().size() != olist.size()) {
+        return false;
+      }
+      for (V v : e.getValue()) {
+        if (!olist.contains(v)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 }

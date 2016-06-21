@@ -112,7 +112,7 @@
 
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -176,13 +176,6 @@
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>persistence-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
 
     <!-- Netty for WebSockets Support -->
 
@@ -264,7 +257,7 @@
                   <name>org.jboss.errai.bus.do_long_poll</name>
                   <value>false</value>
                 </property>
-                <!-- Do not accidently package server test marshallers when building Errai -->
+                <!-- Do not accidentally package server test marshallers when building Errai -->
                 <property>
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
