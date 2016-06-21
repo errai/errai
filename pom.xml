@@ -84,7 +84,6 @@
     <module>errai-tools</module>
     <module>errai-codegen</module>
     <module>errai-marshalling</module>
-    <module>errai-js</module>
     <module>errai-cdi</module>
     <module>errai-jaxrs</module>
     <module>errai-ui</module>

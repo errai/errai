@@ -64,7 +64,6 @@
     <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
     <version.org.wildfly.core>2.1.0.Final</version.org.wildfly.core>
     <version.javax.validation>1.0.0.GA</version.javax.validation>
-    <version.org.timepedia.exporter>2.3.0</version.org.timepedia.exporter>
   </properties>
 
   <scm>
@@ -223,12 +222,6 @@
         <groupId>com.googlecode.gwtphonegap</groupId>
         <artifactId>gwtphonegap</artifactId>
         <version>${gwt.phonegap.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.timepedia.exporter</groupId>
-        <artifactId>gwtexporter</artifactId>
-        <version>${version.org.timepedia.exporter}</version>
       </dependency>
 
       <dependency>
