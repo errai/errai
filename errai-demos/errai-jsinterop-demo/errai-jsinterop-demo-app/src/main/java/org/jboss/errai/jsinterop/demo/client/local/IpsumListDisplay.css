@@ -1,0 +1,6 @@
+tr.selected > td {
+  background-color: rgb(140,140,140) !important;
+}
+tr {
+ cursor: pointer;
+}

@@ -31,6 +31,7 @@
     <module>errai-jaxrs-demo-crud</module>
     <module>errai-ui-demo-i18n</module>    
     <module>errai-security-demo</module>
+    <module>errai-jsinterop-demo</module>
   </modules>
 
 </project>
