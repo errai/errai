@@ -39,5 +39,10 @@ public interface Document extends Node, GlobalEventHandlers {
   ProcessingInstruction createProcessingInstruction(String target, String data);
   Attr createAttribute(String name);
   EntityReference createEntityReference(String name);
+  NodeList getElementsByName(String name);
   NodeList getElementsByTagName(String tagname);
+  NodeList getElementByClassName(String classNames);
+  Element getElementById(String id);
+  Element querySelector(String selector);
+  NodeList querySelectorAll(String selector);
 }

@@ -35,5 +35,8 @@ public interface Element extends Node {
   Attr setAttributeNode(Attr newAttr);
   Attr removeAttributeNode(Attr oldAttr);
   NodeList getElementsByTagName(String name);
+  NodeList getElementsByClassName(String classNames);
+  Element querySelector(String selector);
+  NodeList querySelectorAll(String selector);
   void normalize();
 }
