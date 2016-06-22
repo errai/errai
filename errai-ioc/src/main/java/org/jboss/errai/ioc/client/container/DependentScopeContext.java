@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import static org.jboss.errai.ioc.client.container.Factory.maybeUnwrapProxy;
+
 import java.lang.annotation.Annotation;
 
 import javax.enterprise.context.Dependent;
@@ -75,8 +77,10 @@ public class DependentScopeContext extends AbstractContext implements HasContext
 
   @Override
   public <T> T getContextualInstance(final String factoryName, final Class<?>[] typeArgs, final Annotation[] qualifiers) {
-    return this.<T>getFactory(factoryName)
-               .createContextualInstance(getContextManager(), typeArgs, qualifiers);
+    final Factory<T> factory = this.<T>getFactory(factoryName);
+    final T instance = factory.createContextualInstance(getContextManager(), typeArgs, qualifiers);
+    registerInstance(maybeUnwrapProxy(instance), factory);
+    return instance;
   }
 
 }

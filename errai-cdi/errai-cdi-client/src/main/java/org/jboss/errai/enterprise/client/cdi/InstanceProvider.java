@@ -16,32 +16,30 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
+import static org.jboss.errai.ioc.client.IOCUtil.joinQualifiers;
+import static org.jboss.errai.ioc.client.QualifierUtil.DEFAULT_ANNOTATION;
+import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
+
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Singleton;
 
-import org.jboss.errai.ioc.client.QualifierUtil;
+import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
-import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
-
-import com.google.gwt.core.client.GWT;
 
 @SuppressWarnings("rawtypes")
 @IOCProvider
 @Singleton
 public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
+  @SuppressWarnings("unchecked")
   @Override
   public Instance provide(final Class[] typeargs, final Annotation[] qualifiers) {
 
@@ -56,96 +54,62 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
      * setup, see the README in the root of errai-javax-enterprise.
      */
 
-    return new InstanceImpl(typeargs[0], qualifiers.length == 0 ? new Annotation[] { QualifierUtil.DEFAULT_ANNOTATION } : qualifiers);
+    return new InstanceImpl(typeargs[0], qualifiers.length == 0 ? new Annotation[] { DEFAULT_ANNOTATION } : qualifiers);
   }
 
-  private static Annotation[] joinQualifiers(Annotation[] a1, Annotation[] a2) {
-    final Set<Annotation> annos = new HashSet<>();
-    annos.addAll(Arrays.asList(a1));
-    annos.addAll(Arrays.asList(a2));
-
-    return annos.toArray(new Annotation[annos.size()]);
-  }
-
-  static class InstanceImpl implements Instance<Object> {
-    private static final IOCEnvironment IOC_ENVIRONMENT = GWT.<IOCEnvironment> create(IOCEnvironment.class);
-    private final Class type;
+  static class InstanceImpl<T> implements Instance<T> {
+    private final Class<T> type;
     private final Annotation[] qualifiers;
 
-    InstanceImpl(final Class type, final Annotation[] qualifiers) {
+    InstanceImpl(final Class<T> type, final Annotation[] qualifiers) {
       this.type = type;
       this.qualifiers = qualifiers;
     }
 
     @Override
-    public Instance<Object> select(final Annotation... qualifiers) {
-      return new InstanceImpl(type, joinQualifiers(this.qualifiers, qualifiers));
+    public Instance<T> select(final Annotation... qualifiers) {
+      return select(type, qualifiers);
     }
 
     @Override
-    public Instance select(final Class subtype, final Annotation... qualifiers) {
-      return new InstanceImpl(subtype, joinQualifiers(this.qualifiers, qualifiers));
+    public <U extends T> Instance<U> select(final Class<U> subtype, final Annotation... qualifiers) {
+      return new InstanceImpl<U>(subtype, joinQualifiers(this.qualifiers, qualifiers));
     }
 
     @Override
-    @SuppressWarnings({ "unchecked" })
     public boolean isUnsatisfied() {
-      Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
-      return beanDefs.isEmpty();
+      return IOCUtil.isUnsatisfied(type, qualifiers);
     }
 
     @Override
-    @SuppressWarnings({ "unchecked" })
     public boolean isAmbiguous() {
-      Collection beanDefs = IOC.getBeanManager().lookupBeans(type, qualifiers);
-      return beanDefs.size() > 1;
+      return IOCUtil.isAmbiguous(type, qualifiers);
     }
 
     @Override
-    public Iterator<Object> iterator() {
-      Collection<SyncBeanDef> beanDefs = IOC.getBeanManager().lookupBeans( type, qualifiers );
+    public Iterator<T> iterator() {
+      final Collection<SyncBeanDef<T>> beanDefs = IOC.getBeanManager().lookupBeans( type, qualifiers );
       if(beanDefs==null){
-        return Collections.emptyList().iterator();
+        return Collections.<T>emptyList().iterator();
       }
       return new InstanceImplIterator(beanDefs);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Object get() {
-      try {
-        return IOC.getBeanManager().<Object> lookupBean(type, qualifiers).getInstance();
-      } catch (IOCResolutionException ex) {
-        if (IOC_ENVIRONMENT.isAsync() && isUnsatisfied()) {
-          throw new RuntimeException("No bean satisfied " + prettyQualifiersAndType()
-                  + ". Hint: Types loaded via Instance should not be @LoadAsync.", ex);
-        }
-        else {
-          throw ex;
-        }
-      }
-    }
-
-    private String prettyQualifiersAndType() {
-      final StringBuilder builder = new StringBuilder();
-      for (final Annotation qual : qualifiers) {
-        builder.append('@').append(qual.annotationType().getSimpleName()).append(' ');
-      }
-      builder.append(type.getSimpleName());
-
-      return builder.toString();
+    public T get() {
+      return IOCUtil.getInstance(type, qualifiers);
     }
 
     @Override
     public void destroy(final Object instance) {
-      IOC.getBeanManager().destroyBean(instance);
+      getBeanManager().destroyBean(instance);
     }
 
-    private class InstanceImplIterator implements Iterator {
+    private class InstanceImplIterator implements Iterator<T> {
 
-      private final Iterator<SyncBeanDef> delegate;
+      private final Iterator<SyncBeanDef<T>> delegate;
 
-      public InstanceImplIterator( Collection<SyncBeanDef> beanDefs ) {
+      public InstanceImplIterator( final Collection<SyncBeanDef<T>> beanDefs ) {
         this.delegate = beanDefs.iterator();
       }
 
@@ -155,7 +119,7 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
       }
 
       @Override
-      public Object next() {
+      public T next() {
         return delegate.next().getInstance();
       }
 

@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+/**
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
 import javax.inject.Provider;
 
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.ioc.client.api.Disposer;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
- * Create factories for beans from {@link Provider providers} annotated with
- * {@link IOCProvider}.
  *
- * @see FactoryBodyGenerator
- * @see AbstractBodyGenerator
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class ProviderFactoryBodyGenerator extends BaseProviderGenerator {
+@IOCProvider
+public class ProvidedAndDisposer implements Provider<ProvidedDisposableBean>, Disposer<ProvidedDisposableBean> {
 
   @Override
-  protected Class<?> getProviderRawType() {
-    return Provider.class;
+  public ProvidedDisposableBean get() {
+    return new ProvidedDisposableBean();
   }
 
   @Override
-  protected ContextualStatementBuilder invokeProviderStmt(final ContextualStatementBuilder provider) {
-    return provider.invoke("get");
+  public void dispose(final ProvidedDisposableBean beanInstance) {
+    beanInstance.destroy();
   }
 
 }

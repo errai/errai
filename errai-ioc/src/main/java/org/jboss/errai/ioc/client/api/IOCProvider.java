@@ -39,6 +39,8 @@ import java.lang.annotation.Target;
  *   <li>{@link ContextualTypeProvider}</li>
  * </ul>
  *
+ * A provider can also implement {@link Disposer}, allowing it to clean up resources when a provided bean is destroyed.
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

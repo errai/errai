@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import java.lang.annotation.Annotation;
 
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.Disposer;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
- * Generate factories for contextual bean instances provided by a {@link ContextualTypeProvider}.
  *
- * @see FactoryBodyGenerator
- * @see AbstractBodyGenerator
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class ContextualFactoryBodyGenerator extends BaseProviderGenerator {
+@IOCProvider
+public class ContextualProviderAndDisposer implements ContextualTypeProvider<ContextuallyProvidedDisposableBean>,
+        Disposer<ContextuallyProvidedDisposableBean> {
 
   @Override
-  protected ContextualStatementBuilder invokeProviderStmt(final ContextualStatementBuilder provider) {
-    return provider.invoke("provide", loadVariable("typeArgs"), loadVariable("qualifiers"));
+  public void dispose(final ContextuallyProvidedDisposableBean beanInstance) {
+    beanInstance.destroy();
   }
 
   @Override
-  protected Class<?> getProviderRawType() {
-    return ContextualTypeProvider.class;
+  public ContextuallyProvidedDisposableBean provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
+    return new ContextuallyProvidedDisposableBean();
   }
 
 }

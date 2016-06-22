@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.tests.wiring.client;
 
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
+import org.jboss.errai.ioc.tests.wiring.client.res.BeanWithProvidedBeansInjected;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentBeanWithDisposer;
 import org.jboss.errai.ioc.tests.wiring.client.res.NestedDependentBean;
@@ -79,5 +80,19 @@ public class DisposerTest extends AbstractErraiIOCTest {
     assertTrue("middle bean's destructor should have been called", middleBean.isPreDestroyCalled());
     assertFalse("inner bean should have been disposed", IOC.getBeanManager().isManaged(innerBean));
     assertTrue("inner bean's destructor should have been called", innerBean.isPreDestroyCalled());
+  }
+
+  public void testDisposerMethodCalledOnProviderWhenProvidedBeanIsDestroyed() throws Exception {
+    final BeanWithProvidedBeansInjected module = IOC.getBeanManager().lookupBean(BeanWithProvidedBeansInjected.class).getInstance();
+    assertFalse("Bean was prematurely destroyed.", module.providedBean.isDestroyed());
+    IOC.getBeanManager().destroyBean(module.providedBean);
+    assertTrue("Disposer method not called after bean was destroyed.", module.providedBean.isDestroyed());
+  }
+
+  public void testDisposerMethodCalledOnContextualProviderWhenProvidedBeanIsDestroyed() throws Exception {
+    final BeanWithProvidedBeansInjected module = IOC.getBeanManager().lookupBean(BeanWithProvidedBeansInjected.class).getInstance();
+    assertFalse("Bean was prematurely destroyed.", module.contextuallyProvidedBean.isDestroyed());
+    IOC.getBeanManager().destroyBean(module.contextuallyProvidedBean);
+    assertTrue("Disposer method not called after bean was destroyed.", module.contextuallyProvidedBean.isDestroyed());
   }
 }
