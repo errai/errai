@@ -50,8 +50,6 @@ public interface JsTypeProvider<T> {
   /**
    * Returns string representations of the qualifiers and their members. 
    */
-  default JsArray<String> getQualifiers() {
-    return new JsArray<String>(new String[0]);
-  }
+  JsArray<String> getQualifiers();
   
 }

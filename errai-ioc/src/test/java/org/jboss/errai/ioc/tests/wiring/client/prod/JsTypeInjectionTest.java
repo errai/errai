@@ -96,6 +96,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       public String getFactoryName() {
         return null;
       }
+
+      @Override
+      public JsArray<String> getQualifiers() {
+        return new JsArray<String>(new String[0]);
+      }
     });
     windowInjContext.addBeanProvider(MultipleImplementationsJsType.class.getName(), new JsTypeProvider<Object>() {
       @Override
@@ -111,6 +116,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       @Override
       public String getFactoryName() {
         return null;
+      }
+
+      @Override
+      public JsArray<String> getQualifiers() {
+        return new JsArray<String>(new String[0]);
       }
     });
     windowInjContext.addBeanProvider(InternallyUnsatisfiedJsTypeIface.class.getName(),
@@ -134,6 +144,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       @Override
       public String getFactoryName() {
         return null;
+      }
+
+      @Override
+      public JsArray<String> getQualifiers() {
+        return new JsArray<String>(new String[0]);
       }
     });
     windowInjContext.addBeanProvider(ExternalJsTypeImpl.class.getName(),
@@ -159,6 +174,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
               public String getFactoryName() {
                 return null;
               }
+
+              @Override
+              public JsArray<String> getQualifiers() {
+                return new JsArray<String>(new String[0]);
+              }
     });
     windowInjContext.addBeanProvider(ConcreteWindowScopedJsType.class.getName(),
             new JsTypeProvider<ConcreteWindowScopedJsType>() {
@@ -181,6 +201,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       @Override
       public String getFactoryName() {
         return null;
+      }
+
+      @Override
+      public JsArray<String> getQualifiers() {
+        return new JsArray<String>(new String[0]);
       }
     });
     windowInjContext.addSuperTypeAlias(ExternalJsTypeIface.class.getName(), ExternalJsTypeImpl.class.getName());
@@ -271,6 +296,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         @Override
         public String getFactoryName() {
           return null;
+        }
+
+        @Override
+        public JsArray<String> getQualifiers() {
+          return new JsArray<String>(new String[0]);
         }
       });
 
@@ -375,6 +405,11 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
       @Override
       public String getFactoryName() {
         return null;
+      }
+
+      @Override
+      public JsArray<String> getQualifiers() {
+        return new JsArray<String>(new String[0]);
       }
     });
     values.clear();
