@@ -219,7 +219,7 @@ public interface DependencyGraphBuilder {
      */
     Annotated,
     /**
-     * With this strategy only types annotated with reachable from a type that is an {@link EntryPoint} or a
+     * With this strategy only types reachable from a type that is an {@link EntryPoint} or a
      * {@link JsType} are kept.
      */
     Aggressive
