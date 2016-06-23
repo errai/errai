@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import javax.enterprise.context.Dependent;
 
+import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.ioc.client.api.ScopeContext;
 
 /**
@@ -31,7 +32,7 @@ import org.jboss.errai.ioc.client.api.ScopeContext;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @ScopeContext({Dependent.class})
-public class DependentScopeContext extends AbstractContext {
+public class DependentScopeContext extends AbstractContext implements HasContextualInstanceSupport {
 
   @Override
   public Class<? extends Annotation> getScope() {
@@ -65,6 +66,17 @@ public class DependentScopeContext extends AbstractContext {
      * false here.
      */
     return false;
+  }
+
+  @Override
+  public Optional<HasContextualInstanceSupport> withContextualInstanceSupport() {
+    return Optional.ofNullable(this);
+  }
+
+  @Override
+  public <T> T getContextualInstance(final String factoryName, final Class<?>[] typeArgs, final Annotation[] qualifiers) {
+    return this.<T>getFactory(factoryName)
+               .createContextualInstance(getContextManager(), typeArgs, qualifiers);
   }
 
 }

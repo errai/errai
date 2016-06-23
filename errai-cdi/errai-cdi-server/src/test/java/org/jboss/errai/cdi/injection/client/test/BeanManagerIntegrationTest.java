@@ -80,7 +80,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     }
   };
 
-  private Any anyAnno = new Any() {
+  private final Any anyAnno = new Any() {
 
     @Override
     public Class<? extends Annotation> annotationType() {
@@ -307,7 +307,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       final SyncBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, anyAnno);
       fail("should have thrown an exception, but got: " + bean);
     }
-    catch (IOCResolutionException e) {
+    catch (final IOCResolutionException e) {
       assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("Multiple beans matched"));
     }
 
@@ -315,7 +315,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       final SyncBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, wrongAnno);
       fail("should have thrown an exception, but got: " + bean);
     }
-    catch (IOCResolutionException e) {
+    catch (final IOCResolutionException e) {
       assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("No beans matched"));
     }
   }
@@ -327,14 +327,14 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertTrue("should contain a pig", containsInstanceOf(beans, Pig.class));
     assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
 
-    for (SyncBeanDef<?> bean : beans) {
+    for (final SyncBeanDef<?> bean : beans) {
       assertEquals("animal", bean.getName());
     }
   }
 
   public void testNameAvailableThroughInterfaceLookup() {
-    Collection<SyncBeanDef<CreditCard>> beans = IOC.getBeanManager().lookupBeans(CreditCard.class);
-    for (SyncBeanDef<CreditCard> bean : beans) {
+    final Collection<SyncBeanDef<CreditCard>> beans = IOC.getBeanManager().lookupBeans(CreditCard.class);
+    for (final SyncBeanDef<CreditCard> bean : beans) {
       if (bean.getBeanClass().getName().endsWith("Visa")) {
         assertEquals("visa", bean.getName());
       }
@@ -348,8 +348,8 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testNameAvailableThroughConcreteTypeLookup() {
-    Collection<SyncBeanDef<Visa>> beans = IOC.getBeanManager().lookupBeans(Visa.class);
-    for (SyncBeanDef<Visa> bean : beans) {
+    final Collection<SyncBeanDef<Visa>> beans = IOC.getBeanManager().lookupBeans(Visa.class);
+    for (final SyncBeanDef<Visa> bean : beans) {
       assertNotNull("Missing name on " + bean, bean.getName());
     }
   }
@@ -363,7 +363,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   public void testLookupAllBeansQualified() {
     final Collection<SyncBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class, QUAL_A);
 
-    assertEquals(1, beans.size());
+    assertEquals("Expected one bean but found multiple: " + beans.toString(), 1, beans.size());
     assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
   }
 
@@ -387,7 +387,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
     IOC.getBeanManager().addDestructionCallback(dependentScopedBean, new DestructionCallback<Object>() {
       @Override
-      public void destroy(Object bean) {
+      public void destroy(final Object bean) {
         testValueHolder.destroyed = true;
       }
     });
@@ -458,7 +458,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
 
       @Override
-      public boolean matches(Set<Annotation> annotations) {
+      public boolean matches(final Set<Annotation> annotations) {
         return true;
       }
 
@@ -473,7 +473,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
 
       @Override
-      public boolean isAssignableTo(Class<?> type) {
+      public boolean isAssignableTo(final Class<?> type) {
         return Arrays.asList(Object.class, DisabledAlternativeBean.class).contains(type);
       }
     });
@@ -507,7 +507,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
 
       @Override
-      public boolean matches(Set<Annotation> annotations) {
+      public boolean matches(final Set<Annotation> annotations) {
         return true;
       }
 
@@ -532,7 +532,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
 
       @Override
-      public boolean isAssignableTo(Class<?> type) {
+      public boolean isAssignableTo(final Class<?> type) {
         return Arrays.asList(Object.class, InterfaceWithNamedImpls.class).contains(type);
       }
     });

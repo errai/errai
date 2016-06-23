@@ -51,10 +51,7 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
@@ -124,8 +121,8 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   }
 
   @Override
-  protected List<Statement> generateInvokePostConstructsStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-          Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
+  protected List<Statement> generateInvokePostConstructsStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
     final List<Statement> stmts = new ArrayList<Statement>();
     final Queue<MetaMethod> postConstructMethods = gatherPostConstructs(injectable);
     for (final MetaMethod postConstruct : postConstructMethods) {
@@ -325,19 +322,10 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
       final ContextualStatementBuilder injectedValue;
       if (depInjectable.isContextual()) {
-        final Injectable providerInjectable = getProviderInjectable(depInjectable);
-        final MetaClass providerType = providerInjectable.getInjectedType();
-        if (providerType.isAssignableTo(ContextualTypeProvider.class)) {
-          final MetaClass[] typeArgsClasses = getTypeArguments(field.getType());
-          final Annotation[] qualifiers = getQualifiers(field).toArray(new Annotation[0]);
-          injectedValue = castTo(providerType,
-                  loadVariable("contextManager").invoke("getInstance",
-                          loadLiteral(providerInjectable.getFactoryName()))).invoke("provide", typeArgsClasses,
-                                  qualifiers);
-        } else {
-          throw new RuntimeException("Unrecognized contextual provider type " + providerType.getFullyQualifiedName()
-                  + " for dependency in " + field.getDeclaringClassName());
-        }
+        final MetaClass[] typeArgsClasses = getTypeArguments(field.getType());
+        final Annotation[] qualifiers = getQualifiers(field).toArray(new Annotation[0]);
+        injectedValue = castTo(depInjectable.getInjectedType(),
+                loadVariable("contextManager").invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
       } else {
         injectedValue = castTo(depInjectable.getInjectedType(),
                 loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
@@ -361,26 +349,8 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
     }
   }
 
-  private MetaClass[] getTypeArguments(final MetaClass type) {
-    final MetaParameterizedType pType = type.getParameterizedType();
-    final MetaType[] typeArgs = (pType != null ? pType.getTypeParameters() : new MetaType[0]);
-    final MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
-
-    for (int i = 0; i < typeArgs.length; i++) {
-      final MetaType argType = typeArgs[i];
-
-      if (argType instanceof MetaClass) {
-        typeArgsClasses[i] = (MetaClass) argType;
-      }
-      else if (argType instanceof MetaParameterizedType) {
-        typeArgsClasses[i] = (MetaClass) ((MetaParameterizedType) argType).getRawType();
-      }
-    }
-    return typeArgsClasses;
-  }
-
-  private void injectSetterMethodDependencies(Injectable injectable, Collection<Dependency> setterDependencies,
-          List<Statement> createInstanceStatements, ClassStructureBuilder<?> bodyBlockBuilder) {
+  private void injectSetterMethodDependencies(final Injectable injectable, final Collection<Dependency> setterDependencies,
+          final List<Statement> createInstanceStatements, final ClassStructureBuilder<?> bodyBlockBuilder) {
     for (final Dependency dep : setterDependencies) {
       final SetterParameterDependency setterDep = SetterParameterDependency.class.cast(dep);
       final MetaMethod setter = setterDep.getMethod();
@@ -388,19 +358,10 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
       final ContextualStatementBuilder injectedValue;
       if (depInjectable.isContextual()) {
-        final Injectable providerInjectable = getProviderInjectable(depInjectable);
-        final MetaClass providerType = providerInjectable.getInjectedType();
-        if (providerType.isAssignableTo(ContextualTypeProvider.class)) {
-          final MetaClass[] typeArgsClasses = getTypeArguments(setter.getParameters()[0].getType());
-          final Annotation[] qualifiers = getQualifiers(setter).toArray(new Annotation[0]);
-          injectedValue = castTo(providerType,
-                  loadVariable("contextManager").invoke("getInstance",
-                          loadLiteral(providerInjectable.getFactoryName()))).invoke("provide", typeArgsClasses,
-                                  qualifiers);
-        } else {
-          throw new RuntimeException("Unrecognized contextual provider type " + providerType.getFullyQualifiedName()
-                  + " for dependency in " + setter.getDeclaringClassName());
-        }
+        final MetaClass[] typeArgsClasses = getTypeArguments(setter.getParameters()[0].getType());
+        final Annotation[] qualifiers = getQualifiers(setter).toArray(new Annotation[0]);
+        injectedValue = castTo(depInjectable.getInjectedType(), loadVariable("contextManager")
+                .invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
       } else {
         injectedValue = castTo(depInjectable.getInjectedType(), loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
       }
@@ -479,44 +440,15 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   private ContextualStatementBuilder getInjectedValue(final Injectable depInjectable, final ParamDependency paramDep) {
     final ContextualStatementBuilder injectedValue;
     if (depInjectable.isContextual()) {
-      injectedValue = invokeContextualProvider(depInjectable, paramDep);
+    final MetaClass[] typeArgsClasses = getTypeArguments(paramDep.getParameter().getType());
+    final Annotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new Annotation[0]);
+      injectedValue = castTo(depInjectable.getInjectedType(),
+              loadVariable("contextManager").invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
     } else {
       injectedValue = castTo(depInjectable.getInjectedType(),
               loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
     }
     return injectedValue;
-  }
-
-  private ContextualStatementBuilder invokeContextualProvider(final Injectable depInjectable, final ParamDependency paramDep) {
-    final Injectable providerInjectable = getProviderInjectable(depInjectable);
-    final MetaClass providerType = providerInjectable.getInjectedType();
-    if (providerType.isAssignableTo(ContextualTypeProvider.class)) {
-      return invokeProviderStmt(paramDep, providerInjectable, providerType);
-    } else {
-      throw new RuntimeException("Unrecognized contextual provider type " + providerType.getFullyQualifiedName()
-              + " for dependency in " + paramDep.getParameter().getDeclaringMember().getDeclaringClassName());
-    }
-  }
-
-  private ContextualStatementBuilder invokeProviderStmt(final ParamDependency paramDep, final Injectable providerInjectable,
-          final MetaClass providerType) {
-    final ContextualStatementBuilder injectedValue;
-    final MetaClass[] typeArgsClasses = getTypeArguments(paramDep.getParameter().getType());
-    final Annotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new Annotation[0]);
-    injectedValue = castTo(providerType,
-            loadVariable("contextManager").invoke("getInstance", loadLiteral(providerInjectable.getFactoryName())))
-                    .invoke("provide", typeArgsClasses, qualifiers);
-    return injectedValue;
-  }
-
-  private Injectable getProviderInjectable(final Injectable depInjectable) {
-    for (final Dependency dep : depInjectable.getDependencies()) {
-      if (dep.getDependencyType().equals(DependencyType.ProducerMember)) {
-        return dep.getInjectable();
-      }
-    }
-
-    throw new RuntimeException();
   }
 
 }

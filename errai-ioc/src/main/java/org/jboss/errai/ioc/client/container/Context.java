@@ -19,7 +19,9 @@ package org.jboss.errai.ioc.client.container;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 
+import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.ScopeContext;
 
 /**
@@ -200,5 +202,14 @@ public interface Context {
    *         {@link Factory} that created this bean instance.
    */
   <P> P getInstanceProperty(Object instance, String propertyName, Class<P> type);
+
+  /**
+   * Some contexts support contextual instances (from a {@link ContextualTypeProvider}).
+   * This method provides access to that aspect of the context, if supported.
+   *
+   * @return An option containing this context if contextual instances are supported,
+   *         or else an empty option.
+   */
+  Optional<HasContextualInstanceSupport> withContextualInstanceSupport();
 
 }

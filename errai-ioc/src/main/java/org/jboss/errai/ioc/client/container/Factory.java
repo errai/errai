@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
+
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Multimaps;
@@ -82,7 +85,17 @@ public abstract class Factory<T> {
    *          For requesting instances from other factories. Never {@code null}.
    * @return A fully wired, unproxied instance of a bean.
    */
-  public abstract T createInstance(ContextManager contextManager);
+  public T createInstance(final ContextManager contextManager) {
+    throw new UnsupportedOperationException("The factory, " + getClass().getSimpleName() + ", only supports contextual instances.");
+  }
+
+  /**
+   * Like {@link #createInstance(ContextManager)} but with contextual paramters for factories backed by a
+   * {@link ContextualTypeProvider}.
+   */
+  public T createContextualInstance(final ContextManager contextManager, final Class<?>[] typeArgs, final Annotation[] qualifiers) {
+    throw new UnsupportedOperationException("The factory, " + getClass().getSimpleName() + ", does not support contextual instances.");
+  }
 
   public abstract void invokePostConstructs(T instance);
 
@@ -138,7 +151,7 @@ public abstract class Factory<T> {
   protected abstract void generatedDestroyInstance(Object instance, ContextManager contextManager);
 
   @SuppressWarnings("unchecked")
-  public static <P> P maybeUnwrapProxy(P instance) {
+  public static <P> P maybeUnwrapProxy(final P instance) {
     if (instance instanceof Proxy) {
       return (P) ((Proxy<P>) instance).unwrap();
     }
@@ -151,7 +164,7 @@ public abstract class Factory<T> {
     return incompleteInstance;
   }
 
-  protected void setIncompleteInstance(T instance) {
+  protected void setIncompleteInstance(final T instance) {
     incompleteInstance = instance;
   }
 

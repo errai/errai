@@ -38,19 +38,21 @@ public class FactoryHandleImpl implements FactoryHandle {
   private final boolean eager;
   private final String beanName;
   private final Class<? extends BeanActivator> activatorType;
+  private final boolean availableByLookup;
 
   public FactoryHandleImpl(final Class<?> actualType, final String factoryName, final Class<? extends Annotation> scope,
-          final boolean eager, final String beanName, final Class<? extends BeanActivator> activatorType) {
+          final boolean eager, final String beanName, final boolean availableByLookup, final Class<? extends BeanActivator> activatorType) {
     this.actualType = actualType;
     this.factoryName = factoryName;
     this.scope = scope;
     this.eager = eager;
     this.beanName = beanName;
     this.activatorType = activatorType;
+    this.availableByLookup = availableByLookup;
   }
 
-  public FactoryHandleImpl(final Class<?> actualType, final String factoryName, final Class<? extends Annotation> scope, final boolean eager, final String beanName) {
-    this(actualType, factoryName, scope, eager, beanName, null);
+  public FactoryHandleImpl(final Class<?> actualType, final String factoryName, final Class<? extends Annotation> scope, final boolean eager, final String beanName, final boolean availableByLookup ) {
+    this(actualType, factoryName, scope, eager, beanName, availableByLookup, null);
   }
 
   @Override
@@ -108,7 +110,7 @@ public class FactoryHandleImpl implements FactoryHandle {
 
   @Override
   public boolean isAvailableByLookup() {
-    return true;
+    return availableByLookup;
   }
 
 }

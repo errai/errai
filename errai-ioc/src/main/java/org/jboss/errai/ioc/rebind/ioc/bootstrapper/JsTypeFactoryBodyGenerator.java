@@ -18,13 +18,13 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.newObject;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.api.ActivatedBy;
@@ -45,8 +45,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
   @Override
-  protected List<Statement> generateCreateInstanceStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-          Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
+  protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
     return Collections.<Statement> singletonList(
             Stmt.castTo(injectable.getInjectedType(), invokeStatic(WindowInjectionContext.class, "createOrGet")
                     .invoke("getBean", injectable.getInjectedType().getFullyQualifiedName())).returnValue());
@@ -63,6 +63,7 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
           injectable.getScope(),
           isEager(injectable.getInjectedType()),
           injectable.getBeanName(),
+          loadLiteral(false),
           loadLiteral(activatorType)
       };
     } else {
@@ -71,17 +72,12 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
           injectable.getFactoryName(),
           injectable.getScope(),
           isEager(injectable.getInjectedType()),
-          injectable.getBeanName()
+          injectable.getBeanName(),
+          loadLiteral(false)
       };
     }
 
-    return ObjectBuilder
-            .newInstanceOf(FactoryHandleImpl.class)
-            .extend(args)
-            .publicOverridesMethod("isAvailableByLookup")
-              .append(loadLiteral(false).returnValue())
-              .finish()
-            .finish();
+    return newObject(FactoryHandleImpl.class, args);
   }
 
 }

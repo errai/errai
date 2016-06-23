@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.errai.common.client.function.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,7 +170,7 @@ public abstract class AbstractContext implements Context {
     return (proxy != null) ? proxy.asBeanType() : instance;
   }
 
-  protected void registerInstance(Object unwrappedInstance, Factory<?> factory) {
+  protected void registerInstance(final Object unwrappedInstance, final Factory<?> factory) {
     factoriesByCreatedInstances.put(unwrappedInstance, factory);
   }
 
@@ -190,7 +191,7 @@ public abstract class AbstractContext implements Context {
   }
 
   @Override
-  public boolean addDestructionCallback(Object instance, DestructionCallback<?> callback) {
+  public boolean addDestructionCallback(final Object instance, final DestructionCallback<?> callback) {
     final Object unwrapped = maybeUnwrap(instance);
     if (factoriesByCreatedInstances.containsKey(unwrapped)) {
       destructionCallbacksByInstance.put(unwrapped, callback);
@@ -200,7 +201,7 @@ public abstract class AbstractContext implements Context {
     }
   }
 
-  private Object maybeUnwrap(Object instance) {
+  private Object maybeUnwrap(final Object instance) {
     return Factory.maybeUnwrapProxy(instance);
   }
 
@@ -218,6 +219,11 @@ public abstract class AbstractContext implements Context {
 
   protected Collection<Proxy<?>> getExistingProxies() {
     return proxies.values();
+  }
+
+  @Override
+  public Optional<HasContextualInstanceSupport> withContextualInstanceSupport() {
+    return Optional.empty();
   }
 
 }

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 import org.jboss.errai.ioc.client.Container;
@@ -53,6 +54,22 @@ public interface ContextManager {
    *         {@link Context} to which the factory with the given name belongs.
    */
   <T> T getInstance(String factoryName);
+
+  /**
+   * Gets a contextual bean instance by dispatching to the appropriate {@link Context}.
+   *
+   * @param factoryName
+   *          The name of the {@link Factory} that creates the desired bean
+   *          instance.
+   * @param typeArgs
+   *          The type arguments of the injection site.
+   * @param qualifiers
+   *          The qualifiers of the injection site.
+   * @return A bean instance that may or may not be {@link Proxy proxied}. The
+   *         number of unique instances returned by this method depends on the
+   *         {@link Context} to which the factory with the given name belongs.
+   */
+  <T> T getContextualInstance(String factoryName, Class<?>[] typeArgs, Annotation[] qualifiers);
 
   /**
    * Like {@link #getInstance(String)} except that the returned instance is

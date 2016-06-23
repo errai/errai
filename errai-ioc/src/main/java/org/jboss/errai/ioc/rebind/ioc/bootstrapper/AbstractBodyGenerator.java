@@ -67,6 +67,8 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.QualifierUtil;
@@ -139,7 +141,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
             .body();
     if (proxyImpl == null) {
       // Type is not proxiable
-      createProxyBody._(loadLiteral(null).returnValue()).finish();
+      createProxyBody.append(loadLiteral(null).returnValue()).finish();
     }
     else {
       final Object proxyInstanceStmt;
@@ -150,8 +152,8 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
                 .privateMethod(parameterizedAs(Proxy.class, typeParametersOf(injectable.getInjectedType())),
                         "createProxyWithErrorMessage")
                 .body()
-                ._(try_()._(load(newObject(proxyImpl)).returnValue()).finish()
-                        .catch_(Throwable.class, "t")._(throw_(RuntimeException.class,
+                .append(try_().append(load(newObject(proxyImpl)).returnValue()).finish()
+                        .catch_(Throwable.class, "t").append(throw_(RuntimeException.class,
                                 loadLiteral(injectableConstructorErrorMessage(injectable)), loadVariable("t")))
                         .finish())
                 .finish();
@@ -159,11 +161,11 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
       }
 
       createProxyBody
-              ._(declareFinalVariable("proxyImpl",
+              .append(declareFinalVariable("proxyImpl",
                       parameterizedAs(Proxy.class, typeParametersOf(injectable.getInjectedType())),
                       proxyInstanceStmt))
-              ._(loadVariable("proxyImpl").invoke("setContext", loadVariable("context")))
-              ._(loadVariable("proxyImpl").returnValue()).finish();
+              .append(loadVariable("proxyImpl").invoke("setContext", loadVariable("context")))
+              .append(loadVariable("proxyImpl").returnValue()).finish();
     }
   }
 
@@ -316,17 +318,17 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
                         .append(proxiedInstanceDeclaration)
                         .appendAll(controller.getInvokeBeforeStatements(method));
         if (method.getReturnType().isVoid()) {
-          ifBlock._(proxyHelperInvocation);
+          ifBlock.append(proxyHelperInvocation);
           ifBlock.appendAll(controller.getInvokeAfterStatements(method));
-          body._(ifBlock.finish().else_()._(nonInitializedCase).finish());
+          body.append(ifBlock.finish().else_().append(nonInitializedCase).finish());
         } else {
-          ifBlock._(declareFinalVariable("retVal", method.getReturnType().getErased(), proxyHelperInvocation));
+          ifBlock.append(declareFinalVariable("retVal", method.getReturnType().getErased(), proxyHelperInvocation));
           ifBlock.appendAll(controller.getInvokeAfterStatements(method));
-          ifBlock._(loadVariable("retVal").returnValue());
+          ifBlock.append(loadVariable("retVal").returnValue());
           if (nonInitializedReturns) {
-            body._(ifBlock.finish().else_()._(nestedCall(nonInitializedCase).returnValue()).finish());
+            body.append(ifBlock.finish().else_().append(nestedCall(nonInitializedCase).returnValue()).finish());
           } else {
-            body._(ifBlock.finish().else_()._(nonInitializedCase).finish());
+            body.append(ifBlock.finish().else_().append(nonInitializedCase).finish());
           }
         }
 
@@ -435,7 +437,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     }
   }
 
-  private Object[] getParametersForInvocation(final MetaMethod method, Object... prependedParams) {
+  private Object[] getParametersForInvocation(final MetaMethod method, final Object... prependedParams) {
     final int paramLength = method.getParameters().length + prependedParams.length;
     final Object[] params = new Object[paramLength];
     for (int i = 0; i < prependedParams.length; i++) {
@@ -472,8 +474,8 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
   private void implementEquals(final ClassStructureBuilder<?> proxyImpl) {
     proxyImpl.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "obj")).body()
-      ._(loadVariable("obj").assignValue(invokeStatic(Factory.class, "maybeUnwrapProxy", loadVariable("obj"))))
-      ._(loadVariable("proxyHelper").invoke("getInstance", loadVariable("this")).invoke("equals", loadVariable("obj")).returnValue())
+      .append(loadVariable("obj").assignValue(invokeStatic(Factory.class, "maybeUnwrapProxy", loadVariable("obj"))))
+      .append(loadVariable("proxyHelper").invoke("getInstance", loadVariable("this")).invoke("equals", loadVariable("obj")).returnValue())
       .finish();
   }
 
@@ -483,49 +485,62 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
     for (final Entry<String, Statement> prop : controller.getProxyProperties()) {
       proxyImpl.privateField(prop.getKey(), prop.getValue().getType()).finish();
-      initBody._(loadVariable(prop.getKey()).assignValue(prop.getValue()));
+      initBody.append(loadVariable(prop.getKey()).assignValue(prop.getValue()));
     }
 
     initBody.finish();
   }
 
-  private void implementUnwrappedInstance(ClassStructureBuilder<?> proxyImpl, Injectable injectable) {
+  private void implementUnwrappedInstance(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
     proxyImpl.publicMethod(Object.class, "unwrap")
              .body()
-             ._(loadVariable("proxyHelper").invoke("getInstance", loadVariable("this")).returnValue())
+             .append(loadVariable("proxyHelper").invoke("getInstance", loadVariable("this")).returnValue())
              .finish();
   }
 
   private void implementSetContext(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
     proxyImpl.publicMethod(void.class, "setContext", finalOf(Context.class, "context"))
              .body()
-             ._(loadVariable("proxyHelper").invoke("setContext", loadVariable("context")))
+             .append(loadVariable("proxyHelper").invoke("setContext", loadVariable("context")))
              .finish();
   }
 
   private void implementClearInstance(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
     proxyImpl.publicMethod(void.class, "clearInstance")
              .body()
-             ._(loadVariable("proxyHelper").invoke("clearInstance"))
+             .append(loadVariable("proxyHelper").invoke("clearInstance"))
              .finish();
   }
 
   private void implementSetInstance(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
     proxyImpl.publicMethod(void.class, "setInstance", finalOf(injectable.getInjectedType(), "instance"))
              .body()
-             ._(loadVariable("proxyHelper").invoke("setInstance", loadVariable("instance")))
+             .append(loadVariable("proxyHelper").invoke("setInstance", loadVariable("instance")))
              .finish();
   }
 
   private void implementAsBeanType(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
     proxyImpl.publicMethod(injectable.getInjectedType(), "asBeanType")
              .body()
-             ._(loadVariable("this").returnValue())
+             .append(loadVariable("this").returnValue())
              .finish();
   }
 
   protected void implementCreateInstance(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable, final List<Statement> createInstanceStatements) {
-    bodyBlockBuilder.publicMethod(injectable.getInjectedType(), "createInstance", finalOf(ContextManager.class, "contextManager"))
+    String createInstanceMethodName;
+    Parameter[] params;
+    if (injectable.isContextual()) {
+      createInstanceMethodName = "createContextualInstance";
+      params = new Parameter[] {
+          finalOf(ContextManager.class, "contextManager"),
+          finalOf(Class[].class, "typeArgs"),
+          finalOf(Annotation[].class, "qualifiers") };
+    }
+    else {
+      createInstanceMethodName = "createInstance";
+      params = new Parameter[] { finalOf(ContextManager.class, "contextManager") };
+    }
+    bodyBlockBuilder.publicMethod(injectable.getInjectedType(), createInstanceMethodName, params)
                     .appendAll(createInstanceStatements)
                     .finish();
   }
@@ -562,7 +577,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
   @Override
   public void generate(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
-          final DependencyGraph graph, InjectionContext injectionContext, final TreeLogger logger,
+          final DependencyGraph graph, final InjectionContext injectionContext, final TreeLogger logger,
           final GeneratorContext context) {
     controller = new FactoryController(injectable.getInjectedType(), injectable.getFactoryName(), bodyBlockBuilder.getClassDefinition());
     preGenerationHook(bodyBlockBuilder, injectable, graph, injectionContext);
@@ -614,8 +629,8 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    * @return A list of statements that will generated in the
    *         {@link Factory#init(Context)} method.
    */
-  protected List<Statement> generateFactoryInitStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-          Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
+  protected List<Statement> generateFactoryInitStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
     return Collections.emptyList();
   }
 
@@ -635,8 +650,8 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    * @return A list of statements that will generated in the
    *         {@link Factory#invokePostConstructs(Object)} method.
    */
-  protected List<Statement> generateInvokePostConstructsStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-          Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
+  protected List<Statement> generateInvokePostConstructsStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
     return Collections.emptyList();
   }
 
@@ -693,14 +708,14 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     final ConstructorBlockBuilder<?> con = bodyBlockBuilder.publicConstructor();
     for (final MetaClass assignableType : getAllAssignableTypes(injectable.getInjectedType())) {
       if (assignableType.isPublic()) {
-        con._(loadVariable("handle").invoke("addAssignableType", loadLiteral(assignableType)));
+        con.append(loadVariable("handle").invoke("addAssignableType", loadLiteral(assignableType)));
       }
     }
     for (final Annotation qual : injectable.getQualifier()) {
-      con._(loadVariable("handle").invoke("addQualifier", annotationLiteral(qual)));
+      con.append(loadVariable("handle").invoke("addQualifier", annotationLiteral(qual)));
     }
     con.finish();
-    bodyBlockBuilder.publicMethod(FactoryHandle.class, "getHandle").body()._(loadVariable("handle").returnValue())
+    bodyBlockBuilder.publicMethod(FactoryHandle.class, "getHandle").body().append(loadVariable("handle").returnValue())
             .finish();
   }
 
@@ -710,11 +725,11 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
       final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().getAnnotation(ActivatedBy.class).value();
       newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
               injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
-              injectable.getBeanName(), loadLiteral(activatorType));
+              injectable.getBeanName(), !injectable.isContextual(), loadLiteral(activatorType));
     } else {
       newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
               injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
-              injectable.getBeanName());
+              injectable.getBeanName(), !injectable.isContextual());
     }
     return newObject;
   }
@@ -754,6 +769,24 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     }
 
     return annos;
+  }
+
+  protected MetaClass[] getTypeArguments(final MetaClass type) {
+    final MetaParameterizedType pType = type.getParameterizedType();
+    final MetaType[] typeArgs = (pType != null ? pType.getTypeParameters() : new MetaType[0]);
+    final MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
+
+    for (int i = 0; i < typeArgs.length; i++) {
+      final MetaType argType = typeArgs[i];
+
+      if (argType instanceof MetaClass) {
+        typeArgsClasses[i] = (MetaClass) argType;
+      }
+      else if (argType instanceof MetaParameterizedType) {
+        typeArgsClasses[i] = (MetaClass) ((MetaParameterizedType) argType).getRawType();
+      }
+    }
+    return typeArgsClasses;
   }
 
   protected static Collection<MetaClass> getAllAssignableTypes(final MetaClass injectedType) {

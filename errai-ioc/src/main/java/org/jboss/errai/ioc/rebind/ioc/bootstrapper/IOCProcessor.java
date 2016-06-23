@@ -296,7 +296,7 @@ public class IOCProcessor {
   }
 
   @SuppressWarnings("unchecked")
-  private void declareStaticLogger(IOCProcessingContext processingContext) {
+  private void declareStaticLogger(final IOCProcessingContext processingContext) {
     processingContext.getBootstrapBuilder()
       .privateField("logger", Logger.class)
       .modifiers(Modifier.Static, Modifier.Final)
@@ -338,7 +338,7 @@ public class IOCProcessor {
         }
         curMethod = processingContext.getBootstrapBuilder().privateMethod(void.class, "registerFactories" + methodNumber, contextParamsDeclaration).body();
       }
-      maybeDeclareAndProcessInjectable(processingContext, scopeContexts, curMethod, injectable);
+      declareAndProcessInjectable(processingContext, scopeContexts, curMethod, injectable);
       registeredInThisMethod++;
     }
     if (curMethod != null) {
@@ -347,16 +347,14 @@ public class IOCProcessor {
     }
   }
 
-  private void maybeDeclareAndProcessInjectable(final IOCProcessingContext processingContext,
+  private void declareAndProcessInjectable(final IOCProcessingContext processingContext,
           final Map<Class<? extends Annotation>, MetaClass> scopeContexts,
-          @SuppressWarnings("rawtypes") BlockBuilder curMethod, final Injectable injectable) {
-    if (!injectable.isContextual()) {
-      if (injectionContext.isAsync() && injectable.loadAsync()) {
-        final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
-        registerAsyncFactory(injectable, processingContext, curMethod, factoryClass);
-      } else {
-        declareAndRegisterConcreteInjectable(injectable, processingContext, scopeContexts, curMethod);
-      }
+          @SuppressWarnings("rawtypes") final BlockBuilder curMethod, final Injectable injectable) {
+    if (injectionContext.isAsync() && injectable.loadAsync()) {
+      final MetaClass factoryClass = addFactoryDeclaration(injectable, processingContext);
+      registerAsyncFactory(injectable, processingContext, curMethod, factoryClass);
+    } else {
+      declareAndRegisterConcreteInjectable(injectable, processingContext, scopeContexts, curMethod);
     }
   }
 
@@ -404,7 +402,8 @@ public class IOCProcessor {
                                          loadLiteral(injectable.getFactoryName()),
                                          loadLiteral(injectable.getScope()),
                                          loadLiteral(false),
-                                         loadLiteral(injectable.getBeanName()))));
+                                         loadLiteral(injectable.getBeanName()),
+                                         loadLiteral(!injectable.isContextual()))));
     for (final MetaClass assignable : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
       curMethod.append(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable)));
     }
@@ -449,7 +448,7 @@ public class IOCProcessor {
     }
   }
 
-  private Statement createJsTypeProviderFor(Injectable injectable) {
+  private Statement createJsTypeProviderFor(final Injectable injectable) {
     final MetaClass type = injectable.getInjectedType();
     final AnonymousClassStructureBuilder jsTypeProvider = newInstanceOf(parameterizedAs(JsTypeProvider.class, typeParametersOf(type))).extend();
     jsTypeProvider
@@ -674,7 +673,7 @@ public class IOCProcessor {
     processProducerFields(typeInjectable, producerType, builder, disposesMethods, enabled);
   }
 
-  private boolean isTopLevel(MetaClass type) {
+  private boolean isTopLevel(final MetaClass type) {
     boolean isTopLevel;
     // Workaround for http://bugs.java.com/view_bug.do?bug_id=2210448
     try {
@@ -1049,7 +1048,7 @@ public class IOCProcessor {
     addMethodInjectionPoints(typeInjectable, builder, problems);
   }
 
-  private void addMethodInjectionPoints(Injectable typeInjectable, DependencyGraphBuilder builder, final List<String> problems) {
+  private void addMethodInjectionPoints(final Injectable typeInjectable, final DependencyGraphBuilder builder, final List<String> problems) {
     final MetaClass type = typeInjectable.getInjectedType();
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> inject : injectAnnotations) {

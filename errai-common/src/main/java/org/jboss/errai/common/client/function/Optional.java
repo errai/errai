@@ -68,6 +68,15 @@ public class Optional<T> {
     return (value != null ? value : orElse.get());
   }
 
+  public T orElseThrow(final Supplier<RuntimeException> orElse) {
+    if (value == null) {
+      throw orElse.get();
+    }
+    else {
+      return value;
+    }
+  }
+
   public void ifPresent(final Consumer<T> f) {
     if (value != null) {
       f.accept(value);

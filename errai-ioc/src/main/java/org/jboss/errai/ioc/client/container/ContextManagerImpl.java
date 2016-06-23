@@ -47,6 +47,14 @@ public class ContextManagerImpl implements ContextManager {
     return getContext(factoryName).getInstance(factoryName);
   }
 
+  @Override
+  public <T> T getContextualInstance(final String factoryName, final Class<?>[] typeArgs, final Annotation[] qualifiers) {
+    return getContext(factoryName)
+            .withContextualInstanceSupport()
+            .orElseThrow(() -> new RuntimeException("The scope, " + getClass().getSimpleName() + ", does not support contextual instances."))
+            .getContextualInstance(factoryName, typeArgs, qualifiers);
+  }
+
   private Context getContext(final String factoryName) {
     final Context context = contextsByFactoryName.get(factoryName);
     if (context == null) {
@@ -103,7 +111,7 @@ public class ContextManagerImpl implements ContextManager {
   }
 
   @Override
-  public boolean addDestructionCallback(Object instance, DestructionCallback<?> callback) {
+  public boolean addDestructionCallback(final Object instance, final DestructionCallback<?> callback) {
     boolean success = false;
     for (final Context context : contexts) {
       success = success || context.addDestructionCallback(instance, callback);

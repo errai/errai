@@ -28,7 +28,6 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
@@ -199,6 +198,9 @@ public class FactoryGenerator extends IncrementalGenerator {
     case Producer:
       generator = new ProducerFactoryBodyGenerator();
       break;
+    case ContextualProvider:
+      generator = new ContextualFactoryBodyGenerator();
+      break;
     case ExtensionProvided:
       if (!(injectable instanceof CustomFactoryInjectable)) {
         throw new RuntimeException(String.format("The injectable, %s, for %s is extension provided but is not a %s",
@@ -207,8 +209,6 @@ public class FactoryGenerator extends IncrementalGenerator {
 
       generator = ((CustomFactoryInjectable) injectable).getGenerator();
       break;
-    case ContextualProvider:
-      throw new RuntimeException("Types provided by a " + ContextualTypeProvider.class.getSimpleName() + " should not have factories generated.");
     default:
       throw new RuntimeException(factoryType + " not yet implemented!");
     }

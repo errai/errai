@@ -22,7 +22,6 @@ import java.util.Collection;
 import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.SharedSingleton;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
@@ -101,7 +100,7 @@ public enum ResolutionPriority {
   Extension {
     private final Collection<InjectableType> extensionTypes = Arrays.asList(InjectableType.Extension, InjectableType.ExtensionProvided);
     @Override
-    public boolean matches(Injectable injectable) {
+    public boolean matches(final Injectable injectable) {
       return extensionTypes.contains(injectable.getInjectableType());
     }
   },
