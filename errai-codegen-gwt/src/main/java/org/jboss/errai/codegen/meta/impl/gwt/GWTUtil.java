@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import com.google.gwt.core.ext.typeinfo.JArrayType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.JWildcardType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
@@ -33,13 +34,13 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  */
 public class GWTUtil {
 
-  public static MetaTypeVariable[] fromTypeVariable(final TypeOracle oracle, 
+  public static MetaTypeVariable[] fromTypeVariable(final TypeOracle oracle,
           final JTypeParameter[] typeParameters) {
-    
+
     return Arrays.stream(typeParameters).map(p -> new GWTTypeVariable(oracle, p)).toArray(s -> new MetaTypeVariable[s]);
   }
 
-  public static MetaType[] fromTypeArray(final TypeOracle oracle, final JType[] types) {        
+  public static MetaType[] fromTypeArray(final TypeOracle oracle, final JType[] types) {
     return Arrays.stream(types).map(t -> fromType(oracle, t)).toArray(s -> new MetaType[s]);
   }
 
@@ -66,11 +67,18 @@ public class GWTUtil {
         return MetaClassFactory.get(Object.class);
       }
     }
+
     if (t.isTypeParameter() != null) {
       final JTypeParameter tp = t.isTypeParameter();
       return MetaClassFactory.get(tp.getErasedType().getQualifiedBinaryName());
     }
-    return GWTClass.newInstance(oracle, t);
+    else if (t.isWildcard() != null) {
+      final JWildcardType wildcard = t.isWildcard();
+      return MetaClassFactory.get(wildcard.getBaseType().getQualifiedBinaryName());
+    }
+    else {
+      return GWTClass.newInstance(oracle, t);
+    }
   }
 
   public static MetaType fromType(final TypeOracle oracle, final JType t) {
