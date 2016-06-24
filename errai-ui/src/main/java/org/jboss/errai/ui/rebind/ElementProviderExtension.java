@@ -41,6 +41,7 @@ import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.common.client.api.annotations.Element;
 import org.jboss.errai.common.client.api.annotations.Properties;
 import org.jboss.errai.common.client.api.annotations.Property;
@@ -226,6 +227,21 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
         @Override
         public String value() {
           return tagName;
+        }
+
+        @Override
+        public int hashCode() {
+          return CDIAnnotationUtils.hashCode(this);
+        }
+
+        @Override
+        public String toString() {
+          return CDIAnnotationUtils.toString(this);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+          return obj instanceof Named && CDIAnnotationUtils.equals(this, (Annotation) obj);
         }
       };
 
