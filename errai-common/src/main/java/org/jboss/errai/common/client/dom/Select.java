@@ -62,6 +62,7 @@ public interface Select extends HTMLElement {
   @JsProperty void setTabIndex(int tabIndex);
 
   void add(HTMLElement element, HTMLElement before);
+  void add(HTMLElement element);
   void remove(int index);
   @Override
   void blur();
