@@ -5398,7 +5398,7 @@ One of the primary complaints of GWT to date has been that it is difficult to us
 
 === Get started
 
-The Errai UI module is directly integrated with <<sid-51282340, Data Binding>> and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using <<sid-19398999,Errai CDI's @Inject>> to instantiate your widgets:
+The Errai UI module is directly integrated with <<sid-51282340, Data Binding>> and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using <<sid-19398999,Errai CDI's @Inject>> to instantiate your components:
 
 [TIP]
 .Plugin Tip
@@ -5414,72 +5414,51 @@ Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon
 Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add Errai UI to your project. If you work better by playing with a finished product, you can see a simple client-server project link:$$https://github.com/errai/summit-demo-2013$$[implemented using Errai UI here].
 ====
 
-[[sid-51806600_ErraiUI-UseErraiUICompositecomponents]]
-
-=== Use Errai UI Components
-
-There are two kinds of UI components you can build with Errai UI: composite components and non-composite components. Composite components extends the [code]+com.google.gwt.user.client.ui.Composite+ class, making the components widgets. Non-composite components do not require extending any base class and can be used without widgets.
-
-==== Composite Components
-
 [WARNING]
 .Widget-based Components
 ====
-Since Errai 4.0, there is no longer a required base class for Errai UI components. In fact, extending [code]+Composite+ is deprecated.
+Since Errai 4.0, Errai UI components are no longer required to extend [code]+Composite+. In fact, extending [code]+Composite+ is deprecated.
+Though components can still be built with and as widgets, we encourage users to build components using purely native HTML elements.
 ====
 
-Composite components behave no differently from any other GWT Widget once built. The primary difference is in A) their construction, and B) their instantiation. As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI, you should always [code]+@Inject+ references to your Composite components.
+=== Use Errai UI Components
 
-[[sid-51806600_ErraiUI-Injectasingleinstance]]
+==== Parts of an Errai UI component
+An Errai UI component consists of a Java class (the _templated bean_), an HTML file (the _template_), and an optional CSS file (the _template stylesheet_).
+The template and template stylesheet describe the look of your component. The templated bean uses the `@org.jboss.errai.ui.shared.api.annotations.DataField` annotation
+to declare mappings between fields in the templated bean and elements in the template.
 
-==== Inject a single composite component instance
+==== Using a single component instance
+As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI,
+you should always [code]+@Inject+ references to your Composite components.
 
-In this example we inject a single composite component and add it to the [code]+RootPanel+.
+In this example we use a single Errai UI component by injecting it and adding it to the DOM.
 
 [source, java]
 ----
 @EntryPoint
 public class Application {
+   /*
+    * This type (org.jboss.errai.common.client.dom.Document) is a thin wrapper
+    * around the DOM document provided by Errai. More on this later.
+    */
    @Inject
-   private ColorComponent comp;
+   private Document document;
+
+   @Inject
+   private TemplatedBean component;
 
    @PostConstruct
    public void init() {
-      comp.setColor("blue");
-      RootPanel.get().add(comp);
+     documnet.getBody().appendChild(component.getElement());
    }
 }
 ----
 
-==== Inject a single non-composite component instance
+==== Using multiple instances (for iteration)
 
-In this example we inject a single non-composite component and add it to the DOM.
-
-[source, java]
-----
-@EntryPoint
-public class Application {
-   @Inject
-   private NonComposite comp;
-
-   @PostConstruct
-   public void init() {
-     Document.get().getBody().appendChild(comp.getRootElement());
-   }
-}
-----
-
-[NOTE]
-.Manually attaching non-composite components
-====
-In order to manually attach a non-composite component to the DOM it is necessary access the root element of the template. How this is done will be demonstrated later on when we discuss using [code]+@DataFields+.
-====
-
-[[sid-51806600_ErraiUI-Injectmultipleinstances%28foriteration%29]]
-
-==== Inject multiple instances (for iteration)
-
-Here we create and add many composite components to the [code]+RootPanel+ using an injected [code]+Instance+.
+In some cases you may need to display multiple instances of a component.
+Here we create and add many components to the DOM using an injected [code]+org.jboss.errai.ioc.client.api.ManagedInstance<T>+.
 
 [source, java]
 ----
@@ -5488,54 +5467,52 @@ public class Application {
    private String[] colors = new String[]{"Blue", "Yellow", "Red"};
 
    @Inject
-   private Instance<ColorComponent> instance;
+   private ManagedInstance<ColorComponent> provider;
+
+   @Inject
+   private Document document;
 
    @PostConstruct
    public void init() {
       for(String color: colors) {
-        ColorComponent comp = instance.get();
-        comp.setColor(c);
-        RootPanel.get().add();
+        // ColorComponent should be @Dependent
+        // so that this produces a new instance each time.
+        ColorComponent component = provider.get();
+        component.setColor(c);
+        document.getBody().appendChild(component.getElement());
       }
    }
 }
 ----
 
-[[sid-51806600_ErraiUI-Createa@TemplatedCompositecomponent]]
+=== Creating your own component
 
-=== Create a @Templated Component
+As previously mentioned, components in Errai UI consist of a Java class (the _templated bean_), an HTML file (the _template_),
+and an optional CSS file (the _template stylesheet_). A Java class is a templated bean if the type is annotated with +@Templated+.
 
-Custom components in Errai UI are single classes extending from [code]+com.google.gwt.user.client.ui.Composite+, and must be annotated with @Templated.
+==== Basic templated bean
 
-[[sid-51806600_ErraiUI-Basiccomponent]]
+Here is a basic templated bean with no Java fields mapped to UI elements.
 
-==== Basic component
+* LoginForm.java
 
-Here is a basic composite component.
-
-[source, java]
-----
-@Templated
-public class LoginFormWidget extends Composite {
-   /* looks for LoginForm.html in LoginForm's package */
-}
-----
-
-Here is the same component again as a non-composite.
++
 
 [source, java]
 ----
 @Templated
 public class LoginForm {
-   /* looks for LoginForm.html in LoginForm's package */
 }
 ----
 
-[[sid-51806600_ErraiUI-Customtemplatenames]]
+Annotating the type with +@Templated+ and no argument declares that this bean should have a template file +LoginForm.html+
+and optionally a stylesheet +LoginForm.css+ in the same package as +LoginForm.java+.
 
 ==== Custom template names
 
-With default values, @Templated informs Errai UI to look in the current package for a parallel [code]+".html"+ template next to the Composite component Class; however, the template name may be overridden by passing a String into the @Templated annotation, like so:
+When no argument is provided to +@Templated+, Errai UI looks in the current package for a template file having
+the simple class name of the templated bean, suffixed with +.html+.
+But +@Templated+ accepts an argument to define an alternatively named or located template, as in the proceeding example.
 
 
 [source, java]
@@ -5599,10 +5576,10 @@ public class MyTemplateProvider implements TemplateProvider {
 
 === Create an HTML template
 
-Templates in Errai UI may be designed either as an HTML snippet or as a full HTML document. You can even take an existing HTML page and use it as a template. With either approach, the [code]+id+, [code]+class+, and [code]+data-field+ attributes in the template identify elements by name. These elements and their children are used in the component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.
+Templates in Errai UI may be designed either as an HTML snippet or as a full HTML document. You can even take an existing HTML page and use it as a template. With either approach, the [code]+id+, [code]+class+, and [code]+data-field+ attributes in the template identify elements by name. These elements and their children are used in the component to add behavior, and use additional components to add functionality to the template. There is no limit to how many templated beans may share a given HTML template.
 
-We will begin by creating a simple HTML login form to accompany our [code]+@Templated LoginForm+ component.
-
+==== Using an HTML fragment as a template
+Here is a simple HTML fragment for a login form to accompany our [code]+@Templated LoginForm+ bean.
 
 [source, xml]
 ----
@@ -5620,12 +5597,14 @@ We will begin by creating a simple HTML login form to accompany our [code]+@Temp
 </form>
 ----
 
-[[sid-51806600_ErraiUI-SelectatemplatefromalargerHTMLfile]]
+This fragment can be used with our previous +@Templated LoginForm+ declaration as is.
 
-==== Select a template from a larger HTML file
+==== Select a fragment from a larger HTML template
+You can also use a full HTML document that is more easily previewed during design. When doing this you must specify the location of the component's root DOM Element within the template file using a [code]+"data-field"+, [code]+id+, or [code]+class+ attribute matching the value of the @Templated annotation. There is no limit to how many templated beans may share a single HTML template.
 
-Or as a full HTML document which may be more easily previewed during design without running the application; however, in this case we must also specify the location of our component's root DOM Element using a [code]+"data-field"+, [code]+id+, or [code]+class+ attribute matching the value of the @Templated annotation. There is no limit to how many component classes may share a given HTML template.
+* LoginForm.java
 
++
 
 [source, java]
 ----
@@ -5635,19 +5614,20 @@ public class LoginForm {
 }
 ----
 
-Notice the corresponding HTML [code]+id+ attribute in the form Element below (we could have used [code]+data-field+ or [code]+class+ instead). Note that multiple components may use the same template provided that they specify a corresponding [code]+data-field+, [code]+id+, or [code]+class+ attribute. Also note that two or more components may share the same DOM elements; there is no conflict since components each receive a unique copy of the template DOM rooted at the designated element at runtime (or from the root element if a fragment is not specified.)
+* my-template.html
 
++
 
 [source, xml]
 ----
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>A full HTML snippet</title>
+    <title>A full HTML document</title>
 </head>
 <body>
     <div>
-        <form id="login-form">
+        <form id="login-form"> # <1>
           <legend>Log in to your account</legend>
 
           <label for="username">Username</label>
@@ -5669,7 +5649,18 @@ Notice the corresponding HTML [code]+id+ attribute in the form Element below (we
 </html>
 ----
 
-For example's sake, the component below could also use the same template. All it needs to do is reference the template name, and specify a fragment.
++
+
+<1> The HTML [code]+id+ value of this form Element matches the +#login-from+ part from the +@Templated("my-template.html#login-from")+ declaration.
+That means that this element will be used as the root of the component defined by +LoginForm.java+. Note that we could also have used
++class="login-form"+ or +data-field="login-form"+ to the same effect.
+
+Multiple components may use the same template, specifying any elements as a their root elements.
+In particular, note that two or more components may declare the same DOM element of this template file as their root elements;
+there is no conflict because are each components instantiated with a unique copy of the template DOM rooted at the specified element at runtime
+(or from the root element if a fragment is not specified.)
+
+For example, the component below also uses the same template file by referencing the template name, and specifying a fragment.
 
 
 [source, java]
@@ -5680,17 +5671,25 @@ public class Footer {
 }
 ----
 
-[[sid-51806600_ErraiUI-UseotherWidgetsinacompositecomponent]]
+=== Adding behaviour to your components
 
-=== Use other Widgets in a component
+Now that we know how to create a +@Templated+ bean and an HTML template, we can start wiring in functionality and behavior;
+this is done by annotating fields and methods to replace specific sub-elements of the template DOM.
+We can even replace portions of the template with other Errai UI components!
 
-Now that we have created the @Templated component and an HTML template, we can start wiring in functionality and behavior; this is done by annotating fields and methods to replace specific sub-elements of the template DOM with other Widgets. We can even replace portions of the template with other Errai UI components!
+==== Annotate Elements in the template with @DataField
 
-[[sid-51806600_ErraiUI-AnnotateWidgetsinthetemplatewith@DataField]]
+In order to substitute elements into the template DOM you must annotate fields in your templated bean with +@DataField+
+and mark the HTML template element with a correspondingly named [code]+data-field+, [code]+id+, or [code]+class+ attribute.
+All replacements happen while the component is being constructed; thus, fields annotated with +@DataField+ must either be [code]++@Inject++ed
+or manually initialized when the templated bean is instantiated.
 
-==== Annotate Widgets or Elements in the template with @DataField
-
-In order to composite widgets or elements into the template DOM, you annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a correspondingly named [code]+data-field+, [code]+id+, or [code]+class+ attribute. This informs Errai UI which element in the template the widget or element should replace. All replacements happen while the @Templated Composite component is being constructed; thus, fields annotated with @DataField must either be [code]++@Inject++ed or provide their own Widget or Element instances in field initializers.
+[NOTE]
+.Uses DOM wrappers from Errai Common
+====
+The +@DataField+ types used in this example are thin HTML wrappers found in the +org.jboss.errai.common.client.dom+ package of errai-common.
+It is still possible to use widgets in a +@DataField+ but this approach is not recommended.
+====
 
 
 [source, java]
@@ -5704,49 +5703,48 @@ public class LoginForm {
    // This is the root element of the template, for adding this component to the DOM.
    @Inject
    @DataField
-   private FormElement form;
+   private Form form;
 
    // If not otherwise specified, the name to match in the HTML template defaults
    // to the name of the field; in this case, the name would be "username"
    @Inject
    @DataField
-   private TextBox username;
+   private TextInput username;
 
    // The name to reference in the template can also be specified manually
    @Inject
    @DataField("pass")
-   private PasswordTextBox password;
+   private PasswordInput password;
 
-   // We can also choose to instantiate our own Widgets. Injection is not required.
+   // We can also choose to instantiate our own data fields. Injection is not required.
    @DataField
-   private Button submit = new Button();
+   private Button submit = (Button) Window.getDocument().createElement("button");
 }
 ----
 
-[IMPORTANT]
+[NOTE]
 ====
-Note: Field, method, and constructor injection are all supported by @DataField.
+Field, method, and constructor injection are all supported by @DataField.
 ====
 
 ==== Allowed DataField types
 
-The previous [code]+LoginForm+ example uses [code]+Widgets+ and a DOM element from gwt-user, but there are other types that can be used as [code]+@DataFields+. Here is a full list:
+The previous [code]+LoginForm+ example uses HTML wrapper elements from Errai Common, but there are other types that can be used as [code]+@DataFields+.
+Here is a full list:
 
-. Any [code]+com.google.gwt.user.client.ui.Widget+ type.
+. Any native [code]+@JsType+ that is a wrapper for a DOM element (including those provided in errai-common).
+
+. Any Errai UI component.
 
 . Any [code]+com.google.gwt.dom.client.Element+ type.
 
-. Any Errai UI component (composite or non-composite).
-
-. Any element interfaces from gwt-elemental.
-
-. Any native [code]+JsType+ that is a wrapper for a DOM element (including those provided in errai-common).
-
 . Any type implementing [code]+org.jboss.errai.common.client.api.IsElement+.
 
-==== Accessing the root element of a non-composite template
+. Any [code]+com.google.gwt.user.client.ui.Widget+ type. (_This approach is no longer recommended!_).
 
-Since non-composite templated beans are not widgets, it is necessary to access their HTMLElement roots when programmatically adding them to the DOM. Errai UI provides two ways of doing this.
+==== Accessing the root element of a component
+
+When programmatically adding components to the DOM, it is necessary to access their HTMLElement roots. Errai UI provides two ways of doing this.
 
 ===== Inject the root element as a DataField
 
@@ -5773,7 +5771,7 @@ This method has the advantage that any valid @DataField type can be used.
 
 ===== Implement org.jboss.errai.ui.client.local.api.IsElement
 
-This interface provides a default implementation of [code]+org.jboss.errai.common.client.api.IsElement+ that works for any @Templated bean. For example:
+This interface provides a default implementation of [code]+org.jboss.errai.common.client.api.IsElement+ that works for any templated bean. For example:
 
 ====== MyBean.html
 [source, html]
@@ -5796,20 +5794,22 @@ public class MyBean implements org.jboss.errai.ui.client.local.api.IsElement {
 ----
 @EntryPoint
 public class Setup {
-  @Inject MyBean bean;
+  @Inject MyBean component;
   @Inject Document doc;
 
   @PostConstruct
   public void attachBean() {
-    doc.getBody().appendChild(bean.getElement());
+    // The default implementation automatically returns
+    // the correct root element.
+    HTMLElement rootElement = component.getElement();
+    doc.getBody().appendChild(rootElement);
   }
 }
 ----
 
 [NOTE]
-.Uses DOM wrappers from Errai Common
 ====
-The `getElement` call in the usage above returns the element as the type [code]+org.jboss.errai.common.client.dom.HTMLElement+.
+The `getElement` call in the usage above returns the element as the [code]+org.jboss.errai.common.client.dom.HTMLElement+ type from errai-common.
 ====
 
 ==== Using JsType element wrappers
@@ -5817,14 +5817,15 @@ The `getElement` call in the usage above returns the element as the type [code]+
 [WARNING]
 .Jsinterop ahead
 ====
-This section assumes basic familiarity with jsinterop in GWT 2.8+.
+This section assumes basic familiarity with JS interop in GWT 2.8+.
 ====
 
-Since 4.0, Errai UI supports working with jsinterop wrappers of DOM elements. Additionally, Errai provides a concise way of allowing your custom jsinterop wrappers to be injected into components.
+Since 4.0, Errai UI supports working with JS interop wrappers of DOM elements.
+Additionally, Errai provides a concise way of allowing your custom JS interop wrappers to be injected into components.
 
 ===== LoginForm with a jsinterop element
 
-Let's redo our previous login form, but with a new jsinterop form element as the root. First we need our element wrapper.
+Let's redo our previous login form, but with a new, custom JS interop form element as the root. First we need our element wrapper.
 
 [source, java]
 ----
@@ -5835,38 +5836,42 @@ public interface NativeForm {
 }
 ----
 
-Here we have a defined a jsinterop interface that will be backed by a FormElement javascript object at runtime. The [code]+org.jboss.errai.ui.shared.api.annotation.Element+ annotation tells the Errai DI container to call `document.createElement("form")` in javascript to satisfy injection sites for this type.
+Here we have a defined a JS interop interface that will be backed by a FormElement javascript object at runtime.
+The [code]+org.jboss.errai.ui.shared.api.annotation.Element+ annotation declares this type as injectable with Errai IOC;
+at the container will call `document.createElement("form")` in javascript to satisfy injection sites for this type.
 
 Once you've defined your element wrapper, using it as a [code]+@DataField+ works exactly as in previous examples.
 
 [source, java]
 ----
 /*
-* Like the component from the previous example, but with a native element as its root.
+* Like the component from the previous example, but with a custom element wrapper as its root.
 */
 @Templated("#form")
 public class LoginForm {
-   // Now are root element is a native JsType
+   // Now the root element is our custom JsType
    @Inject
    @DataField
    private NativeForm form;
 
    @Inject
    @DataField
-   private TextBox username;
+   private TextInput username;
 
    @Inject
    @DataField("pass")
-   private PasswordTextBox password;
+   private PasswordInput password;
 
    @DataField
-   private Button submit = new Button();
+   private Button submit = (Button) Window.getDocument().createElement("button");
 }
 ----
 
 ==== Injecting JsTypes and Elements that have multiple tag names
 
-In our previous examples injecting [code]+Elements+ or native [code]+JsTypes+, we did so with types that had a single possible tag name. But consider the heading tags (h1, h2, ..., h6). In gwt-user these are all represented by [code]+HeadingElement+. We might also wish to make our own [code]+JsType+ wrapper that also represents these tags:
+In our previous examples injecting [code]+Elements+ or native [code]+JsTypes+, we did so with types that had a single possible tag name.
+But consider the heading tags (h1, h2, ..., h6). In gwt-user and errai-common these are all represented by [code]+HeadingElement+.
+We might also wish to make our own [code]+@JsType+ wrapper to represent these tags:
 
 [source, java]
 ----
@@ -5877,7 +5882,8 @@ public interface NativeHeading {
 }
 ----
 
-For both [code]+Elements+ and native [code]+JsTypes+ one can use the [code]+javax.inject.Named+ annotation to specify a tag name at a injection site.
+With the above definition, injecting a +NativeHeading+ is ambiguous. Fortunately for both [code]+Elements+ and native [code]+JsTypes+ we can use the
+[code]+javax.inject.Named+ annotation to remove this ambgiuity by specifying a tag name at a injection site.
 
 [source, java]
 ----
@@ -5901,7 +5907,7 @@ public class Component {
 
 ==== Add corresponding attributes to the HTML template
 
-Each @DataField reference in the Java class must match an element in the HTML template. The matching of Java references to HTML elements is performed as follows:
+Each +@DataField+ reference in the Java class must match an element in the HTML template. The matching of Java references to HTML elements is performed as follows:
 
 . A _name_ for the Java reference is determined. If the [code]+@DataField+ annotation has a value argument, that is used as the reference name. For fields, the default reference name is the field name. Method and constructor parameters have no default name, so they must always specify a value.
 
@@ -5931,18 +5937,18 @@ If more than one Java reference matches the same HTML element in the template, i
 [source, java]
 ----
 @Templated
-public class ErroneousTemplate extends Composite {
+public class ErroneousTemplate {
    @Inject @DataField
-   private Label eat;
+   private Div eat;
 
    @Inject @DataField
-   private Label drink;
+   private Div drink;
 }
 ----
 
 because both fields [code]+eat+ and [code]+drink+ refer to the same HTML [code]+div+ element.
 
-So now we must ensure there are [code]+data-field+, [code]+id+, or [code]+class+ attributes in the right places in our template HTML file. This, combined with the @DataField annotation in our Composite component allow Errai UI to determine where and what should be composited when creating component instances.
+So now we must ensure there are [code]+data-field+, [code]+id+, or [code]+class+ attributes in the right places in our template HTML file. This, combined with the @DataField annotation in our component allows Errai UI to determine where and what should be composited when creating component instances.
 
 
 [source, xml]
@@ -5967,45 +5973,39 @@ Now, when we run our application, we will be able to interact with these fields 
 
 === How HTML templates are merged with Components
 
-Three things are merged or modified when Errai UI creates a new Composite component instance:
+Three things are merged or modified when Errai UI creates a new component instance:
 
-. Element attributes are merged from the template to the component
+. Element attributes are merged from the template to the templated bean +@DataFields+
 
+. Template element inner text and inner HTML are preserved when the given [code]+@DataField+ is a [code]+Widget+ that implements [code]+HasText+ or [code]+HasHTML+
+or if it is a DOM element that has no children.
 
-. DOM Elements are merged from the component to the template
+. If (2) is not applicable then child DOM Elements are merged from the templated bean +@DataField+ to the template.
 
-
-. Template element inner text and inner HTML are preserved when the given [code]+@DataField+ is a [code]+Widget+ that implements [code]+HasText+ or [code]+HasHTML+ or if it is a DOM element that has no children.
-
-
-[[sid-51806600_ErraiUI-Example]]
 
 ==== Example
 
-[[sid-51806600_ErraiUI-Compositecomponentclass%3A]]
-
-===== Composite component class:
-
+===== Templated bean:
 
 [source, java]
 ----
 @Templated
-public class StyledComponent extends Composite {
+public class StyledComponent implements IsElement {
    @Inject
    @DataField("field-1")
-   private Label div = new Label();
+   private Div div;
 
    public StyledComponent() {
-      div.getElement().setAttribute("style", "position: fixed; top: 0; left: 0;");
+      CSSStyleDeclaration style = div.getStyle();
+      style.setProperty("position", "fixed");
+      style.setProperty("top", "0");
+      style.setProperty("left", "0");
       this.getElement().setId("outer-id");
    }
 }
 ----
 
-[[sid-51806600_ErraiUI-Template%3A]]
-
 ===== Template:
-
 
 [source, xml]
 ----
@@ -6015,8 +6015,6 @@ public class StyledComponent extends Composite {
 
 This text will be ignored.
 ----
-
-[[sid-51806600_ErraiUI-Output%2Fresult%3A]]
 
 ===== Output / result:
 
@@ -6028,27 +6026,31 @@ This text will be ignored.
 </form>
 ----
 
-But why does the output look the way it does? Some things happened that may be unsettling at first, but we find that once you understand why these things occur, you'll find the mechanisms extremely powerful.
-
-[[sid-51806600_ErraiUI-Elementattributes%28templatewins%29]]
+But why does the output look the way it does? Some things happened that may be unsettling at first,
+but once you understand why these things occur you will find these mechanisms extremely powerful.
 
 ==== Element attributes (template wins)
 
-When styling your templates, you should keep in mind that all attributes defined in the template file will take precedence over any preset attributes in your [code]+@DataFields+. This "attribute merge" occurs only when the components are instantiated; subsequent changes to any attributes after construction will function normally. In the example we defined a Composite component that applied several styles to a child Widget in its constructor, but we can see from the output that the styles from the template have overridden them. If styles must be applied in Java, instead of the template, [code]+@PostConstruct+ or other methods should be favored over constructors to apply styles to fully-constructed components.
+When styling your templates, you should keep in mind that all attributes defined in the template file will take precedence over any preset attributes in your [code]+@DataFields+.
+This "attribute merge" occurs only when the components are instantiated; subsequent changes to any attributes after construction will function normally.
+In the example we defined a component that applied several styles to a child Widget in its constructor, but we can see from the output that the styles from the template have overridden them.
+If styles must be applied in Java instead of in the template, [code]+@PostConstruct+ or other methods should be favored over constructors to apply styles to fully-constructed components.
 
-[[sid-51806600_ErraiUI-DOMElements%28componentfieldwins%29]]
+==== DOM Elements (templated bean field wins)
 
-==== DOM Elements (component field wins)
-
-Element composition, however, functions inversely from attribute merging, and the [code]+<span>+ defined in our template was actually be replaced by the [code]+<div>+ Label in our Composite component field. This does not, however, change the behavior of the attribute merge - the new [code]+<div>+ was still be rendered inline, because we have specified this style in our template, and the template always wins in competition with attributes set programatically before composition occurs. In short, whatever is inside the [code]+@DataField+ in your class will replace the children of the corresponding element in your template.
-
-[[sid-51806600_ErraiUI-InnertextandinnerHTML%28preservedwhencomponentimplementsHasTextorHasHTML%29]]
+Element composition, however, functions inversely from attribute merging, and the [code]+<span>+ defined in our template is actually replaced by the [code]+<div>+
+because of the Div in our component field. This does not, however, change the behavior of the attribute merge - the new [code]+<div>+ was still be rendered inline,
+because we have specified this style in our template, and the template always wins in competition with attributes set programatically before composition occurs.
+It is this rule that allows nesting of Errai UI components, since the markup of an Errai UI component +A+ used as a +@DataField+ in component +B+ will override
+the markup in the +B+ template.
+In short, whatever is inside the [code]+@DataField+ in your class will replace the children of the corresponding element in your template.
 
 ==== Inner text and inner HTML (preserved when component implements HasText or HasHTML)
 
-Additionally, because [code]+Label+ implements both [code]+HasText+ and [code]+HasHTML+ (only one is required,) the contents of this <span> "field-1" Element in the template were preserved; however, this would not have been the case if the [code]+@DataField+ specified for the element did not implement [code]+HasText+ or [code]+HasHTML+. In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a [code]+@DataField+ reference, or ensure that the UI component being composited implements [code]+HasText+ or [code]+HasHTML+ or is a a DOM element with no children.
-
-[[sid-51806600_ErraiUI-Eventhandlers]]
+Additionally, because [code]+Div+ is a thin Element wrapper the contents of the <span> "field-1" Element in the template were preserved;
+however, this would not have been the case if the [code]+@DataField+ specified for the element was not an element wrapper (for example if it was another Errai UI component).
+In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a [code]+@DataField+ reference,
+or ensure that the UI component being composited implements is a a DOM element with no children.
 
 === Event handlers
 
@@ -6056,9 +6058,7 @@ Dealing with User and DOM Events is a reality in rich web development, and Errai
 
 . GWT events on Widgets
 
-
 . GWT events on DOM Elements
-
 
 . Native DOM events on Elements
 
@@ -6120,7 +6120,7 @@ public class ElementHandlerComponent extends Composite {
 [NOTE]
 .Events with native JsTypes
 ====
-As with previous features, the [code]+DivElement+ above could be replaced with a native [code]+JsType+.
+As with previous features, the [code]+DivElement+ above could be replaced with a native [code]+JsType+ (for example, +Div+ from errai-common).
 ====
 
 [[sid-51806600_ErraiUI-NativeDOMeventsonElements]]
@@ -6475,8 +6475,6 @@ This example works whether [code]+ComponentTwo+ is a composite or non-composite 
 === Extend components
 
 Templating would not be complete without the ability to inherit from parent templates, and Errai UI also makes this possible using simple Java inheritance. The only additional requirement is that components extending from a parent component must also be annotated with @Templated, and the path to the template file must also be specified in the child component's annotation. Child components may specify [code]+@DataField+ references that were omitted in the parent class, and they may also override [code]+@DataField+ references (by using the same [code]+data-field+ name) that were already specified in the parent component.
-
-[[sid-51806600_ErraiUI-Template]]
 
 ==== Template
 
