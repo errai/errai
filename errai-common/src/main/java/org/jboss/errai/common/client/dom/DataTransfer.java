@@ -16,16 +16,29 @@
 
 package org.jboss.errai.common.client.dom;
 
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
- *
  * @author Max Barkley <mbarkley@redhat.com>
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget">Web API</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer">Web API</a>
  */
 @JsType(isNative = true)
-public interface EventTarget {
-  void addEventListener(String type, EventListener<?> listener, boolean useCapture);
-  void removeEventListener(String type, EventListener<?> listener, boolean useCapture);
-  boolean dispatchEvent(Event evt);
+public interface DataTransfer {
+
+  @JsProperty String getDropEffect();
+  @JsProperty void setDropEffect(String value);
+
+  @JsProperty String getEffectAllowed();
+  @JsProperty void setEffectAllowed(String value);
+
+  @JsProperty FileList getFiles();
+  @JsProperty DataTransferItemList getItems();
+  @JsProperty String[] getTypes();
+
+  void clearData();
+  String getData(String format);
+  void setData(String format, String data);
+  void setDragImage(Image img, int xOffset, int yOffset);
+
 }

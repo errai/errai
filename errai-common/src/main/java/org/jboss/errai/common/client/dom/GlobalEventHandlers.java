@@ -26,225 +26,228 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 public interface GlobalEventHandlers {
-  @JsProperty EventListener getOnabort();
-  @JsProperty void setOnabort(EventListener onabort);
+  @JsProperty EventListener<?> getOnabort();
+  @JsProperty void setOnabort(EventListener<?> onabort);
 
-  @JsProperty EventListener getOnblur();
-  @JsProperty void setOnblur(EventListener onblur);
+  @JsProperty EventListener<FocusEvent> getOnblur();
+  @JsProperty void setOnblur(EventListener<FocusEvent> onblur);
 
-  @JsProperty EventListener getOncancel();
-  @JsProperty void setOncancel(EventListener oncancel);
+  @JsProperty EventListener<Event> getOncancel();
+  @JsProperty void setOncancel(EventListener<Event> oncancel);
 
-  @JsProperty EventListener getOncanplay();
-  @JsProperty void setOncanplay(EventListener oncanplay);
+  @JsProperty EventListener<Event> getOncanplay();
+  @JsProperty void setOncanplay(EventListener<Event> oncanplay);
 
-  @JsProperty EventListener getOncanplaythrough();
-  @JsProperty void setOncanplaythrough(EventListener oncanplaythrough);
+  @JsProperty EventListener<Event> getOncanplaythrough();
+  @JsProperty void setOncanplaythrough(EventListener<Event> oncanplaythrough);
 
-  @JsProperty EventListener getOnchange();
-  @JsProperty void setOnchange(EventListener onchange);
+  @JsProperty EventListener<Event> getOnchange();
+  @JsProperty void setOnchange(EventListener<Event> onchange);
 
-  @JsProperty EventListener getOnclick();
-  @JsProperty void setOnclick(EventListener onclick);
+  @JsProperty EventListener<MouseEvent> getOnclick();
+  @JsProperty void setOnclick(EventListener<MouseEvent> onclick);
 
-  @JsProperty EventListener getOnclose();
-  @JsProperty void setOnclose(EventListener onclose);
+  @JsProperty EventListener<Event> getOnclose();
+  @JsProperty void setOnclose(EventListener<Event> onclose);
 
-  @JsProperty EventListener getOncontextmenu();
-  @JsProperty void setOncontextmenu(EventListener oncontextmenu);
+  @JsProperty EventListener<MouseEvent> getOncontextmenu();
+  @JsProperty void setOncontextmenu(EventListener<MouseEvent> oncontextmenu);
 
-  @JsProperty EventListener getOncuechange();
-  @JsProperty void setOncuechange(EventListener oncuechange);
+  @JsProperty EventListener<Event> getOncuechange();
+  @JsProperty void setOncuechange(EventListener<Event> oncuechange);
 
-  @JsProperty EventListener getOndblclick();
-  @JsProperty void setOndblclick(EventListener ondblclick);
+  @JsProperty EventListener<MouseEvent> getOndblclick();
+  @JsProperty void setOndblclick(EventListener<MouseEvent> ondblclick);
 
-  @JsProperty EventListener getOndrag();
-  @JsProperty void setOndrag(EventListener ondrag);
+  @JsProperty EventListener<DragEvent> getOndrag();
+  @JsProperty void setOndrag(EventListener<DragEvent> ondrag);
 
-  @JsProperty EventListener getOndragend();
-  @JsProperty void setOndragend(EventListener ondragend);
+  @JsProperty EventListener<DragEvent> getOndragend();
+  @JsProperty void setOndragend(EventListener<DragEvent> ondragend);
 
-  @JsProperty EventListener getOndragenter();
-  @JsProperty void setOndragenter(EventListener ondragenter);
+  @JsProperty EventListener<DragEvent> getOndragenter();
+  @JsProperty void setOndragenter(EventListener<DragEvent> ondragenter);
 
-  @JsProperty EventListener getOndragexit();
-  @JsProperty void setOndragexit(EventListener ondragexit);
+  @JsProperty EventListener<DragEvent> getOndragexit();
+  @JsProperty void setOndragexit(EventListener<DragEvent> ondragexit);
 
-  @JsProperty EventListener getOndragleave();
-  @JsProperty void setOndragleave(EventListener ondragleave);
+  @JsProperty EventListener<DragEvent> getOndragleave();
+  @JsProperty void setOndragleave(EventListener<DragEvent> ondragleave);
 
-  @JsProperty EventListener getOndragover();
-  @JsProperty void setOndragover(EventListener ondragover);
+  @JsProperty EventListener<DragEvent> getOndragover();
+  @JsProperty void setOndragover(EventListener<DragEvent> ondragover);
 
-  @JsProperty EventListener getOndragstart();
-  @JsProperty void setOndragstart(EventListener ondragstart);
+  @JsProperty EventListener<DragEvent> getOndragstart();
+  @JsProperty void setOndragstart(EventListener<DragEvent> ondragstart);
 
-  @JsProperty EventListener getOndrop();
-  @JsProperty void setOndrop(EventListener ondrop);
+  @JsProperty EventListener<DragEvent> getOndrop();
+  @JsProperty void setOndrop(EventListener<DragEvent> ondrop);
 
-  @JsProperty EventListener getOndurationchange();
-  @JsProperty void setOndurationchange(EventListener ondurationchange);
+  @JsProperty EventListener<Event> getOndurationchange();
+  @JsProperty void setOndurationchange(EventListener<Event> ondurationchange);
 
-  @JsProperty EventListener getOnemptied();
-  @JsProperty void setOnemptied(EventListener onemptied);
+  @JsProperty EventListener<Event> getOnemptied();
+  @JsProperty void setOnemptied(EventListener<Event> onemptied);
 
-  @JsProperty EventListener getOnended();
-  @JsProperty void setOnended(EventListener onended);
+  @JsProperty EventListener<Event> getOnended();
+  @JsProperty void setOnended(EventListener<Event> onended);
 
-  @JsProperty EventListener getOnerror();
-  @JsProperty void setOnerror(EventListener onerror);
+  @JsProperty EventListener<?> getOnerror();
+  @JsProperty void setOnerror(EventListener<?> onerror);
 
-  @JsProperty EventListener getOnfocus();
-  @JsProperty void setOnfocus(EventListener onfocus);
+  @JsProperty EventListener<FocusEvent> getOnfocus();
+  @JsProperty void setOnfocus(EventListener<FocusEvent> onfocus);
 
-  @JsProperty EventListener getOninput();
-  @JsProperty void setOninput(EventListener oninput);
+  @JsProperty EventListener<Event> getOninput();
+  @JsProperty void setOninput(EventListener<Event> oninput);
 
-  @JsProperty EventListener getOninvalid();
-  @JsProperty void setOninvalid(EventListener oninvalid);
+  @JsProperty EventListener<Event> getOninvalid();
+  @JsProperty void setOninvalid(EventListener<Event> oninvalid);
 
-  @JsProperty EventListener getOnkeydown();
-  @JsProperty void setOnkeydown(EventListener onkeydown);
+  @JsProperty EventListener<KeyboardEvent> getOnkeydown();
+  @JsProperty void setOnkeydown(EventListener<KeyboardEvent> onkeydown);
 
-  @JsProperty EventListener getOnkeypress();
-  @JsProperty void setOnkeypress(EventListener onkeypress);
+  @JsProperty EventListener<KeyboardEvent> getOnkeypress();
+  @JsProperty void setOnkeypress(EventListener<KeyboardEvent> onkeypress);
 
-  @JsProperty EventListener getOnkeyup();
-  @JsProperty void setOnkeyup(EventListener onkeyup);
+  @JsProperty EventListener<KeyboardEvent> getOnkeyup();
+  @JsProperty void setOnkeyup(EventListener<KeyboardEvent> onkeyup);
 
-  @JsProperty EventListener getOnload();
-  @JsProperty void setOnload(EventListener onload);
+  @JsProperty EventListener<UIEvent> getOnload();
+  @JsProperty void setOnload(EventListener<UIEvent> onload);
 
-  @JsProperty EventListener getOnloadeddata();
-  @JsProperty void setOnloadeddata(EventListener onloadeddata);
+  @JsProperty EventListener<Event> getOnloadeddata();
+  @JsProperty void setOnloadeddata(EventListener<Event> onloadeddata);
 
-  @JsProperty EventListener getOnloadedmetadata();
-  @JsProperty void setOnloadedmetadata(EventListener onloadedmetadata);
+  @JsProperty EventListener<Event> getOnloadedmetadata();
+  @JsProperty void setOnloadedmetadata(EventListener<Event> onloadedmetadata);
 
-  @JsProperty EventListener getOnloadstart();
-  @JsProperty void setOnloadstart(EventListener onloadstart);
+  @JsProperty EventListener<ProgressEvent> getOnloadstart();
+  @JsProperty void setOnloadstart(EventListener<ProgressEvent> onloadstart);
 
-  @JsProperty EventListener getOnmousedown();
-  @JsProperty void setOnmousedown(EventListener onmousedown);
+  @JsProperty EventListener<MouseEvent> getOnmousedown();
+  @JsProperty void setOnmousedown(EventListener<MouseEvent> onmousedown);
 
-  @JsProperty EventListener getOnmousemove();
-  @JsProperty void setOnmousemove(EventListener onmousemove);
+  @JsProperty EventListener<MouseEvent> getOnmousemove();
+  @JsProperty void setOnmousemove(EventListener<MouseEvent> onmousemove);
 
-  @JsProperty EventListener getOnmouseout();
-  @JsProperty void setOnmouseout(EventListener onmouseout);
+  @JsProperty EventListener<MouseEvent> getOnmouseout();
+  @JsProperty void setOnmouseout(EventListener<MouseEvent> onmouseout);
 
-  @JsProperty EventListener getOnmouseover();
-  @JsProperty void setOnmouseover(EventListener onmouseover);
+  @JsProperty EventListener<MouseEvent> getOnmouseover();
+  @JsProperty void setOnmouseover(EventListener<MouseEvent> onmouseover);
 
-  @JsProperty EventListener getOnmouseup();
-  @JsProperty void setOnmouseup(EventListener onmouseup);
+  @JsProperty EventListener<MouseEvent> getOnmouseup();
+  @JsProperty void setOnmouseup(EventListener<MouseEvent> onmouseup);
 
-  @JsProperty EventListener getOnmousewheel();
-  @JsProperty void setOnmousewheel(EventListener onmousewheel);
+  @JsProperty EventListener<Event> getOnmousewheel();
+  @JsProperty void setOnmousewheel(EventListener<Event> onmousewheel);
 
-  @JsProperty EventListener getOnpause();
-  @JsProperty void setOnpause(EventListener onpause);
+  @JsProperty EventListener<Event> getOnpause();
+  @JsProperty void setOnpause(EventListener<Event> onpause);
 
-  @JsProperty EventListener getOnplay();
-  @JsProperty void setOnplay(EventListener onplay);
+  @JsProperty EventListener<Event> getOnplay();
+  @JsProperty void setOnplay(EventListener<Event> onplay);
 
-  @JsProperty EventListener getOnplaying();
-  @JsProperty void setOnplaying(EventListener onplaying);
+  @JsProperty EventListener<Event> getOnplaying();
+  @JsProperty void setOnplaying(EventListener<Event> onplaying);
 
-  @JsProperty EventListener getOnpointerdown();
-  @JsProperty void setOnpointerdown(EventListener onpointerdown);
+  @JsProperty EventListener<?> getOnpointerdown();
+  @JsProperty void setOnpointerdown(EventListener<?> onpointerdown);
 
-  @JsProperty EventListener getOnpointermove();
-  @JsProperty void setOnpointermove(EventListener onpointermove);
+  @JsProperty EventListener<?> getOnpointermove();
+  @JsProperty void setOnpointermove(EventListener<?> onpointermove);
 
-  @JsProperty EventListener getOnpointerup();
-  @JsProperty void setOnpointerup(EventListener onpointerup);
+  @JsProperty EventListener<?> getOnpointerup();
+  @JsProperty void setOnpointerup(EventListener<?> onpointerup);
 
-  @JsProperty EventListener getOnpointercancel();
-  @JsProperty void setOnpointercancel(EventListener onpointercancel);
+  @JsProperty EventListener<?> getOnpointercancel();
+  @JsProperty void setOnpointercancel(EventListener<?> onpointercancel);
 
-  @JsProperty EventListener getOnpointerover();
-  @JsProperty void setOnpointerover(EventListener onpointerover);
+  @JsProperty EventListener<?> getOnpointerover();
+  @JsProperty void setOnpointerover(EventListener<?> onpointerover);
 
-  @JsProperty EventListener getOnpointerout();
-  @JsProperty void setOnpointerout(EventListener onpointerout);
+  @JsProperty EventListener<?> getOnpointerout();
+  @JsProperty void setOnpointerout(EventListener<?> onpointerout);
 
-  @JsProperty EventListener getOnpointerenter();
-  @JsProperty void setOnpointerenter(EventListener onpointerenter);
+  @JsProperty EventListener<?> getOnpointerenter();
+  @JsProperty void setOnpointerenter(EventListener<?> onpointerenter);
 
-  @JsProperty EventListener getOnpointerleave();
-  @JsProperty void setOnpointerleave(EventListener onpointerleave);
+  @JsProperty EventListener<?> getOnpointerleave();
+  @JsProperty void setOnpointerleave(EventListener<?> onpointerleave);
 
-  @JsProperty EventListener getOnpointerlockchange();
-  @JsProperty void setOnpointerlockchange(EventListener onpointerlockchange);
+  @JsProperty EventListener<?> getOnpointerlockchange();
+  @JsProperty void setOnpointerlockchange(EventListener<?> onpointerlockchange);
 
-  @JsProperty EventListener getOnpointerlockerror();
-  @JsProperty void setOnpointerlockerror(EventListener onpointerlockerror);
+  @JsProperty EventListener<?> getOnpointerlockerror();
+  @JsProperty void setOnpointerlockerror(EventListener<?> onpointerlockerror);
 
-  @JsProperty EventListener getOnprogress();
-  @JsProperty void setOnprogress(EventListener onprogress);
+  @JsProperty EventListener<ProgressEvent> getOnprogress();
+  @JsProperty void setOnprogress(EventListener<ProgressEvent> onprogress);
 
-  @JsProperty EventListener getOnratechange();
-  @JsProperty void setOnratechange(EventListener onratechange);
+  @JsProperty EventListener<Event> getOnratechange();
+  @JsProperty void setOnratechange(EventListener<Event> onratechange);
 
-  @JsProperty EventListener getOnreadystatechange();
-  @JsProperty void setOnreadystatechange(EventListener onreadystatechange);
+  @JsProperty EventListener<Event> getOnreadystatechange();
+  @JsProperty void setOnreadystatechange(EventListener<Event> onreadystatechange);
 
-  @JsProperty EventListener getOnreset();
-  @JsProperty void setOnreset(EventListener onreset);
+  @JsProperty EventListener<Event> getOnreset();
+  @JsProperty void setOnreset(EventListener<Event> onreset);
 
-  @JsProperty EventListener getOnscroll();
-  @JsProperty void setOnscroll(EventListener onscroll);
+  @JsProperty EventListener<UIEvent> getOnscroll();
+  @JsProperty void setOnscroll(EventListener<UIEvent> onscroll);
 
-  @JsProperty EventListener getOnseeked();
-  @JsProperty void setOnseeked(EventListener onseeked);
+  @JsProperty EventListener<Event> getOnseeked();
+  @JsProperty void setOnseeked(EventListener<Event> onseeked);
 
-  @JsProperty EventListener getOnseeking();
-  @JsProperty void setOnseeking(EventListener onseeking);
+  @JsProperty EventListener<Event> getOnseeking();
+  @JsProperty void setOnseeking(EventListener<Event> onseeking);
 
-  @JsProperty EventListener getOnselect();
-  @JsProperty void setOnselect(EventListener onselect);
+  @JsProperty EventListener<?> getOnselect();
+  @JsProperty void setOnselect(EventListener<?> onselect);
 
-  @JsProperty EventListener getOnselectionchange();
-  @JsProperty void setOnselectionchange(EventListener onselectionchange);
+  @JsProperty EventListener<?> getOnselectionchange();
+  @JsProperty void setOnselectionchange(EventListener<?> onselectionchange);
 
-  @JsProperty EventListener getOnshow();
-  @JsProperty void setOnshow(EventListener onshow);
+  @JsProperty EventListener<Event> getOnshow();
+  @JsProperty void setOnshow(EventListener<Event> onshow);
 
-  @JsProperty EventListener getOnstalled();
-  @JsProperty void setOnstalled(EventListener onstalled);
+  @JsProperty EventListener<Event> getOnstalled();
+  @JsProperty void setOnstalled(EventListener<Event> onstalled);
 
-  @JsProperty EventListener getOnsubmit();
-  @JsProperty void setOnsubmit(EventListener onsubmit);
+  @JsProperty EventListener<Event> getOnsubmit();
+  @JsProperty void setOnsubmit(EventListener<Event> onsubmit);
 
-  @JsProperty EventListener getOnsuspend();
-  @JsProperty void setOnsuspend(EventListener onsuspend);
+  @JsProperty EventListener<Event> getOnsuspend();
+  @JsProperty void setOnsuspend(EventListener<Event> onsuspend);
 
-  @JsProperty EventListener getOntimeupdate();
-  @JsProperty void setOntimeupdate(EventListener ontimeupdate);
+  @JsProperty EventListener<Event> getOntimeupdate();
+  @JsProperty void setOntimeupdate(EventListener<Event> ontimeupdate);
 
-  @JsProperty EventListener getOnvolumechange();
-  @JsProperty void setOnvolumechange(EventListener onvolumechange);
+  @JsProperty EventListener<Event> getOnvolumechange();
+  @JsProperty void setOnvolumechange(EventListener<Event> onvolumechange);
 
-  @JsProperty EventListener getOntouchcancel();
-  @JsProperty void setOntouchcancel(EventListener ontouchcancel);
+  @JsProperty EventListener<TouchEvent> getOntouchcancel();
+  @JsProperty void setOntouchcancel(EventListener<TouchEvent> ontouchcancel);
 
-  @JsProperty EventListener getOntouchend();
-  @JsProperty void setOntouchend(EventListener ontouchend);
+  @JsProperty EventListener<TouchEvent> getOntouchend();
+  @JsProperty void setOntouchend(EventListener<TouchEvent> ontouchend);
 
-  @JsProperty EventListener getOntouchmove();
-  @JsProperty void setOntouchmove(EventListener ontouchmove);
+  @JsProperty EventListener<TouchEvent> getOntouchmove();
+  @JsProperty void setOntouchmove(EventListener<TouchEvent> ontouchmove);
 
-  @JsProperty EventListener getOntouchenter();
-  @JsProperty void setOntouchenter(EventListener ontouchenter);
+  @JsProperty EventListener<TouchEvent> getOntouchenter();
+  @JsProperty void setOntouchenter(EventListener<TouchEvent> ontouchenter);
 
-  @JsProperty EventListener getOntouchstart();
-  @JsProperty void setOntouchstart(EventListener ontouchstart);
+  @JsProperty EventListener<TouchEvent> getOntouchstart();
+  @JsProperty void setOntouchstart(EventListener<TouchEvent> ontouchstart);
 
-  @JsProperty EventListener getOntouchleave();
-  @JsProperty void setOntouchleave(EventListener ontouchleave);
+  @JsProperty EventListener<TouchEvent> getOntouchleave();
+  @JsProperty void setOntouchleave(EventListener<TouchEvent> ontouchleave);
 
-  @JsProperty EventListener getOnwaiting();
-  @JsProperty void setOnwaiting(EventListener onwaiting);
+  @JsProperty EventListener<TouchEvent> getOnwaiting();
+  @JsProperty void setOnwaiting(EventListener<TouchEvent> onwaiting);
+
+  @JsProperty EventListener<UIEvent> getOnresize();
+  @JsProperty void setOnresize(EventListener<UIEvent> onresize);
 }

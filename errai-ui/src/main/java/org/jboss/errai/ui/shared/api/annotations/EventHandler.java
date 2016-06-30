@@ -23,6 +23,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jboss.errai.common.client.api.annotations.BrowserEvent;
+import org.jboss.errai.common.client.dom.FocusEvent;
+
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
@@ -35,23 +38,63 @@ import jsinterop.annotations.JsType;
  * This annotation may only be used in classes that has been annotated with {@link Templated}, or in a super-class of
  * said types.
  * <p>
- * Declares a method in a {@link Templated} component as a handler for standard {@link Event} and {@link DomEvent} types
- * fired by {@link DataField} widgets and <code>data-field</code> elements within the component HTML template. Method
- * handlers must accept a single argument of the type of event to be handled.
+ * Declares a method in a {@link Templated} component as a handler for standard {@link Event GWT Widget events},
+ * {@link DomEvent GWT native events}, and {@link BrowserEvent JS interop wrapped DOM events} fired by {@link DataField}
+ * components and <code>data-field</code> elements within the component HTML template. Method handlers must accept a single
+ * argument of the type of event to be handled.
  * <p>
  * The following scenarios are supported by this annotation:
  * <ol>
  *
- * <li>GWT events on Widgets</li>
- * <li>GWT events on {@link Element Elements}</li>
- * <li>GWT events on native {@link JsType JsTypes} wrapping DOM elements</li>
- * <li>Native DOM events on DOM elements</li>
- * <li>Native DOM events on native {@link JsType JsTypes} wrapping DOM elements</li>
+ * <li>{@link BrowserEvent JS interop wrapped events} on any template element or {@link Templated} field
+ * <li>GWT events on Widgets (Deprecated)</li>
+ * <li>GWT events on {@link Element Elements} (Deprecated)</li>
+ * <li>GWT events on native {@link JsType JsTypes} wrapping DOM elements (Deprecated)</li>
+ * <li>Native DOM events on DOM elements (Deprecated)</li>
+ * <li>Native DOM events on native {@link JsType JsTypes} wrapping DOM elements (Deprecated)</li>
  *
  * </ol>
  * <p>
  * <b>WARNING:</b> Native GWT events cannot be used in conjunction with GWT standard events, since upon addition to the
  * widget tree, GWT will override any {@link Widget#sinkEvents(int)} that may have been configured by Errai UI.
+ *
+ * <p>
+ * <b>JS Interop wrapped events</b>
+ * <p>
+ * With this approach, the parameter of the {@link EventHandler} method is a type
+ * annotated with {@link BrowserEvent} such as
+ * {@link org.jboss.errai.common.client.dom.Event Errai's DOM event wrapper}
+ * or any of its subtypes. The target element for the registered listener can be any
+ * {@code @DataField} in a {@link Templated} bean or any {@code data-field} in the template HTML file.
+ * <p>
+ * For types like {@link org.jboss.errai.common.client.dom.Event Event} that do not specify allowable
+ * event types via {@link BrowserEvent}, an {@link EventHandler} must use {@link ForEvent} to specify
+ * the event types being listened to. When using {@link BrowserEvent} types that do specify event types
+ * with {@link BrowserEvent}, {@link ForEvent} is optional.
+ * <p>
+ * Example:
+ * <p>
+ *
+ * <pre>
+ * {@code @Templated}
+ * public class QuickHandlerComponent {
+ *   {@code @Inject}
+ *   {@code @DataField}
+ *   private Anchor link;
+ *
+ *   // Listens to only "click" events on link.
+ *   {@code @EventHandler("link")}
+ *   public void doSomething({@code @ForEvent("click")} {@link org.jboss.errai.common.client.dom.Event Event} e) {
+ *     // do something
+ *   }
+ *
+ *   // Listens to all events declared by {@link FocusEvent} in {@link BrowserEvent} ("blur", "focus", "focusin", and "focusout").
+ *   {@code @EventHandler("link")}
+ *   public void doSomethingElse({@link FocusEvent} e) {
+ *     // do something else
+ *   }
+ * }
+ * </pre>
  * <p>
  * <b>GWT events on Widgets</b>
  * <p>
@@ -97,11 +140,12 @@ import jsinterop.annotations.JsType;
  * <p>
  *
  * <pre>
- * &#064;JsType(isNative=true)
+ * &#064;JsType(isNative = true)
  * public interface ButtonElementWrapper {
  *   // ...
  * }
  * </pre>
+ *
  * <pre>
  * &#064;Templated
  * public class WidgetHandlerComponent extends Composite {
@@ -148,18 +192,19 @@ import jsinterop.annotations.JsType;
  * <b>Native events on JsTypes</b>
  * <p>
  * This approach requires use of the {@link SinkNative} annotation, but does not require that target {@link Element}
- * instances be referenced via {@link DataField} in the {@link Templated} component; they may also
- * target un-referenced <code>data-field</code> elements from the corresponding HTML template.
+ * instances be referenced via {@link DataField} in the {@link Templated} component; they may also target un-referenced
+ * <code>data-field</code> elements from the corresponding HTML template.
  * <p>
  * Example:
  * <p>
  *
  * <pre>
- * &#064;JsType(isNative=true)
+ * &#064;JsType(isNative = true)
  * public interface AnchorElementWrapper {
  *   // ...
  * }
  * </pre>
+ *
  * <pre>
  * &#064;Templated
  * public class QuickHandlerComponent extends Composite {
@@ -185,6 +230,7 @@ import jsinterop.annotations.JsType;
  * <b>See also:</b> {@link SinkNative}, {@link Templated}, {@link DataField}
  *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Max Barkley <mbarkley@redhat.com>
  *
  */
 @Inherited

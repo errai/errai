@@ -16,16 +16,17 @@
 
 package org.jboss.errai.common.client.dom;
 
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
- *
  * @author Max Barkley <mbarkley@redhat.com>
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget">Web API</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">Web API</a>
  */
 @JsType(isNative = true)
-public interface EventTarget {
-  void addEventListener(String type, EventListener<?> listener, boolean useCapture);
-  void removeEventListener(String type, EventListener<?> listener, boolean useCapture);
-  boolean dispatchEvent(Event evt);
+public interface File extends Blob {
+
+  @JsProperty Date getLastModifiedDate();
+  @JsProperty String getName();
+
 }

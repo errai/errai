@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +16,28 @@
 
 package org.jboss.errai.common.client.dom;
 
+import org.jboss.errai.common.client.api.annotations.BrowserEvent;
+
+import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget">Web API</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent">Web API</a>
  */
+@BrowserEvent("wheel")
 @JsType(isNative = true)
-public interface EventTarget {
-  void addEventListener(String type, EventListener<?> listener, boolean useCapture);
-  void removeEventListener(String type, EventListener<?> listener, boolean useCapture);
-  boolean dispatchEvent(Event evt);
+public interface WheelEvent extends MouseEvent {
+
+  @JsOverlay static final int DOM_DELTA_PIXEL = 0;
+  @JsOverlay static final int DOM_DELTA_LINE = 1;
+  @JsOverlay static final int DOM_DELTA_PAGE = 2;
+
+  @JsProperty double getDeltaX();
+  @JsProperty double getDeltaY();
+  @JsProperty double getDeltaZ();
+  @JsProperty int getDeltaMode();
+
 }

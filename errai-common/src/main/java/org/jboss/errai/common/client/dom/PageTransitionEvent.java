@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +16,23 @@
 
 package org.jboss.errai.common.client.dom;
 
+import org.jboss.errai.common.client.api.annotations.BrowserEvent;
+
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget">Web API</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/PageTransitionEvent">Web API</a>
  */
+@BrowserEvent({
+  "pageshow",
+  "pagehide"
+})
 @JsType(isNative = true)
-public interface EventTarget {
-  void addEventListener(String type, EventListener<?> listener, boolean useCapture);
-  void removeEventListener(String type, EventListener<?> listener, boolean useCapture);
-  boolean dispatchEvent(Event evt);
+public interface PageTransitionEvent extends Event {
+
+  @JsProperty(name = "persisted") boolean isPersisted();
+
 }

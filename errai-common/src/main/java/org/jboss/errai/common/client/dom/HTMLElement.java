@@ -26,6 +26,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 public interface HTMLElement extends Element, GlobalEventHandlers {
+  @Override
   NodeList getElementsByClassName(String classNames);
 
   @JsProperty String getInnerHTML();
@@ -102,12 +103,12 @@ public interface HTMLElement extends Element, GlobalEventHandlers {
 
   @JsProperty CSSStyleDeclaration getStyle();
 
-  @JsProperty EventListener getOncopy();
-  @JsProperty void setOncopy(EventListener oncopy);
+  @JsProperty EventListener<ClipboardEvent> getOncopy();
+  @JsProperty void setOncopy(EventListener<ClipboardEvent> oncopy);
 
-  @JsProperty EventListener getOncut();
-  @JsProperty void setOncut(EventListener oncut);
+  @JsProperty EventListener<ClipboardEvent> getOncut();
+  @JsProperty void setOncut(EventListener<ClipboardEvent> oncut);
 
-  @JsProperty EventListener getOnpaste();
-  @JsProperty void setOnpaste(EventListener onpaste);
+  @JsProperty EventListener<ClipboardEvent> getOnpaste();
+  @JsProperty void setOnpaste(EventListener<ClipboardEvent> onpaste);
 }

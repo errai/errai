@@ -16,13 +16,16 @@
 
 package org.jboss.errai.ui.shared;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -68,6 +71,7 @@ import jsinterop.annotations.JsType;
 public final class TemplateUtil {
   private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
 
+  private static final Map<Object, List<Runnable>> cleanupTasks = new IdentityHashMap<>();
   private static TranslationService translationService = null;
   public static TranslationService getTranslationService() {
     if (translationService == null) {
@@ -194,6 +198,14 @@ public final class TemplateUtil {
     }
   }
 
+  public static HTMLElement asErraiElement(final Object element) {
+    try {
+      return nativeCast(element);
+    } catch (final Throwable t) {
+      throw new RuntimeException("Error casting @DataField of type " + element.getClass().getName() + " to org.jboss.errai.common.client.dom.HTMLElement", t);
+    }
+  }
+
   /**
    * Only works for native {@link JsType JsTypes} and {@link JavaScriptObject JavaScriptObjects}.
    */
@@ -222,6 +234,7 @@ public final class TemplateUtil {
   public static void cleanupTemplated(final Object templated) {
     final TemplateWidget templateWidget = TemplateWidgetMapper.get(templated);
     TemplateWidgetMapper.remove(templated);
+    runCleanupTasks(templated);
     if (RootPanel.isInDetachList(templateWidget)) {
       RootPanel.detachNow(templateWidget);
     }
@@ -240,9 +253,16 @@ public final class TemplateUtil {
   }
 
   public static void cleanupWidget(final Composite component) {
+    runCleanupTasks(component);
     if (RootPanel.isInDetachList(component)) {
       RootPanel.detachNow(component);
     }
+  }
+
+  public static void runCleanupTasks(final Object component) {
+    Optional
+      .ofNullable(cleanupTasks.remove(component))
+      .ifPresent(tasks -> tasks.forEach(Runnable::run));
   }
 
   private static native void onAttachNative(Widget w) /*-{
@@ -440,6 +460,28 @@ public final class TemplateUtil {
     }
     DOM.setEventListener(element, listener);
     DOM.sinkEvents(element, eventsToSink);
+  }
+
+  public static void setupBrowserEventListener(final Object component, final HTMLElement element,
+          final org.jboss.errai.common.client.dom.EventListener<?> listener, final String browserEventType) {
+    if (element == null) {
+      throw new RuntimeException("A browser event source was specified in " + component.getClass().getName()
+              + " but the corresponding data-field does not exist!");
+    }
+    element.addEventListener(browserEventType, listener, false);
+    cleanupTasks
+      .computeIfAbsent(component, key -> new ArrayList<>())
+      .add(() -> element.removeEventListener(browserEventType, listener, false));
+  }
+
+  public static void setupBrowserEventListener(final Object component, final Object element,
+          final org.jboss.errai.common.client.dom.EventListener<?> listener, final String browserEventType) {
+    setupBrowserEventListener(component, TemplateUtil.asErraiElement(element), listener, browserEventType);
+  }
+
+  public static void setupBrowserEventListener(final Object component, final Widget widget,
+          final org.jboss.errai.common.client.dom.EventListener<?> listener, final String browserEventType) {
+    setupBrowserEventListener(component, widget.getElement(), listener, browserEventType);
   }
 
   public static <T extends EventHandler> Widget setupPlainElementEventHandler(final Composite component, final Element element,

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.dom;
 
+import org.jboss.errai.common.client.api.annotations.BrowserEvent;
+
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
@@ -26,16 +28,17 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event">Web API</a>
  */
 @JsType(isNative = true)
+@BrowserEvent
 public interface Event {
   @JsOverlay static final short NONE = 0;
   @JsOverlay static final short CAPTURING_PHASE = 1;
   @JsOverlay static final short AT_TARGET = 2;
   @JsOverlay static final short BUBBLING_PHASE = 3;
 
-  @JsProperty boolean getBubbles();
-  @JsProperty boolean getCancelable();
+  @JsProperty(name = "bubbles") boolean isBubbles();
+  @JsProperty(name = "cancelable") boolean isCancelable();
   @JsProperty EventTarget getCurrentTarget();
-  @JsProperty boolean getDefaultPrevented();
+  @JsProperty(name = "defaultPrevented") boolean isDefaultPrevented();
   @JsProperty short getEventPhase();
   @JsProperty EventTarget getTarget();
   @JsProperty double getTimeStamp();

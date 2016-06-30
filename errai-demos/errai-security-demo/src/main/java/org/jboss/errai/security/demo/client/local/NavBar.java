@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.dom.Anchor;
+import org.jboss.errai.common.client.dom.MouseEvent;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.Navigation;
@@ -29,9 +30,8 @@ import org.jboss.errai.ui.nav.client.local.api.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.api.TransitionToRole;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-
-import com.google.gwt.event.dom.client.ClickEvent;
 
 /**
  * <p>
@@ -79,7 +79,7 @@ public class NavBar {
   @Inject Caller<AuthenticationService> authServiceCaller;
 
   @EventHandler("logout")
-  public void logoutClicked(final ClickEvent event) {
+  public void logoutClicked(final @ForEvent("click") MouseEvent event) {
     authServiceCaller.call(response -> welcomePage.go()).logout();
   }
 }

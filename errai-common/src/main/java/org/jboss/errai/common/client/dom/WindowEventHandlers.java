@@ -26,48 +26,42 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 public interface WindowEventHandlers {
-  @JsProperty EventListener getOnafterprint();
-  @JsProperty void setOnafterprint(EventListener onafterprint);
+  @JsProperty EventListener<Event> getOnafterprint();
+  @JsProperty void setOnafterprint(EventListener<Event> onafterprint);
 
-  @JsProperty EventListener getOnbeforeprint();
-  @JsProperty void setOnbeforeprint(EventListener onbeforeprint);
+  @JsProperty EventListener<Event> getOnbeforeprint();
+  @JsProperty void setOnbeforeprint(EventListener<Event> onbeforeprint);
 
-  @JsProperty EventListener getOnbeforeunload();
-  @JsProperty void setOnbeforeunload(EventListener onbeforeunload);
+  @JsProperty EventListener<Event> getOnbeforeunload();
+  @JsProperty void setOnbeforeunload(EventListener<Event> onbeforeunload);
 
-  @JsProperty EventListener getOnhashchange();
-  @JsProperty void setOnhashchange(EventListener onhashchange);
+  @JsProperty EventListener<HashChangeEvent> getOnhashchange();
+  @JsProperty void setOnhashchange(EventListener<HashChangeEvent> onhashchange);
 
-  @JsProperty EventListener getOnlanguagechange();
-  @JsProperty void setOnlanguagechange(EventListener onlanguagechange);
+  @JsProperty EventListener<Event> getOnlanguagechange();
+  @JsProperty void setOnlanguagechange(EventListener<Event> onlanguagechange);
 
-  @JsProperty EventListener getOnmessage();
-  @JsProperty void setOnmessage(EventListener onmessage);
+  @JsProperty EventListener<?> getOnmessage();
+  @JsProperty void setOnmessage(EventListener<?> onmessage);
 
-  @JsProperty EventListener getOnoffline();
-  @JsProperty void setOnoffline(EventListener onoffline);
+  @JsProperty EventListener<Event> getOnoffline();
+  @JsProperty void setOnoffline(EventListener<Event> onoffline);
 
-  @JsProperty EventListener getOnonline();
-  @JsProperty void setOnonline(EventListener ononline);
+  @JsProperty EventListener<Event> getOnonline();
+  @JsProperty void setOnonline(EventListener<Event> ononline);
 
-  @JsProperty EventListener getOnpagehide();
-  @JsProperty void setOnpagehide(EventListener onpagehide);
+  @JsProperty EventListener<PageTransitionEvent> getOnpagehide();
+  @JsProperty void setOnpagehide(EventListener<PageTransitionEvent> onpagehide);
 
-  @JsProperty EventListener getOnpageshow();
-  @JsProperty void setOnpageshow(EventListener onpageshow);
+  @JsProperty EventListener<PageTransitionEvent> getOnpageshow();
+  @JsProperty void setOnpageshow(EventListener<PageTransitionEvent> onpageshow);
 
-  @JsProperty EventListener getOnpopstate();
-  @JsProperty void setOnpopstate(EventListener onpopstate);
+  @JsProperty EventListener<PopStateEvent> getOnpopstate();
+  @JsProperty void setOnpopstate(EventListener<PopStateEvent> onpopstate);
 
-  @JsProperty EventListener getOnresize();
-  @JsProperty void setOnresize(EventListener onresize);
+  @JsProperty EventListener<StorageEvent> getOnstorage();
+  @JsProperty void setOnstorage(EventListener<StorageEvent> onstorage);
 
-  @JsProperty EventListener getOnstorage();
-  @JsProperty void setOnstorage(EventListener onstorage);
-
-  @JsProperty EventListener getOnunhandledrejection();
-  @JsProperty void setOnunhandledrejection(EventListener onunhandledrejection);
-
-  @JsProperty EventListener getOnunload();
-  @JsProperty void setOnunload(EventListener onunload);
+  @JsProperty EventListener<?> getOnunload();
+  @JsProperty void setOnunload(EventListener<?> onunload);
 }

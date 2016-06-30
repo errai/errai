@@ -6056,11 +6056,14 @@ or ensure that the UI component being composited implements is a a DOM element w
 
 Dealing with User and DOM Events is a reality in rich web development, and Errai UI provides several approaches for dealing with all types of browser events using its "quick handler" functionality. It is possible to handle:
 
-. GWT events on Widgets
+. JS interop wrapped DOM events on Widgets and Elements
 
-. GWT events on DOM Elements
+. GWT events on Widgets (Deprecated)
 
-. Native DOM events on Elements
+. GWT events on DOM Elements (Deprecated)
+
+. Native DOM events on Elements (Deprecated)
+
 
 
 [IMPORTANT]
@@ -6072,13 +6075,83 @@ It is not possible to handle Native DOM events on Widgets because GWT overrides 
 
 ==== Concepts
 
-Each of the three scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with [code]+@EventHandler("my-data-field")+ (_event handler methods_) to handle events on the corresponding [code]+@DataField("my-data-field")+ in the same component. Event handler methods annotated with a bare [code]+@EventHandler+ annotation (no annotation parameter) are wired to receive events on the @Templated component itself.
+Each of the scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with [code]+@EventHandler("my-data-field")+ (_event handler methods_) to handle events on the corresponding [code]+@DataField("my-data-field")+ in the same component. Event handler methods annotated with a bare [code]+@EventHandler+ annotation (no annotation parameter) are wired to receive events on the @Templated component itself.
+
+A JS interop wrapped event is a type annotated with `@JsType(isNative=true)` and `@BrowserEvent` and provides an interface to the API of a browser DOM event.
 
 [[sid-51806600_ErraiUI-GWTeventsonWidgets]]
 
+==== JS Interop wrapped events on Elements and Widgets
+
+This approach can be used to handle events on any kind of `@DataField` or on a `data-field` element in the HTML template.  Since many browser event types share interfaces a quick handler with a JS interop event parameter must sometimes specify the browser event type (i.e. "click", "blur", "focus", etc.).
+
+Here is an example of a quick handler for "click" events on an element `@DataField` where the `Event` parameter is a JS interop wrapped event type `org.jboss.errai.common.client.dom.Event`. The `Event` interfaces is annotated with `@BrowserEvent`, but does not specify a value of usable browser event types, so the quick handler must specify the event type is listens to with the `@ForEvent` annotation.
+
+[source, java]
+----
+@Templated
+public class ElementHandlerComponent {
+
+   @Inject
+   @DataField("b1")
+   private ButtonElement button;
+
+   @EventHandler("b1")
+   public void doSomething(@ForEvent("click") Event e) {
+     // do something
+   }
+}
+----
+
+For `@BrowserEvent` wrappers that specify event types, `@ForEvent` may be omitted. In this case the quick handler is registered for all supported event types. In the example below, `FocusEvent` is annotated with `@BrowserEvent({"blur", "focus", "focusin", "focusout"})`, so the quick handler is registered for all four event: blur, focus, focusin, and focusout.
+
+
+[source, java]
+----
+@Templated
+public class ElementHandlerComponent {
+
+   @Inject
+   @DataField
+   private AnchorElement link;
+
+   @EventHandler("link")
+   public void doSomething(FocusEvent e) {
+     // do something
+   }
+}
+----
+
+This approach can also be used with GWT Widget `@DataFields` and template `data-fields` that do not have a `@DataField`.
+
+[source, java]
+----
+@Templated
+public class WidgetAndElementHandlerComponent {
+
+   @Inject
+   @DataField
+   private TextBox input;
+
+   // Handles focus-related events on the
+   // underlying HTML element of the TextBox field.
+   @EventHandler("input")
+   public void doSomething(FocusEvent e) {
+     // do something
+   }
+
+   // Handles dblclick events for the element in the
+   // template with id/class/data-field="button".
+   @EventHandler("button")
+   public void onClick(@ForEvent("dblclick") MouseEvent e) {
+     // do something
+   }
+}
+----
+
 ==== GWT events on Widgets
 
-Probably the simplest and most common use-case, this approach handles GWT Event classes for Widgets that explicitly handle the given event type. If a Widget does not handle the Event type given in the [code]+@EventHandler+ method's signature, the application will fail to compile and appropriate errors will be displayed.
+This approach handles GWT Event classes for Widgets that explicitly handle the given event type. If a Widget does not handle the Event type given in the [code]+@EventHandler+ method's signature, the application will fail to compile and appropriate errors will be displayed.
 
 [source, java]
 ----
