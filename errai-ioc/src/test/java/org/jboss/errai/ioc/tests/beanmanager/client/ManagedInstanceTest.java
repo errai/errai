@@ -130,7 +130,7 @@ public class ManagedInstanceTest extends AbstractErraiIOCTest {
     assertTrue(beans.iterator().next().isDefault());
   }
 
-  public void testDestroyAllOnSelectedDoesNotAffectInjectedOrOtherSelectedInstances() throws Exception {
+  public void testDestroyAllOnSelectedAnnotationDoesNotAffectInjectedOrOtherSelectedInstances() throws Exception {
     final ManagedInstance<DestructableClass> aInstance = module.any.select(a);
     final ManagedInstance<DestructableClass> defaultInstance = module.any.select(DEFAULT_ANNOTATION);
     final List<DestructableClass> aBeans = fromIterator(aInstance.iterator());
@@ -160,6 +160,26 @@ public class ManagedInstanceTest extends AbstractErraiIOCTest {
     }
     for (final DestructableClass instance : defaultDepBeans) {
       assertTrue(getSimpleName(instance) + " was not destroyed after destroyAll was called.", instance.isDestroyed());
+    }
+  }
+
+  public void testDestroyAllOnSelectedSubtypeDoesNotAffectInjectedOrOtherSelectedInstances() throws Exception {
+    final ManagedInstance<DefaultDependentBean> defaultDepBeanInstance = module.any.select(DefaultDependentBean.class);
+    assertFalse("ManagedInstance<DefaultDependentBean> should not be ambiguous.", defaultDepBeanInstance.isAmbiguous());
+    assertFalse("ManagedInstance<DefaultDependentBean> should not be unsatisfied.", defaultDepBeanInstance.isUnsatisfied());
+    final DefaultDependentBean subtypeInstance = defaultDepBeanInstance.get();
+    assertFalse(getSimpleName(subtypeInstance) + " was destroyed before destroyAll was called.", subtypeInstance.isDestroyed());
+
+    final List<DestructableClass> anyBeans = fromIterator(module.any.iterator());
+    assertEquals(4, anyBeans.size());
+    for (final DestructableClass instance : anyBeans) {
+      assertFalse(getSimpleName(instance) + " was destroyed before destroyAll was called.", instance.isDestroyed());
+    }
+
+    defaultDepBeanInstance.destroyAll();
+    assertTrue(getSimpleName(subtypeInstance) + " was not destroyed after destroyAll was called.", subtypeInstance.isDestroyed());
+    for (final DestructableClass instance : anyBeans) {
+      assertFalse(getSimpleName(instance) + " was destroyed after destroyAll was called on subtype instance.", instance.isDestroyed());
     }
   }
 

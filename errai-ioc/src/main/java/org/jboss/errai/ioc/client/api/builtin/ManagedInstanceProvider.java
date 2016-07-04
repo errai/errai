@@ -22,8 +22,11 @@ import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
@@ -52,98 +55,190 @@ public class ManagedInstanceProvider implements ContextualTypeProvider<ManagedIn
     managedInstance.destroyAll();
   }
 
-  private static class ManagedInstanceImpl<T> implements ManagedInstance<T> {
+  private static final Map<Class<?>, SubTypeNode> subTypeNodes = new HashMap<>();
 
+  private static void addSubTypeRelation(final Class<?> superType, final Class<?> subType) {
+    if (!superType.equals(subType)) {
+      SubTypeNode superNode = subTypeNodes.get(superType);
+      if (superNode == null) {
+        superNode = new SubTypeNode(superType, new LinkedHashSet<>(0));
+        subTypeNodes.put(superType, superNode);
+      }
+      SubTypeNode subNode = subTypeNodes.get(subType);
+      if (subNode == null) {
+        subNode = new SubTypeNode(subType, new LinkedHashSet<>(1));
+        subTypeNodes.put(subType, subNode);
+      }
+      subNode.superTypes.add(superNode);
+    }
+  }
+
+  private static boolean isSubTypeRelation(final Class<?> superType, final Class<?> subType) {
+    if (superType.equals(subType)) {
+      return true;
+    }
+    else {
+      final SubTypeNode superNode = subTypeNodes.get(superType);
+      final SubTypeNode subNode = subTypeNodes.get(subType);
+
+      return superNode != null && subNode != null && isSubTypeRelation(superNode, subNode);
+    }
+  }
+
+  private static boolean isSubTypeRelation(final SubTypeNode superNode, final SubTypeNode subNode) {
+    if (subNode.superTypes.contains(superNode)) {
+      return true;
+    }
+    else {
+      for (final SubTypeNode node : subNode.superTypes) {
+        if (isSubTypeRelation(superNode, node)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+  }
+
+  private static class SubTypeNode {
+    private final Class<?> type;
+    private final Set<SubTypeNode> superTypes;
+
+    private SubTypeNode(final Class<?> type, final Set<SubTypeNode> superTypes) {
+      this.type = type;
+      this.superTypes = superTypes;
+    }
+
+    @Override
+    public int hashCode() {
+      return type.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      return obj instanceof SubTypeNode && ((SubTypeNode) obj).type.equals(type);
+    }
+  }
+
+  private static class InstanceKey<T> {
     private final Class<T> type;
     private final Set<Annotation> qualifiers;
-    private final Multimap<Set<Annotation>, ? super T> dependentInstances;
+
+    private InstanceKey(final Class<T> type, final Set<Annotation> qualifiers) {
+      this.type = type;
+      this.qualifiers = qualifiers;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj instanceof InstanceKey) {
+        final InstanceKey<?> other = (InstanceKey<?>) obj;
+        return type.equals(other.type) && qualifiers.equals(other.qualifiers);
+      }
+      else {
+        return false;
+      }
+    }
+
+    @Override
+    public int hashCode() {
+      return type.hashCode() ^ qualifiers.hashCode();
+    }
+  }
+
+  private static class ManagedInstanceImpl<S, T extends S> implements ManagedInstance<T> {
+
+    private final InstanceKey<T> key;
+    private final Multimap<InstanceKey<? extends S>, ? super T> dependentInstances;
 
     private ManagedInstanceImpl(final Class<T> type, final Annotation[] qualifiers) {
       this(type, qualifiers, ArrayListMultimap.create());
     }
 
-    private ManagedInstanceImpl(final Class<T> type, final Annotation[] qualifiers, final Multimap<Set<Annotation>, ? super T> dependentInstances) {
+    private ManagedInstanceImpl(final Class<T> type, final Annotation[] qualifiers, final Multimap<InstanceKey<? extends S>, ? super T> dependentInstances) {
       this(type, new HashSet<>(Arrays.asList(qualifiers)), dependentInstances);
     }
 
-    private ManagedInstanceImpl(final Class<T> type, final Set<Annotation> qualifiers, final Multimap<Set<Annotation>, ? super T> dependentInstances) {
-      this.type = type;
-      this.qualifiers = qualifiers;
+    private ManagedInstanceImpl(final Class<T> type, final Set<Annotation> qualifiers, final Multimap<InstanceKey<? extends S>, ? super T> dependentInstances) {
+      this.key = new InstanceKey<>(type, qualifiers);
       this.dependentInstances = dependentInstances;
     }
 
     @Override
     public T get() {
-      final SyncBeanDef<T> bean = IOCUtil.getSyncBean(type, qualifierArray());
+      final SyncBeanDef<T> bean = IOCUtil.getSyncBean(key.type, qualifierArray());
       final T instance = bean.getInstance();
       if (Dependent.class.equals(bean.getScope())) {
-        dependentInstances.put(qualifiers, instance);
+        dependentInstances.put(key, instance);
       }
 
       return instance;
     }
 
     private Annotation[] qualifierArray() {
-      return qualifiers.toArray(new Annotation[qualifiers.size()]);
+      return key.qualifiers.toArray(new Annotation[key.qualifiers.size()]);
     }
 
     @Override
     public Iterator<T> iterator() {
-      return new ManagedInstanceImplIterator<T>(getBeanManager().lookupBeans(type, qualifierArray()), qualifiers, dependentInstances);
+      return new ManagedInstanceImplIterator<S, T>(getBeanManager().lookupBeans(key.type, qualifierArray()), key, dependentInstances);
     }
 
     @Override
     public ManagedInstance<T> select(final Annotation... qualifiers) {
-      return select(type, qualifiers);
+      return select(key.type, qualifiers);
     }
 
     @Override
     public <U extends T> ManagedInstance<U> select(final Class<U> subtype, final Annotation... qualifiers) {
-      final Set<Annotation> combined = new HashSet<>(this.qualifiers);
+      final Set<Annotation> combined = new HashSet<>(key.qualifiers);
       combined.addAll(Arrays.asList(qualifiers));
+      addSubTypeRelation(key.type, subtype);
       return new ManagedInstanceImpl<>(subtype, combined, dependentInstances);
     }
 
     @Override
     public boolean isUnsatisfied() {
-      return IOCUtil.isUnsatisfied(type, qualifierArray());
+      return IOCUtil.isUnsatisfied(key.type, qualifierArray());
     }
 
     @Override
     public boolean isAmbiguous() {
-      return IOCUtil.isAmbiguous(type, qualifierArray());
+      return IOCUtil.isAmbiguous(key.type, qualifierArray());
     }
 
     @Override
     public void destroy(final T instance) {
       IOCUtil.destroy(instance);
-      dependentInstances.remove(qualifiers, instance);
+      dependentInstances.remove(key, instance);
     }
 
     @Override
     public void destroyAll() {
-      final Iterator<Set<Annotation>> qualifiersIter = dependentInstances.keySet().iterator();
-      while (qualifiersIter.hasNext()) {
-        final Set<Annotation> quals = qualifiersIter.next();
-        if (quals.containsAll(qualifiers)) {
-          final Collection<? super T> instances = dependentInstances.get(quals);
+      final Iterator<InstanceKey<? extends S>> keysIter = dependentInstances.keySet().iterator();
+      while (keysIter.hasNext()) {
+        final InstanceKey<? extends S> key = keysIter.next();
+        final Set<Annotation> quals = key.qualifiers;
+        if (quals.containsAll(this.key.qualifiers) && isSubTypeRelation(this.key.type, key.type)) {
+          final Collection<? super T> instances = dependentInstances.get(key);
           for (final Object instance : instances) {
             IOCUtil.destroy(instance);
           }
-          qualifiersIter.remove();
+          keysIter.remove();
         }
       }
     }
 
-    private static class ManagedInstanceImplIterator<T> implements Iterator<T> {
+    private static class ManagedInstanceImplIterator<S, T extends S> implements Iterator<T> {
 
       private final Iterator<SyncBeanDef<T>> delegate;
-      private final Multimap<Set<Annotation>, ? super T> dependentInstances;
+      private final InstanceKey<T> key;
+      private final Multimap<InstanceKey<? extends S>, ? super T> dependentInstances;
       private Object lastCreatedInstance;
-      private final Set<Annotation> qualifiers;
 
-      private ManagedInstanceImplIterator(final Collection<SyncBeanDef<T>> beanDefs, final Set<Annotation> qualifiers, final Multimap<Set<Annotation>, ? super T> dependentInstances) {
-        this.qualifiers = qualifiers;
+      private ManagedInstanceImplIterator(final Collection<SyncBeanDef<T>> beanDefs, final InstanceKey<T> key,
+              final Multimap<InstanceKey<? extends S>, ? super T> dependentInstances) {
+        this.key = key;
         this.delegate = beanDefs.iterator();
         this.dependentInstances = dependentInstances;
       }
@@ -158,7 +253,7 @@ public class ManagedInstanceProvider implements ContextualTypeProvider<ManagedIn
         final SyncBeanDef<T> bean = delegate.next();
         final T instance = bean.getInstance();
         if (Dependent.class.equals(bean.getScope())) {
-          dependentInstances.put(qualifiers, instance);
+          dependentInstances.put(key, instance);
         }
         lastCreatedInstance = instance;
         return instance;
@@ -169,7 +264,7 @@ public class ManagedInstanceProvider implements ContextualTypeProvider<ManagedIn
         if (lastCreatedInstance == null) {
           throw new IllegalStateException();
         }
-        else if (dependentInstances.remove(qualifiers, lastCreatedInstance)) {
+        else if (dependentInstances.remove(key, lastCreatedInstance)) {
           IOCUtil.destroy(lastCreatedInstance);
           lastCreatedInstance = null;
         }
