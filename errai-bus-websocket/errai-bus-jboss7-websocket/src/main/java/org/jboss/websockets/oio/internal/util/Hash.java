@@ -42,14 +42,14 @@ public final class Hash {
       hashCounter = random.nextInt();
       random.nextBytes(seed = new byte[512]);
     }
-    catch (NoSuchAlgorithmException e) {
+    catch (final NoSuchAlgorithmException e) {
       throw new RuntimeException("runtime does not support secure random algorithm: " + secureRandomAlgorithm);
     }
   }
 
   public static byte[] getRandomBytes(final byte[] bytes) {
     if (hashCounter < 0) {
-      hashCounter -= hashCounter;
+      hashCounter = 0;
     }
     for (int i = 0; i < bytes.length; i++) {
       hashCounter++;
@@ -82,7 +82,7 @@ public final class Hash {
         md.update(additionalSeed);
       }
 
-      byte[] randBytes = new byte[32];
+      final byte[] randBytes = new byte[32];
       getRandomBytes(randBytes);
 
       // 1,000 rounds.
@@ -92,14 +92,14 @@ public final class Hash {
 
       return hashToHexString(md.digest());
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException("failed to generate session id hash", e);
     }
   }
 
   public static String hashToHexString(byte[] hash) {
     final StringBuilder hexString = new StringBuilder(hash.length);
-    for (byte mdbyte : hash) {
+    for (final byte mdbyte : hash) {
       hexString.append(Integer.toHexString(0xFF & mdbyte));
     }
     return hexString.toString();

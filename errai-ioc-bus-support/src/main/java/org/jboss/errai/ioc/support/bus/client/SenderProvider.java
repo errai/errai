@@ -37,7 +37,7 @@ public class SenderProvider implements ContextualTypeProvider<Sender<?>> {
     String toSubject = null, replyTo = null;
     typeargs = typeargs == null ? new Class<?>[0] : typeargs;
 
-    for (Annotation a : qualifiers) {
+    for (final Annotation a : qualifiers) {
       if (a instanceof ToSubject) {
         toSubject = ((ToSubject) a).value();
       }
@@ -54,12 +54,7 @@ public class SenderProvider implements ContextualTypeProvider<Sender<?>> {
     if (toSubject == null) {
       throw new RuntimeException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
               + ToSubject.class.getName() + " qualifier missing at injection point.");
-    }
-
-    if (typeargs.length != 1) {
-      throw new RuntimeException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
-              " one type parameter. (found: " + typeargs.length + ")");
-    }
+    }    
 
     return ErraiMessageSender.of(toSubject, replyTo, ErraiBus.get());
   }

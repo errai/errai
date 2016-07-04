@@ -105,7 +105,7 @@ public class GWTUtil {
     }
     else {
       throw new RuntimeException("Don't know how to make a MetaType from given JType " + t +
-          " (which is a " + (t == null ? null : t.getClass()) + ")");
+          " (which is a " + (t.getClass()) + ")");
     }
   }
 

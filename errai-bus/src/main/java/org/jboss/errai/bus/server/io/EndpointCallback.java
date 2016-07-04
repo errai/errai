@@ -16,13 +16,13 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
-import org.mvel2.DataConversion;
-
 import java.lang.reflect.Method;
 import java.util.List;
+
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.mvel2.DataConversion;
 
 /**
  * <tt>EndpointCallback</tt> is a callback function for a message being sent. It invokes the endpoint function
@@ -52,11 +52,12 @@ public class EndpointCallback implements MessageCallback {
    * @param message
    *         - the message
    */
+  @Override
   @SuppressWarnings("unchecked")
   public void callback(final Message message) {
     final List<Object> parms = message.get(List.class, "MethodParms");
 
-    if ((parms == null && targetTypes.length != 0) || (parms.size() != targetTypes.length)) {
+    if ((parms == null && targetTypes.length != 0) || (parms != null && parms.size() != targetTypes.length)) {
       throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
               + (parms == null ? 0 : parms.size()) + "; required: " + targetTypes.length + ")");
     }
@@ -78,7 +79,7 @@ public class EndpointCallback implements MessageCallback {
     try {
       method.invoke(genericSvc, parms);
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);
     }
   }

@@ -177,9 +177,12 @@ public class ClassChangeUtil {
       // delete any marshaller classes already there
       final Pattern matcher = Pattern.compile("^" + className + "(\\.|$).*class$");
       if (classOutputDir.exists()) {
-        for (final File file : classOutputDir.listFiles()) {
-          if (matcher.matcher(file.getName()).matches()) {
-            file.delete();
+        final File[] files = classOutputDir.listFiles();
+        if (files != null) {
+          for (final File file : files) {
+            if (matcher.matcher(file.getName()).matches()) {
+              file.delete();
+            }
           }
         }
       }
@@ -225,7 +228,7 @@ public class ClassChangeUtil {
       return new File(classOutputDir.getAbsolutePath() + File.separatorChar
           + className + ".class").getAbsolutePath();
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -259,7 +262,7 @@ public class ClassChangeUtil {
       success = true;
       return loadClass;
     }
-    catch (Throwable t) {
+    catch (final Throwable t) {
       // fall through
     }
     finally {
@@ -267,45 +270,47 @@ public class ClassChangeUtil {
         try {
           inputStream.close();
         }
-        catch (Throwable ignore) {
+        catch (final Throwable ignore) {
         }
       }
     }
 
     inputStream.read(classDefinition);
 
-    for (final File file : new File(path).getParentFile().listFiles()) {
-      if (file.getName().startsWith(className + "$")) {
-        String s = file.getName();
-        s = s.substring(s.indexOf('$') + 1, s.lastIndexOf('.'));
+    final File[] files = new File(path).getParentFile().listFiles();
+    if (files != null) {
+      for (final File file : files) {
+        if (file.getName().startsWith(className + "$")) {
+          String s = file.getName();
+          s = s.substring(s.indexOf('$') + 1, s.lastIndexOf('.'));
 
-        final String nestedClassName = fqcn + "$" + s;
+          final String nestedClassName = fqcn + "$" + s;
 
-        Class<?> cls = null;
-        try {
-          cls = clsLoader.loadClass(nestedClassName);
-        }
-        catch (ClassNotFoundException ignored) {
-        }
-
-        if (cls != null) continue;
-
-        final String innerClassBaseName = classBase + "$" + s;
-        final File innerClass = new File(innerClassBaseName + ".class");
-        if (innerClass.exists()) {
+          Class<?> cls = null;
           try {
-            inputStream = new FileInputStream(innerClass);
-            classDefinition = new byte[inputStream.available()];
-            inputStream.read(classDefinition);
+            cls = clsLoader.loadClass(nestedClassName);
+          } catch (final ClassNotFoundException ignored) {
+          }
 
-            clsLoader.defineClassX(nestedClassName, classDefinition, 0, classDefinition.length);
+          if (cls != null)
+            continue;
+
+          final String innerClassBaseName = classBase + "$" + s;
+          final File innerClass = new File(innerClassBaseName + ".class");
+          if (innerClass.exists()) {
+            try {
+              inputStream = new FileInputStream(innerClass);
+              classDefinition = new byte[inputStream.available()];
+              inputStream.read(classDefinition);
+
+              clsLoader.defineClassX(nestedClassName, classDefinition, 0, classDefinition.length);
+            } finally {
+              inputStream.close();
+            }
           }
-          finally {
-            inputStream.close();
+          else {
+            break;
           }
-        }
-        else {
-          break;
         }
       }
     }
@@ -323,7 +328,7 @@ public class ClassChangeUtil {
       try {
         cls = clsLoader.loadClass(nestedClassName);
       }
-      catch (ClassNotFoundException ignored) {
+      catch (final ClassNotFoundException ignored) {
       }
 
       if (cls != null) continue;
@@ -352,7 +357,7 @@ public class ClassChangeUtil {
   }
 
   private static class BootstrapClassloader extends ClassLoader {
-    private String searchPath;
+    private final String searchPath;
 
     private BootstrapClassloader(final String searchPath, final ClassLoader classLoader) {
       super(classLoader);
@@ -368,7 +373,7 @@ public class ClassChangeUtil {
       try {
         return super.findClass(name);
       }
-      catch (ClassNotFoundException e) {
+      catch (final ClassNotFoundException e) {
         try {
           FileInputStream inputStream = null;
           final byte[] classDefinition;
@@ -389,7 +394,7 @@ public class ClassChangeUtil {
 
           }
         }
-        catch (IOException e2) {
+        catch (final IOException e2) {
           throw new RuntimeException("failed to load class: " + name, e2);
         }
 
@@ -421,13 +426,13 @@ public class ClassChangeUtil {
               cp.append(File.pathSeparator).append(file.getAbsolutePath());
             }
           }
-          catch (Exception e) {
+          catch (final Exception e) {
             log.warn("Ignoring classpath entry with invalid manifest", e);
           }
         }
       }
     }
-    catch (IOException e1) {
+    catch (final IOException e1) {
       log.warn("Failed to build classpath using manifest discovery. Expect compilation failures...", e1);
     }
     finally {
@@ -552,14 +557,14 @@ public class ClassChangeUtil {
           log.info("Successfully loaded {} with context class loader.", fullyQualifiedClassName);
           return Optional.of(loadedClass);
         }
-        catch (ClassNotFoundException e) {
+        catch (final ClassNotFoundException e) {
           log.warn("Could not load {} class.", fullyQualifiedClassName);
 
           return Optional.empty();
         }
       }
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       log.warn("Could not read {} class: " + fullyQualifiedClassName, e);
 
       return Optional.empty();
@@ -599,9 +604,12 @@ public class ClassChangeUtil {
     try {
       if (directory.exists()) {
         log.info("Directory {} already exists. Deleting directory and contents (enable debug logging to see deleted files).", directory.getAbsolutePath());
-        for (File file : directory.listFiles()) {
-          log.debug("Deleting {}", file.getAbsolutePath());
-          file.delete();
+        final File[] files = directory.listFiles();
+        if (files != null) {
+          for (final File file : files) {
+            log.debug("Deleting {}", file.getAbsolutePath());
+            file.delete();
+          }
         }
         log.debug("Deleting {}", directory.getAbsolutePath());
         directory.delete();
@@ -627,7 +635,7 @@ public class ClassChangeUtil {
         return loadClassDefinition(compiledClassPath, packageName, simpleClassName);
       }
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       throw new RuntimeException("failed to generate class ", e);
     }
   }

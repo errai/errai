@@ -16,40 +16,38 @@
 
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
-import com.google.inject.Guice;
-import org.jboss.errai.common.client.api.ResourceProvider;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
-import org.jboss.errai.common.server.api.annotations.ExtensionComponent;
-import org.jboss.errai.common.server.api.ErraiConfig;
-import org.jboss.errai.common.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
+import org.jboss.errai.common.server.api.ErraiConfig;
+import org.jboss.errai.common.server.api.ErraiConfigExtension;
+import org.jboss.errai.common.server.api.annotations.ExtensionComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.google.inject.AbstractModule;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 7, 2010
  */
 public class LoadExtensions implements BootstrapExecution {
-  private Logger log = LoggerFactory.getLogger(LoadExtensions.class);
+  private final Logger log = LoggerFactory.getLogger(LoadExtensions.class);
 
+  @Override
   public void execute(final BootstrapContext context) {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
 
     boolean autoScanModules = true;
 
-    final Set<String> loadedComponents = new HashSet<String>();
-
-    /*** Extensions  ***/
     if (config.hasProperty("errai.auto_load_extensions")) {
       autoScanModules = Boolean.parseBoolean(config.getProperty("errai.auto_load_extensions"));
     }
@@ -58,26 +56,22 @@ public class LoadExtensions implements BootstrapExecution {
       log.info("searching for errai extensions ...");
 
       final ErraiConfig erraiConfig = new ErraiConfig() {
+        @Override
         public void addBinding(Class<?> type, ResourceProvider provider) {
           config.getExtensionBindings().put(type, provider);
         }
 
+        @Override
         public void addResourceProvider(String name, ResourceProvider provider) {
           config.getResourceProviders().put(name, provider);
-        }
-
-        public void addSerializableType(Class<?> type) {
-          log.debug("marked " + type + " as serializable.");
-          loadedComponents.add(type.getName());
-          config.getSerializableTypes().add(type);
         }
       };
 
       // Search for Errai extensions.
-      MetaDataScanner scanner = context.getScanner();
+      final MetaDataScanner scanner = context.getScanner();
 
-      Set<Class<?>> extensionComponents = scanner.getTypesAnnotatedWith(ExtensionComponent.class);
-      for (Class<?> loadClass : extensionComponents) {
+      final Set<Class<?>> extensionComponents = scanner.getTypesAnnotatedWith(ExtensionComponent.class);
+      for (final Class<?> loadClass : extensionComponents) {
         if (ErraiConfigExtension.class.isAssignableFrom(loadClass)) {
           // We have an annotated ErraiConfigExtension.  So let's configure it.
           final Class<? extends ErraiConfigExtension> clazz =
@@ -89,8 +83,9 @@ public class LoadExtensions implements BootstrapExecution {
           try {
 
             final Runnable create = new Runnable() {
+              @Override
               public void run() {
-                AbstractModule module = new AbstractModule() {
+                final AbstractModule module = new AbstractModule() {
                   @Override
                   protected void configure() {
                     bind(ErraiConfigExtension.class).to(clazz);
@@ -98,7 +93,7 @@ public class LoadExtensions implements BootstrapExecution {
                     bind(MessageBus.class).toInstance(context.getBus());
 
                     // Add any extension bindings.
-                    for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
+                    for (final Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
                       bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
                     }
                   }
@@ -112,18 +107,17 @@ public class LoadExtensions implements BootstrapExecution {
             try {
               create.run();
             }
-            catch (CreationException e) {
+            catch (final CreationException e) {
               log.debug("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
               context.defer(create);
             }
 
           }
-          catch (Throwable e) {
+          catch (final Throwable e) {
             throw new ErraiBootstrapFailure("could not initialize extension: " + loadClass.getName(), e);
           }
         }
       }
-
     }
     else {
       log.info("auto-loading of extensions disabled.");

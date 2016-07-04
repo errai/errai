@@ -17,7 +17,7 @@
 package org.jboss.errai.cdi.eqs;
 
 import static java.lang.String.format;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.lang.annotation.Annotation;
 
@@ -133,14 +133,14 @@ public class DynamicEventQualifierSerializerTest {
 
   @Test
   public void annotationWithTwoProperties() throws Exception {
-    assertEquals(eqs.serialize(twoAttrAnno), format("%s(num=%d,str=foo)", TwoAttrAnno.class.getName(),
+    assertEquals(eqs.serialize(twoAttrAnno), format("%s(num=%d,str=%s)", TwoAttrAnno.class.getName(),
             someNonBindingAttrAnno.num(), someNonBindingAttrAnno.str()));
   }
 
   @Test
   public void annotationWithSomeNonBindingProperties() throws Exception {
     assertEquals(eqs.serialize(someNonBindingAttrAnno),
-            format("%s(num=%d,str=foo)", SomeNonBindingAttrAnno.class.getName(), twoAttrAnno.num(), twoAttrAnno.str()));
+            format("%s(num=%d,str=%s)", SomeNonBindingAttrAnno.class.getName(), twoAttrAnno.num(), twoAttrAnno.str()));
   }
 
 }

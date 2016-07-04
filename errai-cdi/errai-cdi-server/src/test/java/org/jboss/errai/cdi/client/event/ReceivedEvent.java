@@ -45,4 +45,11 @@ public class ReceivedEvent {
   public void setEvent(String event) {
     this.event = event;
   }
+
+  @Override
+  public String toString() {
+    return "ReceivedEvent [receiver=" + receiver + ", event=" + event + "]";
+  }
+  
+  
 }

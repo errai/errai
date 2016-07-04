@@ -85,9 +85,9 @@ public class TestingTickCache implements Iterable<TestingTick> {
    * Removes all leading entries that are older than the time span set on this cache.
    */
   private void prune() {
-    long cutoff = System.currentTimeMillis() - timeSpan;
+    final long cutoff = System.currentTimeMillis() - timeSpan;
     while ((!entries.isEmpty()) && entries.element().getTime().getTime() < cutoff) {
-      entries.remove(0);
+      entries.remove();
     }
   }
 
@@ -145,7 +145,7 @@ public class TestingTickCache implements Iterable<TestingTick> {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    TestingTickCache other = (TestingTickCache) obj;
+    final TestingTickCache other = (TestingTickCache) obj;
     if (entries == null) {
       if (other.entries != null)
         return false;

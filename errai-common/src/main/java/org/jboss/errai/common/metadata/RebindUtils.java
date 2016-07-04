@@ -108,9 +108,6 @@ public class RebindUtils {
     try {
       final MessageDigest md = MessageDigest.getInstance("SHA-1");
       final String classPath = System.getProperty("java.class.path");
-
-      final Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("");
-
       md.update(hashSeed.getBytes());
 
       for (final String p : classPath.split(System.getProperty("path.separator"))) {
@@ -147,7 +144,7 @@ public class RebindUtils {
 
       return _classpathHashCache = hashToHexString(md.digest());
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException("failed to generate hash for classpath fingerprint", e);
     }
   }
@@ -179,7 +176,7 @@ public class RebindUtils {
   }
 
   private static boolean nocache = Boolean.getBoolean("errai.devel.nocache");
-  private static Boolean _hasClasspathChanged;
+  private static volatile Boolean _hasClasspathChanged;
 
   public static boolean hasClasspathChanged() {
     if (nocache)
@@ -277,7 +274,7 @@ public class RebindUtils {
       outputStream.write(data.getBytes("UTF-8"));
       outputStream.close();
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       throw new RuntimeException("could not write file for debug cache", e);
     }
   }
@@ -286,7 +283,7 @@ public class RebindUtils {
     try {
       return Files.toString(file, Charset.forName("UTF-8"));
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       throw new RuntimeException("could not read file for debug cache", e);
     }
   }
@@ -371,7 +368,7 @@ public class RebindUtils {
         return candidateRoots.iterator().next();
       }
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException("could not determine module package", e);
 
     }
@@ -381,22 +378,22 @@ public class RebindUtils {
     final StandardGeneratorContext standardGeneratorContext =
       (StandardGeneratorContext) context;
     try {
-      Field moduleField = StandardGeneratorContext.class.getDeclaredField("module");
+      final Field moduleField = StandardGeneratorContext.class.getDeclaredField("module");
       moduleField.setAccessible(true);
       return (ModuleDef) moduleField.get(standardGeneratorContext);
     }
-    catch (Throwable t) {
+    catch (final Throwable t) {
       try {
         // for GWT versions higher than 2.5.1 we need to get the ModuleDef out of the
         // CompilerContext
-        Field compilerContextField = StandardGeneratorContext.class.getDeclaredField("compilerContext");
+        final Field compilerContextField = StandardGeneratorContext.class.getDeclaredField("compilerContext");
         compilerContextField.setAccessible(true);
         // Using plain Object because CompilerContext doesn't exist in GWT 2.5
-        Object compilerContext = compilerContextField.get(standardGeneratorContext);
-        Method getModuleMethod = compilerContext.getClass().getMethod("getModule");
+        final Object compilerContext = compilerContextField.get(standardGeneratorContext);
+        final Method getModuleMethod = compilerContext.getClass().getMethod("getModule");
         return (ModuleDef) getModuleMethod.invoke(compilerContext);
       }
-      catch (Throwable t2) {
+      catch (final Throwable t2) {
         throw new RuntimeException("could not get module definition (you may be using an incompatible GWT version)", t);
       }
     }
@@ -406,11 +403,11 @@ public class RebindUtils {
     final ModuleDef moduleDef = getModuleDef(context);
 
     try {
-      Field gwtXmlFilesField = ModuleDef.class.getDeclaredField("gwtXmlFiles");
+      final Field gwtXmlFilesField = ModuleDef.class.getDeclaredField("gwtXmlFiles");
       gwtXmlFilesField.setAccessible(true);
       return (Set<File>) gwtXmlFilesField.get(moduleDef);
     }
-    catch (Throwable t) {
+    catch (final Throwable t) {
       throw new RuntimeException("could not access 'gwtXmlFiles' field from the module definition " +
           "(you may be using an incompatible GWT version)");
     }
@@ -420,11 +417,11 @@ public class RebindUtils {
     final ModuleDef moduleDef = getModuleDef(context);
 
     try {
-      Field inheritedModules = ModuleDef.class.getDeclaredField("inheritedModules");
+      final Field inheritedModules = ModuleDef.class.getDeclaredField("inheritedModules");
       inheritedModules.setAccessible(true);
       return (Set<String>) inheritedModules.get(moduleDef);
     }
-    catch (Throwable t) {
+    catch (final Throwable t) {
       throw new RuntimeException("could not access 'inheritedModules' field from the module definition " +
           "(you may be using an incompatible GWT version)");
     }
@@ -435,24 +432,24 @@ public class RebindUtils {
   }
 
   public static Set<String> getReloadablePackageNames(final GeneratorContext context) {
-    Set<String> result = new HashSet<String>();
-    ModuleDef module = getModuleDef(context);
+    final Set<String> result = new HashSet<String>();
+    final ModuleDef module = getModuleDef(context);
     if (module == null) {
       return result;
     }
 
-    String moduleName = module.getCanonicalName().replace(".JUnit", "");
+    final String moduleName = module.getCanonicalName().replace(".JUnit", "");
     result.add(StringUtils.substringBeforeLast(moduleName, "."));
 
-    List<String> dottedModulePaths = new ArrayList<String>();
-    for (File moduleXmlFile : getAllModuleXMLs(context)) {
+    final List<String> dottedModulePaths = new ArrayList<String>();
+    for (final File moduleXmlFile : getAllModuleXMLs(context)) {
       String fileName = moduleXmlFile.getAbsolutePath();
       fileName = fileName.replace(File.separatorChar, '.');
       dottedModulePaths.add(fileName);
     }
 
-    for (String inheritedModule : getInheritedModules(context)) {
-      for (String dottedModulePath : dottedModulePaths) {
+    for (final String inheritedModule : getInheritedModules(context)) {
+      for (final String dottedModulePath : dottedModulePaths) {
         if (dottedModulePath.contains(inheritedModule)) {
           result.add(StringUtils.substringBeforeLast(inheritedModule, "."));
         }
@@ -473,7 +470,7 @@ public class RebindUtils {
         classPathRoots.add(resources.nextElement().getFile());
       }
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       e.printStackTrace();
     }
 
@@ -520,13 +517,13 @@ public class RebindUtils {
                 }
               }
             }
-            catch (ParserConfigurationException e) {
+            catch (final ParserConfigurationException e) {
               e.printStackTrace();
             }
-            catch (SAXException e) {
+            catch (final SAXException e) {
               e.printStackTrace();
             }
-            catch (IOException e) {
+            catch (final IOException e) {
               logger.error("error accessing module XML file", e);
             }
             finally {
@@ -534,7 +531,7 @@ public class RebindUtils {
                 try {
                   inputStream.close();
                 }
-                catch (IOException e) {
+                catch (final IOException e) {
                   logger.warn("problem closing stream", e);
                 }
               }
@@ -551,7 +548,7 @@ public class RebindUtils {
       executorService.shutdown();
       executorService.awaitTermination(60, TimeUnit.MINUTES);
     }
-    catch (InterruptedException e) {
+    catch (final InterruptedException e) {
       e.printStackTrace();
     }
 
@@ -562,7 +559,7 @@ public class RebindUtils {
     try {
       return getModuleDef(context).getCanonicalName();
     }
-    catch (Throwable t) {
+    catch (final Throwable t) {
       return null;
     }
   }
@@ -597,11 +594,11 @@ public class RebindUtils {
         }
       }
     }
-    catch (NoSuchFieldException e) {
+    catch (final NoSuchFieldException e) {
       logger.error("the version of GWT you are running does not appear to be compatible with this version of Errai", e);
       throw new RuntimeException("could not access the module field in the GeneratorContext");
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException("could not determine module package", e);
     }
 

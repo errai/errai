@@ -16,9 +16,10 @@
 
 package org.jboss.errai.bus.client.api;
 
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
+
+import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Abstract test that covers the contract of the AsyncTask interface. Tests for client-side AsyncTask implementations
@@ -115,7 +116,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   protected abstract void runAfterTaskFinished(Runnable r);
 
   public void testCancellationFlag() throws Exception {
-    AsyncTask task = getTaskUnderTest(new CountingRunnable());
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable());
     task.cancel(false);
     assertTrue(task.isCancelled());
   }
@@ -134,15 +135,15 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testExitHandlerRunsImmediatelyOnCancelledTask() throws Exception {
-    AsyncTask task = getTaskUnderTest(new CountingRunnable());
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable());
     task.cancel(false);
-    CountingRunnable cr = new CountingRunnable();
+    final CountingRunnable cr = new CountingRunnable();
     task.setExitHandler(cr);
     assertEquals(1, cr.getRunCount());
   }
 
   public void testMultipleExitHandlersBeforeTaskFinished() throws Exception {
-    AsyncTask task = getTaskUnderTest(new CountingRunnable());
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable());
 
     final CountingRunnable cr1 = new CountingRunnable();
     task.setExitHandler(cr1);
@@ -151,7 +152,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
       task.setExitHandler(cr2);
       fail("Expected IllegalStateException");
     }
-    catch (IllegalStateException e) {
+    catch (final IllegalStateException e) {
       // expected
     }
 
@@ -167,7 +168,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testAddExitHandlerBeforeTaskFinished() throws Exception {
-    AsyncTask task = getTaskUnderTest(new CountingRunnable());
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable());
 
     final CountingRunnable cr = new CountingRunnable();
     task.setExitHandler(cr);
@@ -183,7 +184,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testAddExitHandlerForFailingTask() throws Exception {
-    AsyncTask task = getTaskUnderTest(new CountingRunnable(BLOW_UP));
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable(BLOW_UP));
 
     final CountingRunnable cr = new CountingRunnable();
     task.setExitHandler(cr);
@@ -237,8 +238,8 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testAsyncTaskRefInjection() throws Exception {
-    CountingRunnable runnable = new CountingRunnable();
-    AsyncTask task = getTaskUnderTest(runnable);
+    final CountingRunnable runnable = new CountingRunnable();
+    final AsyncTask task = getTaskUnderTest(runnable);
     assertNotNull("No AsyncTask was injected into runnable", runnable.getAsyncTask());
     assertSame("Wrong AsyncTask injected into runnable", task, runnable.getAsyncTask());
   }

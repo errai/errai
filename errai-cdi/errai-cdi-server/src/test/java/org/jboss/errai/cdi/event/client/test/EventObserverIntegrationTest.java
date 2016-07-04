@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.cdi.event.client.DependentEventObserverTestModule;
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
+import org.jboss.errai.cdi.event.client.EventProducerTestModule;
 import org.jboss.errai.cdi.event.client.OnDemandEventObserver;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -41,12 +42,18 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     return "org.jboss.errai.cdi.event.EventObserverTestModule";
   }
 
+  @Override
+  protected void gwtSetUp() throws Exception {
+    EventProducerTestModule.clearReceivedEventsOnServer();
+    super.gwtSetUp();
+  }
+  
   public void testBusReadyEventObserver() {
     delayTestFinish(60000);
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+        final EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
 
         assertEquals("Wrong number of BusReadyEvents received:", 1, module.getBusReadyEventsReceived());
         finishTest();
@@ -58,7 +65,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     final Runnable verifier = new Runnable() {
       @Override
       public void run() {
-        EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+        final EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
 
         // assert that client received all events
         EventObserverIntegrationTest.this.verifyQualifiedEvents(module.getReceivedQualifiedEvents(), true);
@@ -71,7 +78,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+        final EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
 
         assertNotNull(module.getStartEvent());
         module.setResultVerifier(verifier);
@@ -91,7 +98,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     final Runnable secondVerifier = new Runnable() {
       @Override
       public void run() {
-        OnDemandEventObserver observer = IOC.getBeanManager().lookupBean(OnDemandEventObserver.class).getInstance();
+        final OnDemandEventObserver observer = IOC.getBeanManager().lookupBean(OnDemandEventObserver.class).getInstance();
 
         assertEquals(1, observer.getEventLog().size());
 
@@ -103,12 +110,13 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       @Override
       public void run() {
         // now creating this observer for the first time ever
-        OnDemandEventObserver observer = IOC.getBeanManager().lookupBean(OnDemandEventObserver.class).getInstance();
+        final OnDemandEventObserver observer = IOC.getBeanManager().lookupBean(OnDemandEventObserver.class).getInstance();
 
         assertEquals(0, observer.getEventLog().size());
 
-        EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+        final EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
         module.setResultVerifier(secondVerifier);
+        EventProducerTestModule.clearReceivedEventsOnServer();
         module.start();
       }
     };
@@ -116,7 +124,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+        final EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
 
         assertNotNull(module.getStartEvent());
         module.setResultVerifier(firstVerifier);
@@ -141,7 +149,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       @Override
       public void run() {
         System.out.println("Verifier starting");
-        EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+        final EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
 
         // assert that client received all events
         EventObserverIntegrationTest.this.verifyQualifiedEvents(module.getReceivedQualifiedEvents(), true);
@@ -193,7 +201,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testDestroyBeanWithEventObservers() {
-    DependentEventObserverTestModule module = IOC.getBeanManager().lookupBean(DependentEventObserverTestModule.class).getInstance();
+    final DependentEventObserverTestModule module = IOC.getBeanManager().lookupBean(DependentEventObserverTestModule.class).getInstance();
     IOC.getBeanManager().destroyBean(module);
     assertTrue("Bean wasn't destroyed", module.isDestroyed());
   }
@@ -203,7 +211,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        DependentEventObserverTestModule module = IOC.getBeanManager().lookupBean(DependentEventObserverTestModule.class).getInstance();
+        final DependentEventObserverTestModule module = IOC.getBeanManager().lookupBean(DependentEventObserverTestModule.class).getInstance();
         IOC.getBeanManager().destroyBean(module);
       }
     });

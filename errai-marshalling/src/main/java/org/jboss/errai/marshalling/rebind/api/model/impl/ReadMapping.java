@@ -16,13 +16,13 @@
 
 package org.jboss.errai.marshalling.rebind.api.model.impl;
 
+import java.lang.reflect.Method;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
-
-import java.lang.reflect.Method;
 
 /**
  * @author Mike Brock
@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
 public class ReadMapping extends SimpleMapping implements MemberMapping {
   private MetaClass toMap;
   private MetaClassMember readingMember;
-  private String getterMethod;
+  private final String getterMethod;
 
   public ReadMapping(final String key, final Class<?> type, final String getterMethod) {
     this(key, JavaReflectionClass.newUncachedInstance(type), getterMethod);
@@ -58,7 +58,6 @@ public class ReadMapping extends SimpleMapping implements MemberMapping {
     }
 
     final MetaMethod meth = toMap.getMethod(getterMethod, new MetaClass[0]);
-
 
     final Method method = meth.asMethod();
     if (method != null) {

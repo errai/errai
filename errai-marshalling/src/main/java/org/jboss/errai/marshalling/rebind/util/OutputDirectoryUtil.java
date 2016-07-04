@@ -152,7 +152,7 @@ public class OutputDirectoryUtil {
                   candidate.score++;
                 }
               }
-              catch (Throwable ignored) {
+              catch (final Throwable ignored) {
               }
             }
 
@@ -222,11 +222,14 @@ public class OutputDirectoryUtil {
                                                           final Map<String, String> toMatch,
                                                           final File from) {
     if (from.isDirectory()) {
-      for (final File file : from.listFiles()) {
-        final int currMatch = matching.size();
-        _findMatchingOutputDirectoryByModel(matching, toMatch, file);
-        if (matching.size() > currMatch) {
-          break;
+      final File[] files = from.listFiles();
+      if (files != null) {
+        for (final File file : files) {
+          final int currMatch = matching.size();
+          _findMatchingOutputDirectoryByModel(matching, toMatch, file);
+          if (matching.size() > currMatch) {
+            break;
+          }
         }
       }
     }
@@ -253,7 +256,7 @@ public class OutputDirectoryUtil {
     if (from.isDirectory()) {
       final File[] files = from.listFiles();
       if (files != null) {
-        for (final File file : from.listFiles()) {
+        for (final File file : files) {
           _findAllMatching(matching, fileName, file);
         }
       }
@@ -343,7 +346,7 @@ public class OutputDirectoryUtil {
                 source, outputDirCdt.getAbsolutePath());
         log.info("** Wrote {}.{} class to {}", packageName, simpleClassName, classFilePath);
       }
-      catch (Throwable t) {
+      catch (final Throwable t) {
         log.warn("Encountered error while trying to generate {}.{} class in {}", packageName, simpleClassName, outputDirCdt.getAbsolutePath());
       }
     });
@@ -353,7 +356,7 @@ public class OutputDirectoryUtil {
     final String classFilePath = ClassChangeUtil.generateClassFile(packageName, simpleClassName, tmpDirPath, source, tmpDirPath);
     try {
       ClassChangeUtil.loadClassDefinition(classFilePath, packageName, simpleClassName);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException("Could not load " + packageName + "." + simpleClassName, e);
     }
   }

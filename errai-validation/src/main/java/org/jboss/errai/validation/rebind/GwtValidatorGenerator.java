@@ -47,7 +47,6 @@ import org.jboss.errai.reflections.util.SimplePackageFilter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.thirdparty.guava.common.collect.Sets;
 import com.google.gwt.validation.client.GwtValidation;
 
 /**
@@ -76,13 +75,13 @@ class GwtValidatorGenerator {
   public ClassStructureBuilder<?> generate(final GeneratorContext context) {
     if (globalConstraints == null) {
       globalConstraints = new HashSet<MetaClass>();
-      for (Class<?> clazz : new ContraintScanner().getTypesAnnotatedWith(Constraint.class)) {
+      for (final Class<?> clazz : new ContraintScanner().getTypesAnnotatedWith(Constraint.class)) {
         globalConstraints.add(MetaClassFactory.get(clazz)); 
       }
     }
     
-    Collection<MetaClass> constraints =  ClassScanner.getTypesAnnotatedWith(Constraint.class, context);
-    Set<MetaClass> allConstraints = new HashSet<MetaClass>();
+    final Collection<MetaClass> constraints =  ClassScanner.getTypesAnnotatedWith(Constraint.class, context);
+    final Set<MetaClass> allConstraints = new HashSet<MetaClass>();
     allConstraints.addAll(globalConstraints);
     allConstraints.addAll(constraints);
     
@@ -91,8 +90,8 @@ class GwtValidatorGenerator {
     final Set<Class<?>> groups = extractValidationGroups(validationConfig);
     
     final Set<Class<?>> filteredBeans = new HashSet<Class<?>>();
-    SimplePackageFilter filter = new SimplePackageFilter(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, " "));
-    for (Class<?> bean : beans) {
+    final SimplePackageFilter filter = new SimplePackageFilter(PropertiesUtil.getPropertyValues(BLACKLIST_PROPERTY, " "));
+    for (final Class<?> bean : beans) {
       if (!filter.apply(bean.getName())) {
         filteredBeans.add(bean);
       }
@@ -103,7 +102,7 @@ class GwtValidatorGenerator {
       return null;
     }
 
-    ClassStructureBuilder<?> builder = ClassBuilder.define("Gwt" + Validator.class.getSimpleName()).publicScope()
+    final ClassStructureBuilder<?> builder = ClassBuilder.define("Gwt" + Validator.class.getSimpleName()).publicScope()
             .interfaceDefinition().implementsInterface(Validator.class).body();
 
     builder.getClassDefinition().addAnnotation(new GwtValidation() {
@@ -128,15 +127,15 @@ class GwtValidatorGenerator {
 
   @SuppressWarnings("unchecked")
   private SetMultimap<MetaClass, Annotation> getValidationConfig(Collection<MetaClass> validationAnnotations, GeneratorContext context) {
-    SetMultimap<MetaClass, Annotation> beans = HashMultimap.create();
-    for (MetaClass annotation : validationAnnotations) {
-      for (MetaField field : ClassScanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
+    final SetMultimap<MetaClass, Annotation> beans = HashMultimap.create();
+    for (final MetaClass annotation : validationAnnotations) {
+      for (final MetaField field : ClassScanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
         beans.put(field.getDeclaringClass(), field.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
       }
-      for (MetaMethod method : ClassScanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
+      for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
         beans.put(method.getDeclaringClass(), method.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
       }
-      for (MetaClass type : ClassScanner.getTypesAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
+      for (final MetaClass type : ClassScanner.getTypesAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
         beans.put(type, type.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
       }
     }
@@ -145,17 +144,17 @@ class GwtValidatorGenerator {
   }
 
   private Set<Class<?>> extractValidatableBeans(final Set<MetaClass> beans, final GeneratorContext context) {
-    Set<Class<?>> allBeans = new HashSet<Class<?>>();
+    final Set<Class<?>> allBeans = new HashSet<Class<?>>();
     
-    for (MetaClass bean : beans) {
+    for (final MetaClass bean : beans) {
       allBeans.add(bean.asClass());
     }
     
-    for (MetaField field : ClassScanner.getFieldsAnnotatedWith(Valid.class, null, context)) {
+    for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(Valid.class, null, context)) {
       allBeans.add(field.getDeclaringClass().asClass());
       allBeans.add(field.getType().asClass());
     }
-    for (MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Valid.class, null, context)) {
+    for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Valid.class, null, context)) {
       allBeans.add(method.getDeclaringClass().asClass());
       allBeans.add(method.getReturnType().asClass());
     }
@@ -164,12 +163,12 @@ class GwtValidatorGenerator {
   }
 
   private Set<Class<?>> extractValidationGroups(SetMultimap<MetaClass, Annotation> validationConfig) {
-    Set<Class<?>> groups = new HashSet<Class<?>>();
+    final Set<Class<?>> groups = new HashSet<Class<?>>();
 
-    for (Annotation annotation : validationConfig.values()) {
+    for (final Annotation annotation : validationConfig.values()) {
       try {
-        Method method = annotation.getClass().getMethod("groups", (Class<?>[]) null);
-        Class<?>[] ret = (Class<?>[]) method.invoke(annotation, (Object[]) null);
+        final Method method = annotation.getClass().getMethod("groups", (Class<?>[]) null);
+        final Class<?>[] ret = (Class<?>[]) method.invoke(annotation, (Object[]) null);
         if (ret.length != 0) {
           groups.addAll(Arrays.asList(ret));
         }
@@ -177,13 +176,13 @@ class GwtValidatorGenerator {
           groups.add(Default.class);
         }
       }
-      catch (NoSuchMethodException e) {
+      catch (final NoSuchMethodException e) {
         throw new RuntimeException("Error finding groups() parameter in " + annotation.getClass().getName(), e);
       }
-      catch (InvocationTargetException e) {
+      catch (final InvocationTargetException e) {
         throw new RuntimeException("Error invoking groups() parameter in " + annotation.getClass().getName(), e);
       }
-      catch (IllegalAccessException e) {
+      catch (final IllegalAccessException e) {
         throw new RuntimeException("Error invoking groups() parameter in " + annotation.getClass().getName(), e);
       }
     }

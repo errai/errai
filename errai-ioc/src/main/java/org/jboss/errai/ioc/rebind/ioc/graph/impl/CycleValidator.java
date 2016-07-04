@@ -43,7 +43,7 @@ final class CycleValidator implements Validator {
 
   private static void validateDependentScopedInjectable(final Injectable injectable, final Set<Injectable> visiting,
           final Set<Injectable> visited, final Collection<String> problems, final boolean onlyConstuctorDeps) {
-    if (InjectableType.Disabled.equals(injectable.getInjectedType())) {
+    if (InjectableType.Disabled.equals(injectable.getInjectableType())) {
       visited.add(injectable);
       return;
     }

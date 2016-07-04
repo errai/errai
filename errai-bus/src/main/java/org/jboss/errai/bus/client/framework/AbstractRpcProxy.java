@@ -54,10 +54,7 @@ public abstract class AbstractRpcProxy implements RpcStub {
 
   @Override
   public void setErrorCallback(ErrorCallback errorCallback) {
-    if (errorCallback == null) {
-      errorCallback = defaultErrorCallback;
-    }
-    else {
+    if (errorCallback != null) {
       this.errorCallback = errorCallback;
     }
   }

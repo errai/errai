@@ -113,9 +113,9 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
   private class PermutationCacheManifestArtifact extends Artifact<PermutationCacheManifestArtifact> {
     private static final long serialVersionUID = 1L;
 
-    private Set<String> cachedFiles = new HashSet<String>();
-    private String name;
-    private Map<String, String> props;
+    private final Set<String> cachedFiles = new HashSet<String>();
+    private final String name;
+    private final Map<String, String> props;
 
     public PermutationCacheManifestArtifact(Class<? extends Linker> linker, String name, Map<String, String> props) {
       super(linker);
@@ -153,7 +153,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
   public ArtifactSet link(TreeLogger logger, LinkerContext context, ArtifactSet artifacts, boolean onePermutation)
           throws UnableToCompleteException {
 
-    ArtifactSet toReturn = new ArtifactSet(artifacts);
+    final ArtifactSet toReturn = new ArtifactSet(artifacts);
     if (toReturn.find(SelectionInformation.class).isEmpty()) {
       logger.log(TreeLogger.INFO, "devmode: generating empty " + MANIFEST);
       toReturn.add(emitString(logger, "# Empty in DevMode\n", "dev." + MANIFEST));
@@ -166,11 +166,11 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     else {
       // Group permutations per user agent
       final Multimap<String, PermutationCacheManifestArtifact> permutations = ArrayListMultimap.create();
-      for (PermutationCacheManifestArtifact pcma : artifacts.find(PermutationCacheManifestArtifact.class)) {
+      for (final PermutationCacheManifestArtifact pcma : artifacts.find(PermutationCacheManifestArtifact.class)) {
         permutations.put(pcma.props.get("user.agent"), pcma);
       }
 
-      for (String userAgent : permutations.keySet()) {
+      for (final String userAgent : permutations.keySet()) {
         // Create a cache manifest file for every user agent
         toReturn.add(emitUserAgentCacheManifestFile(userAgent, permutations.get(userAgent), artifacts, logger));
 
@@ -203,18 +203,16 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
   private Artifact<?> createPermutationCacheManifestArtifact(LinkerContext context, TreeLogger logger,
           ArtifactSet artifacts) {
 
-    SelectionInformation si = artifacts.find(SelectionInformation.class).first();
-    PermutationCacheManifestArtifact cacheArtifact = new PermutationCacheManifestArtifact(this.getClass(),
+    final SelectionInformation si = artifacts.find(SelectionInformation.class).first();
+    final PermutationCacheManifestArtifact cacheArtifact = new PermutationCacheManifestArtifact(this.getClass(),
             si.getStrongName(), si.getPropMap());
 
-    if (artifacts != null) {
-      for (Artifact<?> artifact : artifacts) {
-        if (artifact instanceof EmittedArtifact) {
-          EmittedArtifact ea = (EmittedArtifact) artifact;
-          String pathName = ea.getPartialPath();
-          if (shouldBeCached(pathName)) {
-            cacheArtifact.addCachedFile(pathName);
-          }
+    for (final Artifact<?> artifact : artifacts) {
+      if (artifact instanceof EmittedArtifact) {
+        final EmittedArtifact ea = (EmittedArtifact) artifact;
+        final String pathName = ea.getPartialPath();
+        if (shouldBeCached(pathName)) {
+          cacheArtifact.addCachedFile(pathName);
         }
       }
     }
@@ -243,22 +241,22 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
           throws UnableToCompleteException {
 
     // Add static external resources
-    StringBuilder staticResoucesSb = new StringBuilder();
-    String[] cacheExtraFiles = getCacheExtraFiles();
+    final StringBuilder staticResoucesSb = new StringBuilder();
+    final String[] cacheExtraFiles = getCacheExtraFiles();
     for (int i = 0; i < cacheExtraFiles.length; i++) {
       staticResoucesSb.append(cacheExtraFiles[i]);
       staticResoucesSb.append("\n");
     }
 
     // Add generated resources
-    Set<String> cacheableGeneratedResources = new HashSet<String>();
+    final Set<String> cacheableGeneratedResources = new HashSet<String>();
 
     // Add permutation independent resources
     if (globalArtifacts != null) {
-      for (Artifact<?> a : globalArtifacts) {
+      for (final Artifact<?> a : globalArtifacts) {
         if (a instanceof EmittedArtifact) {
-          EmittedArtifact ea = (EmittedArtifact) a;
-          String pathName = ea.getPartialPath();
+          final EmittedArtifact ea = (EmittedArtifact) a;
+          final String pathName = ea.getPartialPath();
           if (shouldBeCached(pathName) && !isPermutationSpecific(globalArtifacts, pathName)) {
             cacheableGeneratedResources.add(pathName);
           }
@@ -268,15 +266,15 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
 
     // Add permutation specific resources
     if (artifacts != null) {
-      for (PermutationCacheManifestArtifact artifact : artifacts) {
-        for (String cachedFile : artifact.cachedFiles) {
+      for (final PermutationCacheManifestArtifact artifact : artifacts) {
+        for (final String cachedFile : artifact.cachedFiles) {
           cacheableGeneratedResources.add(cachedFile);
         }
       }
     }
 
     // Build manifest
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     sb.append("CACHE MANIFEST\n");
     // we have to generate this unique id because the resources can change but
     // the hashed cache.html files can remain the same.
@@ -286,7 +284,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
     sb.append("# Static app files\n");
     sb.append(staticResoucesSb.toString());
     sb.append("\n# Generated permutation specific app files");
-    for (String resource : cacheableGeneratedResources) {
+    for (final String resource : cacheableGeneratedResources) {
       sb.append("\n");
       sb.append(resource);
     }
@@ -304,7 +302,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
    * array is not null.
    */
   private String[] getCacheExtraFiles() {
-    String[] cacheExtraFiles = otherCachedFiles();
+    final String[] cacheExtraFiles = otherCachedFiles();
     return cacheExtraFiles == null ? new String[0] : Arrays.copyOf(cacheExtraFiles, cacheExtraFiles.length);
   }
 
@@ -323,7 +321,7 @@ public class DefaultCacheManifestLinker extends AbstractLinker {
   private boolean isPermutationSpecific(ArtifactSet artifacts, String file) {
     if (permutationFiles == null) {
       permutationFiles = new HashSet<String>();
-      for (PermutationCacheManifestArtifact pcma : artifacts.find(PermutationCacheManifestArtifact.class)) {
+      for (final PermutationCacheManifestArtifact pcma : artifacts.find(PermutationCacheManifestArtifact.class)) {
         permutationFiles.addAll(pcma.cachedFiles);
       }
     }

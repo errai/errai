@@ -16,6 +16,14 @@
 
 package org.jboss.errai.forge.ui.setup;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.jboss.errai.forge.config.ProjectConfig;
@@ -36,13 +44,6 @@ import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Metadata;
 import org.jboss.forge.addon.ui.wizard.UIWizardStep;
-
-import javax.inject.Inject;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 public class ModuleSelect extends AbstractUICommand implements UIWizardStep {
 
@@ -110,11 +111,14 @@ public class ModuleSelect extends AbstractUICommand implements UIWizardStep {
   private static Collection<File> findGwtModuleFiles(final File f) {
     if (f.exists()) {
       if (f.isDirectory()) {
-        Collection<File> retVal = new LinkedList<File>();
-        for (final File child : f.listFiles()) {
-          final Collection<File> result = findGwtModuleFiles(child);
-          if (result.size() > 0) {
-            retVal.addAll(result);
+        final Collection<File> retVal = new LinkedList<File>();
+        final File[] files = f.listFiles();
+        if (files != null) {
+          for (final File child : files) {
+            final Collection<File> result = findGwtModuleFiles(child);
+            if (result.size() > 0) {
+              retVal.addAll(result);
+            }
           }
         }
 
@@ -140,7 +144,7 @@ public class ModuleSelect extends AbstractUICommand implements UIWizardStep {
 
     if (dir.exists()) {
       final Collection<File> found = findGwtModuleFiles(dir);
-      for (File file : found) {
+      for (final File file : found) {
         String relPath = file.getAbsolutePath().replace(dir.getAbsolutePath(), "");
         if (relPath.charAt(0) == File.separatorChar)
           relPath = relPath.substring(1);

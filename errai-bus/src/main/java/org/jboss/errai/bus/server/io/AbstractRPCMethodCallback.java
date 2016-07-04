@@ -50,9 +50,10 @@ public abstract class AbstractRPCMethodCallback implements MessageCallback {
   }
 
   public Object invokeMethodFromMessage(Message message) {
+    @SuppressWarnings("unchecked")
     final List<Object> parms = message.get(List.class, "MethodParms");
 
-    if ((parms == null && targetTypes.length != 0) || (parms.size() != targetTypes.length)) {
+    if ((parms == null && targetTypes.length != 0) || (parms != null && parms.size() != targetTypes.length)) {
       throw new MessageDeliveryFailure(
           "wrong number of arguments sent to endpoint. (received: "
               + (parms == null ? 0 : parms.size())
@@ -61,19 +62,19 @@ public abstract class AbstractRPCMethodCallback implements MessageCallback {
 
     try {
       RpcContext.set(message);
-      return method.invoke(serviceProvider.get(message), parms.toArray(new Object[parms.size()]));
+      return method.invoke(serviceProvider.get(message), (parms != null) ? parms.toArray(new Object[parms.size()]) : new Object[0]);
     }
-    catch (QueueUnavailableException e) {
+    catch (final QueueUnavailableException e) {
       throw e;
     }
-    catch (MessageDeliveryFailure e) {
+    catch (final MessageDeliveryFailure e) {
       throw e;
     }
-    catch (InvocationTargetException e) {
+    catch (final InvocationTargetException e) {
       log.debug("RPC endpoint threw exception:", e.getCause());
       throw new MessageDeliveryFailure("error invoking RPC endpoint " + method, e.getCause(), true);
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);
     }
     finally {

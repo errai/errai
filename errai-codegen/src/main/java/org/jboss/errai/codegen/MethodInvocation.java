@@ -98,7 +98,7 @@ public class MethodInvocation extends AbstractStatement {
     final MetaParameterizedType gSuperClass = inputType.getGenericSuperClass();
     final MetaClass superClass = inputType.getSuperClass();
 
-    if (superClass != null && superClass.getTypeParameters() != null & superClass.getTypeParameters().length > 0
+    if (superClass != null && superClass.getTypeParameters() != null && superClass.getTypeParameters().length > 0
             && gSuperClass != null && gSuperClass.getTypeParameters().length > 0) {
       for (int i = 0; i < superClass.getTypeParameters().length; i++) {
         final String varName = superClass.getTypeParameters()[i].getName();
@@ -142,7 +142,7 @@ public class MethodInvocation extends AbstractStatement {
         resolvedType = (MetaClass) callParmType;
       }
       else if (callParmType instanceof MetaWildcardType) {
-        MetaType[] upperBounds = ((MetaWildcardType) callParmType).getUpperBounds();
+        final MetaType[] upperBounds = ((MetaWildcardType) callParmType).getUpperBounds();
         if (upperBounds != null && upperBounds.length == 1 && upperBounds[0] instanceof MetaClass) {
           resolvedType = (MetaClass) upperBounds[0];
         }

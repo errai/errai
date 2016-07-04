@@ -16,19 +16,12 @@
 
 package org.jboss.errai.bus.server;
 
-import junit.framework.TestCase;
-import org.jboss.errai.bus.client.tests.support.RandomProvider;
-import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
-import org.jboss.errai.bus.server.io.buffers.BufferColor;
-import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -49,6 +42,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
+
+import org.jboss.errai.bus.client.tests.support.RandomProvider;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
+import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+
+import junit.framework.TestCase;
 
 /**
  * @author Mike Brock
@@ -75,7 +75,7 @@ public class TransmissionBufferTests extends TestCase {
 
       assertEquals(s, new String(bOutputStream.toByteArray()));
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -188,7 +188,7 @@ public class TransmissionBufferTests extends TestCase {
 
             System.out.println("Wrote color " + toContend.getColor() + ": " + toWrite + ". Total writes is now " + totalWrites);
           }
-          catch (IOException e) {
+          catch (final IOException e) {
             e.printStackTrace();
           }
         }
@@ -272,27 +272,32 @@ public class TransmissionBufferTests extends TestCase {
     final BufferColor colorA = BufferColor.getNewColor();
 
     final RandomProvider random = new RandomProvider() {
-      private char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+      private final char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
           'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
-      private Random random = new Random(System.nanoTime());
+      private final Random random = new Random(System.nanoTime());
 
+      @Override
       public boolean nextBoolean() {
         return random.nextBoolean();
       }
 
+      @Override
       public int nextInt(final int upper) {
         return random.nextInt(upper);
       }
 
+      @Override
       public double nextDouble() {
         return new BigDecimal(random.nextDouble(), MathContext.DECIMAL32).doubleValue();
       }
 
+      @Override
       public char nextChar() {
         return CHARS[nextInt(1000) % CHARS.length];
       }
 
+      @Override
       public String randString() {
         final StringBuilder builder = new StringBuilder();
         final int len = nextInt(25) + 5;
@@ -323,7 +328,7 @@ public class TransmissionBufferTests extends TestCase {
         assertEquals(s, new String(bOutputStream.toByteArray()));
       }
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -451,7 +456,7 @@ public class TransmissionBufferTests extends TestCase {
               testReader.read(color, true, true);
             }
           }
-          catch (Throwable t) {
+          catch (final Throwable t) {
             t.printStackTrace();
           }
         }
@@ -472,7 +477,7 @@ public class TransmissionBufferTests extends TestCase {
                 testReader.read(color, true, false);
               }
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               t.printStackTrace();
             }
           }
@@ -497,7 +502,7 @@ public class TransmissionBufferTests extends TestCase {
               totalWrites.incrementAndGet();
               latch.countDown();
             }
-            catch (Throwable e) {
+            catch (final Throwable e) {
               e.printStackTrace();
             }
           }
@@ -529,7 +534,7 @@ public class TransmissionBufferTests extends TestCase {
           try {
             testReader.read(segs.get(i), false, false);
           }
-          catch (Exception e) {
+          catch (final Exception e) {
             e.printStackTrace();
           }
         }
@@ -724,7 +729,7 @@ public class TransmissionBufferTests extends TestCase {
 
             }
           }
-          catch (Throwable t) {
+          catch (final Throwable t) {
             t.printStackTrace();
           }
         }

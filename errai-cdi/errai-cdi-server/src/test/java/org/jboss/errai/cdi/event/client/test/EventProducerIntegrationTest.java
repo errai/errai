@@ -16,12 +16,12 @@
 
 package org.jboss.errai.cdi.event.client.test;
 
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.errai.cdi.event.client.EventProducerTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Tests CDI event producers.
@@ -46,7 +46,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
       CDI.addPostInitTask(new Runnable() {
         @Override
         public void run() {
-          EventProducerTestModule module = IOC.getBeanManager().lookupBean(EventProducerTestModule.class).getInstance();
+          final EventProducerTestModule module = IOC.getBeanManager().lookupBean(EventProducerTestModule.class).getInstance();
 
           assertNotNull(module.getEvent());
           assertNotNull(module.getEventA());
@@ -69,7 +69,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
       @Override
       public void run() {
 
-        Map<String, List<String>> actualEvents = module.getReceivedEventsOnServer();
+        final Map<String, List<String>> actualEvents = EventProducerTestModule.getReceivedEventsOnServer();
 
         // assert that the server received all events
         EventProducerIntegrationTest.this.verifyQualifiedEvents(actualEvents, false);

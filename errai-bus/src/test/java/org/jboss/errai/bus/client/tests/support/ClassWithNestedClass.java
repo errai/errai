@@ -48,7 +48,7 @@ public class ClassWithNestedClass {
       if (this == o) return true;
       if (!(o instanceof Nested)) return false;
 
-      Nested nested = (Nested) o;
+      final Nested nested = (Nested) o;
 
       return !(field != null ? !field.equals(nested.field) : nested.field != null);
     }
@@ -60,13 +60,29 @@ public class ClassWithNestedClass {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ClassWithNestedClass)) return false;
-
-    ClassWithNestedClass that = (ClassWithNestedClass) o;
-
-    return !(nested != null ? !nested.equals(that.nested) : that.nested != null);
-
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((nested == null) ? 0 : nested.hashCode());
+    return result;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    final ClassWithNestedClass other = (ClassWithNestedClass) obj;
+    if (nested == null) {
+      if (other.nested != null)
+        return false;
+    }
+    else if (!nested.equals(other.nested))
+      return false;
+    return true;
+  }
+
 }

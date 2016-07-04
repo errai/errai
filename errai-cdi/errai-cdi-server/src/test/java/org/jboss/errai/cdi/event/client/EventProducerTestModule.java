@@ -43,7 +43,7 @@ public class EventProducerTestModule {
   private boolean busReadyEventReceived = false;
   private Runnable verifier;
 
-  private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
+  private final static Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
 
   @Inject
   private Event<String> event;
@@ -169,20 +169,24 @@ public class EventProducerTestModule {
         verifier.run();
       }
     }
-
     List<String> events = receivedEventsOnServer.get(event.getReceiver());
     if (events == null)
       events = new ArrayList<String>();
 
-    if (events.contains(event))
+    if (events.contains(event.getEvent())) {
       throw new RuntimeException(event.getReceiver() + " received " + event.getEvent() + " twice!");
+    }
 
     events.add(event.getEvent());
     receivedEventsOnServer.put(event.getReceiver(), events);
   }
 
-  public Map<String, List<String>> getReceivedEventsOnServer() {
+  public static Map<String, List<String>> getReceivedEventsOnServer() {
     return receivedEventsOnServer;
+  }
+  
+  public static void clearReceivedEventsOnServer() {
+    receivedEventsOnServer.clear();
   }
 
   public void setResultVerifier(Runnable verifier) {
