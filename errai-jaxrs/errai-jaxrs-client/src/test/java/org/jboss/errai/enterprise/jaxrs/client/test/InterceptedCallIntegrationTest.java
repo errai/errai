@@ -38,14 +38,14 @@ public class InterceptedCallIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testInterceptedRestCallWithEndpointBypassing() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGetWithEndpointBypassing();
   }
   
   @Test
   public void testInterceptedRestCallWithParameterManipulation() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGetWithParameterManipulation("will be replaced by interceptor");
   }
   
@@ -53,49 +53,49 @@ public class InterceptedCallIntegrationTest extends AbstractErraiJaxrsTest {
   public void testInterceptedRestCallWithListParameterManipulation() {
     List<String> list = Arrays.asList("1", "2", "3");
     call(InterceptedCallTestService.class,
-        new AssertionCallback<List<String>>("Request was not intercepted", Arrays.asList("intercepted", "2", "3")))
+        new SimpleAssertionCallback<List<String>>("Request was not intercepted", Arrays.asList("intercepted", "2", "3")))
         .interceptedGetWithListParameterManipulation(list);
   }
 
   @Test
   public void testInterceptedRestCallWithResultManipulation() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "result_intercepted"))
         .interceptedGetWithResultManipulation("will be replaced by interceptor");
   }
   
   @Test
   public void testInterceptedRestCallWithChainedInterceptors() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "ABCD"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "ABCD"))
         .interceptedGetWithChainedInterceptors("");
   }
   
   @Test
   public void testInterceptedRestCallWithPrimitiveAndBoxedParameters() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGetWithPrimitiveAndBoxedParameters(1l, 2l);
   }
   
   @Test
   public void testInterceptedRestCallWithResponseCallback() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "result_intercepted"))
         .interceptedGetWithResponseCallback("result");
   }
   
   @Test
   public void testInterceptedRestCallWithResponseAndErrorCallback() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "result_intercepted"))
         .interceptedGetWithResponseAndErrorCallback("result");
   }
   
   @Test
   public void testInterceptedRestCallWithClientErrorCanSucceed() {
     call(InterceptedCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "success"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "success"))
         .interceptedGetForClientError("result");
   }
 }

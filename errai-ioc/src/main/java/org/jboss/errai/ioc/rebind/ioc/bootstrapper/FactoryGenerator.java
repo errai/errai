@@ -155,6 +155,10 @@ public class FactoryGenerator extends IncrementalGenerator {
   }
 
   private boolean isCacheUsable(final String typeName, final Injectable givenInjectable) {
+    if (RebindUtils.NO_CACHE) {
+      return false;
+    }
+
     final Injectable cachedInjectable = injectablesByFactoryTypeName.get(typeName);
 
     if (cachedInjectable != null) {

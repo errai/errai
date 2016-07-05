@@ -34,14 +34,14 @@ public class InterceptsRemoteCallIntegrationTest extends AbstractErraiJaxrsTest 
   @Test
   public void testInterceptedRestCall1() {
     call(InterceptsRemoteCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGet1();
   }
   
   @Test
   public void testInterceptedRestCall2() {
     call(InterceptsRemoteCallTestService.class,
-        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        new SimpleAssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGet2();
   }
 }

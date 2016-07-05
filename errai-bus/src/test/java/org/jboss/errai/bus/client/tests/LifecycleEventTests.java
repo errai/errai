@@ -30,6 +30,7 @@ import org.jboss.errai.bus.client.framework.Wormhole;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener.EventType;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener.RecordedEvent;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -67,6 +67,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import org.jboss.errai.bus.client.api.QueueSession;
@@ -96,14 +97,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
   private final Map<Channel, QueueSession> activeChannels = new ConcurrentHashMap<Channel, QueueSession>();
 
   private WebSocketServerHandshaker handshaker = null;
-  private ErraiService svc;
+  private final ErraiService svc;
 
   public WebSocketServerHandler(final ErraiService bus) {
     this.svc = bus;
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {    
+  protected void channelRead0(final ChannelHandlerContext ctx, final Object msg) throws Exception {
     if (msg instanceof FullHttpRequest) {
       handleHttpRequest(ctx, (FullHttpRequest) msg);
     }
@@ -111,9 +112,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
       handleWebSocketFrame(ctx, (WebSocketFrame) msg);
     }
   }
-  
+
   @Override
-  public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+  public void channelReadComplete(final ChannelHandlerContext ctx) throws Exception {
     ctx.flush();
   }
 
@@ -259,7 +260,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
   private void sendHttpResponse(final ChannelHandlerContext ctx, final FullHttpRequest req, final FullHttpResponse res) {
     // Generate an error page if response status code is not OK (200).
     if (res.getStatus().code() != 200) {
-      ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
+      final ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
       res.content().writeBytes(buf);
       buf.release();
       setContentLength(res, res.content().readableBytes());
@@ -309,6 +310,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
     private final Map<String, String[]> parameters = new HashMap<String, String[]>();
 
     @Override
+    public String changeSessionId() {
+      return null;
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(final Class<T> handlerClass) throws IOException, ServletException {
+      return null;
+    }
+
+    @Override
     public Object getAttribute(final String name) {
       return attributes.get(name);
     }
@@ -342,6 +353,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
     @Override
     public int getContentLength() {
       return 0;
+    }
+
+    @Override
+    public long getContentLengthLong() {
+      return 0L;
     }
 
     @Override

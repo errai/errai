@@ -26,6 +26,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.common.client.api.Assert;
 
 import com.google.gwt.http.client.Request;

@@ -26,10 +26,10 @@ import jsinterop.annotations.JsType;
  */
 @JsType
 public interface ProducedJsType {
-
-  @IOCProducer
-  static ProducedJsType create() {
-    return new ProducedJsType() {};
+  public static class Producer {
+    @IOCProducer
+    public static ProducedJsType create() {
+      return new ProducedJsType() {};
+    }
   }
-
 }

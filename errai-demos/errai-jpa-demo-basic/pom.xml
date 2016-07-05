@@ -63,8 +63,9 @@
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version> 
     <maven.gwt.plugin.version>2.8.0-SNAPSHOT</maven.gwt.plugin.version>   
-    <jetty.version>6.1.25</jetty.version>
     <weld.version>2.3.3.Final</weld.version>
+    <as.version>10.0.0.Final</as.version>
+    <errai.dev.context>${project.build.directory}/wildfly-${as.version}</errai.dev.context>
   </properties>
 
   <!-- These must be here in this order because of missing guava-gwt snapshots in the JBoss Public Repository. -->
@@ -150,6 +151,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-cdi-jboss</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
       <artifactId>jboss-servlet-api_3.1_spec</artifactId>
       <scope>provided</scope>
@@ -227,34 +234,10 @@
 
   <profiles>
     <profile>
-      <id>jetty</id>
+      <id>wildfly</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-      <properties>
-        <webDescriptor>jetty</webDescriptor>
-      </properties>
-      <dependencies>
-        <!-- We need this for CDI BeanManager to work in Dev Mode -->
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-naming</artifactId>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-plus</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
-      <id>wildfly</id>
       <properties>
         <webDescriptor>wildfly</webDescriptor>
       </properties>
@@ -316,79 +299,6 @@
           <artifactId>weld-se-core</artifactId>
           <scope>provided</scope>
           <version>${weld.version}</version>
-        </dependency>
-
-        <!-- Jetty is used for testing only -->
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
-          <version>${jetty.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-plus</artifactId>
-          <scope>provided</scope>
-          <version>${jetty.version}</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-naming</artifactId>
-          <scope>provided</scope>
-          <version>${jetty.version}</version>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <!-- Begin Tomcat 6 and 7 support -->
-    <profile>
-      <id>tomcat</id>
-      <properties>
-        <webDescriptor>tomcat</webDescriptor>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>javax.enterprise</groupId>
-          <artifactId>cdi-api</artifactId>
-          <scope>compile</scope>
-          <version>1.0-SP4</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
-          <version>${jetty.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-plus</artifactId>
-          <version>${jetty.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-naming</artifactId>
-          <version>${jetty.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.weld.se</groupId>
-          <artifactId>weld-se-core</artifactId>
-          <version>${weld.version}</version>
-          <scope>compile</scope>
-          <exclusions>
-            <exclusion>
-              <groupId>javax.el</groupId>
-              <artifactId>el-api</artifactId>
-            </exclusion>
-          </exclusions>
         </dependency>
       </dependencies>
     </profile>
@@ -455,24 +365,6 @@
         <dependency>
           <groupId>org.mvel</groupId>
           <artifactId>mvel2</artifactId>
-        </dependency>
-
-        <!-- CDI Development Utils -->
-        <!-- This must be placed above com.google.gwt:gwt-dev to override the Jetty that is present there -->
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-plus</artifactId>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-naming</artifactId>
-          <scope>compile</scope>
         </dependency>
 
         <!-- Weld Modules -->
@@ -557,10 +449,12 @@
         <artifactId>gwt-maven-plugin</artifactId> 
         <version>${maven.gwt.plugin.version}</version>
         <configuration>
+          <noServer>false</noServer>          
           <strict>true</strict>
           <logLevel>INFO</logLevel>
-          <runTarget>index.html</runTarget>
-          <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100</extraJvmArgs>
+          <runTarget>${errai.dev.context}</runTarget>
+          <extraJvmArgs>${argLine} -Xmx2g -Xms1g -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>          
         </configuration>
@@ -580,19 +474,33 @@
             </goals>
           </execution>
         </executions>
-        <!-- TODO Remove this once a gwt-maven-plugin version is released supporting GWT 2.8 -->
-        <dependencies>
-          <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <version>2.8.0-beta1</version>
-          </dependency>
-          <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-            <version>2.8.0-beta1</version>
-          </dependency>
-        </dependencies>
+      </plugin>
+      <!-- Unpack jboss-as from maven. Remove this if you wish to use your 
+        own jboss/wildfly instance. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-dist</artifactId>
+                  <version>${as.version}</version>
+                  <type>zip</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

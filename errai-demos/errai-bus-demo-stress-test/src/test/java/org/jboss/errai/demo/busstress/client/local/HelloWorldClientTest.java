@@ -16,7 +16,7 @@
 
 package org.jboss.errai.demo.busstress.client.local;
 
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.ioc.client.Container;
 
 import com.google.gwt.user.client.Timer;

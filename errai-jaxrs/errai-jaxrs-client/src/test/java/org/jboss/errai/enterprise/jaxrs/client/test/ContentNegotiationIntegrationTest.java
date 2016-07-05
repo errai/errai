@@ -35,78 +35,78 @@ public class ContentNegotiationIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetText() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@GET producing String using text/plain failed", "text")).getText();
+        new SimpleAssertionCallback<String>("@GET producing String using text/plain failed", "text")).getText();
   }
 
   @Test
   public void testGetTextAsJson() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@GET producing String using application/json failed", "json")).getTextAsJson();
+        new SimpleAssertionCallback<String>("@GET producing String using application/json failed", "json")).getTextAsJson();
   }
   
   @Test
   public void testGetLong() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<Long>("@GET producing long using text/plain failed", 0l)).getLong();
+        new SimpleAssertionCallback<Long>("@GET producing long using text/plain failed", 0l)).getLong();
   }
 
   @Test
   public void testGetLongAsJson() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<Long>("@GET producing long application/json failed", 1l)).getLongAsJson();
+        new SimpleAssertionCallback<Long>("@GET producing long application/json failed", 1l)).getLongAsJson();
   }
   
   public void testGetInt() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<Integer>("@GET producing int using text/plain failed", 0)).getInt();
+        new SimpleAssertionCallback<Integer>("@GET producing int using text/plain failed", 0)).getInt();
   }
 
   @Test
   public void testGetIntAsJsonUsingCustomMediaType() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<Integer>("@GET producing int application/myapp+json failed", 1)).getIntAsJson();
+        new SimpleAssertionCallback<Integer>("@GET producing int application/myapp+json failed", 1)).getIntAsJson();
   }
   
   @Test
   public void testPostAsText() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@POST consuming text/* failed", "post:text")).postText("text");
+        new SimpleAssertionCallback<String>("@POST consuming text/* failed", "post:text")).postText("text");
   }
 
   @Test
   public void testPostAsXml() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@POST consuming application/xml failed", "post:xml")).postXml("xml");
+        new SimpleAssertionCallback<String>("@POST consuming application/xml failed", "post:xml")).postXml("xml");
   }
   
   @Test
   public void testPostAsAnyXml() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@POST consuming application/xml or text/xml failed", "post:anyxml"))
+        new SimpleAssertionCallback<String>("@POST consuming application/xml or text/xml failed", "post:anyxml"))
         .postAnyXml("anyxml");
   }
   
   @Test
   public void testPutAsText() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@PUT consuming text/plain failed", "put:text")).putText("text");
+        new SimpleAssertionCallback<String>("@PUT consuming text/plain failed", "put:text")).putText("text");
   }
 
   @Test
   public void testPutAsXml() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@PUT consuming application/* failed", "put:xml")).putXml("xml");
+        new SimpleAssertionCallback<String>("@PUT consuming application/* failed", "put:xml")).putXml("xml");
   }
   
   @Test
   public void testDeleteAsText() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@DELETE consuming text/plain failed", "delete:text")).deleteText("text");
+        new SimpleAssertionCallback<String>("@DELETE consuming text/plain failed", "delete:text")).deleteText("text");
   }
 
   @Test
   public void testDeleteAsXml() {
     call(ContentNegotiationTestService.class,
-        new AssertionCallback<String>("@DELETE consuming application/xml failed", "delete:xml")).deleteXml("xml");
+        new SimpleAssertionCallback<String>("@DELETE consuming application/xml failed", "delete:xml")).deleteXml("xml");
   }
 }

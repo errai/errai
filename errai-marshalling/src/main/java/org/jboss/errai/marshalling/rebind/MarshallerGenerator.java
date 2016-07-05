@@ -78,7 +78,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter != null) {
-      if (cachedType != null && cachedType.hashContent() == type.hashContent()) {
+      if (!RebindUtils.NO_CACHE && cachedType != null && cachedType.hashContent() == type.hashContent()) {
         log.debug("Reusing cached marshaller for {}", fullyQualifiedTypeName);
         printWriter.append(cachedSourceByTypeName.get(fullyQualifiedTypeName));
         context.commit(logger, printWriter);

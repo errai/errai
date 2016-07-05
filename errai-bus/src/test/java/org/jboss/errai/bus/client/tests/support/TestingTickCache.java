@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
-import javax.annotation.Nonnull;
-
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
@@ -51,23 +49,15 @@ public class TestingTickCache implements Iterable<TestingTick> {
    */
   private TestingTick newestEntry;
 
-  // The @Nonnull annotation is there to ensure that multiple annotations can be specified on a constructor parameter
-  // without affecting the behaviour for @MapsTo (see https://issues.jboss.org/browse/ERRAI-312)
-  public TestingTickCache(@Nonnull @MapsTo("entries") Queue<TestingTick> queueImpl) {
+  public TestingTickCache(@MapsTo("entries") Queue<TestingTick> queueImpl) {
     entries = queueImpl;
   }
 
   // We add this constructor to ensure that it is not picked up for mapping (it has no @MapsTo annotation on all its
   // parameters)
-  public TestingTickCache(@Nonnull String s) {
+  public TestingTickCache(String s) {
     entries = null;
   }
-  
-  // We add this constructor to ensure that it is not picked up for mapping (it has no @MapsTo annotation on all its
-  // parameters)
-  /*public TestingTickCache(@Nonnull @MapsTo("entries") Queue<TestingTick> queueImpl, @Nonnull String s) {
-    entries = null;
-  }*/
 
   /**
    * Adds the given tick to this cache, pruning ticks that are older than {@link #timeSpan} milliseconds.

@@ -45,47 +45,47 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithQueryParam() {
     call(QueryParamTestService.class,
-        new AssertionCallback<Long>("@GET with @QueryParam failed", 1l)).getWithQueryParam(1l);
+        new SimpleAssertionCallback<Long>("@GET with @QueryParam failed", 1l)).getWithQueryParam(1l);
   }
 
   @Test
   public void testGetWithNullQueryParam() {
     call(QueryParamTestService.class,
-        new AssertionCallback<String>("@GET with @QueryParam failed", "")).getWithStringQueryParam(null);
+        new SimpleAssertionCallback<String>("@GET with @QueryParam failed", "")).getWithStringQueryParam(null);
   }
   
   @Test
   public void testGetWithEncodedQueryParam() {
     String queryParamSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
     call(QueryParamTestService.class,
-        new AssertionCallback<String>("@GET w/ encoded @QueryParam failed", queryParamSpecialChars))
+        new SimpleAssertionCallback<String>("@GET w/ encoded @QueryParam failed", queryParamSpecialChars))
         .getWithStringQueryParam(queryParamSpecialChars);
   }
 
   @Test
   public void testGetWithMultipleQueryParams() {
     call(QueryParamTestService.class,
-        new AssertionCallback<String>("@GET with @QueryParams failed", "1/2")).getWithMultipleQueryParams(1l, 2l);
+        new SimpleAssertionCallback<String>("@GET with @QueryParams failed", "1/2")).getWithMultipleQueryParams(1l, 2l);
   }
 
   @Test
   public void testGetWithQueryParamListOfLongs() {
     List<Long> longs = Arrays.asList(1l,2l,3l);
     call(QueryParamTestService.class,
-        new AssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", longs)).getWithQueryParamListOfLongs(longs);
+        new SimpleAssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", longs)).getWithQueryParamListOfLongs(longs);
   }
   
   @Test
   public void testGetWithQueryParamListOfLongsPassingNull() {
     call(QueryParamTestService.class,
-        new AssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", Collections.<Long>emptyList())).getWithQueryParamListOfLongs(null);
+        new SimpleAssertionCallback<List<Long>>("@GET with List<Long> as @QueryParam failed", Collections.<Long>emptyList())).getWithQueryParamListOfLongs(null);
   }
   
   @Test
   public void testGetWithQueryParamListOfEnums() {
     List<EnumMapEntity.SomeEnum> enums = Arrays.asList(EnumMapEntity.SomeEnum.ENUM_VALUE);
     call(QueryParamTestService.class,
-        new AssertionCallback<List<EnumMapEntity.SomeEnum>>(
+        new SimpleAssertionCallback<List<EnumMapEntity.SomeEnum>>(
                 "@GET with List<Enum> as @QueryParam failed", enums)).getWithQueryParamListOfEnums(enums);
   }
   
@@ -93,7 +93,7 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
   public void testGetWithQueryParamSetOfStrings() {
     Set<String> strings = new HashSet<String>(Arrays.asList("1", "2", "3"));
     call(QueryParamTestService.class,
-        new AssertionCallback<Set<String>>("@GET with Set<String> as @QueryParams failed", strings)).getWithQueryParamSetOfStrings(strings);
+        new SimpleAssertionCallback<Set<String>>("@GET with Set<String> as @QueryParams failed", strings)).getWithQueryParamSetOfStrings(strings);
   }
   
   @Test
@@ -103,7 +103,7 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     strings.add("2");
     strings.add("3");
     call(QueryParamTestService.class,
-        new AssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", strings)).getWithQueryParamListOfStrings(strings);
+        new SimpleAssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", strings)).getWithQueryParamListOfStrings(strings);
   }
   
   @Test
@@ -113,7 +113,7 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     List<String> expected = Arrays.asList("1", "2", "3", "4", "5", "6", "7");
     
     call(QueryParamTestService.class,
-        new AssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", expected))
+        new SimpleAssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", expected))
         .getWithMultipleQueryParamListOfStrings(list1, "4", list2);
   }
   
@@ -123,26 +123,26 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     List<String> expected = Arrays.asList("1", "2", "3", "4", "5");
     
     call(QueryParamTestService.class,
-        new AssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", expected))
+        new SimpleAssertionCallback<List<String>>("@GET with List<String> as @QueryParams failed", expected))
         .getWithMultipleQueryParamsAndListOfStrings("1", list, "5");
   }
   
   @Test
   public void testPostWithQueryParam() {
     call(QueryParamTestService.class,
-        new AssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam("", 1);
+        new SimpleAssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam("", 1);
   }
 
   @Test
   public void testPutWithQueryParam() {
     call(QueryParamTestService.class,
-        new AssertionCallback<Double>("@PUT with @QueryParam failed", 1.0)).putWithQueryParam(1.0);
+        new SimpleAssertionCallback<Double>("@PUT with @QueryParam failed", 1.0)).putWithQueryParam(1.0);
   }
 
   @Test
   public void testDeleteWithQueryParam() {
     call(QueryParamTestService.class,
-        new AssertionCallback<Short>("@DELETE with @QueryParam failed", (short) 1)).deleteWithQueryParam((short) 1);
+        new SimpleAssertionCallback<Short>("@DELETE with @QueryParam failed", (short) 1)).deleteWithQueryParam((short) 1);
   }
 
   @Test

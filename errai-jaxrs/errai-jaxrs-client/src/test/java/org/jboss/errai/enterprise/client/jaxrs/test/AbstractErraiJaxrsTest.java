@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.test;
 
+import java.util.function.Function;
+
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.RequestCallback;
@@ -29,7 +31,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Base class for Errai JAX-RS tests.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
@@ -44,37 +46,56 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
     super.gwtSetUp();
   }
 
-  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, Integer... successCodes) {
+  protected <T, R> T call(final Class<T> remote, final RemoteCallback<R> callback, final Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, successCodes);
   }
 
-  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, RestErrorCallback errorCallback,
-      Integer... successCodes) {
+  protected <T, R> T call(final Class<T> remote, final RemoteCallback<R> callback, final RestErrorCallback errorCallback,
+      final Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, successCodes);
   }
 
-  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, RestErrorCallback errorCallback,
-      RequestCallback requestCallback, Integer... successCodes) {
+  protected <T, R> T call(final Class<T> remote, final RemoteCallback<R> callback, final RestErrorCallback errorCallback,
+      final RequestCallback requestCallback, final Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, requestCallback, successCodes);
   }
 
-  protected <T, R> T call(Class<T> remote, String baseUrl, RemoteCallback<R> callback, Integer... successCodes) {
+  protected <T, R> T call(final Class<T> remote, final String baseUrl, final RemoteCallback<R> callback, final Integer... successCodes) {
     return RestClient.create(remote, baseUrl, callback, errorCallback, successCodes);
   }
 
-  protected class AssertionCallback<T> implements RemoteCallback<T> {
+  protected class SimpleAssertionCallback<T> implements RemoteCallback<T> {
     private final String msg;
     private final T expected;
 
-    public AssertionCallback(String msg, T expected) {
+    public SimpleAssertionCallback(final String msg, final T expected) {
       this.msg = msg;
       this.expected = expected;
       delayTestFinish(10000);
     }
 
     @Override
-    public void callback(T response) {
+    public void callback(final T response) {
       assertEquals(msg, expected, response);
+      finishTest();
+    }
+  }
+
+  protected class AssertionCallback<R, T> implements RemoteCallback<R> {
+    private final String msg;
+    private final T expected;
+    private final Function<R, T> converter;
+
+    public AssertionCallback(final String msg, final T expected, final Function<R, T> converter) {
+      this.msg = msg;
+      this.expected = expected;
+      this.converter = converter;
+      delayTestFinish(10000);
+    }
+
+    @Override
+    public void callback(final R response) {
+      assertEquals(msg, expected, converter.apply(response));
       finishTest();
     }
   }
@@ -84,19 +105,19 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
     private final int statusCode;
     private String body;
 
-    public AssertionResponseCallback(String msg, int statusCode) {
+    public AssertionResponseCallback(final String msg, final int statusCode) {
       this.msg = msg;
       this.statusCode = statusCode;
       delayTestFinish(5000);
     }
 
-    public AssertionResponseCallback(String msg, int statusCode, String body) {
+    public AssertionResponseCallback(final String msg, final int statusCode, final String body) {
       this(msg, statusCode);
       this.body = body;
     }
 
     @Override
-    public void callback(Response response) {
+    public void callback(final Response response) {
       assertEquals(msg, statusCode, response.getStatusCode());
       if (body != null)
         assertEquals(msg, body, response.getText());
@@ -106,7 +127,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
 
   private class TestErrorCallback implements RestErrorCallback {
     @Override
-    public boolean error(Request request, Throwable throwable) {
+    public boolean error(final Request request, final Throwable throwable) {
       fail(throwable.toString());
       return false;
     }

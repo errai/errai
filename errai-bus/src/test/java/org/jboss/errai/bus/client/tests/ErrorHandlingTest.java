@@ -27,6 +27,7 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.tests.support.ErrorThrowingRPCService;
 import org.jboss.errai.bus.client.tests.support.SimpleRPCService;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 

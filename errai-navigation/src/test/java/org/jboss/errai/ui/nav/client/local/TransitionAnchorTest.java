@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ui.nav.client.local;
 
+import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
@@ -147,7 +148,7 @@ public class TransitionAnchorTest extends AbstractErraiCDITest {
     nav.goTo("");
     assertFalse(PageB.class.equals(nav.getCurrentPage().contentType()));
 
-    module.pageB.click();
+    invokeOnClick(module.pageB);
     assertEquals(PageB.class, nav.getCurrentPage().contentType());
   }
 
@@ -158,8 +159,11 @@ public class TransitionAnchorTest extends AbstractErraiCDITest {
     nav.goTo("");
     assertFalse(PageWithUniqueRole.class.equals(nav.getCurrentPage().contentType()));
 
-    module.uniqueRole.click();
+    invokeOnClick(module.uniqueRole);
     assertEquals(PageWithUniqueRole.class, nav.getCurrentPage().contentType());
   }
 
+  private static native void invokeOnClick(Anchor anchor) /*-{
+    anchor.onclick();
+  }-*/;
 }

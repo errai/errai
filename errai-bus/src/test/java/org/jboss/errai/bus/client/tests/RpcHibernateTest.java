@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.tests.support.HibernateObject;
 import org.jboss.errai.bus.client.tests.support.HibernateRpc;
 import org.jboss.errai.bus.client.tests.support.OtherHibernateObject;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.common.client.api.RemoteCallback;
 
 public class RpcHibernateTest extends AbstractErraiTest {

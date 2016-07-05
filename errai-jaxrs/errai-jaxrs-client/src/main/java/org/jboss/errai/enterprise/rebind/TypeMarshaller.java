@@ -33,28 +33,28 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 /**
  * Generates the required {@link Statement}s for type marshalling.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class TypeMarshaller {
 
-  public static Statement marshal(Statement statement) {
+  public static Statement marshal(final Statement statement) {
     return marshal(statement, "text/plain");
   }
-  
-  public static Statement marshal(MetaClass type, Statement statement) {
+
+  public static Statement marshal(final MetaClass type, final Statement statement) {
     return marshal(type, statement, "text/plain");
   }
 
-  public static Statement marshal(Statement statement, String contentType) {
+  public static Statement marshal(final Statement statement, final String contentType) {
     if (statement instanceof Parameter) {
-      Parameter param = (Parameter) statement;
+      final Parameter param = (Parameter) statement;
       return marshal(param.getType(), Variable.get(param.getName()), contentType);
     }
     return marshal(statement.getType(), statement, contentType);
   }
 
-  public static Statement marshal(MetaClass type, Statement statement, String contentType) {
+  public static Statement marshal(final MetaClass type, final Statement statement, final String contentType) {
     Statement marshallingStatement = null;
     if (PrimitiveTypeMarshaller.canHandle(type, contentType)) {
       marshallingStatement = PrimitiveTypeMarshaller.marshal(type, statement);
@@ -65,7 +65,7 @@ public class TypeMarshaller {
     return marshallingStatement;
   }
 
-  public static Statement demarshal(MetaClass type, Statement statement, String accepts) {
+  public static Statement demarshal(final MetaClass type, final Statement statement, final String accepts) {
     Statement demarshallingStatement = null;
     if (PrimitiveTypeMarshaller.canHandle(type, accepts)) {
       demarshallingStatement = PrimitiveTypeMarshaller.demarshal(type, statement);
@@ -96,10 +96,10 @@ public class TypeMarshaller {
    */
   public static class PrimitiveTypeMarshaller {
 
-    public static boolean canHandle(MetaClass type, String mimeType) {
+    public static boolean canHandle(final MetaClass type, final String mimeType) {
       boolean canHandle = false;
       if (("text/plain".equals(mimeType) && type.asUnboxed().isPrimitive())
-          || type.equals(MetaClassFactory.get(String.class)) 
+          || type.equals(MetaClassFactory.get(String.class))
           || type.equals(MetaClassFactory.get(Date.class))
           || type.isEnum()) {
         canHandle = true;
@@ -107,10 +107,13 @@ public class TypeMarshaller {
       return canHandle;
     }
 
-    private static Statement marshal(MetaClass type, Statement statement) {
+    private static Statement marshal(final MetaClass type, final Statement statement) {
       ContextualStatementBuilder s = null;
       if (type.isPrimitive()) {
         s = Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement)).invoke("toString");
+      }
+      else if (type.getFullyQualifiedName().equals(Date.class.getName())) {
+        s = Stmt.nestedCall(new TernaryStatement(Bool.isNull(statement), Stmt.load(""), Stmt.nestedCall(statement).invoke("toGMTString")));
       }
       else {
         s = Stmt.nestedCall(new TernaryStatement(Bool.isNull(statement), Stmt.load(""), Stmt.nestedCall(statement)));
@@ -122,7 +125,7 @@ public class TypeMarshaller {
       return s;
     }
 
-    private static Statement demarshal(MetaClass type, Statement statement) {
+    private static Statement demarshal(final MetaClass type, final Statement statement) {
       if (type.equals(statement.getType())) {
         return statement;
       }
@@ -130,7 +133,7 @@ public class TypeMarshaller {
       if (MetaClassFactory.get(void.class).equals(type)) {
         return Stmt.load(null);
       }
-      
+
       if (MetaClassFactory.get(Date.class).equals(type)) {
         return Stmt.newObject(Date.class, statement);
       }

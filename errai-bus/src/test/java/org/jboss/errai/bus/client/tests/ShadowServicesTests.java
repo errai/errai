@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.ChaosMonkey;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 
 import java.util.ArrayList;
 import java.util.List;

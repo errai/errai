@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.errai.bus.client.ErraiBus;
@@ -40,6 +43,7 @@ import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestInterceptorRPCService;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -193,15 +197,14 @@ public class BusCommunicationTests extends AbstractErraiTest {
               final SType type = message.get(SType.class, "SType");
 
               try {
-                assertNotNull(type);
-                assertEquals(sType1, type);
+                assertNotNull("SType is null.", type);
+                compareSTypes(sType1, type);
                 finishTest();
                 return;
               }
-              catch (Throwable e) {
-                e.printStackTrace();
+              catch (final Throwable e) {
+                throw new AssertionError(e);
               }
-              fail();
             }
           }));
 
@@ -211,11 +214,105 @@ public class BusCommunicationTests extends AbstractErraiTest {
               .with(MessageParts.ReplyTo, "ClientReceiver")
               .done().sendNowWith(bus);
         }
-        catch (Throwable t) {
+        catch (final Throwable t) {
           t.printStackTrace(System.out);
         }
       }
     });
+  }
+
+  private static void compareSTypes(final SType expected, final SType actual) {
+    if (expected == actual) return;
+    if (expected == null || actual == null) fail("Only one was null.");
+
+    assertEquals(expected.getClass(), actual.getClass());
+    assertEquals(expected.getSuperValue(), actual.getSuperValue());
+    assertEquals(expected.getPlace(), actual.getPlace());
+    assertEquals(expected.getByteValue(), actual.getByteValue());
+    assertEquals(expected.getCharValue(), actual.getCharValue());
+    assertApproximatelyEqual(expected.getDoubleValue(), actual.getDoubleValue());
+    assertApproximatelyEqual(expected.getFloatValue(), actual.getFloatValue());
+    assertEquals(expected.getIntValue(), actual.getIntValue());
+    assertEquals(expected.getLongValue(), actual.getLongValue());
+    assertEquals(expected.getShortValue(), actual.getShortValue());
+    assertEquals(expected.getActive(), actual.getActive());
+    assertTrue(Arrays.equals(expected.getCharArray(), actual.getCharArray()));
+    assertEquals(expected.getEndDate(), actual.getEndDate());
+    assertEquals(expected.getFieldOne(), actual.getFieldOne());
+    assertEquals(expected.getFieldTwo(), actual.getFieldTwo());
+    compareListOfSTypes(expected.getListOfStypes(), actual.getListOfStypes());
+    assertEquals(expected.getListOfDates(), actual.getListOfDates());
+    compareMapOfSTypes(expected.getMapofStypes(), actual.getMapofStypes());
+    assertEquals(expected.getsTypeToStype(), actual.getsTypeToStype());
+    assertEquals(expected.getStartDate(), actual.getStartDate());
+    compareMultiArray(expected, actual);
+    compareSTypeArray(expected.getsTypeArray(), actual.getsTypeArray());
+
+    /*
+     * The assertions above make it easier to see what went wrong, but in case
+     * something ever changes this assertion ought to hold.
+     */
+    assertEquals(expected, actual);
+  }
+
+  private static void compareMapOfSTypes(final Map<String, SType> expected, final Map<String, SType> actual) {
+    if (expected == null || actual == null) {
+      assertSame(expected, actual);
+    }
+    else {
+      assertEquals(expected.size(), actual.size());
+      for (final Entry<String, SType> entry : expected.entrySet()) {
+        assertTrue(actual.containsKey(entry.getKey()));
+        final SType expectedValue = entry.getValue();
+        final SType actualValue = actual.get(entry.getKey());
+        if (expectedValue == null || actualValue == null) {
+          assertSame(expectedValue, actualValue);
+        }
+        else {
+          compareSTypes(expectedValue, actualValue);
+        }
+      }
+    }
+  }
+
+  private static void compareListOfSTypes(final List<SType> expectedList, final List<SType> actualList) throws AssertionError {
+    if (expectedList == null || actualList == null) {
+      assertSame(expectedList, actualList);
+    }
+    else {
+      compareSTypeArray(expectedList.toArray(new SType[0]), actualList.toArray(new SType[0]));
+    }
+  }
+
+  private static void compareSTypeArray(final SType[] expectedSTypeArray, final SType[] actualSTypeArray)
+          throws AssertionError {
+    if (expectedSTypeArray == null || actualSTypeArray == null) {
+      assertSame(expectedSTypeArray, actualSTypeArray);
+      return;
+    }
+
+    assertEquals(expectedSTypeArray.length, actualSTypeArray.length);
+    for (int i = 0; i < expectedSTypeArray.length; i++) {
+      try {
+        compareSTypes(expectedSTypeArray[i], actualSTypeArray[i]);
+      } catch (final AssertionError ae) {
+        throw new AssertionError("array[" + i + "] not equal.", ae);
+      }
+    }
+  }
+
+  private static void compareMultiArray(final SType expected, final SType actual) {
+    final char[][] expectedCharArrayMulti = expected.getCharArrayMulti();
+    final char[][] actualCharArrayMulti = actual.getCharArrayMulti();
+    if (expectedCharArrayMulti == null || actualCharArrayMulti == null) {
+      assertSame(expectedCharArrayMulti, actualCharArrayMulti);
+    }
+    else {
+      assertEquals(expectedCharArrayMulti.length, actualCharArrayMulti.length);
+      for (int i = 0; i < expectedCharArrayMulti.length; i++) {
+        assertTrue("array[" + i + "] not equal.", Arrays.equals(expectedCharArrayMulti[i], actualCharArrayMulti[i]));
+      }
+    }
   }
 
   public void testSerializableCase2() {
@@ -236,7 +333,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
               finishTest();
               return;
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               t.printStackTrace();
             }
             fail();
@@ -307,7 +404,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
               public boolean error(final Message message, final Throwable caught) {
                 assertNotNull("Message is null.", message);
 
-                String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
+                final String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
                 assertNotNull("Server-provided stack trace is null.", additionalDetails);
                 assertTrue("Additional detail string did not contain a frame for the RPC call. Message contents:\n\n" + message,
                         additionalDetails.contains("TestRPCServiceImpl.exception("));
@@ -341,7 +438,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
               public boolean error(final Message message, final Throwable caught) {
                 assertNotNull("Message is null.", message);
 
-                String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
+                final String additionalDetails = message.get(String.class, MessageParts.AdditionalDetails);
                 assertNotNull("Server-provided stack trace is null.", additionalDetails);
                 assertTrue("Additional detail string did not contain a frame for the RPC call. Message contents:\n\n" + message,
                         additionalDetails.contains("TestRPCServiceImpl.nonPortableException("));
@@ -352,7 +449,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 try {
                   throw caught;
                 }
-                catch (Throwable throwable) {
+                catch (final Throwable throwable) {
                   assertEquals(NonPortableException.class.getName() + ":" + "message", throwable.getMessage());
                   finishTest();
                 }
@@ -722,9 +819,9 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-  static void assertStackContains(String string, Throwable t) {
+  static void assertStackContains(final String string, Throwable t) {
     while (t != null) {
-      for (StackTraceElement ste : t.getStackTrace()) {
+      for (final StackTraceElement ste : t.getStackTrace()) {
         if (ste.toString().contains(string)) {
           return;
         }

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.support.bus.tests.client;
 
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;

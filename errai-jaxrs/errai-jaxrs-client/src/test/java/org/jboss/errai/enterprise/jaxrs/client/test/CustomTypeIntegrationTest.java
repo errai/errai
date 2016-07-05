@@ -39,60 +39,60 @@ public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithCustomType() {
     call(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
+        new SimpleAssertionCallback<Entity>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
   }
   
   @Test
   public void testGetWithCustomSubType() {
     call(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@GET using custom type failed", new SubEntity("val"))).getSubEntity();
+        new SimpleAssertionCallback<Entity>("@GET using custom type failed", new SubEntity("val"))).getSubEntity();
   }
 
   @Test
   public void testGetWithListOfCustomType() {
     call(CustomTypeTestService.class,
-        new AssertionCallback<List<?>>("@GET using list of custom type failed", CustomTypeTestService.ENTITIES)).getEntities();
+        new SimpleAssertionCallback<List<?>>("@GET using list of custom type failed", CustomTypeTestService.ENTITIES)).getEntities();
   }
 
   @Test
   public void testPostWithCustomType() {
     Entity entity = new Entity(1, "post-entity");
     call(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@POST using custom type failed", entity)).postEntity(entity);
+        new SimpleAssertionCallback<Entity>("@POST using custom type failed", entity)).postEntity(entity);
   }
   
   @Test
   public void testPostWithCustomJsonMediaType() {
     Entity entity = new Entity(1, "post-entity");
     call(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@POST using custom type failed", entity)).postEntityCustomJsonMediaType(entity);
+        new SimpleAssertionCallback<Entity>("@POST using custom type failed", entity)).postEntityCustomJsonMediaType(entity);
   }
   
   @Test
   public void testPostWithCustomTypeReturningNull() {
     Entity entity = new Entity(1, "post-entity");
     call(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@POST using custom type failed", null)).postEntityReturningNull(entity);
+        new SimpleAssertionCallback<Entity>("@POST using custom type failed", null)).postEntityReturningNull(entity);
   }
   
   @Test
   public void testPutWithCustomType() {
     Entity entity = new Entity(1, "put-entity");
     call(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@PUT using custom type failed", entity)).putEntity(entity);
+        new SimpleAssertionCallback<Entity>("@PUT using custom type failed", entity)).putEntity(entity);
   }
   
   @Test
   public void testPutWithCustomTypeReturningVoid() {
     Entity entity = new Entity(1, "put-entity");
     call(CustomTypeTestService.class,
-        new AssertionCallback<Void>("@PUT using custom type failed", null)).putEntityReturningVoid(entity);
+        new SimpleAssertionCallback<Void>("@PUT using custom type failed", null)).putEntityReturningVoid(entity);
   }
   
   @Test
   public void testDeleteWithCustomType() {
     Entity entity = new Entity(123, "entity");
     call(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@DELETE using custom type failed", entity)).deleteEntity(123l);
+        new SimpleAssertionCallback<Entity>("@DELETE using custom type failed", entity)).deleteEntity(123l);
   }
 }

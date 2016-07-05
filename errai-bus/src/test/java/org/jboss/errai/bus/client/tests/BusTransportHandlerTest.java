@@ -21,6 +21,7 @@ import java.util.Collection;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 
 public class BusTransportHandlerTest extends AbstractErraiTest {
 

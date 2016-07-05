@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
+import org.jboss.errai.bus.common.FloatUtil;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 import java.util.*;
@@ -61,7 +62,7 @@ public class SType extends STypeSuper {
     return fieldOne;
   }
 
-  public void setFieldOne(String fieldOne) {
+  public void setFieldOne(final String fieldOne) {
     this.fieldOne = fieldOne;
   }
 
@@ -69,7 +70,7 @@ public class SType extends STypeSuper {
     return fieldTwo;
   }
 
-  public void setFieldTwo(String fieldTwo) {
+  public void setFieldTwo(final String fieldTwo) {
     this.fieldTwo = fieldTwo;
   }
 
@@ -77,7 +78,7 @@ public class SType extends STypeSuper {
     return startDate;
   }
 
-  public void setStartDate(Date startDate) {
+  public void setStartDate(final Date startDate) {
     this.startDate = startDate;
   }
 
@@ -85,7 +86,7 @@ public class SType extends STypeSuper {
     return endDate;
   }
 
-  public void setEndDate(Date endDate) {
+  public void setEndDate(final Date endDate) {
     this.endDate = endDate;
   }
 
@@ -93,11 +94,11 @@ public class SType extends STypeSuper {
     return active;
   }
 
-  public void setActive(Boolean active) {
+  public void setActive(final Boolean active) {
     this.active = active;
   }
 
-  public void setListOfStypes(List<SType> listOfStypes) {
+  public void setListOfStypes(final List<SType> listOfStypes) {
     this.listOfStypes = listOfStypes;
   }
 
@@ -109,7 +110,7 @@ public class SType extends STypeSuper {
     return listOfDates;
   }
 
-  public void setListOfDates(List<Date> listOfDates) {
+  public void setListOfDates(final List<Date> listOfDates) {
     this.listOfDates = listOfDates;
   }
 
@@ -117,7 +118,7 @@ public class SType extends STypeSuper {
     return mapofStypes;
   }
 
-  public void setMapofStypes(Map<String, SType> mapofStypes) {
+  public void setMapofStypes(final Map<String, SType> mapofStypes) {
     this.mapofStypes = mapofStypes;
   }
 
@@ -125,7 +126,7 @@ public class SType extends STypeSuper {
     return longValue;
   }
 
-  public void setLongValue(long longValue) {
+  public void setLongValue(final long longValue) {
     this.longValue = longValue;
   }
 
@@ -133,7 +134,7 @@ public class SType extends STypeSuper {
     return intValue;
   }
 
-  public void setIntValue(int intValue) {
+  public void setIntValue(final int intValue) {
     this.intValue = intValue;
   }
 
@@ -141,7 +142,7 @@ public class SType extends STypeSuper {
     return shortValue;
   }
 
-  public void setShortValue(short shortValue) {
+  public void setShortValue(final short shortValue) {
     this.shortValue = shortValue;
   }
 
@@ -149,7 +150,7 @@ public class SType extends STypeSuper {
     return doubleValue;
   }
 
-  public void setDoubleValue(double doubleValue) {
+  public void setDoubleValue(final double doubleValue) {
     this.doubleValue = doubleValue;
   }
 
@@ -157,7 +158,7 @@ public class SType extends STypeSuper {
     return floatValue;
   }
 
-  public void setFloatValue(float floatValue) {
+  public void setFloatValue(final float floatValue) {
     this.floatValue = floatValue;
   }
 
@@ -165,7 +166,7 @@ public class SType extends STypeSuper {
     return byteValue;
   }
 
-  public void setByteValue(byte byteValue) {
+  public void setByteValue(final byte byteValue) {
     this.byteValue = byteValue;
   }
 
@@ -173,7 +174,7 @@ public class SType extends STypeSuper {
     return charValue;
   }
 
-  public void setCharValue(char charValue) {
+  public void setCharValue(final char charValue) {
     this.charValue = charValue;
   }
 
@@ -181,7 +182,7 @@ public class SType extends STypeSuper {
     return place;
   }
 
-  public void setPlace(Place place) {
+  public void setPlace(final Place place) {
     this.place = place;
   }
 
@@ -189,7 +190,7 @@ public class SType extends STypeSuper {
     return charArray;
   }
 
-  public void setCharArray(char[] charArray) {
+  public void setCharArray(final char[] charArray) {
     this.charArray = charArray;
   }
 
@@ -197,7 +198,7 @@ public class SType extends STypeSuper {
     return charArrayMulti;
   }
 
-  public void setCharArrayMulti(char[][] charArrayMulti) {
+  public void setCharArrayMulti(final char[][] charArrayMulti) {
     this.charArrayMulti = charArrayMulti;
   }
 
@@ -206,7 +207,7 @@ public class SType extends STypeSuper {
     return sTypeArray;
   }
 
-  public void setsTypeArray(SType[] sTypeArray) {
+  public void setsTypeArray(final SType[] sTypeArray) {
     this.sTypeArray = sTypeArray;
   }
 
@@ -214,23 +215,23 @@ public class SType extends STypeSuper {
     return sTypeToStype;
   }
 
-  public void setsTypeToStype(Map<SType, SType> sTypeToStype) {
+  public void setsTypeToStype(final Map<SType, SType> sTypeToStype) {
     this.sTypeToStype = sTypeToStype;
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
 
-    SType sType = (SType) o;
+    final SType sType = (SType) o;
 
     if (place != sType.place) return false;
     if (byteValue != sType.byteValue) return false;
     if (charValue != sType.charValue) return false;
-    if (Double.compare(sType.doubleValue, doubleValue) != 0) return false;
-    if (Float.compare(sType.floatValue, floatValue) != 0) return false;
+    if (!FloatUtil.withinPrecision(doubleValue, sType.doubleValue)) return false;
+    if (!FloatUtil.withinPrecision(floatValue, sType.floatValue)) return false;
     if (intValue != sType.intValue) return false;
     if (longValue != sType.longValue) return false;
     if (shortValue != sType.shortValue) return false;
@@ -243,7 +244,7 @@ public class SType extends STypeSuper {
     if (listOfDates != null ? !listOfDates.equals(sType.listOfDates) : sType.listOfDates != null) return false;
 
     if (mapofStypes != null ? !mapofStypes.equals(sType.mapofStypes) : sType.mapofStypes != null) return false;
-    if (sTypeToStype != null ? !sTypeToStype.toString().equals(sType.sTypeToStype.toString()) : sType.sTypeToStype != null)
+    if (sTypeToStype != null ? !sTypeToStype.equals(sType.sTypeToStype) : sType.sTypeToStype != null)
       return
             false;
 
@@ -271,7 +272,6 @@ public class SType extends STypeSuper {
   @Override
   public int hashCode() {
     int result;
-    long temp;
     result = fieldOne != null ? fieldOne.hashCode() : 0;
     result = 31 * result + (fieldTwo != null ? fieldTwo.hashCode() : 0);
     result = 31 * result + (startDate != null ? startDate.hashCode() : 0);
@@ -282,12 +282,9 @@ public class SType extends STypeSuper {
     result = 31 * result + (place != null ? place.hashCode() : 0);
     result = 31 * result + (int) (longValue ^ (longValue >>> 32));
     result = 31 * result + intValue;
-    result = 31 * result + (int) shortValue;
-    temp = doubleValue != +0.0d ? new Double(doubleValue).longValue() : 0L;
-    result = 31 * result + (int) (temp ^ (temp >>> 32));
-    result = 31 * result + (floatValue != +0.0f ? new Float(floatValue).intValue() : 0);
-    result = 31 * result + (int) byteValue;
-    result = 31 * result + (int) charValue;
+    result = 31 * result + shortValue;
+    result = 31 * result + byteValue;
+    result = 31 * result + charValue;
     result = 31 * result + (charArray != null ? Arrays.hashCode(charArray) : 0);
     result = 31 * result + (charArrayMulti != null ? Arrays.hashCode(charArrayMulti) : 0);
     return result;
@@ -319,8 +316,8 @@ public class SType extends STypeSuper {
         .append("}").toString();
   }
 
-  private static String printMultiArray(char[][] c) {
-    StringBuilder builder = new StringBuilder("[");
+  private static String printMultiArray(final char[][] c) {
+    final StringBuilder builder = new StringBuilder("[");
     for (int i = 0; i < c.length; i++) {
       builder.append(Arrays.toString(c[i]));
 
@@ -329,7 +326,7 @@ public class SType extends STypeSuper {
     return builder.append("]").toString();
   }
 
-  public static SType create(RandomProvider random) {
+  public static SType create(final RandomProvider random) {
     final SType sType1 = randomLeafCreate(random);
     sType1.setActive(true);
     sType1.setEndDate(new Date(System.currentTimeMillis()));
@@ -338,7 +335,7 @@ public class SType extends STypeSuper {
     sType1.setFieldTwo("Two!!");
     sType1.setPlace(Place.FIRST);
 
-    List<SType> listOfStypes = new ArrayList<SType>();
+    final List<SType> listOfStypes = new ArrayList<SType>();
 
     final SType sType2 = randomLeafCreate(random);
     sType2.setActive(true);
@@ -362,7 +359,7 @@ public class SType extends STypeSuper {
 
     sType1.setListOfStypes(listOfStypes);
 
-    Map<String, SType> mapOfSTypes = new HashMap<String, SType>();
+    final Map<String, SType> mapOfSTypes = new HashMap<String, SType>();
 
     mapOfSTypes.put(random.randString(), randomLeafCreate(random));
     mapOfSTypes.put(random.randString(), randomLeafCreate(random));
@@ -370,18 +367,18 @@ public class SType extends STypeSuper {
 
     sType1.setMapofStypes(mapOfSTypes);
 
-    Map<SType, SType> sTypeToSType = new HashMap<SType, SType>();
+    final Map<SType, SType> sTypeToSType = new HashMap<SType, SType>();
     sTypeToSType.put(randomLeafCreate(random), randomLeafCreate(random));
     sType1.setsTypeToStype(sTypeToSType);
 
-    List<Date> listOfDates = new LinkedList<Date>();
+    final List<Date> listOfDates = new LinkedList<Date>();
     listOfDates.add(new Date(System.currentTimeMillis() + 3000));
     listOfDates.add(new Date(System.currentTimeMillis() + 10000));
     listOfDates.add(new Date(System.currentTimeMillis() + 20000));
 
     sType1.setListOfDates(listOfDates);
 
-    SType[] sTypeArray = new SType[random.nextInt(10) + 1];
+    final SType[] sTypeArray = new SType[random.nextInt(10) + 1];
 
     for (int i = 0; i < sTypeArray.length; i++) {
       sTypeArray[i] = randomLeafCreate(random);
@@ -392,7 +389,7 @@ public class SType extends STypeSuper {
     return sType1;
   }
 
-  private static SType randomLeafCreate(RandomProvider random) {
+  private static SType randomLeafCreate(final RandomProvider random) {
     final SType sType = new SType();
     sType.setSuperValue(random.randString());
     sType.setActive(random.nextBoolean());
@@ -409,7 +406,7 @@ public class SType extends STypeSuper {
     sType.setShortValue((short) (random.nextInt(Short.MAX_VALUE) - 1));
     sType.setPlace(randPlace(random));
 
-    char[] charArray = new char[random.nextInt(10) + 1];
+    final char[] charArray = new char[random.nextInt(10) + 1];
 
     for (int i = 0; i < charArray.length; i++) {
       charArray[i] = random.nextChar();
@@ -417,10 +414,10 @@ public class SType extends STypeSuper {
 
     sType.setCharArray(charArray);
 
-    char[][] charArrayMulti = new char[random.nextInt(10) + 1][random.nextInt(10) + 1];
+    final char[][] charArrayMulti = new char[random.nextInt(10) + 1][random.nextInt(10) + 1];
 
     for (int i = 0; i < charArrayMulti.length; i++) {
-      char[] subArray = new char[charArrayMulti[i].length];
+      final char[] subArray = new char[charArrayMulti[i].length];
       for (int i2 = 0; i2 < charArrayMulti[i].length; i2++) {
         charArrayMulti[i][i2] = random.nextChar();
       }
@@ -433,15 +430,15 @@ public class SType extends STypeSuper {
   }
 
 
-  private static Date randDateFuture(RandomProvider random) {
+  private static Date randDateFuture(final RandomProvider random) {
     return new Date(System.currentTimeMillis() + random.nextInt(100000));
   }
 
-  private static Date randDatePast(RandomProvider random) {
+  private static Date randDatePast(final RandomProvider random) {
     return new Date(System.currentTimeMillis() - random.nextInt(100000));
   }
 
-  private static Place randPlace(RandomProvider random) {
+  private static Place randPlace(final RandomProvider random) {
     return Place.values()[random.nextInt(100000) % Place.values().length];
   }
 }

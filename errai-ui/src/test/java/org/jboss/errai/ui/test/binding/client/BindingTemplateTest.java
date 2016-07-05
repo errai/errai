@@ -18,6 +18,8 @@ package org.jboss.errai.ui.test.binding.client;
 
 import java.util.Date;
 
+import org.jboss.errai.common.client.dom.HTMLElement;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -38,6 +40,8 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -62,7 +66,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     }
 
     @Override
-    public void setProperty(String value) {
+    public void setProperty(final String value) {
       element.setValue(value);
     }
 
@@ -82,7 +86,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     }
 
     @Override
-    public void setProperty(Boolean value) {
+    public void setProperty(final Boolean value) {
       element.setChecked(value);
     }
 
@@ -102,12 +106,12 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     }
 
     @Override
-    public T toModelValue(T widgetValue) {
+    public T toModelValue(final T widgetValue) {
       return widgetValue;
     }
 
     @Override
-    public T toWidgetValue(T modelValue) {
+    public T toWidgetValue(final T modelValue) {
       return modelValue;
     }
 
@@ -126,12 +130,12 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   private static class DoubleConverter implements Converter<Double, String> {
 
     @Override
-    public Double toModelValue(String widgetValue) {
+    public Double toModelValue(final String widgetValue) {
       return Double.valueOf(widgetValue);
     }
 
     @Override
-    public String toWidgetValue(Double modelValue) {
+    public String toWidgetValue(final Double modelValue) {
       return String.valueOf(modelValue);
     }
 
@@ -150,12 +154,12 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   private static class IntegerConverter implements Converter<Integer, String> {
 
     @Override
-    public Integer toModelValue(String widgetValue) {
+    public Integer toModelValue(final String widgetValue) {
       return Integer.valueOf(widgetValue);
     }
 
     @Override
-    public String toWidgetValue(Integer modelValue) {
+    public String toWidgetValue(final Integer modelValue) {
       return String.valueOf(modelValue);
     }
 
@@ -174,6 +178,12 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   @Override
   public String getModuleName() {
     return getClass().getName().replaceAll("client.*$", "Test");
+  }
+
+  @Override
+  protected void gwtSetUp() throws Exception {
+    setupAddEventListenerInterceptor();
+    super.gwtSetUp();
   }
 
   @Test
@@ -196,7 +206,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
-      public void setProperty(String value) {
+      public void setProperty(final String value) {
         model.setText(value);
       }
 
@@ -209,7 +219,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
-      public void setProperty(String value) {
+      public void setProperty(final String value) {
         model.setPassword(value);
       }
 
@@ -222,7 +232,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<Double>() {
 
       @Override
-      public void setProperty(Double value) {
+      public void setProperty(final Double value) {
         model.setNumber(value);
       }
 
@@ -235,7 +245,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<Integer>() {
 
       @Override
-      public void setProperty(Integer value) {
+      public void setProperty(final Integer value) {
         model.setRange(value);
       }
 
@@ -248,7 +258,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<Boolean>() {
 
       @Override
-      public void setProperty(Boolean value) {
+      public void setProperty(final Boolean value) {
         model.setCheckbox(value);
       }
 
@@ -261,7 +271,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
-      public void setProperty(String value) {
+      public void setProperty(final String value) {
         model.setFile(value);
       }
 
@@ -274,7 +284,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
-      public void setProperty(String value) {
+      public void setProperty(final String value) {
         model.setEmail(value);
       }
 
@@ -287,7 +297,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
-      public void setProperty(String value) {
+      public void setProperty(final String value) {
         model.setColor(value);
       }
 
@@ -300,7 +310,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<Boolean>() {
 
       @Override
-      public void setProperty(Boolean value) {
+      public void setProperty(final Boolean value) {
         model.setRadio(value);
       }
 
@@ -313,7 +323,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
-      public void setProperty(String value) {
+      public void setProperty(final String value) {
         model.setTel(value);
       }
 
@@ -326,7 +336,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
-      public void setProperty(String value) {
+      public void setProperty(final String value) {
         model.setUrl(value);
       }
 
@@ -348,7 +358,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
 
     try {
       model.setNumber(1.0);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("An error occurred while setting model property: " + t.getMessage(), t);
     }
 
@@ -356,8 +366,8 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
 
     try {
       presenter.setValue(2.0);
-      fireChangeEvent(presenter);
-    } catch (Throwable t) {
+      invokeEventListeners(TemplateUtil.asElement(presenter), "change");
+    } catch (final Throwable t) {
       throw new RuntimeException("An error occurred while setting the UI value: " + t.getMessage(), t);
     }
 
@@ -374,7 +384,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
 
     try {
       model.setProperty(value1);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("An error occurred setting [" + value1.toString() + "] for the model property.", t);
     }
     assertEquals("The UI value for input[type='" + type + "'] was not updated after a model change.",
@@ -382,9 +392,11 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
 
     try {
       ui.setProperty(value2);
-      fireChangeEvent(element);
-    } catch (Throwable t) {
-      throw new RuntimeException("An error occurred setting [" + value2.toString() + "] for the ui value.", t);
+      invokeEventListeners(TemplateUtil.asElement(element), "change");
+    } catch (final Throwable t) {
+      throw new RuntimeException(
+              "An error occurred for binding of input[type=" + type + "] setting ["
+              + value2.toString() + "] for the ui value.", t);
     }
     assertEquals("The model value for input[type='" + type + "'] was not updated after a UI change.",
             converter.toModelValue(value2), model.getProperty());
@@ -393,35 +405,35 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   private void automaticBindingAssertions(final BindingTemplate<?> template) {
     assertNotNull("Template instance was not injected!", template);
 
-    Label idLabel = template.getIdLabel();
+    final Label idLabel = template.getIdLabel();
     assertNotNull(idLabel);
     assertEquals("", idLabel.getText());
 
-    DivElement idDiv = template.getIdDiv();
+    final DivElement idDiv = template.getIdDiv();
     assertNotNull(idDiv);
     assertEquals("", idDiv.getInnerText());
 
-    TextBox nameTextBox = template.getNameTextBox();
+    final TextBox nameTextBox = template.getNameTextBox();
     assertNotNull(nameTextBox);
     assertEquals("", nameTextBox.getValue());
 
-    TextBox dateTextBox = template.getDateTextBox();
+    final TextBox dateTextBox = template.getDateTextBox();
     assertNotNull(dateTextBox);
     assertEquals("", dateTextBox.getValue());
 
-    TextBox phoneNumberBox = template.getPhoneNumberBox();
+    final TextBox phoneNumberBox = template.getPhoneNumberBox();
     assertNotNull(phoneNumberBox);
     assertEquals("", phoneNumberBox.getValue());
 
-    Element title = template.getTitleField();
+    final Element title = template.getTitleField();
     assertNotNull(title);
     assertEquals("", title.getInnerHTML());
 
-    TextInputElement age = template.getAge();
+    final TextInputElement age = template.getAge();
     assertNotNull(age);
     assertEquals("", age.getValue());
 
-    TestModel model = template.getModel();
+    final TestModel model = template.getModel();
     model.setId(1711);
     model.getChild().setName("errai");
     model.setLastChanged(new Date());
@@ -449,7 +461,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     assertEquals("Model (age) was not updated!", Integer.valueOf(age.getValue()), model.getAge());
   }
 
-  private void fireChangeEvent(Object element) {
+  private void fireChangeEvent(final Object element) {
     final NativeEvent changeEvent = Document.get().createChangeEvent();
     TemplateUtil.asElement(element).dispatchEvent(changeEvent);
   }
@@ -463,8 +475,105 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       IOC.getBeanManager()
               .lookupBean(TemplateFragmentWithoutFragmentId.class).getInstance();
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       fail("Loading templated instance caused an error: " + e.getMessage());
     }
   }
+
+  @SuppressWarnings("unchecked")
+  private static void invokeEventListeners(final com.google.gwt.dom.client.Element element, final String eventType) {
+    invokeEventListeners((Object) element, eventType);
+    if ("change".equals(eventType)) {
+      @SuppressWarnings("rawtypes")
+      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
+      if (elem instanceof HasValue) {
+        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void invokeEventListeners(final HTMLElement element, final String eventType) {
+    invokeEventListeners((Object) element, eventType);
+    if ("change".equals(eventType)) {
+      @SuppressWarnings("rawtypes")
+      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
+      if (elem instanceof HasValue) {
+        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
+      }
+    }
+  }
+
+  private static void invokeEventListeners(final Object element, final String eventType) {
+    final NativeEvent event = Document.get().createHtmlEvent(eventType, true, true);
+    invokeEventListeners(element, eventType, event);
+  }
+
+  /*
+   * This is a really disgusting workaround for the inability to
+   * dispatch native browser events in the version of HtmlUnit currently
+   * bundled in gwt-dev.
+   *
+   * What does this do?
+   * This replaces "addEventListener" and "removeEventListener"
+   * in the HTMLElement prototype with functions that intercept
+   * and store registered listeners.
+   *
+   * Why does it do it?
+   * So that subsequent calls to "invokeEventListeners" can
+   * manually call any functions added with "addEventListener".
+   *
+   * In short because we cannot dispatch browser events, to test
+   * binding of native elements we must store and then manually invoke
+   * all event listeners.
+   */
+  private static native void setupAddEventListenerInterceptor() /*-{
+    console.log("Setting up event listener interceptors.");
+    function ListenerMap() {
+      var map = new Object();
+
+      this.add = function(element, type, listener) {
+        this.get(element, type).push(listener);
+      };
+
+      this.remove = function(element, type, listener) {
+        var listeners = this.get(element, type);
+        var index = listeners.indexOf(listener);
+        if (index > -1) {
+          listeners.splice(index, 1);
+        }
+      };
+
+      this.get = function(element, type) {
+        if (map[element] === undefined) {
+          map[element] = {};
+        }
+        if (map[element][type] === undefined) {
+          map[element][type] = new Array();
+        }
+        return map[element][type];
+      };
+    };
+    if ($wnd.HTMLElement.prototype._addEventListener === undefined) {
+      listeners = new ListenerMap();
+      $wnd.HTMLElement.prototype._addEventListener = $wnd.HTMLElement.prototype.addEventListener;
+      $wnd.HTMLElement.prototype._removeEventListener = $wnd.HTMLElement.prototype.removeEventListener;
+      console.log("Replacing addEventListener.");
+      $wnd.HTMLElement.prototype.addEventListener = function(type, listener, capture) {
+        console.log("Intercepted addEventListener for " + this + " with type " + type);
+        listeners.add(this, type, listener);
+        this._addEventListener(type, listener, capture);
+      };
+      console.log("Replacing removeEventListener.");
+      $wnd.HTMLElement.prototype.removeEventListener = function(type, listener, capture) {
+        console.log("Intercepted removeEventListener for " + this + " with type " + type);
+        listeners.remove(this, type, listener);
+        this._removeEventListener(type, listener, capture);
+      };
+    }
+  }-*/;
+
+  private static native void invokeEventListeners(Object element, String type, Object evt) /*-{
+    listeners.get(element, type).forEach(function(l) { l(evt); });
+  }-*/;
 }

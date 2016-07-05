@@ -239,7 +239,19 @@
               <forkMode>pertest</forkMode>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
                 flag or the testsuite WILL fail. -->
-              <argLine>-Xmx1500m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true -Dorg.jboss.errai.bus.do_long_poll=false</argLine>
+              <argLine>-Xmx1500m </argLine>
+              <systemPropertyVariables>
+                <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
+                <errai.devel.nocache>true</errai.devel.nocache>
+                <org.jboss.errai.bus.do_long_poll>false</org.jboss.errai.bus.do_long_poll>
+                <!-- These tests must be run in devMode. When run in prod one of two problems happens:
+                      1. An exception occurs from MarshallerGenerator caching between tests in the AyncCDITests suite.
+                      2. If (1) is fixed, a GWT compilation error occurs where an interned value is referenced before being declared.
+                     In the future, if we need to run the tests with a prod compile we might be able to fix these
+                     problems by moving the async tests out of a test suite.
+                 -->
+                <gwt.args>-devMode -testBeginTimeout 5 ${gwtArgs}</gwt.args>
+              </systemPropertyVariables>
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
@@ -342,34 +354,26 @@
           <artifactId>mvel2</artifactId>
         </dependency>
 
-        <!-- CDI Development Utils -->
-        <!-- This must be placed above com.google.gwt:gwt-dev to override 
-          the Jetty that is present there -->
         <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
+          <groupId>org.glassfish</groupId>
+          <artifactId>javax.el</artifactId>
+          <scope>test</scope>
         </dependency>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-plus</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-naming</artifactId>
-        </dependency>
-
         <!-- Weld Modules -->
         <dependency>
           <groupId>org.jboss.weld</groupId>
           <artifactId>weld-core</artifactId>
+          <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.jboss.weld.se</groupId>
           <artifactId>weld-se-core</artifactId>
+          <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet-core</artifactId>
+          <scope>test</scope>
         </dependency>
 
         <!-- GWT and GWT Extensions -->

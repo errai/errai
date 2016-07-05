@@ -20,12 +20,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
-import javax.annotation.concurrent.GuardedBy;
 
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.slf4j.Logger;
 
@@ -40,7 +36,6 @@ public final class WebSocketTokenManager {
   private static final String TOKEN_STORE = WebSocketTokenManager.class.getName() + ":Store";
 
   @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
-  @GuardedBy("session")
   public static String getNewOneTimeToken(final QueueSession session) {
     synchronized (session) {
       List tokenStore = session.getAttribute(List.class, TOKEN_STORE);
@@ -62,7 +57,6 @@ public final class WebSocketTokenManager {
   }
 
   @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-  @GuardedBy("session")
   public static boolean verifyOneTimeToken(final QueueSession session, final String token) {
     synchronized (session) {
       final boolean tokenRemoved;

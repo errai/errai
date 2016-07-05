@@ -64,7 +64,7 @@ public class Album {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(final Long id) {
     this.id = id;
   }
 
@@ -80,15 +80,15 @@ public class Album {
     return releaseDate;
   }
 
-  public void setName(String name) {
+  public void setName(final String name) {
     this.name = name;
   }
 
-  public void setArtist(Artist artist) {
+  public void setArtist(final Artist artist) {
     this.artist = artist;
   }
 
-  public void setReleaseDate(Date releaseDate) {
+  public void setReleaseDate(final Date releaseDate) {
     this.releaseDate = releaseDate;
   }
 
@@ -96,7 +96,7 @@ public class Album {
     return format;
   }
 
-  public void setFormat(Format format) {
+  public void setFormat(final Format format) {
     this.format = format;
   }
 
@@ -104,10 +104,11 @@ public class Album {
   public String toString() {
     // BEWARE: the tests depend on this toString() to fully represent the state of the class
     // BEWARE2: don't cascade the toString() to artist, or you will create infinite recursion
-    return "Album [id=" + id + ", name=" + name
+    // BEWARE3: Use ternaries here so that null and undefined values print the same when run in prod
+    return "Album [id=" + (id == null ? "null" : id) + ", name=" + (name == null ? "null" : name)
             + ", artist=" + (artist == null ? "null" : artist.getName())
-            + ", format=" + format
-            + ", releaseDate=" + releaseDate + "]";
+            + ", format=" + (format == null ? "null" : format)
+            + ", releaseDate=" + (releaseDate == null ? "null" : releaseDate) + "]";
   }
 
   // ------ Lifecycle callbacks (assorted access levels to test that they all work) ------

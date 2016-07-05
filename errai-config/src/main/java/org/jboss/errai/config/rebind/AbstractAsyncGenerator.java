@@ -56,7 +56,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
       public String call() throws Exception {
         final String generatedCode;
 
-        if (isCacheValid()) {
+        if (isCacheEnabled() && isCacheValid()) {
           log.info("Using cached output from " + AbstractAsyncGenerator.this.getClass().getName());
           generatedCode = getGeneratedCache();
         }
@@ -70,6 +70,10 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
         return generatedCode;
       }
     });
+  }
+
+  private boolean isCacheEnabled() {
+    return !RebindUtils.NO_CACHE;
   }
 
   /**
@@ -140,7 +144,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * @return true if newly introduced class is relevant to this generator,
    *         otherwise false.
    */
-  protected boolean isRelevantClass(MetaClass clazz) {
+  protected boolean isRelevantClass(final MetaClass clazz) {
     return true;
   }
 
@@ -206,7 +210,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
         context.commit(logger, printWriter);
       }
     }
-    catch (Throwable e) {
+    catch (final Throwable e) {
       e.printStackTrace();
       logger.log(TreeLogger.ERROR, "Error generating " + className, e);
     }
@@ -224,7 +228,7 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * @param clazz
    *          the class to consider when checking for changes.
    */
-  protected void addCacheRelevantClass(MetaClass clazz) {
+  protected void addCacheRelevantClass(final MetaClass clazz) {
     Set<String> classes = cacheRelevantClasses.get(this.getClass());
     if (classes == null) {
       classes = new HashSet<String>();
@@ -243,8 +247,8 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
    * @param classes
    *          the classes to consider when checking for changes.
    */
-  protected void addCacheRelevantClasses(Collection<MetaClass> classes) {
-    for (MetaClass clazz : classes) {
+  protected void addCacheRelevantClasses(final Collection<MetaClass> classes) {
+    for (final MetaClass clazz : classes) {
       addCacheRelevantClass(clazz);
     }
   }

@@ -66,6 +66,9 @@ import com.google.gwt.dev.javac.StandardGeneratorContext;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RebindUtils {
+  public static final String ERRAI_DEVEL_NOCACHE_PROPERTY = "errai.devel.nocache";
+  public static boolean NO_CACHE = Boolean.getBoolean(ERRAI_DEVEL_NOCACHE_PROPERTY);
+
   static Logger logger = LoggerFactory.getLogger(RebindUtils.class);
   private static String hashSeed = "errai21CR2";
 
@@ -175,11 +178,10 @@ public class RebindUtils {
     return getCacheFile(name).exists();
   }
 
-  private static boolean nocache = Boolean.getBoolean("errai.devel.nocache");
   private static volatile Boolean _hasClasspathChanged;
 
   public static boolean hasClasspathChanged() {
-    if (nocache)
+    if (NO_CACHE)
       return true;
     if (_hasClasspathChanged != null)
       return _hasClasspathChanged;
@@ -220,7 +222,7 @@ public class RebindUtils {
   }
 
   public static boolean hasClasspathChangedForAnnotatedWith(final Class<? extends Annotation> annoClass) {
-    if (nocache)
+    if (NO_CACHE)
       return true;
     Boolean changed = _changeMapForAnnotationScope.get(annoClass);
     if (changed == null) {
@@ -427,7 +429,7 @@ public class RebindUtils {
     }
   }
 
-  public static boolean isModuleInherited(final GeneratorContext context, String moduleName) {
+  public static boolean isModuleInherited(final GeneratorContext context, final String moduleName) {
     return getInheritedModules(context).contains(moduleName);
   }
 

@@ -21,4 +21,5 @@
     <inherits name="com.google.gwt.junit.JUnit"/>
     <inherits name="org.jboss.errai.common.ErraiCommon"/>
     <inherits name="org.jboss.errai.bus.ErraiBus"/>
+    <inherits name="org.jboss.errai.bus.TestCommon"/>
 </module>

@@ -19,6 +19,7 @@ package org.jboss.errai.bus.client.tests;
 import java.util.Set;
 
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 
 /**
  * Tests for the correct behaviour in case remote communication was disabled in the client bus.

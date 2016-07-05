@@ -56,13 +56,25 @@ public class TwoWayConverter<M, W> implements Converter<M, W> {
   }
 
   @Override
-  public M toModelValue(W widgetValue) {
-    return widgetToModel.convert(widgetValue);
+  public M toModelValue(final W widgetValue) {
+    try {
+      return widgetToModel.convert(widgetValue);
+    } catch (final Throwable t) {
+      throw new RuntimeException("There was an error while converting widget value [" + widgetValue + "] with "
+              + widgetToModel.getDomainType().getSimpleName() + " -> " + widgetToModel.getTargetType().getSimpleName()
+              + " converter.", t);
+    }
   }
 
   @Override
-  public W toWidgetValue(M modelValue) {
-    return modelToWidget.convert(modelValue);
+  public W toWidgetValue(final M modelValue) {
+    try {
+      return modelToWidget.convert(modelValue);
+    } catch (final Throwable t) {
+      throw new RuntimeException("There was an error while converting widget value [" + modelValue + "] with "
+              + modelToWidget.getDomainType().getSimpleName() + " -> " + modelToWidget.getTargetType().getSimpleName()
+              + " converter.", t);
+    }
   }
 
 }

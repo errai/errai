@@ -26,14 +26,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.continuation.Continuation;
+import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
-import org.mortbay.jetty.RetryRequest;
-import org.mortbay.util.ajax.Continuation;
-import org.mortbay.util.ajax.ContinuationSupport;
 import org.slf4j.Logger;
 
 /**
@@ -57,7 +56,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
    *     - if the request for the GET could not be handled
    */
   @Override
-  protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+  protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest)),
@@ -79,7 +78,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
    *     - if the request for the POST could not be handled
    */
   @Override
-  protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException {
+  protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException {
 
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest));
@@ -89,13 +88,13 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     try {
       service.store(createCommandMessage(session, httpServletRequest));
     }
-    catch (IOException ioe) {
+    catch (final IOException ioe) {
       log.debug("Problem when storing message", ioe);
     }
-    catch (QueueUnavailableException e) {
+    catch (final QueueUnavailableException e) {
       try {
         sendDisconnectDueToSessionExpiry(httpServletResponse);
-      } catch (IOException ioe) {
+      } catch (final IOException ioe) {
         log.debug("Failed to inform client that session expired", ioe);
       }
       return;
@@ -104,9 +103,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest));
   }
 
-  private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest, 
-          HttpServletResponse httpServletResponse, boolean wait) {
-    
+  private void pollForMessages(final QueueSession session, final HttpServletRequest httpServletRequest,
+          final HttpServletResponse httpServletResponse, final boolean wait) {
+
     try {
       final MessageQueue queue = service.getBus().getQueue(session);
       if (queue == null) {
@@ -124,11 +123,13 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
       if (wait) {
         synchronized (queue.getActivationLock()) {
-          final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
+          final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest);
 
           if (!cont.isResumed() && !queue.messagesWaiting()) {
             queue.setActivationCallback(new JettyQueueActivationCallback(cont));
-            if (cont.suspend(30 * 1000)) {
+            cont.setTimeout(30 * 1000);
+            cont.suspend();
+            if (cont.isResumed()) {
               return;
             }
           }
@@ -136,13 +137,6 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       }
 
       pollQueue(queue, httpServletResponse.getOutputStream(), httpServletResponse);
-    }
-    catch (RetryRequest r) {
-      /**
-       * This *must* be caught and re-thrown to work property with Jetty.
-       */
-
-      throw r;
     }
     catch (final IOException io) {
       log.debug("Problem when polling for new messages", io);
@@ -157,9 +151,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       httpServletResponse.setContentType("application/json");
 
 
-      StringBuilder b = new StringBuilder("{Error" +
+      final StringBuilder b = new StringBuilder("{Error" +
                    "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-               for (StackTraceElement e : t.getStackTrace()) {
+               for (final StackTraceElement e : t.getStackTrace()) {
                  b.append(e.toString()).append("<br/>");
                }
        b.append("\"}").toString();
@@ -173,8 +167,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     }
   }
 
-  private static boolean pollQueue(MessageQueue queue, OutputStream stream,
-                                   HttpServletResponse httpServletResponse) throws IOException {
+  private static boolean pollQueue(final MessageQueue queue, final OutputStream stream,
+                                   final HttpServletResponse httpServletResponse) throws IOException {
     if (queue == null) return false;
     queue.heartBeat();
 
@@ -188,12 +182,12 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   private static class JettyQueueActivationCallback implements QueueActivationCallback {
     private final Continuation cont;
 
-    private JettyQueueActivationCallback(Continuation cont) {
+    private JettyQueueActivationCallback(final Continuation cont) {
       this.cont = cont;
     }
 
     @Override
-    public void activate(MessageQueue queue) {
+    public void activate(final MessageQueue queue) {
       synchronized (queue.getActivationLock()) {
         queue.setActivationCallback(null);
         cont.resume();

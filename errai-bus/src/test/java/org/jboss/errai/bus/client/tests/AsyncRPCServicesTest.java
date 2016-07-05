@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.tests;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.AsyncRPCService;
+import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.common.client.api.RemoteCallback;
 
 

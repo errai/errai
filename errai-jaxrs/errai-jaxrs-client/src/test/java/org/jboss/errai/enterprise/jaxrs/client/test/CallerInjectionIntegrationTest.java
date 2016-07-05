@@ -62,13 +62,13 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testInjectedPlainMethodService() {
     TestModule.getInstance().getPlainMethodTestService()
-        .call(new AssertionCallback<String>("@GET failed", "get")).get();
+        .call(new SimpleAssertionCallback<String>("@GET failed", "get")).get();
   }
 
   @Test
   public void testInjectedCustomTypeMethodService() {
     TestModule.getInstance().getCustomTypeTestService()
-        .call(new AssertionCallback<Entity>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
+        .call(new SimpleAssertionCallback<Entity>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
   }
 
   @Test

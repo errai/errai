@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.tests.support;
 
 import java.util.List;
 
+import org.jboss.errai.bus.common.FloatUtil;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
@@ -38,7 +39,7 @@ public class EntityWithGenericCollections {
     return listOfFloats;
   }
 
-  public void setListOfFloats(List<Float> listOfFloats) {
+  public void setListOfFloats(final List<Float> listOfFloats) {
     this.listOfFloats = listOfFloats;
   }
 
@@ -46,7 +47,7 @@ public class EntityWithGenericCollections {
     return o;
   }
 
-  public void setObject(Object o ){
+  public void setObject(final Object o ){
     this.o = o;
   }
 
@@ -54,7 +55,7 @@ public class EntityWithGenericCollections {
     return listWithLowerBoundWildcard;
   }
 
-  public void setListWithLowerBoundWildcard(List<? extends String> list) {
+  public void setListWithLowerBoundWildcard(final List<? extends String> list) {
     this.listWithLowerBoundWildcard = list;
   }
 
@@ -69,20 +70,32 @@ public class EntityWithGenericCollections {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj)
       return true;
     if (obj == null)
       return false;
     if (getClass() != obj.getClass())
       return false;
-    EntityWithGenericCollections other = (EntityWithGenericCollections) obj;
+    final EntityWithGenericCollections other = (EntityWithGenericCollections) obj;
     if (listOfFloats == null) {
       if (other.listOfFloats != null)
         return false;
     }
-    else if (!listOfFloats.equals(other.listOfFloats))
+    else if (listOfFloats.size() != other.listOfFloats.size())
       return false;
+    else {
+      for (int i = 0; i < listOfFloats.size(); i++) {
+        final Float a = listOfFloats.get(i);
+        final Float b = other.listOfFloats.get(i);
+        final int maxSignifigantDigitIndex = FloatUtil.maxSignifigantDigitIndex(a, b);
+        final int differenceSignifigantDigitIndex = FloatUtil.differenceSignifigantDigitIndex(a, b);
+
+        if (maxSignifigantDigitIndex < differenceSignifigantDigitIndex
+                || maxSignifigantDigitIndex - differenceSignifigantDigitIndex < FloatUtil.DEFAULT_PRECISION)
+          return false;
+      }
+    }
     if (listWithLowerBoundWildcard == null) {
       if (other.listWithLowerBoundWildcard != null)
         return false;
