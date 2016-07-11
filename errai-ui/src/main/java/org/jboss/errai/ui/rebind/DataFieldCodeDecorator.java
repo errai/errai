@@ -21,6 +21,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -77,11 +78,12 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
       else {
         instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
       }
-    }
-    else {
-      if (!isWidget) {
-        throw new GenerationException("Unable to use [" + name + "] in class [" + decorable.getDecorableDeclaringType()
-                + "] as a @DataField. The field must be a Widget or a DOM element as either a JavaScriptObject, native @JsType, or IsElement.");
+    } else if (decorable.getType().isAssignableTo( IsWidget.class )) {
+      instance = Stmt.nestedCall( instance ).invoke( "asWidget" );
+    } else {
+      if ( !isWidget ) {
+        throw new GenerationException( "Unable to use [" + name + "] in class [" + decorable.getDecorableDeclaringType()
+                + "] as a @DataField. The field must be a Widget, IsWidget, or a DOM element as either a JavaScriptObject, native @JsType, or IsElement." );
       }
     }
 
