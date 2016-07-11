@@ -505,17 +505,21 @@ public class ErraiJpaTest extends JpaClientTestCase {
     // the standalone listener is always notified before the entity itself (JPA2 section 3.5.4)
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
-
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
+    /*
+     * Do not assert above before flushing!
+     * There is a difference of behaviour between Errai and Hibernate
+     * where PostPersist happens after a flush in Hibernate, but before
+     * a flush in Errai.
+     */
     em.flush();
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // verify that detach causes no lifecycle updates
     em.detach(album);
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
   }
 
   public void testFetchEntityLifecycle() throws Exception {
@@ -537,18 +541,38 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // fetch a fresh copy
     final Album fetchedAlbum = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // fetch again; expect no more PostLoad notifications
     final Album fetchedAlbum2 = em.find(Album.class, album.getId());
     assertSame(fetchedAlbum, fetchedAlbum2);
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
+  }
+
+  private void assertCallbackLog(final List<CallbackLogEntry> expectedLifecycle) {
+    assertEquals(expectedLifecycle.size(), Album.CALLBACK_LOG.size());
+    for (int i = 0; i < expectedLifecycle.size(); i++) {
+      final CallbackLogEntry expected = expectedLifecycle.get(i);
+      final CallbackLogEntry observed = Album.CALLBACK_LOG.get(i);
+
+      try {
+        assertEquals(expected, observed);
+      } catch (final AssertionError ae) {
+        throw new AssertionError("Index " + i + " differed from the expected log entry.", ae);
+      }
+    }
+    /*
+     * Clear the logs because subsequent test steps can modify
+     * previous log entires causing false positives.
+     */
+    Album.CALLBACK_LOG.clear();
+    expectedLifecycle.clear();
   }
 
   public void testRemoveEntityLifecycle() throws Exception {
@@ -570,13 +594,13 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // fetch a fresh copy
     final Album fetchedAlbum = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // delete it
     em.remove(fetchedAlbum);
@@ -586,7 +610,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostRemove
                                                                                                         .class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostRemove.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
   }
 
   public void testUpdateEntityLifecycle() throws Exception {
@@ -608,7 +632,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // modify it
     album.setName("Cowabunga");
@@ -618,7 +642,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(album, PreUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostUpdate.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
   }
 
   public void testMergeIntoManagedEntityLifecycle() throws Exception {
@@ -640,7 +664,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // create a detached version of the same album, and merge the change
     final Album mergeMe = new Album();
@@ -656,7 +680,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(album, PreUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostUpdate.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
   }
 
   public void testMergeDetachedEntityLifecycle() throws Exception {
@@ -679,7 +703,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
 
     // create a detached version of the same album, and merge the change
     album.setName("Cowabunga");
@@ -695,7 +719,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PreUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PostUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PostUpdate.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
   }
 
   public void testMergeNewEntityLifecycle() throws Exception {
@@ -717,7 +741,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PostPersist.class));
-    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+    assertCallbackLog(expectedLifecycle);
   }
 
   public void testStoreAndFetchOneWithEverythingUsingFieldAccess() throws Exception {
