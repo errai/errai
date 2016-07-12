@@ -428,7 +428,7 @@ public class BindableProxyGenerator {
                     )
                 )
               .finish()
-              .elseif_(Bool.expr(Stmt.invokeStatic(BindableProxyFactory.class, "isBindableType", target().invoke(readMethod))))
+              .elseif_(Stmt.invokeStatic(BindableProxyFactory.class, "isBindableType", target().invoke(readMethod)))
               .append(Stmt.loadVariable(cloneVar).invoke(writeMethod,
                       Cast.to (
                           readMethod.getReturnType(),

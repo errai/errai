@@ -247,8 +247,8 @@ public class MarshallerGeneratorFactory {
         elseBlockBuilder = If.objEquals(Stmt.loadLiteral(typeName), Stmt.loadVariable("a0")).append(stmt).finish();
       }
       else {
-        elseBlockBuilder = elseBlockBuilder.elseif_(Stmt.create(Context.create().addVariable("a0", String.class))
-                .loadLiteral(typeName).invoke("equals", Stmt.loadVariable("a0"))).append(stmt).finish();
+        elseBlockBuilder = elseBlockBuilder.elseif_(Stmt.loadLiteral(typeName).invoke("equals", 
+                Stmt.loadVariable("a0"))).append(stmt).finish();
       }
 
       typeIndex += 1;

@@ -69,7 +69,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
 
   @Override
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
-    Statement rhsStatement = GenUtil.generate(context, rhs);
+    final Statement rhsStatement = GenUtil.generate(context, rhs);
     return if_(new BooleanExpressionBuilder(rhsStatement, op));
   }
 
@@ -113,10 +113,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
 
   @Override
   public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs) {
-    if (lhs.getType() == null)
-      lhs.generate(context);
-
-    IfBlock elseIfBlock = new IfBlock(new BooleanExpressionBuilder(lhs, rhs, op));
+    final IfBlock elseIfBlock = new IfBlock(new BooleanExpressionBuilder(lhs, rhs, op));
     ifBlock.setElseIfBlock(elseIfBlock);
     return elseif_(elseIfBlock);
   }
