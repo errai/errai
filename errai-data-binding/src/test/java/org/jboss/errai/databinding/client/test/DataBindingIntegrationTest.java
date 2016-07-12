@@ -737,6 +737,39 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
+  public void testDeepUnwrapClonesUnproxiedProperties() {
+    final TestModel parent = new TestModel("v0");
+    parent.setName("parent");
+
+    final TestModel child = new TestModel("v1");
+    child.setName("child");
+
+    final TestModel grandChild = new TestModel("v2");
+    grandChild.setName("grandChild");
+
+    child.setChild(grandChild);
+    parent.setChild(child);
+
+    final DataBinder<TestModel> binder = DataBinder.forModel(parent);
+
+    final TestModel unwrapped = ((BindableProxy<TestModel>) binder.getModel()).deepUnwrap();
+    assertNotNull(unwrapped);
+    assertNotNull(unwrapped.getChild());
+    assertNotNull(unwrapped.getChild().getChild());
+
+    assertNotSame(unwrapped, parent);
+    assertNotSame(unwrapped.getChild(), parent.getChild());
+    assertNotSame(unwrapped.getChild().getChild(), parent.getChild().getChild());
+
+    assertFalse(unwrapped instanceof BindableProxy);
+    assertFalse(unwrapped.getChild() instanceof BindableProxy);
+    assertFalse(unwrapped.getChild().getChild() instanceof BindableProxy);
+
+    assertEquals(unwrapped, parent);
+  }
+  
+  @Test
   public void testUpdateWidgetsWithBindablePropertyChain() {
     final TestModel grandChildModel = new TestModel();
     final TestModel childModel = new TestModel();

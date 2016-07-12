@@ -60,11 +60,13 @@ public class BindableProxyFactory {
    * @param <T>
    *          the bindable type
    * @param model
-   *          The model instance to proxy.
+   *          The model instance to proxy, must not be null.
    * @return proxy that can be used in place of the model instance.
    */
   @SuppressWarnings("unchecked")
   public static <T> T getBindableProxy(T model) {
+    Assert.notNull(model);
+    
     if (model instanceof BindableProxy)
       return model;
 
@@ -165,11 +167,15 @@ public class BindableProxyFactory {
    * been generated for that type (the type has been annotated or configured to be bindable).
    *
    * @param model
-   *          the object to be checked.
+   *          the object to be checked, may be null.
    * @return true if the object is bindable, otherwise false.
    */
   @SuppressWarnings("unchecked")
   public static <T> boolean isBindableType(T model) {
+    if (model == null) {
+      return false;
+    }
+    
     if (model instanceof BindableProxy) {
       model = (T) ((BindableProxy<T>) model).unwrap();
     }
