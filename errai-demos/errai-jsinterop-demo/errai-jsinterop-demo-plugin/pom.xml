@@ -193,7 +193,7 @@
           <runTarget>${errai.dev.context}/</runTarget>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000</extraJvmArgs>
+          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.ioc.reachability=Aggressive</extraJvmArgs>
           <generateJsInteropExports>true</generateJsInteropExports>
         </configuration>
       </plugin>
