@@ -30,7 +30,9 @@ import javax.enterprise.inject.Alternative;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.QualifierUtil;
-import org.jboss.errai.ioc.client.WindowInjectionContext;
+import org.jboss.errai.ioc.client.WindowInjectionContextStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -46,6 +48,8 @@ import com.google.common.collect.Multimap;
  */
 @Alternative
 public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
+
+  private static final Logger logger = LoggerFactory.getLogger(SyncBeanManager.class);
 
   private ContextManager contextManager;
   private final Multimap<String, FactoryHandle> handlesByName = ArrayListMultimap.create();
@@ -122,10 +126,11 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public Collection<SyncBeanDef> lookupBeans(final String name, final boolean keepJsDups) {
     Assert.notNull(name);
+    logger.debug("Looking up beans for {}", name);
 
     final Collection<FactoryHandle> handles = handlesByName.get(name);
     final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByName.get(name);
-    final JsArray<JsTypeProvider<?>> jsProviders = WindowInjectionContext.createOrGet().getProviders(name);
+    final JsArray<JsTypeProvider<?>> jsProviders = WindowInjectionContextStorage.createOrGet().getProviders(name);
 
     final Set<String> beanDefFactoryNames = new HashSet<>();
     final Collection beanDefs = new ArrayList<SyncBeanDef<Object>>(handles.size()+runtimeBeanDefs.size()+jsProviders.length());
@@ -137,10 +142,17 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
       }
     }
     for (final JsTypeProvider<?> provider : JsArray.iterable(jsProviders)) {
+      logger.debug("Found JS provider for name {} from factory {}", provider.getName(), provider.getFactoryName());
       if (keepJsDups || provider.getFactoryName() == null || !beanDefFactoryNames.contains(provider.getFactoryName())) {
+        logger.debug("Keeping JS provider for name {} from factory {}", provider.getName(), provider.getFactoryName());
         beanDefs.add(new JsTypeBeanDefImplementation(provider, name));
       }
+      else {
+        logger.debug("Rejecting duplicate JS provider for name {} from factory {}", provider.getName(), provider.getFactoryName());
+      }
     }
+
+    logger.debug("Looked up {} beans: {}", beanDefs.size(), beanDefs);
 
     return beanDefs;
   }

@@ -26,7 +26,8 @@ import java.util.List;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.ioc.client.WindowInjectionContext;
+import org.jboss.errai.ioc.client.WindowInjectionContextImpl;
+import org.jboss.errai.ioc.client.WindowInjectionContextStorage;
 import org.jboss.errai.ioc.client.api.ActivatedBy;
 import org.jboss.errai.ioc.client.container.BeanActivator;
 import org.jboss.errai.ioc.client.container.FactoryHandleImpl;
@@ -35,7 +36,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 /**
- * Generates factories that lookup types from the {@link WindowInjectionContext}
+ * Generates factories that lookup types from the {@link WindowInjectionContextImpl}
  * , allowing the injection of types between dynamic runtime modules.
  *
  * @see FactoryBodyGenerator
@@ -48,7 +49,7 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
   protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
           final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
     return Collections.<Statement> singletonList(
-            Stmt.castTo(injectable.getInjectedType(), invokeStatic(WindowInjectionContext.class, "createOrGet")
+            Stmt.castTo(injectable.getInjectedType(), invokeStatic(WindowInjectionContextStorage.class, "createOrGet")
                     .invoke("getBean", injectable.getInjectedType().getFullyQualifiedName())).returnValue());
   }
 

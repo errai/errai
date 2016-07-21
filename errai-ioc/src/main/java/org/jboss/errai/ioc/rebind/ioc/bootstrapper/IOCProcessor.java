@@ -86,6 +86,7 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
+import org.jboss.errai.ioc.client.WindowInjectionContextStorage;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -315,7 +316,7 @@ public class IOCProcessor {
   @SuppressWarnings("unchecked")
   private void declareWindowInjectionContextField(final IOCProcessingContext processingContext) {
     processingContext.getBootstrapBuilder().privateField("windowContext", WindowInjectionContext.class)
-            .modifiers(Modifier.Final).initializesWith(Stmt.invokeStatic(WindowInjectionContext.class, "createOrGet"))
+            .modifiers(Modifier.Final).initializesWith(Stmt.invokeStatic(WindowInjectionContextStorage.class, "createOrGet"))
             .finish();
   }
 

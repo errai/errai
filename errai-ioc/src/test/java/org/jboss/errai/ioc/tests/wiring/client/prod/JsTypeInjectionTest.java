@@ -28,6 +28,7 @@ import javax.inject.Named;
 
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
+import org.jboss.errai.ioc.client.WindowInjectionContextStorage;
 import org.jboss.errai.ioc.client.container.DynamicAnnotation;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -79,8 +80,8 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    WindowInjectionContext.reset();
-    final WindowInjectionContext windowInjContext = WindowInjectionContext.createOrGet();
+    WindowInjectionContextStorage.reset();
+    final WindowInjectionContext windowInjContext = WindowInjectionContextStorage.createOrGet();
     windowInjContext.addBeanProvider(MultipleImplementationsJsType.class.getName(), new JsTypeProvider<Object>() {
       @Override
       public Object getInstance() {
@@ -213,7 +214,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
   }
 
   public void testSingletonJsTypeInWindowContext() {
-    final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+    final WindowInjectionContext wndContext = WindowInjectionContextStorage.createOrGet();
 
     final Object bean1 = wndContext.getBean(JsTypeSingletonBean.class.getName());
     assertNotNull("@JsType bean was not registered in window context", bean1);
@@ -225,7 +226,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
   }
 
   public void testDependentJsTypeInWindowContext() {
-    final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+    final WindowInjectionContext wndContext = WindowInjectionContextStorage.createOrGet();
 
     final Object bean1 = wndContext.getBean(JsTypeDependentBean.class.getName());
     assertNotNull("@JsType bean was not registered in window context", bean1);
@@ -238,7 +239,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
   @SuppressWarnings("rawtypes")
   public void testNamedJsTypeInWindowContext() {
-    final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+    final WindowInjectionContext wndContext = WindowInjectionContextStorage.createOrGet();
 
     final Object bean1 = wndContext.getBean(JsTypeNamedBean.class.getName());
     assertNotNull("@JsType bean was not registered in window context", bean1);
@@ -256,7 +257,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
   @SuppressWarnings("rawtypes")
   public void testNoDuplicateJsTypeThroughBeanManager() {
-    final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+    final WindowInjectionContext wndContext = WindowInjectionContextStorage.createOrGet();
 
     final Object bean1 = wndContext.getBean(JsTypeNamedBean.class.getName());
     assertNotNull("@JsType bean was not registered in window context", bean1);
@@ -280,7 +281,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
         }
       };
 
-      final WindowInjectionContext wndContext = WindowInjectionContext.createOrGet();
+      final WindowInjectionContext wndContext = WindowInjectionContextStorage.createOrGet();
       wndContext.addBeanProvider("org.jboss.errai.ioc.tests.wiring.client.res.UnimplementedType", new JsTypeProvider<Object>(){
 
         @Override
@@ -312,7 +313,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
   public void testNativeJsTypesNotInWindowContext() throws Exception {
     injectScriptThenRun(() -> {
-      final WindowInjectionContext context = WindowInjectionContext.createOrGet();
+      final WindowInjectionContext context = WindowInjectionContextStorage.createOrGet();
       try {
         context.getBean("org.jboss.errai.ioc.tests.wiring.client.res.NativeConcreteJsType");
         fail("There should not be a provider in the WindowInjectionContext for NativeConcreteJsType.");
@@ -391,7 +392,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
 
     assertEquals(new HashSet<>(Arrays.asList(1, 2)), values);
 
-    WindowInjectionContext.createOrGet().addBeanProvider(MultipleImplementationsJsType.class.getName(), new JsTypeProvider<Object>() {
+    WindowInjectionContextStorage.createOrGet().addBeanProvider(MultipleImplementationsJsType.class.getName(), new JsTypeProvider<Object>() {
       @Override
       public Object getInstance() {
         return new AlternativeImpl(3);
@@ -421,7 +422,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
   }
 
   public void testNoDuplicatesWithSuperTypeAliases() throws Exception {
-    final JsArray<JsTypeProvider<?>> providers = WindowInjectionContext.createOrGet()
+    final JsArray<JsTypeProvider<?>> providers = WindowInjectionContextStorage.createOrGet()
             .getProviders(DuplicateInterface.class.getName());
 
     assertEquals(2, providers.length());
@@ -462,7 +463,7 @@ public class JsTypeInjectionTest extends AbstractErraiIOCTest {
   }
 
   public void testImplNotPublishedUnderExternalJsTypeIfaceWhenAlreadyInWindowContext() throws Exception {
-    assertEquals(1, WindowInjectionContext.createOrGet().getProviders(ExternalJsTypeIface.class.getName()).length());
+    assertEquals(1, WindowInjectionContextStorage.createOrGet().getProviders(ExternalJsTypeIface.class.getName()).length());
   }
 
   public void testLocalBeanSatisfiesExternalJsTypeInterfaceForDefaultInjectionSite() throws Exception {

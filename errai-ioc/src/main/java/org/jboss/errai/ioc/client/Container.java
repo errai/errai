@@ -83,9 +83,8 @@ public class Container implements EntryPoint {
 
       logger.info("IOC bootstrapper successfully initialized in {}ms", System.currentTimeMillis() - bootstrapStart);
     }
-    catch (RuntimeException ex) {
-      logger.error("Critical error in IOC container bootstrap: " + ex.getClass().getName() + ": "
-          + ex.getMessage());
+    catch (final RuntimeException ex) {
+      logger.error("Critical error in IOC container bootstrap.", ex);
 
       throw ex;
     }
