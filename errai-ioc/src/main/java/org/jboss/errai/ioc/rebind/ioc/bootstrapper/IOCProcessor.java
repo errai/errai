@@ -257,11 +257,10 @@ public class IOCProcessor {
   }
 
   private void runExtensionCallbacks(final Collection<MetaClass> allMetaClasses) {
-    for (final MetaClass clazz : allMetaClasses) {
-      for (final ExtensionTypeCallback callback : injectionContext.getExtensionTypeCallbacks()) {
-        callback.callback(clazz);
-      }
-    }
+    final Collection<ExtensionTypeCallback> extensionCallbacks = injectionContext.getExtensionTypeCallbacks();
+    extensionCallbacks.forEach(cb -> cb.init());
+    allMetaClasses.forEach(mc -> extensionCallbacks.forEach(cb -> cb.callback(mc)));
+    extensionCallbacks.forEach(cb -> cb.finish());
   }
 
   private void callFinishInitOnContextManager(final String contextManagerFieldName, final BlockBuilder<?> methodBody) {

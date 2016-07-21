@@ -30,6 +30,8 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
  */
 public interface ExtensionTypeCallback {
 
+  default void init() {}
   void callback(MetaClass type);
+  default void finish() {}
 
 }
