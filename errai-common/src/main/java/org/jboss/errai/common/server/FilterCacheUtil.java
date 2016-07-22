@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.server.scripts;
+package org.jboss.errai.common.server;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;

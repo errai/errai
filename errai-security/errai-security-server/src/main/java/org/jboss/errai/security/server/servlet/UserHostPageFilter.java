@@ -16,8 +16,8 @@
 
 package org.jboss.errai.security.server.servlet;
 
-import static org.jboss.errai.cdi.server.scripts.FilterCacheUtil.getCharResponseWrapper;
-import static org.jboss.errai.cdi.server.scripts.FilterCacheUtil.noCache;
+import static org.jboss.errai.common.server.FilterCacheUtil.getCharResponseWrapper;
+import static org.jboss.errai.common.server.FilterCacheUtil.noCache;
 import static org.jboss.errai.security.Properties.USER_ON_HOSTPAGE_ENABLED;
 
 import java.io.IOException;
@@ -33,7 +33,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.errai.cdi.server.scripts.FilterCacheUtil.CharResponseWrapper;
+import org.jboss.errai.common.server.FilterCacheUtil.CharResponseWrapper;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.security.server.properties.ErraiAppProperties;

@@ -15,8 +15,8 @@
  */
 package org.jboss.errai.cdi.server.scripts;
 
-import static org.jboss.errai.cdi.server.scripts.FilterCacheUtil.getCharResponseWrapper;
-import static org.jboss.errai.cdi.server.scripts.FilterCacheUtil.noCache;
+import static org.jboss.errai.common.server.FilterCacheUtil.getCharResponseWrapper;
+import static org.jboss.errai.common.server.FilterCacheUtil.noCache;
 
 import java.io.IOException;
 
@@ -30,7 +30,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.errai.cdi.server.scripts.FilterCacheUtil.CharResponseWrapper;
+import org.jboss.errai.common.server.FilterCacheUtil.CharResponseWrapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
