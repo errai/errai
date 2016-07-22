@@ -207,26 +207,6 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>jacoco-gwt-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>jacoco-initialize</id>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>jacoco-site</id>
-                <phase>site</phase>
-                <goals>
-                  <goal>report</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <forkMode>always</forkMode>
