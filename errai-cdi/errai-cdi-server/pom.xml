@@ -46,6 +46,13 @@
       </properties>
 
       <dependencies>
+        <!-- Must come before gwt-user to override servlet api -->
+        <dependency>
+          <groupId>org.jboss.spec.javax.servlet</groupId>
+          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      
         <!-- Errai Core -->
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -185,6 +192,11 @@
           <artifactId>errai-data-binding</artifactId>
           <scope>provided</scope>
         </dependency>
+
+        <dependency>
+          <groupId>org.jsoup</groupId>
+          <artifactId>jsoup</artifactId>
+        </dependency>
       </dependencies>
 
       <build>
@@ -250,6 +262,12 @@
       </build>
 
       <dependencies> 
+        <!-- Must come before gwt-user to override servlet api -->
+        <dependency>
+          <groupId>org.jboss.spec.javax.servlet</groupId>
+          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <scope>provided</scope>
+        </dependency>
         <dependency>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
@@ -411,6 +429,11 @@
           <groupId>javax</groupId>
           <artifactId>javaee-api</artifactId>
           <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jsoup</groupId>
+          <artifactId>jsoup</artifactId>
         </dependency>
       </dependencies>
     </profile>

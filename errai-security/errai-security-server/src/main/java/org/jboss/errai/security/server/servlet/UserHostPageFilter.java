@@ -16,11 +16,11 @@
 
 package org.jboss.errai.security.server.servlet;
 
+import static org.jboss.errai.cdi.server.scripts.FilterCacheUtil.getCharResponseWrapper;
+import static org.jboss.errai.cdi.server.scripts.FilterCacheUtil.noCache;
 import static org.jboss.errai.security.Properties.USER_ON_HOSTPAGE_ENABLED;
 
-import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -28,14 +28,12 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.jboss.errai.cdi.server.scripts.FilterCacheUtil.CharResponseWrapper;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.security.server.properties.ErraiAppProperties;
@@ -78,11 +76,11 @@ public class UserHostPageFilter implements Filter {
           ServletException {
 
     if (!isUserOnHostPageEnabled()) {
-      chain.doFilter(request, response);
+      chain.doFilter(request, noCache((HttpServletResponse) response));
     }
     else {
-      final CharResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response);
-      chain.doFilter(request, wrappedResponse);
+      final CharResponseWrapper wrappedResponse = getCharResponseWrapper((HttpServletResponse) response);
+      chain.doFilter(request, noCache(wrappedResponse));
 
       final User user = authenticationService.getUser();
       final String output;
@@ -101,7 +99,7 @@ public class UserHostPageFilter implements Filter {
         output = wrappedResponse.toString();
       }
       
-      byte[] outputBytes = output.getBytes("UTF-8");
+      final byte[] outputBytes = output.getBytes("UTF-8");
       response.setContentLength(outputBytes.length);
       response.getOutputStream().write(outputBytes);
     }
@@ -114,55 +112,4 @@ public class UserHostPageFilter implements Filter {
     return false;
   }
 
-  class CharResponseWrapper extends HttpServletResponseWrapper {
-
-    protected CharArrayWriter charWriter = new CharArrayWriter();
-
-    protected ServletOutputStream outputStream = new ServletOutputStream() {
-
-      @Override
-      public boolean isReady() {
-        return true;
-      }
-
-      @Override
-      public void setWriteListener(WriteListener writeListener) {
-        // no-op
-      }
-
-      @Override
-      public void write(int b) throws IOException {
-        charWriter.write(b);
-      }
-    };
-
-    protected PrintWriter writer = new PrintWriter(charWriter);
-
-    public CharResponseWrapper(final HttpServletResponse response) {
-      super(response);
-    }
-
-    @Override
-    public ServletOutputStream getOutputStream() throws IOException {
-      return outputStream;
-    }
-
-    @Override
-    public PrintWriter getWriter() throws IOException {
-      return writer;
-    }
-
-    @Override
-    public void flushBuffer() throws IOException {
-      // Don't remove this override!
-      // When intercepting static content, WAS 8.5.5.5 prematurely calls this
-      // method to flush the output stream before we can calculate the content
-      // length (see above).
-    }
-
-    @Override
-    public String toString() {
-      return charWriter.toString();
-    }
-  }
 }
