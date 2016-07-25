@@ -18,10 +18,13 @@ package org.jboss.errai.ioc.client.container;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,10 +44,17 @@ import com.google.common.collect.ListMultimap;
  */
 public abstract class AbstractContext implements Context {
 
-  private final Map<String, Factory<?>> factories = new HashMap<String, Factory<?>>();
-  private final Map<String, Proxy<?>> proxies = new LinkedHashMap<String, Proxy<?>>();
-  private final Map<Object, Factory<?>> factoriesByCreatedInstances = new IdentityHashMap<Object, Factory<?>>();
-  private final Set<String> factoriesCurrentlyCreatingInstances = new HashSet<String>();
+  private final Map<String, Factory<?>> factories = new HashMap<>();
+  private final Map<String, Proxy<?>> proxies = new LinkedHashMap<>();
+
+  /*
+   * This field must map to Deque<Factory<?>> to handle producer methods returning types
+   * that are already managed beans, where it is possible for a context to have the same
+   * managed bean as belonging to two factories.
+   */
+  private final Map<Object, Deque<Factory<?>>> factoriesByCreatedInstances = new IdentityHashMap<>();
+
+  private final Set<String> factoriesCurrentlyCreatingInstances = new HashSet<>();
   private final ListMultimap<Object, DestructionCallback<?>> destructionCallbacksByInstance = ArrayListMultimap.create();
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -171,7 +181,12 @@ public abstract class AbstractContext implements Context {
   }
 
   protected void registerInstance(final Object unwrappedInstance, final Factory<?> factory) {
-    factoriesByCreatedInstances.put(unwrappedInstance, factory);
+    Deque<Factory<?>> stack = factoriesByCreatedInstances.get(unwrappedInstance);
+    if (stack == null) {
+      stack = new LinkedList<>();
+      factoriesByCreatedInstances.put(unwrappedInstance, stack);
+    }
+    stack.push(factory);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -179,14 +194,14 @@ public abstract class AbstractContext implements Context {
   public void destroyInstance(final Object instance) {
     // TODO destroy proxy if dependent scope
     final Object unwrapped = maybeUnwrap(instance);
-    final Factory<?> factory = factoriesByCreatedInstances.get(unwrapped);
-    if (factory != null) {
-      for (final DestructionCallback callback : destructionCallbacksByInstance.get(unwrapped)) {
+    final Deque<Factory<?>> factories = factoriesByCreatedInstances.get(unwrapped);
+    while (factories != null && !factories.isEmpty()) {
+      final Factory<?> factory = factories.pop();
+      for (final DestructionCallback callback : destructionCallbacksByInstance.removeAll(unwrapped)) {
         callback.destroy(unwrapped);
       }
       factory.destroyInstance(unwrapped, contextManager);
       factoriesByCreatedInstances.remove(unwrapped);
-      destructionCallbacksByInstance.removeAll(unwrapped);
     }
   }
 
@@ -214,7 +229,18 @@ public abstract class AbstractContext implements Context {
   @Override
   public <P> P getInstanceProperty(final Object instance, final String propertyName, final Class<P> type) {
     final Object unwrapped = maybeUnwrap(instance);
-    return ((Factory<Object>) factoriesByCreatedInstances.get(unwrapped)).getReferenceAs(unwrapped, propertyName, type);
+    final Deque<Factory<?>> factories = factoriesByCreatedInstances.get(unwrapped);
+    if (factories != null) {
+      final Iterator<Factory<?>> iter = factories.descendingIterator();
+      while (iter.hasNext()) {
+        final P property = ((Factory<Object>) iter.next()).getReferenceAs(unwrapped, propertyName, type);
+        if (property != null) {
+          return property;
+        }
+      }
+    }
+
+    return null;
   }
 
   protected Collection<Proxy<?>> getExistingProxies() {

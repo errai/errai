@@ -21,7 +21,9 @@ import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator.getLocalVariableName;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +33,7 @@ import javax.enterprise.inject.Disposes;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -95,8 +98,10 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
               invokeStatic(Factory.class, "maybeUnwrapProxy", loadVariable(PRODUCER_INSTANCE)))));
     }
 
+    final List<Statement> depScopeRegistrationStmts = new ArrayList<>();
+    final Statement[] producerParams = generateProducerParams(producingMember, paramDeps, stmts, depScopeRegistrationStmts);
     final Statement invocation = controller.exposedMethodStmt(loadVariable(PRODUCER_INSTANCE), producingMember,
-            getProducerInvocationParams(producingMember, paramDeps));
+            producerParams);
     stmts.add(declareFinalVariable("instance", producedInjectable.getInjectedType(), invocation));
     if (!producingMember.isStatic()) {
       stmts.add(setProducerInstanceReference());
@@ -104,23 +109,47 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
         stmts.add(loadVariable("this").invoke("registerDependentScopedReference", loadVariable("instance"), loadVariable(PRODUCER_INSTANCE)));
       }
     }
+    stmts.addAll(depScopeRegistrationStmts);
 
     stmts.add(loadVariable("instance").returnValue());
 
     return stmts;
   }
 
-  private Statement[] getProducerInvocationParams(final MetaMethod producingMember, final Collection<Dependency> paramDeps) {
+  private Statement[] generateProducerParams(final MetaMethod producingMember, final Collection<Dependency> paramDeps,
+          final List<Statement> varDeclarationStmts, final List<Statement> depScopeRegistrationStmts) {
     // TODO validate params
     final Statement[] params = new Statement[producingMember.getParameters().length];
 
     for (final Dependency dep : paramDeps) {
       final ParamDependency paramDep = (ParamDependency) dep;
-      params[paramDep.getParamIndex()] = castTo(paramDep.getInjectable().getInjectedType(),
-              loadVariable("contextManager").invoke("getInstance", paramDep.getInjectable().getFactoryName()));
+      final ContextualStatementBuilder producerParamCreationStmt = generateProducerParamCreationStmt(paramDep);
+      final String paramVarName = getLocalVariableName(paramDep.getParameter());
+      varDeclarationStmts.add(declareFinalVariable(paramVarName, paramDep.getParameter().getType(), producerParamCreationStmt));
+      if (paramDep.getInjectable().getWiringElementTypes().contains(WiringElementType.DependentBean)) {
+        depScopeRegistrationStmts.add(loadVariable("this").invoke("registerDependentScopedReference",
+              loadVariable("instance"), loadVariable(paramVarName)));
+      }
+      params[paramDep.getParamIndex()] = loadVariable(paramVarName);
     }
 
     return params;
+  }
+
+  private ContextualStatementBuilder generateProducerParamCreationStmt(final ParamDependency paramDep) {
+    ContextualStatementBuilder producerParamCreationStmt;
+    if (paramDep.getInjectable().isContextual()) {
+      final MetaParameter param = paramDep.getParameter();
+      final MetaClass[] typeArgs = getTypeArguments(param.getType());
+      final Annotation[] annotations = param.getAnnotations();
+      producerParamCreationStmt = castTo(paramDep.getInjectable().getInjectedType(),
+              loadVariable("contextManager").invoke("getContextualInstance", paramDep.getInjectable().getFactoryName(), typeArgs, annotations));
+    }
+    else {
+      producerParamCreationStmt = castTo(paramDep.getInjectable().getInjectedType(),
+              loadVariable("contextManager").invoke("getInstance", paramDep.getInjectable().getFactoryName()));
+    }
+    return producerParamCreationStmt;
   }
 
   private List<Statement> fieldCreateInstanceStatements(final MetaField producingMember, final Injectable producerInjectable,

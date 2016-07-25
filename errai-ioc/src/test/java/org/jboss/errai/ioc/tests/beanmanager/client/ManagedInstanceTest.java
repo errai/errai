@@ -29,9 +29,12 @@ import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.beanmanager.client.res.A;
+import org.jboss.errai.ioc.tests.beanmanager.client.res.B;
 import org.jboss.errai.ioc.tests.beanmanager.client.res.BeanWithManagedInstance;
+import org.jboss.errai.ioc.tests.beanmanager.client.res.C;
 import org.jboss.errai.ioc.tests.beanmanager.client.res.DefaultDependentBean;
 import org.jboss.errai.ioc.tests.beanmanager.client.res.DestructableClass;
+import org.jboss.errai.ioc.tests.beanmanager.client.res.OtherDestructableClass;
 
 /**
  *
@@ -43,6 +46,20 @@ public class ManagedInstanceTest extends AbstractErraiIOCTest {
     @Override
     public Class<? extends Annotation> annotationType() {
       return A.class;
+    }
+  };
+
+  private static final B b = new B() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return B.class;
+    }
+  };
+
+  private static final C c = new C() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return C.class;
     }
   };
 
@@ -212,6 +229,27 @@ public class ManagedInstanceTest extends AbstractErraiIOCTest {
     for (final DestructableClass instance : depBeans) {
       assertTrue(getSimpleName(instance) + " was not destroyed after module was destroyed.", instance.isDestroyed());
     }
+  }
+
+  public void testDestroyingProducedBeanOfApplicationScopedProducerUsingParamInjectedManagedInstance() throws Exception {
+    final OtherDestructableClass producedBean = getBeanManager().lookupBean(OtherDestructableClass.class, a).getInstance();
+    assertFalse(producedBean.isDestroyed());
+    getBeanManager().destroyBean(producedBean);
+    assertTrue(producedBean.isDestroyed());
+  }
+
+  public void testDestroyingProducedBeanOfDepdendentScopedProducerUsingParamInjectedManagedInstance() throws Exception {
+    final OtherDestructableClass producedBean = getBeanManager().lookupBean(OtherDestructableClass.class, b).getInstance();
+    assertFalse(producedBean.isDestroyed());
+    getBeanManager().destroyBean(producedBean);
+    assertTrue(producedBean.isDestroyed());
+  }
+
+  public void testDestroyingProducedBeanOfDependentScopedProducerUsingFieldInjectedManagedInstance() throws Exception {
+    final OtherDestructableClass producedBean = getBeanManager().lookupBean(OtherDestructableClass.class, c).getInstance();
+    assertFalse(producedBean.isDestroyed());
+    getBeanManager().destroyBean(producedBean);
+    assertTrue(producedBean.isDestroyed());
   }
 
   private static String getSimpleName(final DestructableClass instance) {
