@@ -20,10 +20,12 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,13 +69,13 @@ public class CDI {
   public static final String CLIENT_DISPATCHER_SUBJECT = CDI_SERVICE_SUBJECT_PREFIX + "ClientDispatcher";
   private static final String CLIENT_ALREADY_FIRED_RESOURCE = CDI_SERVICE_SUBJECT_PREFIX + "AlreadyFired";
 
-  private static final Set<String> remoteEvents = new HashSet<String>();
+  private static final Set<String> remoteEvents = new HashSet<>();
   private static boolean active = false;
 
-  private static Map<String, List<AbstractCDIEventCallback<?>>> eventObservers = new HashMap<String, List<AbstractCDIEventCallback<?>>>();
-  private static Set<String> localOnlyObserverTypes = new HashSet<String>();
+  private static Map<String, List<AbstractCDIEventCallback<?>>> eventObservers = new HashMap<>();
+  private static Set<String> localOnlyObserverTypes = new HashSet<>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
-  private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<String, List<MessageFireDeferral>>();
+  private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<>();
 
   private static Logger logger = LoggerFactory.getLogger(CDI.class);
 
@@ -92,7 +94,7 @@ public class CDI {
    * Should only be called by bootstrapper for testing purposes.
    */
   public void __resetSubsystem() {
-    for (final String eventType : new HashSet<String>(((ClientMessageBus) ErraiBus.get()).getAllRegisteredSubjects())) {
+    for (final String eventType : new HashSet<>(((ClientMessageBus) ErraiBus.get()).getAllRegisteredSubjects())) {
       if (eventType.startsWith(CDI_SUBJECT_PREFIX)) {
         ErraiBus.get().unsubscribeAll(eventType);
       }
@@ -122,7 +124,7 @@ public class CDI {
     if (qualifiers != null) {
       for (final Annotation qualifier : qualifiers) {
         if (qualifiersPart == null)
-          qualifiersPart = new HashSet<String>(qualifiers.length);
+          qualifiersPart = new HashSet<>(qualifiers.length);
 
         qualifiersPart.add(asString(qualifier));
       }
@@ -155,7 +157,7 @@ public class CDI {
       beanRef = payload;
     }
 
-    final Map<String, Object> messageMap = new HashMap<String, Object>();
+    final Map<String, Object> messageMap = new HashMap<>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
     messageMap.put(CDIProtocol.BeanType.name(), beanRef.getClass().getName());
     messageMap.put(CDIProtocol.BeanReference.name(), beanRef);
@@ -190,7 +192,7 @@ public class CDI {
   }
 
   private static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback,
-          boolean isLocalOnly) {
+          final boolean isLocalOnly) {
 
     if (!eventObservers.containsKey(eventType)) {
       eventObservers.put(eventType, new ArrayList<AbstractCDIEventCallback<?>>());
@@ -230,7 +232,7 @@ public class CDI {
 
       if (!localOnlyObserverTypes.contains(eventType)) {
         boolean shouldUnsubscribe = true;
-        for (AbstractCDIEventCallback<?> cb : eventObservers.get(eventType)) {
+        for (final AbstractCDIEventCallback<?> cb : eventObservers.get(eventType)) {
           if (cb.getQualifiers().equals(callback.getQualifiers())) {
             // found another matching observer -> do not unsubscribe
             shouldUnsubscribe = false;
@@ -268,10 +270,10 @@ public class CDI {
   public static void resendSubscriptionRequestForAllEventTypes() {
     if (isRemoteCommunicationEnabled()) {
       int remoteEventCount = 0;
-      for (Map.Entry<String, List<AbstractCDIEventCallback<?>>> mapEntry : eventObservers.entrySet()) {
-        String eventType = mapEntry.getKey();
+      for (final Map.Entry<String, List<AbstractCDIEventCallback<?>>> mapEntry : eventObservers.entrySet()) {
+        final String eventType = mapEntry.getKey();
         if (!localOnlyObserverTypes.contains(eventType)) {
-          for (AbstractCDIEventCallback<?> callback : mapEntry.getValue()) {
+          for (final AbstractCDIEventCallback<?> callback : mapEntry.getValue()) {
             remoteEventCount++;
             MessageBuilder.createMessage()
                 .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
@@ -290,13 +292,21 @@ public class CDI {
     final String beanType = message.get(String.class, CDIProtocol.BeanType);
     final Object beanRef = message.get(Object.class, CDIProtocol.BeanReference);
 
-    WindowEventObservers.createOrGet().fireEvent(beanType, beanRef);
-    _fireEvent(beanType, message);
-
-    if (lookupTable.containsKey(beanType)) {
-      for (final String superType : lookupTable.get(beanType)) {
-        WindowEventObservers.createOrGet().fireEvent(superType, beanRef);
-        _fireEvent(superType, message);
+    final Set<String> firedBeanTypes = new HashSet<>();
+    final Deque<String> beanTypeQueue = new LinkedList<>();
+    beanTypeQueue.addLast(beanType);
+    firedBeanTypes.add(beanType);
+    while (!beanTypeQueue.isEmpty()) {
+      final String curType = beanTypeQueue.poll();
+      WindowEventObservers.createOrGet().fireEvent(curType, beanRef);
+      _fireEvent(curType, message);
+      if (lookupTable.containsKey(curType)) {
+        for (final String superType : lookupTable.get(curType)) {
+          if (!firedBeanTypes.contains(superType)) {
+            beanTypeQueue.addLast(superType);
+            firedBeanTypes.add(superType);
+          }
+        }
       }
     }
   }
@@ -312,7 +322,7 @@ public class CDI {
   @SuppressWarnings("unchecked")
   private static void fireIfNotFired(final MessageCallback callback, final Message message) {
     if (!message.hasResource(CLIENT_ALREADY_FIRED_RESOURCE)) {
-      message.setResource(CLIENT_ALREADY_FIRED_RESOURCE, new IdentityHashMap<Object, Object>());
+      message.setResource(CLIENT_ALREADY_FIRED_RESOURCE, new IdentityHashMap<>());
     }
 
     if (!message.getResource(Map.class, CLIENT_ALREADY_FIRED_RESOURCE).containsKey(callback)) {
@@ -339,7 +349,7 @@ public class CDI {
   }
 
   private static void fireAllIfWaiting() {
-    for (final String svc : new HashSet<String>(fireOnSubscribe.keySet())) {
+    for (final String svc : new HashSet<>(fireOnSubscribe.keySet())) {
       fireIfWaiting(svc);
     }
   }
@@ -365,7 +375,7 @@ public class CDI {
 
       List<MessageFireDeferral> runnables = fireOnSubscribe.get(type);
       if (runnables == null) {
-        fireOnSubscribe.put(type, runnables = new ArrayList<MessageFireDeferral>());
+        fireOnSubscribe.put(type, runnables = new ArrayList<>());
       }
       runnables.add(deferral);
     }
