@@ -47,6 +47,7 @@ import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithClassFieldAndMap;
 import org.jboss.errai.bus.client.tests.support.EntityWithConstructorAndMethodMappedLong;
 import org.jboss.errai.bus.client.tests.support.EntityWithFactoryMethodAndMixedMappingTypes;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
@@ -927,11 +928,11 @@ public class SerializationTests extends AbstractErraiTest {
       public void run() {
         final Map<Long, List<String>> map = new HashMap<Long, List<String>>();
 
-        List<String> l1 = new ArrayList<String>();
+        final List<String> l1 = new ArrayList<String>();
         l1.add("foo");
         l1.add("bar");
 
-        List<String> l2 = new ArrayList<String>();
+        final List<String> l2 = new ArrayList<String>();
         l2.add("baz");
         l2.add("qux");
 
@@ -976,11 +977,11 @@ public class SerializationTests extends AbstractErraiTest {
       public void run() {
         final Map<String, List<Double>> map = new HashMap<String, List<Double>>();
 
-        List<Double> l1 = new ArrayList<Double>();
+        final List<Double> l1 = new ArrayList<Double>();
         l1.add(1.0);
         l1.add(1.1);
 
-        List<Double> l2 = new ArrayList<Double>();
+        final List<Double> l2 = new ArrayList<Double>();
         l2.add(1.2);
         l2.add(1.3);
 
@@ -1024,11 +1025,11 @@ public class SerializationTests extends AbstractErraiTest {
       public void run() {
         final Map<List<String>, Group> map = new HashMap<List<String>, Group>();
 
-        List<String> l1 = new ArrayList<String>();
+        final List<String> l1 = new ArrayList<String>();
         l1.add("foo");
         l1.add("bar");
 
-        List<String> l2 = new ArrayList<String>();
+        final List<String> l2 = new ArrayList<String>();
         l1.add("baz");
         l1.add("qux");
 
@@ -1065,8 +1066,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<LinkedHashMap<String, Integer>>() {
           @Override
           public void callback(LinkedHashMap<String, Integer> response) {
-            String compareTo = map.toString();
-            String compareFrom = response.toString();
+            final String compareTo = map.toString();
+            final String compareFrom = response.toString();
 
             assertEquals(compareTo, compareFrom);
             finishTest();
@@ -1088,8 +1089,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<LinkedHashSet>() {
           @Override
           public void callback(LinkedHashSet response) {
-            String compareTo = set.toString();
-            String compareFrom = response.toString();
+            final String compareTo = set.toString();
+            final String compareFrom = response.toString();
 
             assertEquals(compareTo, compareFrom);
 
@@ -1123,12 +1124,12 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
         final EntityWithGenericCollections ent = new EntityWithGenericCollections();
-        List<Float> listOffFloats = new ArrayList<Float>();
+        final List<Float> listOffFloats = new ArrayList<Float>();
         listOffFloats.add(1.0f);
         listOffFloats.add(1.1f);
         listOffFloats.add(1.2f);
 
-        List<String> listOfStrings = new ArrayList<String>();
+        final List<String> listOfStrings = new ArrayList<String>();
         listOfStrings.add("str1");
         listOfStrings.add(null);
         listOfStrings.add("str2");
@@ -1206,7 +1207,7 @@ public class SerializationTests extends AbstractErraiTest {
             if (!r.getMessage().equals(t.getMessage()))
               return false;
 
-            StackTraceElement[] st = r.getStackTrace();
+            final StackTraceElement[] st = r.getStackTrace();
 
             if (st == null || trace.length != st.length)
               return false;
@@ -1259,7 +1260,7 @@ public class SerializationTests extends AbstractErraiTest {
             if (r.getMessage() == null || !r.getMessage().equals(t.getMessage()))
               return false;
 
-            StackTraceElement[] st = r.getStackTrace();
+            final StackTraceElement[] st = r.getStackTrace();
 
             if (st == null || trace.length != st.length)
               return false;
@@ -1755,7 +1756,7 @@ public class SerializationTests extends AbstractErraiTest {
 
         final GenericEntity<String> entity = new GenericEntity<String>("foo");
 
-        List<String> groups = new ArrayList<String>();
+        final List<String> groups = new ArrayList<String>();
         groups.add("bar");
         groups.add("baz");
         entity.setList(groups);
@@ -1776,7 +1777,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        List<String> data = new ArrayList<String>();
+        final List<String> data = new ArrayList<String>();
         data.add("bar");
         data.add("baz");
 
@@ -1839,7 +1840,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        List<Group> groups = new ArrayList<Group>();
+        final List<Group> groups = new ArrayList<Group>();
         groups.add(new Group(1, "foo"));
         groups.add(new Group(2, "bar"));
 
@@ -1861,7 +1862,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        Set<Group> groups = new HashSet<Group>();
+        final Set<Group> groups = new HashSet<Group>();
         groups.add(new Group(1, "foo"));
         groups.add(new Group(2, "bar"));
 
@@ -1883,7 +1884,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        Stack<Group> stack = new Stack<Group>();
+        final Stack<Group> stack = new Stack<Group>();
         stack.add(new Group(1, "foo"));
         stack.add(new Group(2, "bar"));
 
@@ -1905,7 +1906,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        Student student = new Student(1, "smartStudent");
+        final Student student = new Student(1, "smartStudent");
         final EntityWithSuperClassField entity = new EntityWithSuperClassField(student);
 
         MessageBuilder.createCall(new RemoteCallback<EntityWithSuperClassField>() {
@@ -2101,30 +2102,30 @@ public class SerializationTests extends AbstractErraiTest {
       public void run() {
 
         final EntityWithTypesUsingNestedParameterizedTypes e = new EntityWithTypesUsingNestedParameterizedTypes();
-        Map<String, String> deTranslations = new HashMap<String, String>();
+        final Map<String, String> deTranslations = new HashMap<String, String>();
         deTranslations.put("hello", "Hallo");
         deTranslations.put("one", "Eins");
 
-        Map<String, String> enTranslations = new HashMap<String, String>();
+        final Map<String, String> enTranslations = new HashMap<String, String>();
         enTranslations.put("hello", "Hello");
         enTranslations.put("one", "One");
 
-        Map<String, Map<String, String>> allTranslations = new HashMap<String, Map<String, String>>();
+        final Map<String, Map<String, String>> allTranslations = new HashMap<String, Map<String, String>>();
         allTranslations.put("de", deTranslations);
         allTranslations.put("en", enTranslations);
         e.setMap(allTranslations);
 
         // regression test for ERRAI-565
-        Map<Long, Map<Object, String>> multiTypeMap = new HashMap<Long, Map<Object, String>>();
-        Map<Object, String> entry123 = new HashMap<Object, String>();
+        final Map<Long, Map<Object, String>> multiTypeMap = new HashMap<Long, Map<Object, String>>();
+        final Map<Object, String> entry123 = new HashMap<Object, String>();
         entry123.put("this is a key", "this is a value");
         multiTypeMap.put(123L, entry123);
-        Map<Object, String> entry456 = new HashMap<Object, String>();
+        final Map<Object, String> entry456 = new HashMap<Object, String>();
         entry456.put("this is another key", "this is another value");
         multiTypeMap.put(456L, entry456);
         e.setMapWithDifferentTypes(multiTypeMap);
 
-        List<List<Integer>> list = new ArrayList<List<Integer>>();
+        final List<List<Integer>> list = new ArrayList<List<Integer>>();
         list.add(new ArrayList<Integer>(Arrays.asList(1, 2, null)));
         list.add(new ArrayList<Integer>(Arrays.asList(3, 4, null)));
         e.setList(list);
@@ -2326,7 +2327,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        GenericEntity<Student> arg = new GenericEntity<Student> ();
+        final GenericEntity<Student> arg = new GenericEntity<Student> ();
         arg.setField(new Student(1, "smart"));
         
         MessageBuilder.createCall(new RemoteCallback<Student>() {
@@ -2339,4 +2340,27 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+ public void testEntityWithClassField() {
+   runAfterInit(new Runnable() {
+     @Override
+     public void run() {
+
+       final EntityWithClassFieldAndMap entity = new EntityWithClassFieldAndMap();
+       entity.setClazz(String.class);
+       
+       MessageBuilder.createCall(new RemoteCallback<EntityWithClassFieldAndMap>() {
+         @Override
+         public void callback(EntityWithClassFieldAndMap response) {
+           assertEquals(entity.getClazz(), response.getClazz());
+           assertEquals(entity.getClazz().getName(), response.getClazz().getName());
+           
+           assertEquals(entity.getClassFromMap(), response.getClassFromMap());
+           assertEquals(entity.getClassFromMap().getName(), response.getClassFromMap().getName());
+           finishTest();
+         }
+       }, TestSerializationRPCService.class).testEntityWithClassField(entity);
+     }
+   });
+ }
 }

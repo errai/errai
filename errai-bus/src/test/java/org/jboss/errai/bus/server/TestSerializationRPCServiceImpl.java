@@ -33,6 +33,7 @@ import java.util.SortedSet;
 import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.EntityWithClassFieldAndMap;
 import org.jboss.errai.bus.client.tests.support.EntityWithConstructorAndMethodMappedLong;
 import org.jboss.errai.bus.client.tests.support.EntityWithFactoryMethodAndMixedMappingTypes;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
@@ -364,7 +365,7 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers) {
     int count = 0;
-    for (TreeNodeContainer tc : listOfContainers) {
+    for (final TreeNodeContainer tc : listOfContainers) {
       count++;
     }
 
@@ -511,5 +512,10 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public <A extends GenericEntity<R>, R extends Student> R testIncrediblyGenericRpcMethod(A arg) {
     arg.getField().setName("smarter");
     return arg.getField();
+  }
+
+  @Override
+  public EntityWithClassFieldAndMap testEntityWithClassField(EntityWithClassFieldAndMap entity) {
+    return entity;
   }
 }

@@ -218,4 +218,6 @@ public interface TestSerializationRPCService {
   public Outer testBackReferenceOrderingWithMapsTo(Outer entity);
   
   public Outer2 testBackReferenceOrderingWithMapsToInverted(Outer2 entity);
+  
+  public EntityWithClassFieldAndMap testEntityWithClassField(EntityWithClassFieldAndMap entity);
 }

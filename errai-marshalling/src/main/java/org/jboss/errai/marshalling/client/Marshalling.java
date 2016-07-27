@@ -96,6 +96,25 @@ public abstract class Marshalling {
 
     return m;
   }
+  
+  /**
+   * Returns a marshaller for the type with the provided fully qualified class name. In case no
+   * marshaller can be found for that type a RuntimeException will be thrown.
+   * 
+   * @param typeName
+   *          the marshallable type name.
+   * 
+   * @return the marshaller instance, never null.
+   */
+  public static <T> Marshaller<T> getMarshaller(final String typeName) {
+    Marshaller<T> m = MarshallingSessionProviderFactory.getProvider().getMarshaller(typeName);
+    
+    if (m == null) {
+      throw new RuntimeException("No marshaller for type: " + typeName);
+    }
+
+    return m;
+  }
 
   /**
    * Returns a JSON representation of the given object, recursively including all of its nested
