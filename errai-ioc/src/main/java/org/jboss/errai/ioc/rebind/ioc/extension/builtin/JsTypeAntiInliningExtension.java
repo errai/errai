@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ExtensionTypeCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -72,51 +73,53 @@ public class JsTypeAntiInliningExtension implements IOCExtensionConfigurator {
 
   @Override
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
-    injectionContext.registerExtensionTypeCallback(new ExtensionTypeCallback() {
-      final Multimap<MetaClass, MetaClass> jsTypeIfaceImpls = HashMultimap.create();
-      final Set<MetaClass> jsTypeIfaces = new HashSet<>();
-      @Override
-      public void init() {
-        requiringDummyImpls = null;
-      }
+    if (IOCProcessor.isJsInteropSupportEnabled()) {
+      injectionContext.registerExtensionTypeCallback(new ExtensionTypeCallback() {
+        final Multimap<MetaClass, MetaClass> jsTypeIfaceImpls = HashMultimap.create();
+        final Set<MetaClass> jsTypeIfaces = new HashSet<>();
+        @Override
+        public void init() {
+          requiringDummyImpls = null;
+        }
 
-      @Override
-      public void callback(final MetaClass type) {
-        if (!type.getFullyQualifiedName().startsWith("java.util")) {
-          if (type.isInterface()) {
-            jsTypeIfaces.add(type);
-          }
-          else if (type.isConcrete() && type.isPublic()) {
-            findJsTypeIfaces(type)
-            .forEach(iface -> {
-              jsTypeIfaces.add(iface);
-              jsTypeIfaceImpls.put(iface, type);
-            });
+        @Override
+        public void callback(final MetaClass type) {
+          if (!type.getFullyQualifiedName().startsWith("java.util")) {
+            if (type.isInterface()) {
+              jsTypeIfaces.add(type);
+            }
+            else if (type.isConcrete() && type.isPublic()) {
+              findJsTypeIfaces(type)
+              .forEach(iface -> {
+                jsTypeIfaces.add(iface);
+                jsTypeIfaceImpls.put(iface, type);
+              });
+            }
           }
         }
-      }
 
-      @Override
-      public void finish() {
-        final Multiset<MetaClass> noOrSingleImplJsTypeIfaces =
-                jsTypeIfaces
-                .stream()
-                .flatMap(iface -> {
-                  final Collection<MetaClass> impls = jsTypeIfaceImpls.get(iface);
-                  if (impls.isEmpty()) {
-                    return stream(new MetaClass[] { iface, iface });
-                  }
-                  else if (impls.size() == 1) {
-                    return stream(new MetaClass[] { iface });
-                  }
-                  else {
-                    return stream(new MetaClass[0]);
-                  }
-                })
-                .collect(toCollection(() -> HashMultiset.create()));
-        requiringDummyImpls = noOrSingleImplJsTypeIfaces;
-      }
-    });
+        @Override
+        public void finish() {
+          final Multiset<MetaClass> noOrSingleImplJsTypeIfaces =
+                  jsTypeIfaces
+                  .stream()
+                  .flatMap(iface -> {
+                    final Collection<MetaClass> impls = jsTypeIfaceImpls.get(iface);
+                    if (impls.isEmpty()) {
+                      return stream(new MetaClass[] { iface, iface });
+                    }
+                    else if (impls.size() == 1) {
+                      return stream(new MetaClass[] { iface });
+                    }
+                    else {
+                      return stream(new MetaClass[0]);
+                    }
+                  })
+                  .collect(toCollection(() -> HashMultiset.create()));
+          requiringDummyImpls = noOrSingleImplJsTypeIfaces;
+        }
+      });
+    }
   }
 
   private Stream<MetaClass> findJsTypeIfaces(final MetaClass type) {

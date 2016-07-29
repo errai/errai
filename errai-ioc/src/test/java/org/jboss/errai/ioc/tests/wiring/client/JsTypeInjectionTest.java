@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -38,11 +39,13 @@ public class JsTypeInjectionTest {
   public static void enableProductionMode() {
     originalGwtArgs = System.getProperty("gwt.args", "");
     System.setProperty("gwt.args", originalGwtArgs + " -prod");
+    System.setProperty(IOCProcessor.PLUGIN_PROPERTY, "true");
   }
 
   @AfterClass
   public static void disableProductionMode() {
     System.setProperty("gwt.args", originalGwtArgs);
+    System.setProperty(IOCProcessor.PLUGIN_PROPERTY, "false");
   }
 
 }

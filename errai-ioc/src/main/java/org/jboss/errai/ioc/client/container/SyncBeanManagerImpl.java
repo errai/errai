@@ -95,7 +95,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   }
 
   private void init() {
-    final Collection<FactoryHandle> eager = new ArrayList<FactoryHandle>();
+    final Collection<FactoryHandle> eager = new ArrayList<>();
     for (final FactoryHandle handle : contextManager.getAllFactoryHandles()) {
       if (handle.isEager()) {
         eager.add(handle);
@@ -130,14 +130,14 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
     final Collection<FactoryHandle> handles = handlesByName.get(name);
     final Collection<SyncBeanDef<?>> runtimeBeanDefs = runtimeBeanDefsByName.get(name);
-    final JsArray<JsTypeProvider<?>> jsProviders = WindowInjectionContextStorage.createOrGet().getProviders(name);
+    final JsArray<JsTypeProvider<?>> jsProviders = getJsProviders(name);
 
     final Set<String> beanDefFactoryNames = new HashSet<>();
     final Collection beanDefs = new ArrayList<SyncBeanDef<Object>>(handles.size()+runtimeBeanDefs.size()+jsProviders.length());
     beanDefs.addAll(runtimeBeanDefs);
     for (final FactoryHandle handle : handles) {
       if (handle.isAvailableByLookup()) {
-        beanDefs.add(new IOCBeanDefImplementation<Object>(handle, this.<Object>getType(name, handle, handle.getActualType())));
+        beanDefs.add(new IOCBeanDefImplementation<>(handle, this.<Object>getType(name, handle, handle.getActualType())));
         beanDefFactoryNames.add(handle.getFactoryName());
       }
     }
@@ -155,6 +155,15 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
     logger.debug("Looked up {} beans: {}", beanDefs.size(), beanDefs);
 
     return beanDefs;
+  }
+
+  private JsArray<JsTypeProvider<?>> getJsProviders(final String name) {
+    try {
+      return WindowInjectionContextStorage.createOrGet().getProviders(name);
+    } catch (final RuntimeException e) {
+      logger.debug("Encountered error when looking up JsType providers for " + name, e);
+      return new JsArray<>(new JsTypeProvider[0]);
+    }
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -176,7 +185,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
 
   @Override
   public <T> Collection<SyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
-    final Set<Annotation> qualifierSet = new HashSet<Annotation>(Arrays.asList(qualifiers));
+    final Set<Annotation> qualifierSet = new HashSet<>(Arrays.asList(qualifiers));
     final Collection<SyncBeanDef<T>> candidates = lookupBeans(type);
     final Iterator<SyncBeanDef<T>> iter = candidates.iterator();
     while (iter.hasNext()) {

@@ -141,8 +141,13 @@ public class IOCProcessor {
   private static final Logger log = LoggerFactory.getLogger(IOCProcessor.class);
 
   public static final String REACHABILITY_PROPERTY = "errai.ioc.reachability";
+  public static final String PLUGIN_PROPERTY = "errai.ioc.jsinterop.support";
 
-  private final Set<Class<? extends Annotation>> nonSimpletonTypeAnnotations = new HashSet<Class<? extends Annotation>>();
+  public static boolean isJsInteropSupportEnabled() {
+    return Boolean.getBoolean(PLUGIN_PROPERTY);
+  }
+
+  private final Set<Class<? extends Annotation>> nonSimpletonTypeAnnotations = new HashSet<>();
 
   private final InjectionContext injectionContext;
   private final QualifierFactory qualFactory;
@@ -193,7 +198,7 @@ public class IOCProcessor {
     start = System.currentTimeMillis();
 
     final Map<Class<? extends Annotation>, MetaClass> scopeContexts = findScopeContexts(processingContext);
-    final Set<MetaClass> scopeContextSet = new LinkedHashSet<MetaClass>(scopeContexts.values());
+    final Set<MetaClass> scopeContextSet = new LinkedHashSet<>(scopeContexts.values());
     final Statement[] contextLocalVarInvocation = contextLocalVarInvocation(scopeContextSet);
 
     @SuppressWarnings("rawtypes")
@@ -201,7 +206,9 @@ public class IOCProcessor {
 
     declareAndRegisterFactories(processingContext, dependencyGraph, scopeContexts, scopeContextSet, registerFactoriesBody);
     final String contextManagerFieldName = declareContextManagerField(processingContext);
-    declareWindowInjectionContextField(processingContext);
+    if (isJsInteropSupportEnabled()) {
+      declareWindowInjectionContextField(processingContext);
+    }
     declareStaticLogger(processingContext);
     if (injectionContext.isAsync()) {
       declareAsyncBeanManagerSetupField(processingContext);
@@ -423,7 +430,8 @@ public class IOCProcessor {
     registerFactoryWithContext(injectable, factoryClass, scopeContexts, registerFactoriesBody);
     final boolean windowScoped = injectable.getWiringElementTypes().contains(WiringElementType.SharedSingleton);
     final boolean jsType = injectable.getWiringElementTypes().contains(WiringElementType.JsType);
-    if (jsType || windowScoped) {
+    final boolean jsinteropSupportEnabled = isJsInteropSupportEnabled();
+    if (jsinteropSupportEnabled && (jsType || windowScoped)) {
       final List<Statement> stmts = new ArrayList<>();
       stmts.add(loadVariable("windowContext").invoke("addBeanProvider",
               injectable.getInjectedType().getFullyQualifiedName(), createJsTypeProviderFor(injectable)));
@@ -508,7 +516,7 @@ public class IOCProcessor {
   }
 
   private List<Statement> contextLocalVarDeclarations(final Collection<MetaClass> scopeContextTypes) {
-    final List<Statement> declarations = new ArrayList<Statement>();
+    final List<Statement> declarations = new ArrayList<>();
     for (final MetaClass scopeContextImpl : scopeContextTypes) {
       if (!scopeContextImpl.isDefaultInstantiable()) {
         throw new RuntimeException(
@@ -540,7 +548,7 @@ public class IOCProcessor {
 
   private Map<Class<? extends Annotation>, MetaClass> findScopeContexts(final IOCProcessingContext processingContext) {
     final Collection<MetaClass> scopeContexts = ClassScanner.getTypesAnnotatedWith(ScopeContext.class);
-    final Map<Class<? extends Annotation>, MetaClass> annoToContextImpl = new HashMap<Class<? extends Annotation>, MetaClass>();
+    final Map<Class<? extends Annotation>, MetaClass> annoToContextImpl = new HashMap<>();
     for (final MetaClass scopeContext : scopeContexts) {
       if (!scopeContext.isAssignableTo(Context.class)) {
         throw new RuntimeException("They type " + scopeContext.getFullyQualifiedName()
@@ -560,7 +568,7 @@ public class IOCProcessor {
   }
 
   private Collection<MetaClass> findRelevantClasses(final IOCProcessingContext processingContext) {
-    final Collection<MetaClass> allMetaClasses = new HashSet<MetaClass>();
+    final Collection<MetaClass> allMetaClasses = new HashSet<>();
     allMetaClasses.addAll(MetaClassFactory.getAllCachedClasses());
     allMetaClasses.remove(MetaClassFactory.get(Object.class));
 
@@ -586,7 +594,7 @@ public class IOCProcessor {
   }
 
   private void processDependencies(final Collection<MetaClass> types, final DependencyGraphBuilder builder) {
-    final List<String> problems = new ArrayList<String>();
+    final List<String> problems = new ArrayList<>();
     for (final MetaClass type : types) {
       processType(type, builder, problems);
     }
@@ -734,7 +742,7 @@ public class IOCProcessor {
   }
 
   private WiringElementType[] getWiringTypes(final MetaClass type, final Class<? extends Annotation> directScope) {
-    final List<WiringElementType> wiringTypes = new ArrayList<WiringElementType>();
+    final List<WiringElementType> wiringTypes = new ArrayList<>();
     wiringTypes.addAll(getWiringTypesForScopeAnnotation(directScope));
 
     if (type.isAnnotationPresent(Alternative.class)) {
@@ -809,7 +817,7 @@ public class IOCProcessor {
 
   private Class<? extends Annotation> getDirectScope(final HasAnnotations annotated) {
     // TODO validate that there's only one scope?
-    final Set<Class<? extends Annotation>> scopeAnnoTypes = new HashSet<Class<? extends Annotation>>();
+    final Set<Class<? extends Annotation>> scopeAnnoTypes = new HashSet<>();
     scopeAnnoTypes.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean));
     scopeAnnoTypes.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.NormalScopedBean));
     scopeAnnoTypes.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.PseudoScopedBean));
@@ -905,7 +913,7 @@ public class IOCProcessor {
 
   private WiringElementType[] getWiringTypeForProducer(final MetaClass enclosingClass, final HasAnnotations annotated,
           final Class<? extends Annotation> directScope) {
-    final List<WiringElementType> wiringTypes = new ArrayList<WiringElementType>();
+    final List<WiringElementType> wiringTypes = new ArrayList<>();
 
     wiringTypes.addAll(getWiringTypesForScopeAnnotation(directScope));
     if (annotated.isAnnotationPresent(Specializes.class)) {
@@ -919,7 +927,7 @@ public class IOCProcessor {
   }
 
   private Collection<MetaMethod> getAllDisposesMethods(final MetaClass type, final boolean staticOnly) {
-    final Collection<MetaMethod> disposers = new ArrayList<MetaMethod>();
+    final Collection<MetaMethod> disposers = new ArrayList<>();
     for (final MetaMethod method : type.getMethods()) {
       if (staticOnly && !method.isStatic()) {
         continue;
@@ -938,7 +946,7 @@ public class IOCProcessor {
   }
 
   private Collection<MetaMethod> getMatchingMethods(final MetaClassMember member, final Collection<MetaMethod> disposesMethods) {
-    final Collection<MetaMethod> matching = new ArrayList<MetaMethod>();
+    final Collection<MetaMethod> matching = new ArrayList<>();
     final Qualifier memberQual = qualFactory.forSource(member);
     final MetaClass producedType = getProducedType(member);
 
@@ -1161,7 +1169,7 @@ public class IOCProcessor {
 
   private List<MetaConstructor> getInjectableConstructors(final MetaClass type) {
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
-    final List<MetaConstructor> cons = new ArrayList<MetaConstructor>();
+    final List<MetaConstructor> cons = new ArrayList<>();
     for (final MetaConstructor con : type.getConstructors()) {
       for (final Class<? extends Annotation> anno : injectAnnotations) {
         if (con.isAnnotationPresent(anno)) {
@@ -1192,7 +1200,7 @@ public class IOCProcessor {
     if (alternatives == null) {
       final String userDefinedAlternatives = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.enabled.alternatives");
       if (userDefinedAlternatives != null) {
-        alternatives = new HashSet<String>(Arrays.asList(userDefinedAlternatives.split("\\s+")));
+        alternatives = new HashSet<>(Arrays.asList(userDefinedAlternatives.split("\\s+")));
       } else {
         alternatives = Collections.emptyList();
       }

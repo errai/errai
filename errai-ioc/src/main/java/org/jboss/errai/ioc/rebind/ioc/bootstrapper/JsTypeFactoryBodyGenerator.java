@@ -60,7 +60,7 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
   protected List<Statement> generateFactoryInitStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
           final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
     final MetaClass type = injectable.getInjectedType();
-    if (requiresAntiInliningDummy(type)) {
+    if (IOCProcessor.isJsInteropSupportEnabled() && requiresAntiInliningDummy(type)) {
       final int count = numberOfRequiredAntiInliningDummies(type);
       final List<Statement> stmts = new ArrayList<>(count);
 
