@@ -219,7 +219,7 @@ public class TransitionProviderIOCExtension implements IOCExtensionConfigurator 
         final ObjectBuilder clickListener =
                 newObject(EventListener.class)
                   .extend()
-                  .publicOverridesMethod("handleEvent", finalOf(Event.class, "event"))
+                  .publicOverridesMethod("call", finalOf(Event.class, "event"))
                     .append(navigationGoToInvocation(targetType))
                     .finish()
                   .finish();

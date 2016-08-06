@@ -38,7 +38,7 @@ public class JsTypeInjectionTest {
   @BeforeClass
   public static void enableProductionMode() {
     originalGwtArgs = System.getProperty("gwt.args", "");
-    System.setProperty("gwt.args", originalGwtArgs + " -prod");
+    System.setProperty("gwt.args", originalGwtArgs + " -generateJsInteropExports -prod");
     System.setProperty(IOCProcessor.PLUGIN_PROPERTY, "true");
   }
 
