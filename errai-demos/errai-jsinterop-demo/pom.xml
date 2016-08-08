@@ -39,8 +39,7 @@
       <url>https://oss.sonatype.org/content/repositories/public</url>
     </repository>
   </repositories>
-
-  <!-- This must be here for gwt-maven-plugin 2.8.0-SNAPSHOT -->
+  
   <pluginRepositories>
     <pluginRepository>
       <id>public-snapshots-repo</id>
