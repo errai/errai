@@ -167,7 +167,7 @@
               <!-- This is required because the BasicIOCTest is run in "simulated 
                 client" mode, which prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
-              <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Derrai.codegen.details=true -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug</argLine>
+              <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Derrai.codegen.details=true -Dgwt.args='-testBeginTimeout 5 -generateJsInteropExports ${gwtArgs}' -Xdebug</argLine>
 
               <systemProperties>
                 <property>
@@ -178,12 +178,15 @@
                   <name>log4j.output.dir</name>
                   <value>${project.build.directory}</value>
                 </property>
+                <property>
+                  <name>errai.ioc.jsinterop.support</name>
+                  <value>true</value>
+                </property>
               </systemProperties>
 
               <excludes>
                 <exclude>**/IOCTests.java</exclude>
                 <exclude>**/org/jboss/errai/ioc/async/test/**/*.java</exclude>
-                <exclude>**/prod/**/*.java</exclude>
                 <exclude>**/unit/**/*.java</exclude>
                 <exclude>**/*UnitTest.java</exclude>
               </excludes>
