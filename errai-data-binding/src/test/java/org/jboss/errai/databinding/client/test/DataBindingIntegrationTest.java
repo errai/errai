@@ -630,7 +630,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     final TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
     model.setName("test");
 
-    final List<TestModel> modelList = new ArrayList<TestModel>();
+    final List<TestModel> modelList = new ArrayList<>();
     modelList.add(model);
     final String marshalledModelList = Marshalling.toJSON(modelList);
     assertEquals(modelList, Marshalling.fromJSON(marshalledModelList, List.class));
@@ -641,7 +641,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     final TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
     model.setName("test");
 
-    final Map<TestModel, TestModel> modelMap = new HashMap<TestModel, TestModel>();
+    final Map<TestModel, TestModel> modelMap = new HashMap<>();
     modelMap.put(model, model);
     final String marshalledModelMap = Marshalling.toJSON(modelMap);
     assertEquals(modelMap, Marshalling.fromJSON(marshalledModelMap, Map.class));
@@ -682,7 +682,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testUpdateWidgets() {
-    final List<String> changedProperties = new ArrayList<String>();
+    final List<String> changedProperties = new ArrayList<>();
 
     final TestModel model = new TestModel();
     final TextBox textBox = new TextBox();
@@ -774,7 +774,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     assertEquals(unwrapped, parent);
   }
-  
+
   @Test
   public void testUpdateWidgetsWithBindablePropertyChain() {
     final TestModel grandChildModel = new TestModel();
@@ -1209,86 +1209,135 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPauseResumeFromUI() {
-    final TextBox textBox = new TextBox();
+    final TextBox parentTextBox = new TextBox();
+    final TextBox childTextBox = new TextBox();
 
-    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    final DataBinder<TestModel> binder = DataBinder
+                                          .forType(TestModel.class)
+                                          .bind(parentTextBox, "value")
+                                          .bind(childTextBox, "child.value");
+
     final TestModel model = binder.getModel();
 
     binder.pause();
     assertSame("Pause should not change model instance", model, binder.getModel());
 
-    textBox.setValue("UI change paused", true);
-    assertEquals("Model should not have been updated while paused", null, model.getValue());
+    parentTextBox.setValue("UI change paused", true);
+    childTextBox.setValue("UI change paused", true);
+    assertEquals("Parent model should not have been updated while paused", null, model.getValue());
+    assertEquals("Child model should not have been updated while paused", null, model.getChild().getValue());
     model.setValue("model change while paused");
-    assertEquals("Widget should not have been updated while paused", "UI change paused", textBox.getText());
+    model.getChild().setValue("model change while paused");
+    assertEquals("Parent bound widget should not have been updated while paused", "UI change paused", parentTextBox.getText());
+    assertEquals("Child bound widget should not have been updated while paused", "UI change paused", childTextBox.getText());
 
     binder.resume(StateSync.FROM_UI);
-    assertEquals("Model not properly updated", "UI change paused", model.getValue());
-    assertEquals("Widget should not have been updated", "UI change paused", textBox.getText());
+    assertEquals("Parent model not properly updated", "UI change paused", model.getValue());
+    assertEquals("Child model not properly updated", "UI change paused", model.getChild().getValue());
+    assertEquals("Parent bound widget should not have been updated", "UI change paused", parentTextBox.getText());
+    assertEquals("Child bound widget should not have been updated", "UI change paused", childTextBox.getText());
 
-    textBox.setValue("UI change resumed", true);
-    assertEquals("Model not properly updated", "UI change resumed", model.getValue());
+    parentTextBox.setValue("UI change resumed", true);
+    childTextBox.setValue("UI change resumed", true);
+    assertEquals("Parent model not properly updated", "UI change resumed", model.getValue());
+    assertEquals("Child model not properly updated", "UI change resumed", model.getChild().getValue());
     model.setValue("model change resumed");
-    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+    model.getChild().setValue("model change resumed");
+    assertEquals("Parent bound widget not properly updated", "model change resumed", parentTextBox.getText());
+    assertEquals("Child bound widget not properly updated", "model change resumed", childTextBox.getText());
   }
 
   @Test
   public void testPauseResumeFromModel() {
-    final TextBox textBox = new TextBox();
+    final TextBox parentTextBox = new TextBox();
+    final TextBox childTextBox = new TextBox();
 
-    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    final DataBinder<TestModel> binder = DataBinder
+                                          .forType(TestModel.class)
+                                          .bind(parentTextBox, "value")
+                                          .bind(childTextBox, "child.value");
     final TestModel model = binder.getModel();
 
     binder.pause();
     assertSame("Pause should not change model instance", model, binder.getModel());
 
-    textBox.setValue("UI change paused", true);
-    assertEquals("Model should not have been updated", null, model.getValue());
+    parentTextBox.setValue("UI change paused", true);
+    childTextBox.setValue("UI change paused", true);
+    assertEquals("Parent model should not have been updated", null, model.getValue());
+    assertEquals("Child model should not have been updated", null, model.getChild().getValue());
     model.setValue("model change paused");
-    assertEquals("Widget should not have been updated", "UI change paused", textBox.getText());
+    model.getChild().setValue("model change paused");
+    assertEquals("Parent bound widget should not have been updated", "UI change paused", parentTextBox.getText());
+    assertEquals("Child bound widget should not have been updated", "UI change paused", childTextBox.getText());
 
     binder.resume(StateSync.FROM_MODEL);
-    assertEquals("Widget not properly updated", "model change paused", textBox.getText());
-    assertEquals("Model should not have been updated", "model change paused", model.getValue());
+    assertEquals("Parent bound widget not properly updated", "model change paused", parentTextBox.getText());
+    assertEquals("Child bound widget not properly updated", "model change paused", childTextBox.getText());
+    assertEquals("Parent model should not have been updated", "model change paused", model.getValue());
+    assertEquals("Child model should not have been updated", "model change paused", model.getChild().getValue());
 
-    textBox.setValue("UI change resumed", true);
-    assertEquals("Model not properly updated", "UI change resumed", model.getValue());
+    parentTextBox.setValue("UI change resumed", true);
+    childTextBox.setValue("UI change resumed", true);
+    assertEquals("Parent model not properly updated", "UI change resumed", model.getValue());
+    assertEquals("Child model not properly updated", "UI change resumed", model.getChild().getValue());
     model.setValue("model change resumed");
-    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+    model.getChild().setValue("model change resumed");
+    assertEquals("Parent bound widget not properly updated", "model change resumed", parentTextBox.getText());
+    assertEquals("Child bound widget not properly updated", "model change resumed", childTextBox.getText());
   }
 
   @Test
   public void testPauseResumeWithSetModel() {
-    final TextBox textBox = new TextBox();
+    final TextBox parentTextBox = new TextBox();
+    final TextBox childTextBox = new TextBox();
 
-    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    final DataBinder<TestModel> binder = DataBinder
+                                          .forType(TestModel.class)
+                                          .bind(parentTextBox, "value")
+                                          .bind(childTextBox, "child.value");
     final TestModel model = binder.getModel();
 
     binder.pause();
     assertSame("Pause should not change model instance", model, binder.getModel());
 
-    textBox.setValue("UI change paused", true);
-    assertEquals("Model should not have been updated", null, model.getValue());
+    parentTextBox.setValue("UI change paused", true);
+    childTextBox.setValue("UI change paused", true);
+    assertEquals("Parent model should not have been updated", null, model.getValue());
+    assertEquals("Child model should not have been updated", null, model.getChild().getValue());
     model.setValue("model change paused");
-    assertEquals("Widget should not have been updated", "UI change paused", textBox.getText());
+    model.getChild().setValue("model change paused");
+    assertEquals("Parent bound widget should not have been updated", "UI change paused", parentTextBox.getText());
+    assertEquals("Child bound widget should not have been updated", "UI change paused", childTextBox.getText());
 
+    final TestModel unproxiedModel = new TestModel("model update");
+    unproxiedModel.setChild(new TestModel("model update"));
     // Resume using setModel
-    final TestModel model2 = binder.setModel(new TestModel("model update"));
-    assertEquals("Widget not properly updated", "model update", textBox.getText());
-    assertEquals("Model should not have been updated", "model update", model2.getValue());
+    final TestModel model2 = binder.setModel(unproxiedModel);
+    assertEquals("Parent bound widget not properly updated", "model update", parentTextBox.getText());
+    assertEquals("Child bound widget not properly updated", "model update", childTextBox.getText());
+    assertEquals("Parent model should not have been updated", "model update", model2.getValue());
+    assertEquals("Child model should not have been updated", "model update", model2.getChild().getValue());
 
-    textBox.setValue("UI change resumed", true);
-    assertEquals("Model not properly updated", "UI change resumed", model2.getValue());
+    parentTextBox.setValue("UI change resumed", true);
+    childTextBox.setValue("UI change resumed", true);
+    assertEquals("Parent model not properly updated", "UI change resumed", model2.getValue());
+    assertEquals("Child model not properly updated", "UI change resumed", model2.getChild().getValue());
     model2.setValue("model change resumed");
-    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+    model2.getChild().setValue("model change resumed");
+    assertEquals("Parent bound widget not properly updated", "model change resumed", parentTextBox.getText());
+    assertEquals("Child bound widget not properly updated", "model change resumed", childTextBox.getText());
 
     // Explicit resume should have no effect after resuming with setModel
     binder.resume(StateSync.FROM_MODEL);
 
-    textBox.setValue("UI change resumed", true);
-    assertEquals("Model not properly updated", "UI change resumed", model2.getValue());
+    parentTextBox.setValue("UI change resumed", true);
+    childTextBox.setValue("UI change resumed", true);
+    assertEquals("Parent model not properly updated", "UI change resumed", model2.getValue());
+    assertEquals("Child model not properly updated", "UI change resumed", model2.getChild().getValue());
     model2.setValue("model change resumed");
-    assertEquals("Widget not properly updated", "model change resumed", textBox.getText());
+    model2.getChild().setValue("model change resumed");
+    assertEquals("Parent bound widget not properly updated", "model change resumed", parentTextBox.getText());
+    assertEquals("Child bound widget not properly updated", "model change resumed", childTextBox.getText());
   }
 
   @Test
