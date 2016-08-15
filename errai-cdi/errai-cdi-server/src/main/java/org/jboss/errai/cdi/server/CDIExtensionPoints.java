@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -98,18 +100,20 @@ public class CDIExtensionPoints implements Extension {
 
   private final TypeRegistry managedTypes = new TypeRegistry();
 
-  private final Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
-  private final Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
-  private final Map<String, Annotation> beanQualifiers = new HashMap<String, Annotation>();
+  private final Set<MessageSender> messageSenders = new LinkedHashSet<>();
+  private final Map<String, Annotation> eventQualifiers = new HashMap<>();
+  private final Map<String, Annotation> beanQualifiers = new HashMap<>();
 
-  private final Set<String> observableEvents = new HashSet<String>();
+  private final Set<String> observableEvents = new HashSet<>();
 
   private static final Set<String> vetoClasses;
 
   private static final String ERRAI_CDI_STANDALONE = "errai.cdi.standalone";
+  private static final String ERRAI_VETO_PATTERN = "errai.cdi.veto.pattern";
+  private static final String DEFAULT_VETO_PATTERN = "(^|.*\\.)client(?!\\.shared)(\\..*)?";
 
   static {
-    final Set<String> veto = new HashSet<String>();
+    final Set<String> veto = new HashSet<>();
     veto.add(ServerMessageBusImpl.class.getName());
     veto.add(RequestDispatcher.class.getName());
     veto.add(ErraiService.class.getName());
@@ -119,7 +123,7 @@ public class CDIExtensionPoints implements Extension {
     if (!EventQualifierSerializer.isSet()) {
       try {
         NonGwtEventQualifierSerializerGenerator.loadAndSetEventQualifierSerializer();
-      } catch (Throwable t) {
+      } catch (final Throwable t) {
         log.warn("Failed to load static or create static " + EventQualifierSerializer.class.getSimpleName() + ". Falling back to dynamic serialization.");
         EventQualifierSerializer.set(new DynamicEventQualifierSerializer());
       }
@@ -131,7 +135,7 @@ public class CDIExtensionPoints implements Extension {
     final ResourceBundle erraiServiceConfig;
     try {
       erraiServiceConfig = getBundle("ErraiService");
-    } catch (MissingResourceException e) {
+    } catch (final MissingResourceException e) {
       // ErraiService is optional!
       return;
     }
@@ -185,13 +189,22 @@ public class CDIExtensionPoints implements Extension {
   private <T> void maybeVetoClientClass(final ProcessAnnotatedType<T> event, final AnnotatedType<T> type) {
     // veto on client side implementations that contain CDI annotations
     // (i.e. @Observes) Otherwise Weld might try to invoke on them
-    Class<?> javaClass = type.getJavaClass();
-    Package pkg = javaClass.getPackage();
+    final Class<?> javaClass = type.getJavaClass();
+    final Package pkg = javaClass.getPackage();
     if (vetoClasses.contains(javaClass.getName())
-            || (pkg != null && pkg.getName().matches("(^|.*\\.)client(?!\\.shared)(\\..*)?")
+            || (pkg != null && matchesVetoPattern(pkg.getName())
             && !javaClass.isInterface())) {
       log.debug("Vetoing processed type: " + javaClass.getName());
       event.veto();
+    }
+  }
+
+  private static boolean matchesVetoPattern(final String pkg) {
+    try {
+      final String pattern = System.getProperty(ERRAI_VETO_PATTERN, DEFAULT_VETO_PATTERN);
+      return Pattern.matches(pattern, pkg);
+    } catch (final PatternSyntaxException ex) {
+      throw new RuntimeException("There is a syntax error in the regex provided for " + ERRAI_VETO_PATTERN, ex);
     }
   }
 
@@ -216,7 +229,7 @@ public class CDIExtensionPoints implements Extension {
       if (!isRpc) {
         try {
           managedTypes.addService(new ServiceTypeParser(type.getJavaClass()));
-        } catch (NotAService e) {
+        } catch (final NotAService e) {
           e.printStackTrace();
         }
       }
@@ -225,7 +238,7 @@ public class CDIExtensionPoints implements Extension {
       if (method.isAnnotationPresent(Service.class)) {
         try {
           managedTypes.addService(new ServiceMethodParser(method.getJavaMember()));
-        } catch (NotAService e) {
+        } catch (final NotAService e) {
           e.printStackTrace();
         }
       }
@@ -300,7 +313,7 @@ public class CDIExtensionPoints implements Extension {
    * Registers beans (type and method services) as they become available from the bean manager.
    */
   private class StartupCallback implements Runnable {
-    private final Set<Object> toRegister = new HashSet<Object>();
+    private final Set<Object> toRegister = new HashSet<>();
     private final BeanManager beanManager;
     private final MessageBus bus;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -316,16 +329,16 @@ public class CDIExtensionPoints implements Extension {
       this.expiryTime = System.currentTimeMillis() + (timeOutInSeconds * 1000);
     }
 
-    private Annotation[] getQualifiers(Class<?> delegateClass) {
+    private Annotation[] getQualifiers(final Class<?> delegateClass) {
       int length = 0;
-      for (Annotation anno : delegateClass.getAnnotations()) {
+      for (final Annotation anno : delegateClass.getAnnotations()) {
         if (anno.annotationType().isAnnotationPresent(Qualifier.class))
           length += 1;
       }
 
-      Annotation[] ret = new Annotation[length];
+      final Annotation[] ret = new Annotation[length];
       int i = 0;
-      for (Annotation anno : delegateClass.getAnnotations()) {
+      for (final Annotation anno : delegateClass.getAnnotations()) {
         if (anno.annotationType().isAnnotationPresent(Qualifier.class))
           ret[i++] = anno;
       }
@@ -352,7 +365,7 @@ public class CDIExtensionPoints implements Extension {
             continue;
           }
         }
-        catch(Throwable t) {
+        catch(final Throwable t) {
           continue;
         }
 
@@ -361,7 +374,7 @@ public class CDIExtensionPoints implements Extension {
           try {
             delegateInstance = CDIServerUtil.lookupBean(beanManager, delegateClass, getQualifiers(delegateClass));
           }
-          catch (IllegalStateException t) {
+          catch (final IllegalStateException t) {
             // handle WELD-001332: BeanManager method getReference() is not available during application initialization
             // try again later...
             return;
@@ -400,7 +413,7 @@ public class CDIExtensionPoints implements Extension {
   }
 
   private void createRPCScaffolding(final Class<?> remoteIface, final MessageBus bus, final BeanManager beanManager) {
-    final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
+    final Map<String, MessageCallback> epts = new HashMap<>();
 
     final ServiceInstanceProvider genericSvc = new ServiceInstanceProvider() {
       @SuppressWarnings("unchecked")
