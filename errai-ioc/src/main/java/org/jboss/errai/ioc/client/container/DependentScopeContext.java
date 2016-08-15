@@ -19,10 +19,10 @@ package org.jboss.errai.ioc.client.container;
 import static org.jboss.errai.ioc.client.container.Factory.maybeUnwrapProxy;
 
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 
-import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.ioc.client.api.ScopeContext;
 
 /**

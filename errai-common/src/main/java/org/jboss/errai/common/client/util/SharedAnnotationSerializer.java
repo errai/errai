@@ -19,8 +19,7 @@ package org.jboss.errai.common.client.util;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Map;
-
-import org.jboss.errai.common.client.function.Function;
+import java.util.function.Function;
 
 /**
  *

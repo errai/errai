@@ -19,13 +19,13 @@ package org.jboss.errai.validation.client.dynamic;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.inject.Alternative;
 import javax.validation.Constraint;
 import javax.validation.ConstraintViolation;
 
-import org.jboss.errai.common.client.function.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

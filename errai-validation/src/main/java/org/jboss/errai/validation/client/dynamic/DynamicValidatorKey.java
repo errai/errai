@@ -26,13 +26,13 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.validation.Constraint;
 
-import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.common.client.logging.util.StringFormat;
 
 import com.google.gwt.regexp.shared.RegExp;
@@ -158,7 +158,7 @@ public class DynamicValidatorKey {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj)
       return true;
     if (obj == null)

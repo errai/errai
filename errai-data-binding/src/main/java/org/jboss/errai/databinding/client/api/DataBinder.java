@@ -18,21 +18,21 @@ package org.jboss.errai.databinding.client.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyAgent;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.Binding;
+import org.jboss.errai.databinding.client.ComponentAlreadyBoundException;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 import org.jboss.errai.databinding.client.InvalidPropertyExpressionException;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.OneTimeUnsubscribeHandle;
 import org.jboss.errai.databinding.client.PropertyChangeHandlerSupport;
 import org.jboss.errai.databinding.client.PropertyChangeUnsubscribeHandle;
-import org.jboss.errai.databinding.client.ComponentAlreadyBoundException;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 
@@ -70,7 +70,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @param modelType
    *          The bindable type, must not be null.
    */
-  private DataBinder(Class<T> modelType) {
+  private DataBinder(final Class<T> modelType) {
     this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType));
   }
 
@@ -80,7 +80,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    */
-  private DataBinder(T model) {
+  private DataBinder(final T model) {
     this.proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(model));
   }
 
@@ -90,8 +90,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @param modelType
    *          The bindable type, must not be null.
    */
-  public static <T> DataBinder<T> forType(Class<T> modelType) {
-    return new DataBinder<T>(modelType);
+  public static <T> DataBinder<T> forType(final Class<T> modelType) {
+    return new DataBinder<>(modelType);
   }
 
   /**
@@ -101,7 +101,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The bindable type, must not be null.
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static <T> DataBinder<List<T>> forListOfType(Class<T> modelType) {
+  public static <T> DataBinder<List<T>> forListOfType(final Class<T> modelType) {
     return new DataBinder<List<T>>((Class) List.class);
   }
 
@@ -111,8 +111,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    */
-  public static <T> DataBinder<T> forModel(T model) {
-    return new DataBinder<T>(model);
+  public static <T> DataBinder<T> forModel(final T model) {
+    return new DataBinder<>(model);
   }
 
   /**
@@ -139,7 +139,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *           If the provided {@code component} is already bound to a property of
    *           the model.
    */
-  public DataBinder<T> bind(final Object component, String property) {
+  public DataBinder<T> bind(final Object component, final String property) {
     return bind(component, property, null);
   }
 
@@ -262,7 +262,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       proxy = BindableProxyFactory.getBindableProxy(Assert.notNull(proxy));
     }
 
-    Binding binding = getAgent().bind(component, property, converter, bindOnKeyUp, initialState);
+    final Binding binding = getAgent().bind(component, property, converter, bindOnKeyUp, initialState);
     bindings.put(property, binding);
     return this;
   }
@@ -280,8 +280,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @throws InvalidPropertyExpressionException
    *           If the provided property chain expression is invalid.
    */
-  public DataBinder<T> unbind(String property) {
-    for (Binding binding : bindings.get(property)) {
+  public DataBinder<T> unbind(final String property) {
+    for (final Binding binding : bindings.get(property)) {
       getAgent().unbind(binding);
     }
     bindings.removeAll(property);
@@ -309,8 +309,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     return unbind(true);
   }
 
-  private DataBinder<T> unbind(boolean clearBindings) {
-    for (Binding binding : bindings.values()) {
+  private DataBinder<T> unbind(final boolean clearBindings) {
+    for (final Binding binding : bindings.values()) {
       getAgent().unbind(binding);
     }
     if (clearBindings) {
@@ -357,7 +357,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         if changes should be automatically synchronized with the UI (also
    *         accessible using {@link #getModel()}).
    */
-  public T setModel(T model) {
+  public T setModel(final T model) {
     return setModel(model, StateSync.FROM_MODEL);
   }
 
@@ -377,7 +377,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         if changes should be automatically synchronized with the UI (also
    *         accessible using {@link #getModel()}).
    */
-  public T setModel(T model, StateSync initialState) {
+  public T setModel(final T model, final StateSync initialState) {
     return setModel(model, initialState, false);
   }
 
@@ -401,7 +401,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         accessible using {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
-  public T setModel(T model, StateSync initialState, boolean fireChangeEvents) {
+  public T setModel(final T model, final StateSync initialState, final boolean fireChangeEvents) {
     Assert.notNull(model);
 
     final BindableProxy<T> newProxy;
@@ -425,9 +425,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
     // replay all bindings
     final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
-    for (Binding b : this.bindings.values()) {
+    for (final Binding b : this.bindings.values()) {
       // must be checked before unbind() removes the handlers
-      boolean bindOnKeyUp = b.needsKeyUpBinding();
+      final boolean bindOnKeyUp = b.needsKeyUpBinding();
 
       newProxy.getBindableProxyAgent().unbind(b);
       bindings.put(b.getProperty(), newProxy.getBindableProxyAgent()
@@ -449,10 +449,10 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @return the list of widgets currently bound to the provided property or an
    *         empty list if no widget was bound to the property.
    */
-  public List<Object> getComponents(String property) {
+  public List<Object> getComponents(final String property) {
     Assert.notNull(property);
-    List<Object> widgets = new ArrayList<>();
-    for (Binding binding : bindings.get(property)) {
+    final List<Object> widgets = new ArrayList<>();
+    for (final Binding binding : bindings.get(property)) {
       widgets.add(binding.getComponent());
     }
     return widgets;
@@ -477,8 +477,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   public void pause() {
     if (paused != null) return;
 
-    T paused = proxy;
-    T clone = (T) ((BindableProxy<?>) proxy).deepUnwrap();
+    final T paused = proxy;
+    final T clone = (T) ((BindableProxy<?>) proxy).deepUnwrap();
     setModel(clone);
     this.paused = paused;
   }
@@ -507,7 +507,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public PropertyChangeUnsubscribeHandle addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
+  public PropertyChangeUnsubscribeHandle addPropertyChangeHandler(final PropertyChangeHandler<?> handler) {
     propertyChangeHandlerSupport.addPropertyChangeHandler(handler);
     final PropertyChangeUnsubscribeHandle agentUnsubHandle = getAgent().addPropertyChangeHandler(handler);
 
@@ -520,7 +520,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public <P> PropertyChangeUnsubscribeHandle addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+  public <P> PropertyChangeUnsubscribeHandle addPropertyChangeHandler(final String property, final PropertyChangeHandler<P> handler) {
     propertyChangeHandlerSupport.addPropertyChangeHandler(property, handler);
     final PropertyChangeUnsubscribeHandle agentUnsubHandle = getAgent().addPropertyChangeHandler(property, handler);
 

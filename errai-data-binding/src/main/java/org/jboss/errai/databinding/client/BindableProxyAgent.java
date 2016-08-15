@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.IsElement;
-import org.jboss.errai.common.client.function.Consumer;
-import org.jboss.errai.common.client.function.Function;
-import org.jboss.errai.common.client.function.Optional;
-import org.jboss.errai.common.client.function.Supplier;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;

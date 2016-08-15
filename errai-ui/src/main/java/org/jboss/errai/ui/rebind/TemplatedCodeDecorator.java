@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,7 +64,6 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.client.function.Supplier;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -138,7 +138,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
               + "] declared a stylesheet [" + styleSheetPath + "] that could not be found.");
     }
 
-    final List<Statement> initStmts = new ArrayList<Statement>();
+    final List<Statement> initStmts = new ArrayList<>();
 
     generateTemplatedInitialization(decorable, controller, initStmts, customProvider, styleSheet);
 
@@ -175,7 +175,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * @return statement representing the template destruction logic.
    */
   private List<Statement> generateTemplateDestruction(final Decorable decorable) {
-    final List<Statement> destructionStatements = new ArrayList<Statement>();
+    final List<Statement> destructionStatements = new ArrayList<>();
     final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(decorable, decorable.getDecorableDeclaringType());
     final Map<String, MetaClass> dataFieldTypes =
       DataFieldCodeDecorator.aggregateDataFieldTypeMap(decorable, decorable.getDecorableDeclaringType());
@@ -303,8 +303,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final MetaClass declaringClass = decorable.getDecorableDeclaringType();
 
     /* Ensure that no @DataFields are handled more than once when used in combination with @SyncNative */
-    final Set<String> processedNativeHandlers = new HashSet<String>();
-    final Set<String> processedEventHandlers = new HashSet<String>();
+    final Set<String> processedNativeHandlers = new HashSet<>();
+    final Set<String> processedEventHandlers = new HashSet<>();
 
     for (final MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
 
@@ -698,7 +698,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         CONSTRUCTED_TEMPLATE_SET_KEY);
 
     if (result == null) {
-      result = new LinkedHashMap<MetaClass, BuildMetaClass>();
+      result = new LinkedHashMap<>();
       decorable.getInjectionContext().setAttribute(CONSTRUCTED_TEMPLATE_SET_KEY, result);
     }
 

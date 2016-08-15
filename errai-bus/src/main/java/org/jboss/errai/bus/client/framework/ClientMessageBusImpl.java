@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
@@ -61,7 +62,6 @@ import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.util.ManagementConsole;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.slf4j.Logger;
@@ -92,9 +92,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final String clientId;
   private String sessionId;
 
-  private final List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
-  private final List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
-  private final List<UncaughtExceptionHandler> uncaughtExceptionHandlers = new ArrayList<UncaughtExceptionHandler>();
+  private final List<SubscribeListener> onSubscribeHooks = new ArrayList<>();
+  private final List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<>();
+  private final List<UncaughtExceptionHandler> uncaughtExceptionHandlers = new ArrayList<>();
 
   /**
    * Forwards every message received across the communication link to the remote
@@ -262,24 +262,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private TransportHandler transportHandler = BOOTSTRAP_HANDLER;
 
-  private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
-  private final Map<String, List<MessageCallback>> localSubscriptions = new HashMap<String, List<MessageCallback>>();
-  private final Map<String, List<MessageCallback>> shadowSubscriptions = new HashMap<String, List<MessageCallback>>();
+  private final Map<String, List<MessageCallback>> subscriptions = new HashMap<>();
+  private final Map<String, List<MessageCallback>> localSubscriptions = new HashMap<>();
+  private final Map<String, List<MessageCallback>> shadowSubscriptions = new HashMap<>();
 
-  private final Map<String, MessageCallback> remotes = new HashMap<String, MessageCallback>();
+  private final Map<String, MessageCallback> remotes = new HashMap<>();
 
-  private final List<TransportErrorHandler> transportErrorHandlers = new ArrayList<TransportErrorHandler>();
+  private final List<TransportErrorHandler> transportErrorHandlers = new ArrayList<>();
 
-  private final List<Runnable> deferredSubscriptions = new ArrayList<Runnable>();
-  private final List<Message> deferredMessages = new ArrayList<Message>();
+  private final List<Runnable> deferredSubscriptions = new ArrayList<>();
+  private final List<Message> deferredMessages = new ArrayList<>();
 
-  private final List<BusLifecycleListener> lifecycleListeners = new ArrayList<BusLifecycleListener>();
+  private final List<BusLifecycleListener> lifecycleListeners = new ArrayList<>();
 
   private BusState state = BusState.UNINITIALIZED;
 
   private final ManagementConsole managementConsole;
 
-  private final Map<String, String> properties = new HashMap<String, String>();
+  private final Map<String, String> properties = new HashMap<>();
 
   private Timer initialConnectTimer;
 
@@ -324,7 +324,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
 
-    final Map<String, TransportHandler> m = new LinkedHashMap<String, TransportHandler>();
+    final Map<String, TransportHandler> m = new LinkedHashMap<>();
     m.put(Capabilities.WebSockets.name(), new WebsocketHandler(ClientMessageBusImpl.this));
     m.put(Capabilities.SSE.name(), new SSEHandler(ClientMessageBusImpl.this));
     m.put(Capabilities.LongPolling.name(),
@@ -421,7 +421,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     deferredSubscriptions.clear();
 
     if (!isProperty(ChaosMonkey.DONT_REALLY_CONNECT, "true")) {
-      final Map<String, String> properties = new HashMap<String, String>();
+      final Map<String, String> properties = new HashMap<>();
       properties.put("phase", "connection");
       properties.put("wait", "1");
 
@@ -593,7 +593,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public Subscription subscribeShadow(final String subject, final MessageCallback callback) {
     List<MessageCallback> messageCallbacks = shadowSubscriptions.get(subject);
     if (messageCallbacks == null) {
-      shadowSubscriptions.put(subject, messageCallbacks = new ArrayList<MessageCallback>());
+      shadowSubscriptions.put(subject, messageCallbacks = new ArrayList<>());
     }
     messageCallbacks.add(callback);
 
@@ -832,7 +832,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final List<MessageCallback> messageCallbacks = subscriptions.get(subject);
     if (messageCallbacks != null) {
       // iterating over a copy of the list in case a subscriber unsubscribes during callback
-      for (final MessageCallback cb : new ArrayList<MessageCallback>(messageCallbacks)) {
+      for (final MessageCallback cb : new ArrayList<>(messageCallbacks)) {
         cb.callback(msg);
       }
     }
@@ -925,7 +925,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       boolean deliveredMessages;
       do {
         deliveredMessages = false;
-        for (final Message message : new ArrayList<Message>(deferredMessages)) {
+        for (final Message message : new ArrayList<>(deferredMessages)) {
           if (shadowSubscriptions.containsKey(message.getSubject())) {
             deferredMessages.remove(message);
             deliveredMessages = true;
@@ -941,8 +941,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!deferredMessages.isEmpty())
       logger.info("transmitting deferred messages now ...");
 
-    final List<Message> highPriority = new ArrayList<Message>();
-    for (final Message message : new ArrayList<Message>(deferredMessages)) {
+    final List<Message> highPriority = new ArrayList<>();
+    for (final Message message : new ArrayList<>(deferredMessages)) {
       if (message.hasPart(MessageParts.PriorityProcessing)) {
         if (remotes.containsKey(message.getSubject()))
           highPriority.add(message);
@@ -950,9 +950,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
 
-    final List<Message> lowPriority = new ArrayList<Message>();
+    final List<Message> lowPriority = new ArrayList<>();
     do {
-      for (final Message message : new ArrayList<Message>(deferredMessages)) {
+      for (final Message message : new ArrayList<>(deferredMessages)) {
         if (remotes.containsKey(message.getSubject()))
           lowPriority.add(message);
         deferredMessages.remove(message);
@@ -1079,11 +1079,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public Set<String> getRemoteServices() {
-    return new HashSet<String>(remotes.keySet());
+    return new HashSet<>(remotes.keySet());
   }
 
   public Set<String> getLocalServices() {
-    return new HashSet<String>(subscriptions.keySet());
+    return new HashSet<>(subscriptions.keySet());
   }
 
   public String getApplicationLocation(final String serviceEntryPoint) {
@@ -1158,7 +1158,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-    final List<BusEventType> events = new ArrayList<BusEventType>();
+    final List<BusEventType> events = new ArrayList<>();
 
     switch (state) {
       case UNINITIALIZED:
@@ -1228,12 +1228,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  public void addUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
+  public void addUncaughtExceptionHandler(final UncaughtExceptionHandler handler) {
     Assert.notNull(handler);
     uncaughtExceptionHandlers.add(handler);
   }
 
-  public void removeUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
+  public void removeUncaughtExceptionHandler(final UncaughtExceptionHandler handler) {
     Assert.notNull(handler);
     uncaughtExceptionHandlers.remove(handler);
   }

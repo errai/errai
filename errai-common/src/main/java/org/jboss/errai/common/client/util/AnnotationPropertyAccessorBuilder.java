@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import org.jboss.errai.common.client.function.Function;
+import java.util.function.Function;
 
 public class AnnotationPropertyAccessorBuilder {
   private final SortedMap<String, Function<Annotation, String>> accessorsByPropertyName = new TreeMap<>();

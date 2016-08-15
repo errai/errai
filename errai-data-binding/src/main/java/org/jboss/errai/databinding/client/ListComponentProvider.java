@@ -19,15 +19,15 @@ package org.jboss.errai.databinding.client;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.function.Consumer;
-import org.jboss.errai.common.client.function.Function;
-import org.jboss.errai.common.client.function.Optional;
-import org.jboss.errai.common.client.function.Supplier;
 import org.jboss.errai.databinding.client.components.DefaultListComponent;
 import org.jboss.errai.databinding.client.components.ListComponent;
 import org.jboss.errai.databinding.client.components.ListContainer;

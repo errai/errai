@@ -26,9 +26,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import org.jboss.errai.common.client.function.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

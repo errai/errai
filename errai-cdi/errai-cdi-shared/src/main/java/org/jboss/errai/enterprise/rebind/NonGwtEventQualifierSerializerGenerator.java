@@ -25,6 +25,7 @@ import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SER
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -37,7 +38,6 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.function.Function;
 import org.jboss.errai.common.client.util.AnnotationPropertyAccessorBuilder;
 import org.jboss.errai.common.client.util.SharedAnnotationSerializer;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
@@ -120,7 +120,7 @@ public class NonGwtEventQualifierSerializerGenerator {
       final Class<? extends EventQualifierSerializer> clazz;
       try {
         clazz = Assert.notNull(generateAndLoad());
-      } catch (Throwable t) {
+      } catch (final Throwable t) {
         throw new RuntimeException("Could not generate " + EventQualifierSerializer.SERIALIZER_CLASS_NAME, t);
       }
 
@@ -135,7 +135,7 @@ public class NonGwtEventQualifierSerializerGenerator {
     } catch (InstantiationException | IllegalAccessException e) {
       throw new RuntimeException("Could not instantiate " + SERIALIZER_PACKAGE_NAME + "."
               + SERIALIZER_CLASS_NAME + " with default constructor.", e);
-    } catch (ClassCastException e) {
+    } catch (final ClassCastException e) {
       throw new RuntimeException(SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME
               + " must be a subclass of " + EventQualifierSerializer.class.getName(), e);
     }

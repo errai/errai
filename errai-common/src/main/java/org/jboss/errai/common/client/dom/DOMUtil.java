@@ -18,8 +18,7 @@ package org.jboss.errai.common.client.dom;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import org.jboss.errai.common.client.function.Optional;
+import java.util.Optional;
 
 import com.google.gwt.regexp.shared.RegExp;
 

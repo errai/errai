@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.function.Consumer;
-import org.jboss.errai.common.client.function.Function;
-import org.jboss.errai.common.client.function.Optional;
-import org.jboss.errai.common.client.function.Supplier;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
 
@@ -70,7 +70,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    * @return An optional containing a UI component associated with the given model, iff the given model is displayed by
    *         this {@link ListComponent}. Otherwise {@link Optional#empty()}.
    */
-  default Optional<C> getComponent(M model) {
+  default Optional<C> getComponent(final M model) {
     final int index = getValue().indexOf(model);
 
     if (index == -1) {
@@ -118,7 +118,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    * @param models
    *          A collection of models whose respective components will be selected.
    */
-  default void selectModels(Collection<M> models) {
+  default void selectModels(final Collection<M> models) {
     for (final M model: models) {
       getComponent(model).ifPresent(c -> selectComponent(c));
     }
@@ -131,7 +131,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    * @param model
    *          A model whose respective component is to be selected.
    */
-  default void selectModel(M model) {
+  default void selectModel(final M model) {
     selectModels(Collections.singleton(model));
   }
 
@@ -149,7 +149,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    *          returned by {@link #getSelectedComponents()}. If a selector has been set via
    *          {@link #setSelector(Consumer)} it will be called for this component.
    */
-  default void selectComponent(C component) {
+  default void selectComponent(final C component) {
     selectComponents(Collections.singleton(component));
   }
 
@@ -192,7 +192,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    *          {@link #setDeselector(Consumer)} it will be called for this component iff the component was previously
    *          selected.
    */
-  default void deselectComponent(C component) {
+  default void deselectComponent(final C component) {
     deselectComponents(Collections.singleton(component));
   }
 
@@ -203,7 +203,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    *          A collection of models. After this call, any component having one of these models will be deslected as if
    *          {@link #deselectComponent(TakesValue)} were called for it.
    */
-  default void deselectModels(Collection<M> models) {
+  default void deselectModels(final Collection<M> models) {
     for (final M model : models) {
       getComponent(model).ifPresent(c -> deselectComponent(c));
     }
@@ -216,7 +216,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    *          A model that, after this call, the component having this model will be deslected as if
    *          {@link #deselectComponent(TakesValue)} were called for it.
    */
-  default void deselectModel(M model) {
+  default void deselectModel(final M model) {
     deselectModels(Collections.singleton(model));
   }
 
@@ -238,7 +238,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    */
   static <M, C extends TakesValue<M> & IsElement> Builder<M, C> forIsElementComponent(final Supplier<C> supplier,
           final Consumer<C> destroyer) {
-    return new Builder<M, C>(root -> new DefaultListComponent<>(root, supplier, destroyer, c -> c.getElement()));
+    return new Builder<>(root -> new DefaultListComponent<>(root, supplier, destroyer, c -> c.getElement()));
   }
 
   /**
@@ -251,7 +251,7 @@ public interface ListComponent<M, C extends TakesValue<M>> extends IsElement, Ta
    */
   static <M, C extends TakesValue<M> & IsWidget> Builder<M, C> forIsWidgetComponent(final Supplier<C> supplier,
           final Consumer<C> destroyer) {
-    return new Builder<M, C>(root -> new DefaultListComponent<>(root, supplier, destroyer, c -> (HTMLElement) c.asWidget().getElement()));
+    return new Builder<>(root -> new DefaultListComponent<>(root, supplier, destroyer, c -> (HTMLElement) c.asWidget().getElement()));
   }
 
   /**

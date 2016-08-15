@@ -22,12 +22,12 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.function.Consumer;
-import org.jboss.errai.common.client.function.Function;
-import org.jboss.errai.common.client.function.Supplier;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.TakesValue;
@@ -152,7 +152,7 @@ public class DefaultListComponent<M, C extends TakesValue<M>> implements ListCom
   }
 
   @Override
-  public C getComponent(int index) {
+  public C getComponent(final int index) {
     return components.get(index);
   }
 

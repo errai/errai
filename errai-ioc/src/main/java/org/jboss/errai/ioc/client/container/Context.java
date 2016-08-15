@@ -18,8 +18,8 @@ package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Optional;
 
-import org.jboss.errai.common.client.function.Optional;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.ScopeContext;

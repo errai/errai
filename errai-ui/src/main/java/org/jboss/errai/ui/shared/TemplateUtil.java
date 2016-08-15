@@ -22,9 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import org.jboss.errai.common.client.function.Supplier;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -74,11 +74,11 @@ public final class TemplateUtil {
   private TemplateUtil() {
   }
 
-  public static void compositeComponentReplace(String componentType, String templateFile, Supplier<Widget> field,
-          final Map<String, Element> dataFieldElements, String fieldName) {
+  public static void compositeComponentReplace(final String componentType, final String templateFile, final Supplier<Widget> field,
+          final Map<String, Element> dataFieldElements, final String fieldName) {
     try {
       compositeComponentReplace(componentType, templateFile, field.get(), dataFieldElements, fieldName);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("There was an error initializing the @DataField " + fieldName + " in the @Templated "
               + componentType + ": " + t.getMessage(), t);
     }
@@ -88,13 +88,13 @@ public final class TemplateUtil {
    * Replace the {@link Element} with the data-field of the given
    * {@link String} with the root {@link Element} of the given {@link UIObject}
    */
-  public static void compositeComponentReplace(String componentType, String templateFile, Widget field,
-          final Map<String, Element> dataFieldElements, String fieldName) {
+  public static void compositeComponentReplace(final String componentType, final String templateFile, final Widget field,
+          final Map<String, Element> dataFieldElements, final String fieldName) {
     if (field == null) {
       throw new IllegalStateException("Widget to be composited into [" + componentType + "] field [" + fieldName
               + "] was null. Did you forget to @Inject or initialize this @DataField?");
     }
-    Element element = dataFieldElements.get(fieldName);
+    final Element element = dataFieldElements.get(fieldName);
     if (element == null) {
       throw new IllegalStateException("Template [" + templateFile
               + "] did not contain data-field, id or class attribute for field [" + componentType + "." + fieldName + "]");
@@ -107,7 +107,7 @@ public final class TemplateUtil {
               + field.getElement().getTagName() + "] for " + fieldName + " in " + componentType);
     }
 
-    Element parentElement = element.getParentElement();
+    final Element parentElement = element.getParentElement();
     try {
       if (field instanceof HasText && (!(field instanceof ElementWrapperWidget) || field.getElement().getChildCount() == 0)) {
         Node firstNode = element.getFirstChild();
@@ -122,8 +122,8 @@ public final class TemplateUtil {
       }
       parentElement.replaceChild(field.getElement(), element);
 
-      boolean hasI18nKey = !field.getElement().getAttribute("data-i18n-key").equals("");
-      boolean hasI18nPrefix = !field.getElement().getAttribute("data-i18n-prefix").equals("");
+      final boolean hasI18nKey = !field.getElement().getAttribute("data-i18n-key").equals("");
+      final boolean hasI18nPrefix = !field.getElement().getAttribute("data-i18n-prefix").equals("");
 
       /*
        * Preserve template Element attributes.
@@ -131,8 +131,8 @@ public final class TemplateUtil {
       final JsArray<Node> templateAttributes = getAttributes(element);
       for (int i = 0; i < templateAttributes.length(); i++) {
         final Node node = templateAttributes.get(i);
-        String name = node.getNodeName();
-        String value = node.getNodeValue();
+        final String name = node.getNodeName();
+        final String value = node.getNodeValue();
         /*
          * If this new component is templated, do not overwrite i18n related attributes.
          */
@@ -148,17 +148,17 @@ public final class TemplateUtil {
           field.getElement().setAttribute(name, value);
         }
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName + "]" +
             " - Did you already @Insert or @Replace a parent Element?" +
             " Is an element referenced by more than one @DataField?", e);
     }
   }
 
-  public static Element asElement(Object element) {
+  public static Element asElement(final Object element) {
     try {
       return nativeCast(element);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("Error casting @DataField of type " + element.getClass().getName() + " to " + Element.class.getName(), t);
     }
   }
@@ -170,16 +170,16 @@ public final class TemplateUtil {
     return element;
   }-*/;
 
-  public static com.google.gwt.user.client.Element asDeprecatedElement(Object element) {
+  public static com.google.gwt.user.client.Element asDeprecatedElement(final Object element) {
     try {
       return nativeCast(element);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException("Error casting @DataField of type " + element.getClass().getName() + " to "
               + com.google.gwt.user.client.Element.class.getName(), t);
     }
   }
 
-  public static void initTemplated(Object templated, Element wrapped, Collection<Widget> dataFields) {
+  public static void initTemplated(final Object templated, final Element wrapped, final Collection<Widget> dataFields) {
     final TemplateWidget widget = new TemplateWidget(wrapped, dataFields);
     TemplateWidgetMapper.put(templated, widget);
     StyleBindingsRegistry.get().updateStyles(templated);
@@ -188,7 +188,7 @@ public final class TemplateUtil {
     TemplateInitializedEvent.fire(widget);
   }
 
-  public static void cleanupTemplated(Object templated) {
+  public static void cleanupTemplated(final Object templated) {
     final TemplateWidget templateWidget = TemplateWidgetMapper.get(templated);
     TemplateWidgetMapper.remove(templated);
     if (RootPanel.isInDetachList(templateWidget)) {
@@ -196,7 +196,7 @@ public final class TemplateUtil {
     }
   }
 
-  public static void initWidget(Composite component, Element wrapped, Collection<Widget> dataFields) {
+  public static void initWidget(final Composite component, final Element wrapped, final Collection<Widget> dataFields) {
     if (!(component instanceof ListWidget)) {
       initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
     }
@@ -208,7 +208,7 @@ public final class TemplateUtil {
     TemplateInitializedEvent.fire(component);
   }
 
-  public static void cleanupWidget(Composite component) {
+  public static void cleanupWidget(final Composite component) {
     if (RootPanel.isInDetachList(component)) {
       RootPanel.detachNow(component);
     }
@@ -222,10 +222,10 @@ public final class TemplateUtil {
     component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
   }-*/;
 
-  private static Map<String, Element> templateRoots = new HashMap<String, Element>();
+  private static Map<String, Element> templateRoots = new HashMap<>();
 
-  public static Element getRootTemplateParentElement(String templateContents, final String templateFileName, final String rootField) {
-    String key = templateFileName + "#" + rootField;
+  public static Element getRootTemplateParentElement(final String templateContents, final String templateFileName, final String rootField) {
+    final String key = templateFileName + "#" + rootField;
     if (templateRoots.containsKey(key)) {
       return cloneIntoNewParent(templateRoots.get(key));
     }
@@ -234,12 +234,12 @@ public final class TemplateUtil {
     parserDiv.setInnerHTML(templateContents);
     if (rootField != null && !rootField.trim().isEmpty()) {
       logger.finer("Locating root element: " + rootField);
-      VisitContext<TaggedElement> context = Visit.depthFirst(parserDiv, new Visitor<TaggedElement>() {
+      final VisitContext<TaggedElement> context = Visit.depthFirst(parserDiv, new Visitor<TaggedElement>() {
         @Override
-        public boolean visit(VisitContextMutable<TaggedElement> context, Element element) {
-          for (AttributeType attrType : AttributeType.values()) {
-            String attrName = attrType.getAttributeName();
-            TaggedElement existingCandidate = context.getResult();
+        public boolean visit(final VisitContextMutable<TaggedElement> context, final Element element) {
+          for (final AttributeType attrType : AttributeType.values()) {
+            final String attrName = attrType.getAttributeName();
+            final TaggedElement existingCandidate = context.getResult();
             if (element.hasAttribute(attrName) && element.getAttribute(attrName).equals(rootField)
                 && (existingCandidate == null || existingCandidate.getAttributeType().ordinal() < attrType.ordinal())) {
               context.setResult(new TaggedElement(attrType, element));
@@ -297,7 +297,7 @@ public final class TemplateUtil {
 
     private final String attributeName;
 
-    AttributeType(String attributeName) {
+    AttributeType(final String attributeName) {
       this.attributeName = attributeName;
     }
 
@@ -310,7 +310,7 @@ public final class TemplateUtil {
     private final AttributeType attributeType;
     private final Element element;
 
-    public TaggedElement(AttributeType attributeType, Element element) {
+    public TaggedElement(final AttributeType attributeType, final Element element) {
       this.attributeType = attributeType;
       this.element = element;
     }
@@ -330,7 +330,7 @@ public final class TemplateUtil {
    *
    * @param templateRoot
    */
-  public static void translateTemplate(String templateFile, Element templateRoot) {
+  public static void translateTemplate(final String templateFile, final Element templateRoot) {
     if (!getTranslationService().isEnabled())
       return;
 
@@ -348,16 +348,16 @@ public final class TemplateUtil {
    *
    * @param templateFile
    */
-  public static String getI18nPrefix(String templateFile) {
-    int idx1 = templateFile.lastIndexOf('/');
-    int idx2 = templateFile.lastIndexOf('.');
+  public static String getI18nPrefix(final String templateFile) {
+    final int idx1 = templateFile.lastIndexOf('/');
+    final int idx2 = templateFile.lastIndexOf('.');
     return templateFile.substring(idx1 + 1, idx2 + 1);
   }
 
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
 
-    final Map<String, Element> dataFields = new LinkedHashMap<String, Element>();
-    final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<String, TaggedElement>();
+    final Map<String, Element> dataFields = new LinkedHashMap<>();
+    final Map<String, TaggedElement> childTemplateElements = new LinkedHashMap<>();
 
     logger.finer("Searching template for fields.");
     // TODO do this as browser split deferred binding using
@@ -365,14 +365,14 @@ public final class TemplateUtil {
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
     Visit.depthFirst(templateRoot, new Visitor<Object>() {
       @Override
-      public boolean visit(VisitContextMutable<Object> context, Element element) {
-        for (AttributeType attrType : AttributeType.values()) {
-          String attrName = attrType.getAttributeName();
-          String attrVal = element.getAttribute(attrName);
+      public boolean visit(final VisitContextMutable<Object> context, final Element element) {
+        for (final AttributeType attrType : AttributeType.values()) {
+          final String attrName = attrType.getAttributeName();
+          final String attrVal = element.getAttribute(attrName);
           if (attrVal != null && !attrVal.isEmpty()) {
-            String[] attributeValues = (attrType == AttributeType.CLASS) ? attrVal.split(" +") : new String[]{attrVal};
-            for (String dataFieldName : attributeValues) {
-              TaggedElement existingCandidate = childTemplateElements.get(dataFieldName);
+            final String[] attributeValues = (attrType == AttributeType.CLASS) ? attrVal.split(" +") : new String[]{attrVal};
+            for (final String dataFieldName : attributeValues) {
+              final TaggedElement existingCandidate = childTemplateElements.get(dataFieldName);
               if (existingCandidate == null || existingCandidate.getAttributeType().ordinal() < attrType.ordinal()) {
                 childTemplateElements.put(dataFieldName, new TaggedElement(attrType, element));
                 dataFields.put(dataFieldName, element);
@@ -387,8 +387,8 @@ public final class TemplateUtil {
     return dataFields;
   }
 
-  public static void setupNativeEventListener(Object component, ElementWrapperWidget wrapper, EventListener listener,
-          int eventsToSink) {
+  public static void setupNativeEventListener(final Object component, final ElementWrapperWidget wrapper, final EventListener listener,
+          final int eventsToSink) {
 
     if (wrapper == null) {
       throw new RuntimeException("A native event source was specified in " + component.getClass().getName()
@@ -400,8 +400,8 @@ public final class TemplateUtil {
   /**
    * Use this for elements that are not wrapped by any widgets (including the ElementWrapperWidget).
    */
-  public static void setupNativeEventListener(Object component, Element element, EventListener listener,
-          int eventsToSink) {
+  public static void setupNativeEventListener(final Object component, final Element element, final EventListener listener,
+          final int eventsToSink) {
 
     if (element == null) {
       throw new RuntimeException("A native event source was specified in " + component.getClass().getName()
@@ -411,26 +411,26 @@ public final class TemplateUtil {
     DOM.sinkEvents(element, eventsToSink);
   }
 
-  public static <T extends EventHandler> Widget setupPlainElementEventHandler(Composite component, Element element,
-          T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
-    ElementWrapperWidget widget = ElementWrapperWidget.getWidget(element);
+  public static <T extends EventHandler> Widget setupPlainElementEventHandler(final Composite component, final Element element,
+          final T handler, final com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
+    final ElementWrapperWidget widget = ElementWrapperWidget.getWidget(element);
     widget.addDomHandler(handler, type);
     // TODO add to Composite as child.
     return widget;
   }
 
-  public static <T extends EventHandler> void setupWrappedElementEventHandler(Widget widget,
-          T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
+  public static <T extends EventHandler> void setupWrappedElementEventHandler(final Widget widget,
+          final T handler, final com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
     widget.addDomHandler(handler, type);
   }
 
   /**
    * Join strings inserting separator between them.
    */
-  private static String join(String[] strings, String separator) {
-    StringBuffer result = new StringBuffer();
+  private static String join(final String[] strings, final String separator) {
+    final StringBuffer result = new StringBuffer();
 
-    for (String s : strings) {
+    for (final String s : strings) {
       if (result.length() != 0) {
         result.append(separator);
       }
@@ -444,9 +444,9 @@ public final class TemplateUtil {
     return elem.attributes;
   }-*/;
 
-  private static Element cloneIntoNewParent(Element element) {
-    Element parent = DOM.createDiv();
-    Element clone = DOM.clone(element, true);
+  private static Element cloneIntoNewParent(final Element element) {
+    final Element parent = DOM.createDiv();
+    final Element clone = DOM.clone(element, true);
     parent.appendChild(clone);
     return parent;
   }
@@ -456,14 +456,14 @@ public final class TemplateUtil {
     final String location;
     final TemplateRenderingCallback renderingCallback;
 
-    TemplateRequest(Class<?> templateProvider, String location, TemplateRenderingCallback renderingCallback) {
+    TemplateRequest(final Class<?> templateProvider, final String location, final TemplateRenderingCallback renderingCallback) {
       this.templateProvider = templateProvider;
       this.location = location;
       this.renderingCallback = renderingCallback;
     }
   }
 
-  private static Queue<TemplateRequest> requests = new LinkedList<TemplateRequest>();
+  private static Queue<TemplateRequest> requests = new LinkedList<>();
 
   /**
    * Called by the generated IOC bootstrapper if a provider is specified on a
@@ -483,7 +483,7 @@ public final class TemplateUtil {
   public static void provideTemplate(final Class<?> templateProvider, final String location,
           final TemplateRenderingCallback renderingCallback) {
 
-    TemplateRequest request = new TemplateRequest(templateProvider, location, renderingCallback);
+    final TemplateRequest request = new TemplateRequest(templateProvider, location, renderingCallback);
     requests.add(request);
     if (requests.size() == 1) {
       provideNextTemplate();
@@ -499,26 +499,26 @@ public final class TemplateUtil {
       final TemplateRequest request = requests.peek();
       IOC.getAsyncBeanManager().lookupBean(request.templateProvider).getInstance(new CreationalCallback() {
         @Override
-        public void callback(Object bean) {
-          TemplateProvider provider = ((TemplateProvider) bean);
+        public void callback(final Object bean) {
+          final TemplateProvider provider = ((TemplateProvider) bean);
           try {
             provider.provideTemplate(request.location, new TemplateRenderingCallback() {
               @Override
-              public void renderTemplate(String template) {
+              public void renderTemplate(final String template) {
                 request.renderingCallback.renderTemplate(template);
                 requests.remove();
                 provideNextTemplate();
               }
             });
           }
-          catch (RuntimeException t) {
+          catch (final RuntimeException t) {
             requests.remove();
             throw t;
           }
         }
       });
     }
-    catch (IOCResolutionException ioce) {
+    catch (final IOCResolutionException ioce) {
       requests.remove();
       throw ioce;
     }
