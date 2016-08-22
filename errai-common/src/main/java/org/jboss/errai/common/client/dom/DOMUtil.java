@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import com.google.gwt.regexp.shared.RegExp;
-
 /**
  * Provides utitlity methods for interacting with the DOM.
  *
@@ -220,7 +218,7 @@ public abstract class DOMUtil {
    */
   public static boolean removeCSSClass(final HTMLElement element, final String className) {
     if (hasCSSClass(element, className)) {
-      element.setClassName(element.getClassName().replaceAll("\\b" + className + "\\b", "").trim());
+      element.getClassList().remove(className);
 
       return true;
     }
@@ -244,7 +242,7 @@ public abstract class DOMUtil {
       return false;
     }
     else {
-      element.setClassName(element.getClassName().trim() + " " + className);
+      element.getClassList().add(className);
 
       return true;
     }
@@ -258,7 +256,8 @@ public abstract class DOMUtil {
    * @return True iff the given element has the given CSS class as part of its class list.
    */
   public static boolean hasCSSClass(final HTMLElement element, final String className) {
-    final RegExp pattern = RegExp.compile("\\b" + className + "\\b");
+    return element.getClassList().contains(className);
+  }
 
     return pattern.test(element.getClassName());
   }
