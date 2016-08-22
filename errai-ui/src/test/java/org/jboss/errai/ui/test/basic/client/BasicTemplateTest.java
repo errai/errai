@@ -57,17 +57,17 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     testInsertAndReplace(app);
   }
 
-  private void testInsertAndReplace(BasicTemplateTestApp app) {
+  private void testInsertAndReplace(final BasicTemplateTestApp app) {
     assertNotNull(app.getComponent());
-    String innerHtml = app.getComponent().getElement().getInnerHTML();
+    final String innerHtml = app.getComponent().getElement().getInnerHTML();
     assertTrue(RegExp.compile("<h1(.)*>This will be rendered</h1>").test(innerHtml));
     assertTrue(RegExp.compile("<div(.)*>This will be rendered</div>").test(innerHtml));
 
-    RegExp buttonInnerHtmlRegExp = RegExp.compile("This will be rendered inside button", "g");
+    final RegExp buttonInnerHtmlRegExp = RegExp.compile("This will be rendered inside button", "g");
     assertTrue("Did find single instance of button text.", buttonInnerHtmlRegExp.test(innerHtml));
     assertTrue("Did find second instance of button text.", buttonInnerHtmlRegExp.test(innerHtml));
 
-    Element c1 = Document.get().getElementById("c1");
+    final Element c1 = Document.get().getElementById("c1");
     assertNotNull(c1);
     assertEquals("Added by component", c1.getInnerText());
 
@@ -75,7 +75,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     assertNotNull(Document.get().getElementById("c3"));
     assertNull(Document.get().getElementById("content"));
 
-    Element nc1 = Document.get().getElementById("nc1");
+    final Element nc1 = Document.get().getElementById("nc1");
     assertNotNull(nc1);
     assertEquals("Added by component", nc1.getInnerText());
 
@@ -94,19 +94,19 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     testAttributesFromTemplateOverrideComponentElement(app);
   }
 
-  private void testAttributesFromTemplateOverrideComponentElement(BasicTemplateTestApp app) {
-    Element c1 = app.getComponent().getLabel().getElement();
-    assertEquals("c1", c1.getAttribute("class"));
+  private void testAttributesFromTemplateOverrideComponentElement(final BasicTemplateTestApp app) {
+    final Element c1 = app.getComponent().getLabel().getElement();
+    assertTrue("Element did not contain the class name [c1]. Observed class value: " + c1.getAttribute("class"), c1.hasClassName("c1"));
     assertEquals("left", c1.getAttribute("align"));
 
-    Element c3 = app.getComponent().getTextBox().getElement();
+    final Element c3 = app.getComponent().getTextBox().getElement();
     assertEquals("address", c3.getAttribute("name"));
 
-    Element nc1 = asElement(app.getComponent().getNativeLabel());
+    final Element nc1 = asElement(app.getComponent().getNativeLabel());
     assertEquals("nc1", nc1.getAttribute("class"));
     assertEquals("left", nc1.getAttribute("align"));
 
-    Element nc3 = TemplateUtil.asElement(app.getComponent().getNativeTextBox());
+    final Element nc3 = TemplateUtil.asElement(app.getComponent().getNativeTextBox());
     assertEquals("address", nc3.getAttribute("name"));
   }
 
@@ -120,19 +120,19 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     testHasHTMLPreservesInnerHTML(app);
   }
 
-  private void testHasHTMLPreservesInnerHTML(BasicTemplateTestApp app) throws Exception {
-    Anchor c4comp = app.getComponent().getC4();
-    String c4compHtml = c4comp.getHTML();
+  private void testHasHTMLPreservesInnerHTML(final BasicTemplateTestApp app) throws Exception {
+    final Anchor c4comp = app.getComponent().getC4();
+    final String c4compHtml = c4comp.getHTML();
     assertTrue("Inner HTML should be preserved when component implements ",
         RegExp.compile("<span(.)*>LinkHTML</span>").test(c4compHtml));
 
-    Element c4 = c4comp.getElement();
+    final Element c4 = c4comp.getElement();
     assertEquals("blah", c4.getAttribute("href"));
     assertEquals("SPAN", c4.getFirstChildElement().getTagName());
     assertEquals("LinkHTML", c4.getFirstChildElement().getInnerHTML());
 
-    Element nc4 = TemplateUtil.asElement(app.getComponent().getNc4());
-    String nc4Html = nc4.getInnerHTML();
+    final Element nc4 = TemplateUtil.asElement(app.getComponent().getNc4());
+    final String nc4Html = nc4.getInnerHTML();
     assertTrue("Inner HTML should be preserved when component implements ",
         RegExp.compile("<span(.)*>LinkHTML</span>").test(nc4Html));
 
@@ -151,15 +151,15 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     testHasHTMLReparentsChildElements(app);
   }
 
-  private void testHasHTMLReparentsChildElements(BasicTemplateTestApp app) throws Exception {
-    Anchor c5 = app.getComponent().getC5();
-    Image c6 = app.getComponent().getC6();
+  private void testHasHTMLReparentsChildElements(final BasicTemplateTestApp app) throws Exception {
+    final Anchor c5 = app.getComponent().getC5();
+    final Image c6 = app.getComponent().getC6();
 
     System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
     assertEquals(c6.getElement(), c5.getElement().getFirstChildElement());
 
-    org.jboss.errai.ui.test.common.client.dom.Element nc5 = app.getComponent().getNc5();
-    org.jboss.errai.ui.test.common.client.dom.Element nc6 = app.getComponent().getNc6();
+    final org.jboss.errai.ui.test.common.client.dom.Element nc5 = app.getComponent().getNc5();
+    final org.jboss.errai.ui.test.common.client.dom.Element nc6 = app.getComponent().getNc6();
 
     System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
     assertEquals(TemplateUtil.asElement(nc6), TemplateUtil.asElement(nc5).getFirstChildElement());
@@ -167,7 +167,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
 
   @Test
   public void testPrecedenceRules() throws Exception {
-    PrecedenceTemplateTestApp app = IOC.getBeanManager().lookupBean(PrecedenceTemplateTestApp.class).getInstance();
+    final PrecedenceTemplateTestApp app = IOC.getBeanManager().lookupBean(PrecedenceTemplateTestApp.class).getInstance();
 
     assertEquals(app.getComponent().getA().getText(), "This is a");
     assertEquals(app.getComponent().getB().getText(), "This is b");

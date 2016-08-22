@@ -19,6 +19,7 @@ package org.jboss.errai.ui.rebind;
 import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
@@ -29,6 +30,7 @@ import static org.jboss.errai.ioc.util.GeneratedNamesUtil.qualifiedClassNameToSh
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,6 +40,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -74,10 +77,13 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ui.client.local.spi.TemplateRenderingCallback;
+import org.jboss.errai.ui.shared.DataFieldMeta;
 import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.TemplateStyleSheet;
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateWidgetMapper;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.DataField.ConflictStrategy;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -273,6 +279,9 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
                   rootTemplateElement))
       );
 
+      final String dataFieldMetasVarName = "dataFieldMetas";
+      initStmts.addAll(generateDataFieldMetas(dataFieldMetasVarName, decorable));
+
       /*
        * Attach Widget field children Elements to the Template DOM
        */
@@ -287,10 +296,38 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       final Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
 
       generateComponentCompositions(decorable, initStmts, component, rootTemplateElement,
-          loadVariable(dataFieldElementsVarName), fieldsMap);
+          loadVariable(dataFieldElementsVarName), fieldsMap, loadVariable(dataFieldMetasVarName));
 
       generateEventHandlerMethodClasses(decorable, controller, initStmts, dataFieldElementsVarName, fieldsMap);
     }
+  }
+
+  @SuppressWarnings("serial")
+  private List<Statement> generateDataFieldMetas(final String dataFieldMetasVarName, final Decorable decorable) {
+    final Map<String, DataField> annoMap = DataFieldCodeDecorator.aggregateDataFieldAnnotationMap(decorable, decorable.getType());
+    final List<Statement> stmts = new ArrayList<>(annoMap.size()+1);
+    stmts.add(declareFinalVariable(dataFieldMetasVarName, new TypeLiteral<Map<String, DataFieldMeta>>() {
+    }, newObject(parameterizedAs(HashMap.class, typeParametersOf(String.class, DataFieldMeta.class)), annoMap.size())));
+    annoMap
+      .entrySet()
+      .stream()
+      .map(entry -> {
+        final String fieldName = entry.getKey();
+        final DataField dataField = entry.getValue();
+        Statement dataFieldMetaInstance;
+        if (dataField.attributeRules().length == 0 && dataField.defaultStrategy().equals(ConflictStrategy.USE_TEMPLATE)) {
+          dataFieldMetaInstance = newObject(DataFieldMeta.class);
+        }
+        else {
+          dataFieldMetaInstance = newObject(DataFieldMeta.class,
+                  loadLiteral(dataField.attributeRules()), loadLiteral(dataField.defaultStrategy()));
+        }
+
+        return loadVariable(dataFieldMetasVarName).invoke("put", fieldName, dataFieldMetaInstance);
+       })
+      .collect(Collectors.toCollection(() -> stmts));
+
+    return stmts;
   }
 
   private void generateEventHandlerMethodClasses(final Decorable decorable, final FactoryController controller,
@@ -567,7 +604,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
                                              final Statement component,
                                              final Statement rootTemplateElement,
                                              final Statement dataFieldElements,
-                                             final Statement fieldsMap) {
+                                             final Statement fieldsMap,
+                                             final Statement fieldsMetaMap) {
 
     final boolean composite = decorable.getEnclosingInjectable().getInjectedType().isAssignableTo(Composite.class);
 
@@ -579,7 +617,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(invokeStatic(TemplateUtil.class, "compositeComponentReplace", decorable.getDecorableDeclaringType()
           .getFullyQualifiedName(), getTemplateFileName(decorable.getDecorableDeclaringType()), supplierOf(Cast.to(Widget.class, field.getValue())),
-          dataFieldElements, field.getKey()));
+          dataFieldElements, fieldsMetaMap, field.getKey()));
     }
 
     /*

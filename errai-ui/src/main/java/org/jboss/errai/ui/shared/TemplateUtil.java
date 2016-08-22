@@ -22,9 +22,13 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
+import org.jboss.errai.common.client.dom.DOMUtil;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -33,6 +37,7 @@ import org.jboss.errai.ui.client.local.spi.TemplateProvider;
 import org.jboss.errai.ui.client.local.spi.TemplateRenderingCallback;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.shared.api.annotations.DataField.ConflictStrategy;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
@@ -75,9 +80,9 @@ public final class TemplateUtil {
   }
 
   public static void compositeComponentReplace(final String componentType, final String templateFile, final Supplier<Widget> field,
-          final Map<String, Element> dataFieldElements, final String fieldName) {
+          final Map<String, Element> dataFieldElements, final Map<String, DataFieldMeta> dataFieldMetas, final String fieldName) {
     try {
-      compositeComponentReplace(componentType, templateFile, field.get(), dataFieldElements, fieldName);
+      compositeComponentReplace(componentType, templateFile, field.get(), dataFieldElements, dataFieldMetas, fieldName);
     } catch (final Throwable t) {
       throw new RuntimeException("There was an error initializing the @DataField " + fieldName + " in the @Templated "
               + componentType + ": " + t.getMessage(), t);
@@ -89,12 +94,13 @@ public final class TemplateUtil {
    * {@link String} with the root {@link Element} of the given {@link UIObject}
    */
   public static void compositeComponentReplace(final String componentType, final String templateFile, final Widget field,
-          final Map<String, Element> dataFieldElements, final String fieldName) {
+          final Map<String, Element> dataFieldElements, final Map<String, DataFieldMeta> dataFieldMetas, final String fieldName) {
     if (field == null) {
       throw new IllegalStateException("Widget to be composited into [" + componentType + "] field [" + fieldName
               + "] was null. Did you forget to @Inject or initialize this @DataField?");
     }
     final Element element = dataFieldElements.get(fieldName);
+    final DataFieldMeta meta = dataFieldMetas.get(fieldName);
     if (element == null) {
       throw new IllegalStateException("Template [" + templateFile
               + "] did not contain data-field, id or class attribute for field [" + componentType + "." + fieldName + "]");
@@ -140,18 +146,43 @@ public final class TemplateUtil {
                 && (hasI18nKey || hasI18nPrefix))
           continue;
 
-        if (name.equals("class")) {
-          // setAttribute for "class" does not work in IE8.
-          field.getElement().setClassName(value);
-        }
-        else {
-          field.getElement().setAttribute(name, value);
-        }
+        mergeAttribute(meta, field.getElement().cast(), element.cast(), name, value);
       }
     } catch (final Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName + "]" +
             " - Did you already @Insert or @Replace a parent Element?" +
             " Is an element referenced by more than one @DataField?", e);
+    }
+  }
+
+  private static void mergeAttribute(final DataFieldMeta meta, final HTMLElement beanElement, final HTMLElement templateElement, final String name, final String value) {
+    final ConflictStrategy strategy = meta.getStrategy(name);
+    // Merge all class names regardless of strategy
+    if (name.equals("class")) {
+      DOMUtil.tokenStream(templateElement.getClassList())
+        .filter(token -> !beanElement.getClassList().contains(token))
+        .forEach(token -> beanElement.getClassList().add(token));
+    }
+    // Merge individual properties in style only using the strategy when both elements have a value.
+    else if (name.equals("style")) {
+      Stream<String> propertyNameStream = DOMUtil.cssPropertyNameStream(templateElement.getStyle());
+      if (ConflictStrategy.USE_BEAN.equals(strategy)) {
+        propertyNameStream = propertyNameStream
+                .filter(propertyName -> {
+                  final String beanPropertyValue = beanElement.getStyle().getPropertyValue(propertyName);
+                  return beanPropertyValue == null || beanPropertyValue.isEmpty();
+                 });
+      }
+
+      propertyNameStream
+        .forEach(propertyName -> beanElement.getStyle().setProperty(propertyName, templateElement.getStyle().getPropertyValue(propertyName), ""));
+    }
+    // Use strategy to decide which value is used.
+    else {
+      final String beanValue = beanElement.getAttribute(name);
+      if (ConflictStrategy.USE_TEMPLATE.equals(strategy) || beanValue == null || beanValue.isEmpty()) {
+        beanElement.setAttribute(name, value);
+      }
     }
   }
 

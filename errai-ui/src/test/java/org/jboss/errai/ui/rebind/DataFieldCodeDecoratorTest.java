@@ -70,6 +70,17 @@ public class DataFieldCodeDecoratorTest {
       public String value() {
         return "";
       }
+
+      @Override
+      public AttributeRule[] attributeRules() {
+        return new AttributeRule[0];
+      }
+
+      @Override
+      public ConflictStrategy defaultStrategy() {
+        return ConflictStrategy.USE_TEMPLATE;
+      }
+
     });
     final Map<String, Object> attrs = new HashMap<>();
     when(context.getAttribute(any())).then(invocation -> attrs.get(invocation.getArguments()[0]));

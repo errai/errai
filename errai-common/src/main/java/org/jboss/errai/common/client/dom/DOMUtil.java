@@ -16,9 +16,11 @@
 
 package org.jboss.errai.common.client.dom;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Provides utitlity methods for interacting with the DOM.
@@ -259,6 +261,28 @@ public abstract class DOMUtil {
     return element.getClassList().contains(className);
   }
 
-    return pattern.test(element.getClassName());
+  /**
+   * @param tokenList
+   *          Must not be null.
+   * @return A sequential, ordered {@link Stream} of tokens from the given {@link DOMTokenList}.
+   */
+  public static Stream<String> tokenStream(final DOMTokenList tokenList) {
+    return Stream
+      .iterate(0, n -> n + 1)
+      .limit(tokenList.getLength())
+      .map(i -> tokenList.item(i));
+  }
+
+  /**
+   * @param styleDeclaration
+   *          Must not be null.
+   * @return A stream of property names from the given style declaration.
+   */
+  public static Stream<String> cssPropertyNameStream(final CSSStyleDeclaration styleDeclaration) {
+    return Arrays
+            .stream(styleDeclaration.getCssText() != null
+                    ? styleDeclaration.getCssText().split(";") : new String[0])
+            .map(style -> style.split(":", 2)[0].trim())
+            .filter(propertyName -> !propertyName.isEmpty());
   }
 }
