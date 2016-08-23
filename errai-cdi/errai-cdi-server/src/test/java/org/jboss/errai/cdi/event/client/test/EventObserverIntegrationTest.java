@@ -16,6 +16,8 @@
 
 package org.jboss.errai.cdi.event.client.test;
 
+import java.util.Arrays;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.BusLifecycleAdapter;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
@@ -25,7 +27,9 @@ import org.jboss.errai.cdi.event.client.DependentEventObserverTestModule;
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 import org.jboss.errai.cdi.event.client.EventProducerTestModule;
 import org.jboss.errai.cdi.event.client.OnDemandEventObserver;
+import org.jboss.errai.cdi.event.client.PrimitiveEventTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 
 import com.google.gwt.user.client.Timer;
@@ -47,7 +51,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     EventProducerTestModule.clearReceivedEventsOnServer();
     super.gwtSetUp();
   }
-  
+
   public void testBusReadyEventObserver() {
     delayTestFinish(60000);
     CDI.addPostInitTask(new Runnable() {
@@ -70,7 +74,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
         // assert that client received all events
         EventObserverIntegrationTest.this.verifyQualifiedEvents(module.getReceivedQualifiedEvents(), true);
         EventObserverIntegrationTest.this.verifySuperTypeEvents(module.getReceivedSuperTypeEvents());
-        
+
         finishTest();
       }
     };
@@ -178,7 +182,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
             bus.stop(false);
             bus.addLifecycleListener(new BusLifecycleAdapter() {
               @Override
-              public void busOnline(BusLifecycleEvent e) {
+              public void busOnline(final BusLifecycleEvent e) {
                 System.out.println("Bus is back online. Starting event test module.");
                 module.start();
               }
@@ -205,7 +209,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     IOC.getBeanManager().destroyBean(module);
     assertTrue("Bean wasn't destroyed", module.isDestroyed());
   }
-  
+
   // Regression test for ERRAI-646
   public void testDestroyBeanWithEventObserversDoesNotUnsubscribeOtherObservers() {
     CDI.addPostInitTask(new Runnable() {
@@ -215,15 +219,40 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
         IOC.getBeanManager().destroyBean(module);
       }
     });
-    
+
     new Timer() {
       @Override
       public void run() {
         testEventObservers();
       }
     }.schedule(30000);
-    
+
     delayTestFinish(240000);
+  }
+
+  public void testObserverOfPrimitiveEvent() throws Exception {
+    final PrimitiveEventTestModule module = IOCUtil.getInstance(PrimitiveEventTestModule.class);
+
+    module.boolEvent.fire(false);
+    module.doubleEvent.fire(1.0);
+    module.floatEvent.fire(2.0f);
+    module.intEvent.fire(3);
+    module.longEvent.fire(4L);
+    module.shortEvent.fire((short) 5);
+    module.byteEvent.fire((byte) 6);
+    module.charEvent.fire((char) 7);
+
+    assertEquals(Arrays
+            .asList(
+                    false,
+                    1.0,
+                    2.0f,
+                    3,
+                    4L,
+                    (short) 5,
+                    (byte) 6,
+                    (char) 7
+            ), module.observed);
   }
 
 }

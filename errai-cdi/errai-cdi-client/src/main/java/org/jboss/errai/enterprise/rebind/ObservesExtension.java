@@ -86,17 +86,18 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
     controller.ensureMemberExposed(parm);
 
-    final String parmClassName = parm.getType().getFullyQualifiedName();
+    final MetaClass eventType = parm.getType().asBoxed();
+    final String parmClassName = eventType.getFullyQualifiedName();
     final List<Annotation> annotations = InjectUtil.extractQualifiers(parm);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
-    final Set<String> qualifierNames = new HashSet<String>(CDI.getQualifiersPart(qualifiers));
+    final Set<String> qualifierNames = new HashSet<>(CDI.getQualifiersPart(qualifiers));
     final boolean isEnclosingTypeDependent = enclosingTypeIsDependentScoped(decorable);
 
     if (qualifierNames.contains(Any.class.getName())) {
       qualifierNames.remove(Any.class.getName());
     }
 
-    final MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(parm.getType()));
+    final MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(eventType));
 
     AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
 
@@ -110,7 +111,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBack = callBackBlock.finish();
     }
 
-    final List<Statement> callbackStatements = new ArrayList<Statement>();
+    final List<Statement> callbackStatements = new ArrayList<>();
     if (!isEnclosingTypeDependent) {
       callbackStatements
               .add(declareFinalVariable("instance", decorable.getDecorableDeclaringType(), castTo(decorable.getEnclosingInjectable().getInjectedType(),
@@ -118,23 +119,23 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
     callbackStatements.add(decorable.call(Refs.get("event")));
 
-    callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(parm, "event"))
+    callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(eventType, "event"))
         .appendAll(callbackStatements)
         .finish()
         .publicOverridesMethod("toString")
         ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
 
-    final List<Statement> initStatements = new ArrayList<Statement>();
-    final List<Statement> destroyStatements = new ArrayList<Statement>();
+    final List<Statement> initStatements = new ArrayList<>();
+    final List<Statement> destroyStatements = new ArrayList<>();
     final String subscrVar = method.getName() + "Subscription";
 
     final String subscribeMethod;
 
-    if (parm.getType().isAnnotationPresent(JsType.class)) {
+    if (eventType.isAnnotationPresent(JsType.class)) {
       subscribeMethod = "subscribeJsType";
       callBackBlock = getJsTypeSubscriptionCallback(decorable, controller);
     }
-    else if (EnvUtil.isPortableType(parm.getType()) && !EnvUtil.isLocalEventType(parm.getType())) {
+    else if (EnvUtil.isPortableType(eventType) && !EnvUtil.isLocalEventType(eventType)) {
       subscribeMethod = "subscribe";
       callBackBlock = getSubscriptionCallback(decorable, controller);
     }
@@ -153,7 +154,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       initStatements.add(subscribeStatement);
     }
 
-    for (final Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
+    for (final Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(eventType.asClass())) {
       if (!EnvUtil.isLocalEventType(cls)) {
         final ContextualStatementBuilder routingSubStmt = Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
                 CDI.getSubjectNameByType(cls.getName()), Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"));
@@ -183,12 +184,13 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
   private BlockBuilder<AnonymousClassStructureBuilder> getSubscriptionCallback(final Decorable decorable, final FactoryController controller) {
 
     final MetaParameter parm = decorable.getAsParameter();
-    final String parmClassName = parm.getType().getFullyQualifiedName();
+    final MetaClass eventType = parm.getType().asBoxed();
+    final String parmClassName = eventType.getFullyQualifiedName();
     final List<Annotation> annotations = InjectUtil.extractQualifiers(parm);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
-    final Set<String> qualifierNames = new HashSet<String>(CDI.getQualifiersPart(qualifiers));
+    final Set<String> qualifierNames = new HashSet<>(CDI.getQualifiersPart(qualifiers));
 
-    final MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(parm.getType()));
+    final MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(eventType));
     AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
     BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
 
@@ -200,14 +202,14 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBack = callBackBlock.finish();
     }
 
-    final List<Statement> fireEventStmts = new ArrayList<Statement>();
+    final List<Statement> fireEventStmts = new ArrayList<>();
     if (!decorable.isEnclosingTypeDependent()) {
       fireEventStmts.add(Stmt.declareFinalVariable("instance", decorable.getEnclosingInjectable().getInjectedType(),
               Stmt.invokeStatic(Factory.class, "maybeUnwrapProxy", controller.contextGetInstanceStmt())));
     }
     fireEventStmts.add(decorable.call(Refs.get("event")));
 
-    callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(parm, "event"))
+    callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(eventType, "event"))
         .appendAll(fireEventStmts)
         .finish()
         .publicOverridesMethod("toString")
@@ -219,20 +221,21 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
   private BlockBuilder<AnonymousClassStructureBuilder> getJsTypeSubscriptionCallback(final Decorable decorable, final FactoryController controller) {
 
     final MetaParameter parm = decorable.getAsParameter();
-    final String parmClassName = parm.getType().getFullyQualifiedName();
+    final MetaClass eventType = parm.getType().asBoxed();
+    final String parmClassName = eventType.getFullyQualifiedName();
 
-    final MetaClass callBackType = parameterizedAs(JsTypeEventObserver.class, typeParametersOf(parm.getType()));
-    AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
+    final MetaClass callBackType = parameterizedAs(JsTypeEventObserver.class, typeParametersOf(eventType));
+    final AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
     BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
 
-    final List<Statement> fireEventStmts = new ArrayList<Statement>();
+    final List<Statement> fireEventStmts = new ArrayList<>();
     if (!decorable.isEnclosingTypeDependent()) {
       fireEventStmts.add(Stmt.declareFinalVariable("instance", decorable.getEnclosingInjectable().getInjectedType(),
               Stmt.invokeStatic(Factory.class, "maybeUnwrapProxy", controller.contextGetInstanceStmt())));
     }
     fireEventStmts.add(decorable.call(Refs.get("event")));
 
-    callBackBlock = callBack.publicOverridesMethod("onEvent", Parameter.finalOf(parm, "event"))
+    callBackBlock = callBack.publicOverridesMethod("onEvent", Parameter.finalOf(eventType, "event"))
         .appendAll(fireEventStmts)
         .finish()
         .publicOverridesMethod("toString")
