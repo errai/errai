@@ -51,7 +51,7 @@ public class TransmissionBuffer implements Buffer {
   public static final long STARTING_SEQUENCE = 0;
 
   public static final int DEFAULT_SEGMENT_SIZE = 1024 * 16;              /* 16 Kilobytes */
-  private static final int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
+  public static final int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
 
   private static final int SEGMENT_HEADER_SIZE = 4;                      /* to accommodate a 32-bit integer  */
 
@@ -213,7 +213,7 @@ public class TransmissionBuffer implements Buffer {
     try {
       final int allocSize = ((writeSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
       final long writeHead = writeSequenceNumber.getAndAdd(allocSize);
-      final int seq = (int) writeHead % segments;
+      final int seq = (int) (writeHead % segments);
 
       int writeCursor = seq * segmentSize;
 
@@ -268,7 +268,7 @@ public class TransmissionBuffer implements Buffer {
   @Override
   public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor) throws IOException {
     long lastSeq = -1l;
-    
+
     try {
       // obtain this color's read lock
       bufferColor.lock.lock();
@@ -292,7 +292,7 @@ public class TransmissionBuffer implements Buffer {
       // move the tail sequence for this color up.
       if (lastSeq != -1)
         bufferColor.sequence.set(lastSeq);
-      } 
+      }
       finally {
         // release the read lock on this color/
         bufferColor.lock.unlock();
@@ -775,7 +775,7 @@ public class TransmissionBuffer implements Buffer {
   }
 
   public List<String> dumpSegmentsAsList() {
-    final List<String> list = new ArrayList<String>();
+    final List<String> list = new ArrayList<>();
 
     for (int i = 0; i < segmentMap.length && i < headSequence; i++) {
       int pos = i * segmentSize;

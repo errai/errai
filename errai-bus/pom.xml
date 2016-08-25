@@ -211,7 +211,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <forkMode>always</forkMode>
-              <argLine>${argLine} -Xmx1500m -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
+              <argLine>${argLine} -Xmx2500m -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
               <systemProperties>
                 <property>

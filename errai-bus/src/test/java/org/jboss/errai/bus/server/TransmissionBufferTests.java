@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -146,7 +147,7 @@ public class TransmissionBufferTests extends TestCase {
 
   public void testAudited() throws Exception {
 
-    final List<BufferColor> colors = new ArrayList<BufferColor>();
+    final List<BufferColor> colors = new ArrayList<>();
 
     final TransmissionBuffer buffer = TransmissionBuffer.create();
 
@@ -158,7 +159,7 @@ public class TransmissionBufferTests extends TestCase {
     final String[] writeString = {"<JIMMY>", "<CRAB>", "<KITTY>", "<DOG>", "<JONATHAN>"};
 
 
-    final Map<Short, List<String>> writeLog = new HashMap<Short, List<String>>();
+    final Map<Short, List<String>> writeLog = new HashMap<>();
 
     final int createCount = 500;
 
@@ -181,7 +182,7 @@ public class TransmissionBufferTests extends TestCase {
 
             List<String> stack = writeLog.get(toContend.getColor());
             if (stack == null) {
-              writeLog.put(toContend.getColor(), stack = new ArrayList<String>());
+              writeLog.put(toContend.getColor(), stack = new ArrayList<>());
             }
 
             stack.add(toWrite);
@@ -211,7 +212,7 @@ public class TransmissionBufferTests extends TestCase {
       final String val = new String(byteArrayOutputStream.toByteArray());
       results.add(val);
 
-      final List<String> buildResultList = new ArrayList<String>();
+      final List<String> buildResultList = new ArrayList<>();
 
       int st = 0;
       for (int c = 0; c < val.length(); c++) {
@@ -223,8 +224,8 @@ public class TransmissionBufferTests extends TestCase {
       }
 
 
-      final List<String> resultList = new ArrayList<String>(buildResultList);
-      final List<String> log = new ArrayList<String>(writeLog.get(colors.get(i).getColor()));
+      final List<String> resultList = new ArrayList<>(buildResultList);
+      final List<String> log = new ArrayList<>(writeLog.get(colors.get(i).getColor()));
 
       while (!log.isEmpty() && !resultList.isEmpty()) {
         final String nm = log.remove(0);
@@ -358,13 +359,13 @@ public class TransmissionBufferTests extends TestCase {
 
     logWriter.println("START SESSION: " + new Date().toString());
     try {
-      final List<BufferColor> segs = new ArrayList<BufferColor>();
+      final List<BufferColor> segs = new ArrayList<>();
       for (int i = 0; i < SEGMENT_COUNT; i++) {
         segs.add(BufferColor.getNewColor());
       }
 
-      final Collection<String> writeAuditLog = new ConcurrentLinkedQueue<String>();
-      final Collection<String> readAuditLog = new ConcurrentLinkedQueue<String>();
+      final Collection<String> writeAuditLog = new ConcurrentLinkedQueue<>();
+      final Collection<String> readAuditLog = new ConcurrentLinkedQueue<>();
 
       final int createCount = 10000;
       final String[] writeString = new String[createCount];
@@ -406,7 +407,7 @@ public class TransmissionBufferTests extends TestCase {
           }
 
           final String val = new String(byteArrayOutputStream.toByteArray()).trim();
-          final List<String> buildResultList = new ArrayList<String>();
+          final List<String> buildResultList = new ArrayList<>();
 
           logWriter.println(val);
 
@@ -551,15 +552,15 @@ public class TransmissionBufferTests extends TestCase {
       System.out.println("Read / Write Symmetry Analysis ... ");
       for (final String s : writeAuditLog) {
         if (!readAuditLog.contains(s)) {
-          final Collection<String> leftDiff = new ArrayList<String>(writeAuditLog);
+          final Collection<String> leftDiff = new ArrayList<>(writeAuditLog);
           leftDiff.removeAll(readAuditLog);
 
-          final Collection<String> rightDiff = new ArrayList<String>(readAuditLog);
+          final Collection<String> rightDiff = new ArrayList<>(readAuditLog);
           rightDiff.removeAll(writeAuditLog);
 
-          final Set<String> uniqueReads = new HashSet<String>(readAuditLog);
+          final Set<String> uniqueReads = new HashSet<>(readAuditLog);
 
-          final List<String> duplicates = new ArrayList<String>(readAuditLog);
+          final List<String> duplicates = new ArrayList<>(readAuditLog);
           if (uniqueReads.size() < readAuditLog.size()) {
             for (final String str : uniqueReads) {
               duplicates.remove(duplicates.indexOf(str));
@@ -750,6 +751,33 @@ public class TransmissionBufferTests extends TestCase {
 
     for (final Thread thread : threads) {
       thread.join();
+    }
+  }
+
+  public void testNoIndexOutOfBoundsExceptionWhenWriteHeadGetsLarge() throws Exception {
+    // Preparation to get the writeSequenceNumber large enough
+    final int segmentSize = 1;
+    final int segments = Integer.MAX_VALUE / 4;
+    final TransmissionBuffer buffer = TransmissionBuffer.create(segmentSize, segments);
+    final InputStream nullInputStream = new InputStream() {
+      @Override
+      public int read() throws IOException {
+        return 0;
+      }
+    };
+    final BufferColor color = BufferColor.getNewColorFromHead(buffer);
+    long accum = 0;
+    final int writeSize = segmentSize * segments;
+    while ((accum + writeSize) < Integer.MAX_VALUE) {
+      buffer.write(writeSize, nullInputStream, color);
+      accum += writeSize;
+    }
+
+    // Actual test
+    try {
+      buffer.write(writeSize, nullInputStream, color);
+    } catch (final IndexOutOfBoundsException ex) {
+      throw new AssertionError(ex);
     }
   }
 }
