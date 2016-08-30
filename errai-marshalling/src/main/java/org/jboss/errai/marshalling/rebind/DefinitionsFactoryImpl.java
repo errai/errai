@@ -18,7 +18,20 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -57,19 +70,19 @@ import com.google.common.collect.Multimap;
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Set<MetaClass> exposedClasses = Collections.newSetFromMap(new LinkedHashMap<MetaClass, Boolean>());
-  private final Set<MetaClass> typesWithBuiltInMarshallers = new HashSet<MetaClass>();
+  private final Set<MetaClass> typesWithBuiltInMarshallers = new HashSet<>();
 
   /**
    * Map of aliases to the mapped marshalling type.
    */
   private final Map<String, String> mappingAliases
-      = new LinkedHashMap<String, String>();
+      = new LinkedHashMap<>();
 
   private final Set<MetaClass> arraySignatures
-      = new LinkedHashSet<MetaClass>();
+      = new LinkedHashSet<>();
 
   private final Map<String, MappingDefinition> mappingDefinitions
-      = new LinkedHashMap<String, MappingDefinition>();
+      = new LinkedHashMap<>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
@@ -195,7 +208,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           }
         }
       }
-      catch (Throwable t) {
+      catch (final Throwable t) {
         throw new RuntimeException("Failed to load definition", t);
       }
     }
@@ -232,7 +245,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             }
           }
         }
-        catch (Throwable t) {
+        catch (final Throwable t) {
           throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getName(), t);
         }
       }
@@ -280,7 +293,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             }
           }
         }
-        catch (Throwable t) {
+        catch (final Throwable t) {
           throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getName(), t);
         }
       }
@@ -293,15 +306,29 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     exposedClasses.addAll(envExposedClasses);
 
-    final Map<String, String> configuredMappingAliases = new HashMap<String, String>();
+    final List<MetaClass> exposedSuperTypes = exposedClasses
+      .stream()
+      .filter(mc -> mc.isAnnotationPresent(Portable.class) && mc.getAnnotation(Portable.class).mapSuperTypes())
+      .flatMap(mc -> {
+        final Builder<MetaClass> builder = Stream.builder();
+        MetaClass cur = mc;
+        while (cur.getSuperClass() != null && !cur.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
+          builder.accept((cur = cur.getSuperClass()));
+        }
+        return builder.build().filter(superType -> superType.isConcrete());
+      })
+      .collect(Collectors.toList());
+    exposedClasses.addAll(exposedSuperTypes);
+
+    final Map<String, String> configuredMappingAliases = new HashMap<>();
     configuredMappingAliases.putAll(environmentConfig.getMappingAliases());
     configuredMappingAliases.putAll(defaultMappingAliases());
 
     mappingAliases.putAll(configuredMappingAliases);
 
-    final Map<MetaClass, MetaClass> aliasToMarshaller = new HashMap<MetaClass, MetaClass>();
+    final Map<MetaClass, MetaClass> aliasToMarshaller = new HashMap<>();
 
-    final List<MetaClass> enums = new ArrayList<MetaClass>();
+    final List<MetaClass> enums = new ArrayList<>();
 
     for (final MetaClass cls : exposedClasses) {
       MetaClass mappedClass;
@@ -347,7 +374,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       try {
         aliasToMarshaller.put(MetaClassFactory.get(entry.getKey()), MetaClassFactory.get(entry.getValue()));
       }
-      catch (Throwable t) {
+      catch (final Throwable t) {
         throw new RuntimeException("error loading mapping alias", t);
       }
     }
@@ -460,7 +487,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     while ((cls = cls.getSuperClass()) != null) {
       if (hasDefinition(cls) && cls.getParameterizedType() == null) {
         final MappingDefinition toMerge = getDefinition(cls);
-        final Set<String> parentKeys = new HashSet<String>();
+        final Set<String> parentKeys = new HashSet<>();
 
         for (final Mapping m : toMerge.getInstantiationMapping().getMappings())
           parentKeys.add(m.getKey());
@@ -523,11 +550,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public Collection<MappingDefinition> getMappingDefinitions() {
-    return Collections.unmodifiableCollection(new ArrayList<MappingDefinition>(mappingDefinitions.values()));
+    return Collections.unmodifiableCollection(new ArrayList<>(mappingDefinitions.values()));
   }
 
   private static Map<String, String> defaultMappingAliases() {
-    Map<String, String> mappingAliases = new HashMap<String, String>();
+    final Map<String, String> mappingAliases = new HashMap<>();
     mappingAliases.put("java.util.Arrays$ArrayList", "java.util.List");
     mappingAliases.put("java.util.Collections$UnmodifiableList", "java.util.List");
     mappingAliases.put("java.util.Collections$UnmodifiableSet", "java.util.Set");
@@ -556,11 +583,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     this.mappingAliases.clear();
     this.mappingDefinitions.clear();
     this.typesWithBuiltInMarshallers.clear();
-    loadCustomMappings(); 
+    loadCustomMappings();
   }
 
   @Override
-  public boolean hasBuiltInDefinition(MetaClass type) {
+  public boolean hasBuiltInDefinition(final MetaClass type) {
     return typesWithBuiltInMarshallers.contains(type.asBoxed());
   }
 }

@@ -206,7 +206,7 @@ public interface TestSerializationRPCService {
   public EntityWithInheritedTypeVariable<String> testEntityWithInheritedTypeVariable(EntityWithInheritedTypeVariable<String> entity);
 
   public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(GenericEntityWithConstructorMapping<String> entity);
-  
+
   public <A extends GenericEntity<R>, R extends Student> R testIncrediblyGenericRpcMethod(A arg);
 
   public EntityWithUnderscore_InClassName testEntityWithUnderscore_InClassName(EntityWithUnderscore_InClassName e);
@@ -214,10 +214,12 @@ public interface TestSerializationRPCService {
   public EntityWithMixedMappingTypes testEntityWithMixedMappingTypes(EntityWithMixedMappingTypes entity);
 
   public EntityWithFactoryMethodAndMixedMappingTypes testEntityWithFactoryMethodAndMixedMappingTypes(EntityWithFactoryMethodAndMixedMappingTypes entity);
-  
+
   public Outer testBackReferenceOrderingWithMapsTo(Outer entity);
-  
+
   public Outer2 testBackReferenceOrderingWithMapsToInverted(Outer2 entity);
-  
+
   public EntityWithClassFieldAndMap testEntityWithClassField(EntityWithClassFieldAndMap entity);
+
+  public Object testMapSuperTypesPropertyCausesMarshallerMappingCreationForSuperType(Object entity);
 }

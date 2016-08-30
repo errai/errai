@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * Indicates that instances of the annotated class are eligible to be serialized
  * and sent over the wire between server and clients.
  * <p>
- * 
+ *
  * @since Errai 2.0
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -40,4 +40,10 @@ public @interface Portable {
    * @return
    */
   Class<?> aliasOf() default Object.class;
+
+  /*
+   * Indicate that concrete supertypes of the annotated class should have marshalling mappings generated as if marked
+   * portable.
+   */
+  boolean mapSuperTypes() default false;
 }

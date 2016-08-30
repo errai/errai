@@ -62,6 +62,7 @@ import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
+import org.jboss.errai.bus.client.tests.support.ConcreteNonPortableParent;
 import org.jboss.errai.bus.client.tests.support.Outer;
 import org.jboss.errai.bus.client.tests.support.Outer2;
 import org.jboss.errai.bus.client.tests.support.Student;
@@ -81,289 +82,289 @@ import org.jboss.errai.bus.server.annotations.Service;
 public class TestSerializationRPCServiceImpl implements TestSerializationRPCService {
 
   @Override
-  public String testString(String str) {
+  public String testString(final String str) {
     return str;
   }
 
   @Override
-  public int testInteger(int i) {
+  public int testInteger(final int i) {
     return i;
   }
 
   @Override
-  public long testLong(long l) {
+  public long testLong(final long l) {
     return l;
   }
 
   @Override
   public EntityWithConstructorAndMethodMappedLong testConstructorAndMethodMappedLong(
-          EntityWithConstructorAndMethodMappedLong ewcamml) {
+          final EntityWithConstructorAndMethodMappedLong ewcamml) {
     return ewcamml;
   }
 
   @Override
-  public double testDouble(double d) {
+  public double testDouble(final double d) {
     return d;
   }
 
   @Override
-  public float testFloat(float f) {
+  public float testFloat(final float f) {
     return f;
   }
 
   @Override
-  public short testShort(short s) {
+  public short testShort(final short s) {
     return s;
   }
 
   @Override
-  public boolean testBoolean(boolean b) {
+  public boolean testBoolean(final boolean b) {
     return b;
   }
 
   @Override
-  public char testCharacter(char c) {
+  public char testCharacter(final char c) {
     return c;
   }
 
   @Override
-  public byte testByte(byte b) {
+  public byte testByte(final byte b) {
     return b;
   }
 
   @Override
-  public String[] testStringArray(String[] str) {
+  public String[] testStringArray(final String[] str) {
     return str;
   }
 
   @Override
-  public int[] testIntegerArray(int[] i) {
+  public int[] testIntegerArray(final int[] i) {
     return i;
   }
 
   @Override
-  public long[] testLongArray(long[] l) {
+  public long[] testLongArray(final long[] l) {
     return l;
   }
 
   @Override
-  public double[] testDoubleArray(double[] d) {
+  public double[] testDoubleArray(final double[] d) {
     return d;
   }
 
   @Override
-  public float[] testFloatArray(float[] f) {
+  public float[] testFloatArray(final float[] f) {
     return f;
   }
 
   @Override
-  public short[] testShortArray(short[] s) {
+  public short[] testShortArray(final short[] s) {
     return s;
   }
 
   @Override
-  public boolean[] testBooleanArray(boolean[] b) {
+  public boolean[] testBooleanArray(final boolean[] b) {
     return b;
   }
 
   @Override
-  public char[] testCharacterArray(char[] c) {
+  public char[] testCharacterArray(final char[] c) {
     return c;
   }
 
   @Override
-  public byte[] testByteArray(byte[] b) {
+  public byte[] testByteArray(final byte[] b) {
     return b;
   }
 
   @Override
-  public NeverDeclareAnArrayOfThisType[] testPortableArray(NeverDeclareAnArrayOfThisType[] p) {
+  public NeverDeclareAnArrayOfThisType[] testPortableArray(final NeverDeclareAnArrayOfThisType[] p) {
     return p;
   }
 
   @Override
-  public List<Long> listOfLong(List<Long> list) {
+  public List<Long> listOfLong(final List<Long> list) {
     return list;
   }
 
   @Override
-  public List<Integer> listOfInteger(List<Integer> list) {
+  public List<Integer> listOfInteger(final List<Integer> list) {
     return list;
   }
 
   @Override
-  public List<Float> listOfFloat(List<Float> list) {
+  public List<Float> listOfFloat(final List<Float> list) {
     return list;
   }
 
   @Override
-  public List<Short> listOfShort(List<Short> list) {
+  public List<Short> listOfShort(final List<Short> list) {
     return list;
   }
 
   @Override
-  public List<Byte> listOfByte(List<Byte> list) {
+  public List<Byte> listOfByte(final List<Byte> list) {
     return list;
   }
 
   @Override
-  public List<Boolean> listOfBoolean(List<Boolean> list) {
+  public List<Boolean> listOfBoolean(final List<Boolean> list) {
     return list;
   }
 
   @Override
-  public List<Character> listOfCharacters(List<Character> list) {
+  public List<Character> listOfCharacters(final List<Character> list) {
     return list;
   }
 
   @Override
-  public Set<String> setOfStrings(Set<String> set) {
+  public Set<String> setOfStrings(final Set<String> set) {
     return set;
   }
 
   @Override
-  public Map<Long, String> mapOfLongToString(Map<Long, String> map) {
+  public Map<Long, String> mapOfLongToString(final Map<Long, String> map) {
     return map;
   }
 
   @Override
-  public Map<Long, List<String>> mapOfLongToListOfStrings(Map<Long, List<String>> map) {
+  public Map<Long, List<String>> mapOfLongToListOfStrings(final Map<Long, List<String>> map) {
     return map;
   }
 
   @Override
-  public Map<String, Float> mapOfStringToFloat(Map<String, Float> map) {
+  public Map<String, Float> mapOfStringToFloat(final Map<String, Float> map) {
     return map;
   }
 
   @Override
-  public Map<String, List<Double>> mapOfStringToListOfDoubles(Map<String, List<Double>> map) {
+  public Map<String, List<Double>> mapOfStringToListOfDoubles(final Map<String, List<Double>> map) {
     return map;
   }
 
   @Override
-  public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map) {
+  public Map<Group, Group> mapOfCustomTypes(final Map<Group, Group> map) {
     return map;
   }
 
   @Override
-  public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map) {
+  public Map<List<String>, Group> mapOfListOfStringsToCustomType(final Map<List<String>, Group> map) {
     return map;
   }
 
   @Override
-  public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz) {
+  public ClassWithNestedClass nestedClass(final ClassWithNestedClass clazz) {
     return clazz;
   }
 
   @Override
-  public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent) {
+  public EntityWithGenericCollections genericCollections(final EntityWithGenericCollections ent) {
     return ent;
   }
 
   @Override
   public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(
-      EntityWithStringBufferAndStringBuilder entity) {
+      final EntityWithStringBufferAndStringBuilder entity) {
     return entity;
   }
 
   @Override
-  public Throwable testSerializeThrowable(Throwable t) {
+  public Throwable testSerializeThrowable(final Throwable t) {
     return t;
   }
 
   @Override
-  public AssertionError testSerializeAssertionError(AssertionError t) {
+  public AssertionError testSerializeAssertionError(final AssertionError t) {
     return t;
   }
 
   @Override
-  public Date testJavaUtilDate(Date d) {
+  public Date testJavaUtilDate(final Date d) {
     return d;
   }
 
   @Override
-  public java.sql.Date testJavaSqlDate(java.sql.Date d) {
+  public java.sql.Date testJavaSqlDate(final java.sql.Date d) {
     return d;
   }
 
   @Override
-  public FactoryEntity testFactorySerialization(FactoryEntity e) {
+  public FactoryEntity testFactorySerialization(final FactoryEntity e) {
     return e;
   }
 
   @Override
-  public Timestamp testTimestampSerialization(Timestamp ts) {
+  public Timestamp testTimestampSerialization(final Timestamp ts) {
     return ts;
   }
 
   @Override
-  public Time testTimeSerialization(Time time) {
+  public Time testTimeSerialization(final Time time) {
     return time;
   }
 
   @Override
-  public BigDecimal testBigDecimalSerialization(BigDecimal time) {
+  public BigDecimal testBigDecimalSerialization(final BigDecimal time) {
     return time;
   }
 
   @Override
-  public BigInteger testBigIntegerSerialization(BigInteger time) {
+  public BigInteger testBigIntegerSerialization(final BigInteger time) {
     return time;
   }
 
   @Override
-  public Queue testQueueSerialization(Queue queue) {
+  public Queue testQueueSerialization(final Queue queue) {
     return queue;
   }
 
   @Override
-  public SortedMap testSortedMapSerialization(SortedMap sm) {
+  public SortedMap testSortedMapSerialization(final SortedMap sm) {
     return sm;
   }
 
   @Override
-  public SortedSet testSortedSetSerialization(SortedSet sm) {
+  public SortedSet testSortedSetSerialization(final SortedSet sm) {
     return sm;
   }
 
   @Override
-  public List<Byte> testListOfBytes(List<Byte> lb) {
+  public List<Byte> testListOfBytes(final List<Byte> lb) {
     return lb;
   }
 
   @Override
-  public List testInheritedDefinitionFromExistingParent(List list) {
+  public List testInheritedDefinitionFromExistingParent(final List list) {
     return list;
   }
 
   @Override
-  public TestEnumA testNakedEnum(TestEnumA e) {
+  public TestEnumA testNakedEnum(final TestEnumA e) {
     return e;
   }
 
   @Override
-  public Boron.Bean testPortableInnerClass(Boron.Bean b) {
+  public Boron.Bean testPortableInnerClass(final Boron.Bean b) {
     return b;
   }
 
   @Override
-  public Koron testKoron(Koron k) {
+  public Koron testKoron(final Koron k) {
     return k;
   }
 
   @Override
-  public TestingTickCache testMoron(TestingTickCache m) {
+  public TestingTickCache testMoron(final TestingTickCache m) {
     return m;
   }
 
   @Override
-  public SubMoron testSubMoron(SubMoron s) {
+  public SubMoron testSubMoron(final SubMoron s) {
     return s;
   }
 
   @Override
-  public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers) {
+  public List<TreeNodeContainer> acceptTreeNodeContainers(final List<TreeNodeContainer> listOfContainers) {
     int count = 0;
     for (final TreeNodeContainer tc : listOfContainers) {
       count++;
@@ -373,149 +374,154 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   }
 
   @Override
-  public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e) {
+  public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(final EntityWithUnqualifiedFields e) {
     return e;
   }
 
   @Override
-  public GenericEntity testGenericEntity(GenericEntity e) {
+  public GenericEntity testGenericEntity(final GenericEntity e) {
     return e;
   }
 
   @Override
-  public EntityWithSuperClassField testEntityWithSuperClassField(EntityWithSuperClassField e) {
+  public EntityWithSuperClassField testEntityWithSuperClassField(final EntityWithSuperClassField e) {
     return e;
   }
 
   @Override
-  public User testEntityWithNullField(User u) {
+  public User testEntityWithNullField(final User u) {
     return u;
   }
 
   @Override
-  public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc) {
+  public EnumContainerContainer testEntityWithEnumContainerContainer(final EnumContainerContainer ecc) {
     return ecc;
   }
 
   @Override
-  public LinkedHashMap<String, Integer> testLinkedHashMap(LinkedHashMap<String, Integer> map) {
+  public LinkedHashMap<String, Integer> testLinkedHashMap(final LinkedHashMap<String, Integer> map) {
     return map;
   }
 
   @Override
-  public LinkedHashSet<String> testLinkedHashSet(LinkedHashSet<String> set) {
+  public LinkedHashSet<String> testLinkedHashSet(final LinkedHashSet<String> set) {
     return set;
   }
 
   @Override
-  public BuilderEntity testBuilderSerializationWithPrivateConstructor(BuilderEntity e) {
+  public BuilderEntity testBuilderSerializationWithPrivateConstructor(final BuilderEntity e) {
     return e;
   }
 
   @Override
-  public ImplicitEnum testImplicitEnum(ImplicitEnum e) {
+  public ImplicitEnum testImplicitEnum(final ImplicitEnum e) {
     return e;
   }
 
   @Override
   public EntityWithMapUsingAbstractValueType testEntityWithMapUsingAbstractValueType(
-      EntityWithMapUsingAbstractValueType e) {
+      final EntityWithMapUsingAbstractValueType e) {
     return e;
   }
 
   @Override
-  public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(EntityWithMapUsingAbstractKeyType e) {
+  public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(final EntityWithMapUsingAbstractKeyType e) {
     return e;
   }
 
   @Override
-  public EntityWithMapUsingSubtypeValues testEntityWithMapUsingSubtypeValues(EntityWithMapUsingSubtypeValues e) {
+  public EntityWithMapUsingSubtypeValues testEntityWithMapUsingSubtypeValues(final EntityWithMapUsingSubtypeValues e) {
     return e;
   }
 
   @Override
-  public EntityWithInterfaceField testEntityWithInterfaceField(EntityWithInterfaceField e) {
+  public EntityWithInterfaceField testEntityWithInterfaceField(final EntityWithInterfaceField e) {
     return e;
   }
 
   @Override
-  public EntityWithInterfaceArrayField testEntityWithInterfaceArrayField(EntityWithInterfaceArrayField e) {
+  public EntityWithInterfaceArrayField testEntityWithInterfaceArrayField(final EntityWithInterfaceArrayField e) {
     return e;
   }
 
   @Override
-  public ImmutableEnumContainer testImmutableEntityWithEnum(ImmutableEnumContainer iec) {
+  public ImmutableEnumContainer testImmutableEntityWithEnum(final ImmutableEnumContainer iec) {
     return iec;
   }
 
   @Override
-  public ImmutableArrayContainer testImmutableEntityWithArray(ImmutableArrayContainer e) {
+  public ImmutableArrayContainer testImmutableEntityWithArray(final ImmutableArrayContainer e) {
     return e;
   }
 
   @Override
-  public EntityWithInheritedTypeVariable<String> testEntityWithInheritedTypeVariable(EntityWithInheritedTypeVariable<String> e) {
+  public EntityWithInheritedTypeVariable<String> testEntityWithInheritedTypeVariable(final EntityWithInheritedTypeVariable<String> e) {
     return e;
   }
 
   @Override
-  public EntityWithTypesUsingNestedParameterizedTypes testEntityWithTypesUsingNestedParamTypes(EntityWithTypesUsingNestedParameterizedTypes e) {
+  public EntityWithTypesUsingNestedParameterizedTypes testEntityWithTypesUsingNestedParamTypes(final EntityWithTypesUsingNestedParameterizedTypes e) {
     return e;
   }
 
   @Override
-  public GenericEntitySubtypeInteger testGenericEntitySubtypeInteger(GenericEntitySubtypeInteger e) {
+  public GenericEntitySubtypeInteger testGenericEntitySubtypeInteger(final GenericEntitySubtypeInteger e) {
     return e;
   }
 
   @Override
-  public GenericEntitySubtypeString testGenericEntitySubtypeString(GenericEntitySubtypeString e) {
+  public GenericEntitySubtypeString testGenericEntitySubtypeString(final GenericEntitySubtypeString e) {
     return e;
   }
 
   @Override
-  public EntityWithGoodParts testEntityWithGoodParts(EntityWithGoodParts e) {
+  public EntityWithGoodParts testEntityWithGoodParts(final EntityWithGoodParts e) {
     return e;
   }
 
   @Override
-  public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(GenericEntityWithConstructorMapping<String> entity) {
+  public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(final GenericEntityWithConstructorMapping<String> entity) {
     return entity;
   }
 
   @Override
-  public EntityWithUnderscore_InClassName testEntityWithUnderscore_InClassName(EntityWithUnderscore_InClassName e) {
+  public EntityWithUnderscore_InClassName testEntityWithUnderscore_InClassName(final EntityWithUnderscore_InClassName e) {
     return e;
   }
 
   @Override
-  public EntityWithMixedMappingTypes testEntityWithMixedMappingTypes(EntityWithMixedMappingTypes entity) {
+  public EntityWithMixedMappingTypes testEntityWithMixedMappingTypes(final EntityWithMixedMappingTypes entity) {
     return entity;
   }
 
   @Override
-  public EntityWithFactoryMethodAndMixedMappingTypes testEntityWithFactoryMethodAndMixedMappingTypes(EntityWithFactoryMethodAndMixedMappingTypes entity) {
+  public EntityWithFactoryMethodAndMixedMappingTypes testEntityWithFactoryMethodAndMixedMappingTypes(final EntityWithFactoryMethodAndMixedMappingTypes entity) {
     return entity;
   }
 
   @Override
-  public Outer testBackReferenceOrderingWithMapsTo(Outer entity) {
+  public Outer testBackReferenceOrderingWithMapsTo(final Outer entity) {
     return entity;
   }
 
   @Override
-  public Outer2 testBackReferenceOrderingWithMapsToInverted(Outer2 entity) {
+  public Outer2 testBackReferenceOrderingWithMapsToInverted(final Outer2 entity) {
     return entity;
   }
 
   @Override
-  public <A extends GenericEntity<R>, R extends Student> R testIncrediblyGenericRpcMethod(A arg) {
+  public <A extends GenericEntity<R>, R extends Student> R testIncrediblyGenericRpcMethod(final A arg) {
     arg.getField().setName("smarter");
     return arg.getField();
   }
 
   @Override
-  public EntityWithClassFieldAndMap testEntityWithClassField(EntityWithClassFieldAndMap entity) {
+  public EntityWithClassFieldAndMap testEntityWithClassField(final EntityWithClassFieldAndMap entity) {
+    return entity;
+  }
+
+  @Override
+  public Object testMapSuperTypesPropertyCausesMarshallerMappingCreationForSuperType(final Object entity) {
     return entity;
   }
 }
