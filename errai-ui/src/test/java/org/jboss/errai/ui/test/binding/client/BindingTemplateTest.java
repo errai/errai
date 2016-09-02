@@ -16,10 +16,11 @@
 
 package org.jboss.errai.ui.test.binding.client;
 
+import static org.jboss.errai.common.client.util.EventTestingUtil.invokeEventListeners;
+import static org.jboss.errai.common.client.util.EventTestingUtil.setupAddEventListenerInterceptor;
+
 import java.util.Date;
 
-import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -40,8 +41,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -214,7 +213,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getText();
       }
-    }, new DefaultInputElementHandler(bean.text), new IdentityConverter<String>(String.class), "text", "test value", "other test value", bean.text);
+    }, new DefaultInputElementHandler(bean.text), new IdentityConverter<>(String.class), "text", "test value", "other test value", bean.text);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -227,7 +226,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getPassword();
       }
-    }, new DefaultInputElementHandler(bean.password), new IdentityConverter<String>(String.class), "password", "password123", "letmein123", bean.password);
+    }, new DefaultInputElementHandler(bean.password), new IdentityConverter<>(String.class), "password", "password123", "letmein123", bean.password);
 
     inputElementAssertions(new PropertyHandler<Double>() {
 
@@ -266,7 +265,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public Boolean getProperty() {
         return model.isCheckbox();
       }
-    }, new CheckboxHandler(bean.checkbox), new IdentityConverter<Boolean>(Boolean.class), "checkbox", true, false, bean.checkbox);
+    }, new CheckboxHandler(bean.checkbox), new IdentityConverter<>(Boolean.class), "checkbox", true, false, bean.checkbox);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -279,7 +278,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getFile();
       }
-    }, new DefaultInputElementHandler(bean.file), new IdentityConverter<String>(String.class), "file", "file:///tmp/foo", "file:///tmp/bar", bean.file);
+    }, new DefaultInputElementHandler(bean.file), new IdentityConverter<>(String.class), "file", "file:///tmp/foo", "file:///tmp/bar", bean.file);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -292,7 +291,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getEmail();
       }
-    }, new DefaultInputElementHandler(bean.email), new IdentityConverter<String>(String.class), "email", "a@b.c", "y@z", bean.email);
+    }, new DefaultInputElementHandler(bean.email), new IdentityConverter<>(String.class), "email", "a@b.c", "y@z", bean.email);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -305,7 +304,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getColor();
       }
-    }, new DefaultInputElementHandler(bean.color), new IdentityConverter<String>(String.class), "color", "#000000", "#FFFFFF", bean.color);
+    }, new DefaultInputElementHandler(bean.color), new IdentityConverter<>(String.class), "color", "#000000", "#FFFFFF", bean.color);
 
     inputElementAssertions(new PropertyHandler<Boolean>() {
 
@@ -318,7 +317,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public Boolean getProperty() {
         return model.getRadio();
       }
-    }, new CheckboxHandler(bean.radio), new IdentityConverter<Boolean>(Boolean.class), "radio", true, false, bean.radio);
+    }, new CheckboxHandler(bean.radio), new IdentityConverter<>(Boolean.class), "radio", true, false, bean.radio);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -331,7 +330,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getTel();
       }
-    }, new DefaultInputElementHandler(bean.tel), new IdentityConverter<String>(String.class), "tel", "4161234567", "6473217654", bean.tel);
+    }, new DefaultInputElementHandler(bean.tel), new IdentityConverter<>(String.class), "tel", "4161234567", "6473217654", bean.tel);
 
     inputElementAssertions(new PropertyHandler<String>() {
 
@@ -344,7 +343,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getUrl();
       }
-    }, new DefaultInputElementHandler(bean.url), new IdentityConverter<String>(String.class), "url", "http://jboss.org", "https://redhat.com", bean.url);
+    }, new DefaultInputElementHandler(bean.url), new IdentityConverter<>(String.class), "url", "http://jboss.org", "https://redhat.com", bean.url);
   }
 
   @Test
@@ -479,101 +478,4 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       fail("Loading templated instance caused an error: " + e.getMessage());
     }
   }
-
-  @SuppressWarnings("unchecked")
-  private static void invokeEventListeners(final com.google.gwt.dom.client.Element element, final String eventType) {
-    invokeEventListeners((Object) element, eventType);
-    if ("change".equals(eventType)) {
-      @SuppressWarnings("rawtypes")
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
-      if (elem instanceof HasValue) {
-        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
-      }
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private static void invokeEventListeners(final HTMLElement element, final String eventType) {
-    invokeEventListeners((Object) element, eventType);
-    if ("change".equals(eventType)) {
-      @SuppressWarnings("rawtypes")
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
-      if (elem instanceof HasValue) {
-        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
-      }
-    }
-  }
-
-  private static void invokeEventListeners(final Object element, final String eventType) {
-    final NativeEvent event = Document.get().createHtmlEvent(eventType, true, true);
-    invokeEventListeners(element, eventType, event);
-  }
-
-  /*
-   * This is a really disgusting workaround for the inability to
-   * dispatch native browser events in the version of HtmlUnit currently
-   * bundled in gwt-dev.
-   *
-   * What does this do?
-   * This replaces "addEventListener" and "removeEventListener"
-   * in the HTMLElement prototype with functions that intercept
-   * and store registered listeners.
-   *
-   * Why does it do it?
-   * So that subsequent calls to "invokeEventListeners" can
-   * manually call any functions added with "addEventListener".
-   *
-   * In short because we cannot dispatch browser events, to test
-   * binding of native elements we must store and then manually invoke
-   * all event listeners.
-   */
-  private static native void setupAddEventListenerInterceptor() /*-{
-    console.log("Setting up event listener interceptors.");
-    function ListenerMap() {
-      var map = new Object();
-
-      this.add = function(element, type, listener) {
-        this.get(element, type).push(listener);
-      };
-
-      this.remove = function(element, type, listener) {
-        var listeners = this.get(element, type);
-        var index = listeners.indexOf(listener);
-        if (index > -1) {
-          listeners.splice(index, 1);
-        }
-      };
-
-      this.get = function(element, type) {
-        if (map[element] === undefined) {
-          map[element] = {};
-        }
-        if (map[element][type] === undefined) {
-          map[element][type] = new Array();
-        }
-        return map[element][type];
-      };
-    };
-    if ($wnd.HTMLElement.prototype._addEventListener === undefined) {
-      listeners = new ListenerMap();
-      $wnd.HTMLElement.prototype._addEventListener = $wnd.HTMLElement.prototype.addEventListener;
-      $wnd.HTMLElement.prototype._removeEventListener = $wnd.HTMLElement.prototype.removeEventListener;
-      console.log("Replacing addEventListener.");
-      $wnd.HTMLElement.prototype.addEventListener = function(type, listener, capture) {
-        console.log("Intercepted addEventListener for " + this + " with type " + type);
-        listeners.add(this, type, listener);
-        this._addEventListener(type, listener, capture);
-      };
-      console.log("Replacing removeEventListener.");
-      $wnd.HTMLElement.prototype.removeEventListener = function(type, listener, capture) {
-        console.log("Intercepted removeEventListener for " + this + " with type " + type);
-        listeners.remove(this, type, listener);
-        this._removeEventListener(type, listener, capture);
-      };
-    }
-  }-*/;
-
-  private static native void invokeEventListeners(Object element, String type, Object evt) /*-{
-    listeners.get(element, type).forEach(function(l) { l(evt); });
-  }-*/;
 }

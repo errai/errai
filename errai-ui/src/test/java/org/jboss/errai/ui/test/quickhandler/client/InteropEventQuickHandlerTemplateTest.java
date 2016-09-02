@@ -16,22 +16,17 @@
 
 package org.jboss.errai.ui.test.quickhandler.client;
 
+import static org.jboss.errai.common.client.util.EventTestingUtil.invokeEventListeners;
+import static org.jboss.errai.common.client.util.EventTestingUtil.setupAddEventListenerInterceptor;
+
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.jboss.errai.common.client.dom.Button;
-import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ui.test.quickhandler.client.res.InteropEventQuickHandlerTemplate;
 import org.jboss.errai.ui.test.quickhandler.client.res.InteropEventQuickHandlerTemplate.ObservedEvent;
-
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.user.client.ui.HasValue;
 
 public class InteropEventQuickHandlerTemplateTest extends AbstractErraiCDITest {
 
@@ -108,106 +103,4 @@ public class InteropEventQuickHandlerTemplateTest extends AbstractErraiCDITest {
     invokeEventListeners(button, "click");
     assertEquals(Arrays.asList(new ObservedEvent("noFieldButton", "click")), bean.observed);
   }
-
-  /*
-   * This is a really disgusting workaround for the inability to
-   * dispatch native browser events in the version of HtmlUnit currently
-   * bundled in gwt-dev.
-   *
-   * What does this do?
-   * This replaces "addEventListener" and "removeEventListener"
-   * in the HTMLElement prototype with functions that intercept
-   * and store registered listeners.
-   *
-   * Why does it do it?
-   * So that subsequent calls to "invokeEventListeners" can
-   * manually call any functions added with "addEventListener".
-   *
-   * In short because we cannot dispatch browser events, to test
-   * binding of native elements we must store and then manually invoke
-   * all event listeners.
-   */
-  private static native void setupAddEventListenerInterceptor() /*-{
-    console.log("Setting up event listener interceptors.");
-    function ListenerMap() {
-      var map = new Map();
-
-      this.add = function(element, type, listener) {
-        var curList = this.get(element, type);
-        console.debug("Adding listener for " + type + " event in " + element + ". Total of " + (curList.length + 1) + " listeners.");
-        curList.push(listener);
-      };
-
-      this.remove = function(element, type, listener) {
-        var listeners = this.get(element, type);
-        var index = listeners.indexOf(listener);
-        if (index > -1) {
-          listeners.splice(index, 1);
-        }
-      };
-
-      this.get = function(element, type) {
-        if (map.get(element) === undefined) {
-          map.set(element, new Map());
-        }
-        if (map.get(element).get(type) === undefined) {
-          map.get(element).set(type, []);
-        }
-        return map.get(element).get(type);
-      };
-    };
-    if ($wnd.HTMLElement.prototype._addEventListener === undefined) {
-      listeners = new ListenerMap();
-      $wnd.HTMLElement.prototype._addEventListener = $wnd.HTMLElement.prototype.addEventListener;
-      $wnd.HTMLElement.prototype._removeEventListener = $wnd.HTMLElement.prototype.removeEventListener;
-      console.log("Replacing addEventListener.");
-      $wnd.HTMLElement.prototype.addEventListener = function(type, listener, capture) {
-        console.debug("Intercepted addEventListener(" + this + ", " + type + ", " + capture + ")");
-        listeners.add(this, type, listener);
-        this._addEventListener(type, listener, capture);
-      };
-      console.log("Replacing removeEventListener.");
-      $wnd.HTMLElement.prototype.removeEventListener = function(type, listener, capture) {
-        console.debug("Intercepted removeEventListener for " + this + " with type " + type);
-        listeners.remove(this, type, listener);
-        this._removeEventListener(type, listener, capture);
-      };
-    }
-  }-*/;
-
-  @SuppressWarnings("unchecked")
-  private static void invokeEventListeners(final HTMLElement element, final String eventType) {
-    invokeEventListeners((Object) element, eventType);
-    if ("change".equals(eventType)) {
-      @SuppressWarnings("rawtypes")
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
-      if (elem instanceof HasValue) {
-        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
-      }
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private static void invokeEventListeners(final Element element, final String eventType) {
-    invokeEventListeners((Object) element, eventType);
-    if ("change".equals(eventType)) {
-      @SuppressWarnings("rawtypes")
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
-      if (elem instanceof HasValue) {
-        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
-      }
-    }
-  }
-
-  private static void invokeEventListeners(final Object element, final String eventType) {
-    final NativeEvent event = Document.get().createHtmlEvent(eventType, true, true);
-    invokeEventListeners(element, eventType, event);
-  }
-
-  private static native void invokeEventListeners(Object element, String type, Object evt) /*-{
-    var foundListeners = listeners.get(element, type);
-    console.debug("Found " + foundListeners.length + " for " + type + " event on element " + element);
-    foundListeners.forEach(function(l) { l(evt); });
-  }-*/;
-
 }

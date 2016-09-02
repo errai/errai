@@ -16,6 +16,9 @@
 
 package org.jboss.errai.databinding.client.test;
 
+import static org.jboss.errai.common.client.util.EventTestingUtil.invokeEventListeners;
+import static org.jboss.errai.common.client.util.EventTestingUtil.setupAddEventListenerInterceptor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -24,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.ComponentAlreadyBoundException;
@@ -67,14 +68,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -1468,101 +1465,4 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     invokeEventListeners(view.value, "keyup");
     assertEquals(view.value.getValue(), model.getValue());
   }
-
-  @SuppressWarnings("unchecked")
-  private static void invokeEventListeners(final Element element, final String eventType) {
-    invokeEventListeners((Object) element, eventType);
-    if ("change".equals(eventType)) {
-      @SuppressWarnings("rawtypes")
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
-      if (elem instanceof HasValue) {
-        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
-      }
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private static void invokeEventListeners(final HTMLElement element, final String eventType) {
-    invokeEventListeners((Object) element, eventType);
-    if ("change".equals(eventType)) {
-      @SuppressWarnings("rawtypes")
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
-      if (elem instanceof HasValue) {
-        ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
-      }
-    }
-  }
-
-  private static void invokeEventListeners(final Object element, final String eventType) {
-    final NativeEvent event = Document.get().createHtmlEvent(eventType, true, true);
-    invokeEventListeners(element, eventType, event);
-  }
-
-  /*
-   * This is a really disgusting workaround for the inability to
-   * dispatch native browser events in the version of HtmlUnit currently
-   * bundled in gwt-dev.
-   *
-   * What does this do?
-   * This replaces "addEventListener" and "removeEventListener"
-   * in the HTMLElement prototype with functions that intercept
-   * and store registered listeners.
-   *
-   * Why does it do it?
-   * So that subsequent calls to "invokeEventListeners" can
-   * manually call any functions added with "addEventListener".
-   *
-   * In short because we cannot dispatch browser events, to test
-   * binding of native elements we must store and then manually invoke
-   * all event listeners.
-   */
-  private static native void setupAddEventListenerInterceptor() /*-{
-    console.log("Setting up event listener interceptors.");
-    function ListenerMap() {
-      var map = new Object();
-
-      this.add = function(element, type, listener) {
-        this.get(element, type).push(listener);
-      };
-
-      this.remove = function(element, type, listener) {
-        var listeners = this.get(element, type);
-        var index = listeners.indexOf(listener);
-        if (index > -1) {
-          listeners.splice(index, 1);
-        }
-      };
-
-      this.get = function(element, type) {
-        if (map[element] === undefined) {
-          map[element] = {};
-        }
-        if (map[element][type] === undefined) {
-          map[element][type] = new Array();
-        }
-        return map[element][type];
-      };
-    };
-    if ($wnd.HTMLElement.prototype._addEventListener === undefined) {
-      listeners = new ListenerMap();
-      $wnd.HTMLElement.prototype._addEventListener = $wnd.HTMLElement.prototype.addEventListener;
-      $wnd.HTMLElement.prototype._removeEventListener = $wnd.HTMLElement.prototype.removeEventListener;
-      console.log("Replacing addEventListener.");
-      $wnd.HTMLElement.prototype.addEventListener = function(type, listener, capture) {
-        console.log("Intercepted addEventListener for " + this + " with type " + type);
-        listeners.add(this, type, listener);
-        this._addEventListener(type, listener, capture);
-      };
-      console.log("Replacing removeEventListener.");
-      $wnd.HTMLElement.prototype.removeEventListener = function(type, listener, capture) {
-        console.log("Intercepted removeEventListener for " + this + " with type " + type);
-        listeners.remove(this, type, listener);
-        this._removeEventListener(type, listener, capture);
-      };
-    }
-  }-*/;
-
-  private static native void invokeEventListeners(Object element, String type, Object evt) /*-{
-    listeners.get(element, type).forEach(function(l) { l(evt); });
-  }-*/;
 }
