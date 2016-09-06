@@ -29,6 +29,7 @@ import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.EntityWithBigIntegerId;
 import org.jboss.errai.jpa.test.entity.EntityWithBoxedIntId;
 import org.jboss.errai.jpa.test.entity.EntityWithBoxedLongId;
+import org.jboss.errai.jpa.test.entity.EntityWithNonGeneratedId;
 import org.jboss.errai.jpa.test.entity.EntityWithPrimitiveIntId;
 import org.jboss.errai.jpa.test.entity.EntityWithPrimitiveLongId;
 
@@ -46,7 +47,7 @@ public class IdGeneratorTest extends JpaClientTestCase {
   }
 
   protected EntityManager getEntityManager() {
-    JpaTestClient testClient = JpaTestClient.INSTANCE;
+    final JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
     assertNotNull(testClient.entityManager);
     return JpaTestClient.INSTANCE.entityManager;
@@ -81,9 +82,9 @@ public class IdGeneratorTest extends JpaClientTestCase {
   }
 
   public void testPrimitiveLong() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    EntityWithPrimitiveLongId entity = new EntityWithPrimitiveLongId();
+    final EntityWithPrimitiveLongId entity = new EntityWithPrimitiveLongId();
     assertEquals(0, entity.getId());
 
     em.persist(entity);
@@ -93,9 +94,9 @@ public class IdGeneratorTest extends JpaClientTestCase {
   }
 
   public void testBoxedLong() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    EntityWithBoxedLongId entity = new EntityWithBoxedLongId();
+    final EntityWithBoxedLongId entity = new EntityWithBoxedLongId();
     assertNull(entity.getId());
 
     em.persist(entity);
@@ -106,9 +107,9 @@ public class IdGeneratorTest extends JpaClientTestCase {
   }
 
   public void testPrimitiveInt() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    EntityWithPrimitiveIntId entity = new EntityWithPrimitiveIntId();
+    final EntityWithPrimitiveIntId entity = new EntityWithPrimitiveIntId();
     assertEquals(0, entity.getId());
 
     em.persist(entity);
@@ -118,9 +119,9 @@ public class IdGeneratorTest extends JpaClientTestCase {
   }
 
   public void testBoxedInt() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    EntityWithBoxedIntId entity = new EntityWithBoxedIntId();
+    final EntityWithBoxedIntId entity = new EntityWithBoxedIntId();
     assertNull(entity.getId());
 
     em.persist(entity);
@@ -131,9 +132,9 @@ public class IdGeneratorTest extends JpaClientTestCase {
   }
 
   public void testBigInteger() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    EntityWithBigIntegerId entity = new EntityWithBigIntegerId();
+    final EntityWithBigIntegerId entity = new EntityWithBigIntegerId();
     assertNull(entity.getId());
 
     em.persist(entity);
@@ -141,6 +142,21 @@ public class IdGeneratorTest extends JpaClientTestCase {
 
     assertNotNull(entity.getId());
     assertTrue(entity.getId().compareTo(BigInteger.ZERO) > 0);
+  }
+
+  public void testNonGeneratedIdWithZeroValue() throws Exception {
+    final EntityManager em = getEntityManager();
+
+    final EntityWithNonGeneratedId entity = new EntityWithNonGeneratedId();
+    entity.setMessage("foo");
+
+    try {
+      em.persist(entity);
+      em.flush();
+    } catch (final Throwable t) {
+      throw new AssertionError("Could not persist entity with non-generated id set to zero.", t);
+    }
+    assertEquals(0L, entity.getId());
   }
 
 }
