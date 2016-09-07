@@ -2046,7 +2046,7 @@ The reply-to service can also be specified declaratively using the [code]+@Reply
 
 These [code]+Sender<?>+ features are just convenient wrappers around the full-featured programmatic ErraiBus API. See <<sid-5931280, Messaging API Basics>> and <<sid-24674472, Conversations>> for full information about low-level ErraiBus communication.
 
-===== @UncaughtExceptionHandler
+==== Global Exception Handling
 
 In plain GWT apps you can register your own handler for uncaught exceptions with `GWT.setUncaughtExceptionHandler`. With Errai IOC you can annotate methods in IOC beans as uncaught exception handlers as in the example below.
 
