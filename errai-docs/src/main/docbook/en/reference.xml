@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2016-06-24</date>
+    <date>2016-09-07</date>
     
     
     
@@ -2237,6 +2237,19 @@ public class MyLocalService implements MessageCallback {
 <simpara>These <literal><phrase role="code">Sender&lt;?&gt;</phrase></literal> features are just convenient wrappers around the full-featured programmatic ErraiBus API. See <link linkend="sid-5931280">Messaging API Basics</link> and <link linkend="sid-24674472">Conversations</link> for full information about low-level ErraiBus communication.</simpara>
 </section>
 </section>
+<section id="_global_exception_handling">
+<title>Global Exception Handling</title>
+<simpara>In plain GWT apps you can register your own handler for uncaught exceptions with <literal>GWT.setUncaughtExceptionHandler</literal>. With Errai IOC you can annotate methods in IOC beans as uncaught exception handlers as in the example below.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@ApplicationScoped
+public class SingletonHandler {
+  @UncaughtExceptionHandler
+  private void handle(Throwable t) {
+    // do something
+  }
+}</programlisting>
+<simpara>In this example, <literal>SingletonHandler</literal> is <literal>@ApplicationScoped</literal> so the <literal>handle</literal> method will be invoked on the same instance for every uncaught exception. If the <literal>SingletonHandler</literal> has not bean instantiated when an uncaught exception occurs, the container will instantiate the instance and invoke the <literal>handle</literal> method.</simpara>
+<simpara>An <literal>@UncaughtExceptionHandler</literal> method in a <literal>@Dependent</literal> bean will only be invoked for instances that have already been created. If multiple instances of such a bean exist, the <literal>@UncaughtExceptionHandler</literal> method will be invoked for each instance. If none exists the container will not create an instance and no handler methods will be invoked for that type.</simpara>
+</section>
 <section id="sid-21758082">
 <title>Lifecycle Tools</title>
 <simpara>A problem commonly associated with building large applications in the browser is ensuring that things happen in the proper order when code starts executing. Errai IOC provides you tools which permit you to ensure things happen before initialization, and forcing things to happen after initialization of all of the Errai services.</simpara>
@@ -3241,7 +3254,7 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-GlobalRPCexceptionhandler">
 <title>Global RPC exception handler</title>
 <simpara>In a scenario where many different remote calls potentially throw the same exception types (e.g. exceptions related to authentication or authorization) it can be easier to register a global exception handler instead of providing error callbacks at each RPC invocation. This global exception handler is called in case an exception occurs in the process of a remote call that has no error callback associated with it. So, it will handle an otherwise uncaught exception.</simpara>
-<programlisting language="java" linenumbering="unnumbered">@UncaughtException
+<programlisting language="java" linenumbering="unnumbered">@UncaughtExceptionHandler
 private void onUncaughtException(Throwable caught) {
   try {
     throw caught;
@@ -5602,17 +5615,22 @@ or ensure that the UI component being composited implements is a a DOM element w
 <orderedlist numeration="arabic">
   
     <listitem>
-      <simpara>GWT events on Widgets</simpara>
+      <simpara>JS interop wrapped DOM events on Widgets and Elements</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>GWT events on DOM Elements</simpara>
+      <simpara>GWT events on Widgets (Deprecated)</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara>Native DOM events on Elements</simpara>
+      <simpara>GWT events on DOM Elements (Deprecated)</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara>Native DOM events on Elements (Deprecated)</simpara>
       
     </listitem>
   
@@ -5622,11 +5640,64 @@ or ensure that the UI component being composited implements is a a DOM element w
 </important>
 <section id="sid-51806600_ErraiUI-Concepts">
 <title>Concepts</title>
-<simpara>Each of the three scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with <literal><phrase role="code">@EventHandler("my-data-field")</phrase></literal> (<emphasis>event handler methods</emphasis>) to handle events on the corresponding <literal><phrase role="code">@DataField("my-data-field")</phrase></literal> in the same component. Event handler methods annotated with a bare <literal><phrase role="code">@EventHandler</phrase></literal> annotation (no annotation parameter) are wired to receive events on the @Templated component itself.</simpara>
+<simpara>Each of the scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with <literal><phrase role="code">@EventHandler("my-data-field")</phrase></literal> (<emphasis>event handler methods</emphasis>) to handle events on the corresponding <literal><phrase role="code">@DataField("my-data-field")</phrase></literal> in the same component. Event handler methods annotated with a bare <literal><phrase role="code">@EventHandler</phrase></literal> annotation (no annotation parameter) are wired to receive events on the @Templated component itself.</simpara>
+<simpara>A JS interop wrapped event is a type annotated with <literal>@JsType(isNative=true)</literal> and <literal>@BrowserEvent</literal> and provides an interface to the API of a browser DOM event.</simpara>
 </section>
 <section id="sid-51806600_ErraiUI-GWTeventsonWidgets">
+<title>JS Interop wrapped events on Elements and Widgets</title>
+<simpara>This approach can be used to handle events on any kind of <literal>@DataField</literal> or on a <literal>data-field</literal> element in the HTML template.  Since many browser event types share interfaces a quick handler with a JS interop event parameter must sometimes specify the browser event type (i.e. "click", "blur", "focus", etc.).</simpara>
+<simpara>Here is an example of a quick handler for "click" events on an element <literal>@DataField</literal> where the <literal>Event</literal> parameter is a JS interop wrapped event type <literal>org.jboss.errai.common.client.dom.Event</literal>. The <literal>Event</literal> interfaces is annotated with <literal>@BrowserEvent</literal>, but does not specify a value of usable browser event types, so the quick handler must specify the event type is listens to with the <literal>@ForEvent</literal> annotation.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated
+public class ElementHandlerComponent {
+
+   @Inject
+   @DataField("b1")
+   private ButtonElement button;
+
+   @EventHandler("b1")
+   public void doSomething(@ForEvent("click") Event e) {
+     // do something
+   }
+}</programlisting>
+<simpara>For <literal>@BrowserEvent</literal> wrappers that specify event types, <literal>@ForEvent</literal> may be omitted. In this case the quick handler is registered for all supported event types. In the example below, <literal>FocusEvent</literal> is annotated with <literal>@BrowserEvent({"blur", "focus", "focusin", "focusout"})</literal>, so the quick handler is registered for all four event: blur, focus, focusin, and focusout.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated
+public class ElementHandlerComponent {
+
+   @Inject
+   @DataField
+   private AnchorElement link;
+
+   @EventHandler("link")
+   public void doSomething(FocusEvent e) {
+     // do something
+   }
+}</programlisting>
+<simpara>This approach can also be used with GWT Widget <literal>@DataFields</literal> and template <literal>data-fields</literal> that do not have a <literal>@DataField</literal>.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Templated
+public class WidgetAndElementHandlerComponent {
+
+   @Inject
+   @DataField
+   private TextBox input;
+
+   // Handles focus-related events on the
+   // underlying HTML element of the TextBox field.
+   @EventHandler("input")
+   public void doSomething(FocusEvent e) {
+     // do something
+   }
+
+   // Handles dblclick events for the element in the
+   // template with id/class/data-field="button".
+   @EventHandler("button")
+   public void onClick(@ForEvent("dblclick") MouseEvent e) {
+     // do something
+   }
+}</programlisting>
+</section>
+<section id="_gwt_events_on_widgets">
 <title>GWT events on Widgets</title>
-<simpara>Probably the simplest and most common use-case, this approach handles GWT Event classes for Widgets that explicitly handle the given event type. If a Widget does not handle the Event type given in the <literal><phrase role="code">@EventHandler</phrase></literal> method&#8217;s signature, the application will fail to compile and appropriate errors will be displayed.</simpara>
+<simpara>This approach handles GWT Event classes for Widgets that explicitly handle the given event type. If a Widget does not handle the Event type given in the <literal><phrase role="code">@EventHandler</phrase></literal> method&#8217;s signature, the application will fail to compile and appropriate errors will be displayed.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated
 public class WidgetHandlerComponent extends Composite {
 
