@@ -18,8 +18,8 @@ package org.jboss.errai.security.client.local.callback;
 
 import javax.inject.Inject;
 
-import org.jboss.errai.bus.client.api.UncaughtException;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.api.UncaughtExceptionHandler;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
@@ -51,7 +51,7 @@ public class DefaultBusSecurityErrorCallback {
     this.context = context;
   }
 
-  @UncaughtException
+  @UncaughtExceptionHandler
   public void handleError(final Throwable throwable) {
     try {
       if (throwable instanceof UnauthenticatedException) {

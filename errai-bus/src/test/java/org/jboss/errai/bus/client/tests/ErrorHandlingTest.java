@@ -24,7 +24,6 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.tests.support.ErrorThrowingRPCService;
 import org.jboss.errai.bus.client.tests.support.SimpleRPCService;
 import org.jboss.errai.bus.common.AbstractErraiTest;
@@ -46,7 +45,7 @@ public class ErrorHandlingTest extends AbstractErraiTest {
 
   private static class Ref<T> {
     T value;
-    public Ref(T initial) {
+    public Ref(final T initial) {
       this.value = initial;
     }
   }
@@ -60,7 +59,11 @@ public class ErrorHandlingTest extends AbstractErraiTest {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    GWT.setUncaughtExceptionHandler(e -> {});
+    GWT.setUncaughtExceptionHandler(e -> {
+      if (e instanceof AssertionError) {
+        throw (AssertionError) e;
+      }
+    });
     super.gwtSetUp();
     subscriptions.add(bus.subscribe(LOCAL_ERROR_THROWING_SERVICE, m -> {
       throw new RuntimeException("Thrown by " + LOCAL_ERROR_THROWING_SERVICE);
@@ -74,6 +77,23 @@ public class ErrorHandlingTest extends AbstractErraiTest {
     }
     subscriptions.clear();
     super.gwtTearDown();
+  }
+
+  public void testDefaultErrorHandlerCallsGwtUncaughtExceptionHandler() throws Exception {
+    runAfterInit(() -> {
+      final Throwable t = new Throwable();
+      final Ref<Throwable> caughtRef = new Ref<>(null);
+      GWT.setUncaughtExceptionHandler(caught -> {
+        caughtRef.value = caught;
+      });
+      MessageBuilder
+      .createMessage(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
+      .with(MessageParts.Throwable, t)
+      .noErrorHandling()
+      .sendNowWith(bus);
+      assertSame(t, caughtRef.value);
+      finishTest();
+    });
   }
 
   public void testRemoteDefaultErrorHandling() {
@@ -215,7 +235,7 @@ public class ErrorHandlingTest extends AbstractErraiTest {
         finishTest();
       }));
       MessageBuilder
-        .createCall((Long time) -> fail("Should not receive response."), ErrorThrowingRPCService.class)
+        .createCall((final Long time) -> fail("Should not receive response."), ErrorThrowingRPCService.class)
         .currentTime();
     });
   }
@@ -226,7 +246,7 @@ public class ErrorHandlingTest extends AbstractErraiTest {
         fail("Should not have received error on subject " + DefaultErrorCallback.CLIENT_ERROR_SUBJECT);
       }));
       MessageBuilder
-        .createCall((Long time) -> fail("Should not receive response."),
+        .createCall((final Long time) -> fail("Should not receive response."),
                     (m, t) -> {
                       final Timer finishTimer = new Timer() {
                         @Override
@@ -255,7 +275,7 @@ public class ErrorHandlingTest extends AbstractErraiTest {
         finishTest();
       }));
       MessageBuilder
-        .createCall((Long time) -> fail("Should not receive response."),
+        .createCall((final Long time) -> fail("Should not receive response."),
                     (m, t) -> {
                       assertNotNull(t);
                       assertNotNull(t.getMessage());
@@ -275,14 +295,20 @@ public class ErrorHandlingTest extends AbstractErraiTest {
           fail("Timed-out without UncaughtExceptionHandler being invoked.");
         }
       };
-      final UncaughtExceptionHandler handler = t -> finishTest();
-      ((ClientMessageBusImpl) bus).addUncaughtExceptionHandler(handler);
+      final UncaughtExceptionHandler handler = t -> {
+        if (t instanceof AssertionError) {
+          throw (AssertionError) t;
+        }
+        else {
+          finishTest();
+        }
+      };
+      GWT.setUncaughtExceptionHandler(handler);
 
       subscriptions.add(() -> failTimer.cancel());
-      subscriptions.add(() -> ((ClientMessageBusImpl) bus).removeUncaughtExceptionHandler(handler));
 
       MessageBuilder
-        .createCall((Long time) -> {
+        .createCall((final Long time) -> {
           throw new RuntimeException("Client callback exception.");
         }, ErrorThrowingRPCService.class)
         .currentTime();
@@ -298,14 +324,20 @@ public class ErrorHandlingTest extends AbstractErraiTest {
           fail("Timed-out without UncaughtExceptionHandler being invoked.");
         }
       };
-      final UncaughtExceptionHandler handler = t -> finishTest();
-      ((ClientMessageBusImpl) bus).addUncaughtExceptionHandler(handler);
+      final UncaughtExceptionHandler handler = t -> {
+        if (t instanceof AssertionError) {
+          throw (AssertionError) t;
+        }
+        else {
+          finishTest();
+        }
+      };
+      GWT.setUncaughtExceptionHandler(handler);
 
       subscriptions.add(() -> failTimer.cancel());
-      subscriptions.add(() -> ((ClientMessageBusImpl) bus).removeUncaughtExceptionHandler(handler));
 
       MessageBuilder
-        .createCall((Long time) -> {
+        .createCall((final Long time) -> {
           throw new RuntimeException("Client callback exception.");
         },
         (m, t) -> {

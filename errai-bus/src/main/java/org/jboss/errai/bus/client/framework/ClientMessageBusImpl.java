@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
@@ -68,7 +67,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Timer;
@@ -94,7 +92,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private final List<SubscribeListener> onSubscribeHooks = new ArrayList<>();
   private final List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<>();
-  private final List<UncaughtExceptionHandler> uncaughtExceptionHandlers = new ArrayList<>();
 
   /**
    * Forwards every message received across the communication link to the remote
@@ -122,13 +119,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       if (errorTo == null || DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(errorTo)) {
         final Throwable t = message.get(Throwable.class, MessageParts.Throwable);
-        Optional.ofNullable(GWT.getUncaughtExceptionHandler())
-                .ifPresent(h -> h.onUncaughtException(t));
-
-        if (!uncaughtExceptionHandlers.isEmpty()) {
-          for (final UncaughtExceptionHandler handler : uncaughtExceptionHandlers) {
-            handler.onUncaughtException(t);
-          }
+        if (GWT.getUncaughtExceptionHandler() != null) {
+          GWT.getUncaughtExceptionHandler().onUncaughtException(t);
         }
         else {
           managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
@@ -1226,19 +1218,5 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
     }
-  }
-
-  public void addUncaughtExceptionHandler(final UncaughtExceptionHandler handler) {
-    Assert.notNull(handler);
-    uncaughtExceptionHandlers.add(handler);
-  }
-
-  public void removeUncaughtExceptionHandler(final UncaughtExceptionHandler handler) {
-    Assert.notNull(handler);
-    uncaughtExceptionHandlers.remove(handler);
-  }
-
-  public void removeAllUncaughtExceptionHandlers() {
-    uncaughtExceptionHandlers.clear();
   }
 }

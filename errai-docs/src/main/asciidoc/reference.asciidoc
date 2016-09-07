@@ -2046,6 +2046,25 @@ The reply-to service can also be specified declaratively using the [code]+@Reply
 
 These [code]+Sender<?>+ features are just convenient wrappers around the full-featured programmatic ErraiBus API. See <<sid-5931280, Messaging API Basics>> and <<sid-24674472, Conversations>> for full information about low-level ErraiBus communication.
 
+===== @UncaughtExceptionHandler
+
+In plain GWT apps you can register your own handler for uncaught exceptions with `GWT.setUncaughtExceptionHandler`. With Errai IOC you can annotate methods in IOC beans as uncaught exception handlers as in the example below.
+
+[source, java]
+----
+@ApplicationScoped
+public class SingletonHandler {
+  @UncaughtExceptionHandler
+  private void handle(Throwable t) {
+    // do something
+  }
+}
+----
+
+In this example, `SingletonHandler` is `@ApplicationScoped` so the `handle` method will be invoked on the same instance for every uncaught exception. If the `SingletonHandler` has not bean instantiated when an uncaught exception occurs, the container will instantiate the instance and invoke the `handle` method.
+
+An `@UncaughtExceptionHandler` method in a `@Dependent` bean will only be invoked for instances that have already been created. If multiple instances of such a bean exist, the `@UncaughtExceptionHandler` method will be invoked for each instance. If none exists the container will not create an instance and no handler methods will be invoked for that type.
+
 [[sid-21758082]]
 
 ==== Lifecycle Tools
@@ -3466,7 +3485,7 @@ In a scenario where many different remote calls potentially throw the same excep
 
 [source, java]
 ----
-@UncaughtException
+@UncaughtExceptionHandler
 private void onUncaughtException(Throwable caught) {
   try {
     throw caught;

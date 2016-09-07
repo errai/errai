@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.support.bus.tests.server;
+package org.jboss.errai.ioc.tests.extensions.client.res;
 
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.ioc.support.bus.tests.client.res.ExceptionService;
-import org.jboss.errai.ioc.support.bus.tests.client.res.TestException;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
-@Service
-public class ExceptionServiceImpl implements ExceptionService {
+import org.jboss.errai.ioc.client.api.UncaughtExceptionHandler;
 
-  @Override
-  public TestException exception() throws TestException {
-    throw new TestException();
+/**
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+@ApplicationScoped
+public class AppScopedUncaughtExceptionHandler {
+
+  @Inject
+  private UncaughtExceptionTestLogger logger;
+
+  @UncaughtExceptionHandler
+  public void handle(final Throwable t) {
+    if (t instanceof ExceptionForAppScopedHandler) logger.log(t);
   }
 
 }

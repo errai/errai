@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.support.bus.tests.client.res;
+package org.jboss.errai.ioc.tests.extensions.client.res;
 
-import org.jboss.errai.bus.server.annotations.Remote;
+/**
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ */
+public class ExceptionForDependentHandler extends Throwable {
 
-@Remote
-public interface ExceptionService {
-  public TestException exception() throws TestException;
+  private static final long serialVersionUID = 1L;
+
 }

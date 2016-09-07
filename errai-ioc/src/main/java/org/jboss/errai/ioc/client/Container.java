@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.jboss.errai.ioc.client.container.BeanManagerSetup;
 import org.jboss.errai.ioc.client.container.ContextManager;
+import org.jboss.errai.ioc.client.container.ErraiUncaughtExceptionHandler;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 
 public class Container implements EntryPoint {
 
@@ -38,7 +40,13 @@ public class Container implements EntryPoint {
     bootstrapContainer();
   }
 
+  private void setUncaughtExceptionHandler() {
+    final UncaughtExceptionHandler replacedHandler = GWT.getUncaughtExceptionHandler();
+    GWT.setUncaughtExceptionHandler(new ErraiUncaughtExceptionHandler(replacedHandler));
+  }
+
   public void bootstrapContainer() {
+    setUncaughtExceptionHandler();
     logger.info("Starting to bootstrap IOC container...");
     final long bootstrapStart = System.currentTimeMillis();
     try {
@@ -90,7 +98,7 @@ public class Container implements EntryPoint {
     }
   }
 
-  private static final List<Runnable> afterInit = new ArrayList<Runnable>();
+  private static final List<Runnable> afterInit = new ArrayList<>();
   private static boolean init = false;
 
   /**

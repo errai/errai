@@ -16,11 +16,7 @@
 
 package org.jboss.errai.security.client.local;
 
-import junit.framework.AssertionFailedError;
-
-import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -37,6 +33,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.user.client.Timer;
 
+import junit.framework.AssertionFailedError;
+
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -50,7 +48,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
     final UncaughtExceptionHandler oldHandler = GWT.getUncaughtExceptionHandler();
     GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
       @Override
-      public void onUncaughtException(Throwable t) {
+      public void onUncaughtException(final Throwable t) {
         /*
          * Lest we forget: passing null to the default uncaught exception handler makes the test
          * immediately finish successfully.
@@ -76,7 +74,6 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    ((ClientMessageBusImpl) ErraiBus.get()).removeAllUncaughtExceptionHandlers();
     super.gwtTearDown();
     timer.cancel();
   }
@@ -109,7 +106,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
           try {
             runnable.run();
           }
-          catch (AssertionFailedError e) {
+          catch (final AssertionFailedError e) {
             passed = false;
           }
           finally {
@@ -138,7 +135,7 @@ abstract class AbstractSecurityInterceptorTest extends AbstractErraiCDITest {
         MessageBuilder.createCall(new RemoteCallback<Void>() {
 
           @Override
-          public void callback(Void response) {
+          public void callback(final Void response) {
             final ActiveUserCache provider = IOC.getBeanManager().lookupBean(ActiveUserCache.class).getInstance();
             assertEquals("Calling logout did not log out user from active user cache.", User.ANONYMOUS, provider.getUser());
             test.run();
