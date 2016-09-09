@@ -21,8 +21,11 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
+
+import com.google.common.collect.Multimap;
 
 /**
  * Caches information regarding security events and the current user (i.e. which
@@ -33,38 +36,82 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 public interface SecurityContext {
 
   /**
-   * Navigate to the {@link LoginPage}, caching the current page. This is the same as calling
-   * {@link #redirectToLoginPage(Class)} with the argument {@link Navigation#getCurrentPage()
-   * Navigation.getCurrentPage().contentType()}.
+   * Equivalent to
+   * <pre>
+   * redirectToLoginPage(
+   *    getNavigation().getCurrentPage().contentType(),
+   *    getNavigation().getCurrentState())
+   * </pre>
+   *
+   * @see #redirectToLoginPage(Class, Multimap)
    */
   public void redirectToLoginPage();
+
+  /**
+   * Equivalent to
+   *
+   * <pre>
+   * redirectToLoginPage(fromPage, ImmutableMultimap.of())
+   * </pre>
+   *
+   * @see #redirectToLoginPage(Class, Multimap)
+   *
+   * @param fromPage
+   *          This {@link Page} type is cached so that a subsequent call to {@code navigateBackOr*} will return to the
+   *          {@link Page} of this type.
+   */
+  public void redirectToLoginPage(final Class<?> fromPage);
 
   /**
    * Navigate to the {@link LoginPage}.
    *
    * @param fromPage
-   *          This {@link Page} type is cached so that a subsequent call to
-   *          {@link #navigateBackOrHome()} or {@link #navigateBackOrToPage(Class)} will return to
-   *          the {@link Page} of this type.
+   *          This {@link Page} type is cached so that a subsequent call to @{@code navigateBackOr*} will return to the
+   *          {@link Page} of this type.
+   * @param fromState
+   *          This map of {@link PageState PageStates} is cached so that a subsequent call to {@code navigateBackOr*}
+   *          will return to the cached page with this state.
    */
-  public void redirectToLoginPage(Class<?> fromPage);
+  public void redirectToLoginPage(Class<?> fromPage, Multimap<String, String> fromState);
 
   /**
-   * Navigate to the {@link SecurityError}, caching the current page. This is the same as calling
-   * {@link #redirectToSecurityErrorPage(Class)} with the argument
-   * {@link Navigation#getCurrentPage() Navigation.getCurrentPage().contentType()}.
+   * Equivalent to
+   * <pre>
+   * redirectToSecurityErrorPagePage(
+   *    getNavigation().getCurrentPage().contentType(),
+   *    getNavigation().getCurrentState())
+   * </pre>
+   *
+   * @see #redirectToSecurityErrorPage(Class, Multimap)
    */
   public void redirectToSecurityErrorPage();
+
+  /**
+   * Equivalent to
+   *
+   * <pre>
+   * redirectToSecurityErrorPage(fromPage, ImmutableMultimap.of())
+   * </pre>
+   *
+   * @see #redirectToSecurityErrorPage(Class, Multimap)
+   *
+   * @param fromPage
+   *          This {@link Page} type is cached so that a subsequent call to {@code navigateBackOr*} will return to the
+   *          {@link Page} of this type.
+   */
+  public void redirectToSecurityErrorPage(final Class<?> fromPage);
 
   /**
    * Navigate to the {@link SecurityError} page.
    *
    * @param fromPage
-   *          This {@link Page} type is cached so that a subsequent call to
-   *          {@link #navigateBackOrHome()} or {@link #navigateBackOrToPage(Class)} will return to
-   *          the {@link Page} of this type.
+   *          This {@link Page} type is cached so that a subsequent call to @{@code navigateBackOr*} will return to the
+   *          {@link Page} of this type.
+   * @param fromState
+   *          This map of {@link PageState PageStates} is cached so that a subsequent call to {@code navigateBackOr*}
+   *          will return to the cached page with this state.
    */
-  public void redirectToSecurityErrorPage(Class<?> fromPage);
+  public void redirectToSecurityErrorPage(Class<?> fromPage, Multimap<String, String> fromState);
 
   /**
    * Navigate to the last page a user was redirected from (via this security context), or to the
@@ -81,6 +128,18 @@ public interface SecurityContext {
    *          {@code null}.
    */
   public void navigateBackOrToPage(Class<?> pageType);
+
+  /**
+   * Navigate to the last page a user was redirected from (via this security context), or to the given page if the user
+   * has not been redirected.
+   *
+   * @param pageType
+   *          The type of the page to navigate to if the user has not been redirected. Must not be {@code null}.
+   * @param pageState
+   *          The map of {@link PageState PageStates} to use for navigation if the user has not been redirected. Must
+   *          not be {@code null}.
+   */
+  public void navigateBackOrToPage(Class<?> pageType, Multimap<String, String> pageState);
 
   /**
    * @return True iff {@link SecurityContext#isCacheValid()} is true and
@@ -125,4 +184,9 @@ public interface SecurityContext {
    * {@link SecurityContext#isUserCacheValid()} will return false.
    */
   public void invalidateCache();
+
+  /**
+   * Return the {@link Navigation} instance for this application.
+   */
+  public Navigation getNavigation();
 }

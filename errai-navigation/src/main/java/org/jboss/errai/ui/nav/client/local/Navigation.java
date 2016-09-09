@@ -47,6 +47,7 @@ import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -102,7 +103,7 @@ public class Navigation {
      * @param state
      *          The state information to pass to the page node before showing it.
      */
-    private Request(PageNode<C> pageNode, HistoryToken state) {
+    private Request(final PageNode<C> pageNode, final HistoryToken state) {
       this.pageNode = pageNode;
       this.state = state;
     }
@@ -123,7 +124,7 @@ public class Navigation {
 
   private HandlerRegistration historyHandlerRegistration;
 
-  private Map<IsWidget, HandlerRegistration> attachHandlerRegistrations = new HashMap<IsWidget, HandlerRegistration>();
+  private final Map<IsWidget, HandlerRegistration> attachHandlerRegistrations = new HashMap<>();
 
   @Inject
   private Logger logger;
@@ -136,7 +137,7 @@ public class Navigation {
   /**
    * Queued navigation requests which could not handled immediately.
    */
-  private final Queue<Request> queuedRequests = new LinkedList<Request>();
+  private final Queue<Request> queuedRequests = new LinkedList<>();
 
   private int redirectDepth = 0;
 
@@ -165,7 +166,7 @@ public class Navigation {
         try {
           logger.debug("URL value changed to " + event.getValue());
           if (needsApplicationContext()) {
-            String context = inferAppContext(event.getValue());
+            final String context = inferAppContext(event.getValue());
             logger.info("No application context defined. Inferring application context as "
                     + context
                     + ". Change this value by setting the variable \"erraiApplicationWebContext\" in your GWT host page"
@@ -175,10 +176,10 @@ public class Navigation {
           token = historyTokenFactory.parseURL(event.getValue());
 
           if (currentPage == null || !token.equals(currentPageToken)) {
-            PageNode<IsWidget> toPage = navGraph.getPage(token.getPageName());
-            navigate(new Request<IsWidget>(toPage, token), false);
+            final PageNode<IsWidget> toPage = navGraph.getPage(token.getPageName());
+            navigate(new Request<>(toPage, token), false);
           }
-        } catch (Exception e) {
+        } catch (final Exception e) {
           logger.warn("An error occurred while navigating.", e);
           if (token == null)
             navigationErrorHandler.handleInvalidURLError(e, event.getValue());
@@ -205,7 +206,7 @@ public class Navigation {
     if (!(url.startsWith("/")))
       url = "/" + url;
 
-    int indexOfNextSlash = url.indexOf("/", 1);
+    final int indexOfNextSlash = url.indexOf("/", 1);
 
     if (indexOfNextSlash < 0)
       return "";
@@ -219,7 +220,7 @@ public class Navigation {
    * @param handler
    *          An error handler for navigation. Setting this to null assigns the {@link DefaultNavigationErrorHandler}
    */
-  public void setErrorHandler(PageNavigationErrorHandler handler) {
+  public void setErrorHandler(final PageNavigationErrorHandler handler) {
     if (handler == null)
       navigationErrorHandler = new DefaultNavigationErrorHandler(this);
     else
@@ -246,15 +247,15 @@ public class Navigation {
    *          The state information to set on the page node before showing it. Normally the map keys correspond with the
    *          names of fields annotated with {@code @PageState} in the widget class, but this is not required.
    */
-  public <C> void goTo(Class<C> toPage, Multimap<String, String> state) {
+  public <C> void goTo(final Class<C> toPage, final Multimap<String, String> state) {
     PageNode<C> toPageInstance = null;
 
     try {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance, state);
-    } catch (RedirectLoopException e) {
+    } catch (final RedirectLoopException e) {
       throw e;
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       if (toPageInstance == null)
         // This is an extremely unlikely case, so throwing an exception is preferable to going through the navigation error handler.
         throw new PageNotFoundException("There is no page of type " + toPage.getName() + " in the navigation graph.");
@@ -270,14 +271,14 @@ public class Navigation {
    * @param toPage
    *          the name of the page node to lookup and display.
    */
-  public void goTo(String toPage) {
+  public void goTo(final String toPage) {
     PageNode<?> toPageInstance = null;
     try {
       toPageInstance = navGraph.getPage(toPage);
       navigate(toPageInstance);
-    } catch (RedirectLoopException e) {
+    } catch (final RedirectLoopException e) {
       throw e;
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
        navigationErrorHandler.handleInvalidPageNameError(e, toPage);
     }
   }
@@ -289,14 +290,14 @@ public class Navigation {
    * @param role
    *          The unique role of the page that needs to be displayed.
    */
-  public void goToWithRole(Class<? extends UniquePageRole> role) {
+  public void goToWithRole(final Class<? extends UniquePageRole> role) {
     PageNode<?> toPageInstance = null;
     try {
        toPageInstance = navGraph.getPageByRole(role);
       navigate(toPageInstance);
-    } catch (RedirectLoopException e) {
+    } catch (final RedirectLoopException e) {
       throw e;
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
         navigationErrorHandler.handleError(e, role);
     }
   }
@@ -308,25 +309,25 @@ public class Navigation {
    *          the role to find PageNodes by
    * @return All the pageNodes of the pages that have the specific pageRole.
    */
-  public Collection<PageNode<?>> getPagesByRole(Class<? extends PageRole> pageRole) {
+  public Collection<PageNode<?>> getPagesByRole(final Class<? extends PageRole> pageRole) {
     return navGraph.getPagesByRole(pageRole);
   }
 
-  private <C> void navigate(PageNode<C> toPageInstance) {
+  private <C> void navigate(final PageNode<C> toPageInstance) {
     navigate(toPageInstance, ImmutableListMultimap.<String, String> of());
   }
 
-  private <C> void navigate(PageNode<C> toPageInstance, Multimap<String, String> state) {
-    HistoryToken token = historyTokenFactory.createHistoryToken(toPageInstance.name(), state);
+  private <C> void navigate(final PageNode<C> toPageInstance, final Multimap<String, String> state) {
+    final HistoryToken token = historyTokenFactory.createHistoryToken(toPageInstance.name(), state);
     logger.debug("Navigating to " + toPageInstance.name() + " at url: " + token.toString());
-    navigate(new Request<C>(toPageInstance, token), true);
+    navigate(new Request<>(toPageInstance, token), true);
   }
 
   /**
    * Captures a backup of the current page state in history, sets the state on the given PageNode from the given state
    * token, then makes its widget visible in the content area.
    */
-  private <C> void navigate(Request<C> request, boolean fireEvent) {
+  private <C> void navigate(final Request<C> request, final boolean fireEvent) {
     if (locked) {
       queuedRequests.add(request);
       return;
@@ -341,7 +342,7 @@ public class Navigation {
     maybeShowPage(request, fireEvent);
   }
 
-  private <C> void handleQueuedRequests(Request<C> request, boolean fireEvent) {
+  private <C> void handleQueuedRequests(final Request<C> request, final boolean fireEvent) {
     if (queuedRequests.isEmpty()) {
       // No new navigation requests were recorded in the lifecycle methods.
       // This is the page which has to be displayed and the browser's history
@@ -371,7 +372,7 @@ public class Navigation {
    * Hide the page currently displayed and call the associated lifecycle methods.
    */
   private void hideCurrentPage() {
-    IsWidget currentContent = navigatingContainer.getWidget();
+    final IsWidget currentContent = navigatingContainer.getWidget();
 
     // Note: Optimized out in production mode
     if (currentPage != null && (currentContent == null || currentWidget.asWidget() != currentContent)) {
@@ -410,7 +411,7 @@ public class Navigation {
         widget = TemplateWidgetMapper.get(unwrappedComponent);
       }
       else {
-        throw new RuntimeException("Page must implement IsWidget or be @Templated.");
+        throw new RuntimeException("Page must implement IsWidget, IsElement, or be @Templated.");
       }
 
       maybeAttachContentPanel();
@@ -419,7 +420,7 @@ public class Navigation {
       if ((unwrappedComponent instanceof Composite) && (getCompositeWidget((Composite) unwrappedComponent) == null)) {
         final HandlerRegistration reg = widget.addAttachHandler(new Handler() {
           @Override
-          public void onAttachOrDetach(AttachEvent event) {
+          public void onAttachOrDetach(final AttachEvent event) {
             if (event.isAttached() && currentWidget != unwrappedComponent) {
               pageHiding(unwrappedComponent, widget, request, fireEvent);
             }
@@ -438,7 +439,7 @@ public class Navigation {
       throw new RuntimeException("Was passed in a proxy, but should always receive an unwrapped widget.");
     }
 
-    HandlerRegistration reg = attachHandlerRegistrations.remove(component);
+    final HandlerRegistration reg = attachHandlerRegistrations.remove(component);
     if (reg != null) {
       reg.removeHandler();
     }
@@ -446,7 +447,7 @@ public class Navigation {
     final NavigationControl control = new NavigationControl(new Runnable() {
       @Override
       public void run() {
-        final Access<C> accessEvent = new AccessImpl<C>();
+        final Access<C> accessEvent = new AccessImpl<>();
         accessEvent.fireAsync(component, new LifecycleCallback() {
 
           @Override
@@ -500,6 +501,14 @@ public class Navigation {
   }
 
   /**
+   * @return The state multimap used to show the currently displayed page. If a navigation request has been submitted
+   *         this may return the state of page being navigated to before that page has actually been displayed.
+   */
+  public Multimap<String, String> getCurrentState() {
+    return (currentPageToken != null) ? currentPageToken.getState() : ImmutableMultimap.of();
+  }
+
+  /**
    * Returns the panel that this Navigation object manages. The contents of this panel will be updated by the navigation
    * system in response to PageTransition requests, as well as changes to the GWT navigation system.
    *
@@ -525,7 +534,7 @@ public class Navigation {
    *          the new value for currentPage.
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private void setCurrentPage(PageNode currentPage) {
+  private void setCurrentPage(final PageNode currentPage) {
     this.currentPage = currentPage;
   }
 

@@ -27,7 +27,7 @@ import org.jboss.errai.security.shared.api.Role;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 
-import com.google.gwt.user.client.ui.IsWidget;
+import com.google.common.collect.Multimap;
 
 /**
  * Listens for page navigation events and redirects if the logged in user lacks
@@ -35,7 +35,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleListener<W> {
+public class PageRoleLifecycleListener<C> implements LifecycleListener<C> {
 
   private final RestrictedAccess annotation;
   private final RequiredRolesExtractor roleExtractor;
@@ -46,7 +46,7 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
   }
 
   @Override
-  public void observeEvent(final LifecycleEvent<W> event) {
+  public void observeEvent(final LifecycleEvent<C> event) {
     // There is no good way to inject the context within the bootstrapper.
     final SecurityContext securityContext = SecurityContextHoldingSingleton.getSecurityContext();
     final Set<Role> roles = roleExtractor.extractAllRoles(annotation);
@@ -55,15 +55,19 @@ public class PageRoleLifecycleListener<W extends IsWidget> implements LifecycleL
             || !securityContext.getCachedUser().getRoles().containsAll(roles)) {
       event.veto();
 
+      final Class<?> pageClass = Factory.maybeUnwrapProxy(event.getInstance()).getClass();
+      // This returns the correct state because Navigation sets the state when the request is made, but before it is
+      // navigated to.
+      final Multimap<String, String> pageState = securityContext.getNavigation().getCurrentState();
       if (!securityContext.hasCachedUser())
-        securityContext.redirectToLoginPage(Factory.maybeUnwrapProxy(event.getInstance()).getClass());
+        securityContext.redirectToLoginPage(pageClass, pageState);
       else
-        securityContext.redirectToSecurityErrorPage(Factory.maybeUnwrapProxy(event.getInstance()).getClass());
+        securityContext.redirectToSecurityErrorPage(pageClass, pageState);
     }
   }
 
   @Override
-  public boolean isObserveableEventType(final Class<? extends LifecycleEvent<W>> eventType) {
+  public boolean isObserveableEventType(final Class<? extends LifecycleEvent<C>> eventType) {
     return eventType.equals(Access.class);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.security.test.page.client.res;
+package org.jboss.errai.security.client.local;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
+import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageState;
 
-import com.google.gwt.user.client.ui.SimplePanel;
-
 /**
- * @author edewit@redhat.com
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @Page
-@RestrictedAccess
-@ApplicationScoped
-public class RequireAuthenticationPage extends SimplePanel {
+@Singleton
+public class UnsecuredPageWithState implements IsElement {
+
+  @Inject
+  private Div div;
 
   @PageState
   private String state;
+
+  @Override
+  public HTMLElement getElement() {
+    return div;
+  }
 
   public String getState() {
     return state;

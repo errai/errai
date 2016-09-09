@@ -21,11 +21,13 @@ import java.util.Set;
 
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.client.local.TestLoginPage;
 import org.jboss.errai.security.client.local.TestPage;
 import org.jboss.errai.security.client.local.TestSecurityErrorPage;
+import org.jboss.errai.security.client.local.UnsecuredPageWithState;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.Role;
@@ -137,7 +139,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        final Set<Role> roles = new HashSet<Role>();
+        final Set<Role> roles = new HashSet<>();
         roles.add(new RoleImpl("user"));
         final User user = new UserImpl("testuser", roles);
 
@@ -160,7 +162,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        final Set<Role> roles = new HashSet<Role>();
+        final Set<Role> roles = new HashSet<>();
         roles.add(new RoleImpl("user"));
         roles.add(new RoleImpl("admin"));
         final User user = new UserImpl("testuser", roles);
@@ -184,7 +186,7 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        final Set<Role> roles = new HashSet<Role>();
+        final Set<Role> roles = new HashSet<>();
         roles.add(new RoleImpl("user"));
         final User user = new UserImpl("testuser", roles);
 
@@ -200,6 +202,62 @@ public class SecureNavigationIntegrationTest extends AbstractErraiCDITest {
         assertEquals(RequireAuthenticationPage.class, navigation.getCurrentPage().contentType());
         finishTest();
       }
+    });
+  }
+
+  public void testSecurityContextReturnsToDeniedPageWithSamePageStateAfterLogin() throws Exception {
+    runNavTest(new Runnable() {
+
+      @Override
+      public void run() {
+        final Set<Role> roles = new HashSet<>();
+        roles.add(new RoleImpl("user"));
+        final User user = new UserImpl("testuser", roles);
+
+        // Setup
+        assertEquals(TestPage.class, navigation.getCurrentPage().contentType());
+        navigation.goTo(RequireAuthenticationPage.class, ImmutableMultimap.of("state", "foo"));
+        assertEquals(TestLoginPage.class, navigation.getCurrentPage().contentType());
+
+        // Now login and try to go to the page we were denied from.
+        activeUserCache.setUser(user);
+        securityContext.navigateBackOrHome();
+
+        assertEquals(RequireAuthenticationPage.class, navigation.getCurrentPage().contentType());
+        final String state = IOCUtil.getInstance(RequireAuthenticationPage.class).getState();
+        assertEquals("foo", state);
+        finishTest();
+      }
+    });
+  }
+
+  public void testSecurityContextReturnsToPreviouslyDisplayedPageWithPageStateAfterRedirectToSecurityErrorPage() throws Exception {
+    runNavTest(() -> {
+      navigation.goTo(UnsecuredPageWithState.class, ImmutableMultimap.of("state", "foo"));
+      assertEquals(UnsecuredPageWithState.class, navigation.getCurrentPage().contentType());
+      assertEquals(ImmutableMultimap.of("state", "foo"), navigation.getCurrentState());
+
+      securityContext.redirectToSecurityErrorPage();
+      securityContext.navigateBackOrHome();
+
+      assertEquals(UnsecuredPageWithState.class, navigation.getCurrentPage().contentType());
+      assertEquals(ImmutableMultimap.of("state", "foo"), navigation.getCurrentState());
+      finishTest();
+    });
+  }
+
+  public void testSecurityContextReturnsToPreviouslyDisplayedPageWithPageStateAfterRedirectToLoginPage() throws Exception {
+    runNavTest(() -> {
+      navigation.goTo(UnsecuredPageWithState.class, ImmutableMultimap.of("state", "foo"));
+      assertEquals(UnsecuredPageWithState.class, navigation.getCurrentPage().contentType());
+      assertEquals(ImmutableMultimap.of("state", "foo"), navigation.getCurrentState());
+
+      securityContext.redirectToLoginPage();
+      securityContext.navigateBackOrHome();
+
+      assertEquals(UnsecuredPageWithState.class, navigation.getCurrentPage().contentType());
+      assertEquals(ImmutableMultimap.of("state", "foo"), navigation.getCurrentState());
+      finishTest();
     });
   }
 

@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -78,6 +79,16 @@ public class SecurityContextImpl implements SecurityContext {
     }
   }
 
+  private static class PageCache {
+    final Class<?> pageClass;
+    final Multimap<String, String> pageState;
+
+    PageCache(final Class<?> pageClass, final Multimap<String, String> pageState) {
+      this.pageClass = pageClass;
+      this.pageState = pageState;
+    }
+  }
+
   @Inject
   private Event<LoggedInEvent> loginEvent;
 
@@ -96,7 +107,7 @@ public class SecurityContextImpl implements SecurityContext {
   @Inject
   private Caller<NonCachingUserService> userServiceCaller;
 
-  private Class<?> lastPageCache;
+  private PageCache lastPageCache;
 
   @PostConstruct
   private void setup() {
@@ -137,11 +148,6 @@ public class SecurityContextImpl implements SecurityContext {
     }).getUser();
   }
 
-  @Override
-  public void redirectToLoginPage() {
-    redirectToLoginPage(getCurrentPage());
-  }
-
   private Class<?> getCurrentPage() {
     if (navigation.getCurrentPage() != null) {
       return navigation.getCurrentPage().contentType();
@@ -152,20 +158,44 @@ public class SecurityContextImpl implements SecurityContext {
     }
   }
 
+  private Multimap<String, String> getCurrentPageState() {
+    return navigation.getCurrentState();
+  }
+
+  @Override
+  public Navigation getNavigation() {
+    return navigation;
+  }
+
+  @Override
+  public void redirectToLoginPage() {
+    redirectToLoginPage(getCurrentPage(), getCurrentPageState());
+  }
+
   @Override
   public void redirectToLoginPage(final Class<?> fromPage) {
-    lastPageCache = fromPage;
+    redirectToLoginPage(fromPage, ImmutableMultimap.of());
+  }
+
+  @Override
+  public void redirectToLoginPage(final Class<?> fromPage, final Multimap<String, String> fromState) {
+    lastPageCache = new PageCache(fromPage, fromState);
     navigation.goToWithRole(LoginPage.class);
   }
 
   @Override
   public void redirectToSecurityErrorPage() {
-    redirectToSecurityErrorPage(getCurrentPage());
+    redirectToSecurityErrorPage(getCurrentPage(), getCurrentPageState());
   }
 
   @Override
   public void redirectToSecurityErrorPage(final Class<?> fromPage) {
-    lastPageCache = fromPage;
+    redirectToSecurityErrorPage(fromPage, ImmutableMultimap.of());
+  }
+
+  @Override
+  public void redirectToSecurityErrorPage(final Class<?> fromPage, final Multimap<String, String> fromState) {
+    lastPageCache = new PageCache(fromPage, fromState);
     navigation.goToWithRole(SecurityError.class);
   }
 
@@ -192,8 +222,13 @@ public class SecurityContextImpl implements SecurityContext {
 
   @Override
   public void navigateBackOrToPage(final Class<?> pageType) {
+    navigateBackOrToPage(pageType, ImmutableMultimap.of());
+  }
+
+  @Override
+  public void navigateBackOrToPage(final Class<?> pageType, final Multimap<String, String> pageState) {
     if (lastPageCache != null) {
-      navigation.goTo(lastPageCache, ImmutableMultimap.<String, String>of());
+      navigation.goTo(lastPageCache.pageClass, lastPageCache.pageState);
       lastPageCache = null;
     }
     else {
