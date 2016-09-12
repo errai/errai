@@ -336,11 +336,27 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *
    * @return The model instance which has to be used in place of the provided
    *         model (see {@link #forModel(Object)} and {@link #forType(Class)})
-   *         if changes should be automatically synchronized with the UI.
+   *         if changes should be automatically synchronized with the UI. If
+   *         this binder has been {@link #pause() paused} then the this returns
+   *         the paused model that may not be synchronized with the UI.
    */
   public T getModel() {
     ensureProxied();
     return (paused == null) ? proxy : paused;
+  }
+
+  /**
+   * Returns the working model instance associated with this {@link DataBinder}.
+   *
+   * @return The model instance which has to be used in place of the provided
+   *         model (see {@link #forModel(Object)} and {@link #forType(Class)})
+   *         if changes should be automatically synchronized with the UI. Unlike
+   *         {@link #getModel()} this method always returns a model that is
+   *         sychronized to the UI, even if this binder has been paused.
+   */
+  public T getWorkingModel() {
+    ensureProxied();
+    return proxy;
   }
 
   /**
