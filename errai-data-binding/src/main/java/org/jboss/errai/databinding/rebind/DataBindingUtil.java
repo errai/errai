@@ -139,7 +139,7 @@ public class DataBindingUtil {
     Statement dataBinderRef;
     MetaClass dataModelType;
 
-    MetaClass enclosingType = decorable.getEnclosingInjectable().getInjectedType();
+    final MetaClass enclosingType = decorable.getEnclosingInjectable().getInjectedType();
     final Collection<HasAnnotations> allAnnotated = getMembersAndParamsAnnotatedWith(enclosingType, Model.class);
 
     if (!allAnnotated.isEmpty()) {
@@ -178,13 +178,13 @@ public class DataBindingUtil {
       }
     }
     else {
-      List<MetaField> modelFields = decorable.getDecorableDeclaringType().getFieldsAnnotatedWith(Model.class);
+      final List<MetaField> modelFields = decorable.getDecorableDeclaringType().getFieldsAnnotatedWith(Model.class);
       if (!modelFields.isEmpty()) {
         throw new GenerationException("Found one or more fields annotated with @Model but missing @Inject "
                 + modelFields.toString());
       }
 
-      List<MetaParameter> modelParameters = decorable.getDecorableDeclaringType().getParametersAnnotatedWith(Model.class);
+      final List<MetaParameter> modelParameters = decorable.getDecorableDeclaringType().getParametersAnnotatedWith(Model.class);
       if (!modelParameters.isEmpty()) {
         throw new GenerationException(
                 "Found one or more constructor or method parameters annotated with @Model but missing @Inject "
@@ -196,7 +196,7 @@ public class DataBindingUtil {
   }
 
   private static Collection<HasAnnotations> getMembersAndParamsAnnotatedWith(final MetaClass enclosingType, final Class<? extends Annotation> annoType) {
-    final Collection<HasAnnotations> annotated = new ArrayList<HasAnnotations>();
+    final Collection<HasAnnotations> annotated = new ArrayList<>();
 
     final Target target = annoType.getAnnotation(Target.class);
     final Collection<ElementType> allowedTypes = (target == null) ? null : Arrays.asList(target.value());
@@ -331,7 +331,7 @@ public class DataBindingUtil {
    * @param type
    *          the type to check
    */
-  private static void assertTypeIsDataBinder(MetaClass type) {
+  private static void assertTypeIsDataBinder(final MetaClass type) {
     final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
 
     if (!databinderMetaClass.isAssignableFrom(type)) {
@@ -347,7 +347,7 @@ public class DataBindingUtil {
    * @param type
    *          the type to check
    */
-  private static void assertTypeIsBindable(MetaClass type) {
+  private static void assertTypeIsBindable(final MetaClass type) {
     if (!type.isAnnotationPresent(Bindable.class) && !getConfiguredBindableTypes().contains(type)) {
       throw new GenerationException(type.getName() + " must be a @Bindable type when used as @Model");
     }
@@ -361,7 +361,7 @@ public class DataBindingUtil {
    *
    * @return true if the provide type is bindable, otherwise false.
    */
-  public static boolean isBindableType(MetaClass type) {
+  public static boolean isBindableType(final MetaClass type) {
     return (type.isAnnotationPresent(Bindable.class) || getConfiguredBindableTypes().contains(type));
   }
 
@@ -375,10 +375,10 @@ public class DataBindingUtil {
    *         annotated and configured in ErraiApp.properties).
    */
   public static Set<MetaClass> getAllBindableTypes(final GeneratorContext context) {
-    Collection<MetaClass> annotatedBindableTypes = ClassScanner.getTypesAnnotatedWith(Bindable.class,
+    final Collection<MetaClass> annotatedBindableTypes = ClassScanner.getTypesAnnotatedWith(Bindable.class,
             RebindUtils.findTranslatablePackages(context), context);
 
-    Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
+    final Set<MetaClass> bindableTypes = new HashSet<>(annotatedBindableTypes);
     bindableTypes.addAll(DataBindingUtil.getConfiguredBindableTypes());
     return bindableTypes;
   }
@@ -401,7 +401,7 @@ public class DataBindingUtil {
   }
 
   private static Set<MetaClass> refreshConfiguredBindableTypes() {
-    final Set<MetaClass> refreshedTypes = new HashSet<MetaClass>(configuredBindableTypes.size());
+    final Set<MetaClass> refreshedTypes = new HashSet<>(configuredBindableTypes.size());
 
     for (final MetaClass clazz : configuredBindableTypes) {
       refreshedTypes.add(MetaClassFactory.get(clazz.getFullyQualifiedName()));
@@ -411,9 +411,9 @@ public class DataBindingUtil {
   }
 
   private static Set<MetaClass> findConfiguredBindableTypes() {
-    Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
+    final Set<MetaClass> bindableTypes = new HashSet<>();
     final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
-    for (URL url : erraiAppProperties) {
+    for (final URL url : erraiAppProperties) {
       InputStream inputStream = null;
       try {
         log.debug("Checking " + url.getFile() + " for bindable types...");
@@ -421,24 +421,24 @@ public class DataBindingUtil {
 
         final ResourceBundle props = new PropertyResourceBundle(inputStream);
         for (final String key : props.keySet()) {
-          if (key.equals("errai.ui.bindableTypes")) {
+          if (key.equals(EnvUtil.CONFIG_ERRAI_BINDABLE_TYPES)) {
             for (final String s : props.getString(key).split(" ")) {
               try {
                 bindableTypes.add(MetaClassFactory.get(s.trim()));
-              } catch (Exception e) {
+              } catch (final Exception e) {
                 throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
               }
             }
             break;
           }
         }
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new RuntimeException("Error reading ErraiApp.properties", e);
       } finally {
         if (inputStream != null) {
           try {
             inputStream.close();
-          } catch (IOException e) {
+          } catch (final IOException e) {
             log.warn("Failed to close input stream", e);
           }
         }
