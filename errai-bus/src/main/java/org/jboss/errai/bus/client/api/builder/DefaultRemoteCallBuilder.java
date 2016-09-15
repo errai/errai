@@ -140,7 +140,9 @@ public class DefaultRemoteCallBuilder {
     final RemoteCallErrorDef errorDef = new RemoteCallErrorDef() {
       @Override
       public RemoteCallSendable errorsHandledBy(@SuppressWarnings("rawtypes") ErrorCallback errorCallback) {
-        message.errorsCall(errorCallback);
+        if (errorCallback != null) {
+          message.errorsCall(errorCallback);
+        }
         return sendable;
       }
 

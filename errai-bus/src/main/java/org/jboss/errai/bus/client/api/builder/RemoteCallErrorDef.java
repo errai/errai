@@ -19,23 +19,22 @@ package org.jboss.errai.bus.client.api.builder;
 import org.jboss.errai.common.client.api.ErrorCallback;
 
 /**
- * This interface, <tt>RemoteCallErrorDef</tt> is a template for creating a remote call error handler. It ensures that
- * the error is constructed properly
+ * Template for creating a remote call error handler.
  */
 public interface RemoteCallErrorDef {
 
   /**
-   * Sets the error handler function and returns an instance of <tt>RemoteCallSendable</tt>
+   * Configures the error handler function
    *
-   * @param errorCallback - the error handler
-   * @return an instance of <tt>RemoteCallSendable</tt>
+   * @param errorCallback the error handler function, if null the default error handling will be used.
+   * @return an instance of {@link RemoteCallSendable}
    */
-  public RemoteCallSendable errorsHandledBy(ErrorCallback errorCallback);
+  public RemoteCallSendable errorsHandledBy(ErrorCallback<?> errorCallback);
 
   /**
-   * Sets the default error handler function and returns an instance of <tt>RemoteCallSendable</tt>
+   * Activates the default error handler function. 
    *
-   * @return an instance of <tt>RemoteCallSendable</tt>
+   * @return an instance of {@link RemoteCallSendable}
    */
   public RemoteCallSendable defaultErrorHandling();
 }

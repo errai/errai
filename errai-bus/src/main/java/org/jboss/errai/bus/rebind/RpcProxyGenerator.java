@@ -36,7 +36,6 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
@@ -62,14 +61,14 @@ public class RpcProxyGenerator {
   }
 
   public ClassStructureBuilder<?> generate() {
-    String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
-    ClassStructureBuilder<?> classBuilder =
+    final String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
+    final ClassStructureBuilder<?> classBuilder =
       ClassBuilder.define(safeProxyClassName, AbstractRpcProxy.class)
         .packageScope()
         .implementsInterface(remote)
         .body();
 
-    for (MetaMethod method : remote.getMethods()) {
+    for (final MetaMethod method : remote.getMethods()) {
       if (ProxyUtil.shouldProxyMethod(method)) {
         generateMethod(classBuilder, method);
       }
@@ -79,22 +78,22 @@ public class RpcProxyGenerator {
   }
 
   private void generateMethod(ClassStructureBuilder<?> classBuilder, MetaMethod method) {
-    List<Class<?>> interceptors = interceptorProvider.getInterceptors(remote, method);
-    boolean intercepted = !interceptors.isEmpty();
+    final List<Class<?>> interceptors = interceptorProvider.getInterceptors(remote, method);
+    final boolean intercepted = !interceptors.isEmpty();
 
-    Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
-    Parameter[] finalParms = new Parameter[parms.length];
-    List<Statement> parmVars = new ArrayList<Statement>();
+    final Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
+    final Parameter[] finalParms = new Parameter[parms.length];
+    final List<Statement> parmVars = new ArrayList<Statement>();
     for (int i = 0; i < parms.length; i++) {
       finalParms[i] = Parameter.of(parms[i].getType().getErased(), parms[i].getName(), true);
       parmVars.add(Stmt.loadVariable(parms[i].getName()));
     }
 
-    Statement parameters = (intercepted) ?
+    final Statement parameters = (intercepted) ?
         new StringStatement("getParameters()", MetaClassFactory.get(Object[].class)) :
           Stmt.newArray(Object.class).initialize(parmVars.toArray());
 
-    BlockBuilder<?> methodBlock =
+    final BlockBuilder<?> methodBlock =
         classBuilder.publicMethod(method.getReturnType().getErased(), method.getName(), finalParms);
 
     if (intercepted) {
@@ -105,7 +104,7 @@ public class RpcProxyGenerator {
       methodBlock.append(generateRequest(classBuilder, method, parameters, false));
     }
 
-    Statement returnStmt = ProxyUtil.generateProxyMethodReturnStatement(method);
+    final Statement returnStmt = ProxyUtil.generateProxyMethodReturnStatement(method);
     if (returnStmt != null) {
       methodBlock.append(returnStmt);
     }
@@ -115,7 +114,7 @@ public class RpcProxyGenerator {
 
   private Statement generateInterceptorLogic(ClassStructureBuilder<?> classBuilder,
       MetaMethod method, Statement requestLogic, List<Statement> parmVars, List<Class<?>> interceptors) {
-    Statement callContext = ProxyUtil.generateProxyMethodCallContext(context, RemoteCallContext.class,
+    final Statement callContext = ProxyUtil.generateProxyMethodCallContext(context, RemoteCallContext.class,
         classBuilder.getClassDefinition(), method, requestLogic, interceptors).finish();
 
     return Stmt.try_()
@@ -145,33 +144,18 @@ public class RpcProxyGenerator {
 
   private Statement generateRequest(ClassStructureBuilder<?> classBuilder,
       MetaMethod method, Statement methodParams, boolean intercepted) {
-    BlockStatement requestBlock = new BlockStatement();
+    
+    final Statement sendable = Stmt
+            .invokeStatic(MessageBuilder.class, "createCall")
+            .invoke("call", remote.getFullyQualifiedName())
+            .invoke("endpoint", ProxyUtil.createCallSignature(method),
+                Stmt.loadClassMember("qualifiers"),
+                methodParams)
+            .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
+            .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"));
 
-    requestBlock.addStatement(Stmt.declareVariable("sendable", RemoteCallSendable.class, null));
-    requestBlock.addStatement(
-        If.isNull(Variable.get("errorCallback"))
-        .append(Stmt.loadVariable("sendable").assignValue(
-            Stmt
-                .invokeStatic(MessageBuilder.class, "createCall")
-                .invoke("call", remote.getFullyQualifiedName())
-                .invoke("endpoint", ProxyUtil.createCallSignature(method),
-                    Stmt.loadClassMember("qualifiers"),
-                    methodParams)
-                .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-                .invoke("defaultErrorHandling")))
-        .finish()
-        .else_()
-        .append(Stmt.loadVariable("sendable").assignValue(
-            Stmt
-                .invokeStatic(MessageBuilder.class, "createCall")
-                .invoke("call", remote.getFullyQualifiedName())
-                .invoke("endpoint", ProxyUtil.createCallSignature(method),
-                    Stmt.loadClassMember("qualifiers"),
-                    methodParams)
-                .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-                .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))))
-        .finish());
-
+    final BlockStatement requestBlock = new BlockStatement();
+    requestBlock.addStatement(Stmt.declareVariable("sendable", RemoteCallSendable.class, sendable));
     requestBlock.addStatement(Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
         .invoke("sendRequest", Variable.get("bus"), Variable.get("sendable")));
 
