@@ -89,7 +89,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
   private static final Qualifier UNIVERSAL = new Universal();
 
-  private final Map<SortedSet<AnnotationWrapper>, NormalQualifier> qualifiers = new HashMap<SortedSet<AnnotationWrapper>, NormalQualifier>();
+  private final Map<SortedSet<AnnotationWrapper>, NormalQualifier> qualifiers = new HashMap<>();
 
   @Override
   public Qualifier forSource(final HasAnnotations annotated) {
@@ -119,7 +119,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
   }
 
   private SortedSet<AnnotationWrapper> getRawQualifiers(final HasAnnotations annotated) {
-    final SortedSet<AnnotationWrapper> annos = new TreeSet<AnnotationWrapper>();
+    final SortedSet<AnnotationWrapper> annos = new TreeSet<>();
     for (final Annotation anno : annotated.getAnnotations()) {
       if (anno.annotationType().isAnnotationPresent(javax.inject.Qualifier.class)) {
         if (anno.annotationType().equals(Named.class) && ((Named) anno).value().equals("")) {
@@ -187,7 +187,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
   @Override
   public Qualifier forDefault() {
-    return getOrCreateQualifier(new TreeSet<AnnotationWrapper>(Arrays.asList(DEFAULT_WRAPPER, ANY_WRAPPER)));
+    return getOrCreateQualifier(new TreeSet<>(Arrays.asList(DEFAULT_WRAPPER, ANY_WRAPPER)));
   }
 
   @Override
@@ -224,7 +224,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
       }
     }
 
-    return getOrCreateQualifier(new TreeSet<DefaultQualifierFactory.AnnotationWrapper>(allAnnosByType.values()));
+    return getOrCreateQualifier(new TreeSet<>(allAnnosByType.values()));
   }
 
   private static final class NormalQualifier implements Qualifier {
@@ -234,6 +234,11 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
     private NormalQualifier(final Set<AnnotationWrapper> set) {
       this.annotations = set;
+    }
+
+    @Override
+    public boolean isDefaultQualifier() {
+      return annotations.size() == 2 && annotations.contains(ANY_WRAPPER) && annotations.contains(DEFAULT_WRAPPER);
     }
 
     @Override
@@ -324,6 +329,11 @@ public class DefaultQualifierFactory implements QualifierFactory {
     @Override
     public boolean isSatisfiedBy(final Qualifier other) {
       return other == this;
+    }
+
+    @Override
+    public boolean isDefaultQualifier() {
+      return false;
     }
 
     @Override

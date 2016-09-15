@@ -26,6 +26,7 @@ import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAnnotationArrayStmt;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -415,8 +416,8 @@ public class IOCProcessor {
       curMethod.append(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable)));
     }
 
-    for (final Annotation qualifier : injectable.getQualifier()) {
-      curMethod.append(loadVariable(handleVarName).invoke("addQualifier", loadLiteral(qualifier)));
+    if (!injectable.getQualifier().isDefaultQualifier()) {
+      curMethod.append(loadVariable(handleVarName).invoke("setQualifiers", getAnnotationArrayStmt(injectable.getQualifier())));
     }
 
     return loadVariable(handleVarName);

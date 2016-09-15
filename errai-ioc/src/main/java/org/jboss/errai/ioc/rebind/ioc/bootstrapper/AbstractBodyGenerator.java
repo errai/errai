@@ -29,6 +29,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.nestedCall;
+import static org.jboss.errai.codegen.util.Stmt.newArray;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
 import static org.jboss.errai.codegen.util.Stmt.throw_;
 import static org.jboss.errai.codegen.util.Stmt.try_;
@@ -43,6 +44,7 @@ import java.util.Map.Entry;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.codegen.BooleanOperator;
@@ -56,6 +58,7 @@ import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.MethodCommentBuilder;
+import org.jboss.errai.codegen.builder.impl.AbstractStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
@@ -78,7 +81,6 @@ import org.jboss.errai.ioc.client.container.BeanActivator;
 import org.jboss.errai.ioc.client.container.Context;
 import org.jboss.errai.ioc.client.container.ContextManager;
 import org.jboss.errai.ioc.client.container.Factory;
-import org.jboss.errai.ioc.client.container.FactoryHandle;
 import org.jboss.errai.ioc.client.container.FactoryHandleImpl;
 import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.container.ProxyHelper;
@@ -713,10 +715,17 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
         con.append(loadVariable("handle").invoke("addAssignableType", loadLiteral(assignableType)));
       }
     }
-    for (final Annotation qual : injectable.getQualifier()) {
-      con.append(loadVariable("handle").invoke("addQualifier", annotationLiteral(qual)));
+    final org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier qualifier = injectable.getQualifier();
+    if (!qualifier.isDefaultQualifier()) {
+      final AbstractStatementBuilder qualArray =
+              getAnnotationArrayStmt(qualifier);
+      con.append(loadVariable("handle").invoke("setQualifiers", qualArray));
     }
     con.finish();
+  }
+
+  public static AbstractStatementBuilder getAnnotationArrayStmt(final org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier qualifier) {
+    return newArray(Annotation.class).initialize(qualifier.stream().map(AbstractBodyGenerator::annotationLiteral).toArray());
   }
 
   protected Statement generateFactoryHandleStatement(final Injectable injectable) {
@@ -750,11 +759,13 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return false;
   }
 
-  protected static Statement annotationLiteral(final Annotation qual) {
+  public static Statement annotationLiteral(final Annotation qual) {
     if (qual.annotationType().equals(Any.class)) {
       return loadStatic(QualifierUtil.class, "ANY_ANNOTATION");
     } else if (qual.annotationType().equals(Default.class)) {
       return loadStatic(QualifierUtil.class, "DEFAULT_ANNOTATION");
+    } else if (qual.annotationType().equals(Named.class)) {
+      return invokeStatic(QualifierUtil.class, "createNamed", ((Named) qual).value());
     } else {
       return LiteralFactory.getLiteral(qual);
     }

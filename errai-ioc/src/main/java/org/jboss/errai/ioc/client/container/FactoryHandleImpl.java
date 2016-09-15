@@ -18,9 +18,12 @@ package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.jboss.errai.ioc.client.QualifierUtil;
 
 /**
  * @see FactoryHandle
@@ -28,9 +31,10 @@ import java.util.List;
  */
 public class FactoryHandleImpl implements FactoryHandle {
 
+  private static final List<Annotation> defaultQualifiers = Arrays.asList(QualifierUtil.DEFAULT_QUALIFIERS);
+
   // TODO intern qualifiers for all FactoryHandle instances
-  // Initialize size to 2 because most types have exactly two qualifiers: @Any and @Default
-  private final List<Annotation> qualifiers = new ArrayList<>(2);
+  private List<Annotation> qualifiers;
   private final List<Class<?>> assignableTypes = new ArrayList<>();
   private final Class<?> actualType;
   private final String factoryName;
@@ -62,7 +66,16 @@ public class FactoryHandleImpl implements FactoryHandle {
 
   @Override
   public Collection<Annotation> getQualifiers() {
-    return Collections.unmodifiableCollection(qualifiers);
+    if (qualifiers == null) {
+      return Collections.unmodifiableCollection(defaultQualifiers);
+    }
+    else {
+      return Collections.unmodifiableCollection(qualifiers);
+    }
+  }
+
+  public void setQualifiers(final Annotation[] qualifiers) {
+    this.qualifiers = Arrays.asList(qualifiers);
   }
 
   @Override
@@ -83,10 +96,6 @@ public class FactoryHandleImpl implements FactoryHandle {
   @Override
   public Class<? extends Annotation> getScope() {
     return scope;
-  }
-
-  public void addQualifier(final Annotation qualifier) {
-    qualifiers.add(qualifier);
   }
 
   public void addAssignableType(final Class<?> type) {

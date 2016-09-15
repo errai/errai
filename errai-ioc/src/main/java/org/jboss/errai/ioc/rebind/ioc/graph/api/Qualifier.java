@@ -38,6 +38,8 @@ public interface Qualifier extends Iterable<Annotation> {
    */
   boolean isSatisfiedBy(Qualifier other);
 
+  boolean isDefaultQualifier();
+
   /**
    * @return A unique string that can be used as part of a Java identifier.
    */

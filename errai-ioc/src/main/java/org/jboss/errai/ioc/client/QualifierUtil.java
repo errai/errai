@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
+import javax.inject.Named;
 
 /**
  * A utility class for testing the equality of qualifiers at runtime.
@@ -112,8 +113,8 @@ public class QualifierUtil {
   public static boolean contains(final Collection<Annotation> allOf, final Collection<Annotation> in) {
     if (allOf.isEmpty()) return true;
 
-    final Map<String, Annotation> allOfMap = new HashMap<String, Annotation>();
-    final Map<String, Annotation> inMap = new HashMap<String, Annotation>();
+    final Map<String, Annotation> allOfMap = new HashMap<>();
+    final Map<String, Annotation> inMap = new HashMap<>();
 
     for (final Annotation a : in) {
       inMap.put(a.annotationType().getName(), a);
@@ -146,7 +147,7 @@ public class QualifierUtil {
     return annotations == null || (annotations.size() == 2 && contains(DEFAULT_MATCHING_MAP.values(), annotations));
   }
 
-  public static void initFromFactoryProvider(QualifierEqualityFactoryProvider provider) {
+  public static void initFromFactoryProvider(final QualifierEqualityFactoryProvider provider) {
     factoryProvider = provider;
     factory = null;
     init();
@@ -191,5 +192,20 @@ public class QualifierUtil {
 
   public static Annotation[] getDefaultQualifiers() {
     return DEFAULT_QUALIFIERS;
+  }
+
+  public static Named createNamed(final String name) {
+    return new Named() {
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Named.class;
+      }
+
+      @Override
+      public String value() {
+        return name;
+      }
+    };
   }
 }
