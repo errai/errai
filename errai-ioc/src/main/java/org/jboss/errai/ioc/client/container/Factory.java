@@ -49,7 +49,13 @@ public abstract class Factory<T> {
    */
   protected final Factory<T> thisInstance = this;
 
-  private final Map<T, Map<String, Object>> referenceMaps = new IdentityHashMap<T, Map<String, Object>>();
+  /*
+   * Do not remove! Used in generated code.
+   */
+  protected final FactoryHandleImpl handle;
+
+
+  private final Map<T, Map<String, Object>> referenceMaps = new IdentityHashMap<>();
   private final SetMultimap<T, Object> dependentScopedDependencies = Multimaps
           .newSetMultimap(new IdentityHashMap<T, Collection<Object>>(), new Supplier<Set<Object>>() {
             @Override
@@ -59,6 +65,14 @@ public abstract class Factory<T> {
           });
 
   private T incompleteInstance;
+
+  protected Factory() {
+    this.handle = null;
+  }
+
+  protected Factory(final FactoryHandleImpl handle) {
+    this.handle = handle;
+  }
 
   /**
    * At runtime the init method is called once after all factories and
@@ -71,7 +85,7 @@ public abstract class Factory<T> {
    *          instance of the bean. This should be done using
    *          {@link Context#getInstance(String)}.
    */
-  public abstract void init(Context context);
+  public void init(final Context context) {}
 
   /**
    * This method is invoked whenever an actual instance of a bean must be
@@ -97,7 +111,7 @@ public abstract class Factory<T> {
     throw new UnsupportedOperationException("The factory, " + getClass().getSimpleName() + ", does not support contextual instances.");
   }
 
-  public abstract void invokePostConstructs(T instance);
+  public void invokePostConstructs(final T instance) {}
 
   public void setReference(final T instance, final String referenceName, final Object ref) {
     final Map<String, Object> instanceRefMap = getInstanceRefMap(instance);
@@ -107,7 +121,7 @@ public abstract class Factory<T> {
   private Map<String, Object> getInstanceRefMap(final T instance) {
     Map<String, Object> map = referenceMaps.get(maybeUnwrapProxy(instance));
     if (map == null) {
-      map = new HashMap<String, Object>();
+      map = new HashMap<>();
       referenceMaps.put(instance, map);
     }
 
@@ -119,9 +133,13 @@ public abstract class Factory<T> {
     return (P) getInstanceRefMap(maybeUnwrapProxy(instance)).get(referenceName);
   }
 
-  public abstract Proxy<T> createProxy(Context context);
+  public Proxy<T> createProxy(final Context context) {
+    return null;
+  }
 
-  public abstract FactoryHandle getHandle();
+  public FactoryHandle getHandle() {
+    return handle;
+  }
 
   protected <D> D registerDependentScopedReference(final T instance, final D dependentScopedBeanRef) {
     dependentScopedDependencies.put(maybeUnwrapProxy(instance), dependentScopedBeanRef);
@@ -148,7 +166,7 @@ public abstract class Factory<T> {
     dependentScopedDependencies.removeAll(instance);
   }
 
-  protected abstract void generatedDestroyInstance(Object instance, ContextManager contextManager);
+  protected void generatedDestroyInstance(final Object instance, final ContextManager contextManager) {}
 
   @SuppressWarnings("unchecked")
   public static <P> P maybeUnwrapProxy(final P instance) {

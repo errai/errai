@@ -132,18 +132,14 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    */
   protected FactoryController controller;
 
-  protected void implementCreateProxy(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable) {
+  protected void maybeImplementCreateProxy(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable) {
     final MetaClass proxyImpl = maybeCreateProxyImplementation(injectable, bodyBlockBuilder);
 
-    final BlockBuilder<?> createProxyBody = bodyBlockBuilder
-            .publicMethod(parameterizedAs(Proxy.class, typeParametersOf(injectable.getInjectedType())), "createProxy",
-                    finalOf(Context.class, "context"))
-            .body();
-    if (proxyImpl == null) {
-      // Type is not proxiable
-      createProxyBody.append(loadLiteral(null).returnValue()).finish();
-    }
-    else {
+    if (proxyImpl != null) {
+      final BlockBuilder<?> createProxyBody = bodyBlockBuilder
+              .publicMethod(parameterizedAs(Proxy.class, typeParametersOf(injectable.getInjectedType())), "createProxy",
+                      finalOf(Context.class, "context"))
+              .body();
       final Object proxyInstanceStmt;
       if (injectable.getInjectedType().isInterface() || getAccessibleNoArgConstructor(injectable.getInjectedType()) != null) {
         proxyInstanceStmt = newObject(proxyImpl);
@@ -587,12 +583,12 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     final List<Statement> destroyInstanceStatements = generateDestroyInstanceStatements(bodyBlockBuilder, injectable, graph, injectionContext);
     final List<Statement> invokePostConstructStatements = generateInvokePostConstructsStatements(bodyBlockBuilder, injectable, graph, injectionContext);
 
-    implementFactoryInit(bodyBlockBuilder, injectable, factoryInitStatements);
+    implementConstructor(bodyBlockBuilder, injectable);
+    maybeImplementFactoryInit(bodyBlockBuilder, injectable, factoryInitStatements);
     implementCreateInstance(bodyBlockBuilder, injectable, createInstanceStatements);
-    implementDestroyInstance(bodyBlockBuilder, injectable, destroyInstanceStatements);
-    implementInvokePostConstructs(bodyBlockBuilder, injectable, invokePostConstructStatements);
-    implementCreateProxy(bodyBlockBuilder, injectable);
-    implementGetHandle(bodyBlockBuilder, injectable);
+    maybeImplementDestroyInstance(bodyBlockBuilder, injectable, destroyInstanceStatements);
+    maybeImplementInvokePostConstructs(bodyBlockBuilder, injectable, invokePostConstructStatements);
+    maybeImplementCreateProxy(bodyBlockBuilder, injectable);
 
     addPrivateAccessors(bodyBlockBuilder);
   }
@@ -655,30 +651,36 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return Collections.emptyList();
   }
 
-  private void implementFactoryInit(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
+  private void maybeImplementFactoryInit(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
           final List<Statement> factoryInitStatements) {
-    bodyBlockBuilder.publicMethod(void.class, "init", finalOf(Context.class, "context")).appendAll(factoryInitStatements).finish();
+    if (!factoryInitStatements.isEmpty()) {
+      bodyBlockBuilder.publicMethod(void.class, "init", finalOf(Context.class, "context")).appendAll(factoryInitStatements).finish();
+    }
   }
 
-  private void implementInvokePostConstructs(final ClassStructureBuilder<?> bodyBlockBuilder,
+  private void maybeImplementInvokePostConstructs(final ClassStructureBuilder<?> bodyBlockBuilder,
           final Injectable injectable, final List<Statement> invokePostConstructStatements) {
-    bodyBlockBuilder
-            .publicMethod(MetaClassFactory.get(void.class), "invokePostConstructs", finalOf(injectable.getInjectedType(), "instance"))
-            .appendAll(invokePostConstructStatements).finish();
+    if (!invokePostConstructStatements.isEmpty()) {
+      bodyBlockBuilder
+      .publicMethod(MetaClassFactory.get(void.class), "invokePostConstructs", finalOf(injectable.getInjectedType(), "instance"))
+      .appendAll(invokePostConstructStatements).finish();
+    }
   }
 
-  private void implementDestroyInstance(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
+  private void maybeImplementDestroyInstance(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
           final List<Statement> destroyInstanceStatements) {
-    bodyBlockBuilder
-            .publicMethod(void.class, "generatedDestroyInstance", finalOf(Object.class, "instance"),
-                    finalOf(ContextManager.class, "contextManager"))
-            .append(loadVariable("this").invoke("destroyInstanceHelper",
-                    Stmt.castTo(injectable.getInjectedType(), loadVariable("instance")),
-                    loadVariable("contextManager")))
-            .finish();
-    bodyBlockBuilder.publicMethod(void.class, "destroyInstanceHelper",
-            finalOf(injectable.getInjectedType(), "instance"), finalOf(ContextManager.class, "contextManager"))
-            .appendAll(destroyInstanceStatements).finish();
+    if (!destroyInstanceStatements.isEmpty()) {
+      bodyBlockBuilder
+      .publicMethod(void.class, "generatedDestroyInstance", finalOf(Object.class, "instance"),
+              finalOf(ContextManager.class, "contextManager"))
+      .append(loadVariable("this").invoke("destroyInstanceHelper",
+              Stmt.castTo(injectable.getInjectedType(), loadVariable("instance")),
+              loadVariable("contextManager")))
+      .finish();
+      bodyBlockBuilder.publicMethod(void.class, "destroyInstanceHelper",
+              finalOf(injectable.getInjectedType(), "instance"), finalOf(ContextManager.class, "contextManager"))
+      .appendAll(destroyInstanceStatements).finish();
+    }
   }
 
   /**
@@ -702,10 +704,10 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return controller.getDestructionStatements();
   }
 
-  protected void implementGetHandle(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable) {
+  protected void implementConstructor(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable) {
     final Statement newObject = generateFactoryHandleStatement(injectable);
-    bodyBlockBuilder.privateField("handle", FactoryHandleImpl.class).initializesWith(newObject).finish();
     final ConstructorBlockBuilder<?> con = bodyBlockBuilder.publicConstructor();
+    con.callSuper(newObject);
     for (final MetaClass assignableType : getAllAssignableTypes(injectable.getInjectedType())) {
       if (assignableType.isPublic()) {
         con.append(loadVariable("handle").invoke("addAssignableType", loadLiteral(assignableType)));
@@ -715,8 +717,6 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
       con.append(loadVariable("handle").invoke("addQualifier", annotationLiteral(qual)));
     }
     con.finish();
-    bodyBlockBuilder.publicMethod(FactoryHandle.class, "getHandle").body().append(loadVariable("handle").returnValue())
-            .finish();
   }
 
   protected Statement generateFactoryHandleStatement(final Injectable injectable) {
@@ -761,7 +761,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
   }
 
   protected Collection<Annotation> getQualifiers(final HasAnnotations injectedType) {
-    final Collection<Annotation> annos = new ArrayList<Annotation>();
+    final Collection<Annotation> annos = new ArrayList<>();
     for (final Annotation anno : injectedType.getAnnotations()) {
       if (anno.annotationType().isAnnotationPresent(Qualifier.class)) {
         annos.add(anno);
