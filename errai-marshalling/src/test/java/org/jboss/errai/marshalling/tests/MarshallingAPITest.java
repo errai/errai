@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.tests;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.AImpl1;
@@ -41,6 +44,7 @@ import org.jboss.errai.marshalling.tests.res.EntityWithPublicFields;
 import org.jboss.errai.marshalling.tests.res.InterfaceA;
 import org.jboss.errai.marshalling.tests.res.Outer;
 import org.jboss.errai.marshalling.tests.res.Outer2;
+import org.jboss.errai.marshalling.tests.res.SomeInterface;
 import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
@@ -60,10 +64,10 @@ public class MarshallingAPITest {
     MappingContextSingleton.get();
   }
 
-  private void testEncodeDecode(Object value) {
+  private void testEncodeDecode(final Object value) {
     if (value == null) return;
     final String json = ServerMarshalling.toJSON(value);
-    Object result = ServerMarshalling.fromJSON(json);
+    final Object result = ServerMarshalling.fromJSON(json);
     Assert.assertEquals(value, result);
   }
 
@@ -81,12 +85,12 @@ public class MarshallingAPITest {
   public void testNullLong() {
     testEncodeDecode((Long) null);
   }
-  
+
   @Test
   public void testDoubleNan() {
     testEncodeDecode(Double.NaN);
   }
-  
+
   @Test
   public void testDoublePosInf() {
     testEncodeDecode(Double.POSITIVE_INFINITY);
@@ -111,7 +115,7 @@ public class MarshallingAPITest {
   public void testFloatNegInf() {
     testEncodeDecode(Float.NEGATIVE_INFINITY);
   }
-  
+
   @Test
   public void testQualifiedShort() {
     testEncodeDecode((short) 123);
@@ -144,11 +148,11 @@ public class MarshallingAPITest {
 
   @Test
   public void testUserEntity() {
-    User user = new User();
+    final User user = new User();
     user.setUserName("foo");
     user.setPassword("bar");
 
-    Set<Role> roles = new HashSet<Role>();
+    final Set<Role> roles = new HashSet<>();
     roles.add(new Role("admin"));
     roles.add(new Role("users"));
 
@@ -159,13 +163,13 @@ public class MarshallingAPITest {
 
   @Test
   public void testEntityWithNullBoxedNatives() {
-    NullBoxedNatives entity = new NullBoxedNatives();
+    final NullBoxedNatives entity = new NullBoxedNatives();
     testEncodeDecode(entity);
   }
 
   @Test
   public void testNullEnumInEntity() {
-    ItemWithEnum itemWithEnum = new ItemWithEnum();
+    final ItemWithEnum itemWithEnum = new ItemWithEnum();
     testEncodeDecode(itemWithEnum);
   }
 
@@ -183,9 +187,9 @@ public class MarshallingAPITest {
 
   @Test
   public void testEntityWithInterfaceArray() {
-    EntityWithInterfaceArray ewia = new EntityWithInterfaceArray();
+    final EntityWithInterfaceArray ewia = new EntityWithInterfaceArray();
 
-    InterfaceA[] a = new InterfaceA[4];
+    final InterfaceA[] a = new InterfaceA[4];
     a[0] = new AImpl1(4711);
     a[1] = null;
     a[2] = new AImpl2("admin");
@@ -197,9 +201,9 @@ public class MarshallingAPITest {
 
   @Test
   public void testEntityWithInterfaceArrayInPublicField() {
-    EntityWithInterfaceArrayInPublicField ewiaipf = new EntityWithInterfaceArrayInPublicField();
+    final EntityWithInterfaceArrayInPublicField ewiaipf = new EntityWithInterfaceArrayInPublicField();
 
-    InterfaceA[] a = new InterfaceA[4];
+    final InterfaceA[] a = new InterfaceA[4];
     a[0] = new AImpl1(4711);
     a[1] = null;
     a[2] = new AImpl2("admin");
@@ -211,9 +215,9 @@ public class MarshallingAPITest {
 
   @Test
   public void testEntityWithPortableSubtypesInArray() {
-    EntityWithPortableSubtypesInArray ewpsia = new EntityWithPortableSubtypesInArray();
+    final EntityWithPortableSubtypesInArray ewpsia = new EntityWithPortableSubtypesInArray();
 
-    AImpl1[] a = new AImpl1[3];
+    final AImpl1[] a = new AImpl1[3];
     a[0] = new AImpl1(4711);
     a[1] = null;
     a[2] = new ASubImpl1(11f);
@@ -235,9 +239,9 @@ public class MarshallingAPITest {
 
   @Test
   public void testEntityWithPublicFields() {
-    EntityWithPublicFields ewpf = new EntityWithPublicFields();
+    final EntityWithPublicFields ewpf = new EntityWithPublicFields();
 
-    ArrayList<String> values = new ArrayList<String>();
+    final ArrayList<String> values = new ArrayList<>();
     values.add("1");
     values.add("2");
     values.add("3");
@@ -250,9 +254,9 @@ public class MarshallingAPITest {
 
   @Test
   public void testEntityWithInheritedPublicFields() {
-    EntityWithInheritedPublicFields ewipf = new EntityWithInheritedPublicFields();
+    final EntityWithInheritedPublicFields ewipf = new EntityWithInheritedPublicFields();
 
-    ArrayList<String> values = new ArrayList<String>();
+    final ArrayList<String> values = new ArrayList<>();
     values.add("1");
     values.add("2");
     values.add("3");
@@ -265,36 +269,41 @@ public class MarshallingAPITest {
 
   @Test
   public void testEntityWithMapUsingArrayValues() {
-    EntityWithMapUsingArrayValues ewmuav = new EntityWithMapUsingArrayValues();
+    final EntityWithMapUsingArrayValues ewmuav = new EntityWithMapUsingArrayValues();
 
-    Map<String, String[]> data = new HashMap<String, String[]>();
+    final Map<String, String[]> data = new HashMap<>();
     data.put("1", new String[]{"2", "3", "4"});
     data.put("5", new String[]{"6", "7", "8"});
 
     ewmuav.setData(data);
     testEncodeDecode(ewmuav);
   }
-  
+
   // This is a regression test for ERRAI-794
   @Test
   public void testBackReferenceOrderingWithMapsTo() {
-    Outer.Nested key = new Outer.Nested("exp");
-    Outer outer = new Outer (Arrays.asList(key), key);
+    final Outer.Nested key = new Outer.Nested("exp");
+    final Outer outer = new Outer (Arrays.asList(key), key);
     testEncodeDecode(outer);
-    
-    Outer2.Nested key2 = new Outer2.Nested("exp");
-    Outer2 outer2 = new Outer2 (key2, Arrays.asList(key2));
+
+    final Outer2.Nested key2 = new Outer2.Nested("exp");
+    final Outer2 outer2 = new Outer2 (key2, Arrays.asList(key2));
     testEncodeDecode(outer2);
   }
-  
+
   // This is a regression test for ERRAI-811
   @Test
   public void testEntityWithMapUsingNullKey() {
-    Map<String, String> data = new HashMap<String, String>();
+    final Map<String, String> data = new HashMap<>();
     data.put("key1", "value1");
     data.put(null, "value2");
 
     testEncodeDecode(data);
   }
-  
+
+  @Test
+  public void testCanHandleReturnsTrueForInterface() throws Exception {
+    assertTrue(Marshalling.canHandle(SomeInterface.class));
+  }
+
 }

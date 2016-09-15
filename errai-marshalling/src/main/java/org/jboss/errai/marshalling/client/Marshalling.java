@@ -33,7 +33,7 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 /**
  * A collection of static methods for accomplishing common tasks with the Errai marshalling API.
- * 
+ *
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -41,28 +41,28 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 public abstract class Marshalling {
 
   /**
-   * Returns true if the given type is marshallable by the Errai Marshalling system, and false
-   * otherwise.
+   * Returns true if the given type is marshallable by the Errai Marshalling system or is an interface that is possibly
+   * marshallable, and false otherwise.
    * <p>
-   * Marshallable types include all native Java types, most built-in Java API types, types annotated
-   * with {@code @Portable}, types configured for marshalling via {@code ErraiApp.properties}, and
-   * arrays, Collections, and Maps of marshallable types.
-   * 
+   * Marshallable types include all native Java types, most built-in Java API types, types annotated with
+   * {@code @Portable}, types configured for marshalling via {@code ErraiApp.properties}, and arrays, Collections, and
+   * Maps of marshallable types.
+   *
    * @param type
    *          The type to check for marshallability.
-   * @return True for marshallable types and false for non-marshallable types.
+   * @return True for marshallable types or possibly marshallable interfaces and false for non-marshallable types.
    */
   public static boolean canHandle(final Class<?> type) {
-    return MarshallingSessionProviderFactory.getProvider().hasMarshaller(type.getName());
+    return type.isInterface() || MarshallingSessionProviderFactory.getProvider().hasMarshaller(type.getName());
   }
 
   /**
    * Returns a marshaller for the type with the provided fully qualified class name. In case no
    * marshaller can be found for that type a RuntimeException will be thrown.
-   * 
+   *
    * @param type
    *          the marshallable type.
-   * 
+   *
    * @return the marshaller instance, never null.
    */
   public static <T> Marshaller<T> getMarshaller(final Class<T> type) {
@@ -72,13 +72,13 @@ public abstract class Marshalling {
   /**
    * Returns a marshaller for the type with the provided fully qualified class name. In case no
    * marshaller can be found for that type a RuntimeException will be thrown.
-   * 
+   *
    * @param type
    *          the marshallable type.
    * @param creationCallback
    *          A callback that will be used to create a marshaller for the provided type in case it
    *          hasn't already been created.
-   * 
+   *
    * @return the marshaller instance, never null.
    */
   public static <T> Marshaller<T> getMarshaller(final Class<T> type,
@@ -96,19 +96,19 @@ public abstract class Marshalling {
 
     return m;
   }
-  
+
   /**
    * Returns a marshaller for the type with the provided fully qualified class name. In case no
    * marshaller can be found for that type a RuntimeException will be thrown.
-   * 
+   *
    * @param typeName
    *          the marshallable type name.
-   * 
+   *
    * @return the marshaller instance, never null.
    */
   public static <T> Marshaller<T> getMarshaller(final String typeName) {
-    Marshaller<T> m = MarshallingSessionProviderFactory.getProvider().getMarshaller(typeName);
-    
+    final Marshaller<T> m = MarshallingSessionProviderFactory.getProvider().getMarshaller(typeName);
+
     if (m == null) {
       throw new RuntimeException("No marshaller for type: " + typeName);
     }
@@ -119,7 +119,7 @@ public abstract class Marshalling {
   /**
    * Returns a JSON representation of the given object, recursively including all of its nested
    * attributes.
-   * 
+   *
    * @param obj
    *          The object to marshall. Should be of a type for which {@link #canHandle(Class)}
    *          returns true. Null is permitted.
@@ -151,13 +151,13 @@ public abstract class Marshalling {
   /**
    * Appends a JSON representation of the given object to the given Appendable, recursively
    * including all of its nested attributes.
-   * 
+   *
    * @param appendTo
    *          the Appendable to write the JSON representation to.
    * @param obj
    *          The object to marshall. Should be of a type for which {@link #canHandle(Class)}
    *          returns true. Null is permitted.
-   * 
+   *
    */
   public static void toJSON(final Appendable appendTo, final Object obj) throws IOException {
     appendTo.append(toJSON(obj));
@@ -165,7 +165,7 @@ public abstract class Marshalling {
 
   /**
    * Works the same as a call to {@link #toJSON(Object)}, but may perform better.
-   * 
+   *
    * @param obj
    *          The map to marshal to JSON.
    * @return The JSON representation of the map.
@@ -177,7 +177,7 @@ public abstract class Marshalling {
 
   /**
    * Works the same as a call to {@link #toJSON(Object)}, but may perform better.
-   * 
+   *
    * @param arr
    *          The list to marshal to JSON.
    * @return The JSON representation of the list.
@@ -189,7 +189,7 @@ public abstract class Marshalling {
   /**
    * Converts the given JSON message to a Java object, recursively decoding nested attributes
    * contained in that message.
-   * 
+   *
    * @param json
    *          The JSON representation of the object graph to demarshall.
    * @param type
@@ -203,7 +203,7 @@ public abstract class Marshalling {
   /**
    * Converts the given JSON message (which is likely a collection) to a Java object, recursively
    * decoding nested attributes contained in that message.
-   * 
+   *
    * @param json
    *          The JSON representation of the object graph to demarshall.
    * @param type
@@ -236,7 +236,7 @@ public abstract class Marshalling {
   /**
    * Converts the given JSON message to a Java map object, recursively decoding nested attributes
    * contained in that message.
-   * 
+   *
    * @param json
    *          The JSON representation of the object graph to demarshall.
    * @param type
@@ -245,7 +245,7 @@ public abstract class Marshalling {
    *          the key type used in the map.
    * @param assumedMapValueType
    *          the value type used in the map.
-   * 
+   *
    * @return the root of the reconstructed object graph.
    */
   @SuppressWarnings("unchecked")
@@ -266,7 +266,7 @@ public abstract class Marshalling {
   /**
    * Converts the given JSON message to a Java object, recursively decoding nested attributes
    * contained in that message, which must contain type information for the root object.
-   * 
+   *
    * @param json
    *          The JSON representation of the object graph to demarshall.
    * @return the root of the reconstructed object graph.
