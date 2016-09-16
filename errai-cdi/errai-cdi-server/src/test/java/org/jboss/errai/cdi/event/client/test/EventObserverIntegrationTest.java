@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.event.client.test;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 
 import org.jboss.errai.bus.client.ErraiBus;
@@ -26,8 +27,13 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.cdi.event.client.DependentEventObserverTestModule;
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 import org.jboss.errai.cdi.event.client.EventProducerTestModule;
+import org.jboss.errai.cdi.event.client.NotifierModule;
 import org.jboss.errai.cdi.event.client.OnDemandEventObserver;
 import org.jboss.errai.cdi.event.client.PrimitiveEventTestModule;
+import org.jboss.errai.cdi.event.client.shared.Create;
+import org.jboss.errai.cdi.event.client.shared.Delete;
+import org.jboss.errai.cdi.event.client.shared.NotifierStartEvent;
+import org.jboss.errai.cdi.event.client.shared.Update;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -253,6 +259,73 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
                     (byte) 6,
                     (char) 7
             ), module.observed);
+  }
+
+  public void testEventWithEmptyCollectionOfSubTypeRetainsQualifiers() throws Exception {
+    final long start = System.currentTimeMillis();
+    final int timeLimit = 20000;
+    delayTestFinish(timeLimit);
+    CDI.addPostInitTask(() -> {
+      final Create create = new Create() {
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Create.class;
+        }
+      };
+      final Update update = new Update() {
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Update.class;
+        }
+      };
+      final Delete delete = new Delete() {
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Delete.class;
+        }
+      };
+
+      final NotifierModule module = IOCUtil.getInstance(NotifierModule.class);
+      module.event.select(create).fire(new NotifierStartEvent());
+      module.event.select(update).fire(new NotifierStartEvent());
+      module.event.select(delete).fire(new NotifierStartEvent());
+
+      final Runnable test = () -> {
+        assertTrue(module.observed.containsKey(Create.class));
+        assertEquals(1, module.observed.get(Create.class).size());
+        assertTrue(module.observed.get(Create.class).get(0).getEmpty().isEmpty());
+
+        assertTrue(module.observed.containsKey(Update.class));
+        assertEquals(1, module.observed.get(Update.class).size());
+        assertTrue(module.observed.get(Update.class).get(0).getEmpty().isEmpty());
+
+        assertTrue(module.observed.containsKey(Delete.class));
+        assertEquals(1, module.observed.get(Delete.class).size());
+        assertTrue(module.observed.get(Delete.class).get(0).getEmpty().isEmpty());
+
+        finishTest();
+      };
+
+      final Timer timer = new Timer() {
+
+        @Override
+        public void run() {
+          try {
+            test.run();
+          }
+          catch (final AssertionError ae) {
+            if (timeLimit - (System.currentTimeMillis() - start) > 1000) {
+              schedule(500);
+            }
+            else {
+              throw ae;
+            }
+          }
+        }
+      };
+      timer.schedule(500);
+
+    });
   }
 
 }

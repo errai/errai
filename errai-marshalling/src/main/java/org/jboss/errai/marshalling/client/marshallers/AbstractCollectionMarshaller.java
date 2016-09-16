@@ -60,6 +60,8 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
     if (array == null) return null;
 
     final String assumedElementType = ctx.getAssumedElementType();
+    // the assumed element type can only be used once since it is not set for nested collections.
+    ctx.setAssumedElementType(null);
 
     for (int i = 0; i < array.size(); i++) {
       final EJValue elem = array.get(i);
@@ -80,8 +82,6 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
           type = ctx.determineTypeFor(null, elem);
         }
 
-        // the assumed element type can only be used once since it is not set for nested collections.
-        ctx.setAssumedElementType(null);
         final Marshaller<Object> marshallerInstance = ctx.getMarshallerInstance(type);
         if (marshallerInstance == null) {
           throw new RuntimeException("no marshaller for type: " + type);
