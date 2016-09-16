@@ -50,32 +50,32 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   }
 
   @Override
-  public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+  public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
     return ServerMarshalling.canHandle(type);
   }
 
   @Override
-  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+  public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
     return ServerMarshalling.canHandle(type);
   }
 
   @Override
-  public long getSize(Object t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+  public long getSize(final Object t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
     return -1;
   }
 
   @Override
-  public void writeTo(Object t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-      MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
+  public void writeTo(final Object t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType,
+      final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException,
       WebApplicationException {
 
     entityStream.write(ServerMarshalling.toJSON(t).getBytes(Charset.forName("UTF-8")));
   }
 
   @Override
-  public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-      MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
+  public Object readFrom(final Class<Object> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType,
+      final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException, WebApplicationException {
 
-    return ServerMarshalling.fromJSON(entityStream, type);
+    return ServerMarshalling.fromJSON(entityStream);
   }
 }

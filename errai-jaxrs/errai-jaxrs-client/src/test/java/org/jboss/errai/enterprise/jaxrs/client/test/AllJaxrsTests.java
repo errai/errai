@@ -21,7 +21,7 @@ import org.junit.runners.Suite;
 
 /**
  * Test suite running all jax-rs integration tests.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @RunWith(Suite.class)
@@ -42,7 +42,8 @@ import org.junit.runners.Suite;
     PathParamTest.class,
     PathParamIntegrationTest.class,
     PlainMethodIntegrationTest.class,
-    QueryParamIntegrationTest.class })
+    QueryParamIntegrationTest.class,
+    ErraiProviderIntegrationTest.class })
 public class AllJaxrsTests {
 
 }
