@@ -710,11 +710,10 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     final Statement newObject = generateFactoryHandleStatement(injectable);
     final ConstructorBlockBuilder<?> con = bodyBlockBuilder.publicConstructor();
     con.callSuper(newObject);
-    for (final MetaClass assignableType : getAllAssignableTypes(injectable.getInjectedType())) {
-      if (assignableType.isPublic()) {
-        con.append(loadVariable("handle").invoke("addAssignableType", loadLiteral(assignableType)));
-      }
-    }
+
+    final AbstractStatementBuilder assignableTypeArrayStmt = getAssignableTypesArrayStmt(injectable.getInjectedType());
+    con.append(loadVariable("handle").invoke("setAssignableTypes", assignableTypeArrayStmt));
+
     final org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier qualifier = injectable.getQualifier();
     if (!qualifier.isDefaultQualifier()) {
       final AbstractStatementBuilder qualArray =
@@ -722,6 +721,15 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
       con.append(loadVariable("handle").invoke("setQualifiers", qualArray));
     }
     con.finish();
+  }
+
+  public static AbstractStatementBuilder getAssignableTypesArrayStmt(final MetaClass type) {
+    final Object[] publicAssignableTypes = getAllAssignableTypes(type)
+      .stream()
+      .filter(MetaClass::isPublic)
+      .toArray();
+    final AbstractStatementBuilder assignableTypeArrayStmt = newArray(Class.class).initialize(publicAssignableTypes);
+    return assignableTypeArrayStmt;
   }
 
   public static AbstractStatementBuilder getAnnotationArrayStmt(final org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier qualifier) {
@@ -800,7 +808,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return typeArgsClasses;
   }
 
-  protected static Collection<MetaClass> getAllAssignableTypes(final MetaClass injectedType) {
+  public static Collection<MetaClass> getAllAssignableTypes(final MetaClass injectedType) {
     return injectedType.getAllSuperTypesAndInterfaces();
   }
 

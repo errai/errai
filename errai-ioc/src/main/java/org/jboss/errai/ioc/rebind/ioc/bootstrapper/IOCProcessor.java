@@ -27,6 +27,7 @@ import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAnnotationArrayStmt;
+import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAssignableTypesArrayStmt;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -412,9 +413,8 @@ public class IOCProcessor {
                                          loadLiteral(false),
                                          loadLiteral(injectable.getBeanName()),
                                          loadLiteral(!injectable.isContextual()))));
-    for (final MetaClass assignable : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
-      curMethod.append(loadVariable(handleVarName).invoke("addAssignableType", loadLiteral(assignable)));
-    }
+
+    curMethod.append(loadVariable(handleVarName).invoke("setAssignableTypes", getAssignableTypesArrayStmt(injectable.getInjectedType())));
 
     if (!injectable.getQualifier().isDefaultQualifier()) {
       curMethod.append(loadVariable(handleVarName).invoke("setQualifiers", getAnnotationArrayStmt(injectable.getQualifier())));

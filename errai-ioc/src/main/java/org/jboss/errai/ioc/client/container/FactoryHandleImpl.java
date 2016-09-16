@@ -33,9 +33,8 @@ public class FactoryHandleImpl implements FactoryHandle {
 
   private static final List<Annotation> defaultQualifiers = Arrays.asList(QualifierUtil.DEFAULT_QUALIFIERS);
 
-  // TODO intern qualifiers for all FactoryHandle instances
   private List<Annotation> qualifiers;
-  private final List<Class<?>> assignableTypes = new ArrayList<>();
+  private List<Class<?>> assignableTypes;
   private final Class<?> actualType;
   private final String factoryName;
   private final Class<? extends Annotation> scope;
@@ -78,6 +77,10 @@ public class FactoryHandleImpl implements FactoryHandle {
     this.qualifiers = Arrays.asList(qualifiers);
   }
 
+  public void setAssignableTypes(final Class<?>[] assignableTypes) {
+    this.assignableTypes = Arrays.asList(assignableTypes);
+  }
+
   @Override
   public Collection<Class<?>> getAssignableTypes() {
     return Collections.unmodifiableCollection(assignableTypes);
@@ -96,10 +99,6 @@ public class FactoryHandleImpl implements FactoryHandle {
   @Override
   public Class<? extends Annotation> getScope() {
     return scope;
-  }
-
-  public void addAssignableType(final Class<?> type) {
-    assignableTypes.add(type);
   }
 
   @Override
