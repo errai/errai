@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,10 +30,12 @@ import org.jboss.errai.databinding.client.Binding;
 import org.jboss.errai.databinding.client.ComponentAlreadyBoundException;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 import org.jboss.errai.databinding.client.InvalidPropertyExpressionException;
+import org.jboss.errai.databinding.client.MapBindableProxy;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.OneTimeUnsubscribeHandle;
 import org.jboss.errai.databinding.client.PropertyChangeHandlerSupport;
 import org.jboss.errai.databinding.client.PropertyChangeUnsubscribeHandle;
+import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 
@@ -58,9 +61,6 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   private T paused;
 
   protected DataBinder() {
-    throw new RuntimeException(
-            "This constructor exists to allow external access to protected methods through subclassing. There should be no instantiable subclasses of "
-                    + getClass().getName());
   }
 
   /**
@@ -103,6 +103,21 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <T> DataBinder<List<T>> forListOfType(final Class<T> modelType) {
     return new DataBinder<List<T>>((Class) List.class);
+  }
+
+  /**
+   * Creates a {@link DataBinder} for a map.
+   *
+   * @param propertyTypes
+   *          A collection of name-type pairs describing the properties that can be in map models for the returned
+   *          binder. Adding other properties to the model of the returned binder will cause
+   *          {@link NonExistingPropertyException NonExistingPropertyExceptions} to be thrown.
+   */
+  public static DataBinder<Map<String, Object>> forMap( final Map<String, PropertyType> propertyTypes ) {
+    final DataBinder<Map<String, Object>> binder = new DataBinder<>();
+    binder.proxy = new MapBindableProxy(propertyTypes);
+
+    return binder;
   }
 
   /**

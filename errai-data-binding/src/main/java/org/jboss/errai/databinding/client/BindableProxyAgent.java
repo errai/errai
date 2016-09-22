@@ -164,7 +164,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           final boolean bindOnKeyUp, final StateSync initialState) {
     logger.debug("Binding property {} to component {}", property, component);
 
-    final Converter converter = findConverter(property, getPropertyType(property), component, providedConverter);
+    final Converter converter = findConverter(property, getPropertyType(property).getType(), component, providedConverter);
     logger.debug("Using converter: {} <--> {}", converter.getModelType().getSimpleName(), converter.getComponentType().getSimpleName());
 
     final String lastSubProperty = property.substring(property.lastIndexOf('.')+1);
@@ -282,23 +282,29 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
             || (t instanceof JavaScriptException && t.getMessage().contains("null"));
   }
 
-  private Class<?> getPropertyType(final String property) {
+  private PropertyType getPropertyType(final String property) {
     return getPropertyType(proxy, property);
   }
 
-  private static Class<?> getPropertyType(final BindableProxy<?> proxy, final String property) {
+  private static PropertyType getPropertyType(final BindableProxy<?> proxy, final String property) {
     final BindableProxyAgent<?> agent = proxy.getBindableProxyAgent();
     if (property.contains(".")) {
       final int firstDot = property.indexOf(".");
       final String topLevelProperty = property.substring(0, firstDot);
       final String childProperty = property.substring(firstDot+1);
-      final Class<?> topLevelType = getPropertyType(proxy, topLevelProperty);
-      final BindableProxy<?> topLevelProxy = BindableProxyFactory.getBindableProxy(topLevelType.getName());
+      final PropertyType topLevelType = getPropertyType(proxy, topLevelProperty);
+      final BindableProxy<?> topLevelProxy;
+      if (topLevelType instanceof MapPropertyType) {
+        topLevelProxy = (BindableProxy<?>) DataBinder.forMap(((MapPropertyType) topLevelType).getPropertyTypes()).getModel();
+      }
+      else {
+        topLevelProxy = BindableProxyFactory.getBindableProxy(topLevelType.getType().getName());
+      }
 
       return getPropertyType(topLevelProxy, childProperty);
     }
     else if (agent.propertyTypes.containsKey(property)) {
-      return agent.propertyTypes.get(property).getType();
+      return agent.propertyTypes.get(property);
     }
     else {
       throw new NonExistingPropertyException(property);
@@ -597,7 +603,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         binder.addPropertyChangeHandler("**", handler);
       }
     }
-    else {
+    else if (proxy.get(bindableProperty) != null) {
       binder.setModel(proxy.get(bindableProperty), initialState, true);
     }
     proxy.set(bindableProperty, binder.getModel());
