@@ -103,4 +103,10 @@ public class InteropEventQuickHandlerTemplateTest extends AbstractErraiCDITest {
     invokeEventListeners(button, "click");
     assertEquals(Arrays.asList(new ObservedEvent("noFieldButton", "click")), bean.observed);
   }
+
+  public void testPrivateMethodHandler() throws Exception {
+    assertTrue(bean.observed.isEmpty());
+    invokeEventListeners(bean.privateHandler, "dblclick");
+    assertEquals(Arrays.asList(new ObservedEvent("privateHandler", "dblclick")), bean.observed);
+  }
 }

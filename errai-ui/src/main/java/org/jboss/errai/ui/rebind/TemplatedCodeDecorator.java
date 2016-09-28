@@ -24,7 +24,6 @@ import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.nestedCall;
@@ -50,7 +49,6 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.apache.xerces.impl.dtd.models.DFAContentModel;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -371,7 +369,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       }
       else {
         processJsInteropDomEvent(initStmts, dataFieldElementsVarName, fieldsMap, instance, dataFieldTypes, declaringClass, method,
-                targetDataFieldNames, eventType);
+                targetDataFieldNames, eventType, controller);
       }
     }
   }
@@ -379,7 +377,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   private void processJsInteropDomEvent(final List<Statement> initStmts, final String dataFieldElementsVarName,
           final Statement fieldsMap, final Statement instance, final Map<String, MetaClass> dataFieldTypes,
           final MetaClass declaringClass, final MetaMethod method, final String[] targetDataFieldNames,
-          final MetaClass eventType) {
+          final MetaClass eventType, final FactoryController controller) {
     final String[] browserEventTypes = Optional
       .ofNullable(method.getParameters()[0].getAnnotation(ForEvent.class))
       .map(anno -> anno.value())
@@ -391,7 +389,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         .newInstanceOf(org.jboss.errai.common.client.dom.EventListener.class)
         .extend()
         .publicOverridesMethod("call", Parameter.of(org.jboss.errai.common.client.dom.Event.class, "event"))
-          .append(load(instance).invoke(method, castTo(eventType, loadVariable("event"))))
+          .append(InjectUtil.invokePublicOrPrivateMethod(controller, method, castTo(eventType, loadVariable("event"))))
           .finish()
         .finish();
       final ContextualStatementBuilder elementStmt;

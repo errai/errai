@@ -83,6 +83,10 @@ public class InteropEventQuickHandlerTemplate {
 
   @Inject
   @DataField
+  public Button privateHandler;
+
+  @Inject
+  @DataField
   public TextInput input;
 
   @Inject
@@ -123,6 +127,11 @@ public class InteropEventQuickHandlerTemplate {
   @EventHandler("noFieldButton")
   public void onNoFieldButtonSingle(final @ForEvent("click") MouseEvent evt) {
     observed.add(new ObservedEvent("noFieldButton", evt.getType()));
+  }
+
+  @EventHandler("privateHandler")
+  private void onButtonDoubleClick(final @ForEvent("dblclick") MouseEvent evt) {
+    observed.add(new ObservedEvent("privateHandler", evt.getType()));
   }
 
 }
