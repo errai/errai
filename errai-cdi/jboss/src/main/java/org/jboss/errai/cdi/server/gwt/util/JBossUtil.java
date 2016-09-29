@@ -31,8 +31,10 @@ public class JBossUtil {
   private static final String APP_CONTEXT_PROPERTY = "errai.dev.context";
   private static final String JBOSS_HOME_PROPERTY = "errai.jboss.home";
   private static final String CMD_ARGS_PROPERTY = "errai.jboss.args";
-  public static final String USERS_PROPERTY_FILE = "application-users.properties";
-  public static final String ROLES_PROPERTY_FILE = "application-roles.properties";
+  public static final String APP_USERS_PROPERTY_FILE = "application-users.properties";
+  public static final String APP_ROLES_PROPERTY_FILE = "application-roles.properties";
+  public static final String MGMT_USERS_PROPERTY_FILE = "mgmt-users.properties";
+  public static final String MGMT_GROUPS_PROPERTY_FILE = "mgmt-groups.properties";
   public static final String CLI_CONFIGURATION_FILE = "bin" + File.separator + "jboss-cli.xml";
   public static final String STANDALONE_CONFIGURATION = "standalone" + File.separator + "configuration";
 

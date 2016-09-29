@@ -121,18 +121,32 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
    * roles for development mode.
    */
   private void prepareUsersAndRoles(final String jbossHome) {
-    InputStream usersStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.USERS_PROPERTY_FILE);
+    InputStream appUsersStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.APP_USERS_PROPERTY_FILE);
 
-    if (usersStream != null) {
-      processPropertiesFile(JBossUtil.USERS_PROPERTY_FILE, jbossHome, usersStream, true);
+    if (appUsersStream != null) {
+      processPropertiesFile(JBossUtil.APP_USERS_PROPERTY_FILE, jbossHome, appUsersStream, true);
     }
 
-    InputStream rolesStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.ROLES_PROPERTY_FILE);
+    InputStream appRolesStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.APP_ROLES_PROPERTY_FILE);
 
-    if (rolesStream != null) {
-      processPropertiesFile(JBossUtil.ROLES_PROPERTY_FILE, jbossHome, rolesStream, false);
+    if (appRolesStream != null) {
+      processPropertiesFile(JBossUtil.APP_ROLES_PROPERTY_FILE, jbossHome, appRolesStream, false);
+    }
+    
+    InputStream mgmtUsersStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.MGMT_USERS_PROPERTY_FILE);
+
+    if (mgmtUsersStream != null) {
+      processPropertiesFile(JBossUtil.MGMT_USERS_PROPERTY_FILE, jbossHome, mgmtUsersStream, true);
+    }
+
+    InputStream mgmtGroupsStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.MGMT_GROUPS_PROPERTY_FILE);
+
+    if (mgmtGroupsStream != null) {
+      processPropertiesFile(JBossUtil.MGMT_GROUPS_PROPERTY_FILE, jbossHome, mgmtGroupsStream, false);
     }
   }
 
