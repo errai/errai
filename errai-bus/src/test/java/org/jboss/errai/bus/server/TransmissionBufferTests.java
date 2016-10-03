@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
+import org.jboss.errai.bus.server.io.ByteWriteAdapter;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
@@ -754,11 +755,11 @@ public class TransmissionBufferTests extends TestCase {
     }
   }
 
-  public void testNoIndexOutOfBoundsExceptionWhenWriteHeadGetsLarge() throws Exception {
+  public void testNoIndexOutOfBoundsExceptionWhenWritingAfterWriteHeadGetsLarge() throws Exception {
     // Preparation to get the writeSequenceNumber large enough
     final int segmentSize = 1;
     final int segments = Integer.MAX_VALUE / 4;
-    final TransmissionBuffer buffer = TransmissionBuffer.create(segmentSize, segments);
+    final TransmissionBuffer buffer = TransmissionBuffer.createDirect(segmentSize, segments);
     final InputStream nullInputStream = new InputStream() {
       @Override
       public int read() throws IOException {
@@ -776,6 +777,51 @@ public class TransmissionBufferTests extends TestCase {
     // Actual test
     try {
       buffer.write(writeSize, nullInputStream, color);
+    } catch (final IndexOutOfBoundsException ex) {
+      throw new AssertionError(ex);
+    }
+  }
+
+  public void testNoIndexOutOfBoundsExceptionWhenReadingAfterWriteHeadGetsLarge() throws Exception {
+    // Preparation to get the writeSequenceNumber large enough
+    final int segmentSize = Integer.MAX_VALUE / 4;
+    final int segments = 4;
+    final TransmissionBuffer buffer = TransmissionBuffer.createDirect(segmentSize, segments);
+    final InputStream nullInputStream = new InputStream() {
+      @Override
+      public int read() throws IOException {
+        return 0;
+      }
+    };
+    final BufferColor color = BufferColor.getNewColorFromHead(buffer);
+    long accum = 0;
+    final int writeSize = segmentSize * segments;
+    while ((accum + writeSize) < Integer.MAX_VALUE) {
+      buffer.write(writeSize, nullInputStream, color);
+      accum += writeSize;
+    }
+    buffer.write(writeSize, nullInputStream, color);
+
+    // Actual test
+    try {
+      buffer.read(new ByteWriteAdapter() {
+
+        @Override
+        public void write(final byte[] b) throws IOException {
+        }
+
+        @Override
+        public void write(final byte b) throws IOException {
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+        }
+
+        @Override
+        public void flush() throws IOException {
+        }
+      }, color);
     } catch (final IndexOutOfBoundsException ex) {
       throw new AssertionError(ex);
     }

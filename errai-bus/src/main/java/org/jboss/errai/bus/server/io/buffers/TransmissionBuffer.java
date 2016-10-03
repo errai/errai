@@ -211,7 +211,7 @@ public class TransmissionBuffer implements Buffer {
     final ReentrantLock lock = bufferColor.lock;
     lock.lock();
     try {
-      final int allocSize = ((writeSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
+      final int allocSize = (int) (((long) writeSize + (long) SEGMENT_HEADER_SIZE) / segmentSize) + 1;
       final long writeHead = writeSequenceNumber.getAndAdd(allocSize);
       final int seq = (int) (writeHead % segments);
 
@@ -320,7 +320,7 @@ public class TransmissionBuffer implements Buffer {
                       final BufferColor bufferColor,
                       final BufferFilter callback) throws IOException {
 
-    return read(outputStream, bufferColor, callback, (int) headSequence % segments);
+    return read(outputStream, bufferColor, callback, (int) (headSequence % segments));
   }
 
   /**
@@ -593,7 +593,7 @@ public class TransmissionBuffer implements Buffer {
 
   @Override
   public int getHeadPositionBytes() {
-    return ((int) headSequence % segments) * segmentSize;
+    return (int) (headSequence % segments) * segmentSize;
   }
 
   @Override
@@ -626,7 +626,7 @@ public class TransmissionBuffer implements Buffer {
    */
   private long getNextSegment(final BufferColor bufferColor, final long headSeq, long colorSeq) {
     for (final int color = bufferColor.getColor(); colorSeq < headSeq; colorSeq++) {
-      final short seg = segmentMap[((int) colorSeq % segments)];
+      final short seg = segmentMap[(int) (colorSeq % segments)];
 
       if (seg == color || seg == Short.MIN_VALUE) {
         return colorSeq;
@@ -665,47 +665,48 @@ public class TransmissionBuffer implements Buffer {
 
     final long sequenceToRead = getNextSegment(color, head, sequence);
     if (sequenceToRead != -1) {
-      int readCursor = ((int) sequenceToRead % segments) * segmentSize;
+      int readCursor = (int) (sequenceToRead % segments) * segmentSize;
 
       final int readSize = readChunkSize(readCursor);
 
       readCursor += SEGMENT_HEADER_SIZE;
 
-      final int endRead = readCursor + readSize;
+      // Have to use long here in case readCursor + readSize > Integer.MAX_VALUE
+      final long endRead = (long) readCursor + (long) readSize;
       final int maxInitialRead;
 
       if (endRead < bufferSize) {
-        maxInitialRead = endRead;
+        // In this branch, endRead <= Integer.MAX_VALUE
+        maxInitialRead = (int) endRead;
       }
       else {
         maxInitialRead = bufferSize;
       }
 
-      if (callback == null) {
-        for (; readCursor < maxInitialRead; readCursor++) {
-          outputStream.write(_buffer.get(readCursor));
-        }
+      final BufferFilter nullSafeCallback = (callback == null ? NoOpBufferFilter.INSTANCE : callback);
 
-        if (readCursor < endRead) {
-          final int remaining = endRead - bufferSize;
-          for (int i = 0; i < remaining; i++) {
-            outputStream.write(_buffer.get(i));
-          }
+      for (; readCursor >= 0 && readCursor < maxInitialRead; readCursor++) {
+        outputStream.write(nullSafeCallback.each(_buffer.get(readCursor), outputStream));
+      }
+
+      if (readCursor < endRead) {
+        /*
+         * This cast is safe because:
+         * 1. readSize <= bufferSize
+         * 2. endRead = readCursor + readSize
+         * 3. readCursor is an int so readCursor <= Integer.MAX_VALUE
+         *
+         * This means:
+         *   endRead - bufferSize <= (Integer.MAX_VALUE + bufferSize) - bufferSize == Integer.MAX_VALUE
+         */
+        final int remaining = (int) (endRead - bufferSize);
+        for (int i = 0; i < remaining; i++) {
+          outputStream.write(nullSafeCallback.each(_buffer.get(i), outputStream));
         }
       }
-      else {
-        for (; readCursor < maxInitialRead; readCursor++) {
-          outputStream.write(callback.each(_buffer.get(readCursor), outputStream));
-        }
 
-        if (readCursor < endRead) {
-          final int remaining = endRead - bufferSize;
-          for (int i = 0; i < remaining; i++) {
-            outputStream.write(callback.each(_buffer.get(i), outputStream));
-          }
-        }
-      }
-      return sequenceToRead + ((readSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
+      // Need to cast before adding incase readSize + SEGMENT_HEADER_SIZE is bigger than Integegr.MAX_VALUE
+      return sequenceToRead + (((long) readSize + (long) SEGMENT_HEADER_SIZE) / segmentSize) + 1;
     }
     else {
       return -1;
