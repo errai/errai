@@ -16,12 +16,20 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import com.google.gwt.user.client.Timer;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.tests.support.SlowService;
 import org.jboss.errai.bus.common.AbstractErraiTest;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
+
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock
@@ -42,13 +50,14 @@ public class BusRenegotiationTests extends AbstractErraiTest {
             .signalling().noErrorHandling().sendNowWith(ErraiBus.get());
 
         new Timer() {
+          @Override
           public void run() {
             MessageBuilder.createMessage()
                 .toSubject("TestService3")
                 .signalling().noErrorHandling().repliesTo(
                 new MessageCallback() {
                   @Override
-                  public void callback(Message message) {
+                  public void callback(final Message message) {
                     finishTest();
 
                   }
@@ -58,6 +67,42 @@ public class BusRenegotiationTests extends AbstractErraiTest {
         }.schedule(500);
       }
     });
+  }
 
+  public void testRpcResponseSubjectsNotAdvertisedAfterReconnection() throws Exception {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        logger.info("Calling slow service...");
+        MessageBuilder.createCall(
+                (final Long retVal) -> fail(
+                        "RemoteCallback invoked. Likely the assertion that caused the failure was swallowed. See logs for details."),
+                (m, e) -> {
+                  fail("ErrorCallback invoked");
+                  return false;
+                }, SlowService.class).sleep(10000);
+
+        final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
+
+        logger.info("Stopping bus in test...");
+        bus.stop(false);
+
+        logger.info("Reinitializing bus in test...");
+        bus.init();
+
+        logger.info("Running assertions in test...");
+        final Set<String> allSubjects = bus.getAllRegisteredSubjects();
+        final List<String> rpcResponseSubjects = allSubjects.stream()
+                .filter(s -> s.endsWith(":RPC")).collect(Collectors.toList());
+        try {
+          assertEquals(Collections.emptyList(), rpcResponseSubjects);
+        } catch (final AssertionError ae) {
+          logger.info("Test failed.", ae);
+          throw ae;
+        }
+        logger.info("Test completed");
+        finishTest();
+      }
+    });
   }
 }

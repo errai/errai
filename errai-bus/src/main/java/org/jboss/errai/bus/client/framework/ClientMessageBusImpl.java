@@ -306,7 +306,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     this.onUnsubscribeHooks.clear();
     this.transportHandler = BOOTSTRAP_HANDLER;
 
+    removeRpcResponseSubscriptions();
     setupDefaultHandlers();
+  }
+
+  private void removeRpcResponseSubscriptions() {
+    final Iterator<String> iter = subscriptions.keySet().iterator();
+    while (iter.hasNext()) {
+      final String topic = iter.next();
+      if (topic.endsWith(":RespondTo:RPC") || topic.endsWith(":Errors:RPC")) {
+        iter.remove();
+      }
+    }
   }
 
   private void setupDefaultHandlers() {
