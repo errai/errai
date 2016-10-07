@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.support.bus.rebind;
 
-import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,6 +34,9 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
@@ -52,13 +55,13 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
  * <li>Errai's message bus is not in connected state
  * <li>A remote endpoint for the service doesn't exist
  * </ul>
- * 
+ *
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
 public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService> {
-  public ShadowServiceDecorator(Class<ShadowService> decoratesWith) {
+  public ShadowServiceDecorator(final Class<ShadowService> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -103,27 +106,28 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
             .append(Stmt.declareVariable("methodParms", List.class,
                     Stmt.loadVariable("message").invoke("get", List.class, Stmt.loadLiteral("MethodParms"))));
 
-    for (final Method method : intf.getMethods()) {
-      if (ProxyUtil.isMethodInInterface(intf, method)) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
+    final MetaClass mc = MetaClassFactory.get(intf);
+    for (final MetaMethod method : mc.getMethods()) {
+      if (ProxyUtil.isMethodInInterface(mc, method) && ProxyUtil.shouldProxyMethod(method)) {
+        final MetaClass[] parameterTypes = Arrays.stream(method.getParameters()).map(p -> p.getType()).toArray(MetaClass[]::new);
         final VariableReference[] objects = new VariableReference[parameterTypes.length];
         final BlockBuilder<ElseBlockBuilder> blockBuilder = If
-                .cond(Stmt.loadLiteral(ProxyUtil.createCallSignature(intf, method)).invoke("equals",
+                .cond(Stmt.loadLiteral(ProxyUtil.createCallSignature(method)).invoke("equals",
                         Stmt.loadVariable("commandType")));
-        
+
         for (int i = 0; i < parameterTypes.length; i++) {
-          final Class<?> parameterType = parameterTypes[i];
+          final MetaClass parameterType = parameterTypes[i];
           blockBuilder.append(Stmt.declareVariable("var" + i, parameterType,
                   Stmt.castTo(parameterType, Stmt.loadVariable("methodParms").invoke("get", i))));
           objects[i] = Refs.get("var" + i);
         }
 
-        final boolean hasReturnType = !method.getReturnType().equals(void.class);
+        final boolean hasReturnType = !method.getReturnType().isVoid();
         blockBuilder.append(Stmt.declareFinalVariable("instance", intf, controller.contextGetInstanceStmt()));
         final Statement methodInvocation = Stmt.nestedCall(Stmt.loadVariable("instance")).invoke(method.getName(), (Object[]) objects);
         blockBuilder.append(Stmt.try_()
                 .append((hasReturnType) ? Stmt.declareFinalVariable("ret", method.getReturnType(), methodInvocation) : methodInvocation)
-                .append((decorable.isEnclosingTypeDependent()) ? Stmt.loadVariable("context").invoke("destroyInstance", Refs.get("instance")) 
+                .append((decorable.isEnclosingTypeDependent()) ? Stmt.loadVariable("context").invoke("destroyInstance", Refs.get("instance"))
                         : EmptyStatement.INSTANCE)
                 .append((hasReturnType) ? Stmt.invokeStatic(MessageBuilder.class, "createConversation", Stmt.loadVariable("message"))
                         .invoke("subjectProvided").invoke("with", "MethodReply", Refs.get("ret"))

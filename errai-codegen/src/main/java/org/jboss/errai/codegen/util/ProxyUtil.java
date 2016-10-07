@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -229,7 +230,7 @@ public abstract class ProxyUtil {
       // need to make sure that IOC is an optional dependency. This should probably
       // be replaced with some sort of pluggable model instead (where a Statement can
       // be provided by some Provider in the IOC module itself maybe).
-      StringBuilder builder = new StringBuilder();
+      final StringBuilder builder = new StringBuilder();
       builder.append("org.jboss.errai.ioc.client.container.IOC.getAsyncBeanManager().lookupBeans(")
               .append(interceptor.getSimpleName())
               .append(".class).iterator().next().getInstance(icc)");
@@ -253,12 +254,12 @@ public abstract class ProxyUtil {
     // methods of this type.
     final Multimap<Class<?>, Class<?>> standaloneInterceptors = ArrayListMultimap.create();
 
-    public InterceptorProvider(Collection<MetaClass> featureInterceptors, Collection<MetaClass> standaloneInterceptors) {
+    public InterceptorProvider(final Collection<MetaClass> featureInterceptors, final Collection<MetaClass> standaloneInterceptors) {
       setFeatureInterceptors(featureInterceptors);
       setStandaloneInterceptors(standaloneInterceptors);
     }
 
-    private void setFeatureInterceptors(Collection<MetaClass> featureInterceptors) {
+    private void setFeatureInterceptors(final Collection<MetaClass> featureInterceptors) {
       for (final MetaClass featureInterceptor : featureInterceptors) {
         final Class<? extends Annotation>[] annotations =
             featureInterceptor.getAnnotation(FeatureInterceptor.class).value();
@@ -269,11 +270,11 @@ public abstract class ProxyUtil {
       }
     }
 
-    private void setStandaloneInterceptors(Collection<MetaClass> standaloneInterceptors) {
-      for (MetaClass interceptorClass : standaloneInterceptors) {
-        InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
-        Class<?>[] intercepts = interceptor.value();
-        for (Class<?> intercept : intercepts) {
+    private void setStandaloneInterceptors(final Collection<MetaClass> standaloneInterceptors) {
+      for (final MetaClass interceptorClass : standaloneInterceptors) {
+        final InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
+        final Class<?>[] intercepts = interceptor.value();
+        for (final Class<?> intercept : intercepts) {
           this.standaloneInterceptors.put(intercept, interceptorClass.asClass());
         }
       }
@@ -290,8 +291,8 @@ public abstract class ProxyUtil {
      * @return the list of interceptors that should be triggered when invoking the provided proxy
      *         method on the provided type, never null.
      */
-    public List<Class<?>> getInterceptors(MetaClass type, MetaMethod method) {
-      List<Class<?>> interceptors = new ArrayList<Class<?>>();
+    public List<Class<?>> getInterceptors(final MetaClass type, final MetaMethod method) {
+      final List<Class<?>> interceptors = new ArrayList<>();
 
       InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
       if (interceptedCall == null) {
@@ -302,12 +303,12 @@ public abstract class ProxyUtil {
         interceptors.addAll(standaloneInterceptors.get(type.asClass()));
       }
       else {
-        for (Class<?> clazz : interceptedCall.value()) {
+        for (final Class<?> clazz : interceptedCall.value()) {
           interceptors.add(clazz);
         }
       }
 
-      for (Class<? extends Annotation> annotation : featureInterceptors.keySet()) {
+      for (final Class<? extends Annotation> annotation : featureInterceptors.keySet()) {
         if (type.isAnnotationPresent(annotation) || method.isAnnotationPresent(annotation)) {
           interceptors.addAll(featureInterceptors.get(annotation));
         }
@@ -323,7 +324,7 @@ public abstract class ProxyUtil {
    *
    * @param interceptor
    */
-  private static boolean isManagedBean(Class<?> interceptor) {
+  private static boolean isManagedBean(final Class<?> interceptor) {
     if (interceptor.getAnnotation(ApplicationScoped.class) != null)
       return true;
     if (interceptor.getAnnotation(Singleton.class) != null)
@@ -364,8 +365,14 @@ public abstract class ProxyUtil {
       if (iface.getMethod(member.getName(), member.getParameterTypes()) != null)
         return true;
     }
-    catch (NoSuchMethodException e) {
+    catch (final NoSuchMethodException e) {
     }
+    return false;
+  }
+
+  public static boolean isMethodInInterface(final MetaClass iface, final MetaMethod member) {
+    if (iface.getMethod(member.getName(), Arrays.stream(member.getParameters()).map(p -> p.getType()).toArray(MetaClass[]::new)) != null)
+      return true;
     return false;
   }
 
@@ -409,7 +416,7 @@ public abstract class ProxyUtil {
     return returnStatement;
   }
 
-  private static Annotation[] filter(final Annotation[] raw, Set<String> packages) {
+  private static Annotation[] filter(final Annotation[] raw, final Set<String> packages) {
     final Annotation[] firstPass = new Annotation[raw.length];
     int j = 0;
     for (int i = 0; i < raw.length; i++) {
