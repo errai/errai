@@ -27,7 +27,7 @@ public class ClientTaskManagerTimedTaskTest extends ClientAsyncTaskTest {
   private CountingRunnable latestRunnable;
 
   @Override
-  protected AsyncTask getTaskUnderTest(CountingRunnable task) {
+  protected AsyncTask getTaskUnderTest(final CountingRunnable task) {
     latestRunnable = task;
     assertEquals("Hey, you can't pass me a used runnable!", 0, task.getRunCount());
     return TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 100, latestRunnable);
@@ -49,7 +49,7 @@ public class ClientTaskManagerTimedTaskTest extends ClientAsyncTaskTest {
       }
     }.schedule(120);
   }
-  
+
   public void testRepeatingTask() throws Exception {
     final CountingRunnable cr = new CountingRunnable();
     final AsyncTask task = TaskManagerFactory.get()
@@ -60,10 +60,10 @@ public class ClientTaskManagerTimedTaskTest extends ClientAsyncTaskTest {
       @Override
       public void run() {
         task.cancel(true);
-        int actualRunCount = cr.getRunCount();
-        int expectedRunCount = 30;
+        final int actualRunCount = cr.getRunCount();
+        final int expectedRunCount = 30;
         assertTrue("task executed " + actualRunCount + " times. Should have been at least " + expectedRunCount,
-            actualRunCount > expectedRunCount);
+            actualRunCount >= expectedRunCount);
         finishTest();
       }
     }.schedule(2000);
