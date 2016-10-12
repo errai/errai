@@ -60,7 +60,15 @@ public class HostPageScriptInjectorFilter implements Filter {
 
     final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-    if (!registry.isEmpty()) {
+    /*
+     * ===== DANGER WILL ROBISON =====
+     * 
+     * When Errai is not being executed from a Java EE server (or a Servlet container
+     * with CDI glued on), the ScriptRegistry will not be injected.  While the null
+     * check below is unneeded in many cases, if you're running super-dev-mode
+     * with the default Jetty implementation this null check is required.
+     */
+    if (registry !=null && !registry.isEmpty()) {
       final CharResponseWrapper wrappedResponse = getCharResponseWrapper((HttpServletResponse) response);
       chain.doFilter(request, noCache(wrappedResponse));
 
