@@ -30,14 +30,14 @@ import com.google.gwt.user.client.ui.Widget;
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public class TemplateWidget extends Panel {
-  private Collection<Widget> children;
+  private final Collection<Widget> children;
 
-  public TemplateWidget(Element root, Collection<Widget> children) {
+  public TemplateWidget(final Element root, final Collection<Widget> children) {
     this.setElement(root);
     this.children = children;
 
     for (Widget child : children) {
-      if (child.getParent() instanceof TemplateWidget) {
+      if (!(child instanceof TemplateWidget) && child.getParent() instanceof TemplateWidget) {
         child = child.getParent();
       }
       child.removeFromParent();
@@ -56,7 +56,7 @@ public class TemplateWidget extends Panel {
   }
 
   @Override
-  public boolean remove(Widget child) {
+  public boolean remove(final Widget child) {
     if(child.getParent() != this)
     {
       return false;
