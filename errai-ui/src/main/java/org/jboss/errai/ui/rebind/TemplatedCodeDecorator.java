@@ -157,10 +157,6 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
     generateTemplatedInitialization(decorable, controller, initStmts, customProvider, styleSheet);
 
-    if (declaringClass.isAnnotationPresent(EntryPoint.class)) {
-      initStmts.add(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("instance")));
-    }
-
     if (customProvider) {
       final Statement init =
         Stmt.invokeStatic(TemplateUtil.class, "provideTemplate",
