@@ -19,12 +19,17 @@ package org.jboss.errai.ui.test.basic.client;
 import static org.jboss.errai.ui.shared.TemplateUtil.asElement;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateWidget;
 import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.jboss.errai.ui.test.basic.client.res.BasicComponent;
 import org.jboss.errai.ui.test.basic.client.res.BasicComponentUsingDataFields;
+import org.jboss.errai.ui.test.basic.client.res.LessStyledComponent;
+import org.jboss.errai.ui.test.basic.client.res.LessStyledComponentAbsolute;
+import org.jboss.errai.ui.test.basic.client.res.LessStyledComponentRelative;
+import org.jboss.errai.ui.test.basic.client.res.LessStyledComponentWithImport;
 import org.jboss.errai.ui.test.basic.client.res.NonCompositeComponent;
 import org.jboss.errai.ui.test.basic.client.res.StyledComponent;
 import org.jboss.errai.ui.test.basic.client.res.StyledComponentWithAbsoluteSheetPath;
@@ -45,6 +50,15 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
   @Override
   public String getModuleName() {
     return getClass().getName().replaceAll("client.*$", "Test");
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    super.gwtTearDown();
+    /*
+     * This acts as a reset for the LESS stylesheet tests. Without this, the tests are not independent.
+     */
+    StyleInjector.inject(".styled {\n color: black;\n background-color: black;\n}");
   }
 
   @Test
@@ -240,6 +254,63 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     styledBeanAssertions(bean, "margin", "10px");
   }
 
+  @Test
+  public void testLessStyleSheetWithDefaultPath() throws Exception {
+    try {
+      final LessStyledComponent bean = IOCUtil.getInstance(LessStyledComponent.class);
+      StyleInjector.flush();
+      assertTrue("Element does not have correct CSS class.", bean.styled.getClassList().contains("styled"));
+      assertEquals("rgb(255,0,0)", getPropertyValue(bean.styled, "color").replaceAll("\\s+", ""));
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError(t);
+    }
+  }
+
+  @Test
+  public void testLessStyleSheetWithRelativePath() throws Exception {
+    try {
+      final LessStyledComponentRelative bean = IOCUtil.getInstance(LessStyledComponentRelative.class);
+      StyleInjector.flush();
+      assertTrue("Element does not have correct CSS class.", bean.styled.getClassList().contains("styled"));
+      assertEquals("rgb(255,0,0)", getPropertyValue(bean.styled, "color").replaceAll("\\s+", ""));
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError(t);
+    }
+  }
+
+  @Test
+  public void testLessStyleSheetWithAbsolutePath() throws Exception {
+    try {
+      final LessStyledComponentAbsolute bean = IOCUtil.getInstance(LessStyledComponentAbsolute.class);
+      StyleInjector.flush();
+      assertTrue("Element does not have correct CSS class.", bean.styled.getClassList().contains("styled"));
+      assertEquals("rgb(255,0,0)", getPropertyValue(bean.styled, "color").replaceAll("\\s+", ""));
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError(t);
+    }
+  }
+
+  @Test
+  public void testLessStyleSheetWithImportedSheet() throws Exception {
+    try {
+      final LessStyledComponentWithImport bean = IOCUtil.getInstance(LessStyledComponentWithImport.class);
+      StyleInjector.flush();
+      assertTrue("Element does not have correct CSS class.", bean.styled.getClassList().contains("styled"));
+      assertEquals("rgb(255,0,0)", getPropertyValue(bean.styled, "color").replaceAll("\\s+", ""));
+      assertEquals("rgb(0,0,255)", getPropertyValue(bean.styled, "background-color").replaceAll("\\s+", ""));
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError(t);
+    }
+  }
+
   private void styledBeanAssertions(final StyledTemplatedBean bean, final String propertyName, final String propertyValue) {
     // Need to flush so that styles are computed immediately.
     StyleInjector.flush();
@@ -247,7 +318,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     assertEquals("Style from StyledComponent.css was not applied.", propertyValue, getPropertyValue(bean.getStyled(), propertyName));
   }
 
-  private static native String getPropertyValue(Element elem, String prop) /*-{
+  private static native String getPropertyValue(Object elem, String prop) /*-{
     return $wnd.getComputedStyle(elem,null).getPropertyValue(prop);
   }-*/;
 

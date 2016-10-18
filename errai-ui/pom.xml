@@ -115,6 +115,12 @@
         </exclusion>
       </exclusions>
     </dependency>
+    
+    <dependency>
+      <groupId>org.lesscss</groupId>
+      <artifactId>lesscss</artifactId>
+    </dependency>
+    
     <!-- Replacement for commons-logging-api excluded from the above org.apache.stanbol.enhancer.engines.htmlextractor -->
     <dependency>
       <groupId>org.slf4j</groupId>
