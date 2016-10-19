@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ui.rebind;
 
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
@@ -242,14 +243,14 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       /*
        * Instantiate the ClientBundle Template resource
        */
-      initStmts.add(Stmt
-          .declareVariable(getConstructedTemplateTypes(decorable).get(declaringClass))
-          .named(templateVarName)
-          .initializeWith(
-              Stmt.invokeStatic(GWT.class, "create", constructed.get(declaringClass))));
+        initStmts.add(declareVariable(constructed.get(declaringClass)).named(templateVarName)
+                .initializeWith(invokeStatic(GWT.class, "create", constructed.get(declaringClass))));
 
-        if (generateCssBundle)
-          initStmts.add(Stmt.loadVariable(templateVarName).invoke("getStyle").invoke("ensureInjected"));
+        if (generateCssBundle) {
+          controller.addFactoryInitializationStatements(singletonList(castTo(constructed.get(declaringClass),
+                  invokeStatic(GWT.class, "create", constructed.get(declaringClass))).invoke("getStyle")
+                          .invoke("ensureInjected")));
+        }
       }
 
       /*
@@ -263,7 +264,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           final LessCompiler compiler = new LessCompiler();
           final String compiledCss = compiler.compile(source);
 
-          initStmts.add(invokeStatic(StyleInjector.class, "inject", loadLiteral(compiledCss)));
+          controller.addFactoryInitializationStatements(singletonList(invokeStatic(StyleInjector.class, "inject", loadLiteral(compiledCss))));
         } catch (URISyntaxException | IOException | LessException e) {
           throw new RuntimeException("Error while attempting to compile the LESS stylesheet [" + resolvedStylesheetPath.get() + "].", e);
         }
