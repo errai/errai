@@ -259,7 +259,6 @@
                 <include>src/main/webapp/WEB-INF/deploy/**</include>
                 <include>src/main/webapp/WEB-INF/lib/**</include>
                 <include>src/main/webapp/App/**</include>
-                <include>**/gwt-unitCache/**</include>
                 <include>**/*.JUnit/**</include>
                 <include>monitordb.*</include>
               </includes>

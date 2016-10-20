@@ -312,7 +312,6 @@
                 <include>src/main/webapp/WEB-INF/classes/**</include>
                 <include>src/main/webapp/WEB-INF/lib/**</include>
                 <include>src/main/webapp/TodoList/**</include>
-                <include>**/gwt-unitCache/**</include>
                 <include>**/*.JUnit/**</include>
                 <include>monitordb.*</include>
               </includes>
