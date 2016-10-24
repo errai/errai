@@ -29,7 +29,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Named;
@@ -73,6 +76,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TagName;
 
 import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
@@ -144,7 +148,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
               @Override
               protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
                       final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-                final List<Statement> stmts = new ArrayList<Statement>();
+                final List<Statement> stmts = new ArrayList<>();
                 final String elementVar = "element";
 
                 stmts.add(declareFinalVariable(elementVar, com.google.gwt.dom.client.Element.class,
@@ -157,7 +161,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
                 final String retValVar = "retVal";
                 stmts.add(declareFinalVariable(retValVar, type, invokeStatic(TemplateUtil.class, "nativeCast", loadVariable(elementVar))));
-                if (typeHasValueWithOverlayMethods(type)) {
+                if (implementsNativeHasValueAndRequiresGeneratedInvocation(type)) {
                   stmts.add(invokeStatic(NativeHasValueAccessors.class, "registerAccessor", loadVariable(retValVar), createAccessorImpl(type, retValVar)));
                 }
                 stmts.add(loadVariable(retValVar).returnValue());
@@ -176,11 +180,37 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     }
   }
 
-  private static boolean typeHasValueWithOverlayMethods(final MetaClass type) {
-    final MetaMethod getValue;
-    return type.isAssignableTo(HasValue.class)
-            && ((getValue = type.getMethod("getValue", new Class[0])).isAnnotationPresent(JsOverlay.class)
-                    || type.getMethod("setValue", getValue.getReturnType()).isAnnotationPresent(JsOverlay.class));
+  /*
+   * If a type uses @JsOverlay or @JsProperty on overrides of HasValue methods, then we must generate
+   * an invocation so the GWT compiler uses the correct JS invocation at runtime.
+   */
+  private static boolean implementsNativeHasValueAndRequiresGeneratedInvocation(final MetaClass type) {
+    if (type.isAssignableTo(HasValue.class)) {
+      final Optional<MetaMethod> oGetValue = Optional.of(type.getMethod("getValue", new MetaClass[0]));
+      final Optional<MetaMethod> oSetValue = oGetValue
+              .flatMap(m -> Optional.of(m.getReturnType()))
+              .flatMap(retType -> Optional.of(type.getMethod("setValue", retType)));
+
+
+      if (!oGetValue.isPresent() || !oSetValue.isPresent()) {
+        /*
+         * In this case, the methods could be default implementations on an interface (not retunred by TypeOracle) so we
+         * will assume we need to generate an invocation.
+         */
+        return true;
+      }
+      else {
+        final Stream<Annotation> getAnnos = oGetValue.map(m -> Arrays.stream(m.getAnnotations())).orElseGet(Stream::empty);
+        final Stream<Annotation> setAnnos = oSetValue.map(m -> Arrays.stream(m.getAnnotations())).orElseGet(Stream::empty);
+
+        final Predicate<Annotation> testForOverlayOrProperty = anno -> anno.annotationType().equals(JsProperty.class)
+                || anno.annotationType().equals(JsOverlay.class);
+
+        return getAnnos.anyMatch(testForOverlayOrProperty) || setAnnos.anyMatch(testForOverlayOrProperty);
+      }
+    }
+
+    return false;
   }
 
   private static Object createAccessorImpl(final MetaClass type, final String varName) {
@@ -198,7 +228,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   }
 
   private static Set<Property> getProperties(final MetaClass type) {
-    final Set<Property> properties = new HashSet<Property>();
+    final Set<Property> properties = new HashSet<>();
 
     final Property declaredProperty = type.getAnnotation(Property.class);
     final Properties declaredProperties = type.getAnnotation(Properties.class);
