@@ -59,26 +59,14 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.8.0-rc3</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.8.0</maven.gwt.plugin.version>
   </properties>
 
-  <!-- These must be here in this order because of missing guava-gwt snapshots in the JBoss Public Repository. -->
   <repositories>
     <repository>
       <id>jboss</id>
       <name>JBoss Public Repo</name>
       <url>https://repository.jboss.org/nexus/content/groups/public</url>
-    </repository>
-    <repository>
-      <id>google-snapshots</id>
-      <name>Google Snapshots Repo</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
     </repository>
     <repository>
       <id>sonatype-public</id>
@@ -87,23 +75,12 @@
     </repository>
   </repositories>
 
-  <!-- This must be here for gwt-maven-plugin 2.8.0-SNAPSHOT -->
   <pluginRepositories>
     <pluginRepository>
       <id>public-snapshots-repo</id>
       <url>https://oss.sonatype.org/content/repositories/public/</url>
       <releases>
         <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>google-snapshots-repo</id>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
-      <releases>
-        <enabled>false</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
