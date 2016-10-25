@@ -83,6 +83,8 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+import org.jboss.errai.marshalling.rebind.mappings.builtin.StackTraceElementDefinition;
+import org.jboss.errai.marshalling.rebind.mappings.builtin.ThrowableDefinition;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.ServerClassMarshaller;
 import org.slf4j.Logger;
@@ -197,7 +199,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final EnvironmentConfig environmentConfig = getEnvironmentConfig();
     final Set<MetaClass> envExposedClasses = environmentConfig.getExposedClasses();
 
-    for (final Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class, true)) {
+    for (final Class<?> cls : findCustomMappings(scanner)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
         throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit "
             + MappingDefinition.class.getName());
@@ -456,6 +458,19 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     assert getDefinition("java.util.Arrays$ArrayList") != null;
 
     log.debug("comprehended " + exposedClasses.size() + " classes");
+  }
+
+  private Set<Class<?>> findCustomMappings(final MetaDataScanner scanner) {
+    Set<Class<?>> scannedMappings = scanner.getTypesAnnotatedWith(CustomMapping.class, true);
+    if (scannedMappings.isEmpty()) {
+      // This should only happen in OSGI environments where we can't get classpath URLs
+      log.warn("Unable to scan classpath for CustomMappings. Falling back to default.");
+      scannedMappings = new HashSet<>();
+      scannedMappings.add(ThrowableDefinition.class);
+      scannedMappings.add(StackTraceElementDefinition.class);
+    }
+
+    return scannedMappings;
   }
 
   private Set<Class<?>> findServerMarshallers(final MetaDataScanner scanner) {
