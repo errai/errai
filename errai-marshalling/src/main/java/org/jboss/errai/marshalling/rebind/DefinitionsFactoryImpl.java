@@ -46,6 +46,34 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
+import org.jboss.errai.marshalling.client.marshallers.BigDecimalMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.BigIntegerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.BooleanMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.ByteMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.CharacterMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.DateMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.DoubleMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.FloatMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.IntegerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.LinkedHashSetMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.LinkedListMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.LinkedMapMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.LongMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.PriorityQueueMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.QueueMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.SQLDateMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.SetMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.ShortMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.SortedMapMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.SortedSetMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.StringBufferMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.StringBuilderMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.StringMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.TimeMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.TimestampMarshaller;
 import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
@@ -56,6 +84,7 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
+import org.jboss.errai.marshalling.server.marshallers.ServerClassMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -255,7 +284,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    final Set<Class<?>> serverMarshallers = scanner.getTypesAnnotatedWith(ServerMarshaller.class, true);
+    final Set<Class<?>> serverMarshallers = findServerMarshallers(scanner);
 
     for (final Class<?> marshallerCls : serverMarshallers) {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
@@ -427,6 +456,46 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     assert getDefinition("java.util.Arrays$ArrayList") != null;
 
     log.debug("comprehended " + exposedClasses.size() + " classes");
+  }
+
+  private Set<Class<?>> findServerMarshallers(final MetaDataScanner scanner) {
+    Set<Class<?>> serverMarshallers = scanner.getTypesAnnotatedWith(ServerMarshaller.class, true);
+
+    if (serverMarshallers.isEmpty()) {
+      // This should only happen in OSGI environments where we can't get classpath URLs
+      log.warn("Unable to scan classpath for ServerMarshallers. Falling back to default.");
+      serverMarshallers = new HashSet<>();
+      serverMarshallers.add(BigDecimalMarshaller.class);
+      serverMarshallers.add(BigIntegerMarshaller.class);
+      serverMarshallers.add(BooleanMarshaller.class);
+      serverMarshallers.add(ByteMarshaller.class);
+      serverMarshallers.add(CharacterMarshaller.class);
+      serverMarshallers.add(DateMarshaller.class);
+      serverMarshallers.add(DoubleMarshaller.class);
+      serverMarshallers.add(FloatMarshaller.class);
+      serverMarshallers.add(IntegerMarshaller.class);
+      serverMarshallers.add(LinkedHashSetMarshaller.class);
+      serverMarshallers.add(LinkedListMarshaller.class);
+      serverMarshallers.add(LinkedMapMarshaller.class);
+      serverMarshallers.add(ListMarshaller.class);
+      serverMarshallers.add(LongMarshaller.class);
+      serverMarshallers.add(MapMarshaller.class);
+      serverMarshallers.add(ObjectMarshaller.class);
+      serverMarshallers.add(PriorityQueueMarshaller.class);
+      serverMarshallers.add(QueueMarshaller.class);
+      serverMarshallers.add(SetMarshaller.class);
+      serverMarshallers.add(ShortMarshaller.class);
+      serverMarshallers.add(SortedMapMarshaller.class);
+      serverMarshallers.add(SortedSetMarshaller.class);
+      serverMarshallers.add(SQLDateMarshaller.class);
+      serverMarshallers.add(StringBufferMarshaller.class);
+      serverMarshallers.add(StringBuilderMarshaller.class);
+      serverMarshallers.add(StringMarshaller.class);
+      serverMarshallers.add(TimeMarshaller.class);
+      serverMarshallers.add(TimestampMarshaller.class);
+      serverMarshallers.add(ServerClassMarshaller.class);
+    }
+    return serverMarshallers;
   }
 
   @Override
