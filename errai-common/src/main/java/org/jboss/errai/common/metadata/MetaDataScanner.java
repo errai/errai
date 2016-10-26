@@ -56,7 +56,7 @@ import com.google.common.collect.Multimap;
  * <p/>
  * <p/>
  * The initial set of config URLs (entry points) is discovered through ErraiApp.properties.
- * 
+ *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -67,7 +67,7 @@ public class MetaDataScanner extends Reflections {
   private static final String EXTENSION_KEY = "errai.class_scanning_extension";
 
   public static class CacheHolder implements CacheStore {
-    final Map<String, Set<SortableClassFileWrapper>> ANNOTATIONS_TO_CLASS = new ConcurrentHashMap<String, Set<SortableClassFileWrapper>>();
+    final Map<String, Set<SortableClassFileWrapper>> ANNOTATIONS_TO_CLASS = new ConcurrentHashMap<>();
 
     @Override
     public void clear() {
@@ -84,7 +84,7 @@ public class MetaDataScanner extends Reflections {
     }
   });
 
-  MetaDataScanner(final List<URL> urls, File cacheFile) {
+  MetaDataScanner(final List<URL> urls, final File cacheFile) {
     super(getConfiguration(urls));
     try {
       for (final Class<? extends Vfs.UrlType> cls : findExtensions()) {
@@ -92,11 +92,11 @@ public class MetaDataScanner extends Reflections {
           final Vfs.UrlType urlType = cls.asSubclass(Vfs.UrlType.class).newInstance();
           registerTypeHandler(urlType);
           log.info("added class scanning extensions: " + cls.getName());
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
           throw new RuntimeException("could not load scanner extension: " + cls.getName(), t);
         }
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       t.printStackTrace();
     }
     if (cacheFile != null) {
@@ -110,9 +110,9 @@ public class MetaDataScanner extends Reflections {
   private List<Class<? extends Vfs.UrlType>> findExtensions() {
     final Collection<URL> erraiAppProperties = getErraiAppProperties();
 
-    final List<Class<? extends Vfs.UrlType>> extensions = new ArrayList<Class<? extends Vfs.UrlType>>();
+    final List<Class<? extends Vfs.UrlType>> extensions = new ArrayList<>();
 
-    for (URL url : erraiAppProperties) {
+    for (final URL url : erraiAppProperties) {
       InputStream inputStream = null;
       try {
         inputStream = url.openStream();
@@ -129,19 +129,19 @@ public class MetaDataScanner extends Reflections {
 
                 final Class<?> aClass = Thread.currentThread().getContextClassLoader().loadClass(clsName);
                 extensions.add(aClass.asSubclass(Vfs.UrlType.class));
-              } catch (Throwable t) {
+              } catch (final Throwable t) {
                 throw new RuntimeException("could not load class scanning extension: " + clsName, t);
               }
             }
           }
         }
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new RuntimeException("error reading ErraiApp.properties", e);
       } finally {
         if (inputStream != null) {
           try {
             inputStream.close();
-          } catch (IOException e) {
+          } catch (final IOException e) {
             //
           }
         }
@@ -152,7 +152,7 @@ public class MetaDataScanner extends Reflections {
 
   private static Collection<URL> getErraiAppProperties() {
     try {
-      final Set<URL> urlList = new HashSet<URL>();
+      final Set<URL> urlList = new HashSet<>();
       Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("ErraiApp.properties");
 
       while (resources.hasMoreElements()) {
@@ -165,7 +165,7 @@ public class MetaDataScanner extends Reflections {
       }
 
       return urlList;
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
     }
   }
@@ -181,7 +181,7 @@ public class MetaDataScanner extends Reflections {
   static MetaDataScanner createInstanceFromCache() {
     try {
       return createInstance(getConfigUrls(), RebindUtils.getCacheFile(RebindUtils.getClasspathHash() + ".cache.xml"));
-    } catch (ReflectionsException e) {
+    } catch (final ReflectionsException e) {
       e.printStackTrace();
       return createInstance();
     }
@@ -206,16 +206,17 @@ public class MetaDataScanner extends Reflections {
     return scanner;
   }
 
-  public static void registerTypeHandler(Vfs.UrlType handler) {
+  public static void registerTypeHandler(final Vfs.UrlType handler) {
     Vfs.addDefaultURLTypes(handler);
   }
 
   private static void registerDefaultHandlers() {
     final List<Vfs.UrlType> urlTypes = Vfs.getDefaultUrlTypes();
     urlTypes.add(new WarUrlType());
-    urlTypes.add(new LeafUrlType(".jnilib"));
-    urlTypes.add(new LeafUrlType(".zip"));
-    urlTypes.add(new LeafUrlType(".pom"));
+    urlTypes.add(NoOpUrl.forSuffix(".jnilib"));
+    urlTypes.add(NoOpUrl.forSuffix(".zip"));
+    urlTypes.add(NoOpUrl.forSuffix(".pom"));
+    urlTypes.add(NoOpUrl.forProtocol("bundleresource"));
     // thread safe?
     Vfs.setDefaultURLTypes(urlTypes);
   }
@@ -224,7 +225,7 @@ public class MetaDataScanner extends Reflections {
           final String excludeRegex) {
     final Pattern p = Pattern.compile(excludeRegex);
 
-    final Set<String> result = new HashSet<String>();
+    final Set<String> result = new HashSet<>();
     final Set<String> types = getStore().getTypesAnnotatedWith(annotation.getName());
     for (final String className : types) {
       if (!p.matcher(className).matches())
@@ -236,7 +237,7 @@ public class MetaDataScanner extends Reflections {
 
   public Set<Class<?>> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
           final Collection<String> packages) {
-    final Set<Class<?>> results = new HashSet<Class<?>>();
+    final Set<Class<?>> results = new HashSet<>();
     for (final Class<?> cls : getTypesAnnotatedWith(annotation)) {
       if (packages.contains(cls.getPackage().getName())) {
         results.add(cls);
@@ -247,7 +248,7 @@ public class MetaDataScanner extends Reflections {
 
   public Set<Method> getMethodsAnnotatedWithExcluding(final Class<? extends Annotation> annotation,
           final String excludeRegex) {
-    final Set<Method> results = new HashSet<Method>();
+    final Set<Method> results = new HashSet<>();
     final Pattern p = Pattern.compile(excludeRegex);
     for (final Method method : getMethodsAnnotatedWith(annotation)) {
       if (!p.matcher(method.getClass().getName()).matches()) {
@@ -259,7 +260,7 @@ public class MetaDataScanner extends Reflections {
 
   public Set<Method> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation,
           final Collection<String> packages) {
-    final Set<Method> results = new HashSet<Method>();
+    final Set<Method> results = new HashSet<>();
     for (final Method method : getMethodsAnnotatedWith(annotation)) {
       if (packages.contains(method.getDeclaringClass().getPackage().getName())) {
         results.add(method);
@@ -270,7 +271,7 @@ public class MetaDataScanner extends Reflections {
 
   public Set<Field> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation,
           final Collection<String> packages) {
-    final Set<Field> results = new HashSet<Field>();
+    final Set<Field> results = new HashSet<>();
     for (final Field field : getFieldsAnnotatedWith(annotation)) {
       if (packages.contains(field.getDeclaringClass().getPackage().getName())) {
         results.add(field);
@@ -279,16 +280,16 @@ public class MetaDataScanner extends Reflections {
     return results;
   }
 
-  private final Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache = new HashMap<Class<? extends Annotation>, Set<Class<?>>>();
+  private final Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache = new HashMap<>();
 
   @Override
   public Set<Class<?>> getTypesAnnotatedWith(final Class<? extends Annotation> annotation) {
     Set<Class<?>> types = _annotationCache.get(annotation);
     if (types == null) {
-      types = new HashSet<Class<?>>(super.getTypesAnnotatedWith(annotation));
+      types = new HashSet<>(super.getTypesAnnotatedWith(annotation));
 
       if (annotation.isAnnotationPresent(Inherited.class)) {
-        for (final Class<?> cls : new ArrayList<Class<?>>(types)) {
+        for (final Class<?> cls : new ArrayList<>(types)) {
           types.addAll(getSubTypesOf(cls));
         }
       }
@@ -323,7 +324,7 @@ public class MetaDataScanner extends Reflections {
 
         return RebindUtils.hashToHexString(md.digest());
 
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("could not generate hash", e);
       }
     }
@@ -332,7 +333,7 @@ public class MetaDataScanner extends Reflections {
   public static List<URL> getConfigUrls(final ClassLoader loader) {
     try {
       final Enumeration<URL> configTargets = loader.getResources(ERRAI_CONFIG_STUB_NAME);
-      final List<URL> urls = new ArrayList<URL>();
+      final List<URL> urls = new ArrayList<>();
 
       while (configTargets.hasMoreElements()) {
         final URL url = configTargets.nextElement();
@@ -345,7 +346,7 @@ public class MetaDataScanner extends Reflections {
           } finally {
             stream.close();
           }
-        } catch (IOException e) {
+        } catch (final IOException e) {
           System.err.println("could not read properties file");
           e.printStackTrace();
         }
@@ -359,7 +360,7 @@ public class MetaDataScanner extends Reflections {
         urls.add(new URL(URLDecoder.decode(urlString.replaceAll("\\+", "%2b"), "UTF-8")));
       }
       return urls;
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
       throw new RuntimeException("Failed to scan configuration Url's", e);
     }

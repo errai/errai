@@ -18,22 +18,55 @@ package org.jboss.errai.common.metadata;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.function.Predicate;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.reflections.vfs.Vfs;
 
 /**
  * A trivial URL Type handler for Reflections VFS which matches any classpath
- * entry ending with a given suffix (or filename extension) and returns an empty
+ * entry matching a given predicate and returns an empty
  * VFS directory. When used with the extension ".jnilib", this helps silence a
  * bunch of warnings that happen when you compile an Errai app on a Mac OS X
  * JVM.
  * <p>
  * Instances are fully immutable and therefore threadsafe.
  */
-public final class LeafUrlType implements Vfs.UrlType {
+public final class NoOpUrl implements Vfs.UrlType {
 
-  private final String urlSuffix;
+  private final Predicate<URL> test;
+
+  public static NoOpUrl forSuffix(final String urlSuffix) {
+    final Predicate<URL> test = new Predicate<URL>() {
+      @Override
+      public boolean test(final URL url) {
+        return url.toExternalForm().endsWith(urlSuffix);
+      }
+
+      @Override
+      public String toString() {
+        return "*" + urlSuffix;
+      }
+    };
+
+    return new NoOpUrl(test);
+  }
+
+  public static NoOpUrl forProtocol(final String protocol) {
+    final Predicate<URL> test = new Predicate<URL>() {
+      @Override
+      public boolean test(final URL url) {
+        return url.getProtocol().equals(protocol);
+      }
+
+      @Override
+      public String toString() {
+        return protocol + "://*";
+      }
+    };
+
+    return new NoOpUrl(test);
+  }
 
   /**
    * A VFS directory rooted at a given URL which does not contain any entries.
@@ -43,7 +76,7 @@ public final class LeafUrlType implements Vfs.UrlType {
   private static final class EmptyVfsDir implements Vfs.Dir {
     private final URL url;
 
-    private EmptyVfsDir(URL url) {
+    private EmptyVfsDir(final URL url) {
       this.url = url;
     }
 
@@ -64,17 +97,17 @@ public final class LeafUrlType implements Vfs.UrlType {
   }
 
   /**
-   * Creates a new LeafUrlType that matches URLs with the given suffix.
+   * Creates a new LeafUrlType that matches URLs using the given predicate..
    *
-   * @param urlSuffix the filename suffix to match. Must not be null.
+   * @param test Must not be null.
    */
-  public LeafUrlType(String urlSuffix) {
-    this.urlSuffix = Assert.notNull(urlSuffix);
+  public NoOpUrl(final Predicate<URL> test) {
+    this.test = Assert.notNull(test);
   }
 
   @Override
   public boolean matches(final URL url) {
-    return url.toExternalForm().endsWith(urlSuffix);
+    return test.test(url);
   }
 
   @Override
@@ -84,6 +117,6 @@ public final class LeafUrlType implements Vfs.UrlType {
 
   @Override
   public String toString() {
-    return "*" + urlSuffix;
+    return test.toString();
   }
 }
