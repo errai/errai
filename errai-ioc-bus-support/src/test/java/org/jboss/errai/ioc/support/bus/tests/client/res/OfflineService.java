@@ -6,4 +6,6 @@ import org.jboss.errai.bus.server.annotations.Remote;
 public interface OfflineService {
 
   String greeting(String value);
+
+  String otherGreeting(String value);
 }

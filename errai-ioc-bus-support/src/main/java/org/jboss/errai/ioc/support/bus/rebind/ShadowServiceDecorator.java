@@ -29,7 +29,6 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.ShadowService;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.VariableReference;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
@@ -113,20 +112,18 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
     for (final MetaMethod method : mc.getMethods()) {
       if (ProxyUtil.isMethodInInterface(mc, method) && ProxyUtil.shouldProxyMethod(method)) {
         final MetaClass[] parameterTypes = Arrays.stream(method.getParameters()).map(p -> p.getType()).toArray(MetaClass[]::new);
-        final VariableReference[] objects = new VariableReference[parameterTypes.length];
+        final Statement[] objects = new Statement[parameterTypes.length];
         final BlockBuilder<ElseBlockBuilder> blockBuilder = If
                 .cond(Stmt.loadLiteral(ProxyUtil.createCallSignature(method)).invoke("equals",
                         Stmt.loadVariable("commandType")));
+        blockBuilder.append(Stmt.declareFinalVariable("instance", intf, controller.contextGetInstanceStmt()));
 
         for (int i = 0; i < parameterTypes.length; i++) {
           final MetaClass parameterType = parameterTypes[i];
-          builder.append(Stmt.declareVariable("var" + i, parameterType,
-                  Stmt.castTo(parameterType, Stmt.loadVariable("methodParms").invoke("get", i))));
-          objects[i] = Refs.get("var" + i);
+          objects[i] = Stmt.castTo(parameterType, Stmt.loadVariable("methodParms").invoke("get", i));
         }
 
         final boolean hasReturnType = !method.getReturnType().isVoid();
-        builder.append(Stmt.declareFinalVariable("instance", intf, controller.contextGetInstanceStmt()));
         final Statement methodInvocation = Stmt.nestedCall(Stmt.loadVariable("instance")).invoke(method.getName(), (Object[]) objects);
         final Statement invocation = (hasReturnType) ? Stmt.declareFinalVariable("ret", method.getReturnType(), methodInvocation) : methodInvocation;
         final Statement maybeDestroy = (decorable.isEnclosingTypeDependent()) ? Stmt.loadVariable("context").invoke("destroyInstance", Refs.get("instance"))
@@ -138,7 +135,7 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
         final ObjectBuilder runnable = Stmt.newObject(Runnable.class).extend().publicOverridesMethod("run").append(invocation).append(maybeDestroy)
                 .append(sendResponse).finish().finish();
         final StatementBuilder runnableDecl = Stmt.declareFinalVariable("invocation", Runnable.class, runnable);
-        builder.append(runnableDecl);
+        blockBuilder.append(runnableDecl);
 
         blockBuilder.append(Stmt.try_()
                 .append(Stmt.loadVariable("invocation").invoke("run"))
