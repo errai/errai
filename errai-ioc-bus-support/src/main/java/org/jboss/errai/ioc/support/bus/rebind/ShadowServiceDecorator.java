@@ -34,6 +34,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -46,6 +47,8 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
+import org.jboss.errai.ioc.support.bus.client.ServiceNotReady;
+import org.jboss.errai.ioc.support.bus.client.ShadowServiceHelper;
 
 /**
  * Generates logic to register client-side shadow services for Errai's message
@@ -123,17 +126,26 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
         }
 
         final boolean hasReturnType = !method.getReturnType().isVoid();
-        blockBuilder.append(Stmt.declareFinalVariable("instance", intf, controller.contextGetInstanceStmt()));
+        builder.append(Stmt.declareFinalVariable("instance", intf, controller.contextGetInstanceStmt()));
         final Statement methodInvocation = Stmt.nestedCall(Stmt.loadVariable("instance")).invoke(method.getName(), (Object[]) objects);
+        final Statement invocation = (hasReturnType) ? Stmt.declareFinalVariable("ret", method.getReturnType(), methodInvocation) : methodInvocation;
+        final Statement maybeDestroy = (decorable.isEnclosingTypeDependent()) ? Stmt.loadVariable("context").invoke("destroyInstance", Refs.get("instance"))
+                : EmptyStatement.INSTANCE;
+        final Statement sendResponse = (hasReturnType) ? Stmt.invokeStatic(MessageBuilder.class, "createConversation", Stmt.loadVariable("message"))
+                .invoke("subjectProvided").invoke("with", "MethodReply", Refs.get("ret"))
+                .invoke("noErrorHandling").invoke("sendNowWith", Stmt.invokeStatic(ErraiBus.class, "get"))
+                : EmptyStatement.INSTANCE;
+        final ObjectBuilder runnable = Stmt.newObject(Runnable.class).extend().publicOverridesMethod("run").append(invocation).append(maybeDestroy)
+                .append(sendResponse).finish().finish();
+        final StatementBuilder runnableDecl = Stmt.declareFinalVariable("invocation", Runnable.class, runnable);
+        builder.append(runnableDecl);
+
         blockBuilder.append(Stmt.try_()
-                .append((hasReturnType) ? Stmt.declareFinalVariable("ret", method.getReturnType(), methodInvocation) : methodInvocation)
-                .append((decorable.isEnclosingTypeDependent()) ? Stmt.loadVariable("context").invoke("destroyInstance", Refs.get("instance"))
-                        : EmptyStatement.INSTANCE)
-                .append((hasReturnType) ? Stmt.invokeStatic(MessageBuilder.class, "createConversation", Stmt.loadVariable("message"))
-                        .invoke("subjectProvided").invoke("with", "MethodReply", Refs.get("ret"))
-                        .invoke("noErrorHandling").invoke("sendNowWith", Stmt.invokeStatic(ErraiBus.class, "get"))
-                        : EmptyStatement.INSTANCE)
-                .finish().catch_(Throwable.class, "throwable")
+                .append(Stmt.loadVariable("invocation").invoke("run"))
+                .finish()
+                .catch_(ServiceNotReady.class, "ex")
+                .append(Stmt.invokeStatic(ShadowServiceHelper.class, "deferred", Stmt.loadVariable("invocation"))).finish()
+                .catch_(Throwable.class, "throwable")
                 .append(Stmt.throw_(RuntimeException.class, Stmt.loadVariable("throwable"))).finish());
         builder.append(blockBuilder.finish());
       }
