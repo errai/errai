@@ -27,7 +27,7 @@ import org.jboss.errai.ioc.support.bus.tests.client.res.OfflineMessageCallback;
 
 /**
  * Tests shadowed RPC services.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ShadowServiceIntegrationTest extends AbstractErraiIOCBusTest {
@@ -39,23 +39,23 @@ public class ShadowServiceIntegrationTest extends AbstractErraiIOCBusTest {
       callerBean.getOfflineServiceCaller().call((r) -> {
         assertEquals(greeter.offline(), r);
         finishTest();
-      }).greeting();
+      }).greeting("foo");
     });
   }
-  
+
   public void testCallerUsesShadowServiceIfBusNotConnected() {
     runAfterInit(() -> {
       ((ClientMessageBusImpl) ErraiBus.get()).setState(BusState.CONNECTION_INTERRUPTED);
-      
+
       final Greeter greeter = IOC.getBeanManager().lookupBean(Greeter.class).getInstance();
       final CallerBean callerBean = IOC.getBeanManager().lookupBean(CallerBean.class).getInstance();
       callerBean.getOnlineServiceCaller().call((r) -> {
         assertEquals(greeter.offline(), r);
         finishTest();
-      }).greeting();
+      }).greeting("foo");
     });
   }
-  
+
   public void testCallerUsesRemoteEndpointIfBusConnected() {
     runAfterInit(() -> {
       final Greeter greeter = IOC.getBeanManager().lookupBean(Greeter.class).getInstance();
@@ -63,17 +63,17 @@ public class ShadowServiceIntegrationTest extends AbstractErraiIOCBusTest {
       callerBean.getOnlineServiceCaller().call((r) -> {
         assertEquals(greeter.online(), r);
         finishTest();
-      }).greeting();
+      }).greeting("foo");
     });
   }
-  
+
   public void testShadowServiceAsMessageCallback() {
     runAfterInit(() -> {
       final OfflineMessageCallback callback = IOC.getBeanManager().lookupBean(OfflineMessageCallback.class).getInstance();
       assertNull(callback.getGreeting());
-      
+
       MessageBuilder.createMessage()
-        .toSubject("Greeting") 
+        .toSubject("Greeting")
         .signalling()
         .with("greeting", "Hello, there")
         .noErrorHandling()
@@ -84,5 +84,5 @@ public class ShadowServiceIntegrationTest extends AbstractErraiIOCBusTest {
       finishTest();
     });
   }
-  
+
 }

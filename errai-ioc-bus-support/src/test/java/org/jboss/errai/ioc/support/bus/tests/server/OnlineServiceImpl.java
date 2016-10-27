@@ -11,9 +11,9 @@ public class OnlineServiceImpl implements OnlineService {
 
   @Inject
   private Greeter greeter;
-  
+
   @Override
-  public String greeting() {
+  public String greeting(final String value) {
     return greeter.online();
   }
 

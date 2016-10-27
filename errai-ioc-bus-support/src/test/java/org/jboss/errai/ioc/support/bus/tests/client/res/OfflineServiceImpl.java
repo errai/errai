@@ -11,9 +11,9 @@ public class OfflineServiceImpl implements OfflineService, OnlineService {
 
   @Inject
   private Greeter greeter;
-  
+
   @Override
-  public String greeting() {
+  public String greeting(final String value) {
     return greeter.offline();
   }
 

@@ -120,7 +120,7 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
 
         for (int i = 0; i < parameterTypes.length; i++) {
           final MetaClass parameterType = parameterTypes[i];
-          blockBuilder.append(Stmt.declareVariable("var" + i, parameterType,
+          builder.append(Stmt.declareVariable("var" + i, parameterType,
                   Stmt.castTo(parameterType, Stmt.loadVariable("methodParms").invoke("get", i))));
           objects[i] = Refs.get("var" + i);
         }
