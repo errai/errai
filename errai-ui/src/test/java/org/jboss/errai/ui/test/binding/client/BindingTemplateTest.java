@@ -25,13 +25,17 @@ import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.test.binding.client.res.BindableEmailAnchor;
 import org.jboss.errai.ui.test.binding.client.res.BindingDateConverter;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
 import org.jboss.errai.ui.test.binding.client.res.InputElementsModel;
-import org.jboss.errai.ui.test.binding.client.res.NativeNumberInputElement;
+import org.jboss.errai.ui.test.binding.client.res.JsOverlayNumberInputElement;
+import org.jboss.errai.ui.test.binding.client.res.JsPropertyDivElement;
 import org.jboss.errai.ui.test.binding.client.res.TemplateFragmentWithoutFragmentId;
+import org.jboss.errai.ui.test.binding.client.res.TemplateWithDefaultJsOverlayHasValueOverride;
 import org.jboss.errai.ui.test.binding.client.res.TemplateWithInputElements;
-import org.jboss.errai.ui.test.binding.client.res.TemplateWithNativeHasValue;
+import org.jboss.errai.ui.test.binding.client.res.TemplateWithJsOverlayHasValue;
+import org.jboss.errai.ui.test.binding.client.res.TemplateWithJsPropertyHasValue;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.jboss.errai.ui.test.common.client.dom.Element;
 import org.jboss.errai.ui.test.common.client.dom.TextInputElement;
@@ -347,10 +351,10 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testBindingToJsTypeWithNativeHasValue() throws Exception {
-    final TemplateWithNativeHasValue bean = IOC.getBeanManager().lookupBean(TemplateWithNativeHasValue.class).getInstance();
+  public void testBindingToJsTypeWithJsOverlayHasValue() throws Exception {
+    final TemplateWithJsOverlayHasValue bean = IOC.getBeanManager().lookupBean(TemplateWithJsOverlayHasValue.class).getInstance();
     final InputElementsModel model = bean.binder.getModel();
-    final NativeNumberInputElement presenter = bean.number;
+    final JsOverlayNumberInputElement presenter = bean.number;
 
     assertNull("Model value should be null.", model.getNumber());
     assertNull("UI value should be null.", presenter.getValue());
@@ -371,6 +375,74 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     }
 
     assertEquals("Model value was not updated.", presenter.getValue(), model.getNumber());
+  }
+
+  @Test
+  public void testBindingToJsTypeWithJsPropertyHasValue() throws Exception {
+    final TemplateWithJsPropertyHasValue bean = IOC.getBeanManager().lookupBean(TemplateWithJsPropertyHasValue.class).getInstance();
+    final InputElementsModel model = bean.binder.getModel();
+    final JsPropertyDivElement elementWrapper = bean.text;
+
+    assertNull("Model value should be null.", model.getText());
+    assertNull("UI value should be null.", elementWrapper.getValue());
+
+    try {
+      model.setText("1.0");
+    } catch (final Throwable t) {
+      throw new RuntimeException("An error occurred while setting model property: " + t.getMessage(), t);
+    }
+
+    assertEquals("UI value was not updated.", model.getText(), elementWrapper.getValue());
+
+    try {
+      elementWrapper.setValue("2.0");
+      invokeEventListeners(TemplateUtil.asElement(elementWrapper), "change");
+    } catch (final Throwable t) {
+      throw new RuntimeException("An error occurred while setting the UI value: " + t.getMessage(), t);
+    }
+
+    assertEquals("Model value was not updated.", elementWrapper.getValue(), model.getText());
+  }
+
+  @Test
+  public void testBindingToJsTypeInterfaceWithJsOverlayHasValue() throws Exception {
+    final TemplateWithDefaultJsOverlayHasValueOverride bean = IOC.getBeanManager().lookupBean(TemplateWithDefaultJsOverlayHasValueOverride.class).getInstance();
+    final InputElementsModel model = bean.binder.getModel();
+    final BindableEmailAnchor elementWrapper = bean.email;
+
+    assertNull("Model value should be null.", model.getEmail());
+    assertEquals("UI value should be empty.", "", elementWrapper.getValue());
+
+    try {
+      model.setEmail("a@b");
+    } catch (final Throwable t) {
+      throw new RuntimeException("An error occurred while setting model property: " + t.getMessage(), t);
+    }
+
+    assertEquals("UI value was not updated.", model.getEmail(), elementWrapper.getValue());
+
+    try {
+      elementWrapper.setValue("b@a");
+      invokeEventListeners(TemplateUtil.asElement(elementWrapper), "change");
+    } catch (final Throwable t) {
+      throw new RuntimeException("An error occurred while setting the UI value: " + t.getMessage(), t);
+    }
+
+    assertEquals("Model value was not updated.", elementWrapper.getValue(), model.getEmail());
+  }
+
+  /**
+   * Regression test for ERRAI-779
+   */
+  @Test
+  public void testTemplateFragmentContainingWordBodyIsParsedWithoutError() throws Exception {
+    try {
+      IOC.getBeanManager()
+              .lookupBean(TemplateFragmentWithoutFragmentId.class).getInstance();
+    }
+    catch (final Exception e) {
+      fail("Loading templated instance caused an error: " + e.getMessage());
+    }
   }
 
   private <M, U> void inputElementAssertions(final PropertyHandler<M> model, final PropertyHandler<U> ui,
@@ -463,19 +535,5 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   private void fireChangeEvent(final Object element) {
     final NativeEvent changeEvent = Document.get().createChangeEvent();
     TemplateUtil.asElement(element).dispatchEvent(changeEvent);
-  }
-
-  /**
-   * Regression test for ERRAI-779
-   */
-  @Test
-  public void testTemplateFragmentContainingWordBodyIsParsedWithoutError() throws Exception {
-    try {
-      IOC.getBeanManager()
-              .lookupBean(TemplateFragmentWithoutFragmentId.class).getInstance();
-    }
-    catch (final Exception e) {
-      fail("Loading templated instance caused an error: " + e.getMessage());
-    }
   }
 }

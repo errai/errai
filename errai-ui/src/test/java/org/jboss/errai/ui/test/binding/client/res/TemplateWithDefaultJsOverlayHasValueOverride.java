@@ -18,7 +18,6 @@ package org.jboss.errai.ui.test.binding.client.res;
 
 import javax.inject.Inject;
 
-import org.jboss.errai.databinding.client.IdentityConverter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
@@ -30,20 +29,14 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @Templated("TemplateWithInputElements.html")
-public class TemplateWithNativeHasValue {
-
-  public static class DoubleToDouble extends IdentityConverter<Double> {
-    public DoubleToDouble() {
-      super(Double.class);
-    }
-  }
+public class TemplateWithDefaultJsOverlayHasValueOverride {
 
   @Inject
   @AutoBound
   public DataBinder<InputElementsModel> binder;
 
   @Inject
-  @Bound(converter = DoubleToDouble.class) @DataField
-  public NativeNumberInputElement number;
+  @Bound @DataField
+  public BindableEmailAnchor email;
 
 }

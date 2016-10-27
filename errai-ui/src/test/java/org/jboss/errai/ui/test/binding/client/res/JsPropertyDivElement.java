@@ -17,52 +17,26 @@
 package org.jboss.errai.ui.test.binding.client.res;
 
 import org.jboss.errai.common.client.api.annotations.Element;
-import org.jboss.errai.common.client.api.annotations.Property;
 import org.jboss.errai.common.client.ui.HasValue;
 
-import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
- * This native input element wrapper treats a text input element as if it has a number value. This tests that the
+ * This native div element wrapper allows binding to the value property. This tests that the
  * presence of {@link HasValue} overrides type inference based on element type.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Element("input")
-@Property(name = "type", value = "number")
-@JsType(isNative = true, name = "HTMLInputElement", namespace = JsPackage.GLOBAL)
-public abstract class NativeNumberInputElement implements HasValue<Double> {
+@Element("div")
+@JsType(isNative = true, name = "HTMLDivElement", namespace = JsPackage.GLOBAL)
+public abstract class JsPropertyDivElement implements HasValue<String> {
 
-  @JsProperty(name = "value")
-  public abstract String getRawValue();
+  @Override @JsProperty
+  public final native String getValue();
 
-  @JsProperty(name = "value")
-  public abstract void setRawValue(String value);
-
-  @JsOverlay
-  @Override
-  public final Double getValue() {
-    final String rawValue = getRawValue();
-    if (rawValue == null || "".equals(rawValue)) {
-      return null;
-    }
-    else {
-      return Double.parseDouble(rawValue);
-    }
-  }
-
-  @JsOverlay
-  @Override
-  public final void setValue(final Double value) {
-    if (value == null) {
-      setRawValue("");
-    }
-    else {
-      setRawValue(value.toString());
-    }
-  }
+  @Override @JsProperty
+  public final native void setValue(String value);
 
 }

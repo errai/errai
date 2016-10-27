@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -75,8 +74,6 @@ import org.jboss.errai.ui.shared.TemplateUtil;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TagName;
 
-import jsinterop.annotations.JsOverlay;
-import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
@@ -186,25 +183,25 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
    */
   private static boolean implementsNativeHasValueAndRequiresGeneratedInvocation(final MetaClass type) {
     if (type.isAssignableTo(HasValue.class)) {
-      final Optional<MetaMethod> oGetValue = Optional.of(type.getMethod("getValue", new MetaClass[0]));
-      final Optional<MetaMethod> oSetValue = oGetValue
-              .flatMap(m -> Optional.of(m.getReturnType()))
-              .flatMap(retType -> Optional.of(type.getMethod("setValue", retType)));
+      final MetaClass hasValue = MetaClassFactory.get(HasValue.class);
+      final MetaMethod getValue = type.getMethod("getValue", new MetaClass[0]);
+      final MetaMethod setValue = type.getMethod("setValue", getValue.getReturnType());
 
 
-      if (!oGetValue.isPresent() || !oSetValue.isPresent()) {
+      if (type.isInterface()
+              && (getValue.getDeclaringClass().getErased().equals(hasValue)
+                      || setValue.getDeclaringClass().getErased().equals(hasValue))) {
         /*
-         * In this case, the methods could be default implementations on an interface (not retunred by TypeOracle) so we
+         * In this case, the methods could be default implementations on an interface (not returned by TypeOracle) so we
          * will assume we need to generate an invocation.
          */
         return true;
       }
       else {
-        final Stream<Annotation> getAnnos = oGetValue.map(m -> Arrays.stream(m.getAnnotations())).orElseGet(Stream::empty);
-        final Stream<Annotation> setAnnos = oSetValue.map(m -> Arrays.stream(m.getAnnotations())).orElseGet(Stream::empty);
+        final Stream<Annotation> getAnnos = Arrays.stream(getValue.getAnnotations());
+        final Stream<Annotation> setAnnos = Arrays.stream(setValue.getAnnotations());
 
-        final Predicate<Annotation> testForOverlayOrProperty = anno -> anno.annotationType().equals(JsProperty.class)
-                || anno.annotationType().equals(JsOverlay.class);
+        final Predicate<Annotation> testForOverlayOrProperty = anno -> anno.annotationType().getPackage().getName().equals("jsinterop.annotations");
 
         return getAnnos.anyMatch(testForOverlayOrProperty) || setAnnos.anyMatch(testForOverlayOrProperty);
       }
