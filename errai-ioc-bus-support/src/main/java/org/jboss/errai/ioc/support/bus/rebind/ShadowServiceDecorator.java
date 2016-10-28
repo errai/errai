@@ -132,8 +132,22 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
                 .invoke("subjectProvided").invoke("with", "MethodReply", Refs.get("ret"))
                 .invoke("noErrorHandling").invoke("sendNowWith", Stmt.invokeStatic(ErraiBus.class, "get"))
                 : EmptyStatement.INSTANCE;
-        final ObjectBuilder runnable = Stmt.newObject(Runnable.class).extend().publicOverridesMethod("run").append(invocation).append(maybeDestroy)
-                .append(sendResponse).finish().finish();
+        final ObjectBuilder runnable = Stmt
+                .newObject(Runnable.class)
+                .extend()
+                .publicOverridesMethod("run")
+                  .append(Stmt.try_()
+                            .append(invocation)
+                            .append(maybeDestroy)
+                            .append(sendResponse)
+                          .finish()
+                          .catch_(RuntimeException.class, "ex")
+                            .append(Stmt.throw_("ex"))
+                          .finish()
+                          .catch_(Throwable.class, "t")
+                            .append(Stmt.throw_(RuntimeException.class, Stmt.loadVariable("t")))
+                          .finish())
+                  .finish().finish();
         final StatementBuilder runnableDecl = Stmt.declareFinalVariable("invocation", Runnable.class, runnable);
         blockBuilder.append(runnableDecl);
 
@@ -141,9 +155,7 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
                 .append(Stmt.loadVariable("invocation").invoke("run"))
                 .finish()
                 .catch_(ServiceNotReady.class, "ex")
-                .append(Stmt.invokeStatic(ShadowServiceHelper.class, "deferred", Stmt.loadVariable("invocation"))).finish()
-                .catch_(Throwable.class, "throwable")
-                .append(Stmt.throw_(RuntimeException.class, Stmt.loadVariable("throwable"))).finish());
+                .append(Stmt.invokeStatic(ShadowServiceHelper.class, "deferred", Stmt.loadVariable("invocation"))).finish());
         builder.append(blockBuilder.finish());
       }
     }

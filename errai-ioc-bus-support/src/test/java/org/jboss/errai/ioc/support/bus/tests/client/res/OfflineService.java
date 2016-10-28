@@ -7,5 +7,5 @@ public interface OfflineService {
 
   String greeting(String value);
 
-  String otherGreeting(String value);
+  String otherGreeting(String value) throws CheckedException;
 }
