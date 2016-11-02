@@ -68,6 +68,14 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
           return ctx.getMarshallerInstance(targetType.getName()).demarshall(o, ctx);
         }
       }
+      else if ("java.lang.Object".equals(encodedType)) {
+          // check for null Objects to avoid a stack overflow,
+    	  // otherwise we'll just fall through, find the ObjectMarshaller again
+    	  // and keep looping...
+    	  if (jsObject.containsKey(SerializationParts.QUALIFIED_VALUE) &&
+    			  jsObject.get(SerializationParts.QUALIFIED_VALUE)==null)
+    		  return null;
+      }
 
       if (jsObject.containsKey(SerializationParts.NUMERIC_VALUE)) {
         return NumbersUtils.getNumber(encodedType, jsObject.get(SerializationParts.NUMERIC_VALUE));
