@@ -97,7 +97,6 @@
     <module>errai-config</module>
     <module>errai-codegen-gwt</module>
     <module>errai-cordova</module>
-    <module>errai-cordova-maven-plugin</module>
     <module>errai-ioc-bus-support</module>
     <module>errai-bus-websocket</module>    
     <module>errai-jboss-as-support</module>

@@ -51,11 +51,6 @@ Release Steps
 
         % mvn install -Pdistro,javadoc -Dmaven.test.skip=true -Dgwt.compiler.skip=true
         
-1. Deploy the Errai Cordova project template
-
-        % cd errai-cordova-maven-plugin/src/main/bash
-        % sudo ./cordova-bundle a.b.c.Final
-
 1. Upload the docs and the distro zipfile
 
         % cd dist
