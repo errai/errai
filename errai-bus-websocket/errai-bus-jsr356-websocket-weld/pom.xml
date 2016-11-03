@@ -91,6 +91,12 @@
       <version>${wildfly.version}</version>
       <type>zip</type>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.transaction</groupId>
+          <artifactId>jta</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
