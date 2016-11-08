@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2016-09-07</date>
+    <date>2016-10-19</date>
     
     
     
@@ -6258,40 +6258,24 @@ public class CustomComponent extends Composite {
 </section>
 <section id="sid-51806600_ErraiUI-ExtendedstylingwithLESS">
 <title>Extended styling with LESS</title>
-<simpara>Errai also supports <ulink url="http://lesscss.org">LESS</ulink> stylesheets. To get started using these you&#8217;ll have to create a LESS stylesheet and place it on the classpath of your project and declare their ordering with the <literal>StyleDescriptor</literal> annotation. Every application should have 0 or 1 classes annotated with <literal>StyleDescriptor</literal> like the following example:</simpara>
+<simpara>Errai also supports <ulink url="http://lesscss.org">LESS</ulink> stylesheets for <literal>@Templated</literal>. You can specify a CSS or LESS stylesheet path for a component with the <literal>stylesheet</literal> attribute of <literal>@Templated</literal>, as in the example below:</simpara>
 <programlisting language="java" linenumbering="unnumbered">package org.jboss.errai.example;
 
-@StyleDescriptor({ "/main.less", "other.css" })
-public class MyStyleDescriptor {
+@Templated(stylesheet = "main.less")
+public class StyledComponent {
 }</programlisting>
-<simpara>The two files listed above, <literal>main.less</literal> and <literal>other.css</literal>, will be compiled into a single stylesheet by Errai. The relative path for <literal>other.css</literal> will be loaded relative to the package <literal>org.jboss.errai.example</literal>.</simpara>
+<simpara>For the above example, during GWT compilation Errai will load the LESS stylesheet from the classpath (in this case with the path <literal>org/jboss/errai/example/main.less</literal>) and compile it. At runtime the compiled CSS will be loaded.</simpara>
+<simpara>You can omit the <literal>stylesheet</literal> attribute if your LESS stylsheet follows the standard Errai UI naming conventions. For example:</simpara>
+<programlisting language="java" linenumbering="unnumbered">package org.jboss.errai.example;
+
+@Templated
+public class StyledComponent {
+}</programlisting>
+<simpara>Errai will automatically find and compile a LESS stylesheet for this template if it exists on the classpath at this path: <literal>org/jboss/errai/example/StyledComponent.less</literal></simpara>
 <note>
-<title>Do Not Declare Imported Stylesheets</title>
-<simpara>It is only necessary to declare top-level stylesheets with the <literal>StyleDescriptor</literal>. If a CSS or LESS resource is only meant to be imported by another LESS stylesheet, then it need only be on the classpath.</simpara>
+<title>Precedence of CSS and LESS</title>
+<simpara>When the <literal>stylesheet</literal> attribute is not specified, Errai will only find a LESS stylesheet as described above if no CSS stylesheet exists at the default path.</simpara>
 </note>
-<simpara>Errai will convert the LESS stylesheet to css, perform optimisations on it, and ensure that is get injected into the pages of your application. It will also obfuscate the class selectors and replace the use of those in your templates. To be able to use the selectors in your code you can use:</simpara>
-<programlisting language="java" linenumbering="unnumbered">public class MyComponent extends Component {
-  @Inject
-  private LessStyle lessStyle;
-
-  ...
-
-  @PostConstruct
-  private void init() {
-    textBox.setStyleName(lessStyle.get("input"));
-  }
-}</programlisting>
-<simpara>Finally it will also add any deferred binding properties to the top of your LESS stylesheet, so for example you could use the user.agent in LESS like this:</simpara>
-<programlisting language="java" linenumbering="unnumbered">.mixin (@a) when (@a = "safari") {
-  background-color: black;
-}
-
-.mixin (@a) when (@a = "gecko1_8") {
-  background-color: white;
-}
-
-.class1 { .mixin(@user_agent) }</programlisting>
-<simpara>Because a dot is not allowed in LESS variables it&#8217;s replaced with an underscore, so in the example above class1 will have a black background on Safari and Chrome and white on Firefox. On the top of this LESS stylesheet @user_agent: "safari" will get generated.</simpara>
 </section>
 </chapter>
 <chapter id="sid-54493676">
@@ -13486,7 +13470,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>Remove any usage of the <literal>@StyleDescriptor</literal>. Plain CSS files can be declared in Java code via the <literal>@Templated</literal> annotation. Errai no longer provides annotations for using LESS.</simpara>
+      <simpara>Remove any usage of the <literal>@StyleDescriptor</literal>. LESS and CSS files can be declared in Java code via the <literal>@Templated</literal> annotation.</simpara>
       
     </listitem>
   
