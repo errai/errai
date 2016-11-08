@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.Factory;
@@ -34,6 +35,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.AppScopedBeanInvokingSelf;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
+import org.jboss.errai.ioc.tests.wiring.client.res.ChildWithSetterOverride;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentOnInnerType;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentBeanWithConstructorCycle;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithPackageConstr;
@@ -320,5 +322,11 @@ public class BasicIOCTest extends IOCClientTestCase {
     } catch (final RuntimeException e) {
       throw new AssertionError("Could not lookup the dependent bean without error: " + e.getMessage(), e);
     }
+  }
+
+  // Regression test for ERRAI-994
+  public void testOverrideOfInjectSetterMethod() throws Exception {
+    final ChildWithSetterOverride bean = IOCUtil.getInstance(ChildWithSetterOverride.class);
+    assertEquals("AQual", bean.dep.value);
   }
 }
