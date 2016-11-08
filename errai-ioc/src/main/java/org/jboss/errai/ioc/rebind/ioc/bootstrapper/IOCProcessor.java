@@ -1068,7 +1068,7 @@ public class IOCProcessor {
                   + setter.getParameters().length + ".");
         } else {
           final MetaParameter metaParam = setter.getParameters()[0];
-          builder.addSetterMethodDependency(typeInjectable, metaParam.getType(), qualFactory.forSink(setter), setter);
+          builder.addSetterMethodDependency(typeInjectable, metaParam.getType(), qualFactory.forSink(setter.getParameters()[0]), setter);
         }
       }
     }
