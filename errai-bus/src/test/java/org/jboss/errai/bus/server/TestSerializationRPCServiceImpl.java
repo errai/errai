@@ -72,6 +72,8 @@ import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TestingTickCache;
 import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.User;
+import org.jboss.errai.bus.client.tests.support.pkg.PortableType1;
+import org.jboss.errai.bus.client.tests.support.pkg.serializablesubpkg.PortableType2;
 import org.jboss.errai.bus.server.annotations.Service;
 
 /**
@@ -522,6 +524,16 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public Object testMapSuperTypesPropertyCausesMarshallerMappingCreationForSuperType(final Object entity) {
+    return entity;
+  }
+
+  @Override
+  public PortableType1 testPortableTypeInSerializablePackage(final PortableType1 entity) {
+    return entity;
+  }
+
+  @Override
+  public PortableType2 testPortableTypeInSerializableSubPackage(final PortableType2 entity) {
     return entity;
   }
 }

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.config.rebind;
 
+import static java.util.stream.Collectors.toCollection;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,6 +26,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -40,6 +43,7 @@ import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,66 +205,116 @@ public abstract class EnvUtil {
   private static void processErraiAppPropertiesBundle(final Map<String, String> frameworkProps, final Map<String, String> mappingAliases,
           final Set<MetaClass> exposedClasses, final Set<MetaClass> nonportableClasses, final Set<String> explicitTypes,
           final ResourceBundle props) {
-    for (final Object o : props.keySet()) {
-      final String key = (String) o;
+    for (final String key : props.keySet()) {
       final String value = props.getString(key);
-      if (frameworkProps.containsKey(key)) {
-        if (isListValuedProperty(key)) {
-          // TODO should validate that different values don't conflict
-          final String oldValue = frameworkProps.get(key);
-          final String newValue = oldValue + " " + value;
-          log.debug("Merging property {} = {}", key, newValue);
-          frameworkProps.put(key, newValue);
-        } else {
-          log.warn("The property {} has been set multiple times.", key);
-          frameworkProps.put(key, value);
+      updateFrameworkProperties(frameworkProps, key, value);
+
+      if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+        addSerializableTypes(exposedClasses, explicitTypes, value);
+      }
+      else if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
+        addNonSerializableTypes(exposedClasses, nonportableClasses, value);
+      }
+      else if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
+        addMappingAliases(mappingAliases, explicitTypes, value);
+      }
+    }
+  }
+
+  private static void addMappingAliases(final Map<String, String> mappingAliases, final Set<String> explicitTypes,
+          final String value) {
+    for (final String s : value.split(" ")) {
+      try {
+        final String[] mapping = s.split("->");
+
+        if (mapping.length != 2) {
+          throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
         }
+
+        final Class<?> fromMapping = Class.forName(mapping[0].trim());
+        final Class<?> toMapping = Class.forName(mapping[1].trim());
+
+        mappingAliases.put(fromMapping.getName(), toMapping.getName());
+        explicitTypes.add(fromMapping.getName());
+        explicitTypes.add(toMapping.getName());
+      }
+      catch (final Exception e) {
+        throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
+      }
+    }
+  }
+
+  private static void addNonSerializableTypes(final Set<MetaClass> exposedClasses, final Set<MetaClass> nonportableClasses,
+          final String value) {
+    final Set<String> patterns = new LinkedHashSet<>();
+    for (final String s : value.split(" ")) {
+      final String singleValue = s.trim();
+      if (singleValue.endsWith("*")) {
+        patterns.add(singleValue);
+      }
+      else {
+        try {
+          nonportableClasses.add(MetaClassFactory.get(singleValue));
+        }
+        catch (final Exception e) {
+          throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: "
+                  + s, e);
+        }
+      }
+    }
+    if (!patterns.isEmpty()) {
+      final SimplePackageFilter filter = new SimplePackageFilter(patterns);
+      MetaClassFactory
+        .getAllCachedClasses()
+        .stream()
+        .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
+        .collect(toCollection(() -> exposedClasses));
+    }
+  }
+
+  private static void addSerializableTypes(final Set<MetaClass> exposedClasses, final Set<String> explicitTypes,
+          final String value) {
+    final Set<String> patterns = new LinkedHashSet<>();
+    for (final String s : value.split(" ")) {
+      final String singleValue = s.trim();
+      if (singleValue.endsWith("*")) {
+        patterns.add(singleValue);
+      }
+      else {
+        try {
+          exposedClasses.add(MetaClassFactory.get(singleValue));
+          explicitTypes.add(singleValue);
+        }
+        catch (final Exception e) {
+          throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: "
+                  + s, e);
+        }
+      }
+    }
+    if (!patterns.isEmpty()) {
+      final SimplePackageFilter filter = new SimplePackageFilter(patterns);
+      MetaClassFactory
+        .getAllCachedClasses()
+        .stream()
+        .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
+        .collect(toCollection(() -> exposedClasses));
+    }
+  }
+
+  private static void updateFrameworkProperties(final Map<String, String> frameworkProps, final String key, final String value) {
+    if (frameworkProps.containsKey(key)) {
+      if (isListValuedProperty(key)) {
+        // TODO should validate that different values don't conflict
+        final String oldValue = frameworkProps.get(key);
+        final String newValue = oldValue + " " + value;
+        log.debug("Merging property {} = {}", key, newValue);
+        frameworkProps.put(key, newValue);
       } else {
+        log.warn("The property {} has been set multiple times.", key);
         frameworkProps.put(key, value);
       }
-
-      for (final String s : value.split(" ")) {
-        if ("".equals(s))
-          continue;
-        if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-          try {
-            exposedClasses.add(MetaClassFactory.get(s.trim()));
-            explicitTypes.add(s.trim());
-          }
-          catch (final Exception e) {
-            throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: "
-                    + s, e);
-          }
-        }
-        else if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
-          try {
-            nonportableClasses.add(MetaClassFactory.get(s.trim()));
-          }
-          catch (final Exception e) {
-            throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: "
-                    + s, e);
-          }
-        }
-        else if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
-          try {
-            final String[] mapping = s.split("->");
-
-            if (mapping.length != 2) {
-              throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
-            }
-
-            final Class<?> fromMapping = Class.forName(mapping[0].trim());
-            final Class<?> toMapping = Class.forName(mapping[1].trim());
-
-            mappingAliases.put(fromMapping.getName(), toMapping.getName());
-            explicitTypes.add(fromMapping.getName());
-            explicitTypes.add(toMapping.getName());
-          }
-          catch (final Exception e) {
-            throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
-          }
-        }
-      }
+    } else {
+      frameworkProps.put(key, value);
     }
   }
 

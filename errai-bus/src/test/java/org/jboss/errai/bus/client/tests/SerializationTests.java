@@ -46,6 +46,7 @@ import org.jboss.errai.bus.client.tests.support.AbstractClassA;
 import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.ConcreteNonPortableParent;
 import org.jboss.errai.bus.client.tests.support.CustomList;
 import org.jboss.errai.bus.client.tests.support.EntityWithClassFieldAndMap;
 import org.jboss.errai.bus.client.tests.support.EntityWithConstructorAndMethodMappedLong;
@@ -79,12 +80,10 @@ import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
-import org.jboss.errai.bus.client.tests.support.ConcreteNonPortableParent;
 import org.jboss.errai.bus.client.tests.support.OneDimensionalPrimitiveArrayPortable;
 import org.jboss.errai.bus.client.tests.support.Outer;
 import org.jboss.errai.bus.client.tests.support.Outer2;
 import org.jboss.errai.bus.client.tests.support.Person;
-import org.jboss.errai.bus.client.tests.support.PortableChildReferencingSuperType;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.SubInterface;
@@ -96,6 +95,9 @@ import org.jboss.errai.bus.client.tests.support.TestingTick;
 import org.jboss.errai.bus.client.tests.support.TestingTickCache;
 import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.User;
+import org.jboss.errai.bus.client.tests.support.pkg.PortableType1;
+import org.jboss.errai.bus.client.tests.support.pkg.serializablesubpkg.PortableType2;
+import org.jboss.errai.bus.client.tests.support.pkg.subpkg.NonSerializable;
 import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.marshalling.client.Marshalling;
@@ -2350,5 +2352,49 @@ public class SerializationTests extends AbstractErraiTest {
        }, TestSerializationRPCService.class).testMapSuperTypesPropertyCausesMarshallerMappingCreationForSuperType(entity);
      }
    });
+ }
+
+ public void testTypeInSerializablePackageIsPortable() throws Exception {
+   runAfterInit(new Runnable() {
+    @Override
+    public void run() {
+      final PortableType1 entity = new PortableType1("foo");
+
+      MessageBuilder.createCall(new RemoteCallback<PortableType1>() {
+
+        @Override
+        public void callback(final PortableType1 response) {
+          assertEquals("foo", response.value);
+          finishTest();
+        }
+      }, TestSerializationRPCService.class).testPortableTypeInSerializablePackage(entity);
+    }
+  });
+ }
+
+ public void testTypeInSerializableSubPackageIsPortable() throws Exception {
+   runAfterInit(new Runnable() {
+    @Override
+    public void run() {
+      final PortableType2 entity = new PortableType2("bar");
+
+      MessageBuilder.createCall(new RemoteCallback<PortableType2>() {
+
+        @Override
+        public void callback(final PortableType2 response) {
+          assertEquals("bar", response.value);
+          finishTest();
+        }
+      }, TestSerializationRPCService.class).testPortableTypeInSerializableSubPackage(entity);
+    }
+  });
+ }
+
+ public void testTypeInNonSerializablePackageIsNotPortable() throws Exception {
+   try {
+     Marshalling.toJSON(new NonSerializable());
+   } catch (final RuntimeException ex) {
+     assertTrue("Unexpected exception.", ex.getMessage().contains("No marshaller for type"));
+   }
  }
 }

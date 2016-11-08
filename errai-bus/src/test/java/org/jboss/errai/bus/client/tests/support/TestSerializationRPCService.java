@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import org.jboss.errai.bus.client.tests.support.pkg.PortableType1;
+import org.jboss.errai.bus.client.tests.support.pkg.serializablesubpkg.PortableType2;
 import org.jboss.errai.bus.server.annotations.Remote;
 
 /**
@@ -222,4 +224,8 @@ public interface TestSerializationRPCService {
   public EntityWithClassFieldAndMap testEntityWithClassField(EntityWithClassFieldAndMap entity);
 
   public Object testMapSuperTypesPropertyCausesMarshallerMappingCreationForSuperType(Object entity);
+
+  public PortableType1 testPortableTypeInSerializablePackage(PortableType1 entity);
+
+  public PortableType2 testPortableTypeInSerializableSubPackage(PortableType2 entity);
 }
