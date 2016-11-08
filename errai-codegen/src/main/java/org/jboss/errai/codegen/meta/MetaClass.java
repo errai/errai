@@ -47,7 +47,6 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
    * Returns all declared and inherited methods on this class that have the
    * given annotation targeting them.
    * <p>
-   * TODO: the returned collection should not include overridden methods from superclasses.
    *
    * @param annotation
    *          The annotation to scan this class's methods for. Must not be null.

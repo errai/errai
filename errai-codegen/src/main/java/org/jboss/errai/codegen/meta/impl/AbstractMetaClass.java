@@ -66,7 +66,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   private final T enclosedMetaObject;
   protected MetaParameterizedType parameterizedType;
   protected MetaParameterizedType genericSuperClass;
-  private final Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
+  private final Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<>();
   private MetaMethod[] staticMethodCache;
 
   protected AbstractMetaClass(final T enclosedMetaObject) {
@@ -332,21 +332,50 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public final List<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
-    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
+    final Map<String, List<MetaMethod>> methodsByName = new HashMap<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
         if (m.isAnnotationPresent(annotation)) {
-          methods.add(m);
+          final List<MetaMethod> methods = methodsByName.computeIfAbsent(m.getName(), k -> new ArrayList<>());
+          if (isNotOverriden(m, methods)) {
+            methods.add(m);
+          }
         }
       }
       scanTarget = scanTarget.getSuperClass();
     }
-    return Collections.unmodifiableList(methods);
+
+    return Collections
+            .unmodifiableList(methodsByName
+                    .values()
+                    .stream()
+                    .flatMap(list -> list.stream())
+                    .collect(Collectors.toList()));
+  }
+
+  private boolean isNotOverriden(final MetaMethod method, final List<MetaMethod> overrideCandidates) {
+    return !overrideCandidates
+            .stream()
+            .anyMatch(m -> {
+              if (m.getName().equals(method.getName()) && m.getParameters().length == method.getParameters().length) {
+                for (int i = 0; i < m.getParameters().length; i++) {
+                  final MetaClass candidateOverrideParamType = m.getParameters()[i].getType();
+                  final MetaClass paramType = method.getParameters()[i].getType();
+                  if (!candidateOverrideParamType.isAssignableTo(paramType)) {
+                    return false;
+                  }
+                }
+
+                return true;
+              }
+
+              return false;
+            });
   }
 
   @Override
-  public List<MetaMethod> getDeclaredMethodsAnnotatedWith(Class<? extends Annotation> annotation) {
+  public List<MetaMethod> getDeclaredMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
     return Arrays.stream(getDeclaredMethods())
       .filter(m -> m.isAnnotationPresent(annotation))
       .collect(collectingAndThen(Collectors.toList(), l -> Collections.unmodifiableList(l)));
@@ -354,7 +383,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public List<MetaMethod> getMethodsWithMetaAnnotations(final Class<? extends Annotation> annotation) {
-    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
+    final List<MetaMethod> methods = new ArrayList<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
@@ -382,7 +411,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public final List<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
-    final List<MetaField> fields = new ArrayList<MetaField>();
+    final List<MetaField> fields = new ArrayList<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaField m : scanTarget.getDeclaredFields()) {
@@ -396,8 +425,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public List<MetaField> getFieldsWithMetaAnnotations(Class<? extends Annotation> annotation) {
-    final List<MetaField> methods = new ArrayList<MetaField>();
+  public List<MetaField> getFieldsWithMetaAnnotations(final Class<? extends Annotation> annotation) {
+    final List<MetaField> methods = new ArrayList<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaField m : scanTarget.getDeclaredFields()) {
@@ -414,8 +443,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public List<MetaParameter> getParametersAnnotatedWith(Class<? extends Annotation> annotation) {
-    final List<MetaParameter> methods = new ArrayList<MetaParameter>();
+  public List<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
+    final List<MetaParameter> methods = new ArrayList<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaConstructor m : scanTarget.getDeclaredConstructors()) {
@@ -682,9 +711,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       private final Map<String, MetaMethod> setterProperties;
 
       {
-        final Set<String> properties = new HashSet<String>();
-        final Map<String, MetaMethod> getterProperties = new HashMap<String, MetaMethod>();
-        final Map<String, MetaMethod> setterProperties = new HashMap<String, MetaMethod>();
+        final Set<String> properties = new HashSet<>();
+        final Map<String, MetaMethod> getterProperties = new HashMap<>();
+        final Map<String, MetaMethod> setterProperties = new HashMap<>();
 
         for (final MetaMethod method : getMethods()) {
           final String property = ReflectionUtil.getPropertyFromAccessor(method.getName());
@@ -810,7 +839,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
 	  return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
