@@ -16,6 +16,8 @@
 
 package org.jboss.errai.validation.client.dynamic;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,6 +70,14 @@ public class DynamicValidatorKey {
 
     typeAliases.put(List.class.getName(), Collection.class.getName());
     typeAliases.put(Set.class.getName(), Collection.class.getName());
+    
+    typeAliases.put(Integer.class.getName(), Number.class.getName());
+    typeAliases.put(Long.class.getName(), Number.class.getName());
+    typeAliases.put(Double.class.getName(), Number.class.getName());
+    typeAliases.put(Short.class.getName(), Number.class.getName());
+    typeAliases.put(Float.class.getName(), Number.class.getName());
+    typeAliases.put(BigDecimal.class.getName(), Number.class.getName());
+    typeAliases.put(BigInteger.class.getName(), Number.class.getName());
   }
 
   private static Optional<String> getTypeAlias(final String valueType) {

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.validation.client.test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.Set;
 
 import javax.inject.Singleton;
 import javax.validation.ConstraintViolation;
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
@@ -76,7 +79,67 @@ public class DynamicValidationIntegrationTest extends AbstractErraiIOCTest {
             Collections.singletonMap("value", 100L), "101");
     assertEquals(1, invalidResult.size());
   }
+  
+  public void testValidateMaxLongValidator() throws Exception {
+    final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
+    final Set<ConstraintViolation<Long>> validResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100L), 99l);
+    assertTrue(validResult.toString(), validResult.isEmpty());
+    final Set<ConstraintViolation<Long>> invalidResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100L), 101l);
+    assertEquals(1, invalidResult.size());
+  }
 
+  public void testValidateMaxIntegerValidator() throws Exception {
+    final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
+    final Set<ConstraintViolation<Integer>> validResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), 99);
+    assertTrue(validResult.toString(), validResult.isEmpty());
+    final Set<ConstraintViolation<Integer>> invalidResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), 101);
+    assertEquals(1, invalidResult.size());
+  }
+  
+  public void testValidateMaxDoubleValidator() throws Exception {
+    final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
+    final Set<ConstraintViolation<Double>> validResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), 99d);
+    assertTrue(validResult.toString(), validResult.isEmpty());
+    final Set<ConstraintViolation<Double>> invalidResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), 101d);
+    assertEquals(1, invalidResult.size());
+  }
+  
+  public void testValidateDecimalMaxFloatValidator() throws Exception {
+    final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
+    final Set<ConstraintViolation<Float>> validResult = validator.validate(DecimalMax.class,
+            Collections.singletonMap("value", "100.0"), 99.9f);
+    assertTrue(validResult.toString(), validResult.isEmpty());
+    final Set<ConstraintViolation<Float>> invalidResult = validator.validate(DecimalMax.class,
+            Collections.singletonMap("value", "100.0"), 100.1f);
+    assertEquals(1, invalidResult.size());
+  }
+  
+  public void testValidateMaxBigDecimalValidator() throws Exception {
+    final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
+    final Set<ConstraintViolation<BigDecimal>> validResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), BigDecimal.valueOf(99l));
+    assertTrue(validResult.toString(), validResult.isEmpty());
+    final Set<ConstraintViolation<BigDecimal>> invalidResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), BigDecimal.valueOf(101l));
+    assertEquals(1, invalidResult.size());
+  }
+  
+  public void testValidateMaxBigIntegerValidator() throws Exception {
+    final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
+    final Set<ConstraintViolation<BigInteger>> validResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), BigInteger.valueOf(99l));
+    assertTrue(validResult.toString(), validResult.isEmpty());
+    final Set<ConstraintViolation<BigInteger>> invalidResult = validator.validate(Max.class,
+            Collections.singletonMap("value", 100l), BigInteger.valueOf(101l));
+    assertEquals(1, invalidResult.size());
+  }
+  
   public void testValidationWithMultipleParams() throws Exception {
     final Map<String, Object> params = new HashMap<>();
     params.put("integer", 3);
