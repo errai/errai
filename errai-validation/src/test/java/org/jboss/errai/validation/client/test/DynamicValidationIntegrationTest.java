@@ -80,6 +80,19 @@ public class DynamicValidationIntegrationTest extends AbstractErraiIOCTest {
     assertEquals(1, invalidResult.size());
   }
   
+  public void testValidateMaxStringValidatorWithMessage() throws Exception {
+    final Map<String, Object> parameters = new HashMap<>();
+    parameters.put("value", 100l);
+    parameters.put("message", "{javax.validation.constraints.Max.message}");
+    
+    final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
+    final Set<ConstraintViolation<String>> invalidResult = validator.validate(Max.class, parameters, "101");
+    assertEquals(1, invalidResult.size());
+    assertNotNull(invalidResult.iterator().next().getMessage());
+    // i.e. must be less than or equal to 100 (not verifying the rest of the text as it's dependent on the locale)
+    assertTrue(invalidResult.iterator().next().getMessage().contains("100"));
+  }
+  
   public void testValidateMaxLongValidator() throws Exception {
     final DynamicValidator validator = IOC.getBeanManager().lookupBean(DynamicValidator.class).getInstance();
     final Set<ConstraintViolation<Long>> validResult = validator.validate(Max.class,

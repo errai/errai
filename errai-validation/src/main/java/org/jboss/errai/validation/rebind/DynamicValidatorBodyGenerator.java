@@ -41,6 +41,7 @@ import javax.validation.ConstraintViolation;
 
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.TernaryStatement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -50,6 +51,7 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
@@ -57,8 +59,12 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.validation.client.dynamic.DynamicValidator;
+import org.jboss.errai.validation.client.dynamic.DynamicValidatorUtil;
 import org.jboss.errai.validation.client.dynamic.GeneratedDynamicValidator;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.validation.client.ProviderValidationMessageResolver;
+import com.google.gwt.validation.client.ValidationMessageResolver;
 import com.google.gwt.validation.client.impl.ConstraintViolationImpl;
 
 /**
@@ -82,6 +88,9 @@ public class DynamicValidatorBodyGenerator extends AbstractBodyGenerator {
     statements.add(Stmt.declareFinalVariable("dynamicValidator", DynamicValidator.class,
             ObjectBuilder.newInstanceOf(DynamicValidator.class)));
 
+    bodyBlockBuilder.privateField("messageResolver", ValidationMessageResolver.class)
+      .initializesWith(Stmt.invokeStatic(GWT.class, "create", Stmt.loadLiteral(ProviderValidationMessageResolver.class))).finish();
+    
     validators
       .stream()
       .map(validator -> addDynamicValidator(bodyBlockBuilder, validator))
@@ -119,6 +128,16 @@ public class DynamicValidatorBodyGenerator extends AbstractBodyGenerator {
       .append(if_(Bool.expr(loadVariable("this").invoke("isValid", loadVariable("value"), castTo(ConstraintValidatorContext.class, loadLiteral(null)))))
                 .append(invokeStatic(Collections.class, "emptySet").returnValue())
               .finish().else_()
+                .append(Stmt.declareVariable("paramMessage", String.class, castTo(String.class, 
+                        loadVariable("parameters").invoke("get", Stmt.loadLiteral("message")))))
+                .append(Stmt.loadVariable("paramMessage").assignValue(
+                        new TernaryStatement(Bool.isNotNull(Stmt.loadVariable("paramMessage")),
+                                Stmt.loadVariable("paramMessage")
+                                .invoke("replaceAll", Stmt.loadLiteral("{"), Stmt.loadLiteral(""))
+                                .invoke("replaceAll", Stmt.loadLiteral("}"), Stmt.loadLiteral(""))
+                                ,Stmt.loadLiteral(""))))
+                .append(Stmt.declareFinalVariable("message", String.class, 
+                        Stmt.loadVariable("messageResolver").invoke("get", Refs.get("paramMessage"))))
                 .append(invokeStatic(Collections.class, "singleton", createConstraintViolation()).returnValue())
               .finish())
       .finish();
@@ -149,7 +168,9 @@ public class DynamicValidatorBodyGenerator extends AbstractBodyGenerator {
   }
 
   private ContextualStatementBuilder createConstraintViolation() {
-    return invokeStatic(ConstraintViolationImpl.class, "builder").invoke("setInvalidValue", loadVariable("value")).invoke("build");
+    return invokeStatic(ConstraintViolationImpl.class, "builder").invoke("setInvalidValue", loadVariable("value"))
+            .invoke("setMessage", Stmt.invokeStatic(DynamicValidatorUtil.class, "interpolateMessage", Refs.get("parameters"), Refs.get("message")))
+            .invoke("build");
   }
 
   private ObjectBuilder createAnnoImpl(final MetaClass annoType) {

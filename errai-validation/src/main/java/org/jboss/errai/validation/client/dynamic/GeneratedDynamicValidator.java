@@ -43,4 +43,5 @@ public interface GeneratedDynamicValidator<T> {
    *         ConstraintViolations} if given value is invalid.
    */
   Set<ConstraintViolation<T>> validate(Map<String, Object> parameters, T value);
+  
 }
