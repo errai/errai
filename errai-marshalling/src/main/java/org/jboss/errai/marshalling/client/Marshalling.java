@@ -182,6 +182,32 @@ public abstract class Marshalling {
   }
 
   /**
+   * Converts the given JSON message to a Java object, recursively decoding nested attributes
+   * contained in that message.
+   *
+   * @param json
+   *          The JSON representation of the object graph to demarshall.
+   * @return the root of the reconstructed object graph.
+   */
+  public static Object fromJSON(final EJValue json) {
+    return fromJSON(json, Object.class);
+  }
+
+  /**
+   * Converts the given JSON message to a Java object, recursively decoding nested attributes
+   * contained in that message.
+   *
+   * @param json
+   *          The JSON representation of the object graph to demarshall.
+   * @param type
+   *          The expected type of the root of the object graph.
+   * @return the root of the reconstructed object graph.
+   */
+  public static <T> T fromJSON(final EJValue json, final Class<T> type) {
+    return fromJSON(json, type, null);
+  }
+
+  /**
    * Converts the given JSON message (which is likely a collection) to a Java object, recursively
    * decoding nested attributes contained in that message.
    * 
@@ -195,13 +221,31 @@ public abstract class Marshalling {
    *          JSON message.
    * @return the root of the reconstructed object graph.
    */
-  @SuppressWarnings("unchecked")
   public static <T> T fromJSON(final String json, final Class<T> type, final Class<?> assumedElementType) {
     if (json == null || "null".equals(json)) {
       return null;
     }
 
     final EJValue parsedValue = ParserFactory.get().parse(json);
+    return fromJSON(parsedValue, type, assumedElementType);
+  }
+
+  /**
+   * Converts the given JSON message (which is likely a collection) to a Java object, recursively
+   * decoding nested attributes contained in that message.
+   *
+   * @param json
+   *          The JSON representation of the object graph to demarshall.
+   * @param type
+   *          The expected type of the root of the object graph.
+   * @param assumedElementType
+   *          the type of elements assumed to be in the root collection. A null value means that
+   *          either the root object is not a collection, or its element type is provided in the
+   *          JSON message.
+   * @return the root of the reconstructed object graph.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T fromJSON(final EJValue parsedValue, final Class<T> type, final Class<?> assumedElementType) {
     final MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
     if (assumedElementType != null) {
       session.setAssumedElementType(assumedElementType.getName());

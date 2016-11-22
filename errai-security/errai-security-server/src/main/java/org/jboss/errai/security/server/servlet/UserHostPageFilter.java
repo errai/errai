@@ -33,7 +33,7 @@ import org.jsoup.nodes.Document;
  * application's host page. This is useful in case the login page lives outside
  * the GWT application as it makes instances of {@link User} immediately
  * injectable (without requiring a server round-trip.)
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @WebFilter(filterName = "ErraiUserHostPageFilter", urlPatterns = { "/index.jsp", "/index.html" })
@@ -69,12 +69,11 @@ public class UserHostPageFilter implements Filter {
 
       final User user = authenticationService.getUser();
       final String output;
-      
+
       if (user != null) {
-        final String injectedScript = "<script>var " + 
-                SecurityConstants.ERRAI_SECURITY_CONTEXT_DICTIONARY + "  = {\"" +
-                SecurityConstants.DICTIONARY_USER + "\": '" + 
-                ServerMarshalling.toJSON(user) + "'};" + "</script>";
+        final String injectedScript = "<script>var " +
+                SecurityConstants.ERRAI_SECURITY_CONTEXT_DICTIONARY + "  = " +
+                securityContextJson(user) + "; </script>";
 
         final Document document = Jsoup.parse(wrappedResponse.toString());
         document.head().append(injectedScript);
@@ -83,11 +82,17 @@ public class UserHostPageFilter implements Filter {
       else {
         output = wrappedResponse.toString();
       }
-      
-      byte[] outputBytes = output.getBytes("UTF-8");
+
+      final byte[] outputBytes = output.getBytes("UTF-8");
       response.setContentLength(outputBytes.length);
       response.getOutputStream().write(outputBytes);
     }
+  }
+
+  String securityContextJson(final User user) {
+    final String userJson = ServerMarshalling.toJSON(user);
+
+    return "{\"" + SecurityConstants.DICTIONARY_USER + "\": " + userJson + "}";
   }
 
   private boolean isUserOnHostPageEnabled() {
