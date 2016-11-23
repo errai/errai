@@ -350,7 +350,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     final Optional<Class<?>> componentValueType;
 
     if (component instanceof Widget) {
-      componentValueType = Optional.ofNullable(Convert.inferWidgetValueType((Widget) component, propertyType));
+      final Class<?> presumedType = (userProvidedConverter == null) ? propertyType : userProvidedConverter.getComponentType();
+      componentValueType = Optional.ofNullable(Convert.inferWidgetValueType((Widget) component, presumedType));
     }
     else if (isElement(component)) {
       final Element element = BoundUtil.asElement(component);
