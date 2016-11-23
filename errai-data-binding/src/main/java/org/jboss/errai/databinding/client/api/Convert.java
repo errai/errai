@@ -335,6 +335,9 @@ public class Convert {
   public static void deregisterDefaultConverters() {
     defaultConverters.clear();
   }
+  
+  @SuppressWarnings("rawtypes")
+  public static final Map<Class<? extends Widget>, Class> widgetValueTypes = new HashMap<>();
 
   @SuppressWarnings("rawtypes")
   public static Class inferWidgetValueType(final Widget widget, final Class<?> defaultWidgetValueType) {
@@ -350,6 +353,9 @@ public class Convert {
           value = ((WrappedPortable) value).unwrap();
         }
         widgetValueType = value.getClass();
+      }
+      else if (widgetValueTypes.get(widget.getClass()) != null) {
+          widgetValueType = widgetValueTypes.get(widget.getClass());
       }
       else if (widget instanceof TextBoxBase) {
         widgetValueType = String.class;
