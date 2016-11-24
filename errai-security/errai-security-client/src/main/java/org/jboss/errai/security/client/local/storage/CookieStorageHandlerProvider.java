@@ -16,22 +16,21 @@
 
 package org.jboss.errai.security.client.local.storage;
 
-import java.util.MissingResourceException;
-
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-import org.jboss.errai.security.shared.api.SecurityConstants;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.i18n.client.Dictionary;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Cookies;
 
 @IOCProvider
@@ -48,21 +47,19 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
 
     @Override
     public User getUser() {
-      User user = null;
-      try {
-        // If the GWT app's host page is behind a login page, the server
-        // can set the currently authenticated user by providing the
-        // errai_security_context variable as part of the host page. This way
-        // the Errai app can bootstrap and the already authenticated user
-        // instance is immediately injectable (without contacting the server
-        // first).
-        Dictionary dictionary = Dictionary.getDictionary(SecurityConstants.ERRAI_SECURITY_CONTEXT_DICTIONARY);
-        user = (User) Marshalling.fromJSON(dictionary.get(SecurityConstants.DICTIONARY_USER));
-      } 
-      catch (MissingResourceException mre) {
-        // Writing the errai_security_context variable is optional.
+      // If the GWT app's host page is behind a login page, the server
+      // can set the currently authenticated user by providing the
+      // errai_security_context variable as part of the host page. This way
+      // the Errai app can bootstrap and the already authenticated user
+      // instance is immediately injectable (without contacting the server
+      // first).
+      if (ClientSecurityConstants.securityContextObject != null) {
+        final EJValue userJson = GWTJSON.wrap(new JSONObject(ClientSecurityConstants.securityContextUserObject));
+        return (User) Marshalling.fromJSON(userJson);
       }
-      return user;
+      else {
+        return null;
+      }
     }
 
     @Override
@@ -75,20 +72,20 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
     UserCookieStorageHandlerImpl() {
       MarshallerFramework.initializeDefaultSessionProvider();
     }
-    
+
     @Override
     public User getUser() {
       try {
         final String json = Cookies.getCookie(UserCookieEncoder.USER_COOKIE_NAME);
         if (json != null) {
-          User user = UserCookieEncoder.fromCookieValue(json);
+          final User user = UserCookieEncoder.fromCookieValue(json);
           logger.debug("Found " + user + " in cookie cache!");
           return user;
         }
         else {
           return null;
         }
-      } catch (RuntimeException e) {
+      } catch (final RuntimeException e) {
         logger.warn("Failed to retrieve current user from a cookie.", e);
         Cookies.removeCookie(UserCookieEncoder.USER_COOKIE_NAME);
         return null;
@@ -102,7 +99,7 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
           logger.debug("Storing " + user + " in cookie cache.");
           final String json = UserCookieEncoder.toCookieValue(user);
           Cookies.setCookie(UserCookieEncoder.USER_COOKIE_NAME, json);
-        } catch (RuntimeException ex) {
+        } catch (final RuntimeException ex) {
           logger.warn(
                   "Failed to store user in cookie cache. Subsequent visits to this app will redirect to login screen even if the session is still valid.",
                   ex);
