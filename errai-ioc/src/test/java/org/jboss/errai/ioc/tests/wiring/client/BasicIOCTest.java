@@ -33,6 +33,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBeanInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.AppScopedBeanInvokingSelf;
+import org.jboss.errai.ioc.tests.wiring.client.res.ApplicationScopedBeanInheritingPreDestroy;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.ChildWithSetterOverride;
@@ -328,5 +329,11 @@ public class BasicIOCTest extends IOCClientTestCase {
   public void testOverrideOfInjectSetterMethod() throws Exception {
     final ChildWithSetterOverride bean = IOCUtil.getInstance(ChildWithSetterOverride.class);
     assertEquals("AQual", bean.dep.value);
+  }
+
+  // Regression test for ERRAI-1002
+  public void testApplicationScopedSubTypeWithInheritedPreDestroy() throws Exception {
+    // Just test that we can look it up. Original issue causes compilation failure.
+    IOC.getBeanManager().lookupBean(ApplicationScopedBeanInheritingPreDestroy.class).getInstance();
   }
 }

@@ -548,12 +548,6 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     createInstanceStatements.add(loadVariable("instance").returnValue());
   }
 
-  protected String addPrivateMethodAccessor(final MetaMethod postConstruct, final ClassStructureBuilder<?> bodyBlockBuilder) {
-    addPrivateAccessStubs("jsni", bodyBlockBuilder, postConstruct);
-
-    return getPrivateMethodName(postConstruct);
-  }
-
   /**
    * @param bodyBlockBuilder
    *          The {@link ClassStructureBuilder} for the {@link Factory} being

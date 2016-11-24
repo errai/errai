@@ -97,7 +97,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
     final Collection<Dependency> fieldDependencies = dependenciesByType.get(DependencyType.Field);
     final Collection<Dependency> setterDependencies = dependenciesByType.get(DependencyType.SetterParameter);
 
-    final List<Statement> createInstanceStatements = new ArrayList<Statement>();
+    final List<Statement> createInstanceStatements = new ArrayList<>();
 
     constructInstance(injectable, constructorDependencies, createInstanceStatements);
     injectFieldDependencies(injectable, fieldDependencies, createInstanceStatements, bodyBlockBuilder);
@@ -111,7 +111,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   @Override
   protected List<Statement> generateDestroyInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
           final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-    final List<Statement> destructionStmts = new ArrayList<Statement>();
+    final List<Statement> destructionStmts = new ArrayList<>();
 
     maybeInvokePreDestroys(injectable, destructionStmts, bodyBlockBuilder);
     destructionStmts
@@ -123,7 +123,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   @Override
   protected List<Statement> generateInvokePostConstructsStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
           final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-    final List<Statement> stmts = new ArrayList<Statement>();
+    final List<Statement> stmts = new ArrayList<>();
     final Queue<MetaMethod> postConstructMethods = gatherPostConstructs(injectable);
     for (final MetaMethod postConstruct : postConstructMethods) {
       if (postConstruct.isPublic()) {
@@ -145,7 +145,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   private void runDecorators(final Injectable injectable, final InjectionContext injectionContext,
           final ClassStructureBuilder<?> bodyBlockBuilder) {
     final MetaClass type = injectable.getInjectedType();
-    final Set<HasAnnotations> privateAccessors = new HashSet<HasAnnotations>();
+    final Set<HasAnnotations> privateAccessors = new HashSet<>();
     final List<DecoratorRunnable> decoratorRunnables = new ArrayList<>();
     decoratorRunnables.addAll(generateDecoratorRunnablesForType(injectionContext, type, ElementType.FIELD,
             bodyBlockBuilder, privateAccessors, injectable));
@@ -257,7 +257,8 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       if (preDestroy.isPublic()) {
         destructionStmts.add(loadVariable("instance").invoke(preDestroy));
       } else {
-        final String accessorName = addPrivateMethodAccessor(preDestroy, bodyBlockBuilder);
+        controller.ensureMemberExposed(preDestroy);
+        final String accessorName = getPrivateMethodName(preDestroy);
         destructionStmts.add(invokePrivateAccessorWithNoParams(accessorName));
       }
     }
@@ -268,7 +269,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   }
 
   private Queue<MetaMethod> gatherPreDestroys(final Injectable injectable) {
-    final Queue<MetaMethod> preDestroyQueue = new LinkedList<MetaMethod>();
+    final Queue<MetaMethod> preDestroyQueue = new LinkedList<>();
     MetaClass type = injectable.getInjectedType();
     do {
       final List<MetaMethod> curPreDestroys = type.getDeclaredMethodsAnnotatedWith(PreDestroy.class);
@@ -291,7 +292,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
   private Queue<MetaMethod> gatherPostConstructs(final Injectable injectable) {
     MetaClass type = injectable.getInjectedType();
-    final Deque<MetaMethod> postConstructs = new ArrayDeque<MetaMethod>();
+    final Deque<MetaMethod> postConstructs = new ArrayDeque<>();
 
     do {
       final List<MetaMethod> currentPostConstructs = type.getDeclaredMethodsAnnotatedWith(PostConstruct.class);
@@ -411,7 +412,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   private void addConstructorInjectionStatements(final Injectable injectable, final Collection<Dependency> constructorDependencies,
           final List<Statement> createInstanceStatements) {
     final Object[] constructorParameterStatements = new Object[constructorDependencies.size()];
-    final List<Statement> dependentScopedRegistrationStatements = new ArrayList<Statement>(constructorDependencies.size());
+    final List<Statement> dependentScopedRegistrationStatements = new ArrayList<>(constructorDependencies.size());
     for (final Dependency dep : constructorDependencies) {
       processConstructorDependencyStatement(createInstanceStatements, constructorParameterStatements, dependentScopedRegistrationStatements, dep);
     }
