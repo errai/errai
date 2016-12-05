@@ -122,7 +122,9 @@ public class MarshallerGeneratorFactory {
 
   public static final String MARSHALLER_NAME_PREFIX = "Marshaller_for_";
   public static final String SHORT_MARSHALLER_PREFIX = "Marshaller_";
+  public static final String VERY_SHORT_MARSHALLER_PREFIX = "M";
   private static final String MARSHALLERS_VAR = "marshallers";
+  private static final boolean VERY_SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_VERY_SHORT_IMPL_NAMES, "false"));
   private static final boolean SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_SHORT_IMPL_NAMES, "true"));
   private static final int MARSHALLER_HELPER_METHOD_SIZE = 100;
 
@@ -136,14 +138,14 @@ public class MarshallerGeneratorFactory {
   private Context classContext;
   private boolean done;
 
-  private final Set<String> arrayMarshallers = new HashSet<String>();
-  private final Set<String> unlazyMarshallers = new HashSet<String>();
+  private final Set<String> arrayMarshallers = new HashSet<>();
+  private final Set<String> unlazyMarshallers = new HashSet<>();
 
   private static final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
   private static boolean refresh = false;
 
   private static final UniqueNameGenerator uniqueGenerator = new UniqueNameGenerator();
-  private static final Map<String, String> leasedNamesByTypeName = new HashMap<String, String>();
+  private static final Map<String, String> leasedNamesByTypeName = new HashMap<>();
 
   long startTime;
 
@@ -247,7 +249,7 @@ public class MarshallerGeneratorFactory {
         elseBlockBuilder = If.objEquals(Stmt.loadLiteral(typeName), Stmt.loadVariable("a0")).append(stmt).finish();
       }
       else {
-        elseBlockBuilder = elseBlockBuilder.elseif_(Stmt.loadLiteral(typeName).invoke("equals", 
+        elseBlockBuilder = elseBlockBuilder.elseif_(Stmt.loadLiteral(typeName).invoke("equals",
                 Stmt.loadVariable("a0"))).append(stmt).finish();
       }
 
@@ -416,15 +418,7 @@ public class MarshallerGeneratorFactory {
         final MappingStrategy strategy = MappingStrategyFactory
             .createStrategy(false, GeneratorMappingContextFactory.getFor(context, target), type);
 
-        final String marshallerClassName;
-        if (SHORT_MARSHALLER_NAMES) {
-          marshallerClassName = MarshallerGeneratorFactory.SHORT_MARSHALLER_PREFIX
-                  + uniqueGenerator.uniqueName(
-                          NameUtil.shortenDerivedIdentifier(NameUtil.derivedIdentifier(type.getFullyQualifiedName())))
-                  + "Impl";
-        } else {
-          marshallerClassName = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "Impl";
-        }
+        final String marshallerClassName = generateMarshallerImplClassName(type, target == MarshallerOutputTarget.GWT);
 
         final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerClassName);
         customMarshaller = marshaller.getClassDefinition();
@@ -476,7 +470,7 @@ public class MarshallerGeneratorFactory {
     final String varName = getVarName(type);
 
     if (!arrayMarshallers.contains(varName)) {
-      final String marshallerClassName = getMarshallerImplClassName(type);
+      final String marshallerClassName = getMarshallerImplClassName(type, gwtTarget);
       final InnerClass arrayMarshaller = new InnerClass(generateArrayMarshaller(type, marshallerClassName, gwtTarget));
       classStructureBuilder.declaresInnerClass(arrayMarshaller);
 
@@ -489,22 +483,25 @@ public class MarshallerGeneratorFactory {
     return varName;
   }
 
-  public static String getMarshallerImplClassName(final MetaClass type) {
+  public static String getMarshallerImplClassName(final MetaClass type, final boolean gwtTarget) {
     String implName = leasedNamesByTypeName.get(type.getFullyQualifiedName());
     if (implName == null) {
-      implName = leaseMarshallerImplClassName(type);
+      implName = generateMarshallerImplClassName(type, gwtTarget);
       leasedNamesByTypeName.put(type.getFullyQualifiedName(), implName);
     }
 
     return implName;
   }
 
-  private static String leaseMarshallerImplClassName(final MetaClass type) {
+  private static String generateMarshallerImplClassName(final MetaClass type, final boolean gwtTarget) {
     final String varName = getVarName(type);
-
-    if (SHORT_MARSHALLER_NAMES) {
+    if (VERY_SHORT_MARSHALLER_NAMES && !gwtTarget) {
+      return VERY_SHORT_MARSHALLER_PREFIX + uniqueGenerator.uniqueName(NameUtil.getShortHashString(varName));
+    }
+    else if (SHORT_MARSHALLER_NAMES) {
       return SHORT_MARSHALLER_PREFIX + uniqueGenerator.uniqueName(NameUtil.shortenDerivedIdentifier(varName)) + "_Impl";
-    } else {
+    }
+    else {
       return MARSHALLER_NAME_PREFIX + varName + "_Impl";
     }
   }

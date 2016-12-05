@@ -56,8 +56,8 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
   // We're keeping this cache of portable types to compare their contents and
   // find out if they have changed since the last refresh.
-  private static Map<String, MetaClass> cachedPortableTypes = new ConcurrentHashMap<String, MetaClass>();
-  private static Map<String, String> cachedSourceByTypeName = new ConcurrentHashMap<String, String>();
+  private static Map<String, MetaClass> cachedPortableTypes = new ConcurrentHashMap<>();
+  private static Map<String, String> cachedSourceByTypeName = new ConcurrentHashMap<>();
 
   /*
    * A version id. Increment this as needed, when structural changes are made to
@@ -72,7 +72,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
   public RebindResult generateIncrementally(final TreeLogger logger, final GeneratorContext context, final String typeName) throws UnableToCompleteException {
     final String fullyQualifiedTypeName = distillTargetTypeName(typeName);
     final MetaClass type = MetaClassFactory.get(fullyQualifiedTypeName);
-    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type);
+    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
     final String marshallerTypeName = packageName + "." + className;
     final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
 

@@ -49,6 +49,7 @@ public class MarshallingGenUtil {
   private static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
   private static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
   public static final String USE_SHORT_IMPL_NAMES = "errai.marshalling.short_names";
+  public static final String USE_VERY_SHORT_IMPL_NAMES = "errai.marshalling.very_short_names";
 
   public static final String ARRAY_VAR_PREFIX = "arrayOf_";
   public static final String ERRAI_DOLLARSIGN_REPLACEMENT = ".erraiD.";
@@ -69,7 +70,7 @@ public class MarshallingGenUtil {
     return ARRAY_VAR_PREFIX + normalizeName(clazz);
   }
 
-  public static String getVarName(String clazz) {
+  public static String getVarName(final String clazz) {
     return normalizeName(clazz);
   }
 
@@ -81,7 +82,7 @@ public class MarshallingGenUtil {
     return result;
   }
 
-  public static MetaMethod findGetterMethod(MetaClass cls, String key) {
+  public static MetaMethod findGetterMethod(final MetaClass cls, final String key) {
     MetaMethod metaMethod = _findGetterMethod("get", cls, key);
     if (metaMethod != null)
       return metaMethod;
@@ -89,9 +90,9 @@ public class MarshallingGenUtil {
     return metaMethod;
   }
 
-  private static MetaMethod _findGetterMethod(String prefix, MetaClass cls, String key) {
+  private static MetaMethod _findGetterMethod(final String prefix, final MetaClass cls, String key) {
     key = (prefix + key).toUpperCase();
-    for (MetaMethod m : cls.getDeclaredMethods()) {
+    for (final MetaMethod m : cls.getDeclaredMethods()) {
       if (m.getName().toUpperCase().equals(key) && m.getParameters().length == 0) {
         return m;
       }
@@ -114,7 +115,7 @@ public class MarshallingGenUtil {
    * @return The concrete element type meeting all above-mentioned criteria, or null if one or more
    *         of the criteria fails.
    */
-  public static MetaClass getConcreteCollectionElementType(MetaClass toType) {
+  public static MetaClass getConcreteCollectionElementType(final MetaClass toType) {
     if (toType.isAssignableTo(Collection.class)) {
       return getConcreteElementType(toType);
     }
@@ -135,7 +136,7 @@ public class MarshallingGenUtil {
    * @return The concrete element type meeting all above-mentioned criteria, or null if one or more
    *         of the criteria fails.
    */
-  public static MetaClass getConcreteElementType(MetaClass toType) {
+  public static MetaClass getConcreteElementType(final MetaClass toType) {
     return getConcreteTypeParameter(toType, 0, 1);
   }
 
@@ -152,7 +153,7 @@ public class MarshallingGenUtil {
    * @return The concrete map key type meeting all above-mentioned criteria, or null if one or more
    *         of the criteria fails.
    */
-  public static MetaClass getConcreteMapKeyType(MetaClass toType) {
+  public static MetaClass getConcreteMapKeyType(final MetaClass toType) {
     if (toType.isAssignableTo(Map.class)) {
       return getConcreteTypeParameter(toType, 0, 2);
     }
@@ -172,21 +173,21 @@ public class MarshallingGenUtil {
    * @return The concrete map value type meeting all above-mentioned criteria, or null if one or
    *         more of the criteria fails.
    */
-  public static MetaClass getConcreteMapValueType(MetaClass toType) {
+  public static MetaClass getConcreteMapValueType(final MetaClass toType) {
     if (toType.isAssignableTo(Map.class)) {
       return getConcreteTypeParameter(toType, 1, 2);
     }
     return null;
   }
 
-  private static MetaClass getConcreteTypeParameter(MetaClass toType, int typeParamIndex, int typeParamsSize) {
+  private static MetaClass getConcreteTypeParameter(final MetaClass toType, final int typeParamIndex, final int typeParamsSize) {
     if (toType.getParameterizedType() != null) {
-      MetaType[] typeParms = toType.getParameterizedType().getTypeParameters();
+      final MetaType[] typeParms = toType.getParameterizedType().getTypeParameters();
       if (typeParms != null && typeParms.length == typeParamsSize) {
 
         MetaClass typeParameter = null;
         if (typeParms[typeParamIndex] instanceof MetaParameterizedType) {
-          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParms[typeParamIndex];
+          final MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParms[typeParamIndex];
           typeParameter = (MetaClass) parameterizedTypeParemeter.getRawType();
         }
         else if (typeParms[typeParamIndex] instanceof MetaClass) {
@@ -200,7 +201,7 @@ public class MarshallingGenUtil {
   }
 
   public static Collection<MetaClass> getDefaultArrayMarshallers() {
-    final List<MetaClass> l = new ArrayList<MetaClass>();
+    final List<MetaClass> l = new ArrayList<>();
 
     l.add(MetaClassFactory.get(Object[].class));
     l.add(MetaClassFactory.get(String[].class));
@@ -259,18 +260,18 @@ public class MarshallingGenUtil {
     }
   }
 
-  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder,
-      MetaClass marshallerForType, MetaClass type, BlockBuilder<?> initMethod) {
+  public static void ensureMarshallerFieldCreated(final ClassStructureBuilder<?> classStructureBuilder,
+      final MetaClass marshallerForType, final MetaClass type, final BlockBuilder<?> initMethod) {
     ensureMarshallerFieldCreated(classStructureBuilder, marshallerForType, type, initMethod, null);
   }
 
-  public static void ensureMarshallerFieldCreated(ClassStructureBuilder<?> classStructureBuilder,
-      MetaClass marshallerForType, MetaClass type, BlockBuilder<?> initMethod,
-      Statement marshallerCreationCallback) {
-    String fieldName = MarshallingGenUtil.getVarName(type);
+  public static void ensureMarshallerFieldCreated(final ClassStructureBuilder<?> classStructureBuilder,
+      final MetaClass marshallerForType, final MetaClass type, final BlockBuilder<?> initMethod,
+      final Statement marshallerCreationCallback) {
+    final String fieldName = MarshallingGenUtil.getVarName(type);
 
     if (classStructureBuilder.getClassDefinition().getField(fieldName) == null) {
-      Statement marshallerLookup = createMarshallerLookup(marshallerForType, type, marshallerCreationCallback);
+      final Statement marshallerLookup = createMarshallerLookup(marshallerForType, type, marshallerCreationCallback);
       if (initMethod == null) {
         classStructureBuilder.privateField(fieldName,
             parameterizedAs(Marshaller.class, typeParametersOf(type.getErased().asBoxed())))
@@ -288,8 +289,8 @@ public class MarshallingGenUtil {
     }
   }
 
-  private static Statement createMarshallerLookup(MetaClass marshallerForType, MetaClass type,
-      Statement marshallerCreationCallback) {
+  private static Statement createMarshallerLookup(final MetaClass marshallerForType, final MetaClass type,
+      final Statement marshallerCreationCallback) {
     Statement marshallerLookup = null;
 
     if (type.equals(marshallerForType)) {

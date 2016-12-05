@@ -58,4 +58,58 @@ public class NameUtil {
     return builder.toString();
   }
 
+  /**
+   * @return A compact String representation of the given object's hashCode, using only characters in the ranges
+   *         'A'-'Z', 'a'-'z', '0'-'9', '_', and '$'.
+   */
+  public static String getShortHashString(final Object obj) {
+    return getShortHashString(obj.hashCode());
+  }
+
+  /**
+   * @return A compact String representation of the given hashCode, using only characters in the ranges
+   *         'A'-'Z', 'a'-'z', '0'-'9', '_', and '$'.
+   */
+  public static String getShortHashString(final int hashCode) {
+    int remaining = hashCode;
+    final StringBuilder builder = new StringBuilder(6);
+    for (int i = 0; i < 6; i++) {
+      final int part = remaining & 0b111111;
+      builder.append(getHashChar(part));
+      remaining = (remaining >> 6);
+    }
+
+    return builder.toString();
+  }
+
+  static char getHashChar(int part) {
+    if (part <= 'Z' - 'A') {
+      return (char) ('A' + part);
+    }
+    else {
+      part -= 1 + ('Z' - 'A');
+      if (part <= 'z' - 'a') {
+        return (char) ('a' + part);
+      }
+      else {
+        part -= 1 + ('z' - 'a');
+        if (part <= '9' - '0') {
+          return (char) ('0' + part);
+        }
+        else {
+          part -= 1 + ('9' - '0');
+          if (part == 0) {
+            return '$';
+          }
+          else if (part == 1) {
+            return '_';
+          }
+          else {
+            throw new IllegalArgumentException("Argument [part] should satisfy [0 <= part < 64], but [part = " + part + "].");
+          }
+        }
+      }
+    }
+  }
+
 }
