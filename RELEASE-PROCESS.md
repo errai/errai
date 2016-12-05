@@ -21,9 +21,9 @@ after each step as we go.
 Release Steps
 -------------
 
-1. Run the test suite. Ensure all tests pass.
+1. Run the test suite. Ensure all tests pass. (Can skip this if last CI build is green.)
         
-        % mvn -Pintegration-test clean test
+        % mvn -Pintegration-test clean install
         
 1. Update reference guide with latest content and check in generated docbook.
         
@@ -75,13 +75,15 @@ Release Steps
   * Browse to https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/ and verify that 
      the artifacts are present
 
+1. Release the new version on [JIRA](https://issues.jboss.org/projects/ERRAI?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=unreleased).
+
 1. Update the version number of errai in the getting started demo's pom.xml:
   https://github.com/errai/errai-tutorial/blob/master/pom.xml
 
 1. Update the website with links to the new version (https://github.com/errai/errai.github.com)
 
-1. Publish a release blog entry at http://errai-blog.blogspot.com/
+1. (Optional) Publish a release blog entry at http://errai-blog.blogspot.com/
 
-1. Tweet about the release!
+1. (Optional) Tweet about the release!
 
 === You're done! Congrats! You deserve beer! ===
