@@ -28,8 +28,10 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.logging.util.ReflectableJSO;
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.QualifierUtil;
+import org.jboss.errai.ioc.client.WindowInjectionContext;
 import org.jboss.errai.ioc.client.WindowInjectionContextStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,13 +160,23 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   }
 
   private JsArray<JsTypeProvider<?>> getJsProviders(final String name) {
-    try {
-      return WindowInjectionContextStorage.createOrGet().getProviders(name);
-    } catch (final RuntimeException e) {
-      logger.debug("Encountered error when looking up JsType providers for " + name, e);
+    final WindowInjectionContext windowInjectionContext = WindowInjectionContextStorage.createOrGet();
+
+    // This check may be false if -generateJsInteropExports is not set
+    if (hasGetProvidersMethod(windowInjectionContext)) {
+      return windowInjectionContext.getProviders(name);
+    }
+    else {
+      logger.debug("Did not look up external JsTypeProviders for {}. "
+              + "Hint: It looks like the WindowInjectionContext was supplied by an app "
+              + "that was compiled without the flag \"-generateJsInteropExports\".", name);
       return new JsArray<>(new JsTypeProvider[0]);
     }
   }
+
+  private static native boolean hasGetProvidersMethod(WindowInjectionContext obj)/*-{
+    return obj.getProviders != undefined;
+  }-*/;
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
