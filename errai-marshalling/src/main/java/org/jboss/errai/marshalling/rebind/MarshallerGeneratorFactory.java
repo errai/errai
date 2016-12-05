@@ -82,8 +82,10 @@ import com.google.gwt.core.shared.GWT;
 public class MarshallerGeneratorFactory {
   public static final String MARSHALLER_NAME_PREFIX = "Marshaller_for_";
   public static final String SHORT_MARSHALLER_PREFIX = "Marshaller_";
+  public static final String VERY_SHORT_MARSHALLER_PREFIX = "M";
   private static final String MARSHALLERS_VAR = "marshallers";
   private static final boolean SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_SHORT_IMPL_NAMES, "true"));
+  private static final boolean VERY_SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_VERY_SHORT_IMPL_NAMES, "true"));
 
   private final MarshallerOutputTarget target;
   private final ReachableTypes reachableTypes;
@@ -190,7 +192,7 @@ public class MarshallerGeneratorFactory {
           }
 
           @Override
-          public Statement deferred(MetaClass type, MetaClass marshaller) {
+          public Statement deferred(final MetaClass type, final MetaClass marshaller) {
             return
             Stmt.newObject(parameterizedAs(DeferredMarshallerCreationCallback.class, typeParametersOf(type)))
                 .extend()
@@ -215,7 +217,7 @@ public class MarshallerGeneratorFactory {
     final MetaClass javaUtilMap = MetaClassFactory.get(new TypeLiteral<Map<String, Marshaller>>() {});
     autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
 
-    ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
+    final ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
 
     for (final MetaClass cls : mappingContext.getDefinitionsFactory().getExposedClasses()) {
       final String clsName = cls.getFullyQualifiedName();
@@ -238,7 +240,7 @@ public class MarshallerGeneratorFactory {
 
       Statement marshaller = null;
       if (marshallerCls.isAnnotationPresent(AlwaysQualify.class)) {
-        MetaClass type = MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
+        final MetaClass type = MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
             MetaClassFactory.typeParametersOf(cls));
 
         marshaller = Stmt.declareFinalVariable(varName, type, Stmt.newObject(QualifyingMarshallerWrapper.class)
@@ -316,7 +318,7 @@ public class MarshallerGeneratorFactory {
       mappingContext.registerGeneratedMarshaller(clazz.getFullyQualifiedName());
     }
 
-    boolean lazyEnabled = CommonConfigAttribs.LAZY_LOAD_BUILTIN_MARSHALLERS.getBoolean();
+    final boolean lazyEnabled = CommonConfigAttribs.LAZY_LOAD_BUILTIN_MARSHALLERS.getBoolean();
 
     for (final MetaClass cls : exposed) {
       final MetaClass compType = cls.getOuterComponentType();
@@ -367,15 +369,7 @@ public class MarshallerGeneratorFactory {
         final MappingStrategy strategy = MappingStrategyFactory
             .createStrategy(false, GeneratorMappingContextFactory.getFor(context, target), type);
 
-        final String marshallerClassName;
-        if (SHORT_MARSHALLER_NAMES) {
-          marshallerClassName = MarshallerGeneratorFactory.SHORT_MARSHALLER_PREFIX
-                  + uniqueGenerator.uniqueName(
-                          NameUtil.shortenDerivedIdentifier(NameUtil.derivedIdentifier(type.getFullyQualifiedName())))
-                  + "Impl";
-        } else {
-          marshallerClassName = MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX + MarshallingGenUtil.getVarName(type) + "Impl";
-        }
+        final String marshallerClassName = generateMarshallerImplClassName(type, target == MarshallerOutputTarget.GWT);
 
         final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerClassName);
         customMarshaller = marshaller.getClassDefinition();
@@ -415,7 +409,7 @@ public class MarshallerGeneratorFactory {
         .entrySet()) {
 
       if (aliasEntry.getValue().equals(type.getFullyQualifiedName())) {
-        MetaClass aliasType = MetaClassFactory.get(aliasEntry.getKey());
+        final MetaClass aliasType = MetaClassFactory.get(aliasEntry.getKey());
         if (!mappingContext.isRendered(aliasType)) {
           addMarshaller(marshaller, aliasType);
         }
@@ -423,11 +417,11 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  private String addArrayMarshaller(final MetaClass type, boolean gwtTarget) {
+  private String addArrayMarshaller(final MetaClass type, final boolean gwtTarget) {
     final String varName = getVarName(type);
 
     if (!arrayMarshallers.contains(varName)) {
-      final String marshallerClassName = getMarshallerImplClassName(type);
+      final String marshallerClassName = getMarshallerImplClassName(type, gwtTarget);
       final InnerClass arrayMarshaller = new InnerClass(generateArrayMarshaller(type, marshallerClassName, gwtTarget));
       classStructureBuilder.declaresInnerClass(arrayMarshaller);
 
@@ -443,28 +437,31 @@ public class MarshallerGeneratorFactory {
     return varName;
   }
 
-  public static String getMarshallerImplClassName(final MetaClass type) {
+  public static String getMarshallerImplClassName(final MetaClass type, final boolean gwtTarget) {
     String implName = leasedNamesByTypeName.get(type.getFullyQualifiedName());
     if (implName == null) {
-      implName = leaseMarshallerImplClassName(type);
+      implName = generateMarshallerImplClassName(type, gwtTarget);
       leasedNamesByTypeName.put(type.getFullyQualifiedName(), implName);
     }
 
     return implName;
   }
 
-  private static String leaseMarshallerImplClassName(final MetaClass type) {
+  private static String generateMarshallerImplClassName(final MetaClass type, final boolean gwtTarget) {
     final String varName = getVarName(type);
-
-    if (SHORT_MARSHALLER_NAMES) {
+    if (VERY_SHORT_MARSHALLER_NAMES && !gwtTarget) {
+      return VERY_SHORT_MARSHALLER_PREFIX + uniqueGenerator.uniqueName(NameUtil.getShortHashString(varName));
+    }
+    else if (SHORT_MARSHALLER_NAMES) {
       return SHORT_MARSHALLER_PREFIX + uniqueGenerator.uniqueName(NameUtil.shortenDerivedIdentifier(varName)) + "_Impl";
-    } else {
+    }
+    else {
       return MARSHALLER_NAME_PREFIX + varName + "_Impl";
     }
   }
 
-  static BuildMetaClass generateArrayMarshaller(final MetaClass arrayType, final String marshallerClassName, boolean gwtTarget) {
-    MetaClass toMap = arrayType.getOuterComponentType();
+  static BuildMetaClass generateArrayMarshaller(final MetaClass arrayType, final String marshallerClassName, final boolean gwtTarget) {
+    final MetaClass toMap = arrayType.getOuterComponentType();
 
     final int dimensions = GenUtil.getArrayDimensions(arrayType);
 
@@ -521,7 +518,7 @@ public class MarshallerGeneratorFactory {
     return classStructureBuilder.getClassDefinition();
   }
 
-  static void arrayDemarshallCode(MetaClass toMap,
+  static void arrayDemarshallCode(final MetaClass toMap,
                                    final int dim,
                                    final ClassStructureBuilder<?> classBuilder,
                                    final BlockBuilder<?> initMethod) {
@@ -617,8 +614,8 @@ public class MarshallerGeneratorFactory {
     return reachableTypes.contains(name);
   }
 
-  public static BuildMetaClass createArrayMarshallerClass(MetaClass type) {
-    BuildMetaClass arrayMarshaller =
+  public static BuildMetaClass createArrayMarshallerClass(final MetaClass type) {
+    final BuildMetaClass arrayMarshaller =
         ClassBuilder
             .define(MARSHALLER_NAME_PREFIX + getVarName(type)).packageScope()
             .abstractClass()

@@ -48,17 +48,17 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  * actually needed. This is also an incremental generator. It will only generate
  * code when a portable type has changed or a new one has been introduced.
  * Otherwise, it will use a cached version of the generated marshaller code.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallerGenerator extends IncrementalGenerator {
   private static final Logger log = LoggerFactory.getLogger(MarshallerGenerator.class);
   private final String packageName = MarshallerFramework.class.getPackage().getName();
-  
+
   // We're keeping this cache of portable types to compare their contents and
   // find out if they have changed since the last refresh.
   private static Map<String, MetaClass> cachedPortableTypes = new ConcurrentHashMap<String, MetaClass>();
-  
+
   /*
    * A version id. Increment this as needed, when structural changes are made to
    * the generated output, specifically with respect to it's effect on the
@@ -69,14 +69,14 @@ public class MarshallerGenerator extends IncrementalGenerator {
   private static final long GENERATOR_VERSION_ID = 1L;
 
   @Override
-  public RebindResult generateIncrementally(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+  public RebindResult generateIncrementally(final TreeLogger logger, final GeneratorContext context, final String typeName) throws UnableToCompleteException {
     final String fullyQualifiedTypeName = distillTargetTypeName(typeName);
     final MetaClass type = MetaClassFactory.get(fullyQualifiedTypeName);
-    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type);
+    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
     final String marshallerTypeName = packageName + "." + className;
     final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
-    
-    if (cachedType != null && cachedType.hashContent() == type.hashContent() 
+
+    if (cachedType != null && cachedType.hashContent() == type.hashContent()
             && context.isGeneratorResultCachingEnabled() && !type.isArray()) {
       log.debug("Reusing cached marshaller for " + fullyQualifiedTypeName);
       return new RebindResult(RebindMode.USE_ALL_CACHED, marshallerTypeName);
@@ -85,7 +85,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
       final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       if (printWriter == null) {
         return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);
-      } 
+      }
       log.debug("Generating marshaller for " + fullyQualifiedTypeName);
       generateMarshaller(context, type, className, marshallerTypeName, logger, printWriter);
       cachedPortableTypes.put(fullyQualifiedTypeName, type);
@@ -95,14 +95,14 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
   private void generateMarshaller(final GeneratorContext context, final MetaClass type, final String className,
           final String marshallerTypeName, final TreeLogger logger, final PrintWriter printWriter) {
-    
-    MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
+
+    final MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
     final MappingStrategy strategy =
         MappingStrategyFactory.createStrategy(true, GeneratorMappingContextFactory.getFor(context, target), type);
 
     String gen = null;
     if (type.isArray()) {
-      BuildMetaClass marshallerClass =
+      final BuildMetaClass marshallerClass =
           MarshallerGeneratorFactory.generateArrayMarshaller(type, marshallerTypeName, true);
       gen = marshallerClass.toJavaString();
     }
@@ -114,27 +114,27 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
     final File tmpFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/" + className + ".java");
     RebindUtils.writeStringToFile(tmpFile, gen);
-    
+
     context.commit(logger, printWriter);
   }
 
-  private String distillTargetTypeName(String marshallerName) {
-    int pos = marshallerName.lastIndexOf(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX);
+  private String distillTargetTypeName(final String marshallerName) {
+    final int pos = marshallerName.lastIndexOf(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX);
     String typeName = marshallerName.substring(pos).replace(MarshallerGeneratorFactory.MARSHALLER_NAME_PREFIX, "");
 
-    boolean isArrayType = typeName.startsWith(MarshallingGenUtil.ARRAY_VAR_PREFIX);
+    final boolean isArrayType = typeName.startsWith(MarshallingGenUtil.ARRAY_VAR_PREFIX);
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ARRAY_VAR_PREFIX, "");
     typeName = StringUtils.replace(typeName, "_", ".");
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_DOLLARSIGN_REPLACEMENT, "$");
     typeName = StringUtils.replace(typeName, MarshallingGenUtil.ERRAI_UNDERSCORE_REPLACEMENT, "_");
 
     if (isArrayType) {
-      int lastDot = typeName.lastIndexOf(".");
-      int dimension = Integer.parseInt(typeName.substring(lastDot + 2));
+      final int lastDot = typeName.lastIndexOf(".");
+      final int dimension = Integer.parseInt(typeName.substring(lastDot + 2));
       typeName = typeName.substring(0, lastDot);
 
-      String primitiveName = AbstractMetaClass.getInternalPrimitiveNameFrom(typeName);
-      boolean isPrimitiveArrayType = !primitiveName.equals(typeName);
+      final String primitiveName = AbstractMetaClass.getInternalPrimitiveNameFrom(typeName);
+      final boolean isPrimitiveArrayType = !primitiveName.equals(typeName);
 
       typeName = "";
       for (int i = 0; i < dimension; i++) {
@@ -156,5 +156,5 @@ public class MarshallerGenerator extends IncrementalGenerator {
   public long getVersionId() {
     return GENERATOR_VERSION_ID;
   }
-  
+
 }
