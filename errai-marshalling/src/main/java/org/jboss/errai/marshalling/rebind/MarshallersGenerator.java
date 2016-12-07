@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.rebind;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,7 +50,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 public class MarshallersGenerator extends AbstractAsyncGenerator {
   private static final Logger logger = LoggerFactory.getLogger(Generator.class);
 
-  public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai.marshalling.server.impl";
+  public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai";
   public static final String SERVER_MARSHALLER_CLASS_NAME = "ServerMarshallingFactoryImpl";
   private static final String SERVER_MARSHALLER_OUTPUT_DIR_PROP = "errai.marshalling.server.classOutput";
   private static final String SERVER_MARSHALLER_OUTPUT_ENABLED_PROP = "errai.marshalling.server.classOutput.enabled";
@@ -127,7 +126,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
                         candidate.score++;
                       }
                     }
-                    catch (Throwable ignored) {
+                    catch (final Throwable ignored) {
                     }
                   }
 
@@ -259,8 +258,8 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
             try {
               ClassChangeUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
             }
-            catch (IOException e) {
-              throw new RuntimeException("failed to load server marshallers", e);
+            catch (final Throwable t) {
+              throw new RuntimeException("failed to load server marshallers", t);
             }
           }
         }
