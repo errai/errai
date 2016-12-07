@@ -43,7 +43,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
 
   static final Logger logger = LoggerFactory.getLogger(Generator.class);
 
-  public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai.marshalling.server.impl";
+  public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai";
   public static final String SERVER_MARSHALLER_CLASS_NAME = "ServerMarshallingFactoryImpl";
   private static final String SERVER_MARSHALLER_OUTPUT_DIR_PROP = "errai.marshalling.server.classOutput";
   private static final String SERVER_MARSHALLER_OUTPUT_ENABLED_PROP = "errai.marshalling.server.classOutput.enabled";
@@ -106,7 +106,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
             try {
               OutputDirectoryUtil.generateClassFileInTmpDir(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, serverSource, tmpLocation);
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               throw new RuntimeException("failed to load server marshallers", t);
             }
           }
