@@ -102,13 +102,21 @@
             <!-- Override exclusions in parent -->
             <configuration combine.self="override">
               <excludes>
+                <exclude>**/it/**/*.java</exclude>
               </excludes>
+              <includes>
+                <include>**/*Tests.java</include>
+                <include>**/*Test.java</include>
+              </includes>
             </configuration>
           </plugin>
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <skipTests>true</skipTests>
+              <includes>
+                <include>**/it/**/*Tests.java</include>
+                <include>**/it/**/*Test.java</include>
+              </includes>
             </configuration>
           </plugin>
           <plugin>
