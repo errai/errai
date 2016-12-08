@@ -22,6 +22,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
+
 /**
  * Provides utitlity methods for interacting with the DOM.
  *
@@ -285,4 +289,81 @@ public abstract class DOMUtil {
             .map(style -> style.split(":", 2)[0].trim())
             .filter(propertyName -> !propertyName.isEmpty());
   }
+
+  /**
+   * Appends the underlying {@link HTMLElement} of a {@link Widget} to another {@link HTMLElement}, in a way that does
+   * not break GWT Widget events.
+   *
+   * @param parent
+   *          The parent element that is appended to. Must not be null.
+   * @param child
+   *          The child Widget, whose underlying HTML element will be appended to the parent. Must not be null.
+   */
+  public static void appendWidgetToElement(final HTMLElement parent, final IsWidget child) {
+    appendWidgetToElement(parent, child.asWidget());
+  }
+
+  /**
+   * Appends the underlying {@link HTMLElement} of a {@link Widget} to another {@link HTMLElement}, in a way that does
+   * not break GWT Widget events.
+   *
+   * @param parent
+   *          The parent element that is appended to. Must not be null.
+   * @param child
+   *          The child Widget, whose underlying HTML element will be appended to the parent. Must not be null.
+   */
+  public static void appendWidgetToElement(final HTMLElement parent, final Widget child) {
+    if (child.isAttached()) {
+      child.removeFromParent();
+    }
+    onAttach(child);
+    RootPanel.detachOnWindowClose(child);
+    parent.appendChild(nativeCast(child.getElement()));
+  }
+
+  /**
+   * <p>
+   * Remove a {@link Widget} from its parent. Use this to undo calls to
+   * {@link #appendWidgetToElement(HTMLElement, IsWidget)}.
+   *
+   * <p>
+   * This works like calling {@code child.asWidget().removeFromParent()} except that if {@code child} is in the
+   * {@link RootPanel#isInDetachList(Widget) dettach list} its underlying HTML element will also be removed from its
+   * parent.
+   *
+   * @param Must
+   *          not be null.
+   */
+  public static void removeFromParent(final IsWidget child) {
+    removeFromParent(child.asWidget());
+  }
+
+  /**
+   * <p>
+   * Remove a {@link Widget} from its parent. Use this to undo calls to
+   * {@link #appendWidgetToElement(HTMLElement, Widget)}.
+   *
+   * <p>
+   * This works like calling {@code child.removeFromParent()} except that if {@code child} is in the
+   * {@link RootPanel#isInDetachList(Widget) dettach list} its underlying HTML element will also be removed from its
+   * parent.
+   *
+   * @param Must
+   *          not be null.
+   */
+  public static void removeFromParent(final Widget child) {
+    final boolean wasInDettachList = RootPanel.isInDetachList(child);
+    child.removeFromParent();
+    if (wasInDettachList) {
+      child.getElement().removeFromParent();
+    }
+  }
+
+  private static native void onAttach(Widget w)/*-{
+    w.@com.google.gwt.user.client.ui.Widget::onAttach()();
+  }-*/;
+
+  private static native HTMLElement nativeCast(com.google.gwt.dom.client.Element gwtElement)/*-{
+    return gwtElement;
+  }-*/;
 }
