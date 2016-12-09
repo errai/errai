@@ -397,7 +397,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   private boolean oneTypeIsInterface(final Class<?> propertyType, final Class<?> converterModelType) {
-    return propertyType.isInterface() ^ converterModelType.isInterface();
+    return propertyType.isInterface() || converterModelType.isInterface();
   }
 
   /**
