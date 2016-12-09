@@ -59,13 +59,13 @@ public class ClassPathResource implements Resource {
   @Override
   public Resource createRelative(final String relativeResourcePath) throws IOException {
     final String newPath;
-    if (path.endsWith("/")) {
-      newPath = path + relativeResourcePath;
+    if (relativeResourcePath.startsWith("/")) {
+      newPath = relativeResourcePath.substring(1);
     }
     else {
       final int endOfParentPath = path.lastIndexOf('/');
-      final String parentPath = (endOfParentPath != -1 ? path.substring(0, endOfParentPath) : "");
-      newPath = parentPath + "/" + relativeResourcePath;
+      final String parentPath = path.substring(0, endOfParentPath+1);
+      newPath = parentPath + relativeResourcePath;
     }
     return new ClassPathResource(newPath, classLoader);
   }
