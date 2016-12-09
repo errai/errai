@@ -45,6 +45,7 @@ public class BusRenegotiationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+        logger.info("Starting testBusRecoversFromSessionExpiry runnable...");
         MessageBuilder.createMessage()
             .toSubject("ExpiryService")
             .signalling().noErrorHandling().sendNowWith(ErraiBus.get());
@@ -52,6 +53,7 @@ public class BusRenegotiationTests extends AbstractErraiTest {
         new Timer() {
           @Override
           public void run() {
+            logger.info("Running testBusRecoversFromSessionExpiry timer...");
             MessageBuilder.createMessage()
                 .toSubject("TestService3")
                 .signalling().noErrorHandling().repliesTo(
@@ -59,7 +61,6 @@ public class BusRenegotiationTests extends AbstractErraiTest {
                   @Override
                   public void callback(final Message message) {
                     finishTest();
-
                   }
                 }
             ).sendNowWith(ErraiBus.get());
