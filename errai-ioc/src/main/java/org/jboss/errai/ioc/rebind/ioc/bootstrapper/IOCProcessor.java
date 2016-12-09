@@ -1129,7 +1129,7 @@ public class IOCProcessor {
         if (scopeDoesNotRequireProxy(type)) {
           return instantiable;
         } else if (noArgConstructor == null || !(noArgConstructor.isPublic() || noArgConstructor.isProtected())) {
-          log.warn("The class {} must be proxiable but does not have an accessible no-argument constructor", type.getFullyQualifiedName());
+          log.debug("The class {} must be proxiable but does not have an accessible no-argument constructor", type.getFullyQualifiedName());
           final boolean injectConstructorProxiable = injectConstructor.isPublic() || injectConstructor.isProtected();
           if (!injectConstructorProxiable) {
             problems.add(String.format(
