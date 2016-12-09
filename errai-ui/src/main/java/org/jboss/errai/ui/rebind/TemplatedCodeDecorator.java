@@ -33,8 +33,6 @@ import static org.jboss.errai.ioc.util.GeneratedNamesUtil.qualifiedClassNameToSh
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,10 +96,10 @@ import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
-import org.lesscss.HttpResource;
 import org.lesscss.LessCompiler;
 import org.lesscss.LessException;
 import org.lesscss.LessSource;
+import org.lesscss.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -258,14 +256,13 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
        */
       if (resolvedStylesheetPath.isPresent() && lessStylesheet) {
         try {
-          final URL lessURL = Thread.currentThread().getContextClassLoader().getResource(resolvedStylesheetPath.get());
-          final HttpResource lessResource = new HttpResource(lessURL.toURI());
+          final Resource lessResource = new ClassPathResource(resolvedStylesheetPath.get(), Thread.currentThread().getContextClassLoader());
           final LessSource source = new LessSource(lessResource);
           final LessCompiler compiler = new LessCompiler();
           final String compiledCss = compiler.compile(source);
 
           controller.addFactoryInitializationStatements(singletonList(invokeStatic(StyleInjector.class, "inject", loadLiteral(compiledCss))));
-        } catch (URISyntaxException | IOException | LessException e) {
+        } catch (IOException | LessException e) {
           throw new RuntimeException("Error while attempting to compile the LESS stylesheet [" + resolvedStylesheetPath.get() + "].", e);
         }
       }
