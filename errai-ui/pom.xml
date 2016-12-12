@@ -198,7 +198,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <forkMode>always</forkMode>
-              <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
+              <argLine>-Xmx1500m ${argLine}</argLine>
 
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>

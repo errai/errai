@@ -151,6 +151,12 @@ public final class TemplateUtil {
           continue;
 
         mergeAttribute(meta, field.getElement().cast(), element.cast(), name, value);
+
+        final Element previous = dataFieldElements.put(fieldName, field.getElement());
+        final Element root = dataFieldElements.get("this");
+        if (root != null && root == previous) {
+          dataFieldElements.put("this", field.getElement());
+        }
       }
     } catch (final Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName + "]" +
@@ -434,6 +440,8 @@ public final class TemplateUtil {
         return true;
       }
     });
+
+    dataFields.put("this", templateRoot);
 
     return dataFields;
   }

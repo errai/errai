@@ -432,7 +432,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           .finish()
         .finish();
       final ContextualStatementBuilder elementStmt;
-      if (dataFieldTypes.containsKey(dataFieldName)) {
+      if (dataFieldTypes.containsKey(dataFieldName) && !"this".equals(dataFieldName)) {
         final MetaClass fieldType = dataFieldTypes.get(dataFieldName);
         if (fieldType.isAssignableTo(Widget.class)) {
           elementStmt = castTo(Widget.class, nestedCall(fieldsMap).invoke("get", dataFieldName));
