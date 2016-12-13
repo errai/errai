@@ -111,4 +111,7 @@ public interface HTMLElement extends Element, GlobalEventHandlers {
 
   @JsProperty EventListener<ClipboardEvent> getOnpaste();
   @JsProperty void setOnpaste(EventListener<ClipboardEvent> onpaste);
+
+  DOMClientRect getBoundingClientRect();
+
 }
