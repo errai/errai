@@ -6769,7 +6769,7 @@ By adding this attribute in the template you can translate it with the following
 [source, javascript]
 ----
 {
-    "Widget.welcome": "Willkommen bei Errai-ui i18n."
+    "TemplatedClassName.welcome": "Willkommen bei Errai-ui i18n."
 }
 ----
 
@@ -6777,8 +6777,26 @@ or
 
 [source]
 ----
-Widget.welcome=Willkommen bei Errai-ui i18n.
+TemplatedClassName.welcome=Willkommen bei Errai-ui i18n.
 ----
+
+These keys are prefixed with the name of the `@Templated` class to which they belong, and as such will only applied to the element with `data-i18n-key="welcome"` in that classes template. You may also declare translations without the prefix that can apply to any template, like so:
+
+[source, javascript]
+----
+{
+    "welcome": "Willkommen bei Errai-ui i18n."
+}
+----
+
+or
+
+[source]
+----
+welcome=Willkommen bei Errai-ui i18n.
+----
+
+Either of these translations will apply to elements with `data-i18n-key="welcome"` in any template.
 
 
 Because your templates are designer templates and can contain some mock data that doesn't need to be translated, Errai has the ability to indicate that with an attribute [code]+data-role=dummy+:

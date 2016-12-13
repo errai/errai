@@ -73,7 +73,7 @@ public abstract class TranslationService {
    *
    * @param jsonData
    */
-  protected void registerJsonBundle(String data, String locale) {
+  protected void registerJsonBundle(final String data, final String locale) {
     registerJSON(JSONMap.create(data), locale);
   }
 
@@ -82,7 +82,7 @@ public abstract class TranslationService {
    *
    * @param jsonData
    */
-  protected void registerPropertiesBundle(String data, String locale) {
+  protected void registerPropertiesBundle(final String data, final String locale) {
     final Map<String, String> translation = Properties.load(data);
 
     for (final Entry<String, String> entry : translation.entrySet()) {
@@ -97,7 +97,7 @@ public abstract class TranslationService {
    * @param value
    * @param locale
    */
-  protected void registerTranslation(String key, String value, String locale) {
+  protected void registerTranslation(final String key, final String value, String locale) {
     if (locale != null) {
       locale = locale.toLowerCase();
     }
@@ -111,11 +111,11 @@ public abstract class TranslationService {
    * @param data
    * @param locale
    */
-  protected void registerJSON(JSONMap data, String locale) {
+  protected void registerJSON(final JSONMap data, final String locale) {
     logger.fine("Registering translation data for locale: " + locale);
-    Set<String> keys = data.keys();
-    for (String key : keys) {
-      String value = data.get(key);
+    final Set<String> keys = data.keys();
+    for (final String key : keys) {
+      final String value = data.get(key);
       registerTranslation(key, value, locale);
     }
     logger.fine("Registered " + keys.size() + " translation keys.");
@@ -126,13 +126,19 @@ public abstract class TranslationService {
    *
    * @param translationKey
    */
-  public String getTranslation(String translationKey) {
-    String localeName = getActiveLocale();
+  public String getTranslation(final String translationKey) {
+    final String localeName = getActiveLocale();
     logger.fine("Translating key: " + translationKey + "  into locale: " + localeName);
-    Map<String, String> translationData = dictionary.get(localeName);
+    final Map<String, String> translationData = dictionary.get(localeName);
     if (translationData.containsKey(translationKey)) {
       logger.fine("Translation found in locale map: " + localeName);
       return translationData.get(translationKey);
+    } else {
+      final String nonNamespacedKey = translationKey.substring(translationKey.indexOf('.')+1);
+      if (!nonNamespacedKey.equals(translationKey) && translationData.containsKey(nonNamespacedKey)) {
+        logger.fine("Global translation found in locale map: " + localeName);
+        return translationData.get(nonNamespacedKey);
+      }
     }
     // Nothing? Then return null.
     logger.fine("Translation not found in any locale map, leaving unchanged.");
@@ -146,27 +152,27 @@ public abstract class TranslationService {
    * @param key
    * @param args
    */
-  public String format(String key, Object... args) {
-    String pattern = getTranslation(key);
+  public String format(final String key, final Object... args) {
+    final String pattern = getTranslation(key);
     if (pattern == null)
       return "!!!" + key + "!!!"; //$NON-NLS-1$ //$NON-NLS-2$
     if (args.length == 0)
       return pattern;
 
     // TODO add support for actually using { in a message
-    StringBuilder builder = new StringBuilder(pattern);
+    final StringBuilder builder = new StringBuilder(pattern);
     int argId = 0;
-    for (Object arg : args) {
-      String rcode = "{" + (argId++) + "}";
-      int startIdx = builder.indexOf(rcode);
-      int endIdx = startIdx + rcode.length();
+    for (final Object arg : args) {
+      final String rcode = "{" + (argId++) + "}";
+      final int startIdx = builder.indexOf(rcode);
+      final int endIdx = startIdx + rcode.length();
       builder.replace(startIdx, endIdx, String.valueOf(arg));
     }
     return builder.toString();
   }
 
   public String getActiveLocale() {
-    String localeName = currentLocale();
+    final String localeName = currentLocale();
     if (!dictionary.get(localeName).isEmpty()) {
       return localeName;
     }
@@ -224,7 +230,7 @@ public abstract class TranslationService {
    *
    * @param locale
    */
-  public final static void setCurrentLocale(String locale) {
+  public final static void setCurrentLocale(final String locale) {
     setCurrentLocaleWithoutUpdate(locale);
     retranslateTemplatedBeans();
   }
@@ -235,7 +241,7 @@ public abstract class TranslationService {
    *
    * @param locale
    */
-  public final static void setCurrentLocaleWithoutUpdate(String locale) {
+  public final static void setCurrentLocaleWithoutUpdate(final String locale) {
     currentLocale = locale;
   }
 
@@ -247,13 +253,13 @@ public abstract class TranslationService {
     DomVisit.revisit(new ElementWrapper(Document.get().getBody()), new TranslationDomRevisitor());
 
     // Translate DOM-detached Singleton templates
-    for (AsyncBeanDef<Composite> beanDef : IOC.getAsyncBeanManager().lookupBeans(Composite.class)) {
-      Class<? extends Annotation> scope = beanDef.getScope();
+    for (final AsyncBeanDef<Composite> beanDef : IOC.getAsyncBeanManager().lookupBeans(Composite.class)) {
+      final Class<? extends Annotation> scope = beanDef.getScope();
       if (scope != null
               && (scope.equals(ApplicationScoped.class)))
         beanDef.getInstance(new CreationalCallback<Composite>() {
           @Override
-          public void callback(Composite beanInstance) {
+          public void callback(final Composite beanInstance) {
             /*
              * Only translate parent-less widgets to avoid re-translating a single widget multiple
              * times (the call to revisit will traverse the whole subtree rooted at this widget).

@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -111,54 +112,54 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   private static final Logger log = LoggerFactory.getLogger(TranslationServiceGenerator.class);
 
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName)
+  public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
     return startAsyncGeneratorsAndWaitFor(TranslationService.class, context, logger,
             TranslationService.class.getPackage().getName(), GENERATED_CLASS_NAME);
   }
 
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context) {
+  public String generate(final TreeLogger logger, final GeneratorContext context) {
     // The class we will be building is GeneratedTranslationService
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(
             TranslationService.class, GENERATED_CLASS_NAME);
-    ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
+    final ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
 
     // The i18n keys found (per locale) while processing the bundles.
-    Map<String, Set<String>> discoveredI18nMap = new HashMap<String, Set<String>>();
+    final Map<String, Set<String>> discoveredI18nMap = new HashMap<>();
 
     // Find all fields annotated with @TranslationKey and generate code
     // in the c'tor to register each one as a translation key for the
     // default (null) locale. These values may get overridden by keys
     // found in the default bundle. This is why we do this before we do
     // the bundle work.
-    Map<String, String> translationKeyFieldMap = new HashMap<String, String>();
-    Collection<MetaField> translationKeyFields = ClassScanner.getFieldsAnnotatedWith(TranslationKey.class, null, context);
-    for (MetaField metaField : translationKeyFields) {
+    final Map<String, String> translationKeyFieldMap = new HashMap<>();
+    final Collection<MetaField> translationKeyFields = ClassScanner.getFieldsAnnotatedWith(TranslationKey.class, null, context);
+    for (final MetaField metaField : translationKeyFields) {
       // Figure out the translation key name
       String name = null;
-      String fieldName = metaField.getName();
-      String defaultName = metaField.getDeclaringClass().getFullyQualifiedName() + "." + fieldName;
+      final String fieldName = metaField.getName();
+      final String defaultName = metaField.getDeclaringClass().getFullyQualifiedName() + "." + fieldName;
       if (!metaField.getType().isAssignableFrom(String.class)) {
         throw new GenerationException("Translation key fields must be of type java.lang.String: " + defaultName);
       }
       try {
-        Class<?> asClass = metaField.getDeclaringClass().asClass();
-        Field field = asClass.getField(fieldName);
-        Object fieldVal = field.get(null);
+        final Class<?> asClass = metaField.getDeclaringClass().asClass();
+        final Field field = asClass.getField(fieldName);
+        final Object fieldVal = field.get(null);
         if (fieldVal == null) {
           throw new GenerationException("Translation key fields cannot be null: " + defaultName);
         }
         name = fieldVal.toString();
       }
-      catch (Exception e) {
+      catch (final Exception e) {
         log.warn("There was an error while processing a TranslationKey", e);
       }
 
       // Figure out the translation key value (for the null locale).
       String value = null;
-      TranslationKey annotation = metaField.getAnnotation(TranslationKey.class);
-      String defaultValue = annotation.defaultValue();
+      final TranslationKey annotation = metaField.getAnnotation(TranslationKey.class);
+      final String defaultValue = annotation.defaultValue();
       if (defaultValue != null) {
         value = defaultValue;
       }
@@ -177,16 +178,16 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     // Scan for all @Bundle annotations.
     final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class, context);
 
-    Set<String> bundlePaths = new HashSet<String>();
-    for (MetaClass bundleAnnotatedClass : bundleAnnotatedClasses) {
-      String bundlePath = getMessageBundlePath(bundleAnnotatedClass);
+    final Set<String> bundlePaths = new HashSet<>();
+    for (final MetaClass bundleAnnotatedClass : bundleAnnotatedClasses) {
+      final String bundlePath = getMessageBundlePath(bundleAnnotatedClass);
       bundlePaths.add(bundlePath);
     }
 
     // Now get all files in the message bundle (all localized versions)
     final Collection<URL> scannableUrls = getScannableUrls(bundleAnnotatedClasses);
     log.info("Preparing to scan for i18n bundle files.");
-    MessageBundleScanner scanner = new MessageBundleScanner(
+    final MessageBundleScanner scanner = new MessageBundleScanner(
             new ConfigurationBuilder()
                 .filterInputsBy(new FilterBuilder().include(".*json").include(".*properties"))
                 .setUrls(scannableUrls)
@@ -194,8 +195,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     // For each one, generate the code to load the translation and put that generated
     // code in the c'tor of the generated class (GeneratedTranslationService)
-    Collection<String> resources = scanner.getStore().get(MessageBundleResourceScanner.class).values();
-    for (String bundlePath : bundlePaths) {
+    final Collection<String> resources = scanner.getStore().get(MessageBundleResourceScanner.class).values();
+    for (final String bundlePath : bundlePaths) {
       // If we didn't find at least the specified root bundle file, that's a problem.
       if (!resources.contains(bundlePath)) {
         throw new GenerationException("Missing i18n bundle (specified in @Bundle): " + bundlePath);
@@ -204,10 +205,11 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     // Now generate code to load up each of the JSON files and register them
     // with the translation service.
+    final Set<String> duplicates = new HashSet<>();
     int i = 0;
-    for (String resource : resources) {
+    for (final String resource : resources) {
       // Generate this component's ClientBundle resource interface
-      BuildMetaClass messageBundleResourceInterface = generateMessageBundleResourceInterface(resource);
+      final BuildMetaClass messageBundleResourceInterface = generateMessageBundleResourceInterface(resource);
       // Add it as an inner class to the generated translation service
       classBuilder.getClassDefinition().addInnerClass(new InnerClass(messageBundleResourceInterface));
 
@@ -217,13 +219,17 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
               .initializeWith(Stmt.invokeStatic(GWT.class, "create", messageBundleResourceInterface)));
 
       // Create a dictionary from the message bundle and register it.
-      String locale = getLocaleFromBundlePath(resource);
-      
+      final String locale = getLocaleFromBundlePath(resource);
+
       final String registerBundleMethod = (isJsonBundle(resource)) ? "registerJsonBundle" : "registerPropertiesBundle";
       ctor.append(Stmt.loadVariable("this").invoke(registerBundleMethod,
               Stmt.loadVariable(msgBundleVarName).invoke("getContents").invoke("getText"), locale));
 
-      recordBundleKeys(discoveredI18nMap, locale, resource);
+      duplicates.addAll(recordBundleKeys(discoveredI18nMap, locale, resource));
+    }
+
+    if (!duplicates.isEmpty()) {
+      log.warn("Multiple bundles contain translations for these keys: {}", duplicatesToString(duplicates));
     }
 
     // We're done generating the c'tor
@@ -234,8 +240,18 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     return classBuilder.toJavaString();
   }
 
+  private String duplicatesToString(final Set<String> duplicates) {
+    final StringBuilder builder = new StringBuilder();
+
+    builder.append('[');
+    duplicates.forEach(dup -> builder.append(dup).append(", "));
+    builder.replace(builder.length() - ", ".length(), builder.length(), "]");
+
+    return builder.toString();
+  }
+
   private Collection<URL> getScannableUrls(final Collection<MetaClass> bundleAnnotatedClasses) {
-    final Collection<URL> urls = new HashSet<URL>();
+    final Collection<URL> urls = new HashSet<>();
 
     addUrlsFromBundleAnnotations(bundleAnnotatedClasses, urls);
     addUrlsFromErraiAppProperties(urls);
@@ -248,7 +264,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   }
 
   private void addUrlsFromBundleAnnotations(final Collection<MetaClass> bundleAnnotatedClasses, final Collection<URL> urls) {
-    final Set<String> completedPaths = new HashSet<String>();
+    final Set<String> completedPaths = new HashSet<>();
 
     for (final MetaClass bundleClass : bundleAnnotatedClasses) {
       final String bundlePath = getMessageBundlePath(bundleClass);
@@ -262,14 +278,14 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         final URL classpathElement;
         final String pathRoot = getPathRoot(bundleClass, resource);
         try {
-          String urlString = new URI(pathRoot).toURL().toString();
+          final String urlString = new URI(pathRoot).toURL().toString();
 
           // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
           // a HTML form encoded String, which is why we escape the plus symbols here.
           // Otherwise, they would be decoded into space characters.
           // The pound character still must not appear anywhere in the path!
           classpathElement = new URL(URLDecoder.decode(urlString.replaceAll("\\+", "%2b"), "UTF-8"));
-        } catch (Exception e) {
+        } catch (final Exception e) {
           log.warn("Failed to construct URL for i18n bundle defined in " + bundleClass);
           continue;
         }
@@ -301,56 +317,65 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param discoveredI18nMap
    * @param locale
    * @param bundlePath
+   *
+   * @return A set keys that were duplicates of already discovered keys.
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  protected static void recordBundleKeys(Map<String, Set<String>> discoveredI18nMap, String locale, String bundlePath) {
+  protected static Set<String> recordBundleKeys(final Map<String, Set<String>> discoveredI18nMap, final String locale, final String bundlePath) {
     InputStream is = null;
+    final Set<String> duplicates = new HashSet<>();
     try {
-      Set<String> keys = discoveredI18nMap.get(locale);
-      if (keys == null) {
-        keys = new HashSet<String>();
-        discoveredI18nMap.put(locale, keys);
-      }
+      final Set<String> keys = discoveredI18nMap.computeIfAbsent(locale, l -> new HashSet<>());
       is = TranslationServiceGenerator.class.getClassLoader().getResourceAsStream(bundlePath);
-      
+
       if (isJsonBundle(bundlePath)) {
-        JsonFactory jsonFactory = new JsonFactory();
-        JsonParser jp = jsonFactory.createJsonParser(is);
+        final JsonFactory jsonFactory = new JsonFactory();
+        final JsonParser jp = jsonFactory.createJsonParser(is);
         JsonToken token = jp.nextToken();
         while (token != null) {
           token = jp.nextToken();
           if (token == JsonToken.FIELD_NAME) {
-            String name = jp.getCurrentName();
+            final String name = jp.getCurrentName();
+            if (keys.contains(name)) {
+              duplicates.add(name);
+            }
             keys.add(name);
           }
         }
-      } 
+      }
       else {
         final Properties properties = new Properties();
         properties.load(is);
-        keys.addAll((Set) properties.keySet());
+        final Set<String> propertFileKeys = (Set) properties.keySet();
+        propertFileKeys
+          .stream()
+          .filter(key -> keys.contains(key))
+          .collect(Collectors.toCollection(() -> duplicates));
+        keys.addAll(propertFileKeys);
       }
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException(e);
     }
     finally {
       IOUtils.closeQuietly(is);
     }
+
+    return duplicates;
   }
 
-  private static boolean isJsonBundle(String path) {
+  private static boolean isJsonBundle(final String path) {
     return path.endsWith(".json");
   }
-  
+
   /**
    * Gets the bundle name from the @Bundle annotation.
    *
    * @param bundleAnnotatedClass
    */
-  private String getMessageBundlePath(MetaClass bundleAnnotatedClass) {
-    Bundle annotation = bundleAnnotatedClass.getAnnotation(Bundle.class);
-    String name = annotation.value();
+  private String getMessageBundlePath(final MetaClass bundleAnnotatedClass) {
+    final Bundle annotation = bundleAnnotatedClass.getAnnotation(Bundle.class);
+    final String name = annotation.value();
     if (name == null) {
       throw new GenerationException("@Bundle: bundle name must not be null].");
     }
@@ -359,7 +384,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       return name.substring(1);
     }
     else {
-      String packageName = bundleAnnotatedClass.getPackageName();
+      final String packageName = bundleAnnotatedClass.getPackageName();
       return packageName.replace('.', '/') + "/" + name;
     }
   }
@@ -370,7 +395,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param bundlePath
    */
   private String getMessageBundleTypeName(final String bundlePath) {
-    String typeName =
+    final String typeName =
         bundlePath.replace(".json", "MessageBundleResource").replace('/', '.').replace('-', '_').replace('.', '_');
     return typeName;
   }
@@ -409,14 +434,14 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param bundlePath
    *          path to the message bundle
    */
-  public static String getLocaleFromBundlePath(String bundlePath) {
-    Matcher matcher = LOCALE_IN_FILENAME_PATTERN.matcher(bundlePath);
+  public static String getLocaleFromBundlePath(final String bundlePath) {
+    final Matcher matcher = LOCALE_IN_FILENAME_PATTERN.matcher(bundlePath);
     if (matcher != null && matcher.matches()) {
-      StringBuilder locale = new StringBuilder();
-      String lang = matcher.group(2);
+      final StringBuilder locale = new StringBuilder();
+      final String lang = matcher.group(2);
       if (lang != null)
         locale.append(lang);
-      String region = matcher.group(3);
+      final String region = matcher.group(3);
       if (region != null)
         locale.append("_").append(region.substring(1));
       return locale.toString();
@@ -440,9 +465,9 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param context
    *          the generator context
    */
-  protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap,
-      Map<String, String> translationKeyFieldMap, File destDir) {
-    Map<String, String> allI18nValues = new HashMap<String, String>();
+  protected static void generateI18nHelperFilesInto(final Map<String, Set<String>> discoveredI18nMap,
+      final Map<String, String> translationKeyFieldMap, final File destDir) {
+    final Map<String, String> allI18nValues = new HashMap<>();
 
     // Make sure to put the *usages* of translation keys that we found by scanning the
     // Java code for @TranslationKey annotated static fields into the all-i18n-values map
@@ -450,31 +475,31 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     // Find all *usages* of translation keys by scanning and processing all templates.
     final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
-    for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
+    for (final MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
       if (!templatedAnnotatedClass.getAnnotation(Templated.class)
               .provider().equals(Templated.DEFAULT_PROVIDER.class))
         continue;
 
-      String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
-      String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
-      String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
+      final String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
+      final String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
+      final String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
       final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
       if (resource == null) {
         throw new IllegalArgumentException("Could not find template " + templateFileName + " for @Templated class "
             + templatedAnnotatedClass.getName());
       }
-      Document templateNode = new TemplateCatalog().parseTemplate(resource);
+      final Document templateNode = new TemplateCatalog().parseTemplate(resource);
       if (templateNode == null) // TODO log that the template failed to parse
         continue;
-      Element templateRoot = getTemplateRootNode(templateNode, templateFragment);
+      final Element templateRoot = getTemplateRootNode(templateNode, templateFragment);
       if (templateRoot == null) // TODO log that the template root couldn't be found
         continue;
-      Map<String, String> i18nValues = getTemplateI18nValues(templateRoot, i18nPrefix);
+      final Map<String, String> i18nValues = getTemplateI18nValues(templateRoot, i18nPrefix);
       allI18nValues.putAll(i18nValues);
     }
 
     // Output a JSON file containing *all* of the keys that need translation.
-    File allI18nValuesFile = new File(destDir, "errai-bundle-all.json");
+    final File allI18nValuesFile = new File(destDir, "errai-bundle-all.json");
     if (allI18nValuesFile.isFile())
       allI18nValuesFile.delete();
     outputBundleFile(allI18nValues, allI18nValuesFile, null);
@@ -488,21 +513,21 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       Set<String> discoveredDefaultI18nKeys = discoveredI18nMap.get(null);
       if (discoveredDefaultI18nKeys == null)
         discoveredDefaultI18nKeys = Collections.emptySet();
-      Set<String> extraI18nKeys = new HashSet<String>(discoveredDefaultI18nKeys);
+      final Set<String> extraI18nKeys = new HashSet<>(discoveredDefaultI18nKeys);
       extraI18nKeys.removeAll(allI18nValues.keySet());
-      Map<String, String> m = new HashMap<String, String>();
-      for (String extraKey : extraI18nKeys)
+      final Map<String, String> m = new HashMap<>();
+      for (final String extraKey : extraI18nKeys)
         m.put(extraKey, "");
-      File extraI18nValuesFile = new File(destDir, "errai-bundle-extra.json");
+      final File extraI18nValuesFile = new File(destDir, "errai-bundle-extra.json");
       if (extraI18nValuesFile.isFile())
         extraI18nValuesFile.delete();
       outputBundleFile(m, extraI18nValuesFile, extraI18nKeys);
 
       // Ouput a JSON file containing just the i18n keys that are missing from the
       // existing i18n bundles (found in a template but missing from the bundles).
-      Set<String> missingI18nKeys = new HashSet<String>(allI18nValues.keySet());
+      final Set<String> missingI18nKeys = new HashSet<>(allI18nValues.keySet());
       missingI18nKeys.removeAll(discoveredDefaultI18nKeys);
-      File missingI18nValuesFile = new File(destDir, "errai-bundle-missing.json");
+      final File missingI18nValuesFile = new File(destDir, "errai-bundle-missing.json");
       if (missingI18nValuesFile.isFile())
         missingI18nValuesFile.delete();
       outputBundleFile(allI18nValues, missingI18nValuesFile, missingI18nKeys);
@@ -517,10 +542,10 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param templateNode
    * @param templateFragment
    */
-  private static Element getTemplateRootNode(Document templateNode, String templateFragment) {
+  private static Element getTemplateRootNode(final Document templateNode, final String templateFragment) {
     try {
-      XPath xpath = XPathFactory.newInstance().newXPath();
-      Element documentElement = templateNode.getDocumentElement();
+      final XPath xpath = XPathFactory.newInstance().newXPath();
+      final Element documentElement = templateNode.getDocumentElement();
       if (templateFragment == null || templateFragment.trim().length() == 0) {
         return (Element) xpath.evaluate("//body", documentElement, XPathConstants.NODE);
       }
@@ -529,7 +554,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
             XPathConstants.NODE);
       }
     }
-    catch (XPathExpressionException e) {
+    catch (final XPathExpressionException e) {
       return null;
     }
   }
@@ -541,7 +566,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param templateRoot
    * @param i18nPrefix
    */
-  private static Map<String, String> getTemplateI18nValues(Element templateRoot, final String i18nPrefix) {
+  private static Map<String, String> getTemplateI18nValues(final Element templateRoot, final String i18nPrefix) {
     final TemplateVisitor visitor = new TemplateVisitor(i18nPrefix);
     DomVisit.visit(templateRoot, visitor);
     return visitor.getI18nValues();
@@ -554,25 +579,25 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param bundleFile
    * @param onlyTheseKeys
    */
-  private static void outputBundleFile(Map<String, String> i18nValues, File bundleFile, Set<String> onlyTheseKeys) {
+  private static void outputBundleFile(final Map<String, String> i18nValues, final File bundleFile, final Set<String> onlyTheseKeys) {
     if (onlyTheseKeys != null && onlyTheseKeys.isEmpty())
       return;
 
     try {
-      JsonFactory f = new JsonFactory();
-      JsonGenerator g = f.createJsonGenerator(bundleFile, JsonEncoding.UTF8);
+      final JsonFactory f = new JsonFactory();
+      final JsonGenerator g = f.createJsonGenerator(bundleFile, JsonEncoding.UTF8);
       g.useDefaultPrettyPrinter();
       g.writeStartObject();
-      Set<String> orderedKeys = new TreeSet<String>(i18nValues.keySet());
-      for (String key : orderedKeys) {
-        String value = i18nValues.get(key);
+      final Set<String> orderedKeys = new TreeSet<>(i18nValues.keySet());
+      for (final String key : orderedKeys) {
+        final String value = i18nValues.get(key);
         if (onlyTheseKeys == null || onlyTheseKeys.contains(key))
           g.writeStringField(key, value);
       }
       g.writeEndObject();
       g.close();
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -583,17 +608,17 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @author eric.wittmann@redhat.com
    */
   private static class MessageBundleResourceScanner extends ResourcesScanner {
-    private final List<String> bundlePrefixes = new ArrayList<String>();
+    private final List<String> bundlePrefixes = new ArrayList<>();
 
     /**
      * Constructor.
      *
      * @param bundlePath
      */
-    public MessageBundleResourceScanner(Set<String> bundlePaths) {
+    public MessageBundleResourceScanner(final Set<String> bundlePaths) {
       Assert.notNull(bundlePaths);
-      for (String path : bundlePaths) {
-        String prefix = path.substring(0, Math.max(path.lastIndexOf(".json"), path.lastIndexOf(".properties")));
+      for (final String path : bundlePaths) {
+        final String prefix = path.substring(0, Math.max(path.lastIndexOf(".json"), path.lastIndexOf(".properties")));
         bundlePrefixes.add(prefix);
       }
     }
@@ -602,8 +627,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
      * @see org.jboss.errai.reflections.scanners.ResourcesScanner#acceptsInput(java.lang.String)
      */
     @Override
-    public boolean acceptsInput(String file) {
-      for (String bundlePrefix : bundlePrefixes) {
+    public boolean acceptsInput(final String file) {
+      for (final String bundlePrefix : bundlePrefixes) {
         if (file.startsWith(bundlePrefix)) {
           return true;
         }
@@ -625,7 +650,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
      *
      * @param config
      */
-    public MessageBundleScanner(Configuration config) {
+    public MessageBundleScanner(final Configuration config) {
       super(config);
       scan();
     }

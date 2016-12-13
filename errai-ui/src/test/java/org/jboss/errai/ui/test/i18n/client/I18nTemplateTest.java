@@ -17,11 +17,13 @@
 package org.jboss.errai.ui.test.i18n.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.client.widget.LocaleListBox;
 import org.jboss.errai.ui.client.widget.LocaleSelector;
 import org.jboss.errai.ui.shared.api.Locale;
+import org.jboss.errai.ui.test.i18n.client.res.I18nPrefixingTestBean;
 import org.junit.Test;
 
 public class I18nTemplateTest extends AbstractErraiCDITest {
@@ -94,10 +96,36 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
     IOC.getBeanManager().destroyBean(app);
   }
 
+  @Test
+  public void testPrefixedKeyUsedWhenAvailableForLocale() throws Exception {
+    TranslationService.setCurrentLocale("fr_fr");
+    final I18nPrefixingTestBean bean = IOCUtil.getInstance(I18nPrefixingTestBean.class);
+    assertEquals("Accueil spécifique!", bean.welcome.getTextContent());
+  }
+
+  @Test
+  public void testUnprefixedKeyUsedWhenNoPrefixedKeyDefinedForLocale() throws Exception {
+    TranslationService.setCurrentLocale("fr_fr");
+    final I18nPrefixingTestBean bean = IOCUtil.getInstance(I18nPrefixingTestBean.class);
+    assertEquals("Au revoir générique!", bean.farewell.getTextContent());
+  }
+
+  @Test
+  public void testPrefixedDefaultBundleUsedBeforeUnprefixedDefaultBundle() throws Exception {
+    final I18nPrefixingTestBean bean = IOCUtil.getInstance(I18nPrefixingTestBean.class);
+    assertEquals("Specific goodbye!", bean.farewell.getTextContent());
+  }
+
+  @Test
+  public void testUnprefixedDefaultBundleWhenNoPrefixedKeyExists() throws Exception {
+    final I18nPrefixingTestBean bean = IOCUtil.getInstance(I18nPrefixingTestBean.class);
+    assertEquals("Translation of UI element was wrong.", "Generic welcome!", bean.welcome.getTextContent());
+  }
+
   private void localeListBoxAssertions(final I18nTemplateTestApp app) {
     // given
-    LocaleSelector selector = IOC.getBeanManager().lookupBean(LocaleSelector.class).getInstance();
-    LocaleListBox localeListBox = app.getComponent().getListBox();
+    final LocaleSelector selector = IOC.getBeanManager().lookupBean(LocaleSelector.class).getInstance();
+    final LocaleListBox localeListBox = app.getComponent().getListBox();
     localeListBox.init();
 
     // when - then
