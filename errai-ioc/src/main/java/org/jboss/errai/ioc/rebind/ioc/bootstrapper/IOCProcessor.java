@@ -625,6 +625,7 @@ public class IOCProcessor {
           if (isSimpleton(type)) {
             builder.addInjectable(type, qualFactory.forSource(type), Dependent.class, InjectableType.Type,
                     WiringElementType.DependentBean, WiringElementType.Simpleton);
+            maybeProcessAsStaticOnlyProducer(builder, type);
           }
           else if ((enabled = isEnabled(type)) && isConstructable(type, problems)) {
             final Class<? extends Annotation> directScope = getScope(type);
@@ -640,6 +641,9 @@ public class IOCProcessor {
                     InjectableType.Disabled, getWiringTypes(type, directScope));
             maybeProcessAsProducer(builder, type, typeInjectable, false);
             maybeProcessAsProvider(typeInjectable, builder, false);
+          }
+          else {
+            maybeProcessAsStaticOnlyProducer(builder, type);
           }
         }
         else {
@@ -722,7 +726,12 @@ public class IOCProcessor {
 
     final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
     for (final Class<? extends Annotation> producerAnnoType : producerAnnos) {
-      if (!type.getMethodsAnnotatedWith(producerAnnoType).isEmpty()) {
+      final List<MetaMethod> producerMethods = type.getMethodsAnnotatedWith(producerAnnoType);
+      if (!producerMethods.isEmpty() && producerMethods.stream().anyMatch(method -> !method.isStatic())) {
+        return false;
+      }
+      final List<MetaField> producerFields = type.getFieldsAnnotatedWith(producerAnnoType);
+      if (!producerFields.isEmpty() && producerFields.stream().anyMatch(field -> !field.isStatic())) {
         return false;
       }
     }

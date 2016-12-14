@@ -88,7 +88,7 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
 
   private List<Statement> methodCreateInstanceStatements(final MetaMethod producingMember, final Injectable producerInjectable,
           final Injectable producedInjectable, final Collection<Dependency> paramDeps, final ClassStructureBuilder<?> bodyBlockBuilder) {
-    final List<Statement> stmts = new ArrayList<Statement>();
+    final List<Statement> stmts = new ArrayList<>();
     controller.ensureMemberExposed(producingMember);
 
     if (!producingMember.isStatic()) {
@@ -154,15 +154,12 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
 
   private List<Statement> fieldCreateInstanceStatements(final MetaField producingMember, final Injectable producerInjectable,
           final Injectable producedInjectable, final ClassStructureBuilder<?> bodyBlockBuilder) {
-    final List<Statement> stmts = new ArrayList<Statement>();
+    final List<Statement> stmts = new ArrayList<>();
     controller.ensureMemberExposed(producingMember);
 
     if (!producingMember.isStatic()) {
       final Statement producerInstanceValue = loadVariable("contextManager").invoke("getInstance", producerInjectable.getFactoryName());
       stmts.add(declareVariable(PRODUCER_INSTANCE, producerInjectable.getInjectedType(), producerInstanceValue));
-      if (producerInjectable.getWiringElementTypes().contains(WiringElementType.DependentBean)) {
-        stmts.add(loadVariable("this").invoke("registerDependentScopedReference", loadVariable(PRODUCER_INSTANCE)));
-      }
 
       stmts.add(loadVariable(PRODUCER_INSTANCE).assignValue(Stmt.castTo(producerInjectable.getInjectedType(),
               invokeStatic(Factory.class, "maybeUnwrapProxy", loadVariable(PRODUCER_INSTANCE)))));
@@ -173,6 +170,9 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
 
     if (!producingMember.isStatic()) {
       stmts.add(setProducerInstanceReference());
+      if (producerInjectable.getWiringElementTypes().contains(WiringElementType.DependentBean)) {
+        stmts.add(loadVariable("this").invoke("registerDependentScopedReference", loadVariable("instance"), loadVariable(PRODUCER_INSTANCE)));
+      }
     }
 
     stmts.add(loadVariable("instance").returnValue());
@@ -187,7 +187,7 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
   @Override
   protected List<Statement> generateDestroyInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
           final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
-    final List<Statement> destroyInstanceStmts = new ArrayList<Statement>();
+    final List<Statement> destroyInstanceStmts = new ArrayList<>();
     final Multimap<DependencyType, Dependency> depsByType = separateByType(injectable.getDependencies());
     final Collection<Dependency> producerMemberDeps = depsByType.get(DependencyType.ProducerMember);
 

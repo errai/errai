@@ -42,6 +42,8 @@ import org.jboss.errai.ioc.tests.wiring.client.res.DependentBeanWithConstructorC
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithPackageConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithPrivateConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.DependentWithProtectedConstr;
+import org.jboss.errai.ioc.tests.wiring.client.res.FieldProducedSelf;
+import org.jboss.errai.ioc.tests.wiring.client.res.FieldProducedSimpleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.IfaceProducer;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstr;
@@ -55,10 +57,13 @@ import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton2;
+import org.jboss.errai.ioc.tests.wiring.client.res.StaticProducerOfSelf;
+import org.jboss.errai.ioc.tests.wiring.client.res.StaticProducerOfSelfSimpleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestBeanActivator;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestProviderDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypeWithJustAFieldProducer;
 import org.junit.runner.RunWith;
 
 import com.google.gwt.core.shared.GWT;
@@ -335,5 +340,56 @@ public class BasicIOCTest extends IOCClientTestCase {
   public void testApplicationScopedSubTypeWithInheritedPreDestroy() throws Exception {
     // Just test that we can look it up. Original issue causes compilation failure.
     IOC.getBeanManager().lookupBean(ApplicationScopedBeanInheritingPreDestroy.class).getInstance();
+  }
+
+  public void testStaticProducerMethodOfOwnType() throws Exception {
+    try {
+      IOCUtil.getInstance(StaticProducerOfSelf.class);
+    } catch (final Throwable t) {
+      throw new AssertionError("Unable to lookup " + StaticProducerOfSelf.class.getSimpleName(), t);
+    }
+  }
+
+  public void testStaticProducerMethodOfSimpletonOverridesSimpleton() throws Exception {
+    try {
+      final StaticProducerOfSelfSimpleton bean = IOCUtil.getInstance(StaticProducerOfSelfSimpleton.class);
+      assertTrue("Bean was not created by producer method.", bean.produced);
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError("Unable to lookup " + StaticProducerOfSelfSimpleton.class.getSimpleName(), t);
+    }
+  }
+
+  public void testStaticProducerFieldOfOwnType() throws Exception {
+    try {
+      IOCUtil.getInstance(FieldProducedSelf.class);
+    } catch (final Throwable t) {
+      throw new AssertionError("Unable to lookup " + FieldProducedSelf.class.getSimpleName(), t);
+    }
+  }
+
+  public void testStaticProducerFieldOfSimpletonOverridesSimpleton() throws Exception {
+    try {
+      final FieldProducedSimpleton bean = IOCUtil.getInstance(FieldProducedSimpleton.class);
+      assertSame("Bean was not from producer field.", FieldProducedSimpleton.instance, bean);
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError("Unable to lookup " + FieldProducedSimpleton.class.getSimpleName(), t);
+    }
+  }
+
+  public void testNonStaticProducerFieldDetectedWhenNoOtherIocAnnotations() throws Exception {
+    try {
+      // Sanity check that the type with the producer field is a bean
+      IOCUtil.getInstance(TypeWithJustAFieldProducer.class);
+      // The real test: that the producer field is a bean
+      IOCUtil.getInstance(TypeWithJustAFieldProducer.ProducedType.class);
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError(t);
+    }
   }
 }
