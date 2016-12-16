@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2016-10-19</date>
+    <date>2016-12-13</date>
     
     
     
@@ -6162,10 +6162,17 @@ WelcomePage.As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_
 ...</programlisting>
 <simpara>By adding this attribute in the template you can translate it with the following:</simpara>
 <programlisting language="javascript" linenumbering="unnumbered">{
-    "Widget.welcome": "Willkommen bei Errai-ui i18n."
+    "TemplatedClassName.welcome": "Willkommen bei Errai-ui i18n."
 }</programlisting>
 <simpara>or</simpara>
-<screen>Widget.welcome=Willkommen bei Errai-ui i18n.</screen>
+<screen>TemplatedClassName.welcome=Willkommen bei Errai-ui i18n.</screen>
+<simpara>These keys are prefixed with the name of the <literal>@Templated</literal> class to which they belong, and as such will only applied to the element with <literal>data-i18n-key="welcome"</literal> in that classes template. You may also declare translations without the prefix that can apply to any template, like so:</simpara>
+<programlisting language="javascript" linenumbering="unnumbered">{
+    "welcome": "Willkommen bei Errai-ui i18n."
+}</programlisting>
+<simpara>or</simpara>
+<screen>welcome=Willkommen bei Errai-ui i18n.</screen>
+<simpara>Either of these translations will apply to elements with <literal>data-i18n-key="welcome"</literal> in any template.</simpara>
 <simpara>Because your templates are designer templates and can contain some mock data that doesn&#8217;t need to be translated, Errai has the ability to indicate that with an attribute <literal><phrase role="code">data-role=dummy</phrase></literal>:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;div id=navbar data-role=dummy&gt;
   &lt;div class="navbar navbar-fixed-top"&gt;
@@ -8200,6 +8207,11 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
   
     <listitem>
       <simpara><emphasis>errai.marshalling.short_names</emphasis> when set to true (the default value), Errai will shorten the names of generated marshaller classes (rather than using the long names which encode the fully qualified class names of the types being marshalled). This was added to avoid issues with path length limitations on certain platforms.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis>errai.marshalling.very_short_names</emphasis> when set to true, Errai will shorten the names of generated marshaller classes to a 7 character long hash. This was added to avoid issues with path length limitations on certain platforms.</simpara>
       
     </listitem>
   
