@@ -24,20 +24,13 @@ import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
-import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.Cookies;
 
 @IOCProvider
 @Singleton
-public class CookieStorageHandlerProvider implements Provider<UserStorageHandler> {
-
-  private static final Logger logger = LoggerFactory.getLogger(CookieStorageHandlerProvider.class);
+public class StorageHandlerProvider implements Provider<UserStorageHandler> {
 
   private static class ReadOnlyStorageHandler implements UserStorageHandler {
 
@@ -67,61 +60,9 @@ public class CookieStorageHandlerProvider implements Provider<UserStorageHandler
     }
   }
 
-  private static class UserCookieStorageHandlerImpl implements UserStorageHandler {
-
-    UserCookieStorageHandlerImpl() {
-      MarshallerFramework.initializeDefaultSessionProvider();
-    }
-
-    @Override
-    public User getUser() {
-      try {
-        final String json = Cookies.getCookie(UserCookieEncoder.USER_COOKIE_NAME);
-        if (json != null) {
-          final User user = UserCookieEncoder.fromCookieValue(json);
-          logger.debug("Found " + user + " in cookie cache!");
-          return user;
-        }
-        else {
-          return null;
-        }
-      } catch (final RuntimeException e) {
-        logger.warn("Failed to retrieve current user from a cookie.", e);
-        Cookies.removeCookie(UserCookieEncoder.USER_COOKIE_NAME);
-        return null;
-      }
-    }
-
-    @Override
-    public void setUser(final User user) {
-      if (user != null) {
-        try {
-          logger.debug("Storing " + user + " in cookie cache.");
-          final String json = UserCookieEncoder.toCookieValue(user);
-          Cookies.setCookie(UserCookieEncoder.USER_COOKIE_NAME, json);
-        } catch (final RuntimeException ex) {
-          logger.warn(
-                  "Failed to store user in cookie cache. Subsequent visits to this app will redirect to login screen even if the session is still valid.",
-                  ex);
-        }
-      }
-      else {
-        Cookies.removeCookie(UserCookieEncoder.USER_COOKIE_NAME);
-      }
-    }
-
-  }
-
-  private final SecurityProperties properties = GWT.create(SecurityProperties.class);
-
   @Override
   public UserStorageHandler get() {
-    if (Cookies.isCookieEnabled() && properties.isLocalStorageOfUserAllowed()) {
-      return new UserCookieStorageHandlerImpl();
-    }
-    else {
-      return new ReadOnlyStorageHandler();
-    }
+    return new ReadOnlyStorageHandler();
   }
 
 }

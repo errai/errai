@@ -16,37 +16,23 @@
 
 package org.jboss.errai.mocksafe.test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.lang.reflect.Field;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
-import org.jboss.errai.security.client.local.storage.CookieStorageHandlerProvider;
-import org.jboss.errai.security.client.local.storage.SecurityProperties;
-import org.junit.Before;
+import org.jboss.errai.security.client.local.storage.StorageHandlerProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 
-import com.google.gwt.user.client.Cookies;
-import com.google.gwtmockito.GwtMock;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 @RunWith(GwtMockitoTestRunner.class)
 public class CookieStorageHandlerProviderTest {
 
-  @GwtMock
-  private SecurityProperties properties;
-
   @InjectMocks
-  private CookieStorageHandlerProvider provider;
-
-  @Before
-  public final void setup() {
-    when(properties.isLocalStorageOfUserAllowed()).thenReturn(true);
-  }
+  private StorageHandlerProvider provider;
 
   /**
    * If apps inject a User into singleton or application-scoped beans, there is the chance that the
@@ -55,11 +41,10 @@ public class CookieStorageHandlerProviderTest {
    * reinitialized.
    */
   @Test
-  public void testCookieHandlerInitializesMarshalling() throws Exception {
+  public void testStorageHandlerInitializesMarshalling() throws Exception {
 
     // this test depends on static state, so we need to reset things right before the test
     resetMarshallingSystem();
-    forceCookiesEnabled();
 
     provider.get();
     assertTrue(MarshallingSessionProviderFactory.isMarshallingSessionProviderRegistered());
@@ -72,19 +57,8 @@ public class CookieStorageHandlerProviderTest {
    * suite).
    */
   @Test
-  public void proveTestCookieHandlerInitializesMarshallingIsRepeatable() throws Exception {
-    testCookieHandlerInitializesMarshalling();
-  }
-
-  private void forceCookiesEnabled() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-    Field isCheckedField = Cookies.class.getDeclaredField("isCookieChecked");
-    Field isEnabledField = Cookies.class.getDeclaredField("isCookieEnabled");
-
-    isCheckedField.setAccessible(true);
-    isEnabledField.setAccessible(true);
-
-    isCheckedField.set(null, true);
-    isEnabledField.set(null, true);
+  public void proveStorageHandlerInitializesMarshallingIsRepeatable() throws Exception {
+    testStorageHandlerInitializesMarshalling();
   }
 
   private void resetMarshallingSystem() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {

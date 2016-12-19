@@ -24,12 +24,9 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.security.client.local.api.SecurityContext;
-import org.jboss.errai.security.shared.api.UserCookieEncoder;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 import org.jboss.errai.security.shared.service.AuthenticationService;
-
-import com.google.gwt.user.client.Cookies;
 
 /**
  * Tests for proper behaviour when the app loads up and the remembered user
@@ -59,15 +56,20 @@ public class PrePopulatedUserStorageIntegrationTest extends AbstractSecurityInte
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<Void>() {
           @Override
-          public void callback(Void x) {
+          public void callback(final Void x) {
             InitVotes.voteFor(PrePopulatedUserStorageIntegrationTest.class);
           }
         }, AuthenticationService.class).logout();
       }
     });
 
-    // now fake a remembered client-side user from a previous session
-    Cookies.setCookie(UserCookieEncoder.USER_COOKIE_NAME, Marshalling.toJSON(prePopulatedUser));
+    // now fake a stored client-side user
+    final String jsonAsString = Marshalling.toJSON(prePopulatedUser);
+    try {
+      setUserObject(jsonAsString);
+    } catch (final Throwable t) {
+      throw new RuntimeException("Failed to create stored user. Payload: [" + jsonAsString + "]", t);
+    }
 
     super.gwtSetUp();
   }
@@ -90,10 +92,15 @@ public class PrePopulatedUserStorageIntegrationTest extends AbstractSecurityInte
       @Override
       public void run() {
         assertEquals(User.ANONYMOUS, securityContext.getCachedUser());
-        assertNull(Cookies.getCookie(UserCookieEncoder.USER_COOKIE_NAME));
         finishTest();
       }
     });
   }
+
+  private static native void setUserObject(Object user)/*-{
+    $wnd.errai_security_context = {
+      "user" : eval('(' + user + ')')
+    };
+  }-*/;
 
 }

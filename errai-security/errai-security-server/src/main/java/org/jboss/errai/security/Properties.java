@@ -17,6 +17,5 @@
 package org.jboss.errai.security;
 
 public class Properties {
-  public static final String USER_COOKIE_ENABLED = "errai.security.user_cookie_enabled";
   public static final String USER_ON_HOSTPAGE_ENABLED = "errai.security.user_on_hostpage_enabled";
 }

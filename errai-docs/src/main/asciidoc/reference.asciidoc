@@ -7997,30 +7997,9 @@ But the drawback is that any attempts to navigate to a secured `@Page` before th
 
 In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.
 
-One option offered by Errai is to persist the `org.jboss.errai.security.shared.api.identity.User` object in a cookie. This can be done by adding the following to `ErraiApp.properties`:
+One option offered by Errai is to persist the `org.jboss.errai.security.shared.api.identity.User` object on the GWT host page using a servlet filter. In errai-security-server there is `org.jboss.errai.security.server.servlet.UserHostPageFilter` that uses the `AuthenticationService` to do this. The `UserHostPageFilter` works in a CDI container. Enable the filter by setting `errai.security.user_on_hostpage_enabled=true` in ErraiApp.properties and ensuring the filter is active for your hostpage URL (filters index.html and index.jsp by default).
 
-----
-errai.security.user_cookie_enabled=true
-----
-
-With this option enabled the `User` will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.
-
-[WARNING]
-.User cookie is deprecated
-====
-For users with many roles, the serialized string may be too large to fit in a cookie. For this reason, the user cookie is not recommended and is kept only for backwards compatibility.
-====
-
-[IMPORTANT]
-.User is stored in plain text
-====
-The `errai.security.user_cookie_enabled=true` setting causes the `User` to be stored in *plain text*. That includes the following information:
-
-* The user's login name.
-* The user's full name.
-* The user's email address.
-* The user's security roles.
-====
+With this option enabled the `User` will be persisted to a JavaScript variable on the GWT host page, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.
 
 If you do not wish to use this feature you will likely want to handle this case in the `@PageShowing` method of your `LoginPage`. Here is an outline of what you might want to do:
 
