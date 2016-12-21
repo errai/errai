@@ -31,7 +31,6 @@ import org.jboss.errai.bus.client.api.SessionEndEvent;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServerLaundryList;
 import org.jboss.errai.common.client.api.Assert;
 import org.slf4j.Logger;
@@ -102,7 +101,6 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
   private static class HttpSessionWrapper implements QueueSession, Serializable {
     private final SessionsContainer container;
     private final String parentSessionId;
-    private final String sessionId;
     private final String remoteQueueID;
     private List<SessionEndListener> sessionEndListeners;
 
@@ -111,13 +109,11 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       this.container = Assert.notNull(container);
       this.remoteQueueID = Assert.notNull(remoteQueueID);
       this.parentSessionId = Assert.notNull(httpSessionId);
-      this.sessionId = SecureHashUtil.nextSecureHash("SHA-256",
-              httpSessionId.getBytes(), remoteQueueID.getBytes());
     }
 
     @Override
     public String getSessionId() {
-      return sessionId;
+      return remoteQueueID + "-" + parentSessionId;
     }
 
     @Override
@@ -191,14 +187,14 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       final HttpSessionWrapper that = (HttpSessionWrapper) o;
 
       if (remoteQueueID != null ? !remoteQueueID.equals(that.remoteQueueID) : that.remoteQueueID != null) return false;
-      if (sessionId != null ? !sessionId.equals(that.sessionId) : that.sessionId != null) return false;
+      if (parentSessionId != null ? !parentSessionId.equals(that.parentSessionId) : that.parentSessionId != null) return false;
 
       return true;
     }
 
     @Override
     public int hashCode() {
-      int result = (sessionId != null ? sessionId.hashCode() : 0);
+      int result = (parentSessionId != null ? parentSessionId.hashCode() : 0);
       result = 31 * result + (remoteQueueID != null ? remoteQueueID.hashCode() : 0);
       return result;
     }
@@ -206,7 +202,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     @Override
     public String toString() {
       return "HttpSessionWrapper{" +
-              "sessionId='" + sessionId + '\'' +
+              "sessionId='" + getSessionId() + '\'' +
               ", remoteQueueID='" + remoteQueueID + '\'' +
               '}';
     }
