@@ -22,6 +22,8 @@ import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
@@ -39,15 +41,19 @@ import java.nio.charset.Charset;
  * bus and the client buses.
  */
 public abstract class AbstractErraiServlet extends HttpServlet {
+  private static final long serialVersionUID = 1L;
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   protected final byte[] SSE_TERMINATION_BYTES = "\n\n".getBytes();
+  protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
   /* New and configured errai service */
-  protected ErraiService service;
+  protected ErraiService<HttpSession> service;
 
   /* A default Http session provider */
   protected SessionProvider<HttpSession> sessionProvider;
+
+  private RequestSecurityCheck csrfSecurityCheck;
 
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
@@ -64,6 +70,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     longPollingEnabled = !hostedModeTesting && ErraiConfigAttribs.DO_LONG_POLL.getBoolean(config);
     longPollTimeout = ErraiConfigAttribs.LONG_POLL_TIMEOUT.getInt(config);
     sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(config);
+    csrfSecurityCheck = (ErraiConfigAttribs.ENABLE_CSRF_BUS_TOKEN.getBoolean(config) ? CSRFTokenCheck.INSTANCE : RequestSecurityCheck.noCheck());
+
   }
 
   public static ConnectionPhase getConnectionPhase(final HttpServletRequest request) {
@@ -202,5 +210,13 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected void prepareSSEContinue(final HttpServletResponse response) throws IOException {
     response.getOutputStream().write("data: ".getBytes());
+  }
+
+  protected boolean failFromMissingCSRFToken(final HttpServletRequest httpServletRequest) {
+    return csrfSecurityCheck.isInsecure(httpServletRequest, log);
+  }
+
+  protected void prepareTokenChallenge(final HttpServletRequest request, final HttpServletResponse httpServletResponse) {
+    csrfSecurityCheck.prepareResponse(request, httpServletResponse, log);
   }
 }

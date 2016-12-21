@@ -64,6 +64,8 @@ public enum ErraiConfigAttribs {
    */
   BUS_BUFFER_ALLOCATION_MODE("errai.bus.buffer_allocation_mode", "direct"),
 
+  ENABLE_CSRF_BUS_TOKEN("errai.bus.enable_csrf_token", "false"),
+
   HOSTED_MODE_TESTING("errai.hosted_mode_testing", "false"),
   DO_LONG_POLL("org.jboss.errai.bus.do_long_poll", "true"),
   LONG_POLL_TIMEOUT("errai.bus.long_poll_timeout", "45000"),

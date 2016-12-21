@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +36,6 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
-import org.slf4j.Logger;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
@@ -84,7 +82,7 @@ import org.slf4j.Logger;
  */
 
 public class DefaultBlockingServlet extends AbstractErraiServlet implements Filter {
-  private static final Logger log = getLogger(DefaultBlockingServlet.class);
+  private static final long serialVersionUID = 1L;
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -113,10 +111,9 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   @Override
   protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
       throws ServletException {
-
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
-        getClientId(httpServletRequest)),
-        httpServletRequest, httpServletResponse, isLongPollingEnabled(), isSSERequest(httpServletRequest));
+            getClientId(httpServletRequest)),
+            httpServletRequest, httpServletResponse, isLongPollingEnabled(), isSSERequest(httpServletRequest));
   }
 
   /**
@@ -137,6 +134,11 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException {
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest));
+
+    if (failFromMissingCSRFToken(httpServletRequest)) {
+      prepareTokenChallenge(httpServletRequest, httpServletResponse);
+      return;
+    }
 
     try {
       service.store(createCommandMessage(session, httpServletRequest));
@@ -175,13 +177,16 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
           case CONNECTING:
           case DISCONNECTING:
             return;
+          case NORMAL:
+          case UNKNOWN:
+            break;
         }
 
         sendDisconnectDueToSessionExpiry(httpServletResponse);
         return;
       }
       queue.heartBeat();
-      
+
       final ServletOutputStream outputStream = httpServletResponse.getOutputStream();
       if (sse) {
         while (!queue.isStale()) {

@@ -20,6 +20,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.*;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.framework.ClientCSRFTokenCache;
+import org.jboss.errai.common.client.framework.Constants;
 import org.jboss.errai.common.client.framework.RpcBatch;
 import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
@@ -104,24 +106,37 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
     this.successCodes = successCodes;
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({ "rawtypes" })
   protected void sendRequest(final RequestBuilder requestBuilder, final String body,
           final ResponseDemarshallingCallback demarshallingCallback) {
+    sendRequest(requestBuilder, body, demarshallingCallback, true);
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  protected void sendRequest(final RequestBuilder requestBuilder, final String body,
+          final ResponseDemarshallingCallback demarshallingCallback, final boolean firstTry) {
 
     final RemoteCallback remoteCallback = getRemoteCallback();
     try {
       // Allow overriding of request body in client-side interceptors
-      String requestBody = (requestBuilder.getRequestData() != null) ? requestBuilder.getRequestData() : body;
-      Request request = requestBuilder.sendRequest(requestBody, new RequestCallback() {
+      final String requestBody = (requestBuilder.getRequestData() != null) ? requestBuilder.getRequestData() : body;
+      if (ClientCSRFTokenCache.hasAssignedCSRFToken()) {
+        requestBuilder.setHeader(Constants.ERRAI_CSRF_TOKEN_HEADER, ClientCSRFTokenCache.getAssignedCSRFToken());
+      }
+      final Request request = requestBuilder.sendRequest(requestBody, new RequestCallback() {
         @Override
         public void onError(Request request, Throwable throwable) {
           handleError(throwable, request, null);
         }
 
         @Override
-        public void onResponseReceived(Request request, Response response) {
-          int statusCode = response.getStatusCode();
-          if ((successCodes == null || successCodes.contains(statusCode)) && (statusCode >= 200 && statusCode < 300)) {
+        public void onResponseReceived(final Request request, final Response response) {
+          final int statusCode = response.getStatusCode();
+          if (firstTry && statusCode == 403 && response.getHeader(Constants.ERRAI_CSRF_TOKEN_HEADER) != null) {
+            ClientCSRFTokenCache.setAssignedCSRFToken(response.getHeader(Constants.ERRAI_CSRF_TOKEN_HEADER));
+            sendRequest(requestBuilder, requestBody, demarshallingCallback, false);
+          }
+          else if ((successCodes == null || successCodes.contains(statusCode)) && (statusCode >= 200 && statusCode < 300)) {
 
             if (remoteCallback instanceof ResponseCallback) {
               ((ResponseCallback) getRemoteCallback()).callback(response);

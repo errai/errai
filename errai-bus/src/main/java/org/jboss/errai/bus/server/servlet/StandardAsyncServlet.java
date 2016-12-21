@@ -56,6 +56,9 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         case CONNECTING:
         case DISCONNECTING:
           return;
+        case NORMAL:
+        case UNKNOWN:
+          break;
       }
       try {
         sendDisconnectDueToSessionExpiry(response);
@@ -137,6 +140,12 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
     session.setAttribute("NoSSE", Boolean.TRUE);
+
+    if (failFromMissingCSRFToken(request)) {
+      prepareTokenChallenge(request, response);
+      return;
+    }
+
     try {
       try {
         service.store(createCommandMessage(session, request));

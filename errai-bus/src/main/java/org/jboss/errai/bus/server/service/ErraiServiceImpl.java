@@ -173,6 +173,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     if (this.sessionProvider != null) {
       throw new IllegalStateException("cannot set session provider more than once.");
     }
+    sessionProvider.init(config);
     this.sessionProvider = sessionProvider;
   }
 
@@ -183,7 +184,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
 
   @Override
   public void setDispatcher(RequestDispatcher dispatcher) {
-    if (this.sessionProvider != null) {
+    if (this.dispatcher != null) {
       throw new IllegalStateException("cannot set dispatcher more than once.");
     }
     this.dispatcher = dispatcher;

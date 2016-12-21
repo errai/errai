@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.client.framework.transports;
 
+import static org.jboss.errai.common.client.framework.Constants.ERRAI_CSRF_TOKEN_HEADER;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +35,7 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
+import org.jboss.errai.common.client.framework.ClientCSRFTokenCache;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -527,6 +530,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     // this has no effect on same origin requests but ensures the cookie and auth
     // headers are sent when using CORS.
     builder.setIncludeCredentials(true);
+    if (ClientCSRFTokenCache.hasAssignedCSRFToken())
+      builder.setHeader(ERRAI_CSRF_TOKEN_HEADER, ClientCSRFTokenCache.getAssignedCSRFToken());
 
     final RxInfo rxInfo = new RxInfo(System.currentTimeMillis(), waitChannel);
 
@@ -763,6 +768,17 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
           schedulePolling();
           break;
 
+        // Happens for first bus request when CSRF token is enabled
+        case 403: {
+          final String assignedCSRFToken = response.getHeader(ERRAI_CSRF_TOKEN_HEADER);
+          if (assignedCSRFToken != null) {
+            ClientCSRFTokenCache.setAssignedCSRFToken(assignedCSRFToken);
+            txRetries++;
+            undeliveredMessages.removeAll(toSend);
+            transmit(toSend, true);
+            return;
+          }
+        }
         default: {
           final BusTransportError transportError =
                   new BusTransportError(HttpPollingHandler.this, request, null, statusCode, RetryInfo.NO_RETRY);

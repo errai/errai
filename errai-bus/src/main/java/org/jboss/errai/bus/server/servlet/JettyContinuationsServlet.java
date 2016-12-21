@@ -40,6 +40,7 @@ import org.slf4j.Logger;
  * using Jetty Continuations.
  */
 public class JettyContinuationsServlet extends AbstractErraiServlet {
+  private static final long serialVersionUID = 1L;
   private static final Logger log = getLogger(JettyContinuationsServlet.class);
   /**
    * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
@@ -85,6 +86,11 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     session.setAttribute("NoSSE", Boolean.TRUE);
 
+    if (failFromMissingCSRFToken(httpServletRequest)) {
+      prepareTokenChallenge(httpServletRequest, httpServletResponse);
+      return;
+    }
+
     try {
       service.store(createCommandMessage(session, httpServletRequest));
     }
@@ -113,6 +119,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
           case CONNECTING:
           case DISCONNECTING:
             return;
+          case NORMAL:
+          case UNKNOWN:
+            break;
         }
 
         sendDisconnectDueToSessionExpiry(httpServletResponse);

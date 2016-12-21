@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.api;
 import javax.servlet.http.HttpSession;
 
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 /**
  * Allows retrieval and creation of {@link QueueSession}s for a specific type of communication channel.
@@ -38,4 +39,12 @@ public interface SessionProvider<T> {
    *         If none already exists, one is created.
    */
   public QueueSession createOrGetSession(T externSessRef, String remoteQueueId);
+
+  /**
+   * Must be called by the Errai framework before any calls to {@link #createOrGetSession(Object, String)}.
+   *
+   * @param config
+   *          The configuration of this Errai deployment, used for initializing any configuration specific behaviour.
+   */
+  public void init(ErraiServiceConfigurator config);
 }
