@@ -303,6 +303,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void verifyConnectionToMessageSource(final Message message) {
     if (message.isFlagSet(RoutingFlag.FromRemote)
+            && !message.isFlagSet(RoutingFlag.FromPeer)
             && !(BuiltInServices.ServerBus.name().equals(message.getSubject())
                     && BusCommand.Associate.name().equals(message.getCommandType()))) {
       // throws an exception if no queue is found
