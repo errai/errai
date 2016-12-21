@@ -264,6 +264,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    */
   @Override
   public void sendGlobal(final Message message) {
+    verifyConnectionToMessageSource(message);
     message.commit();
     final String subject = message.getSubject();
 
@@ -297,6 +298,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
     else if (subscriptions.containsKey("local:".concat(subject))) {
       subscriptions.get("local:".concat(subject)).deliver(message);
+    }
+  }
+
+  private void verifyConnectionToMessageSource(final Message message) {
+    if (message.isFlagSet(RoutingFlag.FromRemote)
+            && !(BuiltInServices.ServerBus.name().equals(message.getSubject())
+                    && BusCommand.Associate.name().equals(message.getCommandType()))) {
+      // throws an exception if no queue is found
+      getQueueByMessage(message);
     }
   }
 
