@@ -16,9 +16,21 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
+import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
+import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithPartsFromRawMap;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
@@ -27,17 +39,6 @@ import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.errai.marshalling.server.JSONStreamDecoder;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
-import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithPartsFromRawMap;
 
 /**
  * The <tt>MessageFactory</tt> facilitates the building of a command message using a JSON string

@@ -1118,26 +1118,20 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
             final StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
-            final boolean first;
             if (doLongPolling) {
               capabilitiesBuffer.append(Capabilities.LongPolling.name());
-              first = false;
             }
             else {
               capabilitiesBuffer.append(Capabilities.ShortPolling.name());
-              first = false;
               msg.set(MessageParts.PollFrequency, hostedModeTesting ? 50 : 250);
             }
 
             if (webSocketServer || webSocketServlet) {
-              if (!first) {
-                capabilitiesBuffer.append(',');
-              }
-              capabilitiesBuffer.append(Capabilities.WebSockets.name());
+              capabilitiesBuffer.append(',').append(Capabilities.WebSockets.name());
               final String webSocketURL;
               final HttpServletRequest request = message.getResource(HttpServletRequest.class,
                       HttpServletRequest.class.getName());
-  
+
               String websocketScheme = "ws";
               if (request.getScheme().equals("https") || useSecureWebsocket || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"))) {
                 websocketScheme = "wss";

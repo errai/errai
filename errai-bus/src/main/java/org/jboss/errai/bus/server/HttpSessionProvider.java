@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +29,10 @@ import org.jboss.errai.bus.client.api.SessionEndEvent;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.servlet.CSRFTokenCheck;
+import org.jboss.errai.bus.server.servlet.RequestSecurityCheck;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServerLaundryList;
 import org.jboss.errai.common.client.api.Assert;
@@ -42,8 +45,16 @@ import org.slf4j.LoggerFactory;
 public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
   static final Logger log = LoggerFactory.getLogger(HttpSessionProvider.class);
-
   static final Map<String, SessionsContainer> containersByHttpSessionId = new HashMap<>();
+
+  private RequestSecurityCheck csrfCheck = RequestSecurityCheck.noCheck();
+
+  @Override
+  public void init(final ErraiServiceConfigurator config) {
+    csrfCheck = (ErraiConfigAttribs.ENABLE_CSRF_BUS_TOKEN.getBoolean(config)
+            ? CSRFTokenCheck.INSTANCE
+                    : RequestSecurityCheck.noCheck());
+  }
 
   @Override
   public QueueSession createOrGetSession(final HttpSession externSessRef, final String remoteQueueID) {
@@ -54,6 +65,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     else {
       sc = new SessionsContainer();
       containersByHttpSessionId.put(externSessRef.getId(), sc);
+      csrfCheck.prepareSession(externSessRef, log);
     }
 
     QueueSession qs = sc.getSession(remoteQueueID);
