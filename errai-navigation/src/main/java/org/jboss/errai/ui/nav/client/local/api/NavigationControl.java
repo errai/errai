@@ -28,11 +28,17 @@ import org.jboss.errai.ui.nav.client.local.PageHiding;
 public class NavigationControl {
 
   private final Runnable runnable;
+  private Runnable interrupt;
   
   private boolean hasRun;
 
   public NavigationControl(final Runnable runnable) {
     this.runnable = runnable;
+  }
+
+  public NavigationControl(final Runnable runnable, Runnable interrupt) {
+    this(runnable);
+    this.interrupt = interrupt;
   }
 
   /**
@@ -44,7 +50,21 @@ public class NavigationControl {
       hasRun = true;
     }
     else {
-      throw new IllegalStateException("This method can only be called once.");
+      throw new IllegalStateException("proceed() method can only be called once.");
+    }
+  }
+
+  /**
+   * Notifies that the navigation is interrupted.
+   */
+  public void interrupt() {
+    if(!hasRun) {
+      if(interrupt != null) {
+        interrupt.run();
+      }
+    }
+    else {
+      throw new IllegalStateException("interrupt() method can only be called once.");
     }
   }
 }
