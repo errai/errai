@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server;
 
 import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import org.jboss.errai.bus.client.api.SessionEndEvent;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServerLaundryList;
 import org.jboss.errai.common.client.api.Assert;
 import org.slf4j.Logger;
@@ -41,17 +41,19 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
-  private static final Logger log = LoggerFactory.getLogger(HttpSessionProvider.class);
+  static final Logger log = LoggerFactory.getLogger(HttpSessionProvider.class);
+
+  static final Map<String, SessionsContainer> containersByHttpSessionId = new HashMap<>();
 
   @Override
   public QueueSession createOrGetSession(final HttpSession externSessRef, final String remoteQueueID) {
     final SessionsContainer sc;
-    if (externSessRef.getAttribute(SessionsContainer.class.getName()) != null) {
-      sc = (SessionsContainer) externSessRef.getAttribute(SessionsContainer.class.getName());
+    if (containersByHttpSessionId.containsKey(externSessRef.getId())) {
+      sc = containersByHttpSessionId.get(externSessRef.getId());
     }
     else {
       sc = new SessionsContainer();
-      externSessRef.setAttribute(SessionsContainer.class.getName(), sc);
+      containersByHttpSessionId.put(externSessRef.getId(), sc);
     }
 
     QueueSession qs = sc.getSession(remoteQueueID);
@@ -61,7 +63,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       qs.setAttribute(HttpSession.class.getName(), externSessRef);
       qs.addSessionEndListener(new SessionEndListener() {
         @Override
-        public void onSessionEnd(SessionEndEvent event) {
+        public void onSessionEnd(final SessionEndEvent event) {
           log.debug("queue session " + remoteQueueID + " ended");
           sc.removeSession(remoteQueueID);
         }
@@ -71,9 +73,9 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     return qs;
   }
 
-  public static class SessionsContainer implements Serializable {
-    private transient final Map<String, Object> sharedAttributes = new HashMap<String, Object>();
-    private transient final Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
+  public static class SessionsContainer {
+    private final Map<String, Object> sharedAttributes = new HashMap<>();
+    private final Map<String, QueueSession> queueSessions = new HashMap<>();
 
     public QueueSession createSession(final String httpSessionId, final String remoteQueueId) {
       final QueueSession qs = new HttpSessionWrapper(this, httpSessionId, remoteQueueId);
@@ -89,18 +91,12 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       queueSessions.remove(remoteQueueId);
     }
 
-    /**
-     * Just returns a fresh new SessionsContainer.
-     */
-    private Object readResolve() throws ObjectStreamException {
-      // this is necessary because deserializing the private final fields gets us a couple of big fat nulls.
-      return new SessionsContainer();
-    }
   }
 
-  private static class HttpSessionWrapper implements QueueSession, Serializable {
+  private static class HttpSessionWrapper implements QueueSession {
     private final SessionsContainer container;
     private final String parentSessionId;
+    private final String sessionId;
     private final String remoteQueueID;
     private List<SessionEndListener> sessionEndListeners;
 
@@ -109,11 +105,13 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       this.container = Assert.notNull(container);
       this.remoteQueueID = Assert.notNull(remoteQueueID);
       this.parentSessionId = Assert.notNull(httpSessionId);
+      this.sessionId = SecureHashUtil.nextSecureHash("SHA-256",
+              httpSessionId.getBytes(), remoteQueueID.getBytes());
     }
 
     @Override
     public String getSessionId() {
-      return remoteQueueID + "-" + parentSessionId;
+      return sessionId;
     }
 
     @Override
@@ -162,7 +160,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     public void addSessionEndListener(final SessionEndListener listener) {
       synchronized (this) {
         if (sessionEndListeners == null) {
-          sessionEndListeners = new ArrayList<SessionEndListener>();
+          sessionEndListeners = new ArrayList<>();
         }
         sessionEndListeners.add(listener);
       }
@@ -187,14 +185,14 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       final HttpSessionWrapper that = (HttpSessionWrapper) o;
 
       if (remoteQueueID != null ? !remoteQueueID.equals(that.remoteQueueID) : that.remoteQueueID != null) return false;
-      if (parentSessionId != null ? !parentSessionId.equals(that.parentSessionId) : that.parentSessionId != null) return false;
+      if (sessionId != null ? !sessionId.equals(that.sessionId) : that.sessionId != null) return false;
 
       return true;
     }
 
     @Override
     public int hashCode() {
-      int result = (parentSessionId != null ? parentSessionId.hashCode() : 0);
+      int result = (sessionId != null ? sessionId.hashCode() : 0);
       result = 31 * result + (remoteQueueID != null ? remoteQueueID.hashCode() : 0);
       return result;
     }
@@ -202,7 +200,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     @Override
     public String toString() {
       return "HttpSessionWrapper{" +
-              "sessionId='" + getSessionId() + '\'' +
+              "sessionId='" + sessionId + '\'' +
               ", remoteQueueID='" + remoteQueueID + '\'' +
               '}';
     }
