@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2016-06-23</date>
+    <date>2016-12-28</date>
     
     
     
@@ -7923,6 +7923,11 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
   
     <listitem>
       <simpara><emphasis>errai.marshalling.short_names</emphasis> when set to true (the default value), Errai will shorten the names of generated marshaller classes (rather than using the long names which encode the fully qualified class names of the types being marshalled). This was added to avoid issues with path length limitations on certain platforms.</simpara>
+      
+    </listitem>
+  
+    <listitem>
+      <simpara><emphasis>errai.marshalling.very_short_names</emphasis> when set to true, Errai will shorten the names of generated marshaller classes to a 7 character long hash. This was added to avoid issues with path length limitations on certain platforms.</simpara>
       
     </listitem>
   
