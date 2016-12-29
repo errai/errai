@@ -3499,6 +3499,10 @@ private void onUncaughtException(Throwable caught) {
 }
 ----
 
+==== Logging RPC exceptions on the server
+
+Errai logs all exceptions thrown by RPC endpoints on the server at the DEBUG level. To show these messages in your server logs, set the logger "org.jboss.errai.bus.server.io.AbstractRPCMethodCallback" to the DEBUG level. Errai uses SLF4J, so how you go about setting this logger to debug will depend on what logging backend you use.
+
 [[sid-5931313_RemoteProcedureCalls%28RPC%29-ClientsideInterceptors]]
 
 === Client-side Interceptors
