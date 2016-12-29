@@ -83,4 +83,9 @@ public class DependentScopeContext extends AbstractContext implements HasContext
     return instance;
   }
 
+  @Override
+  protected void afterDestroyInstance(final Object instance) {
+    if (instance instanceof Proxy) removeProxy(instance);
+  }
+
 }

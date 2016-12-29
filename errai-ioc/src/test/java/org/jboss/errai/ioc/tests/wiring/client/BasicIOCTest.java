@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.ioc.client.IOCClientTestCase;
@@ -27,12 +29,14 @@ import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBeanInterface;
 import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.AppScopedBeanInvokingSelf;
+import org.jboss.errai.ioc.tests.wiring.client.res.AppScopedWithPreDestroy;
 import org.jboss.errai.ioc.tests.wiring.client.res.ApplicationScopedBeanInheritingPreDestroy;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
@@ -391,5 +395,38 @@ public class BasicIOCTest extends IOCClientTestCase {
     } catch (final Throwable t) {
       throw new AssertionError(t);
     }
+  }
+
+  public void testDestoryingApplicationScopedBean() throws Exception {
+    final AppScopedWithPreDestroy proxiedInstance1 = IOCUtil.getInstance(AppScopedWithPreDestroy.class);
+    final AppScopedWithPreDestroy instance1 = Factory.maybeUnwrapProxy(proxiedInstance1);
+
+    assertEquals("PostConstruct for first instance was not called.",
+            Collections.singletonList(instance1), AppScopedWithPreDestroy.createdInstances);
+    assertEquals("@PreDestroy was prematurely called.", Collections.emptyList(), AppScopedWithPreDestroy.destroyedInstances);
+    assertTrue("Instance returned from bean manager was not proxied.", proxiedInstance1 instanceof Proxy);
+
+    IOCUtil.destroy(proxiedInstance1);
+    assertEquals("Created and destroyed instances were not the same after destroy called on only instance.",
+            AppScopedWithPreDestroy.createdInstances, AppScopedWithPreDestroy.destroyedInstances);
+
+    final AppScopedWithPreDestroy proxiedInstance2 = IOCUtil.getInstance(AppScopedWithPreDestroy.class);
+    final AppScopedWithPreDestroy instance2 = Factory.maybeUnwrapProxy(proxiedInstance2);
+
+    assertSame("ApplicationScoped beans should reuse the same proxy.", proxiedInstance1, proxiedInstance2);
+    assertNotSame("The instances should be different after the first was destroyed.", instance1, instance2);
+    assertEquals("PostConstruct not called for second instance.", Arrays.asList(instance1, instance2),
+            AppScopedWithPreDestroy.createdInstances);
+    assertEquals("Only the PreDestroy for the first instance shoudl have been called.",
+            Collections.singletonList(instance1), AppScopedWithPreDestroy.destroyedInstances);
+
+    IOCUtil.destroy(proxiedInstance2);
+    assertEquals("Created and destroyed instances were not the same after destroy called on both beans.",
+            AppScopedWithPreDestroy.createdInstances, AppScopedWithPreDestroy.destroyedInstances);
+
+    // Force creation of new instance through lazy-loading proxy mechanism
+    final AppScopedWithPreDestroy instance3 = Factory.maybeUnwrapProxy(proxiedInstance2);
+    assertEquals("New instance was not created by proxy lazy-loading mechanism",
+            Arrays.asList(instance1, instance2, instance3), AppScopedWithPreDestroy.createdInstances);
   }
 }

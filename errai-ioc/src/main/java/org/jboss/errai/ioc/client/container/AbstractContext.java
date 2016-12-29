@@ -138,6 +138,7 @@ public abstract class AbstractContext implements Context {
    * @return Returns null if a proxy cannot be created.
    */
   protected <T> Proxy<T> getOrCreateProxy(final String factoryName) {
+    // TODO this will not work for @Dependent proxied beans.
     @SuppressWarnings("unchecked")
     Proxy<T> proxy = (Proxy<T>) proxies.get(factoryName);
     if (proxy == null) {
@@ -192,18 +193,23 @@ public abstract class AbstractContext implements Context {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public void destroyInstance(final Object instance) {
-    // TODO destroy proxy if dependent scope
-    final Object unwrapped = maybeUnwrap(instance);
-    final Deque<Factory<?>> factories = factoriesByCreatedInstances.get(unwrapped);
-    while (factories != null && !factories.isEmpty()) {
-      final Factory<?> factory = factories.pop();
-      for (final DestructionCallback callback : destructionCallbacksByInstance.removeAll(unwrapped)) {
-        callback.destroy(unwrapped);
+    if (isManaged(instance)) {
+      beforeDestroyInstance(instance);
+      final Object unwrapped = maybeUnwrap(instance);
+      final Deque<Factory<?>> factories = factoriesByCreatedInstances.remove(unwrapped);
+      while (factories != null && !factories.isEmpty()) {
+        final Factory<?> factory = factories.pop();
+        for (final DestructionCallback callback : destructionCallbacksByInstance.removeAll(unwrapped)) {
+          callback.destroy(unwrapped);
+        }
+        factory.destroyInstance(unwrapped, contextManager);
       }
-      factory.destroyInstance(unwrapped, contextManager);
-      factoriesByCreatedInstances.remove(unwrapped);
+      afterDestroyInstance(instance);
     }
   }
+
+  protected void beforeDestroyInstance(final Object instance) {}
+  protected void afterDestroyInstance(final Object instance) {}
 
   @Override
   public boolean addDestructionCallback(final Object instance, final DestructionCallback<?> callback) {
@@ -222,7 +228,8 @@ public abstract class AbstractContext implements Context {
 
   @Override
   public boolean isManaged(final Object ref) {
-    return factoriesByCreatedInstances.containsKey(maybeUnwrap(ref));
+    return (ref instanceof Proxy && ((Proxy<?>) ref).getContext() == this)
+            || factoriesByCreatedInstances.containsKey(ref);
   }
 
   @SuppressWarnings("unchecked")
@@ -250,6 +257,10 @@ public abstract class AbstractContext implements Context {
   @Override
   public Optional<HasContextualInstanceSupport> withContextualInstanceSupport() {
     return Optional.empty();
+  }
+
+  protected void removeProxy(final Object instance) {
+    proxies.remove(instance);
   }
 
 }

@@ -466,6 +466,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     implementSetInstance(proxyImpl, injectable);
     implementClearInstance(proxyImpl, injectable);
     implementSetContext(proxyImpl, injectable);
+    implementGetContext(proxyImpl, injectable);
     implementUnwrappedInstance(proxyImpl, injectable);
     implementEquals(proxyImpl);
   }
@@ -500,6 +501,13 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     proxyImpl.publicMethod(void.class, "setContext", finalOf(Context.class, "context"))
              .body()
              .append(loadVariable("proxyHelper").invoke("setContext", loadVariable("context")))
+             .finish();
+  }
+
+  private void implementGetContext(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
+    proxyImpl.publicMethod(Context.class, "getContext")
+             .body()
+             .append(loadVariable("proxyHelper").invoke("getContext").returnValue())
              .finish();
   }
 

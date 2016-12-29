@@ -18,7 +18,7 @@ package org.jboss.errai.common.client.api;
 
 /**
  * Callback interface for receiving the response of an RPC call, regardless of the RPC mechanism.
- * 
+ *
  * @see MessageBuilder#createCall()
  * @see MessageBuilder#createCall(RemoteCallback, Class)
  * @see MessageBuilder#createCall(RemoteCallback, ErrorCallback, Class)
@@ -27,8 +27,6 @@ package org.jboss.errai.common.client.api;
  *          type of response the callback expects. Use {@link Void} for methods returning {@code void}.
  */
 public interface RemoteCallback<R> {
-
-  // TODO consider merging in ErrorCallback here
 
   /**
    * Invoked by the RPC proxy after the remote method has been executed and its

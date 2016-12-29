@@ -28,7 +28,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.logging.util.ReflectableJSO;
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.WindowInjectionContext;

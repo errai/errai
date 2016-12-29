@@ -27,6 +27,7 @@ import org.jboss.errai.cdi.async.test.cyclic.client.res.EquHashCheckCycleB;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.Petrol;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanQuery;
@@ -101,37 +102,16 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
         getAsyncBeanManager().lookupBean(ApplicationScopedBeanInjectSelf.class)
             .getInstance(new CreationalCallback<ApplicationScopedBeanInjectSelf>() {
               @Override
-              public void callback(final ApplicationScopedBeanInjectSelf beanA) {
+              public void callback(final ApplicationScopedBeanInjectSelf proxyA) {
 
-                assertNotNull(beanA);
-                assertNotNull(beanA.getSelf());
+                assertNotNull(proxyA);
+                assertNotNull(proxyA.getSelf());
+                final ApplicationScopedBeanInjectSelf instanceA = Factory.maybeUnwrapProxy(proxyA);
 
-                getAsyncBeanManager().destroyBean(beanA);
+                getAsyncBeanManager().destroyBean(proxyA);
 
-                assertFalse("bean should no longer be managed", getAsyncBeanManager().isManaged(beanA));
-
-                finishTest();
-              }
-            });
-      }
-    });
-  }
-
-  public void testCyclingBeanDestroyViaProxy() {
-    asyncTest(new Runnable() {
-      @Override
-      public void run() {
-        getAsyncBeanManager().lookupBean(ApplicationScopedBeanInjectSelf.class)
-            .getInstance(new CreationalCallback<ApplicationScopedBeanInjectSelf>() {
-              @Override
-              public void callback(ApplicationScopedBeanInjectSelf beanA) {
-                assertNotNull(beanA);
-                assertNotNull(beanA.getSelf());
-
-                // destroy via the proxy reference through self
-                getAsyncBeanManager().destroyBean(beanA.getSelf());
-
-                assertFalse("bean should no longer be managed", getAsyncBeanManager().isManaged(beanA));
+                // Must test with instance because ApplicationScoped proxy is always managed and never destroyed
+                assertFalse("bean should no longer be managed", getAsyncBeanManager().isManaged(instanceA));
 
                 finishTest();
               }
@@ -199,7 +179,7 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
     asyncTest(new Runnable() {
       @Override
       public void run() {
-        AsyncBeanQuery asyncBeanQuery = new AsyncBeanQuery();
+        final AsyncBeanQuery asyncBeanQuery = new AsyncBeanQuery();
         final AsyncBeanFuture<EquHashCheckCycleA> equHashCheckCycleAFuture
             = asyncBeanQuery.load(getAsyncBeanManager().lookupBean(EquHashCheckCycleA.class));
 

@@ -54,6 +54,11 @@ public interface Proxy<T> extends WrappedPortable {
   void setContext(Context context);
 
   /**
+   * @return The context set by {@link #setContext(Context)}.
+   */
+  Context getContext();
+
+  /**
    * Called once after {@link #setInstance(Object)} is called.
    *
    * @param instance The instance wrapped by this proxy.
