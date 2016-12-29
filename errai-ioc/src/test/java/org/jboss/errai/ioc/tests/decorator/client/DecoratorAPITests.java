@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.tests.decorator.client;
 
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.decorator.client.res.MyDecoratedBean;
@@ -43,7 +44,7 @@ public class DecoratorAPITests extends AbstractErraiIOCTest {
     assertEquals(instance.getTestMap(), TestDataCollector.getBeforeInvoke());
     assertEquals(instance.getTestMap(), TestDataCollector.getAfterInvoke());
 
-    Map<String, Object> expectedProperties = new HashMap<String, Object>();
+    final Map<String, Object> expectedProperties = new HashMap<>();
     expectedProperties.put("foobar", "foobie!");
 
     assertEquals(expectedProperties, TestDataCollector.getProperties());
@@ -58,11 +59,13 @@ public class DecoratorAPITests extends AbstractErraiIOCTest {
 
   public void testDestructionStatementsInvoked() throws Exception {
     final MyDecoratedBean instance = IOC.getBeanManager().lookupBean(MyDecoratedBean.class).getInstance();
+    final MyDecoratedBean unwrapped = Factory.maybeUnwrapProxy(instance);
 
     // precondition
     assertTrue(instance.isFlag());
     IOC.getBeanManager().destroyBean(instance);
 
-    assertFalse(instance.isFlag());
+    // Must use unwrapped here or else proxy loads a new instance
+    assertFalse(unwrapped.isFlag());
   }
 }

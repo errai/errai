@@ -34,6 +34,7 @@ import org.jboss.errai.cdi.injection.client.ServiceB;
 import org.jboss.errai.cdi.injection.client.ServiceC;
 import org.jboss.errai.cdi.injection.client.UnreferencedDependentRootBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 
 /**
@@ -97,7 +98,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     assertNotNull("serviceC in serviceA is null", serviceC1);
     assertNotNull("serviceC in serviceB is null", serviceC2);
 
-    final Set<String> testDependentScope = new HashSet<String>();
+    final Set<String> testDependentScope = new HashSet<>();
     testDependentScope.add(serviceC.getName());
     testDependentScope.add(serviceC1.getName());
     testDependentScope.add(serviceC2.getName());
@@ -133,13 +134,15 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testDependentBeanCycleWithPreDestroy() {
-    final DestroyA bean = IOC.getBeanManager()
+    final DestroyA proxy = IOC.getBeanManager()
             .lookupBean(DestroyA.class).getInstance();
+    final DestroyA instance = Factory.maybeUnwrapProxy(proxy);
 
-    IOC.getBeanManager().destroyBean(bean);
+    IOC.getBeanManager().destroyBean(proxy);
 
-    assertTrue("pre-destroy method not called!", bean.isDestroyed());
-    assertTrue("pre-destroy method not called", bean.getTestDestroyB().isDestroyed());
+    // Must call methods on raw instance or else proxy lazy-loads a new instance
+    assertTrue("pre-destroy method not called!", instance.isDestroyed());
+    assertTrue("pre-destroy method not called", instance.getTestDestroyB().isDestroyed());
   }
 
   public void testDependentBeanWithProducerDependency() {

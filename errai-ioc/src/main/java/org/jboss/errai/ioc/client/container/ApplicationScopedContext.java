@@ -38,7 +38,7 @@ import org.jboss.errai.ioc.client.api.SharedSingleton;
 @ScopeContext({ApplicationScoped.class, Singleton.class, EntryPoint.class, SharedSingleton.class})
 public class ApplicationScopedContext extends AbstractContext {
 
-  private static final Set<Class<? extends Annotation>> handledScopes = new HashSet<Class<? extends Annotation>>();
+  private static final Set<Class<? extends Annotation>> handledScopes = new HashSet<>();
 
   static {
     handledScopes.add(ApplicationScoped.class);
@@ -46,7 +46,7 @@ public class ApplicationScopedContext extends AbstractContext {
     handledScopes.add(EntryPoint.class);
   }
 
-  private final Map<String, Object> instances = new HashMap<String, Object>();
+  private final Map<String, Object> instances = new HashMap<>();
 
   @Override
   @SuppressWarnings("unchecked")
@@ -80,4 +80,16 @@ public class ApplicationScopedContext extends AbstractContext {
     return handledScopes.contains(scope);
   }
 
+  @Override
+  protected void afterDestroyInstance(final Object instance) {
+    if (instance instanceof Proxy) {
+      final Proxy<?> proxy = (Proxy<?>) instance;
+      final Object rawInstance = proxy.unwrap();
+      instances.values().remove(rawInstance);
+      proxy.clearInstance();
+    }
+    else {
+      throw new IllegalArgumentException("Cannot destroy ApplicationScoped bean without reference to proxy.");
+    }
+  }
 }
