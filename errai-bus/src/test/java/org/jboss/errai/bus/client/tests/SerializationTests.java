@@ -84,6 +84,7 @@ import org.jboss.errai.bus.client.tests.support.OneDimensionalPrimitiveArrayPort
 import org.jboss.errai.bus.client.tests.support.Outer;
 import org.jboss.errai.bus.client.tests.support.Outer2;
 import org.jboss.errai.bus.client.tests.support.Person;
+import org.jboss.errai.bus.client.tests.support.PortableTypeWithListAndMap;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.SubInterface;
@@ -2395,6 +2396,24 @@ public class SerializationTests extends AbstractErraiTest {
      Marshalling.toJSON(new NonSerializable());
    } catch (final RuntimeException ex) {
      assertTrue("Unexpected exception.", ex.getMessage().contains("No marshaller for type"));
+   }
+ }
+
+ // ERRAI-914
+ public void testTypeWithListAndMapOfList() throws Exception {
+   final PortableTypeWithListAndMap expected = new PortableTypeWithListAndMap();
+   expected.entities.add(1);
+   expected.map.put("foo", Arrays.asList("a", "b", "c"));
+
+   try {
+     final String json = Marshalling.toJSON(expected);
+     final Object observed = Marshalling.fromJSON(json);
+
+     assertEquals(expected, observed);
+   } catch (final AssertionError ae) {
+     throw ae;
+   } catch (final Throwable t) {
+     throw new AssertionError("Unable to marshal object.", t);
    }
  }
 }
