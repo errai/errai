@@ -17,8 +17,10 @@
 package org.jboss.errai.ui.test.extended.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.IOCUtil;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.junit.Test;
+import org.jboss.errai.ui.test.extended.client.res.ChildWithoutTemplatedFragmentValue;
+import org.jboss.errai.ui.test.extended.client.res.CompositeChildWithoutTemplatedFragmentValue;
 
 import com.google.gwt.dom.client.Document;
 
@@ -29,19 +31,39 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
     return getClass().getName().replaceAll("client.*$", "Test");
   }
 
-  @Test
   public void testInsertAndReplaceNestedWithCompositeTemplate() {
-    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(CompositeExtendedTemplateTestApp.class).getInstance();
+    final ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(CompositeExtendedTemplateTestApp.class).getInstance();
     runAssertions(app);
   }
 
-  @Test
   public void testInsertAndReplaceNestedNonCompositeTemplate() {
-    ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(NonCompositeExtendedTemplateTestApp.class).getInstance();
+    final ElementTemplateTestApp app = IOC.getBeanManager().lookupBean(NonCompositeExtendedTemplateTestApp.class).getInstance();
     runAssertions(app);
   }
 
-  private void runAssertions(ElementTemplateTestApp app) {
+  public void testParentWithFragmentValueChildWithout() throws Exception {
+    try {
+      final ChildWithoutTemplatedFragmentValue bean = IOCUtil.getInstance(ChildWithoutTemplatedFragmentValue.class);
+      assertEquals("Child has the wrong root element.", "root", bean.getElement().getId());
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError(t);
+    }
+  }
+
+  public void testCompositeParentWithFragmentValueChildWithout() throws Exception {
+    try {
+      final CompositeChildWithoutTemplatedFragmentValue bean = IOCUtil.getInstance(CompositeChildWithoutTemplatedFragmentValue.class);
+      assertEquals("Child has the wrong root element.", "root", bean.getElement().getId());
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      throw new AssertionError(t);
+    }
+  }
+
+  private void runAssertions(final ElementTemplateTestApp app) {
     assertNotNull(app.getExtComponent());
 
     System.out.println("DUMPING: " + Document.get().getBody().getInnerHTML());
