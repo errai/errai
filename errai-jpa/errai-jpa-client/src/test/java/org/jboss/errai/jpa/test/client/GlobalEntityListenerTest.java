@@ -32,7 +32,6 @@ import javax.persistence.PreUpdate;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
@@ -55,7 +54,7 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
   }
 
   protected EntityManager getEntityManager() {
-    JpaTestClient testClient = JpaTestClient.INSTANCE;
+    final JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
     assertNotNull(testClient.entityManager);
     ((ErraiEntityManager) JpaTestClient.INSTANCE.entityManager).removeAll();
@@ -67,8 +66,6 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
     super.gwtSetUp();
 
     TestingGlobalEntityListener.CALLBACK_LOG.clear();
-
-    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
@@ -86,29 +83,29 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
     // fetch a fresh copy
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
     // fetch again; expect no more PostLoad notifications
-    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    final Album fetchedAlbum2 = em.find(Album.class, album.getId());
     assertSame(fetchedAlbum, fetchedAlbum2);
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
@@ -119,21 +116,21 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
 
     // make them
-    Zentity zentity = new Zentity();
+    final Zentity zentity = new Zentity();
 
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store them
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(zentity);
     em.persist(album);
     em.flush();
     em.clear();
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
     expectedLifecycle.add(new CallbackLogEntry(zentity, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(zentity, PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
@@ -141,12 +138,12 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
     // fetch a fresh copy
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
     // fetch again; expect no more PostLoad notifications
-    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    final Album fetchedAlbum2 = em.find(Album.class, album.getId());
     assertSame(fetchedAlbum, fetchedAlbum2);
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
@@ -157,24 +154,24 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
     // fetch a fresh copy
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
     assertEquals(expectedLifecycle, TestingGlobalEntityListener.CALLBACK_LOG);
 
@@ -191,17 +188,17 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
     assertTrue(TestingGlobalEntityListener.CALLBACK_LOG.isEmpty());
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
 
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
@@ -223,17 +220,17 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
 
     // create an album with an artist, which we will probe for with the NO_SIDE_EFFECTS option
 
-    Artist artist = new Artist();
+    final Artist artist = new Artist();
     artist.setId(123L);
     artist.setName("The Beatles");
 
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(artist);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store them
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(artist);
     em.persist(album);
     em.flush();
@@ -241,7 +238,7 @@ public class GlobalEntityListenerTest extends JpaClientTestCase {
 
     TestingGlobalEntityListener.CALLBACK_LOG.clear();
 
-    ErraiEntityManager eem = (ErraiEntityManager) em;
+    final ErraiEntityManager eem = (ErraiEntityManager) em;
     assertTrue(eem.isKeyInUse(eem.keyFor(album)));
 
     // Finally, ensure there were no events fired as a result of the probe

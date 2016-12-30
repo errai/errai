@@ -32,7 +32,6 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
@@ -75,7 +74,6 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
-    new IOCBeanManagerLifecycle().resetBeanManager();
     new CDI().__resetSubsystem();
     new Container().onModuleLoad();
     new CDIClientBootstrap().onModuleLoad();
@@ -106,41 +104,41 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   }
 
   public void testNewEntityFromServer() {
-    SimpleEntity newEntity = new SimpleEntity();
+    final SimpleEntity newEntity = new SimpleEntity();
     newEntity.setString("the string value");
     newEntity.setDate(new Timestamp(1234567L));
     newEntity.setInteger(9999);
     SimpleEntity.setId(newEntity, 88L);
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     // in this case, the client should make an empty request (both persistence contexts are empty)
 
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
-    fakeServerResponses.add(new NewRemoteEntityResponse<SimpleEntity>(newEntity));
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
+    fakeServerResponses.add(new NewRemoteEntityResponse<>(newEntity));
     performColdSync(expectedClientRequests, fakeServerResponses);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
-    SimpleEntity newEntityExpected = esem.find(SimpleEntity.class, newEntity.getId());
-    SimpleEntity newEntityDesired = dsem.find(SimpleEntity.class, newEntity.getId());
+    final SimpleEntity newEntityExpected = esem.find(SimpleEntity.class, newEntity.getId());
+    final SimpleEntity newEntityDesired = dsem.find(SimpleEntity.class, newEntity.getId());
     assertEquals(newEntityExpected.toString(), newEntity.toString());
     assertEquals(newEntityDesired.toString(), newEntity.toString());
     assertNotSame("Expected State and Desired State instances must be separate", newEntityExpected, newEntityDesired);
   }
 
   public void testIdChangeFromServer() {
-    SimpleEntity entity = new SimpleEntity();
+    final SimpleEntity entity = new SimpleEntity();
     entity.setString("the string value");
     entity.setDate(new Timestamp(1234567L));
     entity.setInteger(9999);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
-    SimpleEntity originalLocalState = dsem.merge(entity);
-    long originalId = originalLocalState.getId();
+    final SimpleEntity originalLocalState = dsem.merge(entity);
+    final long originalId = originalLocalState.getId();
     dsem.flush();
     dsem.detach(originalLocalState);
 
@@ -148,22 +146,22 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertEquals(dsem.find(SimpleEntity.class, originalId).toString(), entity.toString());
 
     // Now change the ID and tell the ClientSyncManager it happened
-    long newId = originalLocalState.getId() + 100;
+    final long newId = originalLocalState.getId() + 100;
     SimpleEntity.setId(entity, newId);
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     expectedClientRequests.add(SyncRequestOperation.created(originalLocalState));
 
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
-    fakeServerResponses.add(new IdChangeResponse<SimpleEntity>(originalId, entity));
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
+    fakeServerResponses.add(new IdChangeResponse<>(originalId, entity));
     performColdSync(expectedClientRequests, fakeServerResponses);
 
     assertNull(esem.find(SimpleEntity.class, originalId));
     assertNull(dsem.find(SimpleEntity.class, originalId));
 
-    SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, newId);
-    SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, newId);
+    final SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, newId);
+    final SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, newId);
     assertEquals(changedEntityExpected.toString(), entity.toString());
     assertEquals(changedEntityDesired.toString(), entity.toString());
     assertNotSame(changedEntityDesired, changedEntityExpected);
@@ -174,20 +172,20 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   // and the server tells us "here's a new entity. its ID is 100!"
   // so we have to move our existing entity out of the way before accepting the remote one.
   public void testNewEntityWithConflictingIdFromServer() {
-    SimpleEntity newRemote = new SimpleEntity();
+    final SimpleEntity newRemote = new SimpleEntity();
     newRemote.setString("new entity from server");
     newRemote.setDate(new Timestamp(1234567L));
     newRemote.setInteger(9999);
     SimpleEntity.setId(newRemote, 100L);
 
-    SimpleEntity existingLocal = new SimpleEntity();
+    final SimpleEntity existingLocal = new SimpleEntity();
     existingLocal.setString("existing local entity");
     existingLocal.setDate(new Timestamp(7654321L));
     existingLocal.setInteger(8888);
     SimpleEntity.setId(existingLocal, 100L);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
     dsem.persist(existingLocal);
     dsem.flush();
@@ -195,15 +193,15 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNull(esem.find(SimpleEntity.class, existingLocal.getId()));
     assertEquals(dsem.find(SimpleEntity.class, existingLocal.getId()).toString(), existingLocal.toString());
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     expectedClientRequests.add(SyncRequestOperation.created(existingLocal)); // note that the mock
                                                                              // server will ignore
                                                                              // this for the purpose
                                                                              // of this test
 
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
-    fakeServerResponses.add(new NewRemoteEntityResponse<SimpleEntity>(newRemote));
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
+    fakeServerResponses.add(new NewRemoteEntityResponse<>(newRemote));
     performColdSync(expectedClientRequests, fakeServerResponses);
 
     // now the ID of existingLocal (still managed by dsem) should not be 100 anymore
@@ -218,17 +216,17 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   }
 
   public void testUpdateFromServer() {
-    SimpleEntity newEntity = new SimpleEntity();
+    final SimpleEntity newEntity = new SimpleEntity();
     newEntity.setString("the string value");
     newEntity.setDate(new Timestamp(1234567L));
     newEntity.setInteger(9999);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
     // persist this as both the "expected state" from the server and the "desired state" on the
     // client
-    SimpleEntity originalEntityState = esem.merge(newEntity);
+    final SimpleEntity originalEntityState = esem.merge(newEntity);
     esem.flush();
     esem.clear();
 
@@ -236,37 +234,37 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     dsem.flush();
     dsem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     expectedClientRequests.add(SyncRequestOperation.unchanged(originalEntityState));
 
     // now cook up a server response that says something changed
     SimpleEntity.setId(newEntity, originalEntityState.getId());
     newEntity.setString("a new string value");
     newEntity.setInteger(110011);
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
-    fakeServerResponses.add(new UpdateResponse<SimpleEntity>(newEntity));
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
+    fakeServerResponses.add(new UpdateResponse<>(newEntity));
     performColdSync(expectedClientRequests, fakeServerResponses);
 
-    SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, newEntity.getId());
-    SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, newEntity.getId());
+    final SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, newEntity.getId());
+    final SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, newEntity.getId());
     assertEquals(changedEntityExpected.toString(), newEntity.toString());
     assertEquals(changedEntityDesired.toString(), newEntity.toString());
     assertNotSame(changedEntityDesired, changedEntityExpected);
   }
 
   public void testDeleteFromServer() {
-    SimpleEntity newEntity = new SimpleEntity();
+    final SimpleEntity newEntity = new SimpleEntity();
     newEntity.setString("the string value");
     newEntity.setDate(new Timestamp(1234567L));
     newEntity.setInteger(9999);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
     // persist this as both the "expected state" from the server and the "desired state" on the
     // client
-    SimpleEntity originalEntityState = esem.merge(newEntity);
+    final SimpleEntity originalEntityState = esem.merge(newEntity);
     esem.flush();
     esem.clear();
 
@@ -274,13 +272,13 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     dsem.flush();
     dsem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     expectedClientRequests.add(SyncRequestOperation.unchanged(originalEntityState));
 
     // now cook up a server response that says it got deleted
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
-    fakeServerResponses.add(new DeleteResponse<SimpleEntity>(newEntity));
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
+    fakeServerResponses.add(new DeleteResponse<>(newEntity));
     performColdSync(expectedClientRequests, fakeServerResponses);
 
     assertNull(esem.find(SimpleEntity.class, newEntity.getId()));
@@ -291,29 +289,29 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     try {
       esem.merge(newEntity);
     }
-    catch (IllegalArgumentException e) {
+    catch (final IllegalArgumentException e) {
       fail("Merging removed entity failed: " + e);
     }
 
     try {
       dsem.merge(newEntity);
     }
-    catch (IllegalArgumentException e) {
+    catch (final IllegalArgumentException e) {
       fail("Merging removed entity failed: " + e);
     }
   }
 
   public void testUpdateFromClient() {
-    SimpleEntity entity = new SimpleEntity();
+    final SimpleEntity entity = new SimpleEntity();
     entity.setString("the string value");
     entity.setDate(new Timestamp(1234567L));
     entity.setInteger(9999);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
     // first persist the expected state
-    SimpleEntity originalEntityState = esem.merge(entity);
+    final SimpleEntity originalEntityState = esem.merge(entity);
     esem.flush();
     esem.clear();
 
@@ -325,43 +323,43 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     dsem.flush();
     dsem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     expectedClientRequests.add(SyncRequestOperation.updated(entity, originalEntityState));
 
     // the server will respond with confirmation of the update
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
-    fakeServerResponses.add(new UpdateResponse<SimpleEntity>(entity));
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
+    fakeServerResponses.add(new UpdateResponse<>(entity));
     performColdSync(expectedClientRequests, fakeServerResponses);
 
-    SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, entity.getId());
-    SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, entity.getId());
+    final SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, entity.getId());
+    final SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, entity.getId());
     assertEquals(changedEntityExpected.toString(), entity.toString());
     assertEquals(changedEntityDesired.toString(), entity.toString());
     assertNotSame(changedEntityDesired, changedEntityExpected);
   }
 
   public void testDeleteFromClient() {
-    SimpleEntity entity = new SimpleEntity();
+    final SimpleEntity entity = new SimpleEntity();
     entity.setString("the string value");
     entity.setDate(new Timestamp(1234567L));
     entity.setInteger(9999);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
     // first persist the expected state
     esem.persist(entity);
     esem.flush();
     esem.clear();
 
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     expectedClientRequests.add(SyncRequestOperation.deleted(entity));
 
     // assuming no conflict, the server deletes the entity and generates the appropriate response
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
-    fakeServerResponses.add(new DeleteResponse<SimpleEntity>(entity));
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
+    fakeServerResponses.add(new DeleteResponse<>(entity));
     performColdSync(expectedClientRequests, fakeServerResponses);
 
     assertNull(esem.find(SimpleEntity.class, entity.getId()));
@@ -369,30 +367,30 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   }
 
   public void testConcurrentSyncRequestsRejected() {
-    SimpleEntity entity = new SimpleEntity();
+    final SimpleEntity entity = new SimpleEntity();
     entity.setString("the string value");
     entity.setDate(new Timestamp(1234567L));
     entity.setInteger(9999);
 
-    ErraiEntityManager esem = csm.getExpectedStateEm();
-    ErraiEntityManager dsem = csm.getDesiredStateEm();
+    final ErraiEntityManager esem = csm.getExpectedStateEm();
+    final ErraiEntityManager dsem = csm.getDesiredStateEm();
 
     // first persist the desired state
-    SimpleEntity clientEntity = dsem.merge(entity);
+    final SimpleEntity clientEntity = dsem.merge(entity);
     dsem.flush();
     dsem.clear();
 
-    Long originalId = clientEntity.getId();
-    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
-        new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    final Long originalId = clientEntity.getId();
+    final List<SyncRequestOperation<SimpleEntity>> expectedClientRequests =
+        new ArrayList<>();
     expectedClientRequests.add(SyncRequestOperation.created(clientEntity));
 
     // the server creates the entity with a different ID and notifies us of the change
-    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    final List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<>();
     SimpleEntity.setId(entity, 1010L);
-    fakeServerResponses.add(new IdChangeResponse<SimpleEntity>(originalId, entity));
+    fakeServerResponses.add(new IdChangeResponse<>(originalId, entity));
 
-    Runnable doDuringSync = new Runnable() {
+    final Runnable doDuringSync = new Runnable() {
 
       boolean alreadyRunning = false;
 
@@ -409,20 +407,20 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
           csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String, Object> emptyMap(),
                   new RemoteCallback<List<SyncResponse<SimpleEntity>>>() {
                     @Override
-                    public void callback(List<SyncResponse<SimpleEntity>> response) {
+                    public void callback(final List<SyncResponse<SimpleEntity>> response) {
                       fail("this recursive call to coldSync must not succeed");
                     }
                   },
               new ErrorCallback<List<SyncResponse<SimpleEntity>>>() {
                 @Override
-                public boolean error(List<SyncResponse<SimpleEntity>> message, Throwable throwable) {
+                public boolean error(final List<SyncResponse<SimpleEntity>> message, final Throwable throwable) {
                   fail("this recursive call to coldSync should have failed synchronously");
                   throw new AssertionError();
                 }
               });
           fail("recursive call to coldSync() failed to throw an exception");
         }
-        catch (IllegalStateException ex) {
+        catch (final IllegalStateException ex) {
           System.out
               .println("Got expected IllegalStateException. Returning normally so client state assertions can run.");
           // expected
@@ -443,9 +441,9 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   public void testDeclarativeSync() {
     delayTestFinish(45000);
 
-    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<>();
 
-    final Map<String, Object> parameters = new HashMap<String, Object>();
+    final Map<String, Object> parameters = new HashMap<>();
 
     // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
     Factory.maybeUnwrapProxy(csm).dataSyncService = new Caller<DataSyncService>() {
@@ -456,8 +454,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
           @SuppressWarnings({ "unchecked", "rawtypes" })
           @Override
-          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
-              List<SyncRequestOperation<X>> actualClientRequests) {
+          public <X> List<SyncResponse<X>> coldSync(final SyncableDataSet<X> dataSet,
+              final List<SyncRequestOperation<X>> actualClientRequests) {
             System.out.println("Short-circuiting DataSyncService call:");
             System.out.println("   dataSet = " + dataSet);
             System.out.println("   actualClientRequests = " + actualClientRequests);
@@ -466,7 +464,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
             // fails at this point!
             parameters.putAll(dataSet.getParameters());
 
-            RemoteCallback rawRemoteCallback = callback;
+            final RemoteCallback rawRemoteCallback = callback;
             rawRemoteCallback.callback(expectedSyncResponses);
 
             return null; // this is the Caller stub. it doesn't return the value directly.
@@ -513,9 +511,9 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   public void testDeclarativeSyncAndFieldValueChanges() {
     delayTestFinish(45000);
 
-    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<>();
 
-    final Map<String, Object> parameters = new HashMap<String, Object>();
+    final Map<String, Object> parameters = new HashMap<>();
 
     // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
     csm.dataSyncService = new Caller<DataSyncService>() {
@@ -526,8 +524,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
           @SuppressWarnings({ "rawtypes" })
           @Override
-          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
-              List<SyncRequestOperation<X>> actualClientRequests) {
+          public <X> List<SyncResponse<X>> coldSync(final SyncableDataSet<X> dataSet,
+              final List<SyncRequestOperation<X>> actualClientRequests) {
             System.out.println("Short-circuiting DataSyncService call:");
             System.out.println("   dataSet = " + dataSet);
             System.out.println("   actualClientRequests = " + actualClientRequests);
@@ -536,7 +534,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
             // fails at this point!
             parameters.putAll(dataSet.getParameters());
 
-            RemoteCallback rawRemoteCallback = callback;
+            final RemoteCallback rawRemoteCallback = callback;
             rawRemoteCallback.callback(expectedSyncResponses);
 
             return null; // this is the Caller stub. it doesn't return the value directly.
@@ -561,7 +559,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     syncBean = IOC.getBeanManager().lookupBean(DependentScopedSyncBean.class).getInstance();
     syncBean.setId(1337);
     syncBean.setName("changed");
-    StateChange<DependentScopedSyncBean> changeEvent = IOC.getBeanManager().lookupBean(StateChange.class).getInstance();
+    final StateChange<DependentScopedSyncBean> changeEvent = IOC.getBeanManager().lookupBean(StateChange.class).getInstance();
     changeEvent.fireAsync(syncBean);
 
     new Timer() {
@@ -588,7 +586,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
   public void testDestructionCallbackStopSyncWorker() {
     delayTestFinish(45000);
 
-    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    final List<SyncResponse<SimpleEntity>> expectedSyncResponses = new ArrayList<>();
 
     // replace the caller so we can see what the SyncWorker asks its ClientSyncManager to do
     csm.dataSyncService = new Caller<DataSyncService>() {
@@ -599,13 +597,13 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
           @SuppressWarnings({ "unchecked", "rawtypes" })
           @Override
-          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
-              List<SyncRequestOperation<X>> actualClientRequests) {
+          public <X> List<SyncResponse<X>> coldSync(final SyncableDataSet<X> dataSet,
+              final List<SyncRequestOperation<X>> actualClientRequests) {
             System.out.println("Short-circuiting DataSyncService call:");
             System.out.println("   dataSet = " + dataSet);
             System.out.println("   actualClientRequests = " + actualClientRequests);
 
-            RemoteCallback rawRemoteCallback = callback;
+            final RemoteCallback rawRemoteCallback = callback;
             rawRemoteCallback.callback(expectedSyncResponses);
 
             return null; // this is the Caller stub. it doesn't return the value directly.
@@ -690,16 +688,16 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
           @SuppressWarnings({ "unchecked", "rawtypes" })
           @Override
-          public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet,
-              List<SyncRequestOperation<X>> actualClientRequests) {
-            List erasedExpectedClientRequests = expectedClientRequests;
+          public <X> List<SyncResponse<X>> coldSync(final SyncableDataSet<X> dataSet,
+              final List<SyncRequestOperation<X>> actualClientRequests) {
+            final List erasedExpectedClientRequests = expectedClientRequests;
             assertSyncRequestsEqual(erasedExpectedClientRequests, actualClientRequests);
 
             if (doDuringSync != null) {
               doDuringSync.run();
             }
 
-            RemoteCallback erasedCallback = callback;
+            final RemoteCallback erasedCallback = callback;
             erasedCallback.callback(fakeServerResponses);
             return null;
           }
@@ -722,14 +720,14 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String, Object> emptyMap(),
             new RemoteCallback<List<SyncResponse<SimpleEntity>>>() {
               @Override
-              public void callback(List<SyncResponse<SimpleEntity>> response) {
+              public void callback(final List<SyncResponse<SimpleEntity>> response) {
                 System.out.println("Got sync callback");
               }
             }, null);
   }
 
   private static <X> void assertSyncRequestsEqual(
-          List<SyncRequestOperation<X>> expected, List<SyncRequestOperation<X>> actual) {
+          final List<SyncRequestOperation<X>> expected, final List<SyncRequestOperation<X>> actual) {
     assertEquals(
             "List lengths differ. Expected: " + stringify(expected) + ", actual: " + stringify(actual),
             expected.size(), actual.size());
@@ -738,15 +736,15 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     }
   }
 
-  private static <X> String stringify(List<SyncRequestOperation<X>> ops) {
-    StringBuilder sb = new StringBuilder(500);
-    for (SyncRequestOperation<X> op : ops) {
+  private static <X> String stringify(final List<SyncRequestOperation<X>> ops) {
+    final StringBuilder sb = new StringBuilder(500);
+    for (final SyncRequestOperation<X> op : ops) {
       sb.append(stringify(op)).append(" ");
     }
     return sb.toString();
   }
 
-  private static <X> String stringify(SyncRequestOperation<X> op) {
+  private static <X> String stringify(final SyncRequestOperation<X> op) {
     return "[" + op.getType() + ": expected=" + op.getExpectedState() + ", desired=" + op.getEntity() + "]";
   }
 

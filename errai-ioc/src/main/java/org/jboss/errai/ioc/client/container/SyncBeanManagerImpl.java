@@ -82,11 +82,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   }
 
   @Override
-  public void destroyAllBeans() {
-    // TODO Decide how this should be implemented.
-  }
-
-  @Override
   public void setContextManager(final ContextManager contextManager) {
     if (this.contextManager != null) {
       throw new RuntimeException("The ContextManager must only be set once.");

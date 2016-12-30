@@ -59,7 +59,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
 
   private final Multimap<String, String> typeNamesByName = HashMultimap.create();
   private final Multimap<String, UnloadedFactory<?>> unloadedByTypeName = HashMultimap.create();
-  private final Map<String, UnloadedFactory<?>> unloadedByFactoryName = new HashMap<String, UnloadedFactory<?>>();
+  private final Map<String, UnloadedFactory<?>> unloadedByFactoryName = new HashMap<>();
 
   @Override
   public void destroyBean(final Object ref) {
@@ -86,11 +86,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     return innerBeanManager.addDestructionCallback(beanInstance, destructionCallback);
   }
 
-  @Override
-  public void destroyAllBeans() {
-    innerBeanManager.destroyAllBeans();
-  }
-
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Collection<AsyncBeanDef> lookupBeans(final String name) {
@@ -102,10 +97,10 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
   }
 
   private <T> Collection<AsyncBeanDef<T>> wrapSyncBeans(final Collection<SyncBeanDef<T>> syncBeans) {
-    final Collection<AsyncBeanDef<T>> asyncBeans = new ArrayList<AsyncBeanDef<T>>(syncBeans.size());
+    final Collection<AsyncBeanDef<T>> asyncBeans = new ArrayList<>(syncBeans.size());
 
     for (final SyncBeanDef<T> syncBean : syncBeans) {
-      asyncBeans.add(new SyncToAsyncBeanDef<T>(syncBean));
+      asyncBeans.add(new SyncToAsyncBeanDef<>(syncBean));
     }
 
     return asyncBeans;
@@ -231,11 +226,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
   private class UnloadedFactory<T> {
     private final FactoryHandle handle;
     private final FactoryLoader<T> loader;
-    private final Set<String> asyncDependencies = new HashSet<String>();
+    private final Set<String> asyncDependencies = new HashSet<>();
 
     private boolean loaded = false;
     private boolean loading = false;
-    private final Queue<Runnable> onLoad = new LinkedList<Runnable>();
+    private final Queue<Runnable> onLoad = new LinkedList<>();
 
     public UnloadedFactory(final FactoryHandle handle, final FactoryLoader<T> loader) {
       this.handle = handle;
@@ -273,7 +268,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
 
       loading = true;
       onLoad.add(onFinish);
-      final RefHolder<Integer> numLoaded = new RefHolder<Integer>();
+      final RefHolder<Integer> numLoaded = new RefHolder<>();
       numLoaded.set(0);
       final Collection<UnloadedFactory<?>> unloadedDeps = getUnloadedAsyncDependencies();
 
@@ -322,10 +317,10 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, BeanManagerSetup,
     }
 
     private Collection<UnloadedFactory<?>> getUnloadedAsyncDependencies() {
-      final Deque<UnloadedFactory<?>> unloadedDeps = new LinkedList<UnloadedFactory<?>>();
+      final Deque<UnloadedFactory<?>> unloadedDeps = new LinkedList<>();
 
-      final Queue<String> bfsQueue = new LinkedList<String>(asyncDependencies);
-      final Set<String> visited = new HashSet<String>();
+      final Queue<String> bfsQueue = new LinkedList<>(asyncDependencies);
+      final Set<String> visited = new HashSet<>();
       visited.add(handle.getFactoryName());
 
       while (bfsQueue.size() > 0) {

@@ -33,11 +33,10 @@ package org.jboss.errai.ioc.client;
 
 
 
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
-import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
+
+import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -48,10 +47,9 @@ public abstract class IOCClientTestCase extends GWTTestCase {
     @Override
     public void bootstrap() {
       try {
-        new IOCBeanManagerLifecycle().resetBeanManager();
         new Container().bootstrapContainer();
       }
-      catch (Throwable t) {
+      catch (final Throwable t) {
         throw new RuntimeException("failed to bootstrap container", t);
       }
     }
@@ -64,7 +62,7 @@ public abstract class IOCClientTestCase extends GWTTestCase {
     initializer.bootstrap();
   }
 
-  public void setInitializer(ContainerBootstrapper initializer) {
+  public void setInitializer(final ContainerBootstrapper initializer) {
     this.initializer = initializer;
   }
 
@@ -77,7 +75,7 @@ public abstract class IOCClientTestCase extends GWTTestCase {
     try {
       bootstrapContainer();
     }
-    catch (Exception t) {
+    catch (final Exception t) {
       t.printStackTrace();
       throw t;
     }

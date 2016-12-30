@@ -27,7 +27,6 @@ import javax.persistence.metamodel.Metamodel;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
 import org.jboss.errai.jpa.test.entity.inherit.ChildOfAbstractParentEntity;
@@ -55,9 +54,9 @@ public class InheritanceTest extends JpaClientTestCase {
   }
 
   protected EntityManager getEntityManager() {
-    JpaTestClient testClient = JpaTestClient.INSTANCE;
+    final JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
-    EntityManager em = testClient.entityManager;
+    final EntityManager em = testClient.entityManager;
     assertNotNull(em);
     ((ErraiEntityManager) em).removeAll();
     return em;
@@ -66,8 +65,6 @@ public class InheritanceTest extends JpaClientTestCase {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-
-    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
@@ -81,9 +78,9 @@ public class InheritanceTest extends JpaClientTestCase {
   }
 
   public void testStoreAndRetrieveConcreteParent() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    ParentConcreteEntity pc = new ParentConcreteEntity();
+    final ParentConcreteEntity pc = new ParentConcreteEntity();
     pc.setPrivateParentField(-4);
     pc.setPackagePrivateParentField(2);
     pc.setProtectedParentField(432344);
@@ -93,14 +90,14 @@ public class InheritanceTest extends JpaClientTestCase {
 
     em.clear();
 
-    ParentConcreteEntity found = em.find(ParentConcreteEntity.class, pc.getId());
+    final ParentConcreteEntity found = em.find(ParentConcreteEntity.class, pc.getId());
     assertEquals(pc.toString(), found.toString());
   }
 
   public void testStoreAndRetrieveChildofConcreteParent() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
+    final ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
     cc.setPrivateParentField(-4);
     cc.setPackagePrivateParentField(2);
     cc.setProtectedParentField(432344);
@@ -111,18 +108,18 @@ public class InheritanceTest extends JpaClientTestCase {
 
     em.clear();
 
-    ChildOfConcreteParentEntity found = em.find(ChildOfConcreteParentEntity.class, cc.getId());
+    final ChildOfConcreteParentEntity found = em.find(ChildOfConcreteParentEntity.class, cc.getId());
     assertEquals(cc.toString(), found.toString());
 
     // ensure lookup by superclass also works
-    ParentConcreteEntity found2 = em.find(ParentConcreteEntity.class, cc.getId());
+    final ParentConcreteEntity found2 = em.find(ParentConcreteEntity.class, cc.getId());
     assertSame(found, found2);
   }
 
   public void testStoreAndRetrieveChildofAbstractParent() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    ChildOfAbstractParentEntity ac = new ChildOfAbstractParentEntity();
+    final ChildOfAbstractParentEntity ac = new ChildOfAbstractParentEntity();
     ac.setPrivateParentField(-4);
     ac.setPackagePrivateParentField(2);
     ac.setProtectedParentField(432344);
@@ -133,27 +130,27 @@ public class InheritanceTest extends JpaClientTestCase {
 
     em.clear();
 
-    ChildOfAbstractParentEntity found = em.find(ChildOfAbstractParentEntity.class, ac.getId());
+    final ChildOfAbstractParentEntity found = em.find(ChildOfAbstractParentEntity.class, ac.getId());
     assertEquals(ac.toString(), found.toString());
 
     // ensure lookup by superclass also works
-    ParentAbstractEntity found2 = em.find(ParentAbstractEntity.class, ac.getId());
+    final ParentAbstractEntity found2 = em.find(ParentAbstractEntity.class, ac.getId());
     assertSame(found, found2);
   }
 
   public void testMetamodelOfConcreteChild() throws Exception {
-    EntityManager em = getEntityManager();
-    Metamodel mm = em.getMetamodel();
+    final EntityManager em = getEntityManager();
+    final Metamodel mm = em.getMetamodel();
 
-    EntityType<ChildOfConcreteParentEntity> childEntityType = mm.entity(ChildOfConcreteParentEntity.class);
-    EntityType<ParentConcreteEntity> parentEntityType = mm.entity(ParentConcreteEntity.class);
+    final EntityType<ChildOfConcreteParentEntity> childEntityType = mm.entity(ChildOfConcreteParentEntity.class);
+    final EntityType<ParentConcreteEntity> parentEntityType = mm.entity(ParentConcreteEntity.class);
 
     // test that inherited attributes report correct declaring type
-    Attribute<? super ChildOfConcreteParentEntity, ?> inheritedAttribute = childEntityType.getAttribute("privateParentField");
+    final Attribute<? super ChildOfConcreteParentEntity, ?> inheritedAttribute = childEntityType.getAttribute("privateParentField");
     assertEquals(parentEntityType, inheritedAttribute.getDeclaringType());
 
     // test that declared attributes report correct declaring type
-    Attribute<? super ChildOfConcreteParentEntity, ?> declaredAttribute = childEntityType.getAttribute("childField");
+    final Attribute<? super ChildOfConcreteParentEntity, ?> declaredAttribute = childEntityType.getAttribute("childField");
     assertEquals(childEntityType, declaredAttribute.getDeclaringType());
   }
 
@@ -161,16 +158,16 @@ public class InheritanceTest extends JpaClientTestCase {
    * Tests that a query for a parent type also returns entities from subtypes that match the criteria.
    */
   public void testPolymorphicQueryReturningSubtypesOfConcreteParent() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    ParentConcreteEntity pc = new ParentConcreteEntity();
+    final ParentConcreteEntity pc = new ParentConcreteEntity();
     pc.setPrivateParentField(1);
     pc.setPackagePrivateParentField(1);
     pc.setProtectedParentField(1);
     pc.setPublicParentField(1);
     em.persist(pc);
 
-    ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
+    final ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
     cc.setPrivateParentField(2);
     cc.setPackagePrivateParentField(2);
     cc.setProtectedParentField(2);
@@ -178,7 +175,7 @@ public class InheritanceTest extends JpaClientTestCase {
     cc.setChildField(2);
     em.persist(cc);
 
-    GrandchildOfConcreteParentEntity gcc = new GrandchildOfConcreteParentEntity();
+    final GrandchildOfConcreteParentEntity gcc = new GrandchildOfConcreteParentEntity();
     gcc.setPrivateParentField(3);
     gcc.setPackagePrivateParentField(3);
     gcc.setProtectedParentField(3);
@@ -186,7 +183,7 @@ public class InheritanceTest extends JpaClientTestCase {
     gcc.setChildField(3);
     em.persist(gcc);
 
-    ChildOfConcreteParentEntity cc2 = new ChildOfConcreteParentEntity();
+    final ChildOfConcreteParentEntity cc2 = new ChildOfConcreteParentEntity();
     cc2.setPrivateParentField(4);
     cc2.setPackagePrivateParentField(4);
     cc2.setProtectedParentField(4);
@@ -196,10 +193,10 @@ public class InheritanceTest extends JpaClientTestCase {
 
     em.flush();
 
-    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
+    final TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
     query.setParameter("protectedFieldAtLeast", 1);
     query.setParameter("protectedFieldAtMost", 3);
-    List<ParentConcreteEntity> resultList = query.getResultList();
+    final List<ParentConcreteEntity> resultList = query.getResultList();
 
     assertEquals(3, resultList.size());
     assertTrue(resultList.contains(pc));
@@ -211,16 +208,16 @@ public class InheritanceTest extends JpaClientTestCase {
   }
 
   public void testPolymorphicQueryReturningOnlyConcreteChild() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    ParentConcreteEntity pc = new ParentConcreteEntity();
+    final ParentConcreteEntity pc = new ParentConcreteEntity();
     pc.setPrivateParentField(1);
     pc.setPackagePrivateParentField(1);
     pc.setProtectedParentField(1);
     pc.setPublicParentField(1);
     em.persist(pc);
 
-    ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
+    final ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
     cc.setPrivateParentField(2);
     cc.setPackagePrivateParentField(2);
     cc.setProtectedParentField(2);
@@ -230,26 +227,26 @@ public class InheritanceTest extends JpaClientTestCase {
 
     em.flush();
 
-    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
+    final TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("parentConcreteEntity", ParentConcreteEntity.class);
     query.setParameter("protectedFieldAtLeast", 2);
     query.setParameter("protectedFieldAtMost", 2);
-    List<ParentConcreteEntity> resultList = query.getResultList();
+    final List<ParentConcreteEntity> resultList = query.getResultList();
 
     assertEquals(1, resultList.size());
     assertTrue(resultList.contains(cc));
   }
 
   public void testPolymorphicQueryForOnlyConcreteChild() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
-    ParentConcreteEntity pc = new ParentConcreteEntity();
+    final ParentConcreteEntity pc = new ParentConcreteEntity();
     pc.setPrivateParentField(1);
     pc.setPackagePrivateParentField(1);
     pc.setProtectedParentField(1);
     pc.setPublicParentField(1);
     em.persist(pc);
 
-    ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
+    final ChildOfConcreteParentEntity cc = new ChildOfConcreteParentEntity();
     cc.setPrivateParentField(2);
     cc.setPackagePrivateParentField(2);
     cc.setProtectedParentField(2);
@@ -257,7 +254,7 @@ public class InheritanceTest extends JpaClientTestCase {
     cc.setChildField(2);
     em.persist(cc);
 
-    ChildOfConcreteParentEntity cc2 = new ChildOfConcreteParentEntity();
+    final ChildOfConcreteParentEntity cc2 = new ChildOfConcreteParentEntity();
     cc2.setPrivateParentField(3);
     cc2.setPackagePrivateParentField(3);
     cc2.setProtectedParentField(3);
@@ -267,21 +264,21 @@ public class InheritanceTest extends JpaClientTestCase {
 
     em.flush();
 
-    TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("childOfParentConcreteEntity", ParentConcreteEntity.class);
+    final TypedQuery<ParentConcreteEntity> query = em.createNamedQuery("childOfParentConcreteEntity", ParentConcreteEntity.class);
     query.setParameter("protectedFieldAtLeast", 1);
     query.setParameter("protectedFieldAtMost", 2);
-    List<ParentConcreteEntity> resultList = query.getResultList();
+    final List<ParentConcreteEntity> resultList = query.getResultList();
 
     assertEquals(1, resultList.size());
     assertTrue(resultList.contains(cc));
   }
 
   public void testIdGenerationIsUniqueWithinInheritanceGroup() throws Exception {
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
 
     // IdTestingEntity1 and IdTestingEntity2 share a common superclass entity. their ids must not overlap.
-    IdTestingEntity1 idte1 = new IdTestingEntity1();
-    IdTestingEntity2 idte2 = new IdTestingEntity2();
+    final IdTestingEntity1 idte1 = new IdTestingEntity1();
+    final IdTestingEntity2 idte2 = new IdTestingEntity2();
 
     em.persist(idte1);
     em.persist(idte2);

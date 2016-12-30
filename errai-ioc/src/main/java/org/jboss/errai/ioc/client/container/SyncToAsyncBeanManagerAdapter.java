@@ -38,46 +38,41 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
 
   private final SyncBeanManager bm;
 
-  public SyncToAsyncBeanManagerAdapter(SyncBeanManager bm) {
+  public SyncToAsyncBeanManagerAdapter(final SyncBeanManager bm) {
     this.bm = bm;
   }
 
   @Override
-  public void destroyBean(Object ref) {
+  public void destroyBean(final Object ref) {
     bm.destroyBean(ref);
   }
 
   @Override
-  public boolean isManaged(Object ref) {
+  public boolean isManaged(final Object ref) {
     return bm.isManaged(ref);
   }
 
   @Override
-  public Object getActualBeanReference(Object ref) {
+  public Object getActualBeanReference(final Object ref) {
     return bm.getActualBeanReference(ref);
   }
 
   @Override
-  public boolean isProxyReference(Object ref) {
+  public boolean isProxyReference(final Object ref) {
     return bm.isProxyReference(ref);
   }
 
   @Override
-  public boolean addDestructionCallback(Object beanInstance, DestructionCallback<?> destructionCallback) {
+  public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
     return bm.addDestructionCallback(beanInstance, destructionCallback);
   }
 
   @Override
-  public void destroyAllBeans() {
-    bm.destroyAllBeans();
-  }
-
-  @Override
   @SuppressWarnings("rawtypes")
-  public Collection<AsyncBeanDef> lookupBeans(String name) {
+  public Collection<AsyncBeanDef> lookupBeans(final String name) {
     final Collection<SyncBeanDef> beanDefs = bm.lookupBeans(name);
 
-    final List<AsyncBeanDef> asyncBeanDefs = new ArrayList<AsyncBeanDef>();
+    final List<AsyncBeanDef> asyncBeanDefs = new ArrayList<>();
     for (final SyncBeanDef beanDef : beanDefs) {
       asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
@@ -86,16 +81,16 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
   }
 
   @Override
-  public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type) {
+  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type) {
     return lookupBeans(type, new Annotation[0]);
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
+  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
     final Collection<SyncBeanDef<T>> beanDefs = bm.lookupBeans(type, qualifiers);
 
-    final List<AsyncBeanDef<T>> asyncBeanDefs = new ArrayList<AsyncBeanDef<T>>();
+    final List<AsyncBeanDef<T>> asyncBeanDefs = new ArrayList<>();
     for (final SyncBeanDef<T> beanDef : beanDefs) {
       asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
@@ -105,14 +100,14 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
 
   @Override
   @SuppressWarnings({ "unchecked" })
-  public <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
+  public <T> AsyncBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
     final SyncBeanDef<T> beanDef = bm.lookupBean(type, qualifiers);
     return createAsyncBeanDef(beanDef);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private AsyncBeanDef createAsyncBeanDef(final SyncBeanDef beanDef) {
-    AsyncBeanDef abd = new AsyncBeanDef() {
+    final AsyncBeanDef abd = new AsyncBeanDef() {
 
       @Override
       public Class getType() {
@@ -130,12 +125,12 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
       }
 
       @Override
-      public void getInstance(CreationalCallback callback) {
+      public void getInstance(final CreationalCallback callback) {
         callback.callback(beanDef.getInstance());
       }
 
       @Override
-      public void newInstance(CreationalCallback callback) {
+      public void newInstance(final CreationalCallback callback) {
         callback.callback(beanDef.newInstance());
       }
 
@@ -145,7 +140,7 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
       }
 
       @Override
-      public boolean matches(Set annotations) {
+      public boolean matches(final Set annotations) {
         return beanDef.matches(annotations);
       }
 
@@ -160,7 +155,7 @@ public class SyncToAsyncBeanManagerAdapter implements AsyncBeanManager {
       }
 
       @Override
-      public boolean isAssignableTo(Class type) {
+      public boolean isAssignableTo(final Class type) {
         return beanDef.isAssignableTo(type);
       }
     };

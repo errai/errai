@@ -23,7 +23,6 @@ import javax.persistence.metamodel.EntityType;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.test.client.JpaTestClient;
@@ -38,7 +37,7 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
   }
 
   protected EntityManager getEntityManager() {
-    JpaTestClient testClient = JpaTestClient.INSTANCE;
+    final JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
     assertNotNull(testClient.entityManager);
     ((ErraiEntityManager) testClient.entityManager).removeAll();
@@ -50,8 +49,6 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
     super.gwtSetUp();
 
     Album.CALLBACK_LOG.clear();
-
-    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
@@ -67,13 +64,13 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
   public void testWhiteListedEntityIsInEntityManager() throws Exception {
     try {
       // we cannot use the class name to test here since the class is not available in client side code generation
-      EntityType et = ((ErraiMetamodel) getEntityManager().getMetamodel())
+      final EntityType et = ((ErraiMetamodel) getEntityManager().getMetamodel())
                         .entity("org.jboss.tests.errai.jpa.exclusion.client.res.WhiteListedEntity");
 
       assertEquals("Incorrect entity type found", et.getJavaType().getName(),
                     "org.jboss.tests.errai.jpa.exclusion.client.res.WhiteListedEntity");
 
-    } catch (IllegalArgumentException ex) {
+    } catch (final IllegalArgumentException ex) {
       fail("WhiteListedEntity was not included in EntityManager");
     }
   }
@@ -85,20 +82,20 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
                         .entity("org.jboss.tests.errai.jpa.exclusion.client.res.BlackListedEntity");
 
       fail("BlackListedEntity was not excluded from EntityManager");
-    } catch (IllegalArgumentException ex) {
+    } catch (final IllegalArgumentException ex) {
       // this is the expected behavior
     }
   }
 
   public void testWhiteListedPackageIsInEntityManager() throws Exception {
     try {
-      EntityType et = ((ErraiMetamodel) getEntityManager().getMetamodel())
+      final EntityType et = ((ErraiMetamodel) getEntityManager().getMetamodel())
                         .entity("org.jboss.tests.errai.jpa.exclusion.whitelist.WhiteListedPackageEntity");
 
       assertEquals("Incorrect entity type found", et.getJavaType().getName(),
                     "org.jboss.tests.errai.jpa.exclusion.whitelist.WhiteListedPackageEntity");
 
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       fail("WhiteListedPackageEntity was not found in EntityManager");
     }
   }
@@ -111,16 +108,16 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
         .entity("org.jboss.tests.errai.jpa.exclusion.whitelist.BlackListedEntityInWhiteListedPackage");
 
       fail("BlackListedEntityInWhiteListedPackage was not excluded from EntityManager");
-    } catch (IllegalArgumentException ex) {
+    } catch (final IllegalArgumentException ex) {
       // this is the expected behavior
     }
   }
 
   public void testBlackListedPackageIsNotInEntityManager() throws Exception {
-      Set<EntityType<?>> entitySet = getEntityManager().getMetamodel().getEntities();
+      final Set<EntityType<?>> entitySet = getEntityManager().getMetamodel().getEntities();
 
-      for (EntityType<?> et : entitySet) {
-        String className = et.getJavaType().getName();
+      for (final EntityType<?> et : entitySet) {
+        final String className = et.getJavaType().getName();
         if (className.startsWith("org.jboss.tests.errai.jpa.exclusion.blacklist")) {
           fail("Class "+ className + "from blacklisted package not excluded from Entity Manager");
         }
@@ -134,7 +131,7 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
         .entity("org.jboss.tests.errai.jpa.exclusion.client.WhiteAndBlackListedEntity");
 
       fail("WhiteAndBlackListedEntity was not excluded from EntityManager");
-    } catch (IllegalArgumentException ex) {
+    } catch (final IllegalArgumentException ex) {
       // this is the expected behavior
     }
 
